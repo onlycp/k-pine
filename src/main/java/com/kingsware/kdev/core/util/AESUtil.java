@@ -2,9 +2,6 @@ package com.kingsware.kdev.core.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -13,6 +10,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 /**
  * AES加密工具类
@@ -49,7 +47,7 @@ public class AESUtil {
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, keySpec);
             byte[] encrypted = cipher.doFinal(src.getBytes(StandardCharsets.UTF_8));
-            return new BASE64Encoder().encode(encrypted);
+            return new String(Base64.getEncoder().encode(encrypted));
         } catch (NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
             logger.warn("AES加密失败，原因：" + e.getMessage());
             return null;
@@ -77,7 +75,7 @@ public class AESUtil {
             SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             cipher.init(Cipher.DECRYPT_MODE, skeySpec);
-            byte[] encrypted1 = new BASE64Decoder().decodeBuffer(src);//先用base64解密
+            byte[] encrypted1 = Base64.getDecoder().decode(src);//先用base64解密
             try {
                 byte[] original = cipher.doFinal(encrypted1);
                 return new String(original, StandardCharsets.UTF_8);
