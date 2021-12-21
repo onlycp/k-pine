@@ -9,9 +9,9 @@ package com.kingsware.kdev.core.db;
  */
 public enum DataBaseTypeEnum {
     // kdb
-    KDB("KDB"),
+    KDB("kdb"),
     // mysql
-    MYSQL("MYSQL");
+    MYSQL("mysql");
 
     /** 数据库类型名称 **/
     private String value;

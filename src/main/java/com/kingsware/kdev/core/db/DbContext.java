@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.db;
 
+import com.kingsware.kdev.core.db.kdb.KDataBase;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kmq.KmqMessageCenter;
 import com.kingsware.kdev.core.util.StringUtils;
@@ -70,12 +71,27 @@ public class DbContext {
      * 将数据库存到本地map中
      * @param dataBase  数据库
      */
-    public void putDatabase(DataBase dataBase) {
+    private void putDatabase(DataBase dataBase) {
         if (dataBase.name().equals(defaultDataBaseName)) {
             this.defaultDataBase = dataBase;
         }
         dataBaseConcurrentHashMap.put(dataBase.name(), dataBase);
     }
+
+    /**
+     * 创建数据库连接
+     * @param name              名称
+     * @param connectConfig     配置信息
+     */
+    public void createDataBase(String name, DBConnectConfig connectConfig) {
+        // 如果是kdb
+        if (connectConfig.getDatabaseType().equalsIgnoreCase(DataBaseTypeEnum.KDB.getValue())) {
+            KDataBase dataBase = new KDataBase();
+            dataBase.initDataBase(name, connectConfig);
+            putDatabase(dataBase);
+        }
+    }
+
 
     /**
      * 将数据库从本地map中删除

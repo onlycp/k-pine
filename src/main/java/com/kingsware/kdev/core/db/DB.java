@@ -1,41 +1,36 @@
 package com.kingsware.kdev.core.db;
 
 import java.util.List;
-import java.util.Map;
 
 /**
- *  数据库操作接口类
+ * 简易数据库操作类
  *
  * @author chen peng
  * @version 1.0.0
- * @date 2021/12/21 11:07 上午
+ * @date 2021/12/21 5:15 下午
  */
-public interface DataBase {
+public class DB {
 
+    /** 数据库上下文字 **/
+    private static final DbContext context = DbContext.getInstance();
+    /** 默认构造函数 **/
+    private DB() {};
     /**
-     * 数据源名称
-     * @return  返回数据源名称
+     * 获取默认数据库
+     * @return  数据库
      */
-    String name();
+    public static DataBase getDefault() {
+        return context.getDefault();
+    }
 
     /**
-     * 数据库类型
-     * @return  数据库类型
-     */
-    DataBaseTypeEnum databaseType();
-
-    /**
-     * 初始化数据库连接
+     * 通过名称获取数据库
      * @param name  名称
-     * @param dbConnectConfig    数据库连接信息
+     * @return  数据库
      */
-    void initDataBase(String name, DBConnectConfig dbConnectConfig);
-
-    /**
-     * 获取数据库配置信息
-     * @return  数据库配置信息
-     */
-    DBConnectConfig getConfig();
+    public static DataBase byName(String name) {
+        return context.get(name);
+    }
 
     /**
      * 通过id查询
@@ -43,7 +38,9 @@ public interface DataBase {
      * @param <T>   实体泛型
      * @return      返回对应实体
      */
-    <T> T findById(Class<T> tClass, Object id );
+    <T> T findById(Class<T> tClass, Object id ) {
+        return getDefault().findById(tClass, id);
+    }
 
     /**
      * 通过SQL查询单条记录
@@ -53,7 +50,9 @@ public interface DataBase {
      * @param <T>       泛型
      * @return          单个实体或空
      */
-    <T> T findOne(Class<T> tClass, String sql, Object... params);
+    <T> T findOne(Class<T> tClass, String sql, Object... params) {
+        return getDefault().findOne(tClass, sql, params);
+    }
 
     /**
      * 查询数量
@@ -61,7 +60,9 @@ public interface DataBase {
      * @param params    参数列表
      * @return          行数
      */
-    long findCount(String sql, Object... params);
+    long findCount(String sql, Object... params) {
+        return getDefault().findCount(sql, params);
+    }
 
     /**
      * 通过SQL列表
@@ -71,7 +72,9 @@ public interface DataBase {
      * @param <T>       泛型
      * @return          单个实体或空
      */
-    <T> List<T> findList(Class<T> tClass, String sql, Object... params);
+    <T> List<T> findList(Class<T> tClass, String sql, Object... params) {
+        return getDefault().findList(tClass, sql, params);
+    }
 
     /**
      * 分页查询
@@ -82,7 +85,9 @@ public interface DataBase {
      * @param <T>           泛型
      * @return              分页查询结果
      */
-    <T> PagedList<T> findPagedList(int startRow, int maxRow, String sql, Object... params);
+    <T> PagedList<T> findPagedList(int startRow, int maxRow, String sql, Object... params) {
+        return getDefault().findPagedList(startRow, maxRow, sql, params);
+    }
 
     /**
      * 通过id删除
@@ -90,7 +95,9 @@ public interface DataBase {
      * @param id        ID
      * @return          影响行数
      */
-    <T> long delete(Class<T> tClass, Object id);
+    <T> long delete(Class<T> tClass, Object id) {
+        return getDefault().delete(tClass, id);
+    }
 
     /**
      * 删除实体
@@ -98,7 +105,9 @@ public interface DataBase {
      * @param <T>       泛型
      * @return          影响行数
      */
-    <T> long delete(T entity);
+    <T> long delete(T entity) {
+        return getDefault().delete(entity);
+    }
 
     /**
      *  保存实体
@@ -106,7 +115,9 @@ public interface DataBase {
      * @param <T>       泛型
      * @return          影响行数
      */
-    <T> long save(T entity);
+    <T> long save(T entity) {
+        return getDefault().save(entity);
+    }
 
 
     /**
@@ -115,7 +126,9 @@ public interface DataBase {
      * @param <T>       泛型
      * @return          影响行数
      */
-    <T> long saveAll(List<T> list);
+    <T> long saveAll(List<T> list) {
+        return getDefault().saveAll(list);
+    }
 
 
 
@@ -125,7 +138,9 @@ public interface DataBase {
      * @param <T>       泛型
      * @return          影响行数
      */
-    <T> long update(T entity);
+    <T> long update(T entity) {
+        return getDefault().update(entity);
+    }
 
     /**
      *  批量更新实体
@@ -133,7 +148,9 @@ public interface DataBase {
      * @param <T>       泛型
      * @return          影响行数
      */
-    <T> long updateAll(List<T> list);
+    <T> long updateAll(List<T> list) {
+        return getDefault().updateAll(list);
+    }
 
 
     /**
@@ -142,8 +159,8 @@ public interface DataBase {
      * @param params    参数列表
      * @return          影响行数
      */
-    long executeUpdateSql(String sql, Object... params);
-
-
+    long executeUpdateSql(String sql, Object... params) {
+        return getDefault().executeUpdateSql(sql, params);
+    }
 
 }
