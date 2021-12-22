@@ -1,6 +1,9 @@
 package com.kingsware.kdev.core.util;
 
 import java.util.List;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 字符串处理工具类
@@ -14,6 +17,9 @@ import java.util.List;
  * @date 2021/12/17 12:35 下午
  */
 public class StringUtils {
+
+    private static final Pattern linePattern = Pattern.compile("_(\\w)");
+    private static final Pattern humpPattern = Pattern.compile("[A-Z]");
 
     /**
      * 私有构建函数
@@ -92,6 +98,119 @@ public class StringUtils {
         }
         return stringBuffer.toString();
     }
+
+
+    /**
+     * 下划线转驼峰
+     * @param str   原始字符串
+     * @return      驼峰字符串
+     */
+    public static String lineToHump(String str) {
+        str = str.toLowerCase();
+        Matcher matcher = linePattern.matcher(str);
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            matcher.appendReplacement(sb, matcher.group(1).toUpperCase());
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
+    }
+
+    /**
+     * 驼峰转下划线
+     * @param str 驼峰字符串
+     * @return    下划线字符串
+     */
+    public static String humpToLine(String str) {
+        Matcher matcher = humpPattern.matcher(str);
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            matcher.appendReplacement(sb, "_" + matcher.group(0).toLowerCase());
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
+    }
+
+
+    /**
+     * 获取字符串长度
+     * @param cs    字符串
+     * @return      长度
+     */
+    public static int length(final String cs) {
+        return cs == null ? 0 : cs.length();
+    }
+
+
+    /**
+     * 首字母大写
+     * @param str   字符串
+     * @return      首字母大写的字符串
+     */
+    public static String capitalize(final String str) {
+        final int strLen = length(str);
+        if (strLen == 0) {
+            return str;
+        }
+
+        final int firstCodepoint = str.codePointAt(0);
+        final int newCodePoint = Character.toTitleCase(firstCodepoint);
+        if (firstCodepoint == newCodePoint) {
+            // already capitalized
+            return str;
+        }
+
+        final int[] newCodePoints = new int[strLen];
+        int outOffset = 0;
+        newCodePoints[outOffset++] = newCodePoint;
+        for (int inOffset = Character.charCount(firstCodepoint); inOffset < strLen; ) {
+            final int codepoint = str.codePointAt(inOffset);
+            newCodePoints[outOffset++] = codepoint;
+            inOffset += Character.charCount(codepoint);
+        }
+        return new String(newCodePoints, 0, outOffset);
+    }
+
+    /**
+     * 首字母小写
+     * @param str   字符串
+     * @return      首字母小写的字符串
+     */
+    public static String uncapitalize(final String str) {
+        final int strLen = length(str);
+        if (strLen == 0) {
+            return str;
+        }
+
+        final int firstCodepoint = str.codePointAt(0);
+        final int newCodePoint = Character.toLowerCase(firstCodepoint);
+        if (firstCodepoint == newCodePoint) {
+            return str;
+        }
+
+        final int[] newCodePoints = new int[strLen];
+        int outOffset = 0;
+        newCodePoints[outOffset++] = newCodePoint;
+        for (int inOffset = Character.charCount(firstCodepoint); inOffset < strLen; ) {
+            final int codepoint = str.codePointAt(inOffset);
+            newCodePoints[outOffset++] = codepoint;
+            inOffset += Character.charCount(codepoint);
+        }
+        return new String(newCodePoints, 0, outOffset);
+    }
+
+
+    /**
+     * 生成uuid并返回
+     * @return  id
+     */
+    public static String getUUID(){
+        UUID uuid = UUID.randomUUID();
+        String str = uuid.toString();
+        // 去掉"-"符号
+        return str.substring(0, 8) + str.substring(9, 13) + str.substring(14, 18) + str.substring(19, 23) + str.substring(24);
+    }
+
 
 
 }

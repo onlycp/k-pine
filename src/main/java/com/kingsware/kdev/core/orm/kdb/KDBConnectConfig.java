@@ -1,6 +1,6 @@
-package com.kingsware.kdev.core.db.kdb;
+package com.kingsware.kdev.core.orm.kdb;
 
-import com.kingsware.kdev.core.db.DBConnectConfig;
+import com.kingsware.kdev.core.orm.DBConnectConfig;
 
 /**
  * KDB配置文件

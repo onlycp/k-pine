@@ -1,10 +1,15 @@
 package com.kingsware.kdev.core.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -85,6 +90,28 @@ public class JsonUtil {
             return null;
         }
         return toBean(json, Map.class);
+    }
+
+    /**
+     * 将 json转为list对象
+     * @param json          json字符串
+     * @param tClass        class
+     * @param <T>           泛型
+     * @return              list对象
+     */
+    public static <T> List<T> toListBean(String json, Class<T> tClass) {
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+            JavaType javaType =  objectMapper.getTypeFactory().constructParametricType(ArrayList.class, tClass);
+            return objectMapper.readValue(json, javaType);
+        } catch (JsonProcessingException e) {
+            logger.warn("字符串转为List对象失败, 源串:{}", json);
+            return null;
+        }
+
+
     }
 
 }

@@ -1,7 +1,8 @@
-package com.kingsware.kdev.core.db;
+package com.kingsware.kdev.core.orm;
+
+import com.kingsware.kdev.core.orm.channel.DbChannel;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  *  数据库操作接口类
@@ -23,6 +24,11 @@ public interface DataBase {
      * @return  数据库类型
      */
     DataBaseTypeEnum databaseType();
+
+    /**
+     * 设置通道
+     */
+    void setChannel(DbChannel dbChannel);
 
     /**
      * 初始化数据库连接

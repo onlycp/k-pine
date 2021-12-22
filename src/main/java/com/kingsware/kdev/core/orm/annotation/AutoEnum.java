@@ -1,4 +1,4 @@
-package com.kingsware.kdev.core.db.annotation;
+package com.kingsware.kdev.core.orm.annotation;
 
 /**
  * 自动赋值
@@ -8,8 +8,6 @@ package com.kingsware.kdev.core.db.annotation;
  * @date 2021/12/21 10:50 上午
  */
 public enum AutoEnum {
-    // 忽略，不参与数据库操作
-    IGNORE,
     // 无
     NONE,
     // 自动ID

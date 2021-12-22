@@ -1,9 +1,7 @@
-package com.kingsware.kdev.core.db;
+package com.kingsware.kdev.core.orm;
 
-import com.kingsware.kdev.core.db.kdb.KDataBase;
+import com.kingsware.kdev.core.orm.kdb.KDataBase;
 import com.kingsware.kdev.core.i18n.I18n;
-import com.kingsware.kdev.core.kmq.KmqMessageCenter;
-import com.kingsware.kdev.core.util.StringUtils;
 
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;

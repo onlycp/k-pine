@@ -1,5 +1,6 @@
-package com.kingsware.kdev.core.db;
+package com.kingsware.kdev.core.orm;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -13,7 +14,7 @@ public class SqlBean {
     /** sql语句 **/
     private String sql;
     /** 参数 **/
-    private List<Object> params;
+    private List<Object> params = new ArrayList<>();
 
     public String getSql() {
         return sql;

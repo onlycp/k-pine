@@ -1,4 +1,4 @@
-package com.kingsware.kdev.core.db;
+package com.kingsware.kdev.core.orm;
 
 import java.util.List;
 

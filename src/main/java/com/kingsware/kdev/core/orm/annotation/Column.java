@@ -1,12 +1,19 @@
-package com.kingsware.kdev.core.db.annotation;
+package com.kingsware.kdev.core.orm.annotation;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * //todo 描述当前类是干什么用的.
+ * column定义
  *
  * @author chen peng
  * @version 1.0.0
  * @date 2021/12/21 10:45 上午
  */
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Column {
     /** 列名 **/
     String name() default "";

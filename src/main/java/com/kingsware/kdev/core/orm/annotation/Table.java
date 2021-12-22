@@ -1,4 +1,4 @@
-package com.kingsware.kdev.core.db.annotation;
+package com.kingsware.kdev.core.orm.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,4 +1,4 @@
-package com.kingsware.kdev.core.db;
+package com.kingsware.kdev.core.orm;
 
 /**
  * 数据库连接配置基类

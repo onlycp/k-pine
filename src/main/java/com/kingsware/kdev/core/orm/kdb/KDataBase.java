@@ -1,12 +1,9 @@
-package com.kingsware.kdev.core.db.kdb;
+package com.kingsware.kdev.core.orm.kdb;
 
-import com.kingsware.kdev.core.db.DBConnectConfig;
-import com.kingsware.kdev.core.db.DataBase;
-import com.kingsware.kdev.core.db.DataBaseTypeEnum;
-import com.kingsware.kdev.core.db.PagedList;
-
+import com.kingsware.kdev.core.bean.BaseModel;
+import com.kingsware.kdev.core.orm.*;
+import com.kingsware.kdev.core.orm.channel.DbChannel;
 import java.util.List;
-import java.util.Map;
 
 /**
  * KDB数据库实现
@@ -20,6 +17,9 @@ public class KDataBase implements DataBase {
     private String name;
     /** 数据库连接信息 **/
     private KDBConnectConfig dbConnectConfig;
+    /** 通道 **/
+    private DbChannel channel;
+
 
     @Override
     public String name() {
@@ -29,6 +29,11 @@ public class KDataBase implements DataBase {
     @Override
     public DataBaseTypeEnum databaseType() {
         return DataBaseTypeEnum.KDB;
+    }
+
+    @Override
+    public void setChannel(DbChannel dbChannel) {
+        this.channel = dbChannel;
     }
 
     @Override
@@ -44,61 +49,75 @@ public class KDataBase implements DataBase {
 
     @Override
     public <T> T findById(Class<T> tClass, Object id) {
-        return null;
+        String sql = SqlGenerator.findByIdSql(tClass);
+        return channel.execute(sql, tClass, id);
+
     }
 
     @Override
     public <T> T findOne(Class<T> tClass, String sql, Object... params) {
-        return null;
+        return channel.execute(sql, tClass,  params);
     }
 
     @Override
     public long findCount(String sql, Object... params) {
-        return 0;
+        return channel.execute(sql, Long.class,  params);
     }
 
     @Override
     public <T> List<T> findList(Class<T> tClass, String sql, Object... params) {
-        return null;
+        return channel.executeList(sql, tClass,  params);
     }
 
     @Override
     public <T> PagedList<T> findPagedList(int startRow, int maxRow, String sql, Object... params) {
+
         return null;
     }
 
     @Override
     public <T> long delete(Class<T> tClass, Object id) {
-        return 0;
+        String sql = SqlGenerator.deleteById(tClass);
+        return channel.execute(sql, Long.class,  id);
     }
 
     @Override
     public <T> long delete(T entity) {
-        return 0;
+        SqlBean sqlBean = SqlGenerator.deleteSql((BaseModel) entity);
+        return  channel.execute(sqlBean.getSql(), Long.class, sqlBean.getParams().toArray());
     }
 
     @Override
     public <T> long save(T entity) {
-        return 0;
+        SqlBean sqlBean = SqlGenerator.insertSql((BaseModel) entity, DataBaseTypeEnum.KDB);
+        return  channel.execute(sqlBean.getSql(), Long.class, sqlBean.getParams().toArray());
+
     }
 
     @Override
     public <T> long saveAll(List<T> list) {
-        return 0;
+        SqlBean sqlBean = SqlGenerator.insertListSql(list , DataBaseTypeEnum.KDB);
+        return  channel.execute(sqlBean.getSql(), Long.class, sqlBean.getParams().toArray());
     }
 
     @Override
     public <T> long update(T entity) {
-        return 0;
+        SqlBean sqlBean = SqlGenerator.updateSql(entity , DataBaseTypeEnum.KDB);
+        return  channel.execute(sqlBean.getSql(), Long.class, sqlBean.getParams().toArray());
     }
 
     @Override
     public <T> long updateAll(List<T> list) {
-        return 0;
+        // 先for处理
+        long result = 0;
+        for (T t: list) {
+            result += update(t);
+        }
+        return result;
     }
 
     @Override
     public long executeUpdateSql(String sql, Object... params) {
-        return 0;
+        return  channel.execute(sql, Long.class, params);
     }
 }
