@@ -3,6 +3,8 @@ package com.kingsware.kdev.core.orm.kdb;
 import com.kingsware.kdev.core.bean.BaseModel;
 import com.kingsware.kdev.core.orm.*;
 import com.kingsware.kdev.core.orm.channel.DbChannel;
+import com.kingsware.kdev.core.orm.channel.KDBHttpChannel;
+
 import java.util.List;
 
 /**
@@ -32,14 +34,15 @@ public class KDataBase implements DataBase {
     }
 
     @Override
-    public void setChannel(DbChannel dbChannel) {
-        this.channel = dbChannel;
-    }
-
-    @Override
     public void initDataBase(String name, DBConnectConfig dbConnectConfig) {
         this.name = name;
         this.dbConnectConfig = (KDBConnectConfig)dbConnectConfig;
+        // 生成通道
+        if ("kdbHttp".equalsIgnoreCase(dbConnectConfig.getChannel())) {
+            KDBHttpChannel kdbHttpChannel = new KDBHttpChannel();
+            kdbHttpChannel.setConfig(dbConnectConfig);
+            this.channel = kdbHttpChannel;
+        }
     }
 
     @Override

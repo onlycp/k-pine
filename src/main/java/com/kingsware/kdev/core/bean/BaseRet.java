@@ -73,6 +73,17 @@ public class BaseRet<T> implements Serializable {
     }
 
     /**
+     * 业务异常时返回结果体
+     * @param message  提示信息
+     * @param <T>   泛型
+     * @return      返回响应
+     */
+    public static <T> BaseRet<T> fail(String message, int code) {
+        return new BaseRet<>(code, message, null);
+    }
+
+
+    /**
      * 成功返回
      * @param data  数据
      * @param <T>   泛型

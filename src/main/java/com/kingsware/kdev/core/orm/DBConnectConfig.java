@@ -10,6 +10,16 @@ package com.kingsware.kdev.core.orm;
 public class DBConnectConfig {
     /** 数据库类型 **/
     private String databaseType;
+    /** 通道名 **/
+    private String channel;
+
+    public String getChannel() {
+        return channel;
+    }
+
+    public void setChannel(String channel) {
+        this.channel = channel;
+    }
 
     public String getDatabaseType() {
         return databaseType;

@@ -19,5 +19,5 @@ public @interface ApiCode {
     /** 接口代码 **/
     String value() default "";
     /** 属于哪个认证体系 **/
-    ApiSystemEnum s() default ApiSystemEnum.ADMIN;
+    ApiSystemEnum system() default ApiSystemEnum.ADMIN;
 }

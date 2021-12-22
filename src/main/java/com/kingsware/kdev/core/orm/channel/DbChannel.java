@@ -1,5 +1,7 @@
 package com.kingsware.kdev.core.orm.channel;
 
+import com.kingsware.kdev.core.orm.DBConnectConfig;
+
 import java.util.List;
 
 /**
@@ -11,7 +13,35 @@ import java.util.List;
  */
 public interface DbChannel {
 
-    public <T> T execute(String sql, Class<T> tClass, Object... objects);
+    /**
+     * 通道名称
+     * @return  通道名
+     */
+    String name();
 
-    public <T> List<T> executeList(String sql, Class<T> tClass, Object... objects);
+    /**
+     * 设置配置文件
+     * @param config 配置文件
+     */
+    void setConfig(DBConnectConfig config);
+
+    /**
+     * 执行SQL，返回单条记录
+     * @param sql       sql语句
+     * @param tClass    class
+     * @param objects   参数列表
+     * @param <T>       泛型
+     * @return          查询结果
+     */
+    <T> T execute(String sql, Class<T> tClass, Object... objects);
+
+    /**
+     * 执行SQL，返回列表
+     * @param sql       sql语句
+     * @param tClass    class
+     * @param objects   参数列表
+     * @param <T>       泛型
+     * @return          查询结果
+     */
+     <T> List<T> executeList(String sql, Class<T> tClass, Object... objects);
 }

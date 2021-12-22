@@ -30,4 +30,5 @@ public class KDBConnectConfig extends DBConnectConfig {
     public void setDbName(String dbName) {
         this.dbName = dbName;
     }
+
 }

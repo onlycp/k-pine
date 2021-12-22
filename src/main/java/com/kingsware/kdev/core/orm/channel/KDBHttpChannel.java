@@ -1,5 +1,8 @@
 package com.kingsware.kdev.core.orm.channel;
 
+import com.kingsware.kdev.core.orm.DBConnectConfig;
+import com.kingsware.kdev.core.orm.kdb.KDBConnectConfig;
+
 import java.util.List;
 
 /**
@@ -10,6 +13,18 @@ import java.util.List;
  * @date 2021/12/22 9:07 上午
  */
 public class KDBHttpChannel implements DbChannel{
+
+    private KDBConnectConfig kdbConnectConfig;
+
+    @Override
+    public String name() {
+        return "kdbHttp";
+    }
+
+    @Override
+    public void setConfig(DBConnectConfig config) {
+        this.kdbConnectConfig = (KDBConnectConfig)config;
+    }
 
     @Override
     public <T> T execute(String sql, Class<T> tClass, Object... objects) {

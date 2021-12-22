@@ -9,8 +9,10 @@ package com.kingsware.kdev.core.enums;
  * @date 2021/12/20 11:55 上午
  */
 public enum ApiSystemEnum {
+    // 所有
+    ALL(0),
     // 管理后台
-    ADMIN(0);
+    ADMIN(1);
 
     private final int value;
 

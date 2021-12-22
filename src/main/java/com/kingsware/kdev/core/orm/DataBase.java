@@ -26,11 +26,6 @@ public interface DataBase {
     DataBaseTypeEnum databaseType();
 
     /**
-     * 设置通道
-     */
-    void setChannel(DbChannel dbChannel);
-
-    /**
      * 初始化数据库连接
      * @param name  名称
      * @param dbConnectConfig    数据库连接信息
