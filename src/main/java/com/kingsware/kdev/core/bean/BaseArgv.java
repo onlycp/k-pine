@@ -8,7 +8,5 @@ import java.io.Serializable;
  * @date  2021-11-15
  */
 public class BaseArgv implements Serializable {
-    /** 版本号 **/
-    private Integer version;
 
 }

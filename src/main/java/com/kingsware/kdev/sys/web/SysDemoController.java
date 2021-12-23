@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.constants.Version;
 import com.kingsware.kdev.sys.argv.SysDemoArgv;
 import com.kingsware.kdev.sys.argv.SysDemoQueryArgc;
 import com.kingsware.kdev.sys.ret.SysDemoRet;
@@ -20,7 +21,7 @@ import javax.annotation.Resource;
  * @date 2021/12/23 11:23 上午
  */
 @RestController
-@RequestMapping("/api/sys/demo")
+@RequestMapping("/"+ Version.V1 + "/sys-demos")
 public class SysDemoController extends BaseController {
 
     @Resource
