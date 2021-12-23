@@ -76,7 +76,6 @@ public class KmqMessageCenter {
             blockingQueueMap.put(entry.getKey(), queue);
             // 启动线程
             executorService.submit(new KmqConsumerThread(entry.getKey(), queue, entry.getValue()));
-
         }
     }
 
