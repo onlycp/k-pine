@@ -43,7 +43,7 @@ public class SqlGenerator {
         // 获取表名
         String tableName = getTableName(tClass);
         // 获取所有的Field
-        Field[] fields = tClass.getFields();
+        Field[] fields = tClass.getDeclaredFields();
 
         StringBuilder builder = new StringBuilder();
         builder.append(" insert into ").append(tableName).append(" ");
@@ -139,7 +139,7 @@ public class SqlGenerator {
         // 获取表名
         String tableName = getTableName(tClass);
         // 获取所有的Field
-        Field[] fields = tClass.getFields();
+        Field[] fields = tClass.getDeclaredFields();
         // 参数对
         List<String> updateList = new ArrayList<>();
         // 参数列表
@@ -261,7 +261,7 @@ public class SqlGenerator {
      */
     private static <T> Field getIdField(Class<T> tClass) {
         // 获取所有的Field
-        Field[] fields = tClass.getFields();
+        Field[] fields = tClass.getDeclaredFields();
         // 查找当前实体的id值
         Optional<Field> optionalIdField = Arrays.stream(fields).filter(it -> {
             if (it.isAnnotationPresent(Column.class)) {

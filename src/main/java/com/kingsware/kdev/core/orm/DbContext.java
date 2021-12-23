@@ -45,7 +45,7 @@ public class DbContext {
      */
     public DataBase getDefault() {
         //  判断有无默认数据库
-        if (getDefault() == null) {
+        if (this.defaultDataBase == null) {
             throw new RuntimeException(I18n.t("db.not-default-database", "当前无默认的数据库连接"));
         }
         return this.defaultDataBase;

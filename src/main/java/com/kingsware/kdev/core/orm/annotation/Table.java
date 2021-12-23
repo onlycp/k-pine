@@ -16,5 +16,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface Table {
     /** 表名 **/
-    String value();
+    String value() default "";
 }

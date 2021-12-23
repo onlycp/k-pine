@@ -76,14 +76,14 @@ public interface DataBase {
 
     /**
      * 分页查询
-     * @param startRow      起始行号
-     * @param maxRow        最大行号(应对分页数)
+     * @param page          页号
+     * @param pageSize      页大小
      * @param sql           查询sql
      * @param params        参数列表
      * @param <T>           泛型
      * @return              分页查询结果
      */
-    <T> PagedList<T> findPagedList(int startRow, int maxRow, String sql, Object... params);
+    <T> PagedList<T> findPagedList(int page, int pageSize, String sql, Object... params);
 
     /**
      * 通过id删除

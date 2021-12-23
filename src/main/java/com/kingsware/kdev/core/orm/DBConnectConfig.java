@@ -12,6 +12,8 @@ public class DBConnectConfig {
     private String databaseType;
     /** 通道名 **/
     private String channel;
+    /** 所用数据库 **/
+    private String innerType;
 
     public String getChannel() {
         return channel;
@@ -27,5 +29,13 @@ public class DBConnectConfig {
 
     public void setDatabaseType(String databaseType) {
         this.databaseType = databaseType;
+    }
+
+    public String getInnerType() {
+        return innerType;
+    }
+
+    public void setInnerType(String innerType) {
+        this.innerType = innerType;
     }
 }

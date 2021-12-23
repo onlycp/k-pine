@@ -73,7 +73,7 @@ public class KDataBase implements DataBase {
     }
 
     @Override
-    public <T> PagedList<T> findPagedList(int startRow, int maxRow, String sql, Object... params) {
+    public <T> PagedList<T> findPagedList(int page, int pageSize, String sql, Object... params) {
 
         return null;
     }

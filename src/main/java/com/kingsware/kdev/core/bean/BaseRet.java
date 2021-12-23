@@ -95,6 +95,14 @@ public class BaseRet<T> implements Serializable {
 
     /**
      * 成功返回
+     * @return      返回成功结果
+     */
+    public static  BaseRet<?> success() {
+        return success(null, I18n.t("common.ok", "OK"));
+    }
+
+    /**
+     * 成功返回
      * @param data  数据
      * @param message  提示信息
      * @param <T>   泛型

@@ -38,7 +38,7 @@ public class DB {
      * @param <T>   实体泛型
      * @return      返回对应实体
      */
-    <T> T findById(Class<T> tClass, Object id ) {
+    public static <T> T findById(Class<T> tClass, Object id ) {
         return getDefault().findById(tClass, id);
     }
 
@@ -50,7 +50,7 @@ public class DB {
      * @param <T>       泛型
      * @return          单个实体或空
      */
-    <T> T findOne(Class<T> tClass, String sql, Object... params) {
+    public static <T> T findOne(Class<T> tClass, String sql, Object... params) {
         return getDefault().findOne(tClass, sql, params);
     }
 
@@ -60,7 +60,7 @@ public class DB {
      * @param params    参数列表
      * @return          行数
      */
-    long findCount(String sql, Object... params) {
+    public static long findCount(String sql, Object... params) {
         return getDefault().findCount(sql, params);
     }
 
@@ -72,21 +72,21 @@ public class DB {
      * @param <T>       泛型
      * @return          单个实体或空
      */
-    <T> List<T> findList(Class<T> tClass, String sql, Object... params) {
+    public static <T> List<T> findList(Class<T> tClass, String sql, Object... params) {
         return getDefault().findList(tClass, sql, params);
     }
 
     /**
      * 分页查询
-     * @param startRow      起始行号
-     * @param maxRow        最大行号(应对分页数)
+     * @param page          页号
+     * @param pageSize      页大小
      * @param sql           查询sql
      * @param params        参数列表
      * @param <T>           泛型
      * @return              分页查询结果
      */
-    <T> PagedList<T> findPagedList(int startRow, int maxRow, String sql, Object... params) {
-        return getDefault().findPagedList(startRow, maxRow, sql, params);
+    public static <T> PagedList<T> findPagedList(int page, int pageSize, String sql, Object... params) {
+        return getDefault().findPagedList(page, pageSize, sql, params);
     }
 
     /**
@@ -95,7 +95,7 @@ public class DB {
      * @param id        ID
      * @return          影响行数
      */
-    <T> long delete(Class<T> tClass, Object id) {
+    public static <T> long delete(Class<T> tClass, Object id) {
         return getDefault().delete(tClass, id);
     }
 
@@ -105,7 +105,7 @@ public class DB {
      * @param <T>       泛型
      * @return          影响行数
      */
-    <T> long delete(T entity) {
+    public static <T> long delete(T entity) {
         return getDefault().delete(entity);
     }
 
@@ -115,7 +115,7 @@ public class DB {
      * @param <T>       泛型
      * @return          影响行数
      */
-    <T> long save(T entity) {
+    public static <T> long save(T entity) {
         return getDefault().save(entity);
     }
 
@@ -126,7 +126,7 @@ public class DB {
      * @param <T>       泛型
      * @return          影响行数
      */
-    <T> long saveAll(List<T> list) {
+    public static <T> long saveAll(List<T> list) {
         return getDefault().saveAll(list);
     }
 
@@ -138,7 +138,7 @@ public class DB {
      * @param <T>       泛型
      * @return          影响行数
      */
-    <T> long update(T entity) {
+    public static  <T> long update(T entity) {
         return getDefault().update(entity);
     }
 
@@ -148,7 +148,7 @@ public class DB {
      * @param <T>       泛型
      * @return          影响行数
      */
-    <T> long updateAll(List<T> list) {
+    public static <T> long updateAll(List<T> list) {
         return getDefault().updateAll(list);
     }
 
@@ -159,7 +159,7 @@ public class DB {
      * @param params    参数列表
      * @return          影响行数
      */
-    long executeUpdateSql(String sql, Object... params) {
+    public static long executeUpdateSql(String sql, Object... params) {
         return getDefault().executeUpdateSql(sql, params);
     }
 

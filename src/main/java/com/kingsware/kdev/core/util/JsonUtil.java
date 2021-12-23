@@ -1,10 +1,7 @@
 package com.kingsware.kdev.core.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +21,11 @@ public class JsonUtil {
     /** 日志打印 **/
     private static final Logger logger  = LoggerFactory.getLogger(JsonUtil.class);
 
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+    static {
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
+
     /** 默认构造函数 **/
     private JsonUtil() {};
 
@@ -37,7 +39,8 @@ public class JsonUtil {
     public static <T> T toBean(String jsonString, Class<T> tClass) {
 
         try {
-            return new ObjectMapper().readValue(jsonString, tClass);
+
+            return objectMapper.readValue(jsonString, tClass);
         } catch (JsonProcessingException e) {
             logger.warn("字符串转为对象失败, 源串:{}", jsonString);
             return null;
@@ -53,7 +56,7 @@ public class JsonUtil {
     public static  <T> String toJson(T bean) {
 
         try {
-            return new ObjectMapper().writeValueAsString(bean);
+            return objectMapper.writeValueAsString(bean);
         } catch (JsonProcessingException e) {
             logger.warn("对象转为字符串失败, 对象:{}", bean);
             return null;
@@ -103,8 +106,10 @@ public class JsonUtil {
 
         try {
             ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             objectMapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
             JavaType javaType =  objectMapper.getTypeFactory().constructParametricType(ArrayList.class, tClass);
+
             return objectMapper.readValue(json, javaType);
         } catch (JsonProcessingException e) {
             logger.warn("字符串转为List对象失败, 源串:{}", json);

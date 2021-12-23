@@ -1,7 +1,10 @@
 package com.kingsware.kdev.core.orm.channel;
 
 import com.kingsware.kdev.core.orm.DBConnectConfig;
+import com.kingsware.kdev.core.orm.SqlGenerator;
 import com.kingsware.kdev.core.orm.kdb.KDBConnectConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -14,6 +17,10 @@ import java.util.List;
  */
 public class KDBHttpChannel implements DbChannel{
 
+    /** 日志打印 **/
+    private static final Logger logger  = LoggerFactory.getLogger(KDBHttpChannel.class);
+
+    /** 配置 **/
     private KDBConnectConfig kdbConnectConfig;
 
     @Override
@@ -28,10 +35,12 @@ public class KDBHttpChannel implements DbChannel{
 
     @Override
     public <T> T execute(String sql, Class<T> tClass, Object... objects) {
+        logger.info("KDBHttpChannel，SQL：{}， Params：{}", sql, objects);
         return null;
     }
 
     public <T> List<T> executeList(String sql, Class<T> tClass,  Object... objects) {
+        logger.info("KDBHttpChannel，SQL：{}， Params：{}", sql, objects);
         return null;
     }
 }

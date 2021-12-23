@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  * @version 1.0.0
  * @date 2021/12/21 10:45 上午
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Column {
     /** 列名 **/
