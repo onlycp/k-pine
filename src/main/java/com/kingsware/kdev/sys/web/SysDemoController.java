@@ -9,6 +9,8 @@ import com.kingsware.kdev.sys.argv.SysDemoArgv;
 import com.kingsware.kdev.sys.argv.SysDemoQueryArgc;
 import com.kingsware.kdev.sys.ret.SysDemoRet;
 import com.kingsware.kdev.sys.service.SysDemoService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -20,6 +22,7 @@ import javax.annotation.Resource;
  * @version 1.0.0
  * @date 2021/12/23 11:23 上午
  */
+@Api(value = "demo示例", tags = {"demo示例"})
 @RestController
 @RequestMapping("/"+ Version.V1 + "/sys-demos")
 public class SysDemoController extends BaseController {
@@ -32,6 +35,7 @@ public class SysDemoController extends BaseController {
      *  查询
      * @return 分页
      */
+    @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
     public BaseRet<PageDataRet<SysDemoRet>> page(SysDemoQueryArgc argv) {
         return BaseRet.success(sysDemoService.query(argv));
@@ -41,6 +45,7 @@ public class SysDemoController extends BaseController {
      * 详细信息
      * @return 详细信息
      */
+    @ApiOperation(value = "详情 " ,notes = "详情")
     @GetMapping("/{id}")
     public BaseRet<SysDemoRet> get(@PathVariable String id) {
         return BaseRet.success(sysDemoService.get(id));
@@ -50,6 +55,7 @@ public class SysDemoController extends BaseController {
      *  新增
      * @return 提示
      */
+    @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
     public BaseRet<?> add(@RequestBody SysDemoArgv argv) {
         sysDemoService.add(argv);
@@ -61,6 +67,7 @@ public class SysDemoController extends BaseController {
      *  编辑
      * @return 提示
      */
+    @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
     public BaseRet<?> edit(@RequestBody SysDemoArgv argv) {
         sysDemoService.edit(argv);
@@ -71,6 +78,7 @@ public class SysDemoController extends BaseController {
      *  删除
      * @return 提示
      */
+    @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         sysDemoService.delete(argv);
