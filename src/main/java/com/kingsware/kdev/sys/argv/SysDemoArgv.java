@@ -1,8 +1,5 @@
 package com.kingsware.kdev.sys.argv;
 
-import com.kingsware.kdev.core.orm.annotation.AutoEnum;
-import com.kingsware.kdev.core.orm.annotation.Column;
-
 /**
  *  演示传参
  *
@@ -17,13 +14,13 @@ public class SysDemoArgv {
     /** 名称 **/
     private String name;
     /** 性别 0：男 1： 女 **/
-    private Integer sex;
+    private String sex;
     /** 生日 **/
     private String birthday;
     /** 描述 **/
     private String note;
     /** 吃饭时间 **/
-    private String eatTime;
+    private String eattime;
 
     public String getId() {
         return id;
@@ -41,11 +38,11 @@ public class SysDemoArgv {
         this.name = name;
     }
 
-    public Integer getSex() {
+    public String getSex() {
         return sex;
     }
 
-    public void setSex(Integer sex) {
+    public void setSex(String sex) {
         this.sex = sex;
     }
 
@@ -65,11 +62,11 @@ public class SysDemoArgv {
         this.note = note;
     }
 
-    public String getEatTime() {
-        return eatTime;
+    public String getEattime() {
+        return eattime;
     }
 
-    public void setEatTime(String eatTime) {
-        this.eatTime = eatTime;
+    public void setEattime(String eattime) {
+        this.eattime = eattime;
     }
 }

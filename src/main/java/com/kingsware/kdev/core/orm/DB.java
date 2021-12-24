@@ -85,8 +85,8 @@ public class DB {
      * @param <T>           泛型
      * @return              分页查询结果
      */
-    public static <T> PagedList<T> findPagedList(int page, int pageSize, String sql, Object... params) {
-        return getDefault().findPagedList(page, pageSize, sql, params);
+    public static <T> PagedList<T> findPagedList(Class<T> tClass, int page, int pageSize, String sql, Object... params) {
+        return getDefault().findPagedList(tClass, page, pageSize, sql, params);
     }
 
     /**

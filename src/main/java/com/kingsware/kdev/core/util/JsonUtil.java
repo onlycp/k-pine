@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,7 +41,6 @@ public class JsonUtil {
     public static <T> T toBean(String jsonString, Class<T> tClass) {
 
         try {
-
             return objectMapper.readValue(jsonString, tClass);
         } catch (JsonProcessingException e) {
             logger.warn("字符串转为对象失败, 源串:{}", jsonString);
@@ -118,5 +119,71 @@ public class JsonUtil {
 
 
     }
+
+    /**
+     * 将map转为实体
+     * @param tClass    实体class
+     * @param map       map对象
+     * @param <T>       T
+     * @return          实例化对象
+     */
+    public static <T> T transformMap2Entity(Class<T> tClass, Map<String, Object> map)  throws Exception{
+        // 实体化
+        T entity = tClass.newInstance();
+        // 由于postgresql会自动将大写转为小写，这里需要一个将实体属性名称转为小写处理
+        Map<String, Field> fieldMap = new HashMap<>();
+        Field[] fields = tClass.getDeclaredFields();
+        for (Field field: fields) {
+            field.setAccessible(true);
+            fieldMap.put(field.getName(), field);
+        }
+        //  遍历map，将值写入到实体
+        for (Map.Entry<String, Object> entry: map.entrySet()) {
+            String key = entry.getKey().toLowerCase();
+            key = StringUtils.lineToHump(key);
+            // 非空的才写入
+            if (entry.getValue() != null) {
+                if (fieldMap.containsKey(key)) {
+                    Field field = fieldMap.get(key);
+                    if (field.getType().isAssignableFrom(Integer.class)) {
+                        field.set(entity, Integer.parseInt(entry.getValue().toString()));
+                    }
+                    else if (field.getType().isAssignableFrom(Long.class)) {
+                        field.set(entity, Long.parseLong(entry.getValue().toString()));
+                    }
+
+                    else {
+                        field.set(entity, entry.getValue());
+                    }
+
+                }
+            }
+        }
+        return entity;
+    }
+
+    /**
+     * 将json转为数组
+     * @param tClass    目标类
+     * @param json      json字符串
+     * @param <T>       泛型
+     * @return          目标列表
+     */
+    public static <T> List<T> transformJson2List(String json, Class<T> tClass) {
+        JavaType javaType =  objectMapper.getTypeFactory().constructParametricType(ArrayList.class, Map.class);
+        try {
+            List<Map<String, Object>> list = objectMapper.readValue(json, javaType);
+            List<T> result = new ArrayList<>(list.size());
+            for (Map<String, Object> map: list) {
+                result.add(transformMap2Entity(tClass, map));
+            }
+            return result;
+        } catch (Exception e) {
+            logger.warn("字符串转为List对象失败, 源串:{}", json);
+            return null;
+        }
+    }
+
+
 
 }

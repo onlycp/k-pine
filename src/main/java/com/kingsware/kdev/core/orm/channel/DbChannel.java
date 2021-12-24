@@ -33,7 +33,22 @@ public interface DbChannel {
      * @param <T>       泛型
      * @return          查询结果
      */
-    <T> T execute(String sql, Class<T> tClass, Object... objects);
+    <T> T queryForObject(String sql, Class<T> tClass, List<Object> objects);
+
+    /**
+     * 返回记录条数
+     * @param sql       sql语句
+     * @param objects   参数列表
+     * @return          记录条数
+     */
+    long queryForCount(String sql, List<Object> objects);
+
+    /**
+     * 返回记录条数
+     * @param sql       sql语句
+     * @param objects   参数列表
+     */
+    void executeSql(String sql, List<Object> objects);
 
     /**
      * 执行SQL，返回列表
@@ -43,5 +58,5 @@ public interface DbChannel {
      * @param <T>       泛型
      * @return          查询结果
      */
-     <T> List<T> executeList(String sql, Class<T> tClass, Object... objects);
+     <T> List<T> queryForList(String sql, Class<T> tClass, List<Object> objects);
 }

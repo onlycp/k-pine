@@ -5,6 +5,9 @@ import com.kingsware.kdev.core.orm.*;
 import com.kingsware.kdev.core.orm.channel.DbChannel;
 import com.kingsware.kdev.core.orm.channel.KDBHttpChannel;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -53,60 +56,91 @@ public class KDataBase implements DataBase {
     @Override
     public <T> T findById(Class<T> tClass, Object id) {
         String sql = SqlGenerator.findByIdSql(tClass);
-        return channel.execute(sql, tClass, id);
+        return channel.queryForObject(sql, tClass, Collections.singletonList(id));
 
     }
 
     @Override
     public <T> T findOne(Class<T> tClass, String sql, Object... params) {
-        return channel.execute(sql, tClass,  params);
+        return channel.queryForObject(sql, tClass,  Arrays.asList(params));
     }
 
     @Override
     public long findCount(String sql, Object... params) {
-        return channel.execute(sql, Long.class,  params);
+        return channel.queryForCount(sql,  Arrays.asList(params));
     }
 
     @Override
     public <T> List<T> findList(Class<T> tClass, String sql, Object... params) {
-        return channel.executeList(sql, tClass,  params);
+        return channel.queryForList(sql, tClass,  Arrays.asList(params));
     }
 
     @Override
-    public <T> PagedList<T> findPagedList(int page, int pageSize, String sql, Object... params) {
-
-        return null;
+    public <T> PagedList<T> findPagedList(Class<T> tClass, int page, int pageSize, String sql, Object... params) {
+        // 先查询总数
+        String selectCountSql = String.format("select count(1) from (%s) tmp_cnt", sql);
+        Long count = channel.queryForCount(selectCountSql, Arrays.asList(params));
+        // 查询数据
+        String dataQuerySql = sql + "limit ?,?";
+        // 计算limit
+        int from = (page - 1) * page;
+        int to = page * pageSize;
+        List<Object> objects = new ArrayList<>(Arrays.asList(params));
+        // 加入from
+        objects.add(from);
+        // 加入to
+        objects.add(to);
+        // 查询数据
+        List<T> data =  channel.queryForList(dataQuerySql, tClass,  objects);
+        // 计算总页数
+        int pageCount = (int) (count / pageSize);
+        if (pageCount % pageSize != 0) {
+            pageCount++;
+        }
+        // 组装结果
+        PagedList<T> pagedList = new PagedList<>();
+        pagedList.setList(data);
+        pagedList.setPageCount(pageCount);
+        pagedList.setPageIndex(page);
+        pagedList.setTotalCount((count.intValue()));
+        pagedList.setPageSize(pageSize);
+        return pagedList;
     }
 
     @Override
     public <T> long delete(Class<T> tClass, Object id) {
         String sql = SqlGenerator.deleteById(tClass);
-        return channel.execute(sql, Long.class,  id);
+        channel.executeSql(sql,Collections.singletonList(id));
+        return 1;
     }
 
     @Override
     public <T> long delete(T entity) {
         SqlBean sqlBean = SqlGenerator.deleteSql((BaseModel) entity);
-        return  channel.execute(sqlBean.getSql(), Long.class, sqlBean.getParams().toArray());
+        channel.executeSql(sqlBean.getSql(), sqlBean.getParams());
+        return 1;
     }
 
     @Override
     public <T> long save(T entity) {
         SqlBean sqlBean = SqlGenerator.insertSql((BaseModel) entity, DataBaseTypeEnum.KDB);
-        return  channel.execute(sqlBean.getSql(), Long.class, sqlBean.getParams().toArray());
+        channel.executeSql(sqlBean.getSql(),  sqlBean.getParams());
+        return 1;
 
     }
 
     @Override
     public <T> long saveAll(List<T> list) {
         SqlBean sqlBean = SqlGenerator.insertListSql(list , DataBaseTypeEnum.KDB);
-        return  channel.execute(sqlBean.getSql(), Long.class, sqlBean.getParams().toArray());
+        channel.executeSql(sqlBean.getSql(), sqlBean.getParams());
+        return list.size();
     }
 
     @Override
     public <T> long update(T entity) {
         SqlBean sqlBean = SqlGenerator.updateSql(entity , DataBaseTypeEnum.KDB);
-        return  channel.execute(sqlBean.getSql(), Long.class, sqlBean.getParams().toArray());
+        channel.executeSql(sqlBean.getSql(), sqlBean.getParams());
+        return 1;
     }
 
     @Override
@@ -121,6 +155,8 @@ public class KDataBase implements DataBase {
 
     @Override
     public long executeUpdateSql(String sql, Object... params) {
-        return  channel.execute(sql, Long.class, params);
+        channel.executeSql(sql,Arrays.asList(params));
+        // 由于kdb没有返回具体行，所以统一返回1
+        return 1;
     }
 }

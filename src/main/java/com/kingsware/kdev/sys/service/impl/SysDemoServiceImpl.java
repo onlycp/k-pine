@@ -9,7 +9,7 @@ import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysDemoArgv;
 import com.kingsware.kdev.sys.argv.SysDemoQueryArgc;
-import com.kingsware.kdev.sys.model.SysDemoModel;
+import com.kingsware.kdev.sys.model.SysDemo;
 import com.kingsware.kdev.sys.ret.SysDemoRet;
 import com.kingsware.kdev.sys.service.SysDemoService;
 import org.springframework.stereotype.Service;
@@ -30,28 +30,27 @@ public class SysDemoServiceImpl extends BaseServiceImpl implements SysDemoServic
     @Override
     public SysDemoRet get(String id) {
         // 查询model
-        SysDemoModel model = DB.findById(SysDemoModel.class, id);
+        SysDemo model = DB.findById(SysDemo.class, id);
         // 转换成ret对象
         return BeanUtils.copyObject(model, SysDemoRet.class);
     }
 
     @Override
     public void add(SysDemoArgv argc) {
-        SysDemoModel model = BeanUtils.copyObject(argc, SysDemoModel.class);
+        SysDemo model = BeanUtils.copyObject(argc, SysDemo.class);
         DB.save(model);
     }
 
     @Override
     public void edit(SysDemoArgv argc) {
-        SysDemoModel model = DB.findById(SysDemoModel.class, argc.getId());
+        SysDemo model = DB.findById(SysDemo.class, argc.getId());
         model.setName(argc.getName());
         model.setNote(argc.getNote());
-        DB.save(model);
+        DB.update(model);
     }
 
     @Override
     public PageDataRet<SysDemoRet> query(SysDemoQueryArgc argc) {
-
         // 拼装sql
         StringBuilder builder = new StringBuilder();
         List<Object> params = new ArrayList<>();
@@ -65,7 +64,7 @@ public class SysDemoServiceImpl extends BaseServiceImpl implements SysDemoServic
         // 返回结果
         PageDataRet<SysDemoRet> pageDataRet = new PageDataRet<>();
         if (argc.isPageQuery()) {
-            PagedList<SysDemoModel> pagedList = DB.findPagedList(argc.getPage(), argc.getPageSize(), builder.toString(), params.toArray());
+            PagedList<SysDemo> pagedList = DB.findPagedList(SysDemo.class, argc.getPage(), argc.getPageSize(), builder.toString(), params.toArray());
             pageDataRet.setPageSize(pagedList.getPageSize());
             pageDataRet.setPageCount(pagedList.getPageCount());
             pageDataRet.setPage(pagedList.getPageIndex());
@@ -73,7 +72,7 @@ public class SysDemoServiceImpl extends BaseServiceImpl implements SysDemoServic
             pageDataRet.setList(BeanUtils.copyList(pagedList.getList(), SysDemoRet.class));
         }
         else {
-            List<SysDemoModel> models = DB.findList(SysDemoModel.class, builder.toString(), params.toArray());
+            List<SysDemo> models = DB.findList(SysDemo.class, builder.toString(), params.toArray());
             pageDataRet.setPage(1);
             pageDataRet.setPageSize(models.size());
             pageDataRet.setTotal(models.size());

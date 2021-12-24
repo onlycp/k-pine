@@ -83,7 +83,7 @@ public interface DataBase {
      * @param <T>           泛型
      * @return              分页查询结果
      */
-    <T> PagedList<T> findPagedList(int page, int pageSize, String sql, Object... params);
+    <T> PagedList<T> findPagedList(Class<T> tClass, int page, int pageSize, String sql, Object... params);
 
     /**
      * 通过id删除

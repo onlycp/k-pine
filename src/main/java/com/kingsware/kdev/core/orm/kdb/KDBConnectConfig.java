@@ -12,6 +12,8 @@ import com.kingsware.kdev.core.orm.DBConnectConfig;
 public class KDBConnectConfig extends DBConnectConfig {
     /** 服务器地址 **/
     private String server;
+    /** sql透传接口 **/
+    private String executeSqlApi;
     /** 数据库名称 **/
     private String dbName;
 
@@ -31,4 +33,11 @@ public class KDBConnectConfig extends DBConnectConfig {
         this.dbName = dbName;
     }
 
+    public String getExecuteSqlApi() {
+        return executeSqlApi;
+    }
+
+    public void setExecuteSqlApi(String executeSqlApi) {
+        this.executeSqlApi = executeSqlApi;
+    }
 }

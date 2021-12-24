@@ -8,8 +8,4 @@ package com.kingsware.kdev.core.base;
  * @date 2021/12/23 9:21 上午
  */
 public interface BaseService {
-
-
-
-
 }
