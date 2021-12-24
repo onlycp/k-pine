@@ -10,4 +10,12 @@ import java.util.Set;
 public class MultiIdArgv extends BaseArgv{
     /** 多选id **/
     private Set<String> ids;
+
+    public Set<String> getIds() {
+        return ids;
+    }
+
+    public void setIds(Set<String> ids) {
+        this.ids = ids;
+    }
 }

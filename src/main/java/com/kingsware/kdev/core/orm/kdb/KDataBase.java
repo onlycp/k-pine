@@ -94,7 +94,7 @@ public class KDataBase implements DataBase {
         List<T> data =  channel.queryForList(dataQuerySql, tClass,  objects);
         // 计算总页数
         int pageCount = (int) (count / pageSize);
-        if (pageCount % pageSize != 0) {
+        if (count % pageSize != 0) {
             pageCount++;
         }
         // 组装结果

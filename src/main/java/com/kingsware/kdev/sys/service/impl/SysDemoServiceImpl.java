@@ -63,14 +63,16 @@ public class SysDemoServiceImpl extends BaseServiceImpl implements SysDemoServic
         }
         // 返回结果
         PageDataRet<SysDemoRet> pageDataRet = new PageDataRet<>();
+        // 分页查询
         if (argc.isPageQuery()) {
             PagedList<SysDemo> pagedList = DB.findPagedList(SysDemo.class, argc.getPage(), argc.getPageSize(), builder.toString(), params.toArray());
             pageDataRet.setPageSize(pagedList.getPageSize());
             pageDataRet.setPageCount(pagedList.getPageCount());
             pageDataRet.setPage(pagedList.getPageIndex());
-            pageDataRet.setTotal(pageDataRet.getTotal());
+            pageDataRet.setTotal(pagedList.getTotalCount());
             pageDataRet.setList(BeanUtils.copyList(pagedList.getList(), SysDemoRet.class));
         }
+        // 一般查询
         else {
             List<SysDemo> models = DB.findList(SysDemo.class, builder.toString(), params.toArray());
             pageDataRet.setPage(1);
@@ -80,12 +82,12 @@ public class SysDemoServiceImpl extends BaseServiceImpl implements SysDemoServic
             pageDataRet.setList(BeanUtils.copyList(models, SysDemoRet.class));
         }
         return pageDataRet;
-
-
     }
 
     @Override
     public void delete(MultiIdArgv argc) {
-
+        for (String id: argc.getIds()) {
+            DB.delete(SysDemo.class, id);
+        }
     }
 }
