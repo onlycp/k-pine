@@ -1,5 +1,8 @@
 package com.kingsware.kdev.core.exception;
 
+import com.kingsware.kdev.core.enums.RetEnum;
+import org.springframework.util.Assert;
+
 /**
  * 用户未授权异常
  * @author chen peng
@@ -13,5 +16,14 @@ public class BusinessException extends RuntimeException{
      */
     public BusinessException(String message) {
         super(message);
+    }
+
+    /**
+     * 业务异常
+     * @param message 提示消息
+     * @return  异常
+     */
+    public static BusinessException serviceThrow(String message) {
+        return new BusinessException(message);
     }
 }
