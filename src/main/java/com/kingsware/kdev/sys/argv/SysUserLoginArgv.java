@@ -1,6 +1,6 @@
 package com.kingsware.kdev.sys.argv;
 
-public class SysUserLoginArgc {
+public class SysUserLoginArgv {
 
     private String token;
 

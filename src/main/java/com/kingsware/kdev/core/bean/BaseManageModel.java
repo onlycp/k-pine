@@ -68,4 +68,5 @@ public class BaseManageModel extends BaseModel {
     public void setWhenModified(String whenModified) {
         this.whenModified = whenModified;
     }
+
 }

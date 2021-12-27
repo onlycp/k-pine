@@ -7,7 +7,7 @@ package com.kingsware.kdev.core.bean;
  * @version 1.0.0
  * @date 2021/12/20 10:44 上午
  */
-public class BasePageArgc {
+public class BasePageArgv {
     /** 页大小 **/
     private Integer pageSize = 20;
     /** 页号 **/
