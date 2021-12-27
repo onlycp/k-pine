@@ -6,7 +6,7 @@ import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
 import com.kingsware.kdev.sys.argv.SysDemoArgv;
-import com.kingsware.kdev.sys.argv.SysDemoQueryArgc;
+import com.kingsware.kdev.sys.argv.SysDemoQueryArgv;
 import com.kingsware.kdev.sys.ret.SysDemoRet;
 import com.kingsware.kdev.sys.service.SysDemoService;
 import io.swagger.annotations.Api;
@@ -37,7 +37,7 @@ public class SysDemoController extends BaseController {
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
-    public BaseRet<PageDataRet<SysDemoRet>> page(SysDemoQueryArgc argv) {
+    public BaseRet<PageDataRet<SysDemoRet>> page(SysDemoQueryArgv argv) {
         return BaseRet.success(sysDemoService.query(argv));
     }
 

@@ -1,7 +1,6 @@
 package com.kingsware.kdev.sys.argv;
 
-import com.kingsware.kdev.core.bean.BaseModel;
-import com.kingsware.kdev.core.orm.annotation.Table;
+import com.kingsware.kdev.core.bean.BasePageArgv;
 
 /**
  * @author AndyZheng
@@ -9,7 +8,7 @@ import com.kingsware.kdev.core.orm.annotation.Table;
  * @description: 字典类型
  * @date 2021-12-27 10:20
  */
-public class SysDictItemArgc {
+public class SysDictItemQueryArgv extends BasePageArgv {
 
     /** id */
     private String id;

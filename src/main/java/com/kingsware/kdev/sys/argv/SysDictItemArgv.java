@@ -1,6 +1,7 @@
 package com.kingsware.kdev.sys.argv;
 
-import com.kingsware.kdev.core.bean.BasePageArgc;
+import com.kingsware.kdev.core.bean.BaseModel;
+import com.kingsware.kdev.core.orm.annotation.Table;
 
 /**
  * @author AndyZheng
@@ -8,12 +9,18 @@ import com.kingsware.kdev.core.bean.BasePageArgc;
  * @description: 字典类型
  * @date 2021-12-27 10:20
  */
-public class SysDictQueryArgc extends BasePageArgc {
+public class SysDictItemArgv {
 
     /** id */
     private String id;
     /** 字典名 */
     private String name;
+    /** 字典组名 */
+    private String groupName;
+    /** 字典类型ID */
+    private String sysDictId;
+    /** 字典值 */
+    private String value;
     /** 字典代码 */
     private String code;
     /** 备注 */
@@ -35,6 +42,29 @@ public class SysDictQueryArgc extends BasePageArgc {
         this.name = name;
     }
 
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
+
+    public String getSysDictId() {
+        return sysDictId;
+    }
+
+    public void setSysDictId(String sysDictId) {
+        this.sysDictId = sysDictId;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
     public String getCode() {
         return code;
     }

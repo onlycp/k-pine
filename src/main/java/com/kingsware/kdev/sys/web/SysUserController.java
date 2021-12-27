@@ -2,7 +2,7 @@ package com.kingsware.kdev.sys.web;
 
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.constants.Version;
-import com.kingsware.kdev.sys.argv.SysUserLoginArgc;
+import com.kingsware.kdev.sys.argv.SysUserLoginArgv;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +20,7 @@ public class SysUserController {
      */
     @ApiOperation(value = "登录 " ,notes = "登录")
     @PostMapping(value = "login")
-    public BaseRet<?> login(@RequestBody SysUserLoginArgc sysUserLoginArgc) {
+    public BaseRet<?> login(@RequestBody SysUserLoginArgv sysUserLoginArgv) {
         Map<String, String> resultMap = new HashMap<>();
         resultMap.put("token", "test");
         return BaseRet.success(resultMap);

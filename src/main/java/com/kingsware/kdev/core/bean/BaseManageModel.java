@@ -1,5 +1,7 @@
 package com.kingsware.kdev.core.bean;
 
+import com.kingsware.kdev.core.orm.annotation.Column;
+
 import java.io.Serializable;
 
 /**
@@ -60,4 +62,5 @@ public class BaseManageModel extends BaseModel {
     public void setWhenModified(String whenModified) {
         this.whenModified = whenModified;
     }
+
 }

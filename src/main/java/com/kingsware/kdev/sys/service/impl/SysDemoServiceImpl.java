@@ -8,7 +8,7 @@ import com.kingsware.kdev.core.orm.PagedList;
 import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysDemoArgv;
-import com.kingsware.kdev.sys.argv.SysDemoQueryArgc;
+import com.kingsware.kdev.sys.argv.SysDemoQueryArgv;
 import com.kingsware.kdev.sys.model.SysDemo;
 import com.kingsware.kdev.sys.ret.SysDemoRet;
 import com.kingsware.kdev.sys.service.SysDemoService;
@@ -50,7 +50,7 @@ public class SysDemoServiceImpl extends BaseServiceImpl implements SysDemoServic
     }
 
     @Override
-    public PageDataRet<SysDemoRet> query(SysDemoQueryArgc argc) {
+    public PageDataRet<SysDemoRet> query(SysDemoQueryArgv argc) {
         // 拼装sql
         StringBuilder builder = new StringBuilder();
         List<Object> params = new ArrayList<>();

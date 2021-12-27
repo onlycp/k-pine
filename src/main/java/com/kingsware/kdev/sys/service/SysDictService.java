@@ -3,44 +3,44 @@ package com.kingsware.kdev.sys.service;
 import com.kingsware.kdev.core.base.BaseService;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
-import com.kingsware.kdev.sys.argv.SysDemoArgv;
-import com.kingsware.kdev.sys.argv.SysDemoQueryArgv;
-import com.kingsware.kdev.sys.ret.SysDemoRet;
+import com.kingsware.kdev.sys.argv.SysDictArgv;
+import com.kingsware.kdev.sys.argv.SysDictQueryArgv;
+import com.kingsware.kdev.sys.ret.SysDictRet;
 
 /**
- * 演示业务基类
+ * 字典类型接口
  *
  * @author chen peng
  * @version 1.0.0
  * @date 2021/12/23 9:35 上午
  */
-public interface SysDemoService extends BaseService {
+public interface SysDictService extends BaseService {
 
     /**
      * 通过id查询
      * @param id    id
      * @return      返回结果
      */
-    SysDemoRet get(String id);
+    SysDictRet get(String id);
 
     /**
      * 新增
      * @param argv 新增
      */
-     void add(SysDemoArgv argv);
+     void add(SysDictArgv argv);
 
     /**
      * 编辑
      * @param argv 编辑
      */
-    void edit(SysDemoArgv argv);
+    void edit(SysDictArgv argv);
 
     /**
      * 编辑
      * @param argv 编辑
      * @return 查询结果
      */
-     PageDataRet<SysDemoRet> query(SysDemoQueryArgv argv);
+     PageDataRet<SysDictRet> query(SysDictQueryArgv argv);
 
     /**
      * 删除
