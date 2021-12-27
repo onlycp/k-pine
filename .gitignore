@@ -1,0 +1,5 @@
+/target/
+/.classpath
+/logs/
+/.idea/
+/k-dev.iml
