@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.model;
 
+import com.kingsware.kdev.core.bean.BaseManageModel;
 import com.kingsware.kdev.core.bean.BaseModel;
 import com.kingsware.kdev.core.orm.annotation.AutoEnum;
 import com.kingsware.kdev.core.orm.annotation.Column;
@@ -14,11 +15,8 @@ import com.kingsware.kdev.core.orm.annotation.Table;
  * @date 2021/12/23 9:12 上午
  */
 @Table
-public class SysDemo extends BaseModel {
+public class SysDemo extends BaseManageModel {
 
-    /** id c**/
-    @Column(auto = AutoEnum.ID)
-    private String id;
     /** 名称 **/
     private String name;
     /** 性别 0：男 1： 女 **/
@@ -32,13 +30,6 @@ public class SysDemo extends BaseModel {
     @ColumnIgnore
     private String iAmPlay;
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;
