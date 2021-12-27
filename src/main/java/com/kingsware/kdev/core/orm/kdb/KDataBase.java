@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.bean.BaseModel;
 import com.kingsware.kdev.core.orm.*;
 import com.kingsware.kdev.core.orm.channel.DbChannel;
 import com.kingsware.kdev.core.orm.channel.KDBHttpChannel;
+import com.kingsware.kdev.core.orm.expression.Expression;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,14 +72,26 @@ public class KDataBase implements DataBase {
     }
 
     @Override
+    public <T> long findCount(Class<T> tClass, List<Expression> expressionList) {
+        SqlBean sqlBean = SqlGenerator.findSql(tClass, expressionList);
+        return this.findCount(SqlGenerator.getListSql2CountSql(sqlBean.getSql()),  sqlBean.getParams().toArray());
+    }
+
+    @Override
     public <T> List<T> findList(Class<T> tClass, String sql, Object... params) {
         return channel.queryForList(sql, tClass,  Arrays.asList(params));
     }
 
     @Override
+    public <T> List<T> findList(Class<T> tClass, List<Expression> expressionList) {
+        SqlBean sqlBean = SqlGenerator.findSql(tClass, expressionList);
+        return this.findList(tClass, sqlBean.getSql(), sqlBean.getParams().toArray());
+    }
+
+    @Override
     public <T> PagedList<T> findPagedList(Class<T> tClass, int page, int pageSize, String sql, Object... params) {
         // 先查询总数
-        String selectCountSql = String.format("select count(1) from (%s) tmp_cnt", sql);
+        String selectCountSql = SqlGenerator.getListSql2CountSql(sql);
         Long count = channel.queryForCount(selectCountSql, Arrays.asList(params));
         // 查询数据
         String dataQuerySql = sql + "limit ?,?";

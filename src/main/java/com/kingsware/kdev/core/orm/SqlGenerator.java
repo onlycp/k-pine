@@ -6,6 +6,9 @@ import com.kingsware.kdev.core.orm.annotation.AutoEnum;
 import com.kingsware.kdev.core.orm.annotation.Column;
 import com.kingsware.kdev.core.orm.annotation.ColumnIgnore;
 import com.kingsware.kdev.core.orm.annotation.Table;
+import com.kingsware.kdev.core.orm.expression.BetweenExpression;
+import com.kingsware.kdev.core.orm.expression.Expression;
+import com.kingsware.kdev.core.orm.expression.SimpleExpression;
 import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.StringUtils;
@@ -41,7 +44,7 @@ public class SqlGenerator {
         // 获取第一个对象的class
         Class tClass = models.get(0).getClass();
         // 获取表名
-        String tableName = getTableName(tClass);
+        String tableName = ModelUtil.getTableName(tClass);
         // 获取所有的Field
         Field[] fields = tClass.getDeclaredFields();
 
@@ -137,7 +140,7 @@ public class SqlGenerator {
     public static <T> SqlBean updateSql(T model,  DataBaseTypeEnum dataBaseTypeEnum) {
         Class tClass = model.getClass();
         // 获取表名
-        String tableName = getTableName(tClass);
+        String tableName = ModelUtil.getTableName(tClass);
         // 获取所有的Field
         Field[] fields = tClass.getDeclaredFields();
         // 参数对
@@ -214,8 +217,62 @@ public class SqlGenerator {
             throw new RuntimeException("Model缺少id列定义, 详情见@Column的auto属性");
         }
         // 获取表名
-        String tableName = getTableName(tClass);
+        String tableName = ModelUtil.getTableName(tClass);
         return String.format("select * from %s where %s=?", tableName, StringUtils.humpToLine(idField.getName()));
+    }
+
+    /**
+     * 通过表达式查询的sql
+     * @param tClass            目标类
+     * @param expressionList    表达式列表
+     * @param <T>               泛型
+     * @return                  sql
+     */
+    public static <T> SqlBean findSql(Class<T> tClass, List<Expression> expressionList ) {
+        SqlBean sqlBean = new SqlBean();
+        // 获取表名
+        String tableName = ModelUtil.getTableName(tClass);
+        // 拼接sql
+        StringBuilder builder = new StringBuilder();
+        builder.append("select * from ").append(tableName).append(" ");
+        // 拼接查询条件
+        builder.append("where 1=1 ");
+        for (Expression expression: expressionList) {
+            // 简单表达式
+            if (expression instanceof SimpleExpression) {
+                SimpleExpression simpleExpression = (SimpleExpression)expression;
+                // 获取列名
+                String columnName = ModelUtil.getColumnName(tClass, simpleExpression.getPropName());
+                // 拼接sql
+                builder.append("and ").append(columnName).append(" ");
+                builder.append(simpleExpression.getOp()).append(" ");
+                builder.append("? ");
+                sqlBean.getParams().add(simpleExpression.getValue());
+            }
+            // 区间查询
+            else if (expression instanceof BetweenExpression) {
+                BetweenExpression betweenExpression = (BetweenExpression)expression;
+                // 获取列名
+                String columnName = ModelUtil.getColumnName(tClass, betweenExpression.getPropName());
+                // 拼接sql
+                builder.append("and ").append(columnName).append(" ");
+                builder.append("between ? and ? ");
+                sqlBean.getParams().add(betweenExpression.getLowValue());
+                sqlBean.getParams().add(betweenExpression.getHighValue());
+            }
+        }
+        sqlBean.setSql(builder.toString());
+        return sqlBean;
+    }
+
+    /**
+     * 将查询列表的sql转为查询个数的
+     * @param sql   原始sql
+     * @return      查询个数的sql
+     */
+    public static String getListSql2CountSql(String sql) {
+        // 简单处理，后续优化
+        return String.format("select count(1) from (%s) tmp_cnt", sql);
     }
 
     public static SqlBean deleteSql(BaseModel model) {
@@ -225,7 +282,7 @@ public class SqlGenerator {
             throw new RuntimeException("Model缺少id列定义, 详情见@Column的auto属性");
         }
         // 获取表名
-        String tableName = getTableName(model.getClass());
+        String tableName = ModelUtil.getTableName(model.getClass());
         // 拼接sql
         StringBuilder builder = new StringBuilder();
         builder.append("delete from ");
@@ -249,9 +306,10 @@ public class SqlGenerator {
             throw new RuntimeException("Model缺少id列定义, 详情见@Column的auto属性");
         }
         // 获取表名
-        String tableName = getTableName(tClass);
+        String tableName = ModelUtil.getTableName(tClass);
         return String.format("delete from %s where %s=?", tableName, StringUtils.humpToLine(idField.getName()));
     }
+
 
 
     /**
@@ -273,32 +331,7 @@ public class SqlGenerator {
         return optionalIdField.orElse(null);
     }
 
-    /**
-     * 获取表名
-     * @param tClass class
-     * @return  表名
-     */
-    private static <T> String getTableName(Class<T> tClass) {
-        String tableName = "";
-        // 如果用@Table，优先从@Table里获取表名
-        if (tClass.isAnnotationPresent(Table.class)) {
-            Table table = tClass.getAnnotation(Table.class);
-            if (StringUtils.isNotEmpty(tableName)) {
-                tableName = table.value();
-            }
 
-        }
-        // 如果此时表名为空，则取class名称作为表名
-        if (StringUtils.isEmpty(tableName)) {
-            // 类名
-            String className = tClass.getSimpleName();
-            // 将首字母改为小写
-            String instName = StringUtils.uncapitalize(className);
-            // 然后转为下划线
-            tableName =  StringUtils.humpToLine(instName);
-        }
-        return tableName;
-    }
 
 
 }
