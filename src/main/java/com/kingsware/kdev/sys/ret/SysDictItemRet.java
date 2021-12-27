@@ -1,4 +1,4 @@
-package com.kingsware.kdev.sys.model.vo;
+package com.kingsware.kdev.sys.ret;
 
 /**
  * @author AndyZheng
@@ -6,7 +6,7 @@ package com.kingsware.kdev.sys.model.vo;
  * @description: 字典类型
  * @date 2021-12-27 10:20
  */
-public class SysDictItemVO {
+public class SysDictItemRet {
 
     /** id */
     private String id;

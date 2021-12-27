@@ -1,7 +1,4 @@
-package com.kingsware.kdev.sys.model.to;
-
-import com.kingsware.kdev.core.bean.BaseModel;
-import com.kingsware.kdev.core.orm.annotation.Table;
+package com.kingsware.kdev.sys.ret;
 
 /**
  * @author AndyZheng
@@ -9,7 +6,7 @@ import com.kingsware.kdev.core.orm.annotation.Table;
  * @description: 字典类型
  * @date 2021-12-27 10:20
  */
-public class SysDictTO {
+public class SysDictRet {
 
     /** id */
     private String id;

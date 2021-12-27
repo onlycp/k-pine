@@ -1,6 +1,6 @@
-package com.kingsware.kdev.sys.model.to;
+package com.kingsware.kdev.sys.argv;
 
-public class SysUserLoginTO {
+public class SysUserLoginArgc {
 
     private String token;
 

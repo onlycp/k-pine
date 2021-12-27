@@ -2,8 +2,7 @@ package com.kingsware.kdev.sys.web;
 
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.constants.Version;
-import com.kingsware.kdev.sys.argv.SysDemoArgv;
-import com.kingsware.kdev.sys.model.to.SysUserLoginTO;
+import com.kingsware.kdev.sys.argv.SysUserLoginArgc;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +13,6 @@ import java.util.Map;
 @Api(value = "系统用户", tags = {"系统用户"})
 @RestController
 @RequestMapping("/"+ Version.V1 + "/sys-user")
-@CrossOrigin("*")
 public class SysUserController {
     /**
      *  登录
@@ -22,7 +20,7 @@ public class SysUserController {
      */
     @ApiOperation(value = "登录 " ,notes = "登录")
     @PostMapping(value = "login")
-    public BaseRet<?> login(@RequestBody SysUserLoginTO sysUserLoginTO) {
+    public BaseRet<?> login(@RequestBody SysUserLoginArgc sysUserLoginArgc) {
         Map<String, String> resultMap = new HashMap<>();
         resultMap.put("token", "test");
         return BaseRet.success(resultMap);
