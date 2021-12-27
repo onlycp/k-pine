@@ -3,6 +3,7 @@ package com.kingsware.kdev.core.orm;
 import com.kingsware.kdev.core.orm.annotation.Column;
 import com.kingsware.kdev.core.orm.annotation.Table;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
+import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 
 import java.lang.reflect.Field;
@@ -54,7 +55,7 @@ public class ModelUtil {
      */
     public static <T> String getColumnName(Class<T> tClass, String propName) {
         // 获取所有的Field
-        Field[] fields = tClass.getDeclaredFields();
+        Field[] fields = BeanUtils.getAllFields(tClass);
         // 找到对应的列
         Field propField = null;
         for (Field field: fields) {

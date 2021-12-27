@@ -19,6 +19,26 @@ public class BeanUtils {
     /** 日志打印 **/
     private static final Logger logger  = LoggerFactory.getLogger(BeanUtils.class);
 
+
+    /**
+     * 获取所有的Field
+     * @param clazz    目标类
+     * @return          所有field，包括继承的
+     */
+    public static Field[] getAllFields(Class<?> clazz) {
+
+        List<Field> allFields = new ArrayList<>();
+        //向上循环 遍历父类
+        for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
+            Field[] field = clazz.getDeclaredFields();
+            for (Field f : field) {
+                f.setAccessible(true);
+                allFields.add(f);
+            }
+        }
+        return allFields.toArray(new Field[0]);
+
+    }
     /**
      * 给对象的属性赋值
      * @param field     属性

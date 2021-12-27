@@ -46,7 +46,7 @@ public class SqlGenerator {
         // 获取表名
         String tableName = ModelUtil.getTableName(tClass);
         // 获取所有的Field
-        Field[] fields = tClass.getDeclaredFields();
+        Field[] fields = BeanUtils.getAllFields(tClass);
 
         StringBuilder builder = new StringBuilder();
         builder.append(" insert into ").append(tableName).append(" ");
@@ -97,6 +97,9 @@ public class SqlGenerator {
                         if (KClientContext.getContext().getUserInfo() != null) {
                             BeanUtils.setField(field, model, KClientContext.getContext().getUserInfo().getId());
                         }
+                        else {
+                            BeanUtils.setField(field, model, "");
+                        }
                     }
                     else if (column.auto() == AutoEnum.WHEN) {
                         BeanUtils.setField(field, model, DateUtils.getNow());
@@ -142,7 +145,7 @@ public class SqlGenerator {
         // 获取表名
         String tableName = ModelUtil.getTableName(tClass);
         // 获取所有的Field
-        Field[] fields = tClass.getDeclaredFields();
+        Field[] fields = BeanUtils.getAllFields(tClass);
         // 参数对
         List<String> updateList = new ArrayList<>();
         // 参数列表
@@ -182,6 +185,9 @@ public class SqlGenerator {
                 if (column.auto() == AutoEnum.WHO) {
                     if (KClientContext.getContext().getUserInfo() != null) {
                         BeanUtils.setField(field, model, KClientContext.getContext().getUserInfo().getId());
+                    }
+                    else {
+                        BeanUtils.setField(field, model, "");
                     }
                 }
                 else if (column.auto() == AutoEnum.WHEN) {
@@ -319,7 +325,7 @@ public class SqlGenerator {
      */
     private static <T> Field getIdField(Class<T> tClass) {
         // 获取所有的Field
-        Field[] fields = tClass.getDeclaredFields();
+        Field[] fields = BeanUtils.getAllFields(tClass);
         // 查找当前实体的id值
         Optional<Field> optionalIdField = Arrays.stream(fields).filter(it -> {
             if (it.isAnnotationPresent(Column.class)) {
