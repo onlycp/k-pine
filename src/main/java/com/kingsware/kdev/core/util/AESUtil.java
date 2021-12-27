@@ -23,6 +23,10 @@ public class AESUtil {
 
     /** 日志打印 **/
     private static final Logger logger  = LoggerFactory.getLogger(AESUtil.class);
+    /** 默认补码方式 **/
+    private static final String defaultCipherMode = "AES/ECB/PKCS5Padding";
+
+
 
     /**
      * AES加密
@@ -30,7 +34,18 @@ public class AESUtil {
      * @param secret    密钥
      * @return          加密后的字符串
      */
-    public static String encrypt(String src, String secret){
+    public static String encrypt(String src, String secret) {
+        return encrypt(src, secret, defaultCipherMode);
+    }
+
+    /**
+     * AES加密
+     * @param src       源字符串
+     * @param secret    密钥
+     * @param cipherMode   算法/模式/补码方式
+     * @return          加密后的字符串
+     */
+    public static String encrypt(String src, String secret, String cipherMode){
         // 如果密码为空，直接返回null
         if (StringUtils.isEmpty(secret)) {
             return null;
@@ -44,7 +59,7 @@ public class AESUtil {
             byte[] raw = secret.getBytes(StandardCharsets.UTF_8);
             SecretKeySpec keySpec = new SecretKeySpec(raw, "AES");
             //"算法/模式/补码方式"
-            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            Cipher cipher = Cipher.getInstance(cipherMode);
             cipher.init(Cipher.ENCRYPT_MODE, keySpec);
             byte[] encrypted = cipher.doFinal(src.getBytes(StandardCharsets.UTF_8));
             return new String(Base64.getEncoder().encode(encrypted));
@@ -61,6 +76,17 @@ public class AESUtil {
      * @return          解密后的字符串
      */
     public static String decrypt(String src, String secret) {
+        return decrypt(src, secret, defaultCipherMode);
+    }
+
+    /**
+     *  解密字符串
+     * @param src       源
+     * @param secret    密钥
+     * @param cipherMode   算法/模式/补码方式
+     * @return          解密后的字符串
+     */
+    public static String decrypt(String src, String secret, String cipherMode) {
         try {
             // 如果密码为空，直接返回null
             if (StringUtils.isEmpty(secret)) {
@@ -73,7 +99,7 @@ public class AESUtil {
             }
             byte[] raw = secret.getBytes(StandardCharsets.UTF_8);
             SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
-            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            Cipher cipher = Cipher.getInstance(cipherMode);
             cipher.init(Cipher.DECRYPT_MODE, skeySpec);
             byte[] encrypted1 = Base64.getDecoder().decode(src);//先用base64解密
             try {

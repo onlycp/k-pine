@@ -16,4 +16,21 @@ public class BetweenExpression extends AbstractExpression {
     public BetweenExpression(String propName) {
         super(propName);
     }
+
+
+    public Object getLowValue() {
+        return lowValue;
+    }
+
+    public void setLowValue(Object lowValue) {
+        this.lowValue = lowValue;
+    }
+
+    public Object getHighValue() {
+        return highValue;
+    }
+
+    public void setHighValue(Object highValue) {
+        this.highValue = highValue;
+    }
 }
