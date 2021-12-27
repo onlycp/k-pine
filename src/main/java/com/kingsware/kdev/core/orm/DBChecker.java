@@ -2,14 +2,12 @@ package com.kingsware.kdev.core.orm;
 
 import com.kingsware.kdev.core.bean.BaseManageModel;
 import com.kingsware.kdev.core.exception.BusinessException;
-import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.util.BeanUtils;
 import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * 唯一性判断
