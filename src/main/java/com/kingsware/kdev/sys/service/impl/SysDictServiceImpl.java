@@ -58,12 +58,17 @@ public class SysDictServiceImpl extends BaseServiceImpl implements SysDictServic
         // 拼装sql
         StringBuilder builder = new StringBuilder();
         List<Object> params = new ArrayList<>();
-        builder.append("select * from sys_dict where 1=1 ");
+        builder.append(" select * from sys_dict where 1=1 ");
         // 拼装查询sql
         if (StringUtils.isNotEmpty(argv.getName())) {
-            builder.append("and ");
-            builder.append("name like '%?%'");
-            params.add(argv.getName());
+            builder.append(" and ");
+            builder.append(" name like ? ");
+            params.add("%" + argv.getName() + "%");
+        }
+        if (StringUtils.isNotEmpty(argv.getCode())) {
+            builder.append(" and ");
+            builder.append(" code like ? ");
+            params.add("%" + argv.getCode() + "%");
         }
         // 返回结果
         PageDataRet<SysDictRet> pageDataRet = new PageDataRet<>();

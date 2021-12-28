@@ -96,13 +96,12 @@ public class KDataBase implements DataBase {
         // 查询数据
         String dataQuerySql = sql + "limit ?,?";
         // 计算limit
-        int from = (page - 1) * page;
-        int to = page * pageSize;
+        int from = (page - 1) * pageSize;
         List<Object> objects = new ArrayList<>(Arrays.asList(params));
         // 加入from
         objects.add(from);
-        // 加入to
-        objects.add(to);
+        // 加入pageSize
+        objects.add(pageSize);
         // 查询数据
         List<T> data =  channel.queryForList(dataQuerySql, tClass,  objects);
         // 计算总页数
