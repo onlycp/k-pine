@@ -6,6 +6,8 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
+import com.kingsware.kdev.core.orm.SqlWrapper;
+import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysRoleArgv;
@@ -39,6 +41,15 @@ public class SysRoleServiceImpl extends BaseServiceImpl implements SysRoleServic
     @Override
     public void add(SysRoleArgv argv) {
         SysRole model = BeanUtils.copyObject(argv, SysRole.class);
+        // 唯一性校验
+        DBChecker<SysRole> checker =DBChecker.build(model, SysRole.class);
+        // 名称唯一
+        checker.uni("name", I18n.t("SysRole.name.unique", "名称必须唯一"));
+        // 编码唯一
+        checker.uni("code", I18n.t("SysRole.code.unique", "编码必须唯一"));
+        // 执行校验
+        checker.checkUnique();
+        // 保存
         DB.save(model);
     }
 
@@ -65,16 +76,15 @@ public class SysRoleServiceImpl extends BaseServiceImpl implements SysRoleServic
     @SuppressWarnings("unchecked")
     public PageDataRet<SysRoleRet> query(SysRoleQueryArgv argv) {
         // 拼装sql
-        StringBuilder builder = new StringBuilder();
-        List<Object> params = new ArrayList<>();
-        builder.append("select * from sys_role where 1=1 ");
+        SqlWrapper wrapper = new SqlWrapper("select * from sys_role where 1=1 ");
         // 拼装查询sql
         if (StringUtils.isNotEmpty(argv.getName())) {
-            builder.append("and ");
-            builder.append("name like ？");
-            params.add("%" +argv.getName() +"%");
+            wrapper.add("name", Op.LIKE, "%" +argv.getName() +"%");
         }
-        return (PageDataRet<SysRoleRet>) query(builder.toString(), params, argv, SysRole.class, SysRoleRet.class);
+        if (StringUtils.isNotEmpty(argv.getCode())) {
+            wrapper.add("code", Op.LIKE, "%" +argv.getCode() +"%");
+        }
+        return (PageDataRet<SysRoleRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysRole.class, SysRoleRet.class);
     }
 
     @Override

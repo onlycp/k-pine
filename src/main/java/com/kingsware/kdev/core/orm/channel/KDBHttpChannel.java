@@ -2,7 +2,6 @@ package com.kingsware.kdev.core.orm.channel;
 
 import com.kingsware.kdev.core.exception.HttpClientException;
 import com.kingsware.kdev.core.orm.DBConnectConfig;
-import com.kingsware.kdev.core.orm.SqlBean;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.orm.kdb.KDBConnectConfig;
 import com.kingsware.kdev.core.orm.kdb.KdbArgc;

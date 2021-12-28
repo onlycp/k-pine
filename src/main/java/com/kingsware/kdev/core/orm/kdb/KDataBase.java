@@ -73,8 +73,8 @@ public class KDataBase implements DataBase {
 
     @Override
     public <T> long findCount(Class<T> tClass, List<Expression> expressionList) {
-        SqlBean sqlBean = SqlGenerator.findSql(tClass, expressionList);
-        return this.findCount(SqlGenerator.getListSql2CountSql(sqlBean.getSql()),  sqlBean.getParams().toArray());
+        SqlWrapper sqlWrapper = SqlGenerator.findSql(tClass, expressionList);
+        return this.findCount(SqlGenerator.getListSql2CountSql(sqlWrapper.getSql()),  sqlWrapper.getParams().toArray());
     }
 
     @Override
@@ -84,8 +84,8 @@ public class KDataBase implements DataBase {
 
     @Override
     public <T> List<T> findList(Class<T> tClass, List<Expression> expressionList) {
-        SqlBean sqlBean = SqlGenerator.findSql(tClass, expressionList);
-        return this.findList(tClass, sqlBean.getSql(), sqlBean.getParams().toArray());
+        SqlWrapper sqlWrapper = SqlGenerator.findSql(tClass, expressionList);
+        return this.findList(tClass, sqlWrapper.getSql(), sqlWrapper.getParams().toArray());
     }
 
     @Override
@@ -129,30 +129,30 @@ public class KDataBase implements DataBase {
 
     @Override
     public <T> long delete(T entity) {
-        SqlBean sqlBean = SqlGenerator.deleteSql((BaseModel) entity);
-        channel.executeSql(sqlBean.getSql(), sqlBean.getParams());
+        SqlWrapper sqlWrapper = SqlGenerator.deleteSql((BaseModel) entity);
+        channel.executeSql(sqlWrapper.getSql(), sqlWrapper.getParams());
         return 1;
     }
 
     @Override
     public <T> long save(T entity) {
-        SqlBean sqlBean = SqlGenerator.insertSql((BaseModel) entity, DataBaseTypeEnum.KDB);
-        channel.executeSql(sqlBean.getSql(),  sqlBean.getParams());
+        SqlWrapper sqlWrapper = SqlGenerator.insertSql((BaseModel) entity, DataBaseTypeEnum.KDB);
+        channel.executeSql(sqlWrapper.getSql(),  sqlWrapper.getParams());
         return 1;
 
     }
 
     @Override
     public <T> long saveAll(List<T> list) {
-        SqlBean sqlBean = SqlGenerator.insertListSql(list , DataBaseTypeEnum.KDB);
-        channel.executeSql(sqlBean.getSql(), sqlBean.getParams());
+        SqlWrapper sqlWrapper = SqlGenerator.insertListSql(list , DataBaseTypeEnum.KDB);
+        channel.executeSql(sqlWrapper.getSql(), sqlWrapper.getParams());
         return list.size();
     }
 
     @Override
     public <T> long update(T entity) {
-        SqlBean sqlBean = SqlGenerator.updateSql(entity , DataBaseTypeEnum.KDB);
-        channel.executeSql(sqlBean.getSql(), sqlBean.getParams());
+        SqlWrapper sqlWrapper = SqlGenerator.updateSql(entity , DataBaseTypeEnum.KDB);
+        channel.executeSql(sqlWrapper.getSql(), sqlWrapper.getParams());
         return 1;
     }
 

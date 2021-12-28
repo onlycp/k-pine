@@ -5,7 +5,6 @@ import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.orm.annotation.AutoEnum;
 import com.kingsware.kdev.core.orm.annotation.Column;
 import com.kingsware.kdev.core.orm.annotation.ColumnIgnore;
-import com.kingsware.kdev.core.orm.annotation.Table;
 import com.kingsware.kdev.core.orm.expression.BetweenExpression;
 import com.kingsware.kdev.core.orm.expression.Expression;
 import com.kingsware.kdev.core.orm.expression.SimpleExpression;
@@ -40,7 +39,7 @@ public class SqlGenerator {
      * @param <T>   泛型
      * @return      批量插入的sql
      */
-    public static <T> SqlBean insertListSql(List<T> models, DataBaseTypeEnum dataBaseTypeEnum) {
+    public static <T> SqlWrapper insertListSql(List<T> models, DataBaseTypeEnum dataBaseTypeEnum) {
         // 获取第一个对象的class
         Class tClass = models.get(0).getClass();
         // 获取表名
@@ -117,10 +116,10 @@ public class SqlGenerator {
         builder.append(" values ");
         builder.append(StringUtils.joinToString(insertValues, ","));
         // 返回结果
-        SqlBean sqlBean = new SqlBean();
-        sqlBean.setSql(builder.toString());
-        sqlBean.setParams(params);
-        return sqlBean;
+        SqlWrapper sqlWrapper = new SqlWrapper();
+        sqlWrapper.setSql(builder.toString());
+        sqlWrapper.setParams(params);
+        return sqlWrapper;
     }
     /**
      * 生成insertSQL
@@ -128,7 +127,7 @@ public class SqlGenerator {
      * @param dataBaseTypeEnum  数据库类型
      * @return              生成后的语句
      */
-    public static <T> SqlBean insertSql(T model, DataBaseTypeEnum dataBaseTypeEnum) {
+    public static <T> SqlWrapper insertSql(T model, DataBaseTypeEnum dataBaseTypeEnum) {
         List<T> models = new ArrayList<>();
         models.add(model);
         return insertListSql(models, dataBaseTypeEnum);
@@ -140,7 +139,7 @@ public class SqlGenerator {
      * @param dataBaseTypeEnum  数据库类型
      * @return  sql结构
      */
-    public static <T> SqlBean updateSql(T model,  DataBaseTypeEnum dataBaseTypeEnum) {
+    public static <T> SqlWrapper updateSql(T model, DataBaseTypeEnum dataBaseTypeEnum) {
         Class tClass = model.getClass();
         // 获取表名
         String tableName = ModelUtil.getTableName(tClass);
@@ -205,10 +204,10 @@ public class SqlGenerator {
         builder.append("where ");
         builder.append(String.format("%s=?", StringUtils.humpToLine(idField.getName())));
         // 返回结果
-        SqlBean sqlBean = new SqlBean();
-        sqlBean.setSql(builder.toString());
-        sqlBean.setParams(params);
-        return sqlBean;
+        SqlWrapper sqlWrapper = new SqlWrapper();
+        sqlWrapper.setSql(builder.toString());
+        sqlWrapper.setParams(params);
+        return sqlWrapper;
     }
 
     /**
@@ -234,8 +233,8 @@ public class SqlGenerator {
      * @param <T>               泛型
      * @return                  sql
      */
-    public static <T> SqlBean findSql(Class<T> tClass, List<Expression> expressionList ) {
-        SqlBean sqlBean = new SqlBean();
+    public static <T> SqlWrapper findSql(Class<T> tClass, List<Expression> expressionList ) {
+        SqlWrapper sqlWrapper = new SqlWrapper();
         // 获取表名
         String tableName = ModelUtil.getTableName(tClass);
         // 拼接sql
@@ -253,7 +252,7 @@ public class SqlGenerator {
                 builder.append("and ").append(columnName).append(" ");
                 builder.append(simpleExpression.getOp()).append(" ");
                 builder.append("? ");
-                sqlBean.getParams().add(simpleExpression.getValue());
+                sqlWrapper.getParams().add(simpleExpression.getValue());
             }
             // 区间查询
             else if (expression instanceof BetweenExpression) {
@@ -263,12 +262,12 @@ public class SqlGenerator {
                 // 拼接sql
                 builder.append("and ").append(columnName).append(" ");
                 builder.append("between ? and ? ");
-                sqlBean.getParams().add(betweenExpression.getLowValue());
-                sqlBean.getParams().add(betweenExpression.getHighValue());
+                sqlWrapper.getParams().add(betweenExpression.getLowValue());
+                sqlWrapper.getParams().add(betweenExpression.getHighValue());
             }
         }
-        sqlBean.setSql(builder.toString());
-        return sqlBean;
+        sqlWrapper.setSql(builder.toString());
+        return sqlWrapper;
     }
 
     /**
@@ -281,7 +280,7 @@ public class SqlGenerator {
         return String.format("select count(1) from (%s) tmp_cnt", sql);
     }
 
-    public static SqlBean deleteSql(BaseModel model) {
+    public static SqlWrapper deleteSql(BaseModel model) {
         // id列名
         Field idField = getIdField(model.getClass());
         if (idField == null) {
@@ -299,10 +298,10 @@ public class SqlGenerator {
         List<Object> params = new ArrayList<>();
         params.add(BeanUtils.getField(idField, model));
         // 返回结果
-        SqlBean sqlBean = new SqlBean();
-        sqlBean.setSql(builder.toString());
-        sqlBean.setParams(params);
-        return sqlBean;
+        SqlWrapper sqlWrapper = new SqlWrapper();
+        sqlWrapper.setSql(builder.toString());
+        sqlWrapper.setParams(params);
+        return sqlWrapper;
     }
 
     public static <T> String deleteById(Class<T> tClass) {
