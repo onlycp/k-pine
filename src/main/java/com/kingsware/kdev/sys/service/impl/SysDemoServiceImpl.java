@@ -34,7 +34,7 @@ public class SysDemoServiceImpl extends BaseServiceImpl implements SysDemoServic
         // 查询model
         SysDemo model = DB.findById(SysDemo.class, id);
         // 转换成ret对象
-        return BeanUtils.copyObject(model, SysDemoRet.class);
+        return (SysDemoRet) model2Ret(model, SysDemoRet.class);
     }
 
     @Override
@@ -58,38 +58,19 @@ public class SysDemoServiceImpl extends BaseServiceImpl implements SysDemoServic
     }
 
     @Override
-    public PageDataRet<SysDemoRet> query(SysDemoQueryArgv argc) {
+    @SuppressWarnings("unchecked")
+    public PageDataRet<SysDemoRet> query(SysDemoQueryArgv argv) {
         // 拼装sql
         StringBuilder builder = new StringBuilder();
         List<Object> params = new ArrayList<>();
         builder.append("select * from sys_demo where 1=1 ");
         // 拼装查询sql
-        if (StringUtils.isNotEmpty(argc.getName())) {
+        if (StringUtils.isNotEmpty(argv.getName())) {
             builder.append("and ");
-            builder.append("name like '%?%'");
-            params.add(argc.getName());
+            builder.append("name like ？");
+            params.add("%" +argv.getName() +"%");
         }
-        // 返回结果
-        PageDataRet<SysDemoRet> pageDataRet = new PageDataRet<>();
-        // 分页查询
-        if (argc.isPageQuery()) {
-            PagedList<SysDemo> pagedList = DB.findPagedList(SysDemo.class, argc.getPage(), argc.getPageSize(), builder.toString(), params.toArray());
-            pageDataRet.setPageSize(pagedList.getPageSize());
-            pageDataRet.setPageCount(pagedList.getPageCount());
-            pageDataRet.setPage(pagedList.getPageIndex());
-            pageDataRet.setTotal(pagedList.getTotalCount());
-            pageDataRet.setList(BeanUtils.copyList(pagedList.getList(), SysDemoRet.class));
-        }
-        // 一般查询
-        else {
-            List<SysDemo> models = DB.findList(SysDemo.class, builder.toString(), params.toArray());
-            pageDataRet.setPage(1);
-            pageDataRet.setPageSize(models.size());
-            pageDataRet.setTotal(models.size());
-            pageDataRet.setPageCount(1);
-            pageDataRet.setList(BeanUtils.copyList(models, SysDemoRet.class));
-        }
-        return pageDataRet;
+        return (PageDataRet<SysDemoRet>) query(builder.toString(), params, argv, SysDemo.class, SysDemoRet.class);
     }
 
     @Override

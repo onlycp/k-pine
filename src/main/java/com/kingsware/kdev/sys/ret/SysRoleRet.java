@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * 演示结果返回
+ * 角色返回
  *
  * @author chen peng
  * @version 1.0.0
@@ -13,19 +13,13 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class SysDemoRet extends BaseManageRet {
-
-    /** id c**/
-    private String id;
+public class SysRoleRet extends BaseManageRet {
     /** 名称 **/
     private String name;
     /** 性别 0：男 1： 女 **/
-    private String sex;
+    private String code;
     /** 生日 **/
-    private String birthday;
-    /** 描述 **/
     private String note;
-    /** 吃饭时间 **/
-    private String eattime;
-
+    /** 状态 **/
+    private Integer status;
 }
