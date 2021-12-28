@@ -132,7 +132,7 @@ public class JsonUtil {
         T entity = tClass.newInstance();
         // 由于postgresql会自动将大写转为小写，这里需要一个将实体属性名称转为小写处理
         Map<String, Field> fieldMap = new HashMap<>();
-        Field[] fields = tClass.getDeclaredFields();
+        Field[] fields = BeanUtils.getAllFields(tClass);
         for (Field field: fields) {
             field.setAccessible(true);
             fieldMap.put(field.getName(), field);
