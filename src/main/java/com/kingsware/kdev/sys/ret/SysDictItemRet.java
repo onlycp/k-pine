@@ -22,6 +22,14 @@ public class SysDictItemRet {
     private String code;
     /** 备注 */
     private String note;
+    /** 创建人员 **/
+    private String whoCreated;
+    /** 创建时间 **/
+    private String whenCreated;
+    /** 修改人员 **/
+    private String whoModified;
+    /** 修改时间 **/
+    private String whenModified;
 
     public String getId() {
         return id;
@@ -76,5 +84,37 @@ public class SysDictItemRet {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public String getWhoCreated() {
+        return whoCreated;
+    }
+
+    public void setWhoCreated(String whoCreated) {
+        this.whoCreated = whoCreated;
+    }
+
+    public String getWhenCreated() {
+        return whenCreated;
+    }
+
+    public void setWhenCreated(String whenCreated) {
+        this.whenCreated = whenCreated;
+    }
+
+    public String getWhoModified() {
+        return whoModified;
+    }
+
+    public void setWhoModified(String whoModified) {
+        this.whoModified = whoModified;
+    }
+
+    public String getWhenModified() {
+        return whenModified;
+    }
+
+    public void setWhenModified(String whenModified) {
+        this.whenModified = whenModified;
     }
 }

@@ -27,6 +27,8 @@ public class SysDictItem extends BaseManageModel {
     private String code;
     /** 备注 */
     private String note;
+    /** 排序序号 */
+    private Integer orderNum;
 
     public String getName() {
         return name;
