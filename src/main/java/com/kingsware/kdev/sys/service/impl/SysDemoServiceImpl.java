@@ -3,7 +3,9 @@ package com.kingsware.kdev.sys.service.impl;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.PagedList;
 import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
@@ -46,6 +48,12 @@ public class SysDemoServiceImpl extends BaseServiceImpl implements SysDemoServic
         SysDemo model = DB.findById(SysDemo.class, argc.getId());
         model.setName(argc.getName());
         model.setNote(argc.getNote());
+        // 唯一性校验
+        DBChecker.build(model, SysDemo.class)
+                .uni("name", I18n.t("SysDemo.name.unique", "名称必须唯一"))
+                .uni(new String[]{"name", "code"}, I18n.t("SysDemo.name.unique", "名称必须唯一"))
+                .checkUnique();
+
         DB.update(model);
     }
 

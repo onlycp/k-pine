@@ -1,5 +1,7 @@
 package com.kingsware.kdev.core.orm;
 
+import com.kingsware.kdev.core.orm.expression.Expression;
+
 import java.util.List;
 
 /**
@@ -65,6 +67,17 @@ public class DB {
     }
 
     /**
+     * 通过表达式查询数量
+     * @param tClass            目标类
+     * @param expressionList    表达式列表
+     * @param <T>               泛型
+     * @return                  数量
+     */
+    public static <T> long findCount(Class<T> tClass, List<Expression> expressionList) {
+        return getDefault().findCount(tClass, expressionList);
+    }
+
+    /**
      * 通过SQL列表
      * @param tClass    实体泛型
      * @param sql       查询sql
@@ -74,6 +87,17 @@ public class DB {
      */
     public static <T> List<T> findList(Class<T> tClass, String sql, Object... params) {
         return getDefault().findList(tClass, sql, params);
+    }
+
+    /**
+     * 通过表达式查询列表
+     * @param tClass            目标类
+     * @param expressionList    表达式列表
+     * @param <T>               泛型
+     * @return          单个实体或空
+     */
+    public static <T> List<T> findList(Class<T> tClass, List<Expression> expressionList) {
+        return getDefault().findList(tClass, expressionList);
     }
 
     /**

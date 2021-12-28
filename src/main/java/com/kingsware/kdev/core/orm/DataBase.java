@@ -1,6 +1,7 @@
 package com.kingsware.kdev.core.orm;
 
 import com.kingsware.kdev.core.orm.channel.DbChannel;
+import com.kingsware.kdev.core.orm.expression.Expression;
 
 import java.util.List;
 
@@ -65,6 +66,15 @@ public interface DataBase {
     long findCount(String sql, Object... params);
 
     /**
+     * 通过表达式查询数量
+     * @param tClass            目标类
+     * @param expressionList    表达式列表
+     * @param <T>               泛型
+     * @return                  数量
+     */
+    <T> long findCount(Class<T> tClass, List<Expression> expressionList);
+
+    /**
      * 通过SQL列表
      * @param tClass    实体泛型
      * @param sql       查询sql
@@ -73,6 +83,17 @@ public interface DataBase {
      * @return          单个实体或空
      */
     <T> List<T> findList(Class<T> tClass, String sql, Object... params);
+
+
+    /**
+     * 通过表达式查询列表
+     * @param tClass            目标类
+     * @param expressionList    表达式列表
+     * @param <T>               泛型
+     * @return          单个实体或空
+     */
+    <T> List<T> findList(Class<T> tClass, List<Expression> expressionList);
+
 
     /**
      * 分页查询

@@ -19,6 +19,26 @@ public class BeanUtils {
     /** 日志打印 **/
     private static final Logger logger  = LoggerFactory.getLogger(BeanUtils.class);
 
+
+    /**
+     * 获取所有的Field
+     * @param clazz    目标类
+     * @return          所有field，包括继承的
+     */
+    public static Field[] getAllFields(Class<?> clazz) {
+
+        List<Field> allFields = new ArrayList<>();
+        //向上循环 遍历父类
+        for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
+            Field[] field = clazz.getDeclaredFields();
+            for (Field f : field) {
+                f.setAccessible(true);
+                allFields.add(f);
+            }
+        }
+        return allFields.toArray(new Field[0]);
+
+    }
     /**
      * 给对象的属性赋值
      * @param field     属性
@@ -44,7 +64,24 @@ public class BeanUtils {
             field.setAccessible(true);
             return field.get(target);
         } catch (IllegalAccessException e) {
-            logger.warn("生成insertSQL时，获取属性值失败, 属性名:{}, 对象:{}", field.getName(), target);
+            logger.warn("获取对象属性值失败，获取属性值失败, 属性名:{}, 对象:{}", field.getName(), target);
+            return null;
+        }
+    }
+
+    /**
+     * 获取对象属性值
+     * @param fieldName     属性
+     * @param target    目标对象
+     */
+    public static Object getField(String fieldName, Object target) {
+
+        try {
+            Field field = target.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return field.get(target);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            logger.warn("获取对象属性值失败, 属性名:{}, 对象:{}", fieldName, target);
             return null;
         }
     }

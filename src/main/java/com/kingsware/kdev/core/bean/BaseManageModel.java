@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.bean;
 
+import com.kingsware.kdev.core.orm.annotation.AutoEnum;
 import com.kingsware.kdev.core.orm.annotation.Column;
 
 import java.io.Serializable;
@@ -13,14 +14,19 @@ import java.io.Serializable;
  */
 public class BaseManageModel extends BaseModel {
     /** id **/
+    @Column(auto = AutoEnum.ID)
     private String id;
     /** 创建人员 **/
+    @Column(auto = AutoEnum.WHO, updatable = false)
     private String whoCreated;
     /** 创建时间 **/
+    @Column(auto = AutoEnum.WHEN, updatable = false)
     private String whenCreated;
     /** 修改人员 **/
+    @Column(auto = AutoEnum.WHO)
     private String whoModified;
     /** 修改时间 **/
+    @Column(auto = AutoEnum.WHEN)
     private String whenModified;
 
     public String getId() {
