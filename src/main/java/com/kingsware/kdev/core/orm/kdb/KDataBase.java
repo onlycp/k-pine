@@ -96,8 +96,8 @@ public class KDataBase implements DataBase {
         // 查询数据
         String dataQuerySql = sql + "limit ?,?";
         // 计算limit
-        int from = (page - 1) * page;
-        int to = page * pageSize;
+        int from = (page - 1) * pageSize;
+        int to = pageSize;
         List<Object> objects = new ArrayList<>(Arrays.asList(params));
         // 加入from
         objects.add(from);

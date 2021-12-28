@@ -9,7 +9,7 @@ package com.kingsware.kdev.core.bean;
  */
 public class BasePageArgv {
     /** 页大小 **/
-    private Integer pageSize = 20;
+    private Integer pageSize;
     /** 页号 **/
     private Integer page;
     /** 是否分页 **/
