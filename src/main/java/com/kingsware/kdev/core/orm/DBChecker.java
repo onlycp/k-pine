@@ -74,9 +74,11 @@ public class DBChecker<T> {
                 }
             }
             else {
-                BaseManageModel queryEntity = (BaseManageModel) list.get(0);
-                if (!queryEntity.getId().equals(model.getId())) {
-                    throw BusinessException.serviceThrow(uni.getErrorMessage());
+                if (list.size() > 0) {
+                    BaseManageModel queryEntity = (BaseManageModel) list.get(0);
+                    if (!queryEntity.getId().equals(model.getId())) {
+                        throw BusinessException.serviceThrow(uni.getErrorMessage());
+                    }
                 }
             }
         }

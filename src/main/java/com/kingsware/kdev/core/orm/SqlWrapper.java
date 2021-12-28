@@ -53,4 +53,10 @@ public class SqlWrapper {
         sql += bind;
         params.addAll(Arrays.asList(objects));
     }
+
+    public void addCondition(String condition, Object... objects) {
+        sql += " and ";
+        sql += condition;
+        params.addAll(Arrays.asList(objects));
+    }
 }

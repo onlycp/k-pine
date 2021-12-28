@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 表名注解
+ * 是否逻辑删除
  *
  * @author chen peng
  * @version 1.0.0
@@ -14,8 +14,9 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.SOURCE)
-public @interface Table {
-    /** 表名 **/
-    String value() default "";
-
+public @interface LogicDelete {
+    /** 逻辑删除字段名 **/
+    String column() default "deleted";
+    /** 默认值 **/
+    int defValue() default 0;
 }

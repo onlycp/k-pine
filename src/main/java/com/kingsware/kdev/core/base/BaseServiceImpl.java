@@ -25,7 +25,7 @@ public class BaseServiceImpl implements BaseService {
         PageDataRet<BaseManageRet> pageDataRet = new PageDataRet<>();
         // 分页查询
         if (argv.isPageQuery()) {
-            PagedList<? extends BaseManageModel> pagedList = DB.findPagedList(inClass, argv.getPage(), argv.getPageSize(), toString(), params.toArray());
+            PagedList<? extends BaseManageModel> pagedList = DB.findPagedList(inClass, argv.getPage(), argv.getPageSize(), sql, params.toArray());
             pageDataRet.setPageSize(pagedList.getPageSize());
             pageDataRet.setPageCount(pagedList.getPageCount());
             pageDataRet.setPage(pagedList.getPageIndex());

@@ -107,7 +107,7 @@ public class KDBHttpChannel implements DbChannel{
             // 拼接请求
             String url = kdbConnectConfig.getServer() +  kdbConnectConfig.getExecuteSqlApi();
             // 发起进攻，杀
-            logger.info("KDBHttpChannel，url:{} ,请求体: {}", url, requestBody);
+            logger.info("url:{} ,请求体: {}", url, requestBody);
             // 杀敌一万，满身是血
             String  responseBody = HttpUtil.postBody(url, requestBody, Collections.emptyMap());
             // 洗洗，换身好衣服

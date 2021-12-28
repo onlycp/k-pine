@@ -2,10 +2,7 @@ package com.kingsware.kdev.sys.model;
 
 import com.kingsware.kdev.core.bean.BaseManageModel;
 import com.kingsware.kdev.core.bean.BaseModel;
-import com.kingsware.kdev.core.orm.annotation.AutoEnum;
-import com.kingsware.kdev.core.orm.annotation.Column;
-import com.kingsware.kdev.core.orm.annotation.ColumnIgnore;
-import com.kingsware.kdev.core.orm.annotation.Table;
+import com.kingsware.kdev.core.orm.annotation.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -17,8 +14,9 @@ import lombok.EqualsAndHashCode;
  * @date 2021/12/23 9:12 上午
  */
 @Data
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 @Table
+@LogicDelete
 public class SysDemo extends BaseManageModel {
 
     /** 名称 **/
