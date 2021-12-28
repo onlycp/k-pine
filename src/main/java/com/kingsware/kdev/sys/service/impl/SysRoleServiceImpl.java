@@ -79,10 +79,10 @@ public class SysRoleServiceImpl extends BaseServiceImpl implements SysRoleServic
         SqlWrapper wrapper = new SqlWrapper("select * from sys_role where 1=1 ");
         // 拼装查询sql
         if (StringUtils.isNotEmpty(argv.getName())) {
-            wrapper.add("name", Op.LIKE, "%" +argv.getName() +"%");
+            wrapper.addCondition("name", Op.LIKE, "%" +argv.getName() +"%");
         }
         if (StringUtils.isNotEmpty(argv.getCode())) {
-            wrapper.add("code", Op.LIKE, "%" +argv.getCode() +"%");
+            wrapper.addCondition("code", Op.LIKE, "%" +argv.getCode() +"%");
         }
         return (PageDataRet<SysRoleRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysRole.class, SysRoleRet.class);
     }

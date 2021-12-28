@@ -34,7 +34,7 @@ public class SqlWrapper {
      * @param op            操作符
      * @param objects       参数
      */
-    public void add(String columnName, Op op, Object... objects) {
+    public void addCondition(String columnName, Op op, Object... objects) {
         sql += " and ";
         sql += (columnName + " ");
         sql += op.bind();
@@ -47,7 +47,7 @@ public class SqlWrapper {
      * @param bind            操作符
      * @param objects       参数
      */
-    public void add(String columnName, String bind, Object... objects) {
+    public void addCondition(String columnName, String bind, Object... objects) {
         sql += " and ";
         sql += (columnName + " ");
         sql += bind;
