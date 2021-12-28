@@ -3,6 +3,7 @@ package com.kingsware.kdev.sys.service.impl;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.PagedList;
 import com.kingsware.kdev.core.util.BeanUtils;
@@ -39,14 +40,15 @@ public class SysDictServiceImpl extends BaseServiceImpl implements SysDictServic
     @Override
     public void add(SysDictArgv argv) {
         SysDict model = BeanUtils.copyObject(argv, SysDict.class);
-        model.setDelete(false);
         DB.save(model);
     }
 
     @Override
     public void edit(SysDictArgv argv) {
         SysDict model = DB.findById(SysDict.class, argv.getId());
-        Assert.notNull(model, "找不到字典类型");
+        if (model == null) {
+            throw new BusinessException("找不到字典类型");
+        }
         model = BeanUtils.copyObject(argv, SysDict.class);
         DB.update(model);
     }

@@ -3,6 +3,8 @@ package com.kingsware.kdev.sys.model;
 import com.kingsware.kdev.core.bean.BaseManageModel;
 import com.kingsware.kdev.core.orm.annotation.Column;
 import com.kingsware.kdev.core.orm.annotation.Table;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 角色表
@@ -10,6 +12,8 @@ import com.kingsware.kdev.core.orm.annotation.Table;
  * @version 1.0.0
  * @date 2021-12-27 10:20
  */
+@Data
+@EqualsAndHashCode
 @Table
 public class SysRole extends BaseManageModel {
 
@@ -22,35 +26,4 @@ public class SysRole extends BaseManageModel {
     /** 备注 */
     private String note;
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
 }
