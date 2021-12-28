@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.kingsware.dev</groupId>
-	<artifactId>k-dev</artifactId>
+	<artifactId>k-dev-cli-api</artifactId>
 	<version>1.0.0</version>
-	<name>k-dev</name>
+	<name>k-dev-cli-api</name>
 	<description>金智维简易开发平台</description>
 	<properties>
 		<java.version>1.8</java.version>
