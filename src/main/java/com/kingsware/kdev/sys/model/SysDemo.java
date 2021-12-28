@@ -6,6 +6,8 @@ import com.kingsware.kdev.core.orm.annotation.AutoEnum;
 import com.kingsware.kdev.core.orm.annotation.Column;
 import com.kingsware.kdev.core.orm.annotation.ColumnIgnore;
 import com.kingsware.kdev.core.orm.annotation.Table;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 演示model
@@ -14,6 +16,8 @@ import com.kingsware.kdev.core.orm.annotation.Table;
  * @version 1.0.0
  * @date 2021/12/23 9:12 上午
  */
+@Data
+@EqualsAndHashCode
 @Table
 public class SysDemo extends BaseManageModel {
 
@@ -30,52 +34,4 @@ public class SysDemo extends BaseManageModel {
     @ColumnIgnore
     private String iAmPlay;
 
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getSex() {
-        return sex;
-    }
-
-    public void setSex(String sex) {
-        this.sex = sex;
-    }
-
-    public String getBirthday() {
-        return birthday;
-    }
-
-    public void setBirthday(String birthday) {
-        this.birthday = birthday;
-    }
-
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
-    }
-
-    public String getEattime() {
-        return eattime;
-    }
-
-    public void setEattime(String eattime) {
-        this.eattime = eattime;
-    }
-
-    public String getiAmPlay() {
-        return iAmPlay;
-    }
-
-    public void setiAmPlay(String iAmPlay) {
-        this.iAmPlay = iAmPlay;
-    }
 }

@@ -2,6 +2,8 @@ package com.kingsware.kdev.sys.argv;
 
 import com.kingsware.kdev.core.bean.BaseModel;
 import com.kingsware.kdev.core.orm.annotation.Table;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author AndyZheng
@@ -9,6 +11,8 @@ import com.kingsware.kdev.core.orm.annotation.Table;
  * @description: 字典类型
  * @date 2021-12-27 10:20
  */
+@Data
+@EqualsAndHashCode
 public class SysDictItemArgv {
 
     /** id */
@@ -26,58 +30,4 @@ public class SysDictItemArgv {
     /** 备注 */
     private String note;
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getGroupName() {
-        return groupName;
-    }
-
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
-    }
-
-    public String getSysDictId() {
-        return sysDictId;
-    }
-
-    public void setSysDictId(String sysDictId) {
-        this.sysDictId = sysDictId;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
-    }
 }

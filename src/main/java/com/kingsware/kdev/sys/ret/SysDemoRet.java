@@ -1,5 +1,8 @@
 package com.kingsware.kdev.sys.ret;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 /**
  * 演示结果返回
  *
@@ -7,6 +10,8 @@ package com.kingsware.kdev.sys.ret;
  * @version 1.0.0
  * @date 2021/12/23 9:49 上午
  */
+@Data
+@EqualsAndHashCode
 public class SysDemoRet {
 
     /** id c**/
@@ -21,54 +26,5 @@ public class SysDemoRet {
     private String note;
     /** 吃饭时间 **/
     private String eattime;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getSex() {
-        return sex;
-    }
-
-    public void setSex(String sex) {
-        this.sex = sex;
-    }
-
-    public String getBirthday() {
-        return birthday;
-    }
-
-    public void setBirthday(String birthday) {
-        this.birthday = birthday;
-    }
-
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
-    }
-
-    public String getEattime() {
-        return eattime;
-    }
-
-    public void setEattime(String eattime) {
-        this.eattime = eattime;
-    }
-
 
 }
