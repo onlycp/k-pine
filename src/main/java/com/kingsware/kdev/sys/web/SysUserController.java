@@ -1,10 +1,12 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
+import com.kingsware.kdev.core.util.IpAddressUtils;
 import com.kingsware.kdev.sys.argv.SysUserArgv;
 import com.kingsware.kdev.sys.argv.SysUserLoginArgv;
 import com.kingsware.kdev.sys.argv.SysUserQueryArgv;
@@ -15,6 +17,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,17 +36,16 @@ public class SysUserController extends BaseController {
     @Resource
     private SysUserService SysUserService;
 
-
     /**
      *  登录
      * @return 提示
      */
+    @ApiIgnore
     @ApiOperation(value = "登录 " ,notes = "登录")
     @PostMapping(value = "login")
-    public BaseRet<?> login(@RequestBody SysUserLoginArgv sysUserLoginArgv) {
-        Map<String, String> resultMap = new HashMap<>();
-        resultMap.put("token", "test");
-        return BaseRet.success(resultMap);
+    public BaseRet<?> login(HttpServletRequest request, @RequestBody SysUserLoginArgv sysUserLoginArgv) {
+        sysUserLoginArgv.setIp(IpAddressUtils.getIpAddress(request));
+        return BaseRet.success(SysUserService.login(sysUserLoginArgv));
     }
     /**
      *  登录信息
