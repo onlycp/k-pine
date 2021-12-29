@@ -86,8 +86,10 @@ public class SysDictItemServiceImpl extends BaseServiceImpl implements SysDictIt
         builder.append(" left join sys_dict as sd on sdi.sys_dict_id = sd.id ");
         builder.append(" where 1=1 ");
         SqlWrapper wrapper = new SqlWrapper(builder.toString());
-        wrapper.addCondition("sys_dict_id", Op.EQ, argv.getSysDictId());
         // 拼装查询sql
+        if (StringUtils.isNotEmpty(argv.getSysDictId())) {
+            wrapper.addCondition("sys_dict_id", Op.EQ, argv.getSysDictId());
+        }
         if (StringUtils.isNotEmpty(argv.getName())) {
             wrapper.addCondition("name", Op.LIKE, "%" +argv.getName() +"%");
         }
