@@ -131,7 +131,7 @@ public class SysUnitServiceImpl extends BaseServiceImpl implements SysUnitServic
     private TreeDataRet<Object> recursiveHandle(SysUnit root, List<SysUnit> familyList) {
         // 创建树节点
         TreeDataRet<Object> treeDataRet = new TreeDataRet<>();
-        treeDataRet.setKey(root.getId());
+        treeDataRet.setValue(root.getId());
         treeDataRet.setLabel(root.getName());
 
         for (SysUnit child: familyList) {
