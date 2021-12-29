@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.service;
 
+import com.kingsware.kdev.core.auth.BaseUserInfo;
 import com.kingsware.kdev.core.base.BaseService;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
@@ -51,4 +52,6 @@ public interface SysUserService extends BaseService {
     void delete(MultiIdArgv argv);
 
     SysUserLoginRet login(SysUserLoginArgv argv);
+
+    BaseUserInfo getBaseUserInfo(String s, String token);
 }

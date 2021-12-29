@@ -145,6 +145,13 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         return ret;
     }
 
+    @Override
+    public BaseUserInfo getBaseUserInfo(String token, String ip) {
+        BaseUserInfo userInfo = TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), ip, appAuthProperties.getTokenExpireMinutes());
+        userInfo.setAvatar("https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif");
+        return userInfo;
+    }
+
     /**
      * 把List<SysRole>
      * @param list

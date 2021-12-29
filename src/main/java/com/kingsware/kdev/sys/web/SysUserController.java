@@ -34,7 +34,7 @@ import java.util.Map;
 public class SysUserController extends BaseController {
 
     @Resource
-    private SysUserService SysUserService;
+    private SysUserService sysUserService;
 
     /**
      *  登录
@@ -45,7 +45,7 @@ public class SysUserController extends BaseController {
     @PostMapping(value = "login")
     public BaseRet<?> login(HttpServletRequest request, @RequestBody SysUserLoginArgv sysUserLoginArgv) {
         sysUserLoginArgv.setIp(IpAddressUtils.getIpAddress(request));
-        return BaseRet.success(SysUserService.login(sysUserLoginArgv));
+        return BaseRet.success(sysUserService.login(sysUserLoginArgv));
     }
     /**
      *  登录信息
@@ -53,13 +53,9 @@ public class SysUserController extends BaseController {
      */
     @ApiOperation(value = "登录信息 " ,notes = "登录信息")
     @GetMapping(value = "info")
-    public BaseRet<?> info(String token) {
-        Map<String, Object> resultMap = new HashMap<>();
-        resultMap.put("roles", new String[] {"admin"});
-        resultMap.put("name", "super admin");
-        resultMap.put("avatar", "https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif");
-        resultMap.put("introduction", "I am a super administrator");
-        return BaseRet.success(resultMap);
+    public BaseRet<?> info(HttpServletRequest request, String token) {
+        String ip = IpAddressUtils.getIpAddress(request);
+        return BaseRet.success(sysUserService.getBaseUserInfo(token, ip));
     }
     /**
      *  登出
@@ -78,7 +74,7 @@ public class SysUserController extends BaseController {
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
     public BaseRet<PageDataRet<SysUserRet>> page(SysUserQueryArgv argv) {
-        return BaseRet.success(SysUserService.query(argv));
+        return BaseRet.success(sysUserService.query(argv));
     }
 
     /**
@@ -88,7 +84,7 @@ public class SysUserController extends BaseController {
     @ApiOperation(value = "详情 " ,notes = "详情")
     @GetMapping("/{id}")
     public BaseRet<SysUserRet> get(@PathVariable String id) {
-        return BaseRet.success(SysUserService.get(id));
+        return BaseRet.success(sysUserService.get(id));
     }
 
     /**
@@ -98,7 +94,7 @@ public class SysUserController extends BaseController {
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
     public BaseRet<?> add(@RequestBody SysUserArgv argv) {
-        SysUserService.add(argv);
+        sysUserService.add(argv);
         return BaseRet.success();
     }
 
@@ -110,7 +106,7 @@ public class SysUserController extends BaseController {
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
     public BaseRet<?> edit(@RequestBody SysUserArgv argv) {
-        SysUserService.edit(argv);
+        sysUserService.edit(argv);
         return BaseRet.success();
     }
 
@@ -121,7 +117,7 @@ public class SysUserController extends BaseController {
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
-        SysUserService.delete(argv);
+        sysUserService.delete(argv);
         return BaseRet.success();
     }
 }

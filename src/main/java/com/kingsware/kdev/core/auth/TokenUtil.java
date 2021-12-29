@@ -83,7 +83,7 @@ public class TokenUtil {
         }
         // 校验令牌有效性
         long expireTime = authToken.getWhenCreated() + ((long) tokenExpireMinutes * 60 * 1000);
-        if (expireTime > System.currentTimeMillis()) {
+        if (expireTime < System.currentTimeMillis()) {
             throw new UnauthorizedException(I18n.t("auth. unauthorized-e006", "登录已失效"));
         }
         // 返回用户信息
