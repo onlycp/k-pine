@@ -29,6 +29,6 @@ public class SysDictItemRet extends BaseManageRet {
     /** 备注 */
     private String note;
     /** 排序序号 */
-    private String orderNum;
+    private Integer orderNum;
 
 }

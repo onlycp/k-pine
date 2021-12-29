@@ -50,12 +50,19 @@ public class SysDictItemServiceImpl extends BaseServiceImpl implements SysDictIt
         if (model == null) {
             throw new BusinessException("找不到字典类型");
         }
+        if (argv.getSysDictId() == null) {
+            throw new BusinessException("找不到字典类型");
+        }
+        SysDict dictType = DB.findById(SysDict.class, argv.getSysDictId());
+        if (dictType == null) {
+            throw new BusinessException("找不到字典类型");
+        }
+        model.setCode(dictType.getCode());
+
         // 唯一性校验
         DBChecker<SysDictItem> checker =DBChecker.build(model, SysDictItem.class);
         // 名称唯一
         checker.uni("name", I18n.t("SysDictItem.name.unique", "字典名称必须唯一"));
-        // 编码唯一
-        checker.uni("code", I18n.t("SysDictItem.code.unique", "字典代码必须唯一"));
         // 执行校验
         checker.checkUnique();
         DB.save(model);
@@ -66,12 +73,18 @@ public class SysDictItemServiceImpl extends BaseServiceImpl implements SysDictIt
         SysDictItem model = DB.findById(SysDictItem.class, argv.getId());
         // 修改
         model = BeanUtils.copyObject(argv, SysDictItem.class);
+        if (argv.getSysDictId() == null) {
+            throw new BusinessException("找不到字典类型");
+        }
+        SysDict dictType = DB.findById(SysDict.class, argv.getSysDictId());
+        if (dictType == null) {
+            throw new BusinessException("找不到字典类型");
+        }
+        model.setCode(dictType.getCode());
         // 唯一性校验
         DBChecker<SysDictItem> checker =DBChecker.build(model, SysDictItem.class);
         // 名称唯一
         checker.uni("name", I18n.t("SysDictItem.name.unique", "字典名称必须唯一"));
-        // 编码唯一
-        checker.uni("code", I18n.t("SysDictItem.code.unique", "字典代码必须唯一"));
         // 执行校验
         checker.checkUnique();
         // 保存
