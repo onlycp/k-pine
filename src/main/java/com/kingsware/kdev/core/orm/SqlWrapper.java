@@ -54,6 +54,11 @@ public class SqlWrapper {
         params.addAll(Arrays.asList(objects));
     }
 
+    /**
+     * 增加查询条件
+     * @param condition 条件语句
+     * @param objects   参数
+     */
     public void addCondition(String condition, Object... objects) {
         sql += " and ";
         sql += condition;

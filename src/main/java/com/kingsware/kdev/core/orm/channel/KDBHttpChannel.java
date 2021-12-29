@@ -101,7 +101,7 @@ public class KDBHttpChannel implements DbChannel{
     private <T> KdbRet send(String scripts, String flowId, T params) {
         try {
             // 组装参数
-            KdbArgc<T> argc =new KdbArgc<>(flowId, scripts,  params);
+            KdbArgc<T> argc =new KdbArgc<>(kdbConnectConfig.getInnerType(),"base_flow", scripts,  params);
             // 转为json
             String requestBody = JsonUtil.toJson(argc);
             // 拼接请求

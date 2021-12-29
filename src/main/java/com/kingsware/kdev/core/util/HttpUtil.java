@@ -57,7 +57,7 @@ public class HttpUtil {
             // 设置编码
             connection.setRequestProperty("charset", "utf-8");
             //  设置content-type
-            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
             // 将额外的请求头加入进来
             if (headerMap != null && !headerMap.isEmpty()) {
                 for (Map.Entry<String, String> entry: headerMap.entrySet()) {
