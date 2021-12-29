@@ -88,21 +88,26 @@ public class SqlGenerator {
                 Field field = field2Column.getField();
                 // 自动赋值
                 if (field2Column.getColumn() != null) {
-                    // 增加值
-                    if (column.auto() == AutoEnum.ID) {
-                        BeanUtils.setField(field, model, StringUtils.getUUID());
-                    }
-                    else if (column.auto() == AutoEnum.WHO) {
-                        if (KClientContext.getContext().getUserInfo() != null) {
-                            BeanUtils.setField(field, model, KClientContext.getContext().getUserInfo().getId());
+                    // 先判断属性性是否为空，如果不为空，则跳过，不进行设置值
+                    Object distFieldValue = BeanUtils.getField(field, model);
+                    if (distFieldValue == null || StringUtils.isEmpty(distFieldValue.toString())) {
+                        // 增加值
+                        if (column.auto() == AutoEnum.ID) {
+                            BeanUtils.setField(field, model, StringUtils.getUUID());
                         }
-                        else {
-                            BeanUtils.setField(field, model, "");
+                        else if (column.auto() == AutoEnum.WHO) {
+                            if (KClientContext.getContext().getUserInfo() != null) {
+                                BeanUtils.setField(field, model, KClientContext.getContext().getUserInfo().getId());
+                            }
+                            else {
+                                BeanUtils.setField(field, model, "");
+                            }
+                        }
+                        else if (column.auto() == AutoEnum.WHEN) {
+                            BeanUtils.setField(field, model, DateUtils.getNow());
                         }
                     }
-                    else if (column.auto() == AutoEnum.WHEN) {
-                        BeanUtils.setField(field, model, DateUtils.getNow());
-                    }
+
                 }
                 params.add(BeanUtils.getField(field2Column.getField(), model));
             }

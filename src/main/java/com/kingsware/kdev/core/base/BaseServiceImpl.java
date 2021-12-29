@@ -55,6 +55,32 @@ public class BaseServiceImpl implements BaseService {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
+    public PageDataRet<? extends BaseManageRet> query(String sql, List<Object> params, BasePageArgv argv, Class<? extends BaseManageRet> outClass) {
+        // 返回结果
+        PageDataRet<BaseManageRet> pageDataRet = new PageDataRet<>();
+        // 分页查询
+        if (argv.isPageQuery()) {
+            PagedList<? extends BaseManageRet> pagedList = DB.findPagedList(outClass, argv.getPage(), argv.getPageSize(), sql, params.toArray());
+            pageDataRet.setPageSize(pagedList.getPageSize());
+            pageDataRet.setPageCount(pagedList.getPageCount());
+            pageDataRet.setPage(pagedList.getPageIndex());
+            pageDataRet.setTotal(pagedList.getTotalCount());
+            pageDataRet.setList((List<BaseManageRet>) pagedList.getList());
+        }
+        // 一般查询
+        else {
+            List<? extends BaseManageRet> models = DB.findList(outClass, sql, params.toArray());
+            pageDataRet.setPage(1);
+            pageDataRet.setPageSize(models.size());
+            pageDataRet.setTotal(models.size());
+            pageDataRet.setPageCount(1);
+            pageDataRet.setList((List<BaseManageRet>) models);
+        }
+        return pageDataRet;
+    }
+
+    @Override
     public BaseManageRet model2Ret(BaseManageModel model, Class<? extends BaseManageRet> outClass) {
         return BeanUtils.copyObject(model, outClass);
     }

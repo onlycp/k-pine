@@ -98,7 +98,7 @@ public class SysDictItemServiceImpl extends BaseServiceImpl implements SysDictIt
             wrapper.addCondition("group_name", Op.LIKE, "%" +argv.getGroupName() +"%");
         }
         // 返回结果
-        return (PageDataRet<SysDictItemRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysDictItem.class, SysDictItemRet.class);
+        return (PageDataRet<SysDictItemRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysDictItemRet.class);
     }
 
     @Override

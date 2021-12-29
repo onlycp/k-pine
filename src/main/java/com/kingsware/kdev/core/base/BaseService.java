@@ -25,6 +25,14 @@ public interface BaseService {
     PageDataRet<? extends BaseManageRet> query(String sql, List<Object> params, BasePageArgv pageArgv, Class<? extends BaseManageModel> inClass,  Class<? extends BaseManageRet> outClass);
 
     /**
+     * 二次封装查询
+     * @param sql           查询sql
+     * @param pageArgv      分页查询参数
+     * @return              可用的分页结果
+     */
+    PageDataRet<? extends BaseManageRet> query(String sql, List<Object> params, BasePageArgv pageArgv,  Class<? extends BaseManageRet> outClass);
+
+    /**
      * 将model转为ret
      * @param model 模型
      * @return      返回结果

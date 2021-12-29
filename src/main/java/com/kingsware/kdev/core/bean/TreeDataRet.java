@@ -1,5 +1,8 @@
 package com.kingsware.kdev.core.bean;
 
+import lombok.Data;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -9,6 +12,7 @@ import java.util.List;
  * @version 1.0.0
  * @date 2021/12/20 11:43 上午
  */
+@Data
 public class TreeDataRet<T> {
     /** 键值 **/
     private String key;
@@ -17,5 +21,5 @@ public class TreeDataRet<T> {
     /** 附加数据 **/
     private T extraData;
     /** 孩子们 **/
-    private List<TreeDataRet<T>> children;
+    private List<TreeDataRet<T>> children = new ArrayList<>();
 }
