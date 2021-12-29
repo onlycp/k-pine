@@ -15,7 +15,7 @@ import java.util.List;
 @Data
 public class TreeDataRet<T> {
     /** 键值 **/
-    private String key;
+    private String value;
     /** 标签 **/
     private String label;
     /** 附加数据 **/

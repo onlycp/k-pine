@@ -100,6 +100,7 @@ public class SysUnitServiceImpl extends BaseServiceImpl implements SysUnitServic
     @Override
     @SuppressWarnings("unchecked")
     public PageDataRet<SysUnitRet> query(SysUnitQueryArgv argv) {
+
         // 拼装sql
         SqlWrapper wrapper = new SqlWrapper("select * from sys_unit where 1=1 ");
         // 拼装查询sql
@@ -110,6 +111,7 @@ public class SysUnitServiceImpl extends BaseServiceImpl implements SysUnitServic
             wrapper.addCondition("status", Op.EQ, argv.getStatus());
         }
         PageDataRet<SysUnitRet> pageDataRet = (PageDataRet<SysUnitRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysUnit.class, SysUnitRet.class);
+        //
         // 将结果转为树
         return pageDataRet;
     }
@@ -131,7 +133,7 @@ public class SysUnitServiceImpl extends BaseServiceImpl implements SysUnitServic
     private TreeDataRet<Object> recursiveHandle(SysUnit root, List<SysUnit> familyList) {
         // 创建树节点
         TreeDataRet<Object> treeDataRet = new TreeDataRet<>();
-        treeDataRet.setKey(root.getId());
+        treeDataRet.setValue(root.getId());
         treeDataRet.setLabel(root.getName());
 
         for (SysUnit child: familyList) {

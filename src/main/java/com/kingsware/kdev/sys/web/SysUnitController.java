@@ -44,11 +44,11 @@ public class SysUnitController extends BaseController {
     }
 
     /**
-     *  查询
-     * @return 分页
+     *  查询树结构
+     * @return 查询树结构
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
-    @GetMapping("/tree/{excludeId}")
+    @GetMapping("/treeOptions/{excludeId}")
     public BaseRet<List<TreeDataRet<Object>>> treeOptions(@PathVariable String excludeId) {
         return BaseRet.success(SysUnitService.treeOptions(excludeId));
     }
