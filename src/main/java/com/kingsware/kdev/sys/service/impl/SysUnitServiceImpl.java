@@ -1,12 +1,14 @@
 package com.kingsware.kdev.sys.service.impl;
 
 import com.kingsware.kdev.core.base.BaseServiceImpl;
+import com.kingsware.kdev.core.bean.BaseManageRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.bean.TreeDataRet;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
+import com.kingsware.kdev.core.orm.PagedList;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.orm.expression.Op;
@@ -19,8 +21,7 @@ import com.kingsware.kdev.sys.ret.SysUnitRet;
 import com.kingsware.kdev.sys.service.SysUnitService;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -110,10 +111,54 @@ public class SysUnitServiceImpl extends BaseServiceImpl implements SysUnitServic
         if (argv.getStatus() != null) {
             wrapper.addCondition("status", Op.EQ, argv.getStatus());
         }
-        PageDataRet<SysUnitRet> pageDataRet = (PageDataRet<SysUnitRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysUnit.class, SysUnitRet.class);
-        //
+        // 查询所有相关的部门
+        List<SysUnit> units = DB.findList(SysUnit.class, wrapper.getSql(), wrapper.getParams().toArray());
+        // 然后通过in查询相关的部门(包括上级关系)
+        Set<Object> ids = new HashSet<>();
+        for (SysUnit unit: units) {
+            String[] splits = unit.getPath().split("/");
+            ids.addAll(Arrays.asList(splits));
+        }
+        // 重新查询自己想要的
+        SqlWrapper wantWrapper = new SqlWrapper("select * from sys_unit where 1=1 ");
+        // 加一个不可能存在的id进去
+        ids.add(StringUtils.getUUID());
+        wantWrapper.in("id", ids);
+        List<SysUnit> wantList = DB.findList(SysUnit.class, wantWrapper.getSql(), wantWrapper.getParams().toArray());
         // 将结果转为树
+        List<SysUnitRet> retList = new ArrayList<>();
+        List<SysUnit> roots = wantList.stream().filter(it -> StringUtils.isEmpty(it.getParentId())).collect(Collectors.toList());
+        for (SysUnit root: roots) {
+            retList.add(recursiveHandleRet(root, wantList));
+
+        }
+        // 转为分页查询结果（内存分页）
+        PageDataRet<SysUnitRet> pageDataRet = new PageDataRet<>();
+        pageDataRet.setPageSize(argv.getPageSize());
+        // 计算页数
+        int pageCount = retList.size() / argv.getPageSize();
+        if ( retList.size() % argv.getPageSize() != 0) {
+            pageCount ++;
+        }
+        pageDataRet.setPageCount(pageCount);
+        pageDataRet.setPage(argv.getPage());
+        pageDataRet.setTotal(retList.size());
+        // 计算截取的起始序号
+        int fromIndex = (argv.getPage()-1) * argv.getPageSize();
+        int toIndex = (argv.getPage()-1) * argv.getPageSize();
+        // 如果结果数量小于from
+        if (retList.size() < fromIndex) {
+            pageDataRet.setList(new ArrayList<>());
+        }
+        else if (retList.size() < toIndex) {
+            pageDataRet.setList(retList.subList(fromIndex, retList.size()));
+        }
+        else {
+            pageDataRet.setList(retList);
+        }
         return pageDataRet;
+
+
     }
 
     @Override
@@ -128,6 +173,24 @@ public class SysUnitServiceImpl extends BaseServiceImpl implements SysUnitServic
             retList.add(recursiveHandle(root, list));
         }
         return retList;
+    }
+
+    /**
+     * 将模型转为树ret
+     * @param root     根节点
+     * @param familyList 列表
+     * @return         ret
+     */
+    private SysUnitRet recursiveHandleRet(SysUnit root, List<SysUnit> familyList) {
+        // 创建树节点
+        SysUnitRet ret = (SysUnitRet) model2Ret(root, SysUnitRet.class);
+        for (SysUnit child: familyList) {
+            if (StringUtils.isNotEmpty(child.getParentId()) && child.getParentId().equals(root.getId())) {
+                ret.getChildren().add(recursiveHandleRet(child, familyList));
+
+            }
+        }
+        return ret;
     }
 
     private TreeDataRet<Object> recursiveHandle(SysUnit root, List<SysUnit> familyList) {

@@ -6,6 +6,7 @@ import lombok.Data;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 /**
  * SQL对象
@@ -63,5 +64,23 @@ public class SqlWrapper {
         sql += " and ";
         sql += condition;
         params.addAll(Arrays.asList(objects));
+    }
+
+    /**
+     * In 查询
+     * @param columnName 列表
+     * @param inSet      id的集合
+     */
+    public void in(String columnName, Set<Object> inSet) {
+        sql += " and ";
+        sql += columnName;
+        sql += " in ( ";
+        for (Object obj: inSet) {
+            sql = sql + "?,";
+            params.add(obj);
+        }
+        // 移除最后一个"."
+        sql = sql.substring(0, sql.length()-1);
+        sql += ")";
     }
 }

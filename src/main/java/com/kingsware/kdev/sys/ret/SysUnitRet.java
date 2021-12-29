@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.bean.BaseManageRet;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,5 +37,5 @@ public class SysUnitRet extends BaseManageRet {
     /** 排序 **/
     private Integer orderNum;
     /** 子节点 **/
-    private List<SysUnitRet> children;
+    private List<SysUnitRet> children = new ArrayList<>();
 }
