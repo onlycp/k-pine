@@ -151,6 +151,9 @@ public class JsonUtil {
                     else if (field.getType().isAssignableFrom(Long.class)) {
                         field.set(entity, Long.parseLong(entry.getValue().toString()));
                     }
+                    else if (field.getType().isAssignableFrom(String.class)) {
+                        field.set(entity, entry.getValue().toString());
+                    }
 
                     else {
                         field.set(entity, entry.getValue());
