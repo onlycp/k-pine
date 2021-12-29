@@ -4,14 +4,20 @@ import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.PagedList;
+import com.kingsware.kdev.core.orm.SqlWrapper;
+import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysDictArgv;
 import com.kingsware.kdev.sys.argv.SysDictQueryArgv;
 import com.kingsware.kdev.sys.model.SysDict;
+import com.kingsware.kdev.sys.model.SysRole;
 import com.kingsware.kdev.sys.ret.SysDictRet;
+import com.kingsware.kdev.sys.ret.SysRoleRet;
 import com.kingsware.kdev.sys.service.SysDictService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -40,6 +46,15 @@ public class SysDictServiceImpl extends BaseServiceImpl implements SysDictServic
     @Override
     public void add(SysDictArgv argv) {
         SysDict model = BeanUtils.copyObject(argv, SysDict.class);
+        // 唯一性校验
+        DBChecker<SysDict> checker =DBChecker.build(model, SysDict.class);
+        // 名称唯一
+        checker.uni("name", I18n.t("SysDict.name.unique", "字典名称必须唯一"));
+        // 编码唯一
+        checker.uni("code", I18n.t("SysDict.code.unique", "字典代码必须唯一"));
+        // 执行校验
+        checker.checkUnique();
+        // 保存
         DB.save(model);
     }
 
@@ -49,48 +64,33 @@ public class SysDictServiceImpl extends BaseServiceImpl implements SysDictServic
         if (model == null) {
             throw new BusinessException("找不到字典类型");
         }
+        // 修改
         model = BeanUtils.copyObject(argv, SysDict.class);
+        // 唯一性校验
+        DBChecker<SysDict> checker =DBChecker.build(model, SysDict.class);
+        // 名称唯一
+        checker.uni("name", I18n.t("SysDict.name.unique", "字典名称必须唯一"));
+        // 编码唯一
+        checker.uni("code", I18n.t("SysDict.code.unique", "字典代码必须唯一"));
+        // 执行校验
+        checker.checkUnique();
+        // 保存
         DB.update(model);
     }
 
     @Override
     public PageDataRet<SysDictRet> query(SysDictQueryArgv argv) {
         // 拼装sql
-        StringBuilder builder = new StringBuilder();
-        List<Object> params = new ArrayList<>();
-        builder.append(" select * from sys_dict where 1=1 ");
+        SqlWrapper wrapper = new SqlWrapper(" select * from sys_dict where 1=1 ");
         // 拼装查询sql
         if (StringUtils.isNotEmpty(argv.getName())) {
-            builder.append(" and ");
-            builder.append(" name like ? ");
-            params.add("%" + argv.getName() + "%");
+            wrapper.addCondition("name", Op.LIKE, "%" + argv.getName() + "%");
         }
         if (StringUtils.isNotEmpty(argv.getCode())) {
-            builder.append(" and ");
-            builder.append(" code like ? ");
-            params.add("%" + argv.getCode() + "%");
+            wrapper.addCondition("code", Op.LIKE, "%" + argv.getCode() + "%");
         }
         // 返回结果
-        PageDataRet<SysDictRet> pageDataRet = new PageDataRet<>();
-        // 分页查询
-        if (argv.isPageQuery()) {
-            PagedList<SysDict> pagedList = DB.findPagedList(SysDict.class, argv.getPage(), argv.getPageSize(), builder.toString(), params.toArray());
-            pageDataRet.setPageSize(pagedList.getPageSize());
-            pageDataRet.setPageCount(pagedList.getPageCount());
-            pageDataRet.setPage(pagedList.getPageIndex());
-            pageDataRet.setTotal(pagedList.getTotalCount());
-            pageDataRet.setList(BeanUtils.copyList(pagedList.getList(), SysDictRet.class));
-        }
-        // 一般查询
-        else {
-            List<SysDict> models = DB.findList(SysDict.class, builder.toString(), params.toArray());
-            pageDataRet.setPage(1);
-            pageDataRet.setPageSize(models.size());
-            pageDataRet.setTotal(models.size());
-            pageDataRet.setPageCount(1);
-            pageDataRet.setList(BeanUtils.copyList(models, SysDictRet.class));
-        }
-        return pageDataRet;
+        return (PageDataRet<SysDictRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysDict.class, SysDictRet.class);
     }
 
     @Override

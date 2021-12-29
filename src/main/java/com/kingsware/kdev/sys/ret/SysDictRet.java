@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.ret;
 
+import com.kingsware.kdev.core.bean.BaseManageRet;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -11,23 +12,13 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode
-public class SysDictRet {
+public class SysDictRet extends BaseManageRet {
 
-    /** id */
-    private String id;
     /** 字典名 */
     private String name;
     /** 字典代码 */
     private String code;
     /** 备注 */
     private String note;
-    /** 创建人员 **/
-    private String whoCreated;
-    /** 创建时间 **/
-    private String whenCreated;
-    /** 修改人员 **/
-    private String whoModified;
-    /** 修改时间 **/
-    private String whenModified;
 
 }

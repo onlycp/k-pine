@@ -4,15 +4,21 @@ import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.PagedList;
+import com.kingsware.kdev.core.orm.SqlWrapper;
+import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysDictItemArgv;
 import com.kingsware.kdev.sys.argv.SysDictItemQueryArgv;
 import com.kingsware.kdev.sys.model.SysDict;
 import com.kingsware.kdev.sys.model.SysDictItem;
+import com.kingsware.kdev.sys.model.SysRole;
 import com.kingsware.kdev.sys.ret.SysDictItemRet;
+import com.kingsware.kdev.sys.ret.SysDictRet;
 import com.kingsware.kdev.sys.service.SysDictItemService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -44,16 +50,31 @@ public class SysDictItemServiceImpl extends BaseServiceImpl implements SysDictIt
         if (model == null) {
             throw new BusinessException("找不到字典类型");
         }
+        // 唯一性校验
+        DBChecker<SysDictItem> checker =DBChecker.build(model, SysDictItem.class);
+        // 名称唯一
+        checker.uni("name", I18n.t("SysDictItem.name.unique", "字典名称必须唯一"));
+        // 编码唯一
+        checker.uni("code", I18n.t("SysDictItem.code.unique", "字典代码必须唯一"));
+        // 执行校验
+        checker.checkUnique();
         DB.save(model);
-        model = BeanUtils.copyObject(argv, SysDictItem.class);
-        DB.update(model);
     }
 
     @Override
     public void edit(SysDictItemArgv argv) {
         SysDictItem model = DB.findById(SysDictItem.class, argv.getId());
-        model.setName(argv.getName());
-        model.setNote(argv.getNote());
+        // 修改
+        model = BeanUtils.copyObject(argv, SysDictItem.class);
+        // 唯一性校验
+        DBChecker<SysDictItem> checker =DBChecker.build(model, SysDictItem.class);
+        // 名称唯一
+        checker.uni("name", I18n.t("SysDictItem.name.unique", "字典名称必须唯一"));
+        // 编码唯一
+        checker.uni("code", I18n.t("SysDictItem.code.unique", "字典代码必须唯一"));
+        // 执行校验
+        checker.checkUnique();
+        // 保存
         DB.update(model);
     }
 
@@ -61,35 +82,23 @@ public class SysDictItemServiceImpl extends BaseServiceImpl implements SysDictIt
     public PageDataRet<SysDictItemRet> query(SysDictItemQueryArgv argv) {
         // 拼装sql
         StringBuilder builder = new StringBuilder();
-        List<Object> params = new ArrayList<>();
-        builder.append("select * from sys_DictItem where 1=1 ");
+        builder.append(" select sdi.*, sd.name as sys_dict_name from sys_dict_item as sdi ");
+        builder.append(" left join sys_dict as sd on sdi.sys_dict_id = sd.id ");
+        builder.append(" where 1=1 ");
+        SqlWrapper wrapper = new SqlWrapper(builder.toString());
+        wrapper.addCondition("sys_dict_id", Op.EQ, argv.getSysDictId());
         // 拼装查询sql
         if (StringUtils.isNotEmpty(argv.getName())) {
-            builder.append("and ");
-            builder.append("name like '%?%'");
-            params.add(argv.getName());
+            wrapper.addCondition("name", Op.LIKE, "%" +argv.getName() +"%");
+        }
+        if (StringUtils.isNotEmpty(argv.getCode())) {
+            wrapper.addCondition("code", Op.LIKE, "%" +argv.getCode() +"%");
+        }
+        if (StringUtils.isNotEmpty(argv.getGroupName())) {
+            wrapper.addCondition("group_name", Op.LIKE, "%" +argv.getGroupName() +"%");
         }
         // 返回结果
-        PageDataRet<SysDictItemRet> pageDataRet = new PageDataRet<>();
-        // 分页查询
-        if (argv.isPageQuery()) {
-            PagedList<SysDictItem> pagedList = DB.findPagedList(SysDictItem.class, argv.getPage(), argv.getPageSize(), builder.toString(), params.toArray());
-            pageDataRet.setPageSize(pagedList.getPageSize());
-            pageDataRet.setPageCount(pagedList.getPageCount());
-            pageDataRet.setPage(pagedList.getPageIndex());
-            pageDataRet.setTotal(pagedList.getTotalCount());
-            pageDataRet.setList(BeanUtils.copyList(pagedList.getList(), SysDictItemRet.class));
-        }
-        // 一般查询
-        else {
-            List<SysDictItem> models = DB.findList(SysDictItem.class, builder.toString(), params.toArray());
-            pageDataRet.setPage(1);
-            pageDataRet.setPageSize(models.size());
-            pageDataRet.setTotal(models.size());
-            pageDataRet.setPageCount(1);
-            pageDataRet.setList(BeanUtils.copyList(models, SysDictItemRet.class));
-        }
-        return pageDataRet;
+        return (PageDataRet<SysDictItemRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysDictItem.class, SysDictItemRet.class);
     }
 
     @Override
