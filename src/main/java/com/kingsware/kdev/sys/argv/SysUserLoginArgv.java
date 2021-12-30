@@ -13,4 +13,6 @@ public class SysUserLoginArgv {
 
     private String password;
 
+    private String ip;
+
 }

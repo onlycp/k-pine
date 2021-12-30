@@ -1,9 +1,14 @@
 package com.kingsware.kdev.sys.service.impl;
 
+import com.kingsware.kdev.core.auth.AppAuthProperties;
+import com.kingsware.kdev.core.auth.BaseUserInfo;
+import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.encrypt.EncryptWorker;
+import com.kingsware.kdev.core.enums.ApiSystemEnum;
+import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
@@ -13,14 +18,22 @@ import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysUserArgv;
+import com.kingsware.kdev.sys.argv.SysUserLoginArgv;
 import com.kingsware.kdev.sys.argv.SysUserQueryArgv;
 import com.kingsware.kdev.sys.model.SysUnit;
+import com.kingsware.kdev.sys.model.SysRole;
 import com.kingsware.kdev.sys.model.SysUser;
 import com.kingsware.kdev.sys.model.SysUserRole;
+import com.kingsware.kdev.sys.model.SysUserRole;
+import com.kingsware.kdev.sys.ret.SysUserLoginRet;
 import com.kingsware.kdev.sys.ret.SysUserRet;
 import com.kingsware.kdev.sys.service.SysUserService;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +46,9 @@ import java.util.List;
  */
 @Service
 public class SysUserServiceImpl extends BaseServiceImpl implements SysUserService {
+
+    @Resource
+    private AppAuthProperties appAuthProperties;
 
     @Override
     public SysUserRet get(String id) {
@@ -140,4 +156,61 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             DB.delete(SysUser.class, id);
         }
     }
+
+    @Override
+    public SysUserLoginRet login(SysUserLoginArgv argv) {
+        // 非空检查
+        if (argv == null
+                || argv.getUsername() == null
+                || argv.getPassword() == null) {
+            throw BusinessException.serviceThrow("请填写完整的登录信息！");
+        }
+        // 拼装sql
+        SqlWrapper wrapper = new SqlWrapper("select * from sys_user where 1=1 ");
+        wrapper.addCondition("username", Op.EQ, argv.getUsername());
+        SysUser model = DB.findOne(SysUser.class, wrapper.getSql(), wrapper.getParams().toArray());
+        if (model == null) {
+            throw BusinessException.serviceThrow("用户名或密码有误！");
+        }
+        if (!EncryptWorker.getInstance().validate(argv.getPassword(), model.getPassword())) {
+            throw BusinessException.serviceThrow("用户名或密码有误！");
+        }
+        BaseUserInfo userInfo = new BaseUserInfo();
+        userInfo = BeanUtils.copyObject(model, BaseUserInfo.class);
+        userInfo.setRoleIds(getRoleIds(getRolesByUserId(model.getId())));
+        userInfo.setApiSystem(ApiSystemEnum.ADMIN);
+
+        String token = TokenUtil.createToken(appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), argv.getIp(), userInfo);
+        SysUserLoginRet ret = new SysUserLoginRet();
+        ret.setToken(token);
+        return ret;
+    }
+
+    @Override
+    public BaseUserInfo getBaseUserInfo(String token, String ip) {
+        BaseUserInfo userInfo = TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), ip, appAuthProperties.getTokenExpireMinutes());
+        userInfo.setAvatar("https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif");
+        return userInfo;
+    }
+
+    /**
+     * 把List<SysRole>
+     * @param list
+     * @return
+     */
+    private String getRoleIds(List<SysUserRole> list) {
+        StringBuilder roleIds = new StringBuilder();
+        list.forEach(item -> {
+            roleIds.append(item.getId());
+        });
+        return roleIds.toString();
+    }
+
+    private List<SysUserRole> getRolesByUserId(String userId) {
+        // 拼装sql
+        SqlWrapper wrapper = new SqlWrapper("select * from sys_user_role where 1=1 ");
+        wrapper.addCondition("sys_user_id", Op.EQ, userId);
+        return DB.findList(SysUserRole.class, wrapper.getSql(), wrapper.getParams().toArray());
+    }
+
 }

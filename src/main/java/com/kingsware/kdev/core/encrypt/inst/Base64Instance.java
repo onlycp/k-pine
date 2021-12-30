@@ -29,7 +29,7 @@ public class Base64Instance implements EncryptInterface {
         if (StringUtils.isEmpty(source)) {
             return false;
         }
-        String str1 = new String(Base64.getDecoder().decode(source.getBytes(StandardCharsets.UTF_8)));
+        String str1 = encrypt(source, config);
         return str1.equals(encrypted);
 
     }

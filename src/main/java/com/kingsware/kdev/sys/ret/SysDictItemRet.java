@@ -11,7 +11,7 @@ import lombok.EqualsAndHashCode;
  * @date 2021-12-27 10:20
  */
 @Data
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 public class SysDictItemRet extends BaseManageRet {
 
     /** 字典名 */
