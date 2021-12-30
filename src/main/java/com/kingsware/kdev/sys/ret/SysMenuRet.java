@@ -1,20 +1,23 @@
-package com.kingsware.kdev.sys.model;
+package com.kingsware.kdev.sys.ret;
 
-import com.kingsware.kdev.core.bean.BaseManageModel;
-import com.kingsware.kdev.core.orm.annotation.Column;
+import com.kingsware.kdev.core.bean.BaseManageRet;
 import com.kingsware.kdev.sys.enums.MenuType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * @author andyzheng
+ * 单位返回
+ *
+ * @author chen peng
  * @version 1.0.0
- * @description: 菜单信息
- * @date 2021/12/30 10:22
+ * @date 2021/12/23 9:49 上午
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class SysMenu extends BaseManageModel {
+public class SysMenuRet extends BaseManageRet {
 
     /** 名称 **/
     private String name;
@@ -29,7 +32,6 @@ public class SysMenu extends BaseManageModel {
     /** 组件路径 **/
     private String componentPath;
     /** 是否隐藏 **/
-    @Column(name = "is_hidden")
     private Boolean hidden;
     /** 菜单类型（M目录 C菜单 F按钮） **/
     private String menuType;
@@ -45,4 +47,6 @@ public class SysMenu extends BaseManageModel {
     private Integer orderNum;
     /** 可用状态 **/
     private Boolean status;
+    /** 子节点 **/
+    private List<SysMenuRet> children = new ArrayList<>();
 }

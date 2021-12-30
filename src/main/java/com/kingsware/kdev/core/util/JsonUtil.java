@@ -136,6 +136,11 @@ public class JsonUtil {
         for (Field field: fields) {
             field.setAccessible(true);
             fieldMap.put(field.getName(), field);
+            // 如果是布尔型，就将is_也加进来
+            if (field.getType().isAssignableFrom(Boolean.class)) {
+                String boolName = "is" + StringUtils.capitalize(field.getName());
+                fieldMap.put(boolName, field);
+            }
         }
         //  遍历map，将值写入到实体
         for (Map.Entry<String, Object> entry: map.entrySet()) {
@@ -151,10 +156,18 @@ public class JsonUtil {
                     else if (field.getType().isAssignableFrom(Long.class)) {
                         field.set(entity, Long.parseLong(entry.getValue().toString()));
                     }
+                    else if (field.getType().isAssignableFrom(Float.class)) {
+                        field.set(entity, Float.parseFloat(entry.getValue().toString()));
+                    }
+                    else if (field.getType().isAssignableFrom(Double.class)) {
+                        field.set(entity, Double.parseDouble(entry.getValue().toString()));
+                    }
                     else if (field.getType().isAssignableFrom(String.class)) {
                         field.set(entity, entry.getValue().toString());
                     }
-
+                    else if (field.getType().isAssignableFrom(Boolean.class)) {
+                        field.set(entity, "1".equals(entry.getValue().toString()));
+                    }
                     else {
                         field.set(entity, entry.getValue());
                     }
