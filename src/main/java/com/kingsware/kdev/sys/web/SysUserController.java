@@ -6,6 +6,7 @@ import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
+import com.kingsware.kdev.core.context.ClientContextAspect;
 import com.kingsware.kdev.core.util.IpAddressUtils;
 import com.kingsware.kdev.sys.argv.SysUserArgv;
 import com.kingsware.kdev.sys.argv.SysUserLoginArgv;
@@ -44,7 +45,7 @@ public class SysUserController extends BaseController {
     @ApiOperation(value = "登录 " ,notes = "登录")
     @PostMapping(value = "login")
     public BaseRet<?> login(HttpServletRequest request, @RequestBody SysUserLoginArgv sysUserLoginArgv) {
-        sysUserLoginArgv.setIp(IpAddressUtils.getIpAddress(request));
+        sysUserLoginArgv.setIp(ClientContextAspect.getClientIp(request));
         return BaseRet.success(sysUserService.login(sysUserLoginArgv));
     }
     /**
@@ -53,8 +54,9 @@ public class SysUserController extends BaseController {
      */
     @ApiOperation(value = "登录信息 " ,notes = "登录信息")
     @GetMapping(value = "info")
-    public BaseRet<?> info(HttpServletRequest request, String token) {
-        String ip = IpAddressUtils.getIpAddress(request);
+    public BaseRet<?> info(HttpServletRequest request) {
+        String ip = ClientContextAspect.getClientIp(request);
+        String token = ClientContextAspect.getTokenString(request);
         return BaseRet.success(sysUserService.getBaseUserInfo(token, ip));
     }
     /**
