@@ -8,15 +8,21 @@ import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
+import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysUserArgv;
 import com.kingsware.kdev.sys.argv.SysUserQueryArgv;
+import com.kingsware.kdev.sys.model.SysUnit;
 import com.kingsware.kdev.sys.model.SysUser;
+import com.kingsware.kdev.sys.model.SysUserRole;
 import com.kingsware.kdev.sys.ret.SysUserRet;
 import com.kingsware.kdev.sys.service.SysUserService;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 用户业务实现类
@@ -33,22 +39,60 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         // 查询model
         SysUser model = DB.findById(SysUser.class, id);
         // 转换成ret对象
-        return (SysUserRet) model2Ret(model, SysUserRet.class);
+        SysUserRet userRet = (SysUserRet) model2Ret(model, SysUserRet.class);
+        // 获取部门信息
+        if (StringUtils.isNotEmpty(model.getSysUnitId())) {
+            SysUnit unit = DB.findById(SysUnit.class, model.getSysUnitId());
+            userRet.setSysUnitPath(unit.getPath());
+        }
+        // 获取角色信息
+        List<SysUserRole> userRoles = DB.findList(SysUserRole.class, Expr.builder().add("sysUserId", "=", model.getId()).build());
+        if ( !userRoles.isEmpty() ) {
+            List<String> ids = new ArrayList<>();
+            for (SysUserRole userRole: userRoles) {
+                ids.add(userRole.getSysRoleId());
+            }
+            userRet.setSysRoleIds(StringUtils.joinToString(ids, ","));
+        }
+        return userRet;
     }
 
     @Override
     public void add(SysUserArgv argv) {
         SysUser model = BeanUtils.copyObject(argv, SysUser.class);
+        model.setId(StringUtils.getUUID());
         // 设置密码
         model.setPassword(EncryptWorker.getInstance().encrypt(model.getPassword()));
         // 唯一性校验
         DBChecker<SysUser> checker =DBChecker.build(model, SysUser.class);
         // 名称唯一
-        checker.uni("username", I18n.t("SysUser.username.unique", "名称必须唯一"));
+        checker.uni("username", I18n.t("SysUser.username.unique", "用户名必须唯一"));
         // 执行校验
         checker.checkUnique();
         // 保存
         DB.save(model);
+        // 保存用户和角色的关系
+        saveUserRoles(model.getId(), argv.getSysRoleIds());
+
+    }
+
+    /**
+     * 保存用户和角色的关系
+     * @param userId
+     * @param sysRoleIds
+     */
+    private void saveUserRoles(String userId, String sysRoleIds) {
+        if (StringUtils.isNotEmpty(sysRoleIds)) {
+            String[] roleIds = sysRoleIds.trim().split(",");
+            List<SysUserRole> userRoles = new ArrayList<>();
+            for (String roleId: roleIds) {
+                SysUserRole userRole = new SysUserRole();
+                userRole.setSysUserId(userId);
+                userRole.setSysRoleId(roleId);
+                userRoles.add(userRole);
+            }
+            DB.saveAll(userRoles);
+        }
     }
 
     @Override
@@ -61,36 +105,33 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         model.setSysUnitId(argv.getSysUnitId());
         model.setNote(argv.getNote());
         model.setStatus(argv.getStatus());
-        model.setStatus(argv.getStatus());
-        // 唯一性校验
-        DBChecker<SysUser> checker =DBChecker.build(model, SysUser.class);
-        // 名称唯一
-        checker.uni("username", I18n.t("SysUser.username.unique", "名称必须唯一"));
-        // 执行校验
-        checker.checkUnique();
         // 保存
         DB.update(model);
+        // 处理用户和角色的关系
+        // 先移除所有关联
+        DB.executeUpdateSql("delete from sys_user_role where sys_user_id=?", model.getId());
+        saveUserRoles(model.getId(), argv.getSysRoleIds());
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public PageDataRet<SysUserRet> query(SysUserQueryArgv argv) {
         // 拼装sql
-        SqlWrapper wrapper = new SqlWrapper("select * from sys_user where 1=1 ");
+        SqlWrapper wrapper = new SqlWrapper("select u.*, un.name as sys_unit_name, un.path as sys_unit_path from sys_user u left join sys_unit un on un.id=u.sys_unit_id where 1=1 ");
         // 拼装查询sql
         if (StringUtils.isNotEmpty(argv.getUsername())) {
-            wrapper.addCondition("username", Op.LIKE, "%" +argv.getUsername() +"%");
+            wrapper.addCondition("u.username", Op.LIKE, "%" +argv.getUsername() +"%");
         }
         if (StringUtils.isNotEmpty(argv.getRealName())) {
-            wrapper.addCondition("realName", Op.LIKE, "%" +argv.getRealName() +"%");
+            wrapper.addCondition("u.real_name", Op.LIKE, "%" +argv.getRealName() +"%");
         }
         if (StringUtils.isNotEmpty(argv.getMobile())) {
-            wrapper.addCondition("mobile", Op.LIKE, "%" +argv.getMobile() +"%");
+            wrapper.addCondition("u.mobile", Op.LIKE, "%" +argv.getMobile() +"%");
         }
         if (argv.getStatus() != null) {
-            wrapper.addCondition("status", Op.EQ, argv.getStatus());
+            wrapper.addCondition("u.status", Op.EQ, argv.getStatus());
         }
-        return (PageDataRet<SysUserRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysUser.class, SysUserRet.class);
+        return (PageDataRet<SysUserRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysUserRet.class);
     }
 
     @Override

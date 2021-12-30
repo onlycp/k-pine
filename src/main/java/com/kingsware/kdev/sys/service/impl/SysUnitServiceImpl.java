@@ -68,6 +68,10 @@ public class SysUnitServiceImpl extends BaseServiceImpl implements SysUnitServic
         model.setEmail(argv.getEmail());
         model.setLeader(argv.getLeader());
         model.setMobile(argv.getMobile());
+        // 处理path， 如果单位有变动时，才需要处理
+        boolean parentChanged = !Objects.equals(model.getParentId(), argv.getParentId());
+        String hisParentPath = model.getPath().replace("/" + model.getId() +"/", "/");
+        model.setParentId(argv.getParentId());
         // 唯一性校验
         DBChecker<SysUnit> checker =DBChecker.build(model, SysUnit.class);
         // 同级下名称唯一
@@ -76,6 +80,18 @@ public class SysUnitServiceImpl extends BaseServiceImpl implements SysUnitServic
         checker.checkUnique();
         // 保存
         DB.update(model);
+        // 更新path
+        if (parentChanged) {
+            SysUnit newParent = DB.findById(SysUnit.class, model.getParentId());
+            String newParentPath = "/";
+            if (newParent != null) {
+                newParentPath = newParent.getPath();
+            }
+            // 新老头
+            String updateSql = "update sys_unit set path=replace(path,?,?) where path like ?";
+            DB.executeUpdateSql(updateSql, hisParentPath, newParentPath, "%/"+ model.getId() + "/%");
+
+        }
     }
 
     /**

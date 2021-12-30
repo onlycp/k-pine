@@ -35,4 +35,6 @@ public class SysUserArgv {
     private Integer status;
     /** 备注 */
     private String note;
+    /** 角色id **/
+    private String sysRoleIds;
 }

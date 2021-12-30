@@ -76,7 +76,7 @@ public class SqlWrapper {
         sql += columnName;
         sql += " in ( ";
         for (Object obj: inSet) {
-            sql = sql + "?,";
+            sql += "?,";
             params.add(obj);
         }
         // 移除最后一个"."
