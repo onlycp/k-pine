@@ -170,6 +170,7 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
         // 加一个不可能存在的id进去
         ids.add(StringUtils.getUUID());
         wantWrapper.in("id", ids);
+        wantWrapper.sortBy("order by order_num asc");
         List<SysMenu> wantList = DB.findList(SysMenu.class, wantWrapper.getSql(), wantWrapper.getParams().toArray());
         // 将结果转为树
         List<SysMenuRet> retList = new ArrayList<>();
@@ -210,7 +211,8 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
     @Override
     public List<TreeDataRet<Object>> treeOptions(String excludeId) {
         // 查找所有
-        List<SysMenu> list = DB.findList(SysMenu.class, Expr.builder().add("path", "not like", "%/"+ excludeId + "/%").build());
+        String sql = "select * from sys_menu where path not like ? order by order_num asc";
+        List<SysMenu> list = DB.findList(SysMenu.class, sql, "%/"+ excludeId + "/%");
         // 转为树型的返回结构
         List<TreeDataRet<Object>> retList = new ArrayList<>();
         // 先处理根节点

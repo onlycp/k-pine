@@ -81,6 +81,11 @@ public class SqlWrapper {
         }
         // 移除最后一个"."
         sql = sql.substring(0, sql.length()-1);
-        sql += ")";
+        sql += ") ";
+    }
+
+    public void sortBy(String sortBy) {
+        sql += sortBy;
+        sql += " ";
     }
 }
