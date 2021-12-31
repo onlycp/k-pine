@@ -47,13 +47,23 @@ public class KmqConsumerThread implements Runnable {
         while (true) {
             try {
                 String payload = queue.take();
+                for (KmqConsumer consumer: consumers) {
+                    try {
+                        consumer.onMessage(payload);
+                    }
+                    catch (Exception e) {
+                        logger.warn("消费者: {} 消费失败，消息内容:{}, 异常信息:{}", consumer.topic(), payload, e.getMessage());
+                        queue.add(payload);
+                    }
+                }
+
 
             } catch (InterruptedException e) {
                 logger.warn("kmq消费异常，topic:{}, e:{}", this.topic, e);
                 Thread.currentThread().interrupt();
             }
             finally {
-                ThreadUtils.sleep(50);
+                ThreadUtils.sleep(10);
             }
         }
     }

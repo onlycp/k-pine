@@ -57,6 +57,9 @@ public class KmqMessageCenter {
         List<Class<?>> classList =  ClassUtils.getClassesByParentClass("com.kingsware.kdev", KmqConsumer.class);
         // 实例化消费实例并放到消费者的map
         for (Class<?> clazz: classList) {
+            if (clazz.isInterface()) {
+                continue;
+            }
             try {
                 KmqConsumer consumer = (KmqConsumer)clazz.newInstance();
                 Set<KmqConsumer> consumerSet = consumers.computeIfAbsent(consumer.topic(), key -> new HashSet<>());

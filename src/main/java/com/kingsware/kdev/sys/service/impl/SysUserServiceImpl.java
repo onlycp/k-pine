@@ -6,6 +6,7 @@ import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.encrypt.EncryptWorker;
 import com.kingsware.kdev.core.enums.ApiSystemEnum;
 import com.kingsware.kdev.core.exception.BusinessException;
@@ -180,7 +181,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         userInfo.setRoleIds(getRoleIds(getRolesByUserId(model.getId())));
         userInfo.setApiSystem(ApiSystemEnum.ADMIN);
 
-        String token = TokenUtil.createToken(appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), argv.getIp(), userInfo);
+        String token = TokenUtil.createToken(appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), KClientContext.getContext().getIp(), userInfo);
         SysUserLoginRet ret = new SysUserLoginRet();
         ret.setToken(token);
         return ret;

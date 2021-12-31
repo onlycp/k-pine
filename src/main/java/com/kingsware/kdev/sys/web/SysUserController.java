@@ -42,10 +42,9 @@ public class SysUserController extends BaseController {
      * @return 提示
      */
     @ApiIgnore
-    @ApiOperation(value = "登录 " ,notes = "登录")
+    @ApiOperation(value = "登录" ,notes = "登录")
     @PostMapping(value = "login")
-    public BaseRet<?> login(HttpServletRequest request, @RequestBody SysUserLoginArgv sysUserLoginArgv) {
-        sysUserLoginArgv.setIp(ClientContextAspect.getClientIp(request));
+    public BaseRet<?> login(@RequestBody SysUserLoginArgv sysUserLoginArgv) {
         return BaseRet.success(sysUserService.login(sysUserLoginArgv));
     }
     /**

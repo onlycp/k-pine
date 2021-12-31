@@ -27,8 +27,6 @@ public class ThreadUtils {
         try {
             Thread.sleep(t);
         } catch (InterruptedException e) {
-            logger.warn("Interrupted!", e);
-            Thread.currentThread().interrupt();
         }
     }
 }
