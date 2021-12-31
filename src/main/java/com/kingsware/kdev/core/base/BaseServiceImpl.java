@@ -1,7 +1,7 @@
 package com.kingsware.kdev.core.base;
 
-import com.kingsware.kdev.core.bean.BaseManageModel;
-import com.kingsware.kdev.core.bean.BaseManageRet;
+import com.kingsware.kdev.core.bean.BaseModel;
+import com.kingsware.kdev.core.bean.BaseSimpleRet;
 import com.kingsware.kdev.core.bean.BasePageArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.orm.DB;
@@ -20,68 +20,68 @@ import java.util.List;
  */
 public class BaseServiceImpl implements BaseService {
     @Override
-    public PageDataRet<? extends BaseManageRet> query(String sql, List<Object> params, BasePageArgv argv, Class<? extends BaseManageModel> inClass,  Class<? extends BaseManageRet> outClass) {
+    public PageDataRet<? extends BaseSimpleRet> query(String sql, List<Object> params, BasePageArgv argv, Class<? extends BaseModel> inClass,  Class<? extends BaseSimpleRet> outClass) {
         // 返回结果
-        PageDataRet<BaseManageRet> pageDataRet = new PageDataRet<>();
+        PageDataRet<BaseSimpleRet> pageDataRet = new PageDataRet<>();
         // 分页查询
         if (argv.isPageQuery()) {
-            PagedList<? extends BaseManageModel> pagedList = DB.findPagedList(inClass, argv.getPage(), argv.getPageSize(), sql, params.toArray());
+            PagedList<? extends BaseModel> pagedList = DB.findPagedList(inClass, argv.getPage(), argv.getPageSize(), sql, params.toArray());
             pageDataRet.setPageSize(pagedList.getPageSize());
             pageDataRet.setPageCount(pagedList.getPageCount());
             pageDataRet.setPage(pagedList.getPageIndex());
             pageDataRet.setTotal(pagedList.getTotalCount());
             // 返回列表
-            List<BaseManageRet> baseManageRets = new ArrayList<>();
-            for (BaseManageModel model: pagedList.getList()) {
-                baseManageRets.add(model2Ret(model, outClass));
+            List<BaseSimpleRet> BaseSimpleRets = new ArrayList<>();
+            for (BaseModel model: pagedList.getList()) {
+                BaseSimpleRets.add(model2Ret(model, outClass));
             }
-            pageDataRet.setList(baseManageRets);
+            pageDataRet.setList(BaseSimpleRets);
         }
         // 一般查询
         else {
-            List<? extends BaseManageModel> models = DB.findList(inClass, sql, params.toArray());
+            List<? extends BaseModel> models = DB.findList(inClass, sql, params.toArray());
             pageDataRet.setPage(1);
             pageDataRet.setPageSize(models.size());
             pageDataRet.setTotal(models.size());
             pageDataRet.setPageCount(1);
             // 返回列表
-            List<BaseManageRet> baseManageRets = new ArrayList<>();
-            for (BaseManageModel model: models) {
-                baseManageRets.add(model2Ret(model, outClass));
+            List<BaseSimpleRet> BaseSimpleRets = new ArrayList<>();
+            for (BaseModel model: models) {
+                BaseSimpleRets.add(model2Ret(model, outClass));
             }
-            pageDataRet.setList(baseManageRets);
+            pageDataRet.setList(BaseSimpleRets);
         }
         return pageDataRet;
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public PageDataRet<? extends BaseManageRet> query(String sql, List<Object> params, BasePageArgv argv, Class<? extends BaseManageRet> outClass) {
+    public PageDataRet<? extends BaseSimpleRet> query(String sql, List<Object> params, BasePageArgv argv, Class<? extends BaseSimpleRet> outClass) {
         // 返回结果
-        PageDataRet<BaseManageRet> pageDataRet = new PageDataRet<>();
+        PageDataRet<BaseSimpleRet> pageDataRet = new PageDataRet<>();
         // 分页查询
         if (argv.isPageQuery()) {
-            PagedList<? extends BaseManageRet> pagedList = DB.findPagedList(outClass, argv.getPage(), argv.getPageSize(), sql, params.toArray());
+            PagedList<? extends BaseSimpleRet> pagedList = DB.findPagedList(outClass, argv.getPage(), argv.getPageSize(), sql, params.toArray());
             pageDataRet.setPageSize(pagedList.getPageSize());
             pageDataRet.setPageCount(pagedList.getPageCount());
             pageDataRet.setPage(pagedList.getPageIndex());
             pageDataRet.setTotal(pagedList.getTotalCount());
-            pageDataRet.setList((List<BaseManageRet>) pagedList.getList());
+            pageDataRet.setList((List<BaseSimpleRet>) pagedList.getList());
         }
         // 一般查询
         else {
-            List<? extends BaseManageRet> models = DB.findList(outClass, sql, params.toArray());
+            List<? extends BaseSimpleRet> models = DB.findList(outClass, sql, params.toArray());
             pageDataRet.setPage(1);
             pageDataRet.setPageSize(models.size());
             pageDataRet.setTotal(models.size());
             pageDataRet.setPageCount(1);
-            pageDataRet.setList((List<BaseManageRet>) models);
+            pageDataRet.setList((List<BaseSimpleRet>) models);
         }
         return pageDataRet;
     }
 
     @Override
-    public BaseManageRet model2Ret(BaseManageModel model, Class<? extends BaseManageRet> outClass) {
+    public BaseSimpleRet model2Ret(BaseModel model, Class<? extends BaseSimpleRet> outClass) {
         return BeanUtils.copyObject(model, outClass);
     }
 }

@@ -6,10 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.Timestamp;
+import java.util.*;
 
 /**
  * Json操作类
@@ -167,6 +165,12 @@ public class JsonUtil {
                     }
                     else if (field.getType().isAssignableFrom(Boolean.class)) {
                         field.set(entity, "1".equals(entry.getValue().toString()));
+                    }
+                    else if (field.getType().isAssignableFrom(Timestamp.class)) {
+                        field.set(entity, new Timestamp(Long.parseLong(entry.getValue().toString())));
+                    }
+                    else if (field.getType().isAssignableFrom(Date.class)) {
+                        field.set(entity, new Date(Long.parseLong(entry.getValue().toString())));
                     }
                     else {
                         field.set(entity, entry.getValue());

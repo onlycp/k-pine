@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
+import java.sql.Timestamp;
 import java.util.*;
 
 /**
@@ -109,7 +110,7 @@ public class SqlGenerator {
                     }
 
                 }
-                params.add(BeanUtils.getField(field2Column.getField(), model));
+                addParams(field2Column.getField(), model, params);
             }
             String subValues = String.format("( %s )", StringUtils.joinToString(itemValues, ","));
             insertValues.add(subValues);
@@ -126,6 +127,24 @@ public class SqlGenerator {
         sqlWrapper.setParams(params);
         return sqlWrapper;
     }
+
+    /**
+     * 增加参数
+     * @param field     属性
+     * @param model     模型
+     * @param params    参数
+     */
+    private static void addParams(Field field, Object model, List<Object> params) {
+        Object value = BeanUtils.getField(field, model);
+        if (value instanceof Timestamp) {
+            Timestamp timestamp = (Timestamp) value;
+            params.add(DateUtils.formatDate(new Date(timestamp.getTime()), DateUtils.DATA_TIME));
+        }
+        else {
+            params.add(value);
+        }
+    }
+
     /**
      * 生成insertSQL
      * @param model         模型
@@ -197,7 +216,7 @@ public class SqlGenerator {
                 else if (column.auto() == AutoEnum.WHEN) {
                     BeanUtils.setField(field, model, DateUtils.getNow());
                 }
-                params.add(BeanUtils.getField(field, model));
+                addParams(field, model, params);
             }
         }
         // 追加id

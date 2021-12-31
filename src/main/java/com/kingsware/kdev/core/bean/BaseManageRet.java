@@ -10,7 +10,7 @@ import lombok.Data;
  * @date 2021/12/28 9:14 上午
  */
 @Data
-public class BaseManageRet {
+public class BaseManageRet extends BaseSimpleRet{
 
     /** id **/
     private String id;

@@ -84,6 +84,24 @@ public class SqlWrapper {
         sql += ") ";
     }
 
+    /**
+     * 区间查询
+     * @param columnName    属性名
+     * @param lowValue      低值
+     * @param highValue     高值
+     */
+    public void between(String columnName, Object lowValue, Object highValue) {
+        sql += " and ";
+        sql += columnName;
+        sql += " between ? and ? ";
+        params.add(lowValue);
+        params.add(highValue);
+    }
+
+    /**
+     * 排序
+     * @param sortBy
+     */
     public void sortBy(String sortBy) {
         sql += sortBy;
         sql += " ";

@@ -52,6 +52,7 @@ public class ClientContextAspect {
         clientInfo.setToken(token);
         clientInfo.setRequest(request);
         clientInfo.setResponse(response);
+        clientInfo.setUrl(request.getRequestURI());
         // 写到线程变量
         KClientContext.setContext(clientInfo);
         // 放开
