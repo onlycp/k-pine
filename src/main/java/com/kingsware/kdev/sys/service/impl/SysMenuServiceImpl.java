@@ -244,6 +244,7 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
         TreeDataRet<Object> treeDataRet = new TreeDataRet<>();
         treeDataRet.setValue(root.getId());
         treeDataRet.setLabel(root.getName());
+        treeDataRet.setExtraData(root);
 
         for (SysMenu child: familyList) {
             if (StringUtils.isNotEmpty(child.getParentId()) && child.getParentId().equals(root.getId())) {
