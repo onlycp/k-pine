@@ -42,7 +42,7 @@ public class SqlGenerator {
      */
     public static <T> SqlWrapper insertListSql(List<T> models, DataBaseTypeEnum dataBaseTypeEnum) {
         // 获取第一个对象的class
-        Class tClass = models.get(0).getClass();
+        Class<?> tClass = models.get(0).getClass();
         // 获取表名
         String tableName = ModelUtil.getTableName(tClass);
         // 获取所有的Field
@@ -170,7 +170,7 @@ public class SqlGenerator {
      * @return  sql结构
      */
     public static <T> SqlWrapper updateSql(T model, DataBaseTypeEnum dataBaseTypeEnum) {
-        Class tClass = model.getClass();
+        Class<?> tClass = model.getClass();
         // 获取表名
         String tableName = ModelUtil.getTableName(tClass);
         // 获取所有的Field
@@ -220,7 +220,12 @@ public class SqlGenerator {
                     }
                 }
                 else if (column.auto() == AutoEnum.WHEN) {
-                    BeanUtils.setField(field, model, DateUtils.getNow());
+                    if (field.getType().isAssignableFrom(Timestamp.class)) {
+                        BeanUtils.setField(field, model, new Timestamp(System.currentTimeMillis()));
+                    }
+                    else if (field.getType().isAssignableFrom(String.class)){
+                        BeanUtils.setField(field, model, DateUtils.getNow());
+                    }
                 }
                 addParams(field, model, params);
             }
@@ -228,14 +233,13 @@ public class SqlGenerator {
         // 追加id
         params.add(BeanUtils.getField(idField, model));
         // 构建sql
-        StringBuilder builder = new StringBuilder();
-        builder.append("update ").append(tableName).append(" set ");
-        builder.append(StringUtils.joinToString(updateList, ",")).append(" ");
-        builder.append("where ");
-        builder.append(String.format("%s=?", StringUtils.humpToLine(idField.getName())));
+        String builder = "update " + tableName + " set " +
+                StringUtils.joinToString(updateList, ",") + " " +
+                "where " +
+                String.format("%s=?", StringUtils.humpToLine(idField.getName()));
         // 返回结果
         SqlWrapper sqlWrapper = new SqlWrapper();
-        sqlWrapper.setSql(builder.toString());
+        sqlWrapper.setSql(builder);
         sqlWrapper.setParams(params);
         return sqlWrapper;
     }
@@ -319,17 +323,16 @@ public class SqlGenerator {
         // 获取表名
         String tableName = ModelUtil.getTableName(model.getClass());
         // 拼接sql
-        StringBuilder builder = new StringBuilder();
-        builder.append("delete from ");
-        builder.append(tableName).append(" ");
-        builder.append("where ");
-        builder.append(String.format("%s=?", StringUtils.humpToLine(idField.getName())));
+        String builder = "delete from " +
+                tableName + " " +
+                "where " +
+                String.format("%s=?", StringUtils.humpToLine(idField.getName()));
         // 参数列表
         List<Object> params = new ArrayList<>();
         params.add(BeanUtils.getField(idField, model));
         // 返回结果
         SqlWrapper sqlWrapper = new SqlWrapper();
-        sqlWrapper.setSql(builder.toString());
+        sqlWrapper.setSql(builder);
         sqlWrapper.setParams(params);
         return sqlWrapper;
     }
