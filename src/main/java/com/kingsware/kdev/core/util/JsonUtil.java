@@ -167,7 +167,18 @@ public class JsonUtil {
                         field.set(entity, "1".equals(entry.getValue().toString()));
                     }
                     else if (field.getType().isAssignableFrom(Timestamp.class)) {
-                        field.set(entity, new Timestamp(Long.parseLong(entry.getValue().toString())));
+                        // 如果值是整型
+                        if (entry.getValue() instanceof Long) {
+                            field.set(entity, new Timestamp(Long.parseLong(entry.getValue().toString())));
+                        }
+                        // 如果值是字符串
+                        else if (entry.getValue() instanceof  String) {
+                            Date date = DateUtils.toDate(entry.getValue().toString(), DateUtils.DATA_TIME);
+                            if (date != null) {
+                                field.set(entity, new Timestamp(date.getTime()));
+                            }
+                        }
+
                     }
                     else if (field.getType().isAssignableFrom(Date.class)) {
                         field.set(entity, new Date(Long.parseLong(entry.getValue().toString())));

@@ -2,8 +2,11 @@ package com.kingsware.kdev.core.bean;
 
 import com.kingsware.kdev.core.orm.annotation.AutoEnum;
 import com.kingsware.kdev.core.orm.annotation.Column;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 /**
  * 管理类model
@@ -12,6 +15,8 @@ import java.io.Serializable;
  * @version 1.0.0
  * @date 2021/12/21 5:49 下午
  */
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class BaseManageModel extends BaseModel {
     /** id **/
     @Column(auto = AutoEnum.ID)
@@ -21,52 +26,12 @@ public class BaseManageModel extends BaseModel {
     private String whoCreated;
     /** 创建时间 **/
     @Column(auto = AutoEnum.WHEN, updatable = false)
-    private String whenCreated;
+    private Timestamp whenCreated;
     /** 修改人员 **/
     @Column(auto = AutoEnum.WHO)
     private String whoModified;
     /** 修改时间 **/
     @Column(auto = AutoEnum.WHEN)
-    private String whenModified;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getWhoCreated() {
-        return whoCreated;
-    }
-
-    public void setWhoCreated(String whoCreated) {
-        this.whoCreated = whoCreated;
-    }
-
-    public String getWhenCreated() {
-        return whenCreated;
-    }
-
-    public void setWhenCreated(String whenCreated) {
-        this.whenCreated = whenCreated;
-    }
-
-    public String getWhoModified() {
-        return whoModified;
-    }
-
-    public void setWhoModified(String whoModified) {
-        this.whoModified = whoModified;
-    }
-
-    public String getWhenModified() {
-        return whenModified;
-    }
-
-    public void setWhenModified(String whenModified) {
-        this.whenModified = whenModified;
-    }
+    private Timestamp whenModified;
 
 }

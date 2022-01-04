@@ -2,6 +2,8 @@ package com.kingsware.kdev.core.bean;
 
 import lombok.Data;
 
+import java.sql.Timestamp;
+
 /**
  * 基础业务返回类
  *
@@ -17,9 +19,9 @@ public class BaseManageRet extends BaseSimpleRet{
     /** 创建人员 **/
     private String whoCreated;
     /** 创建时间 **/
-    private String whenCreated;
+    private Timestamp whenCreated;
     /** 修改人员 **/
     private String whoModified;
     /** 修改时间 **/
-    private String whenModified;
+    private Timestamp whenModified;
 }
