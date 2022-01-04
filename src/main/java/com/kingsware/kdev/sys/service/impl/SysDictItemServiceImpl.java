@@ -104,10 +104,10 @@ public class SysDictItemServiceImpl extends BaseServiceImpl implements SysDictIt
             wrapper.addCondition("sys_dict_id", Op.EQ, argv.getSysDictId());
         }
         if (StringUtils.isNotEmpty(argv.getName())) {
-            wrapper.addCondition("name", Op.LIKE, "%" +argv.getName() +"%");
+            wrapper.addCondition("sdi.name", Op.LIKE, "%" +argv.getName() +"%");
         }
         if (StringUtils.isNotEmpty(argv.getCode())) {
-            wrapper.addCondition("code", Op.LIKE, "%" +argv.getCode() +"%");
+            wrapper.addCondition("sdi.code", Op.LIKE, "%" +argv.getCode() +"%");
         }
         if (StringUtils.isNotEmpty(argv.getGroupName())) {
             wrapper.addCondition("group_name", Op.LIKE, "%" +argv.getGroupName() +"%");
