@@ -112,6 +112,7 @@ public class SysDictItemServiceImpl extends BaseServiceImpl implements SysDictIt
         if (StringUtils.isNotEmpty(argv.getGroupName())) {
             wrapper.addCondition("group_name", Op.LIKE, "%" +argv.getGroupName() +"%");
         }
+        wrapper.sortBy(" order by sdi.order_num ");
         // 返回结果
         return (PageDataRet<SysDictItemRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysDictItemRet.class);
     }
