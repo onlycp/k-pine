@@ -105,7 +105,13 @@ public class SqlGenerator {
                             }
                         }
                         else if (column.auto() == AutoEnum.WHEN) {
-                            BeanUtils.setField(field, model, DateUtils.getNow());
+                            if (field.getType().isAssignableFrom(Timestamp.class)) {
+                                BeanUtils.setField(field, model, new Timestamp(System.currentTimeMillis()));
+                            }
+                            else if (field.getType().isAssignableFrom(String.class)){
+                                BeanUtils.setField(field, model, DateUtils.getNow());
+                            }
+
                         }
                     }
 
