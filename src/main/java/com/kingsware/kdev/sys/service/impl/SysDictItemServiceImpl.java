@@ -58,13 +58,6 @@ public class SysDictItemServiceImpl extends BaseServiceImpl implements SysDictIt
             throw new BusinessException("找不到字典类型");
         }
         model.setCode(dictType.getCode());
-
-        // 唯一性校验
-        DBChecker<SysDictItem> checker =DBChecker.build(model, SysDictItem.class);
-        // 名称唯一
-        checker.uni("name", I18n.t("SysDictItem.name.unique", "字典名称必须唯一"));
-        // 执行校验
-        checker.checkUnique();
         DB.save(model);
     }
 
@@ -81,12 +74,6 @@ public class SysDictItemServiceImpl extends BaseServiceImpl implements SysDictIt
             throw new BusinessException("找不到字典类型");
         }
         model.setCode(dictType.getCode());
-        // 唯一性校验
-        DBChecker<SysDictItem> checker =DBChecker.build(model, SysDictItem.class);
-        // 名称唯一
-        checker.uni("name", I18n.t("SysDictItem.name.unique", "字典名称必须唯一"));
-        // 执行校验
-        checker.checkUnique();
         // 保存
         DB.update(model);
     }
