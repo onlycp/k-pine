@@ -4,14 +4,16 @@ import com.kingsware.kdev.core.exception.HttpClientException;
 import com.kingsware.kdev.core.orm.DBConnectConfig;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.orm.kdb.KDBConnectConfig;
-import com.kingsware.kdev.core.orm.kdb.KdbArgc;
+import com.kingsware.kdev.core.orm.kdb.KdbArgv;
 import com.kingsware.kdev.core.orm.kdb.KdbRet;
+import com.kingsware.kdev.core.orm.kdb.StepArgv;
 import com.kingsware.kdev.core.util.HttpUtil;
 import com.kingsware.kdev.core.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +31,12 @@ public class KDBHttpChannel implements DbChannel{
 
     /** 配置 **/
     private KDBConnectConfig kdbConnectConfig;
+    /** 透传sql的流程id **/
+    private final static String passThroughFlowId = "base_flow";
+    /** 透传sql的流程id **/
+    private final static String executeStep = "execute";
+    /** 透传sql的流程id **/
+    private final static String executeResult = "result@execute";
 
     @Override
     public String name() {
@@ -43,9 +51,10 @@ public class KDBHttpChannel implements DbChannel{
     @Override
     public <T> T queryForObject(String sql, Class<T> tClass, List<Object> objects) {
         // 从kdb请求数据
-        KdbRet ret = send(sql, "", objects);
+        KdbRet ret = send(makePassThrough(sql, objects));
         // 由于kdb响应结果始终为list，所以得先将为list
-        List<T> list = JsonUtil.transformJson2List(ret.getResponseBody(), tClass);
+        String executeRequest = ret.getResponseBody().get(executeResult);
+        List<T> list = JsonUtil.transformJson2List(executeRequest, tClass);
         // 返回结果
         if (list == null || list.isEmpty()) {
             return null;
@@ -59,9 +68,10 @@ public class KDBHttpChannel implements DbChannel{
     @Override
     public long queryForCount(String sql, List<Object> objects) {
         // 从kdb请求数据
-        KdbRet ret = send(sql, "", objects);
+        KdbRet ret = send(makePassThrough(sql, objects));
         // 由于kdb响应结果始终为list，所以得先将为list
-        List<Map> list = JsonUtil.toListBean(ret.getResponseBody(), Map.class);
+        String executeRequest = ret.getResponseBody().get(executeResult);
+        List<Map> list = JsonUtil.toListBean(executeRequest, Map.class);
         // 返回结果
         if (list == null || list.size() != 1) {
             throw new OrmDbException("查询数量时，应保持只有一条记录");
@@ -77,7 +87,7 @@ public class KDBHttpChannel implements DbChannel{
     @Override
     public void executeSql(String sql, List<Object> objects) {
         // 从kdb请求数据
-        KdbRet ret = send(sql, "", objects);
+        KdbRet ret = send(makePassThrough(sql, objects));
         if (ret.getErrorCode() != 0) {
             throw new OrmDbException("sql执行失败，错误信息:" + ret.getMessage());
         }
@@ -85,25 +95,35 @@ public class KDBHttpChannel implements DbChannel{
 
     public <T> List<T> queryForList(String sql, Class<T> tClass, List<Object> objects) {
         // 从kdb请求数据
-        KdbRet ret = send(sql, "", objects);
+        KdbRet ret = send(makePassThrough(sql, objects));
         // 返回结果
-        return JsonUtil.transformJson2List(ret.getResponseBody(), tClass);
+        String executeRequest = ret.getResponseBody().get(executeResult);
+        return JsonUtil.transformJson2List(executeRequest, tClass);
+    }
+
+    /**
+     * 组装sql透传的参数
+     * @param sql       sql
+     * @param objects   参数
+     * @return          透传参数
+     */
+    private KdbArgv makePassThrough(String sql, List<Object> objects) {
+        KdbArgv argv = new KdbArgv();
+        argv.setFlowID(passThroughFlowId);
+        argv.addStep(executeStep, sql, kdbConnectConfig.getInnerType(), objects);
+        return argv;
+
     }
 
     /**
      *  从kdb请求获取数据
-     * @param scripts   脚本内容
-     * @param flowId    流程id
-     * @param params    参数
-     * @param <T>       泛型
+     * @param kdbArgv   kdb参数
      * @return          响应结果
      */
-    private <T> KdbRet send(String scripts, String flowId, T params) {
+    private  KdbRet send(KdbArgv kdbArgv) {
         try {
-            // 组装参数
-            KdbArgc<T> argc =new KdbArgc<>(kdbConnectConfig.getInnerType(),"base_flow", scripts,  params);
             // 转为json
-            String requestBody = JsonUtil.toJson(argc);
+            String requestBody = JsonUtil.toJson(kdbArgv);
             // 拼接请求
             String url = kdbConnectConfig.getServer() +  kdbConnectConfig.getExecuteSqlApi();
             // 发起进攻，杀
