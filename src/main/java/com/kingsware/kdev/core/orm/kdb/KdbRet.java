@@ -12,11 +12,11 @@ import java.util.Map;
  * @date 2021/12/24 3:10 下午
  */
 @Data
-public class KdbRet {
+public class KdbRet<T> {
     /** 响应码 **/
     private int errorCode;
     /** 信息 **/
     private String message;
     /** 响应体 **/
-    private Map<String, String> responseBody;
+    private T responseBody;
 }

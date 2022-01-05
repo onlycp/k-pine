@@ -48,6 +48,24 @@ public class JsonUtil {
 
     /**
      * 将字符串转为对象
+     * @param jsonString    json字符串
+     * @param tClass        目标类
+     * @param <T>           目标泛型
+     * @return              目标对象
+     */
+    public static <T,R> T toBean(String jsonString, Class<T> tClass, Class<R> pClass) {
+
+        JavaType javaType =  objectMapper.getTypeFactory().constructParametricType(tClass, pClass);
+        try {
+            return objectMapper.readValue(jsonString, javaType);
+        } catch (Exception e) {
+            logger.warn("字符串转为List对象失败, 源串:{}", jsonString);
+            return null;
+        }
+    }
+
+    /**
+     * 将字符串转为对象
      * @param bean         源对象
      * @param <T>          源泛型
      * @return             json字符串

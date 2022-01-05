@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.orm.channel;
 
+import com.fasterxml.jackson.databind.JavaType;
 import com.kingsware.kdev.core.exception.HttpClientException;
 import com.kingsware.kdev.core.orm.DBConnectConfig;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
@@ -12,10 +13,7 @@ import com.kingsware.kdev.core.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * KBD的http通道
@@ -51,9 +49,9 @@ public class KDBHttpChannel implements DbChannel{
     @Override
     public <T> T queryForObject(String sql, Class<T> tClass, List<Object> objects) {
         // 从kdb请求数据
-        KdbRet ret = send(makePassThrough(sql, objects));
+        KdbRet<Map> ret = send(makePassThrough(sql, objects), Map.class);
         // 由于kdb响应结果始终为list，所以得先将为list
-        String executeRequest = ret.getResponseBody().get(executeResult);
+        String executeRequest = ret.getResponseBody().get(executeResult).toString();
         List<T> list = JsonUtil.transformJson2List(executeRequest, tClass);
         // 返回结果
         if (list == null || list.isEmpty()) {
@@ -68,9 +66,9 @@ public class KDBHttpChannel implements DbChannel{
     @Override
     public long queryForCount(String sql, List<Object> objects) {
         // 从kdb请求数据
-        KdbRet ret = send(makePassThrough(sql, objects));
+        KdbRet<Map> ret = send(makePassThrough(sql, objects), Map.class);
         // 由于kdb响应结果始终为list，所以得先将为list
-        String executeRequest = ret.getResponseBody().get(executeResult);
+        String executeRequest = ret.getResponseBody().get(executeResult).toString();
         List<Map> list = JsonUtil.toListBean(executeRequest, Map.class);
         // 返回结果
         if (list == null || list.size() != 1) {
@@ -87,7 +85,7 @@ public class KDBHttpChannel implements DbChannel{
     @Override
     public void executeSql(String sql, List<Object> objects) {
         // 从kdb请求数据
-        KdbRet ret = send(makePassThrough(sql, objects));
+        KdbRet<Map> ret = send(makePassThrough(sql, objects), Map.class);
         if (ret.getErrorCode() != 0) {
             throw new OrmDbException("sql执行失败，错误信息:" + ret.getMessage());
         }
@@ -95,9 +93,9 @@ public class KDBHttpChannel implements DbChannel{
 
     public <T> List<T> queryForList(String sql, Class<T> tClass, List<Object> objects) {
         // 从kdb请求数据
-        KdbRet ret = send(makePassThrough(sql, objects));
+        KdbRet<Map> ret = send(makePassThrough(sql, objects), Map.class);
         // 返回结果
-        String executeRequest = ret.getResponseBody().get(executeResult);
+        String executeRequest = ret.getResponseBody().get(executeResult).toString();
         return JsonUtil.transformJson2List(executeRequest, tClass);
     }
 
@@ -115,23 +113,32 @@ public class KDBHttpChannel implements DbChannel{
 
     }
 
+
     /**
      *  从kdb请求获取数据
      * @param kdbArgv   kdb参数
      * @return          响应结果
      */
-    private  KdbRet send(KdbArgv kdbArgv) {
+    private <T> KdbRet<T> send(KdbArgv kdbArgv, Class<T> tClass) {
         try {
             // 转为json
             String requestBody = JsonUtil.toJson(kdbArgv);
             // 拼接请求
             String url = kdbConnectConfig.getServer() +  kdbConnectConfig.getExecuteSqlApi();
             // 发起进攻，杀
-            logger.info("url:{} ,请求体: {}", url, requestBody);
+
+            long t1 = System.currentTimeMillis();
             // 杀敌一万，满身是血
             String  responseBody = HttpUtil.postBody(url, requestBody, Collections.emptyMap());
+            long takeTime = System.currentTimeMillis() - t1;
+            if (takeTime < 1000) {
+                logger.debug("url:{} , Take: {} ,请求体: {}", url, takeTime ,requestBody);
+            }
+            else {
+                logger.warn("url:{} , Take: {} ,请求体: {}", url, takeTime ,requestBody);
+            }
             // 洗洗，换身好衣服
-            KdbRet ret = JsonUtil.toBean(responseBody, KdbRet.class);
+            KdbRet<T> ret = JsonUtil.toBean(responseBody, KdbRet.class, tClass);
             // 看看死了没
             // 灰都没了
             if (ret == null) {
