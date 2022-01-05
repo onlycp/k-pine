@@ -1,15 +1,8 @@
 package com.kingsware.kdev.core.excel;
-
-import com.kingsware.kdev.core.context.SpringContext;
-import com.kingsware.kdev.core.encrypt.EncryptProperties;
-import com.kingsware.kdev.core.encrypt.EncryptWorker;
-import com.kingsware.kdev.core.encrypt.inst.AESInstance;
-import com.kingsware.kdev.core.encrypt.inst.Base64Instance;
-import com.kingsware.kdev.core.encrypt.inst.MD5Instance;
+import com.kingsware.kdev.core.util.BeanUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -21,11 +14,24 @@ import java.util.Optional;
  */
 public class KExcel {
 
-    /** 私有构造函数 **/
-    private KExcel() {}
-
+    /** 文件名称 **/
+    private String fileNme;
     /** 保存当前的所有的sheet **/
     private List<KSheet> sheetList = new ArrayList<>();
+
+
+    public KExcel(String fileNme) {
+        this.fileNme = fileNme;
+    }
+
+
+    public String getFileNme() {
+        return fileNme;
+    }
+
+    public List<KSheet> getSheetList() {
+        return sheetList;
+    }
 
     /**
      * 创建sheet
@@ -45,5 +51,36 @@ public class KExcel {
             sheetList.add(sheet);
             return sheet;
         }
+    }
+
+    /**
+     * 将列表转为表格数据
+     * @param defines       列定义
+     * @param list         数据
+     */
+    public static KExcel fromDataList(String fileName, String sheetName ,List<RegionDefine> defines, List<?> list) {
+        // 创建表格对象
+        KExcel excel = new KExcel(fileName);
+        // 创建sheet
+        KSheet sheet = excel.createSheet(sheetName);
+        // 写入数据
+        for (int i = 0; i < defines.size(); i++) {
+            RegionDefine define = defines.get(i);
+            // 写表头
+            sheet.addCellRegion(1, i+1, define.getLabelName());
+            // 写数据
+            for (int j = 0; j < list.size(); j++) {
+                Object obj = list.get(j);
+                Object cellValue = BeanUtils.getField(define.getPropName(), obj);
+                if (cellValue == null) {
+                    continue;
+                }
+                if (define.getFormat() != null) {
+                    cellValue = define.getFormat().format(cellValue);
+                }
+                sheet.addCellRegion(j + 2, i+1, cellValue);
+            }
+        }
+        return excel;
     }
 }

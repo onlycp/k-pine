@@ -2,6 +2,9 @@ package com.kingsware.kdev.sys.service.impl;
 
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.excel.ExcelWorker;
+import com.kingsware.kdev.core.excel.KExcel;
+import com.kingsware.kdev.core.excel.RegionDefine;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
@@ -11,6 +14,9 @@ import com.kingsware.kdev.sys.model.SysLoginLog;
 import com.kingsware.kdev.sys.ret.SysLoginLogRet;
 import com.kingsware.kdev.sys.service.SysLoginLogService;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 角色业务实现类
@@ -46,6 +52,20 @@ public class SysLoginLogServiceImpl extends BaseServiceImpl implements SysLoginL
         wrapper.sortBy("order by operate_time desc");
 
         return (PageDataRet<SysLoginLogRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysLoginLogRet.class);
+    }
+
+    @Override
+    public void export(SysLoginLogQueryArgv argv) {
+        // 直接调用查询方法
+        argv.setPageQuery(false);
+        PageDataRet<SysLoginLogRet> pageDataRet = query(argv);
+        // 定义标题
+        List<RegionDefine> defineList = new ArrayList<>();
+        defineList.add(RegionDefine.builder().propName("operator").labelName("用户名").build());
+        defineList.add(RegionDefine.builder().propName("operateTime").labelName("操作时间").build());
+        // 导出
+        KExcel kExcel = KExcel.fromDataList("登录日志.xls", "登录日志", defineList, pageDataRet.getList());
+        ExcelWorker.getInstance().getHandler().writeToWeb(kExcel);
     }
 
 }

@@ -27,4 +27,10 @@ public interface SysLoginLogService extends BaseService {
      * @return 查询结果
      */
      PageDataRet<SysLoginLogRet> query(SysLoginLogQueryArgv argv);
+
+    /**
+     * 导出
+     * @param argv 参数
+     */
+    void export(SysLoginLogQueryArgv argv);
 }

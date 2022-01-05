@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.PageDataRet;
@@ -50,6 +51,15 @@ public class SysLoginLogController extends BaseController {
     @GetMapping("/{id}")
     public BaseRet<SysLoginLogRet> get(@PathVariable String id) {
         return BaseRet.success(sysLoginLogService.get(id));
+    }
+
+    /**
+     * 导出
+     */
+    @ApiOperation(value = "导出 " ,notes = "导出")
+    @GetMapping("/export")
+    public void download(SysLoginLogQueryArgv argv) {
+        sysLoginLogService.export(argv);
     }
 
 }
