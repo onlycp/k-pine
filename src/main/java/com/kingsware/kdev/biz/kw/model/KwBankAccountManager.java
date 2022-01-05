@@ -1,0 +1,42 @@
+package com.kingsware.kdev.biz.kw.model;
+
+import com.kingsware.kdev.core.bean.BaseManageModel;
+import com.kingsware.kdev.core.orm.annotation.LogicDelete;
+import com.kingsware.kdev.core.orm.annotation.Table;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import java.sql.Timestamp;
+
+/**
+ * @author andyzheng
+ * @version 1.0.0
+ * @description: 项目客户经理表
+ * @date 2022/1/5 10:13
+ */
+@Data
+@EqualsAndHashCode(callSuper = true)
+@Table
+@LogicDelete
+public class KwBankAccountManager extends BaseManageModel {
+    /** 项目id */
+    private String proId;
+    /** 产品编码 */
+    private String proPm;
+    /** 产品名称 */
+    private String proPmAccount;
+    /** 客户经理姓名 */
+    private String customerManagerName;
+    /** 客户名称 */
+    private String customerName;
+    /** 备用字段1 */
+    private String reserve1;
+    /** 备用字段2 */
+    private String reserve2;
+    /** 备用字段3 */
+    private String reserve3;
+    /** 备用字段4 */
+    private String reserve4;
+    /** 备用字段5 */
+    private String reserve5;
+}

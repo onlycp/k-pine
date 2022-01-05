@@ -1,9 +1,9 @@
 package com.kingsware.kdev.biz.kw.web;
 
-import com.kingsware.kdev.biz.kw.argv.KwEditionArgv;
-import com.kingsware.kdev.biz.kw.argv.KwEditionQueryArgv;
-import com.kingsware.kdev.biz.kw.ret.KwEditionRet;
-import com.kingsware.kdev.biz.kw.service.KwEditionService;
+import com.kingsware.kdev.biz.kw.argv.KwBankAccountManagerArgv;
+import com.kingsware.kdev.biz.kw.argv.KwBankAccountManagerQueryArgv;
+import com.kingsware.kdev.biz.kw.ret.KwBankAccountManagerRet;
+import com.kingsware.kdev.biz.kw.service.KwBankAccountManagerService;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -16,19 +16,19 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 
 /**
- * 银行版本管理控制器
+ * 客户经理信息管理控制器
  *
  * @author AndyZheng
  * @version 1.0.0
  * @date 2021/1/5 11:23 上午
  */
-@Api(value = "银行版本管理", tags = {"银行版本管理"})
+@Api(value = "客户经理信息管理", tags = {"客户经理信息管理"})
 @RestController
-@RequestMapping("/"+ Version.V1 + "/kw-editions")
-public class KwEditionController extends BaseController {
+@RequestMapping("/"+ Version.V1 + "/kw-bank-account-manager")
+public class KwBankAccountManagerController extends BaseController {
 
     @Resource
-    private KwEditionService kwEditionService;
+    private KwBankAccountManagerService kwBankAccountManagerService;
 
 
     /**
@@ -37,8 +37,8 @@ public class KwEditionController extends BaseController {
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
-    public BaseRet<PageDataRet<KwEditionRet>> page(KwEditionQueryArgv argv) {
-        return BaseRet.success(kwEditionService.query(argv));
+    public BaseRet<PageDataRet<KwBankAccountManagerRet>> page(KwBankAccountManagerQueryArgv argv) {
+        return BaseRet.success(kwBankAccountManagerService.query(argv));
     }
 
     /**
@@ -47,8 +47,8 @@ public class KwEditionController extends BaseController {
      */
     @ApiOperation(value = "详情 " ,notes = "详情")
     @GetMapping("/{id}")
-    public BaseRet<KwEditionRet> get(@PathVariable String id) {
-        return BaseRet.success(kwEditionService.get(id));
+    public BaseRet<KwBankAccountManagerRet> get(@PathVariable String id) {
+        return BaseRet.success(kwBankAccountManagerService.get(id));
     }
 
     /**
@@ -57,8 +57,8 @@ public class KwEditionController extends BaseController {
      */
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
-    public BaseRet<?> add(@RequestBody KwEditionArgv argv) {
-        kwEditionService.add(argv);
+    public BaseRet<?> add(@RequestBody KwBankAccountManagerArgv argv) {
+        kwBankAccountManagerService.add(argv);
         return BaseRet.success();
     }
 
@@ -69,8 +69,8 @@ public class KwEditionController extends BaseController {
      */
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
-    public BaseRet<?> edit(@RequestBody KwEditionArgv argv) {
-        kwEditionService.edit(argv);
+    public BaseRet<?> edit(@RequestBody KwBankAccountManagerArgv argv) {
+        kwBankAccountManagerService.edit(argv);
         return BaseRet.success();
     }
 
@@ -81,7 +81,7 @@ public class KwEditionController extends BaseController {
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
-        kwEditionService.delete(argv);
+        kwBankAccountManagerService.delete(argv);
         return BaseRet.success();
     }
 }

@@ -124,4 +124,13 @@ public class BeanUtils {
         return tList;
 
     }
+
+    /**
+     * 同org.springframework.beans.BeanUtils.copyProperties
+     * @param source
+     * @param target
+     */
+    public static void copyProperties(Object source, Object target) {
+        org.springframework.beans.BeanUtils.copyProperties(source, target);
+    }
 }
