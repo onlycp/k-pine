@@ -1,4 +1,4 @@
-package com.kingsware.kdev.core.excel;
+package com.kingsware.kdev.core.excel.format;
 
 /**
  * 格式化处理

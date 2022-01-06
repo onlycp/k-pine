@@ -16,11 +16,11 @@ import java.util.Date;
 @Slf4j
 public class DateUtils {
     // 时间日期
-    public static final String DATA_TIME = "yyyy-MM-dd HH:mm:ss";
+    public static final String DATE_TIME = "yyyy-MM-dd HH:mm:ss";
     // 时间日期
-    public static final String DATA_TIME_MS = "yyyy-MM-dd HH:mm:ss SSS";
+    public static final String DATE_TIME_MS = "yyyy-MM-dd HH:mm:ss SSS";
     // 日期
-    public static final String DATA = "yyyy-MM-dd";
+    public static final String DATE = "yyyy-MM-dd";
 
     /**
      * 私有构造

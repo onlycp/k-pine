@@ -191,7 +191,7 @@ public class JsonUtil {
                         }
                         // 如果值是字符串
                         else if (entry.getValue() instanceof  String) {
-                            Date date = DateUtils.toDate(entry.getValue().toString(), DateUtils.DATA_TIME);
+                            Date date = DateUtils.toDate(entry.getValue().toString(), DateUtils.DATE_TIME);
                             if (date != null) {
                                 field.set(entity, new Timestamp(date.getTime()));
                             }

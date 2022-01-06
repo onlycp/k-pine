@@ -1,5 +1,9 @@
 package com.kingsware.kdev.core.excel;
 
+import com.kingsware.kdev.core.excel.format.RegionDateFormat;
+import com.kingsware.kdev.core.excel.format.RegionDateTimeFormat;
+import com.kingsware.kdev.core.excel.format.RegionDictFormat;
+import com.kingsware.kdev.core.excel.format.RegionFormat;
 import lombok.Builder;
 import lombok.Data;
 
@@ -13,12 +17,42 @@ import lombok.Data;
 @Builder
 @Data
 public class RegionDefine {
-    /** 序号 **/
-    private int index;
     /** 属性名 **/
     private String propName;
     /** label名 **/
     private String labelName;
     /** 格式化 **/
     private RegionFormat format;
+
+    /**
+     * 日期时间格式化
+     * @param propName  属性名
+     * @param labelName 标签
+     * @return          区域定义
+     */
+    public static RegionDefine dateTimeDefine(String propName, String labelName) {
+        return RegionDefine.builder().propName(propName).labelName(labelName).format(new RegionDateTimeFormat()).build();
+    }
+
+    /**
+     * 日期格式化
+     * @param propName  属性名
+     * @param labelName 标签
+     * @return          区域定义
+     */
+    public static RegionDefine dateDefine(String propName, String labelName) {
+        return RegionDefine.builder().propName(propName).labelName(labelName).format(new RegionDateFormat()).build();
+    }
+
+    /**
+     * 字典格式化
+     * @param propName  属性名
+     * @param labelName 标签
+     * @param dictCode 字典码
+     * @return          区域定义
+     */
+    public static RegionDefine dateDefine(String propName, String labelName, String dictCode) {
+        return RegionDefine.builder().propName(propName).labelName(labelName).format(new RegionDictFormat(dictCode)).build();
+    }
+
 }
