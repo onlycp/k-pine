@@ -144,7 +144,7 @@ public class SqlGenerator {
         Object value = BeanUtils.getField(field, model);
         if (value instanceof Timestamp) {
             Timestamp timestamp = (Timestamp) value;
-            params.add(DateUtils.formatDate(new Date(timestamp.getTime()), DateUtils.DATA_TIME));
+            params.add(DateUtils.formatDate(new Date(timestamp.getTime()), DateUtils.DATE_TIME));
         }
         else {
             params.add(value);
@@ -193,7 +193,7 @@ public class SqlGenerator {
             String columnName = StringUtils.humpToLine(field.getName());
             if (!field.isAnnotationPresent(Column.class)) {
                 updateList.add(String.format("%s=?", columnName));
-                params.add(BeanUtils.getField(field, model));
+                addParams(field, model, params);
             }
             else {
                 Column column = field.getAnnotation(Column.class);
