@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.TimeZone;
 
@@ -19,6 +20,8 @@ public class KwBankAccountArgv {
     private String id;
     /** 版本id */
     private String editionId;
+    /** 版本账号id */
+    private String editionAccountId;
     /** 账户 */
     private String account;
     /** 账户类型 */
@@ -49,6 +52,11 @@ public class KwBankAccountArgv {
     private String reserve5;
     /** 关联类型：0待选择默认值；<br>1为单位；<br>2为项目； */
     private Integer relationType;
+    /** 账户余额 */
+    private BigDecimal balance;
+    /** 账户余额更新时间 */
+    @JsonFormat(pattern="yyyy-MM-dd hh:mm:ss", timezone="GMT+8")
+    private Timestamp balanceUpdateTime;
     /** 关联id */
     private String relationId;
     /** 是否流水发送到mbs系统 */

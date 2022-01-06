@@ -1,11 +1,13 @@
 package com.kingsware.kdev.biz.kw.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kingsware.kdev.core.bean.BaseManageModel;
 import com.kingsware.kdev.core.orm.annotation.LogicDelete;
 import com.kingsware.kdev.core.orm.annotation.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 /**
@@ -21,6 +23,8 @@ import java.sql.Timestamp;
 public class KwBankAccount extends BaseManageModel {
     /** 版本id */
     private String editionId;
+    /** 版本账号id */
+    private String editionAccountId;
     /** 账户 */
     private String account;
     /** 账户类型 */
@@ -31,6 +35,10 @@ public class KwBankAccount extends BaseManageModel {
     private String bankDeposit;
     /** 账户状态 */
     private Integer status;
+    /** 账户余额 */
+    private BigDecimal balance;
+    /** 账户余额更新时间 */
+    private Timestamp balanceUpdateTime;
     /** 数据来源 */
     private Integer dataSource;
     /** 开户时间 */

@@ -11,7 +11,9 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
+import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
+import com.kingsware.kdev.core.util.StringUtils;
 import org.springframework.stereotype.Service;
 
 /**
@@ -34,6 +36,9 @@ public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankA
 
     @Override
     public void add(KwBankAccountArgv argv) {
+        if (argv.getRelationType() == null) {
+            argv.setRelationType(0);
+        }
         KwBankAccount model = BeanUtils.copyObject(argv, KwBankAccount.class);
         // 保存
         DB.save(model);
@@ -41,6 +46,9 @@ public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankA
 
     @Override
     public void edit(KwBankAccountArgv argv) {
+        if (argv.getRelationType() == null) {
+            argv.setRelationType(0);
+        }
         KwBankAccount model = DB.findById(KwBankAccount.class, argv.getId());
         if (model == null) {
             throw BusinessException.serviceThrow("当前数据不存在，修改失败。");
@@ -54,11 +62,28 @@ public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankA
     @Override
     public PageDataRet<KwBankAccountRet> query(KwBankAccountQueryArgv argv) {
         // 拼装sql
-        SqlWrapper wrapper = new SqlWrapper(" select * from kw_bank_account where 1=1 ");
+        StringBuilder sql = new StringBuilder();
+        sql.append(" select  ");
+        sql.append(" 	kc.name as company_name, ");
+        sql.append(" 	km.bank_name as mechanism_name, ");
+        sql.append(" 	kba.* ");
+        sql.append(" from kw_bank_account kba  ");
+        sql.append(" left join kw_edition ke on ke.id = kba.edition_id  ");
+        sql.append(" left join kw_company kc on kba.relation_type = 1 and kba.relation_id = kc.id ");
+        sql.append(" left join kw_mechanism km on km.id = ke.mechanism_id  ");
+        sql.append(" where 1=1 ");
+        SqlWrapper wrapper = new SqlWrapper(sql.toString());
         // 拼装查询sql
-//        if (StringUtils.isNotEmpty(argv.getName())) {
-//            wrapper.addCondition("ke.name", Op.LIKE, "%" +argv.getName() +"%");
-//        }
+        if (StringUtils.isNotEmpty(argv.getMechanismId())) {
+            wrapper.addCondition("ke.mechanism_id", Op.EQ, argv.getMechanismId());
+        }
+        if (StringUtils.isNotEmpty(argv.getAccount())) {
+            wrapper.addCondition("kba.account", Op.LIKE, "%" +argv.getAccount() +"%");
+        }
+        if (StringUtils.isNotEmpty(argv.getCompanyName())) {
+            wrapper.addCondition("kc.name", Op.LIKE, "%" +argv.getCompanyName() +"%");
+        }
+        wrapper.groupBy(" kba.id ");
         return (PageDataRet<KwBankAccountRet>) query(wrapper.getSql(), wrapper.getParams(), argv, KwBankAccountRet.class);
     }
 

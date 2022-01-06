@@ -5,6 +5,7 @@ import com.kingsware.kdev.core.bean.BaseManageRet;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 /**
@@ -18,14 +19,25 @@ import java.sql.Timestamp;
 public class KwBankAccountRet extends BaseManageRet {
     /** 版本id */
     private String editionId;
+    /** 版本账号id */
+    private String editionAccountId;
     /** 账户 */
     private String account;
     /** 账户类型 */
     private Integer accountType;
     /** 账户查询频率 */
     private String cxpl;
-    /** 开户行 */
+    /** 开户行ID */
     private String bankDeposit;
+    /** 开户行名 */
+    private String mechanismName;
+    /** 公司名 */
+    private String companyName;
+    /** 账户余额 */
+    private BigDecimal balance;
+    /** 账户余额更新时间 */
+    @JsonFormat(pattern="yyyy-MM-dd hh:mm:ss", timezone="GMT+8")
+    private Timestamp balanceUpdateTime;
     /** 账户状态 */
     private Integer status;
     /** 数据来源 */

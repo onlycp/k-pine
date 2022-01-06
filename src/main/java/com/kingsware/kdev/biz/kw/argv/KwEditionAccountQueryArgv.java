@@ -16,4 +16,8 @@ public class KwEditionAccountQueryArgv extends BasePageArgv {
     private String bankAccount;
     /** 云柜ip **/
     private String usbIp;
+    /** 关联类型：0待选择默认值；<br>1为单位；<br>2为项目； */
+    private Integer relationType;
+    /** 版本id **/
+    private String editionId;
 }

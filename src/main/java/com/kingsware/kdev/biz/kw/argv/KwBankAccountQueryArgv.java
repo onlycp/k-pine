@@ -13,5 +13,11 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class KwBankAccountQueryArgv extends BasePageArgv {
+    /** 行别ID */
+    private String mechanismId;
+    /** 账户 */
+    private String account;
+    /** 所属公司 */
+    private String companyName;
 
 }
