@@ -14,6 +14,8 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class KwEditionQueryArgv extends BasePageArgv {
+    /** 机构id */
+    private String mechanismId;
     /** 版本名称 */
     private String name;
 }

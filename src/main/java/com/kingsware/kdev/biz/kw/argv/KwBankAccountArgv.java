@@ -1,8 +1,11 @@
 package com.kingsware.kdev.biz.kw.argv;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.sql.Timestamp;
+import java.util.TimeZone;
 
 /**
  * @author andyzheng
@@ -29,8 +32,10 @@ public class KwBankAccountArgv {
     /** 数据来源 */
     private Integer dataSource;
     /** 开户时间 */
+    @JsonFormat(pattern="yyyy-MM-dd", timezone="GMT+8")
     private Timestamp createAccountTime;
     /** 销户时间 */
+    @JsonFormat(pattern="yyyy-MM-dd", timezone="GMT+8")
     private Timestamp cancelAccountTime;
     /** 备用字段1 */
     private String reserve1;
