@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -14,6 +15,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.Map;
 
 /**
  * 演示控制器
@@ -83,5 +85,18 @@ public class SysDictItemController extends BaseController {
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         sysDictItemService.delete(argv);
         return BaseRet.success();
+    }
+
+    /**
+     *  获取所有字典，转换成固定格式，分别有LIST, VALUE, KEY 3种种
+     *  LIST用于遍历字典
+     *  VALUE用于通过
+     * @return 分页
+     */
+    @ApiIgnore
+    @ApiOperation(value = "获取所有字典 " ,notes = "获取所有字典")
+    @GetMapping("/all")
+    public BaseRet<Map<String, Object>> getAllDict(SysDictItemQueryArgv argv) {
+        return BaseRet.success(sysDictItemService.getAllDict());
     }
 }

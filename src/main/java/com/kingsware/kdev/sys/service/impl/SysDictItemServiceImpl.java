@@ -14,17 +14,22 @@ import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysDictItemArgv;
 import com.kingsware.kdev.sys.argv.SysDictItemQueryArgv;
+import com.kingsware.kdev.sys.argv.SysDictQueryArgv;
 import com.kingsware.kdev.sys.model.SysDict;
 import com.kingsware.kdev.sys.model.SysDictItem;
 import com.kingsware.kdev.sys.model.SysRole;
 import com.kingsware.kdev.sys.ret.SysDictItemRet;
 import com.kingsware.kdev.sys.ret.SysDictRet;
 import com.kingsware.kdev.sys.service.SysDictItemService;
+import com.kingsware.kdev.sys.service.SysDictService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 字典数据实现类
@@ -35,6 +40,9 @@ import java.util.List;
  */
 @Service
 public class SysDictItemServiceImpl extends BaseServiceImpl implements SysDictItemService {
+
+    @Resource
+    private SysDictService sysDictService;
 
     @Override
     public SysDictItemRet get(String id) {
@@ -99,7 +107,7 @@ public class SysDictItemServiceImpl extends BaseServiceImpl implements SysDictIt
         if (StringUtils.isNotEmpty(argv.getGroupName())) {
             wrapper.addCondition("group_name", Op.LIKE, "%" +argv.getGroupName() +"%");
         }
-        wrapper.sortBy(" order by sdi.order_num ");
+        wrapper.sortBy(" order by sdi.sys_dict_id, sdi.order_num ");
         // 返回结果
         return (PageDataRet<SysDictItemRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysDictItemRet.class);
     }
@@ -109,5 +117,92 @@ public class SysDictItemServiceImpl extends BaseServiceImpl implements SysDictIt
         for (String id: argv.getIds()) {
             DB.delete(SysDictItem.class, id);
         }
+    }
+
+    @Override
+    public Map<String, Object> getAllDict() {
+        Map<String, Object> resultMap = new HashMap<>();
+        // getAllDict
+        List<SysDictRet> dictList = sysDictService.query(new SysDictQueryArgv()).getList();
+
+        // getAllDetail
+        List<SysDictItemRet> dictItemList = this.query(new SysDictItemQueryArgv()).getList();
+
+        // setMap
+        resultMap.put("KEY", getKeyMap(dictList, dictItemList));
+        resultMap.put("VALUE", getValueMap(dictList, dictItemList));
+        resultMap.put("LIST", getListMap(dictList, dictItemList));
+
+        return resultMap;
+    }
+
+    private List<Map<String, String>> getDetailByDictId(List<SysDictItemRet> sysDictItemList, String dictId) {
+        List<Map<String, String>> list = new ArrayList<>();
+        for (SysDictItemRet detail : sysDictItemList) {
+            if (detail.getSysDictId().equals(dictId)) {
+                Map<String, String> map = new HashMap();
+                map.put("KEY", detail.getValue());
+                map.put("VALUE", detail.getName());
+                list.add(map);
+            }
+        }
+        return list;
+    }
+
+    private Map<String, String> getDetailKeyMapByDictId(List<SysDictItemRet> sysDictItemList, String dictId) {
+        Map<String, String> map = new HashMap<>();
+        for (SysDictItemRet detail : sysDictItemList) {
+            if (detail.getSysDictId().equals(dictId)) {
+                map.put(detail.getValue(), detail.getValue());
+            }
+        }
+        return map;
+    }
+
+    private Map<String, String> getDetailValueMapByDictId(List<SysDictItemRet> sysDictItemList, String dictId) {
+        Map<String, String> map = new HashMap<>();
+        for (SysDictItemRet detail : sysDictItemList) {
+            if (detail.getSysDictId().equals(dictId)) {
+                map.put(detail.getValue(), detail.getName());
+            }
+        }
+        return map;
+    }
+
+    private Map<String, String> getDetailNameMapByDictId(List<SysDictItemRet> sysDictItemList, String dictId) {
+        Map<String, String> map = new HashMap<>();
+        for (SysDictItemRet detail : sysDictItemList) {
+            if (detail.getSysDictId().equals(dictId)) {
+                map.put(detail.getName(), detail.getValue());
+            }
+        }
+        return map;
+    }
+
+    private Map<String, Map<String, String>> getKeyMap(List<SysDictRet> dictList, List<SysDictItemRet> sysDictItemList) {
+        Map<String, Map<String, String>> resultMap = new HashMap<>();
+        for (SysDictRet dict : dictList) {
+            Map<String, String> keyMap = getDetailKeyMapByDictId(sysDictItemList, dict.getId());
+            resultMap.put(dict.getCode(), keyMap);
+        }
+        return resultMap;
+    }
+
+    private Map<String, Map<String, String>> getValueMap(List<SysDictRet> dictList, List<SysDictItemRet> sysDictItemList) {
+        Map<String, Map<String, String>> resultMap = new HashMap<>();
+        for (SysDictRet dict : dictList) {
+            Map<String, String> valueMap = getDetailValueMapByDictId(sysDictItemList, dict.getId());
+            resultMap.put(dict.getCode(), valueMap);
+        }
+        return resultMap;
+    }
+
+    private Map<String, List<Map<String, String>>> getListMap(List<SysDictRet> dictList, List<SysDictItemRet> sysDictItemList) {
+        Map<String, List<Map<String, String>>> map = new HashMap<>();
+        for (SysDictRet dict : dictList) {
+            List<Map<String, String>> detailList = getDetailByDictId(sysDictItemList, dict.getId());
+            map.put(dict.getCode(), detailList);
+        }
+        return map;
     }
 }

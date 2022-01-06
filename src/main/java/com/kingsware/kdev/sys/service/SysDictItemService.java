@@ -7,6 +7,8 @@ import com.kingsware.kdev.sys.argv.SysDictItemArgv;
 import com.kingsware.kdev.sys.argv.SysDictItemQueryArgv;
 import com.kingsware.kdev.sys.ret.SysDictItemRet;
 
+import java.util.Map;
+
 /**
  * 字典数据接口
  *
@@ -47,4 +49,6 @@ public interface SysDictItemService extends BaseService {
      * @param argv  查询
      */
     void delete(MultiIdArgv argv);
+
+    Map<String, Object> getAllDict();
 }
