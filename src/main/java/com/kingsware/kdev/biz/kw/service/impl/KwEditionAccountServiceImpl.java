@@ -86,6 +86,9 @@ public class KwEditionAccountServiceImpl extends BaseServiceImpl implements KwEd
         if (StringUtils.isNotEmpty(argv.getUsbIp())) {
             wrapper.addCondition("ea.usb_ip", Op.LIKE, "%" +argv.getUsbIp() +"%");
         }
+        if (StringUtils.isNotEmpty(argv.getEditionId())) {
+            wrapper.addCondition("ea.edition_id", Op.EQ, argv.getEditionId());
+        }
         wrapper.sortBy("order by ea.when_created desc");
 
         return (PageDataRet<KwEditionAccountRet>) query(wrapper.getSql(), wrapper.getParams(), argv, KwEditionAccountRet.class);
