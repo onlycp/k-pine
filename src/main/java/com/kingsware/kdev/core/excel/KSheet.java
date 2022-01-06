@@ -52,8 +52,8 @@ public class KSheet {
         cell1.setColumnIndex(columnIndex1);
         // 单元格2
         KCell cell2 = new KCell();
-        cell1.setRowIndex(rowIndex2);
-        cell1.setColumnIndex(columnIndex2);
+        cell2.setRowIndex(rowIndex2);
+        cell2.setColumnIndex(columnIndex2);
         // 区域的起始单元格和结束单元格设为一致
         region.setStartCell(cell1);
         region.setEndCell(cell2);

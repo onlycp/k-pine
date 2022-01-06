@@ -2,6 +2,8 @@ package com.kingsware.kdev.core.excel;
 
 import lombok.Data;
 
+import java.util.Objects;
+
 /**
  * //todo 描述当前类是干什么用的.
  *
@@ -17,4 +19,14 @@ public class KRegion {
     private KCell endCell;
     /** 值 **/
     private Object value;
+
+    /**
+     * 是否单个单元格
+     * @return  是否
+     */
+    public boolean isSingleCell() {
+        return startCell == endCell;
+    }
+
+
 }

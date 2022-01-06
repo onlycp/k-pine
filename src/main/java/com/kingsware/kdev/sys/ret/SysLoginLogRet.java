@@ -18,12 +18,6 @@ import java.sql.Timestamp;
 public class SysLoginLogRet extends BaseSimpleRet {
     /** id **/
     private String id;
-    /** 模块，对应@Api **/
-    private String module;
-    /** 动作，对应@ApiOperation **/
-    private String action;
-    /** 路径 **/
-    private String url;
     /** 操作时间 **/
     private Timestamp operateTime;
     /** 操作人员 **/

@@ -18,5 +18,7 @@ public class ExcelProperties {
 
     /** 解析器 poi、jxl**/
     private String parser = "jxl";
+    /** 临时文件夹 **/
+    private String tmpPath = "tmp";
 
 }
