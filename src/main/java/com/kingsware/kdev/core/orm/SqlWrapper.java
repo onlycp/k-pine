@@ -103,7 +103,34 @@ public class SqlWrapper {
      * @param sortBy
      */
     public void sortBy(String sortBy) {
-        sql += sortBy;
-        sql += " ";
+        if (sortBy.trim().toLowerCase().startsWith("order by")) {
+            sql += " ";
+            sql += sortBy;
+            sql += " ";
+        }
+        else {
+            sql += " ";
+            sql += "order by ";
+            sql += sortBy;
+            sql += " ";
+        }
+    }
+
+    /**
+     * 增加group by
+     * @param groupBy   group by字符串
+     */
+    public void groupBy(String groupBy) {
+        if (groupBy.trim().toLowerCase().startsWith("group by")) {
+            sql += " ";
+            sql += groupBy;
+            sql += " ";
+        }
+        else {
+            sql += " ";
+            sql += "group by ";
+            sql += groupBy;
+            sql += " ";
+        }
     }
 }
