@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.bean;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.sql.Timestamp;
@@ -19,9 +20,11 @@ public class BaseManageRet extends BaseSimpleRet{
     /** 创建人员 **/
     private String whoCreated;
     /** 创建时间 **/
+    @JsonFormat(pattern="yyyy-MM-dd hh:mm:ss", timezone="GMT+8")
     private Timestamp whenCreated;
     /** 修改人员 **/
     private String whoModified;
     /** 修改时间 **/
+    @JsonFormat(pattern="yyyy-MM-dd hh:mm:ss", timezone="GMT+8")
     private Timestamp whenModified;
 }
