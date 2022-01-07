@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.bean.BaseModel;
 import com.kingsware.kdev.core.orm.*;
 import com.kingsware.kdev.core.orm.channel.DbChannel;
 import com.kingsware.kdev.core.orm.channel.KDBHttpChannel;
+import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.orm.expression.Expression;
 
 import java.util.*;
@@ -64,6 +65,15 @@ public class KDataBase implements DataBase {
     }
 
     @Override
+    public <T> T findSingleAttribute(Class<T> tClass, String sql, Object... params) {
+        List<T> result = channel.queryForAttribute(sql, tClass, Arrays.asList(params));
+        if (result.size() > 1) {
+            throw new OrmDbException("查询数量时，应保持只有一条记录");
+        }
+        return result.isEmpty() ? null : result.get(0);
+    }
+
+    @Override
     public long findCount(String sql, Object... params) {
         return channel.queryForCount(sql,  Arrays.asList(params));
     }
@@ -83,6 +93,11 @@ public class KDataBase implements DataBase {
     public <T> List<T> findList(Class<T> tClass, List<Expression> expressionList) {
         SqlWrapper sqlWrapper = SqlGenerator.findSql(tClass, expressionList);
         return this.findList(tClass, sqlWrapper.getSql(), sqlWrapper.getParams().toArray());
+    }
+
+    @Override
+    public <T> List<T> findSingleAttributeList(Class<T> tClass, String sql, Object... params) {
+        return channel.queryForAttribute(sql, tClass, Arrays.asList(params));
     }
 
     @Override

@@ -58,6 +58,16 @@ public interface DataBase {
     <T> T findOne(Class<T> tClass, String sql, Object... params);
 
     /**
+     * 通过SQL查询单个属性
+     * @param tClass    实体泛型
+     * @param sql       查询sql
+     * @param params    参数列表
+     * @param <T>       泛型
+     * @return          单个实体或空
+     */
+    <T> T findSingleAttribute(Class<T> tClass, String sql, Object... params);
+
+    /**
      * 查询数量
      * @param sql       查询sql
      * @param params    参数列表
@@ -93,6 +103,16 @@ public interface DataBase {
      * @return          单个实体或空
      */
     <T> List<T> findList(Class<T> tClass, List<Expression> expressionList);
+
+    /**
+     * 通过SQL查询单个属性
+     * @param tClass    实体泛型
+     * @param sql       查询sql
+     * @param params    参数列表
+     * @param <T>       泛型
+     * @return          单个实体或空
+     */
+    <T> List<T> findSingleAttributeList(Class<T> tClass, String sql, Object... params);
 
 
     /**

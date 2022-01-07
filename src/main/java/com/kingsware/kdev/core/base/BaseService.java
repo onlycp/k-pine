@@ -33,6 +33,25 @@ public interface BaseService {
     PageDataRet<? extends BaseSimpleRet> query(String sql, List<Object> params, BasePageArgv pageArgv,  Class<? extends BaseSimpleRet> outClass);
 
     /**
+     * 二次封装查询
+     * @param sql           查询sql
+     * @param pageArgv      分页查询参数
+     * @param inClass       传入class
+     * @return              可用的分页结果
+     */
+    PageDataRet<? extends BaseSimpleRet> query(String dbName, String sql, List<Object> params, BasePageArgv pageArgv, Class<? extends BaseModel> inClass,  Class<? extends BaseSimpleRet> outClass);
+
+    /**
+     * 二次封装查询
+     * @param sql           查询sql
+     * @param pageArgv      分页查询参数
+     * @return              可用的分页结果
+     */
+    PageDataRet<? extends BaseSimpleRet> query(String dbName, String sql, List<Object> params, BasePageArgv pageArgv,  Class<? extends BaseSimpleRet> outClass);
+
+
+
+    /**
      * 将model转为ret
      * @param model 模型
      * @return      返回结果

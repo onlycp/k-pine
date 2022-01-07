@@ -59,4 +59,15 @@ public interface DbChannel {
      * @return          查询结果
      */
      <T> List<T> queryForList(String sql, Class<T> tClass, List<Object> objects);
+
+
+    /**
+     * 查找单个属性的列表
+     * @param sql       sql语句
+     * @param tClass    class
+     * @param objects   参数列表
+     * @param <T>       泛型
+     * @return          属性列表
+     */
+     <T> List<T> queryForAttribute(String sql, Class<T> tClass, List<Object> objects);
 }
