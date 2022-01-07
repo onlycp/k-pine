@@ -1,9 +1,8 @@
 package com.kingsware.kdev.sys.service.impl;
 
+import com.kingsware.kdev.biz.kw.model.KwBankAccount;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
-import com.kingsware.kdev.core.bean.BaseRelationArgv;
-import com.kingsware.kdev.core.bean.MultiIdArgv;
-import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.bean.*;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
@@ -13,11 +12,9 @@ import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysDataAccessArgv;
 import com.kingsware.kdev.sys.argv.SysDataAccessQueryArgv;
-import com.kingsware.kdev.sys.model.SysDataAccess;
-import com.kingsware.kdev.sys.model.SysDataAccessResource;
-import com.kingsware.kdev.sys.model.SysDataAccessUser;
-import com.kingsware.kdev.sys.model.SysDataResource;
+import com.kingsware.kdev.sys.model.*;
 import com.kingsware.kdev.sys.ret.SysDataAccessRet;
+import com.kingsware.kdev.sys.ret.SysUnitRet;
 import com.kingsware.kdev.sys.service.SysDataAccessService;
 import org.springframework.stereotype.Service;
 
@@ -93,6 +90,7 @@ public class SysDataAccessServiceImpl extends BaseServiceImpl implements SysData
 
     @Override
     public List<String> querySelectedUserIds(String id) {
+
         SqlWrapper wrapper = new SqlWrapper("select sys_user_id from sys_data_access_user where 1=1 ");
         wrapper.addCondition("sys_data_access_id", Op.EQ, id);
         return DB.findSingleAttributeList(String.class, wrapper.getSql(), wrapper.getParams().toArray());
@@ -136,7 +134,7 @@ public class SysDataAccessServiceImpl extends BaseServiceImpl implements SysData
         // 先移除旧的数据
         SqlWrapper wrapper = new SqlWrapper("delete from sys_data_access_resource where 1=1 ");
         wrapper.addCondition("access_id", Op.EQ, baseRelationArgv.getId());
-        wrapper.addCondition("table_name", Op.EQ, Op.EQ, resource.getTableName());
+        wrapper.addCondition("table_name", Op.EQ, resource.getTableName());
         DB.executeUpdateSql(wrapper.getSql(), wrapper.getParams().toArray());
         // 保存新的数据
         if (baseRelationArgv.getRelationIds() != null && !baseRelationArgv.getRelationIds().isEmpty()) {
@@ -150,5 +148,38 @@ public class SysDataAccessServiceImpl extends BaseServiceImpl implements SysData
             }
             DB.saveAll(dataAccessResources);
         }
+    }
+
+    @Override
+    public List<TreeDataRet<?>> queryCategoryData(String resourceId) {
+        // 获取数据配置定义
+        SysDataResource resource = DB.findById(SysDataResource.class, resourceId);
+        // 查询数据
+        List<CategoryData> categoryDataList = DB.findList(CategoryData.class, resource.getQuerySql());
+        // 转为树形结构
+        List<TreeDataRet<?>> retList = new ArrayList<>();
+        for (CategoryData categoryData: categoryDataList) {
+            if (StringUtils.isEmpty(categoryData.getParentId())) {
+                retList.add(recursiveHandle(categoryData, categoryDataList));
+            }
+        }
+        return retList;
+
+    }
+
+
+    private TreeDataRet<Object> recursiveHandle(CategoryData root, List<CategoryData> familyList) {
+        // 创建树节点
+        TreeDataRet<Object> treeDataRet = new TreeDataRet<>();
+        treeDataRet.setValue(root.getId());
+        treeDataRet.setLabel(root.getName());
+
+        for (CategoryData child: familyList) {
+            if (StringUtils.isNotEmpty(child.getParentId()) && child.getParentId().equals(root.getId())) {
+                treeDataRet.getChildren().add(recursiveHandle(child, familyList));
+
+            }
+        }
+        return treeDataRet;
     }
 }

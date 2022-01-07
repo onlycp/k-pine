@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.base.BaseService;
 import com.kingsware.kdev.core.bean.BaseRelationArgv;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.bean.TreeDataRet;
 import com.kingsware.kdev.sys.argv.SysDataAccessArgv;
 import com.kingsware.kdev.sys.argv.SysDataAccessQueryArgv;
 import com.kingsware.kdev.sys.ret.SysDataAccessRet;
@@ -77,4 +78,11 @@ public interface SysDataAccessService extends BaseService {
      * @param baseRelationArgv  关联关系
      */
     void saveDataAccessResource(String resourceId, BaseRelationArgv baseRelationArgv);
+
+    /**
+     * 获取分类数据
+     * @param resourceId    资源id
+     * @return              树形的分类数据
+     */
+    List<TreeDataRet<?>> queryCategoryData(String resourceId);
 }

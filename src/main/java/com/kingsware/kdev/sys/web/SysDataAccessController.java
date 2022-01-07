@@ -1,10 +1,7 @@
 package com.kingsware.kdev.sys.web;
 
 import com.kingsware.kdev.core.base.BaseController;
-import com.kingsware.kdev.core.bean.BaseRelationArgv;
-import com.kingsware.kdev.core.bean.BaseRet;
-import com.kingsware.kdev.core.bean.MultiIdArgv;
-import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.bean.*;
 import com.kingsware.kdev.core.constants.Version;
 import com.kingsware.kdev.sys.argv.SysDataAccessArgv;
 import com.kingsware.kdev.sys.argv.SysDataAccessQueryArgv;
@@ -113,7 +110,7 @@ public class SysDataAccessController extends BaseController {
      * @return 查询关联数据
      */
     @ApiOperation(value = "查询关联数据 " ,notes = "查询关联数据")
-    @GetMapping("/querySelectedUserIds/{id}/{resourceId}")
+    @GetMapping("/querySelectedDataIds/{id}/{resourceId}")
     public BaseRet<List<String>> querySelectedDataIds(@PathVariable String id, @PathVariable String resourceId) {
         return BaseRet.success(sysDataAccessService.querySelectedDataIds(resourceId, id));
     }
@@ -127,6 +124,17 @@ public class SysDataAccessController extends BaseController {
     public BaseRet<?> saveDataAccessResource(@RequestBody BaseRelationArgv argv,  @PathVariable String resourceId) {
         sysDataAccessService.saveDataAccessResource(resourceId, argv);
         return BaseRet.success();
+    }
+
+
+    /**
+     *  查询关联数据
+     * @return 查询关联数据
+     */
+    @ApiOperation(value = "获取分类数据列表 " ,notes = "获取分类数据列表")
+    @GetMapping("/queryCategoryData/{resourceId}")
+    public BaseRet<List<TreeDataRet<?>>> queryCategoryData(@PathVariable String resourceId) {
+        return BaseRet.success(sysDataAccessService.queryCategoryData(resourceId));
     }
 
 
