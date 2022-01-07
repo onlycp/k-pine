@@ -21,11 +21,22 @@ import java.util.List;
 public class BaseServiceImpl implements BaseService {
     @Override
     public PageDataRet<? extends BaseSimpleRet> query(String sql, List<Object> params, BasePageArgv argv, Class<? extends BaseModel> inClass,  Class<? extends BaseSimpleRet> outClass) {
+        return this.query("db", sql, params, argv, inClass, outClass);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public PageDataRet<? extends BaseSimpleRet> query(String sql, List<Object> params, BasePageArgv argv, Class<? extends BaseSimpleRet> outClass) {
+        return this.query("db", sql, params, argv, outClass);
+    }
+
+    @Override
+    public PageDataRet<? extends BaseSimpleRet> query(String dbName, String sql, List<Object> params, BasePageArgv argv, Class<? extends BaseModel> inClass, Class<? extends BaseSimpleRet> outClass) {
         // 返回结果
         PageDataRet<BaseSimpleRet> pageDataRet = new PageDataRet<>();
         // 分页查询
         if (argv.isPageQuery()) {
-            PagedList<? extends BaseModel> pagedList = DB.findPagedList(inClass, argv.getPage(), argv.getPageSize(), sql, params.toArray());
+            PagedList<? extends BaseModel> pagedList = DB.byName(dbName).findPagedList(inClass, argv.getPage(), argv.getPageSize(), sql, params.toArray());
             pageDataRet.setPageSize(pagedList.getPageSize());
             pageDataRet.setPageCount(pagedList.getPageCount());
             pageDataRet.setPage(pagedList.getPageIndex());
@@ -55,13 +66,12 @@ public class BaseServiceImpl implements BaseService {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public PageDataRet<? extends BaseSimpleRet> query(String sql, List<Object> params, BasePageArgv argv, Class<? extends BaseSimpleRet> outClass) {
+    public PageDataRet<? extends BaseSimpleRet> query(String dbName, String sql, List<Object> params, BasePageArgv argv, Class<? extends BaseSimpleRet> outClass) {
         // 返回结果
         PageDataRet<BaseSimpleRet> pageDataRet = new PageDataRet<>();
         // 分页查询
         if (argv.isPageQuery()) {
-            PagedList<? extends BaseSimpleRet> pagedList = DB.findPagedList(outClass, argv.getPage(), argv.getPageSize(), sql, params.toArray());
+            PagedList<? extends BaseSimpleRet> pagedList = DB.byName(dbName).findPagedList(outClass, argv.getPage(), argv.getPageSize(), sql, params.toArray());
             pageDataRet.setPageSize(pagedList.getPageSize());
             pageDataRet.setPageCount(pagedList.getPageCount());
             pageDataRet.setPage(pagedList.getPageIndex());

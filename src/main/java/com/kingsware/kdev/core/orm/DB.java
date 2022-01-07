@@ -57,6 +57,30 @@ public class DB {
     }
 
     /**
+     * 通过SQL查询单个属性
+     * @param tClass    实体泛型
+     * @param sql       查询sql
+     * @param params    参数列表
+     * @param <T>       泛型
+     * @return          单个实体或空
+     */
+    public static <T> T findSingleAttribute(Class<T> tClass, String sql, Object... params) {
+        return getDefault().findOne(tClass, sql, params);
+    }
+
+    /**
+     * 通过SQL查询单个属性
+     * @param tClass    实体泛型
+     * @param sql       查询sql
+     * @param params    参数列表
+     * @param <T>       泛型
+     * @return          单个实体或空
+     */
+    public static <T> List<T> findSingleAttributeList(Class<T> tClass, String sql, Object... params) {
+        return getDefault().findSingleAttributeList(tClass, sql, params);
+    }
+
+    /**
      * 查询数量
      * @param sql       查询sql
      * @param params    参数列表

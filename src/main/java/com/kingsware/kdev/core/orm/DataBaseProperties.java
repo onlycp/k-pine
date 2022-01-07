@@ -8,6 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,7 +47,12 @@ public class DataBaseProperties {
             // 如果是kdb
             if (databaseType.equalsIgnoreCase(DataBaseTypeEnum.KDB.getValue())) {
                 KDBConnectConfig kdbConnectConfig = JsonUtil.mapToBean(entry.getValue(), KDBConnectConfig.class);
-                dbConnectConfigMap.put(name, kdbConnectConfig);
+                if (kdbConnectConfig != null) {
+                    List<KDBConnectConfig> many = kdbConnectConfig.toMany();
+                    for (KDBConnectConfig one: many) {
+                        dbConnectConfigMap.put(one.getDbName(), one);
+                    }
+                }
             }
 
         }

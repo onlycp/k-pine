@@ -99,6 +99,27 @@ public class KDBHttpChannel implements DbChannel{
         return JsonUtil.transformJson2List(executeRequest, tClass);
     }
 
+    @Override
+    public <T> List<T> queryForAttribute(String sql, Class<T> tClass, List<Object> objects) {
+        // 从kdb请求数据
+        KdbRet<Map> ret = send(makePassThrough(sql, objects), Map.class);
+        // 由于kdb响应结果始终为list，所以得先将为list
+        String executeRequest = ret.getResponseBody().get(executeResult).toString();
+        List<Map> list = JsonUtil.toListBean(executeRequest, Map.class);
+        assert list != null;
+        List<T> result = new ArrayList<>(list.size());
+        for (int i = 0; i < list.size(); i++) {
+            Map<?, ?> map = list.get(i);
+            if (map.size() != 1) {
+                throw new OrmDbException("查询单个属性，但返回不等于1的结果：" + ret.getMessage());
+            }
+            map.forEach((key, value) -> {
+                result.add((T)value);
+            });
+        }
+        return result;
+    }
+
     /**
      * 组装sql透传的参数
      * @param sql       sql
@@ -108,7 +129,7 @@ public class KDBHttpChannel implements DbChannel{
     private KdbArgv makePassThrough(String sql, List<Object> objects) {
         KdbArgv argv = new KdbArgv();
         argv.setFlowID(passThroughFlowId);
-        argv.addStep(executeStep, sql, kdbConnectConfig.getInnerType(), objects);
+        argv.addStep(executeStep, sql, kdbConnectConfig.getDataSource(), objects);
         return argv;
 
     }
