@@ -19,17 +19,17 @@ import java.util.Date;
 @Table
 public class KwWater extends BaseManageModel {
 
-    // 账户
+    // 账户 account
     private String account;
-    // 账户id
+    // 账户id accountId
     private String accountId;
     // 回单id false
     private String receiptId;
-    // 账户名称
+    // 账户名称 accountName
     private String accountName;
-    // 交易日期
+    // 交易日期 transactionDate
     private Date transactionDate;
-    // 交易时间
+    // 交易时间 transactionTime
     private Date transactionTime;
     // 金额 transaction_amount
     private String transactionAmount;
@@ -56,10 +56,17 @@ public class KwWater extends BaseManageModel {
     // 摘要 abstract
     private String abstractInfo;
     // 数据状态 status
+    private Integer status;
     // 是否异常 abnormal
-    // 异常处理状态
-    // 是否有回单
-    //
+    private Integer abnormal;
+    // 异常处理状态 abnormal_status
+    private Integer abnormalstatus;
+    // 是否有回单 has_receipt
+    private Integer hasReceipt;
+    // 数据次序 data_index
+    private Integer dataIndex;
+    // 删除标志 deleted
+    private Integer deleted;
 
 
     /** 备用字段1 **/

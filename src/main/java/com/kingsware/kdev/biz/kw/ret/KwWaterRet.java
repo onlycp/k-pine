@@ -59,5 +59,7 @@ public class KwWaterRet extends BaseManageRet {
     private String purpose;
     // 摘要 abstract
     private String abstractInfo;
+    // 数据次序
+    private Integer dateIndex;
 
 }
