@@ -21,10 +21,10 @@ public class KwWater extends BaseManageModel {
 
     // 账户
     private String account;
-//    // 账户id
-//    private String accountId;
-//    // 回单id false
-//    private String receiptId;
+    // 账户id
+    private String accountId;
+    // 回单id false
+    private String receiptId;
     // 账户名称
     private String accountName;
     // 交易日期
@@ -55,6 +55,11 @@ public class KwWater extends BaseManageModel {
     private String purpose;
     // 摘要 abstract
     private String abstractInfo;
+    // 数据状态 status
+    // 是否异常 abnormal
+    // 异常处理状态
+    // 是否有回单
+    //
 
 
     /** 备用字段1 **/

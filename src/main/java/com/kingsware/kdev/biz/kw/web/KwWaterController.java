@@ -22,8 +22,6 @@ import java.util.Set;
 @RequestMapping("/"+ Version.V1 + "/kw-water")
 public class KwWaterController extends BaseController {
 
-//    @Resource
-//    private KwEditionService kwEditionService;
     @Autowired
     private KwWaterService kwWaterService;
 
@@ -35,12 +33,7 @@ public class KwWaterController extends BaseController {
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
     public BaseRet<PageDataRet<KwWaterRet>> page(KwWaterQueryArgv argv) {
-//        return BaseRet.success(kwEditionService.query(argv));
-        System.out.println(argv);
-//        PageDataRet<KwWaterRet> kwWaterRetPageDataRet = new PageDataRet<>();
-//        kwWaterRetPageDataRet.setPage(1);
-//        kwWaterRetPageDataRet.setPageSize(20);
-//        kwWaterRetPageDataRet.setTotal(500);
+//        System.out.println(argv);
         return BaseRet.success(kwWaterService.query(argv));
     }
 
