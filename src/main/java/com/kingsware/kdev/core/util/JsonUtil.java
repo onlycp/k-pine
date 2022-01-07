@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -183,6 +184,9 @@ public class JsonUtil {
                     }
                     else if (field.getType().isAssignableFrom(Boolean.class)) {
                         field.set(entity, "1".equals(entry.getValue().toString()));
+                    }
+                    else if (field.getType().isAssignableFrom(BigDecimal.class)) {
+                        field.set(entity, new BigDecimal(entry.getValue().toString()));
                     }
                     else if (field.getType().isAssignableFrom(Timestamp.class)) {
                         // 如果值是整型
