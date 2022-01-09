@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.base.BaseService;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.sys.argv.SysRoleArgv;
+import com.kingsware.kdev.sys.argv.SysRoleMenuArgv;
 import com.kingsware.kdev.sys.argv.SysRoleQueryArgv;
 import com.kingsware.kdev.sys.ret.SysRoleRet;
 
@@ -47,4 +48,6 @@ public interface SysRoleService extends BaseService {
      * @param argv  查询
      */
     void delete(MultiIdArgv argv);
+
+    void updatePermission(SysRoleMenuArgv argv);
 }

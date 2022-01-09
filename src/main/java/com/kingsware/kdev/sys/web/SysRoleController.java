@@ -6,6 +6,7 @@ import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
 import com.kingsware.kdev.sys.argv.SysRoleArgv;
+import com.kingsware.kdev.sys.argv.SysRoleMenuArgv;
 import com.kingsware.kdev.sys.argv.SysRoleQueryArgv;
 import com.kingsware.kdev.sys.ret.SysRoleRet;
 import com.kingsware.kdev.sys.service.SysRoleService;
@@ -82,6 +83,17 @@ public class SysRoleController extends BaseController {
     @PostMapping(value = "/delete")
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         SysRoleService.delete(argv);
+        return BaseRet.success();
+    }
+
+    /**
+     *  修改角色权限
+     * @return 提示
+     */
+    @ApiOperation(value = "修改角色权限 " ,notes = "修改角色权限")
+    @PostMapping("update-permission")
+    public BaseRet<?> updatePermission(@RequestBody SysRoleMenuArgv argv) {
+        SysRoleService.updatePermission(argv);
         return BaseRet.success();
     }
 }

@@ -11,14 +11,18 @@ import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysRoleArgv;
+import com.kingsware.kdev.sys.argv.SysRoleMenuArgv;
 import com.kingsware.kdev.sys.argv.SysRoleQueryArgv;
 import com.kingsware.kdev.sys.model.SysRole;
+import com.kingsware.kdev.sys.model.SysRoleMenu;
+import com.kingsware.kdev.sys.model.SysUserRole;
 import com.kingsware.kdev.sys.ret.SysRoleRet;
 import com.kingsware.kdev.sys.service.SysRoleService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 角色业务实现类
@@ -95,5 +99,25 @@ public class SysRoleServiceImpl extends BaseServiceImpl implements SysRoleServic
         for (String id: argv.getIds()) {
             DB.delete(SysRole.class, id);
         }
+    }
+
+    @Override
+    public void updatePermission(SysRoleMenuArgv argv) {
+        // 先移除所有关联
+        if (argv != null && argv.getIds() != null) {
+            DB.executeUpdateSql("delete from sys_role_menu where sys_role_id=?", argv.getSysRoleId());
+            saveRoleMenus(argv.getSysRoleId(), argv.getIds());
+        }
+    }
+
+    private void saveRoleMenus(String roleId, Set<String> menuIds) {
+        List<SysRoleMenu> models = new ArrayList<>();
+        for (String menuId: menuIds) {
+            SysRoleMenu roleMenu = new SysRoleMenu();
+            roleMenu.setSysMenuId(menuId);
+            roleMenu.setSysRoleId(roleId);
+            models.add(roleMenu);
+        }
+        DB.saveAll(models);
     }
 }
