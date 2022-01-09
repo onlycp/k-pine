@@ -21,6 +21,8 @@ public class SysUserArgv {
     private String password;
     /** 姓名 **/
     private String realName;
+    /** 头像 **/
+    private String avatar;
     /** 手机号码 **/
     private String mobile;
     /** 电子邮箱 **/

@@ -4,10 +4,9 @@ import com.kingsware.kdev.core.auth.BaseUserInfo;
 import com.kingsware.kdev.core.base.BaseService;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
-import com.kingsware.kdev.sys.argv.SysUserArgv;
-import com.kingsware.kdev.sys.argv.SysUserLoginArgv;
-import com.kingsware.kdev.sys.argv.SysUserQueryArgv;
+import com.kingsware.kdev.sys.argv.*;
 import com.kingsware.kdev.sys.ret.SysUserLoginRet;
+import com.kingsware.kdev.sys.ret.SysUserProfileRet;
 import com.kingsware.kdev.sys.ret.SysUserRet;
 
 /**
@@ -53,5 +52,11 @@ public interface SysUserService extends BaseService {
 
     SysUserLoginRet login(SysUserLoginArgv argv);
 
+    void changePassword(SysUserChangePasswordArgv argv, String token, String ip);
+
     BaseUserInfo getBaseUserInfo(String s, String token);
+
+    void editProfile(SysUserProfileArgv argv);
+
+    SysUserProfileRet getProfile(String token, String ip);
 }

@@ -1,19 +1,20 @@
-package com.kingsware.kdev.sys.ret;
+package com.kingsware.kdev.sys.argv;
 
-import com.kingsware.kdev.core.bean.BaseManageRet;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * 用户返回
+ *  角色参数
  *
  * @author chen peng
  * @version 1.0.0
- * @date 2021/12/23 9:49 上午
+ * @date 2021/12/23 9:47 上午
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class SysUserRet extends BaseManageRet {
+@EqualsAndHashCode
+public class SysUserProfileArgv {
+    /** id */
+    private String id;
     /** 用户名 */
     private String username;
     /** 姓名 **/
@@ -28,16 +29,10 @@ public class SysUserRet extends BaseManageRet {
     private Integer sex;
     /** 部门id **/
     private String sysUnitId;
-    /** 部门名称 **/
-    private String sysUnitName;
-    /** 部门路径 **/
-    private String sysUnitPath;
-    /** 角色ids **/
-    private String sysRoleIds;
     /** 岗位 **/
     private String post;
-    /** 状态 **/
-    private Integer status;
     /** 备注 */
     private String note;
+    /** 角色id **/
+    private String sysRoleIds;
 }

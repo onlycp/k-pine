@@ -8,9 +8,7 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
 import com.kingsware.kdev.core.context.ClientContextAspect;
 import com.kingsware.kdev.core.util.IpAddressUtils;
-import com.kingsware.kdev.sys.argv.SysUserArgv;
-import com.kingsware.kdev.sys.argv.SysUserLoginArgv;
-import com.kingsware.kdev.sys.argv.SysUserQueryArgv;
+import com.kingsware.kdev.sys.argv.*;
 import com.kingsware.kdev.sys.ret.SysUserRet;
 import com.kingsware.kdev.sys.service.SysUserService;
 import io.swagger.annotations.Api;
@@ -119,6 +117,42 @@ public class SysUserController extends BaseController {
     @PostMapping(value = "/delete")
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         sysUserService.delete(argv);
+        return BaseRet.success();
+    }
+
+    /**
+     *  获取用户基本信息
+     * @return 提示
+     */
+    @ApiOperation(value = "获取用户基本信息 " ,notes = "获取用户基本信息")
+    @GetMapping(value = "/get-profile")
+    public BaseRet<?> getProfile(HttpServletRequest request) {
+        String ip = ClientContextAspect.getClientIp(request);
+        String token = ClientContextAspect.getTokenString(request);
+        return BaseRet.success(sysUserService.getProfile(token, ip));
+    }
+
+    /**
+     *  修改用户基本信息
+     * @return 提示
+     */
+    @ApiOperation(value = "修改用户基本信息 " ,notes = "修改用户基本信息")
+    @PostMapping(value = "/edit-profile")
+    public BaseRet<?> editProfile(@RequestBody SysUserProfileArgv argv) {
+        sysUserService.editProfile(argv);
+        return BaseRet.success();
+    }
+
+    /**
+     *  修改密码
+     * @return 提示
+     */
+    @ApiOperation(value = "修改密码 " ,notes = "修改密码")
+    @PostMapping(value = "/change-password")
+    public BaseRet<?> changePassword(HttpServletRequest request, @RequestBody SysUserChangePasswordArgv argv) {
+        String ip = ClientContextAspect.getClientIp(request);
+        String token = ClientContextAspect.getTokenString(request);
+        sysUserService.changePassword(argv, token, ip);
         return BaseRet.success();
     }
 }
