@@ -91,9 +91,9 @@ public class SqlWrapper {
      * @param highValue     高值
      */
     public void between(String columnName, Object lowValue, Object highValue) {
-        sql += " and ";
+        sql += " and ( ";
         sql += columnName;
-        sql += " between ? and ? ";
+        sql += " between ? and ? ) ";
         params.add(lowValue);
         params.add(highValue);
     }

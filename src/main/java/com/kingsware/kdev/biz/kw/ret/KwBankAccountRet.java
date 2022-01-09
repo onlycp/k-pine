@@ -36,7 +36,7 @@ public class KwBankAccountRet extends BaseManageRet {
     /** 账户余额 */
     private BigDecimal balance;
     /** 账户余额更新时间 */
-    @JsonFormat(pattern="yyyy-MM-dd hh:mm:ss", timezone="GMT+8")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
     private Timestamp balanceUpdateTime;
     /** 账户状态 */
     private Integer status;

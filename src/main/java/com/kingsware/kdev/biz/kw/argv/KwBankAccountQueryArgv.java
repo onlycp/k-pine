@@ -1,8 +1,12 @@
 package com.kingsware.kdev.biz.kw.argv;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kingsware.kdev.core.bean.BasePageArgv;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.sql.Timestamp;
 
 /**
  * @author andyzheng
@@ -19,5 +23,11 @@ public class KwBankAccountQueryArgv extends BasePageArgv {
     private String account;
     /** 所属公司 */
     private String companyName;
+    /** 开始日期 */
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
+    private Timestamp updateDateStartDate;
+    /** 结束日期 */
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
+    private Timestamp updateDateEndDate;
 
 }
