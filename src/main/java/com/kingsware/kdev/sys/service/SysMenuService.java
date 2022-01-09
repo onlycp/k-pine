@@ -51,7 +51,7 @@ public interface SysMenuService extends BaseService {
      * @param excludeId 排除id
      * @return  树型结果∂
      */
-     List<TreeDataRet<Object>> treeOptions(String excludeId);
+     List<TreeDataRet<Object>> treeOptions(String excludeId, String roleIds);
 
     /**
      * 删除
