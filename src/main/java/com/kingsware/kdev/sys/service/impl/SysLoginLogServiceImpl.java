@@ -49,6 +49,9 @@ public class SysLoginLogServiceImpl extends BaseServiceImpl implements SysLoginL
         if (StringUtils.isNotEmpty(argv.getOperateTimes())) {
             wrapper.between("operate_time", argv.getOperateTimes().split(",")[0], argv.getOperateTimes().split(",")[1]);
         }
+        // 加入权限sql
+        wrapper.withAuthority("sys_login_log", "");
+        // 排查
         wrapper.sortBy("order by operate_time desc");
 
         return (PageDataRet<SysLoginLogRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysLoginLogRet.class);

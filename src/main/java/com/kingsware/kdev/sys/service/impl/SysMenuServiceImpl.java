@@ -15,6 +15,7 @@ import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysMenuArgv;
 import com.kingsware.kdev.sys.argv.SysMenuQueryArgv;
 import com.kingsware.kdev.sys.model.SysMenu;
+import com.kingsware.kdev.sys.model.SysRole;
 import com.kingsware.kdev.sys.ret.SysMenuRet;
 import com.kingsware.kdev.sys.service.SysMenuService;
 import org.springframework.stereotype.Service;
@@ -209,10 +210,35 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
     }
 
     @Override
-    public List<TreeDataRet<Object>> treeOptions(String excludeId) {
+    public List<TreeDataRet<Object>> treeOptions(String excludeId, String roleIds) {
         // 查找所有
-        String sql = "select * from sys_menu where path not like ? order by order_num asc";
-        List<SysMenu> list = DB.findList(SysMenu.class, sql, "%/"+ excludeId + "/%");
+        String[] splits = null;
+        if (roleIds != null) {
+            splits = roleIds.split(",");
+        }
+        Set<Object> ids = null;
+        boolean isSuperAdmin = true;
+        if (splits != null && splits.length > 0) {
+            ids = Arrays.stream(splits).collect(Collectors.toSet());
+            isSuperAdmin = isSuperAdmin(ids);
+        }
+        StringBuilder sql = new StringBuilder();
+        sql.append(" select sm.*  ");
+        sql.append(" from sys_menu sm ");
+        if (!isSuperAdmin && ids != null) {
+            sql.append(" right join sys_role_menu srm on srm.sys_menu_id = sm.id ");
+        }
+        sql.append(" where 1=1  ");
+        SqlWrapper wrapper = new SqlWrapper(sql.toString());
+        if (excludeId != null) {
+            wrapper.addCondition("sm.path", Op.NOT_LIKE, "%/"+ excludeId + "/%");
+        }
+        if (!isSuperAdmin && ids != null) {
+            wrapper.in("srm.sys_role_id", ids);
+        }
+        wrapper.sortBy(" order by order_num asc ");
+
+        List<SysMenu> list = DB.findList(SysMenu.class, wrapper.getSql(), wrapper.getParams().toArray());
         // 转为树型的返回结构
         List<TreeDataRet<Object>> retList = new ArrayList<>();
         // 先处理根节点
@@ -221,6 +247,13 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
             retList.add(recursiveHandle(root, list));
         }
         return retList;
+    }
+
+    private boolean isSuperAdmin(Set<Object> ids) {
+        SqlWrapper wrapper = new SqlWrapper("select * from sys_role where code = 'admin'");
+        wrapper.in("id", ids);
+        List<SysRole> list = DB.findList(SysRole.class, wrapper.getSql(), wrapper.getParams().toArray());
+        return list != null && list.size() > 0;
     }
 
     /**

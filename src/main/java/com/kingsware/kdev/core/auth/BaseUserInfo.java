@@ -24,8 +24,12 @@ public class BaseUserInfo {
     private String avatar;
     /** 手机号码 **/
     private String mobile;
+    /** 电子邮箱 **/
+    private String email;
     /** 角色id,多个用逗号分隔 **/
     private String roleIds;
+    /** 角色名,多个用逗号分隔 **/
+    private String roleNames;
     /** 权限体系 **/
     private ApiSystemEnum apiSystem;
 

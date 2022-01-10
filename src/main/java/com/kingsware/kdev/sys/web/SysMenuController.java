@@ -49,8 +49,8 @@ public class SysMenuController extends BaseController {
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/treeOptions/{excludeId}")
-    public BaseRet<List<TreeDataRet<Object>>> treeOptions(@PathVariable String excludeId) {
-        return BaseRet.success(SysMenuService.treeOptions(excludeId));
+    public BaseRet<List<TreeDataRet<Object>>> treeOptions(@PathVariable String excludeId, String roleIds) {
+        return BaseRet.success(SysMenuService.treeOptions(excludeId, roleIds));
     }
 
     /**

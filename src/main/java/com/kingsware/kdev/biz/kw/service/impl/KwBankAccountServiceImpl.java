@@ -16,6 +16,10 @@ import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Set;
+
 /**
  * 银行版本管理业务实现类
  *
@@ -72,6 +76,9 @@ public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankA
         sql.append(" left join kw_company kc on kba.relation_type = 1 and kba.relation_id = kc.id ");
         sql.append(" left join kw_mechanism km on km.id = ke.mechanism_id  ");
         sql.append(" where 1=1 ");
+//        if (argv.getUpdateDateStartDate() != null && argv.getUpdateDateEndDate() != null) {
+//            sql.append(" and kba.balance_update_time between date('" + argv.getUpdateDateStartDate() + "') and date('" + argv.getUpdateDateEndDate() + "') ");
+//        }
         SqlWrapper wrapper = new SqlWrapper(sql.toString());
         // 拼装查询sql
         if (StringUtils.isNotEmpty(argv.getMechanismId())) {
@@ -82,6 +89,9 @@ public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankA
         }
         if (StringUtils.isNotEmpty(argv.getCompanyName())) {
             wrapper.addCondition("kc.name", Op.LIKE, "%" +argv.getCompanyName() +"%");
+        }
+        if (argv.getUpdateDateStartDate() != null && argv.getUpdateDateEndDate() != null) {
+            wrapper.between("kba.balance_update_time", argv.getUpdateDateStartDate(), argv.getUpdateDateEndDate());
         }
         wrapper.groupBy(" kba.id ");
         return (PageDataRet<KwBankAccountRet>) query(wrapper.getSql(), wrapper.getParams(), argv, KwBankAccountRet.class);

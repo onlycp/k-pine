@@ -18,21 +18,19 @@ import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
-import com.kingsware.kdev.sys.argv.SysUserArgv;
-import com.kingsware.kdev.sys.argv.SysUserLoginArgv;
-import com.kingsware.kdev.sys.argv.SysUserQueryArgv;
+import com.kingsware.kdev.sys.argv.*;
 import com.kingsware.kdev.sys.model.SysUnit;
 import com.kingsware.kdev.sys.model.SysRole;
 import com.kingsware.kdev.sys.model.SysUser;
 import com.kingsware.kdev.sys.model.SysUserRole;
 import com.kingsware.kdev.sys.model.SysUserRole;
 import com.kingsware.kdev.sys.ret.SysUserLoginRet;
+import com.kingsware.kdev.sys.ret.SysUserProfileRet;
 import com.kingsware.kdev.sys.ret.SysUserRet;
 import com.kingsware.kdev.sys.service.SysUserService;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -117,6 +115,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         SysUser model = DB.findById(SysUser.class, argv.getId());
         model.setRealName(argv.getRealName());
         model.setMobile(argv.getMobile());
+        model.setEmail(argv.getEmail());
         model.setSex(argv.getSex());
         model.setPost(argv.getPost());
         model.setSysUnitId(argv.getSysUnitId());
@@ -178,7 +177,9 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         }
         BaseUserInfo userInfo = new BaseUserInfo();
         userInfo = BeanUtils.copyObject(model, BaseUserInfo.class);
-        userInfo.setRoleIds(getRoleIds(getRolesByUserId(model.getId())));
+        Map<String, String> roleMap = getRoleIds(getRolesByUserId(model.getId()));
+        userInfo.setRoleIds(roleMap.get("roleIds"));
+        userInfo.setRoleNames(roleMap.get("roleNames"));
         userInfo.setApiSystem(ApiSystemEnum.ADMIN);
 
         String token = TokenUtil.createToken(appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), KClientContext.getContext().getIp(), userInfo);
@@ -188,10 +189,48 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     }
 
     @Override
+    public void changePassword(SysUserChangePasswordArgv argv, String token, String ip) {
+        BaseUserInfo userInfo = TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), ip, appAuthProperties.getTokenExpireMinutes());
+        SysUser model = DB.findById(SysUser.class, userInfo.getId());
+        if (model == null) {
+            throw BusinessException.serviceThrow("登录凭证已失效，请重新登录！");
+        }
+        if (!EncryptWorker.getInstance().validate(argv.getOldPassword(), model.getPassword())) {
+            throw BusinessException.serviceThrow("旧密码有误！");
+        }
+        model.setPassword(EncryptWorker.getInstance().encrypt(argv.getNewPassword()));
+        // 保存
+        DB.update(model);
+    }
+
+    @Override
     public BaseUserInfo getBaseUserInfo(String token, String ip) {
         BaseUserInfo userInfo = TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), ip, appAuthProperties.getTokenExpireMinutes());
-        userInfo.setAvatar("https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif");
+//        userInfo.setAvatar("https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif");
         return userInfo;
+    }
+
+    @Override
+    public SysUserProfileRet getProfile(String token, String ip) {
+        BaseUserInfo userInfo = TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), ip, appAuthProperties.getTokenExpireMinutes());
+        SysUser model = DB.findById(SysUser.class, userInfo.getId());
+        SysUserProfileRet ret = BeanUtils.copyObject(model, SysUserProfileRet.class);
+        Map<String, String> roleMap = getRoleIds(getRolesByUserId(model.getId()));
+        ret.setRoleIds(roleMap.get("roleIds"));
+        ret.setRoleNames(roleMap.get("roleNames"));
+        return ret;
+    }
+
+    @Override
+    public void editProfile(SysUserProfileArgv argv) {
+        SysUser model = DB.findById(SysUser.class, argv.getId());
+        model.setRealName(argv.getRealName());
+        model.setMobile(argv.getMobile());
+        model.setEmail(argv.getEmail());
+        model.setAvatar(argv.getAvatar());
+        model.setSex(argv.getSex());
+        // 保存
+        DB.update(model);
     }
 
     /**
@@ -199,19 +238,30 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
      * @param list
      * @return
      */
-    private String getRoleIds(List<SysUserRole> list) {
+    private Map<String, String> getRoleIds(List<SysRole> list) {
+        Map<String, String> roleMap = new HashMap<>();
         StringBuilder roleIds = new StringBuilder();
+        StringBuilder roleNames = new StringBuilder();
         list.forEach(item -> {
+            if (roleIds.length() != 0) {
+                roleIds.append(",");
+            }
             roleIds.append(item.getId());
+            if (roleNames.length() != 0) {
+                roleNames.append(",");
+            }
+            roleNames.append(item.getName());
         });
-        return roleIds.toString();
+        roleMap.put("roleIds", roleIds.toString());
+        roleMap.put("roleNames", roleNames.toString());
+        return roleMap;
     }
 
-    private List<SysUserRole> getRolesByUserId(String userId) {
+    private List<SysRole> getRolesByUserId(String userId) {
         // 拼装sql
-        SqlWrapper wrapper = new SqlWrapper("select * from sys_user_role where 1=1 ");
+        SqlWrapper wrapper = new SqlWrapper("select sr.* from sys_user_role sur left join sys_role sr on sr.id = sur.sys_role_id where 1=1 ");
         wrapper.addCondition("sys_user_id", Op.EQ, userId);
-        return DB.findList(SysUserRole.class, wrapper.getSql(), wrapper.getParams().toArray());
+        return DB.findList(SysRole.class, wrapper.getSql(), wrapper.getParams().toArray());
     }
 
 }

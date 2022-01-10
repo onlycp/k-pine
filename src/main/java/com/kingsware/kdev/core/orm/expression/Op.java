@@ -18,7 +18,8 @@ public enum Op {
     LT_EQ(" <= ?"),
     GT(" > ?"),
     GT_EQ(" >= ?"),
-    LIKE("like ?");
+    LIKE("like ?"),
+    NOT_LIKE(" not like ? ");
 
     final String exp;
 

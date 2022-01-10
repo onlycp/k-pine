@@ -15,6 +15,7 @@ import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysDictArgv;
 import com.kingsware.kdev.sys.argv.SysDictQueryArgv;
 import com.kingsware.kdev.sys.model.SysDict;
+import com.kingsware.kdev.sys.model.SysDictItem;
 import com.kingsware.kdev.sys.model.SysRole;
 import com.kingsware.kdev.sys.ret.SysDictRet;
 import com.kingsware.kdev.sys.ret.SysRoleRet;
@@ -64,6 +65,7 @@ public class SysDictServiceImpl extends BaseServiceImpl implements SysDictServic
         if (model == null) {
             throw new BusinessException("找不到字典类型");
         }
+        String oldCode = model.getCode();
         // 修改
         model = BeanUtils.copyObject(argv, SysDict.class);
         // 唯一性校验
@@ -76,6 +78,15 @@ public class SysDictServiceImpl extends BaseServiceImpl implements SysDictServic
         checker.checkUnique();
         // 保存
         DB.update(model);
+        // 更新关联的dict item对应的code
+        if (!oldCode.equals(model.getCode())) {
+            updateDictItemByCode(oldCode, model.getCode());
+        }
+    }
+
+    private void updateDictItemByCode(String oldCode, String newCode) {
+        // 更新关联的dict item对应的code
+        DB.executeUpdateSql("update sys_dict_item set code=? where code=?", newCode, oldCode);
     }
 
     @Override

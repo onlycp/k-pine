@@ -13,9 +13,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class SysUserRet extends BaseManageRet {
-    /** 用户名 */
-    private String username;
+public class SysUserProfileRet extends BaseManageRet {
     /** 姓名 **/
     private String realName;
     /** 头像 **/
@@ -26,18 +24,15 @@ public class SysUserRet extends BaseManageRet {
     private String email;
     /** 性别 **/
     private Integer sex;
-    /** 部门id **/
-    private String sysUnitId;
     /** 部门名称 **/
     private String sysUnitName;
-    /** 部门路径 **/
-    private String sysUnitPath;
-    /** 角色ids **/
-    private String sysRoleIds;
     /** 岗位 **/
     private String post;
-    /** 状态 **/
-    private Integer status;
     /** 备注 */
     private String note;
+    /** 角色id,多个用逗号分隔 **/
+    private String roleIds;
+    /** 角色名,多个用逗号分隔 **/
+    private String roleNames;
+
 }
