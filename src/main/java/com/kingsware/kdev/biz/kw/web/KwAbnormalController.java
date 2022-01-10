@@ -37,6 +37,11 @@ public class KwAbnormalController extends BaseController {
         return BaseRet.success(abnormalService.queryAbnormalWater(argv));
     }
 
+    @ApiOperation(value = "流水上下文 " ,notes = "查询流水上下文")
+    @GetMapping("/getWaterContext")
+    public BaseRet getWaterContext(String waterId) {
+        return BaseRet.success(abnormalService.getWaterContext(waterId));
+    }
 
 
 }

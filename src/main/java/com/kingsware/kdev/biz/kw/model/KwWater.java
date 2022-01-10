@@ -63,8 +63,8 @@ public class KwWater extends BaseManageModel {
     private Integer abnormalstatus;
     // 是否有回单 has_receipt
     private Integer hasReceipt;
-    // 数据次序 data_index
-    private Integer dataIndex;
+    // 数据次序 date_index
+    private Integer dateIndex;
     // 删除标志 deleted
     private Integer deleted;
 

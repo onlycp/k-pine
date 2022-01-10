@@ -24,6 +24,7 @@ import com.kingsware.kdev.core.util.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.zip.DeflaterOutputStream;
 
@@ -205,53 +206,118 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
      * @return
      */
     @Override
-    public List<KwWaterRet> getAbnormalWater(String waterId) {
+    public List<KwWaterRet> getWaterContext(String waterId) {
         List<KwWaterRet> retList = new ArrayList<>();
         // 1、查找本条流水
         KwWater model = DB.findById(KwWater.class, waterId);
         KwWaterRet curWaterRet = (KwWaterRet) model2Ret(model, KwWaterRet.class);
+        final String accountId = curWaterRet.getAccountId();
         final Date transactionDate = curWaterRet.getTransactionDate();
         final Integer dateIndex = curWaterRet.getDateIndex();
 
-
+        System.out.println(accountId+" -- "+transactionDate+" -- "+dateIndex);
         // 2、查找前n条流水
-        // 同一天
+        // 同一天 2
+        List<KwWaterRet> nearlyWater1 = null;
+        List<KwWaterRet> nearlyWater2 = null;
+        List<KwWaterRet> nearlyWater3 = null;
+        List<KwWaterRet> nearlyWater4 = null;
+        nearlyWater2 = this.findNearlyWater(2, accountId, transactionDate, dateIndex);
+//        System.out.println(nearlyWater2);
 
-        // 非同一天
+        // 非同一天 1
+        if(nearlyWater2.size()<5){
+            nearlyWater1 = this.findNearlyWater(1, accountId, transactionDate, dateIndex);
+        }
 
 
         // 3、查找后n条流水
-        // 同一天
+        // 同一天  3
+        nearlyWater3 = this.findNearlyWater(3, accountId, transactionDate, dateIndex);
+//        System.out.println(nearlyWater3);
+        // 非同一天 4
+        if (nearlyWater3.size() < 5){
+            nearlyWater4 = this.findNearlyWater(4, accountId, transactionDate, dateIndex);
+        }
 
-        // 非同一天
+
+        // 拼接返回列表
+        // 早于本条
+        if(nearlyWater1 !=null && nearlyWater1.size() >0 ){
+            Collections.reverse(nearlyWater1);
+            for (KwWaterRet kwWaterRet : nearlyWater1) {
+                System.out.println("type 1 == "+kwWaterRet.getTransactionDate()+" -- "+kwWaterRet.getDateIndex());
+                retList.add(kwWaterRet);
+            }
+        }
+
+        if (nearlyWater2 !=null && nearlyWater2.size() >0 ){
+            Collections.reverse(nearlyWater2);
+            for (KwWaterRet kwWaterRet : nearlyWater2) {
+                System.out.println("type 2 == "+kwWaterRet.getTransactionDate()+" -- "+kwWaterRet.getDateIndex());
+                retList.add(kwWaterRet);
+            }
+        }
+
+        // 本条
+        System.out.println("本条 == "+curWaterRet.getTransactionDate()+" -- "+curWaterRet.getDateIndex());
+        retList.add(curWaterRet);
+
+        if (nearlyWater3 !=null && nearlyWater3.size() >0 ){
+            for (KwWaterRet kwWaterRet : nearlyWater3) {
+                System.out.println("type 3 == "+kwWaterRet.getTransactionDate()+" -- "+kwWaterRet.getDateIndex());
+                retList.add(kwWaterRet);
+            }
+        }
+
+        if (nearlyWater4 !=null && nearlyWater4.size() >0 ){
+            for (KwWaterRet kwWaterRet : nearlyWater4) {
+                System.out.println("type 4 == "+kwWaterRet.getTransactionDate()+" -- "+kwWaterRet.getDateIndex());
+
+                retList.add(kwWaterRet);
+            }
+        }
 
         return retList;
     }
 
 
-    private List<KwWaterRet> findNearlyWater(int type,Date transactionDate,Integer dateIndex){
+    private List<KwWaterRet> findNearlyWater(int type,String accountId,Date transactionDate,Integer dateIndex){
         String sql;
+        List<KwWaterRet> list;
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        String dateStr = df.format(transactionDate);
+
         switch (type){
             case 1:
-                // 同一天，次序在本条之前
-                sql="select * from kw_water where transactionDate=? and dateIndex<? order by transactionDate desc,dateIndex desc limit 0,5";
-                break;
-
-            case 2:
                 // 早于本日
-                sql="select * from kw_water where transactionDate < ?  order by transactionDate desc,dateIndex desc limit 0,5 ";
+                sql="select * from kw_water where account_id = ? and transaction_date < ?  order by transaction_date desc,date_index desc limit 0,5 ";
+                dateStr+=" 00:00:00";
+                list = DB.findList(KwWaterRet.class,sql,accountId,dateStr);
+                break;
+            case 2:
+                // 同一天，次序在本条之前
+                sql="select * from kw_water where account_id = ? and transaction_date like ? and date_index<? order by transaction_date desc,date_index desc limit 0,5";
+                dateStr+="%";
+                list = DB.findList(KwWaterRet.class,sql,accountId,dateStr,dateIndex);
                 break;
             case 3:
                 // 同一天，次序在本条之后
-                sql="select * from kw_water where transactionDate = ? and dateIndex>?  order by transactionDate asc,dateIndex asc limit 0,5 ";
+                sql="select * from kw_water where account_id = ? and transaction_date like ? and date_index>?  order by transaction_date asc,date_index asc limit 0,5 ";
+                dateStr+="%";
+                list = DB.findList(KwWaterRet.class,sql,accountId,dateStr,dateIndex);
                 break;
             case 4:
                 // 晚于本日
-                sql="select * from kw_water where transactionDate > ?   order by transactionDate asc,dateIndex asc limit 0,5 ";
+                sql="select * from kw_water where account_id = ? and transaction_date > ?   order by transaction_date asc,date_index asc limit 0,5 ";
+                dateStr+=" 23:59:59";
+                list = DB.findList(KwWaterRet.class,sql,accountId,dateStr);
                 break;
+            default:
+                return null;
         }
 
-        return null;
+        return list;
     }
 
 

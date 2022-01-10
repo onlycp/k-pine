@@ -33,6 +33,6 @@ public interface KwAbnormalService extends BaseService {
     PageDataRet<KwAbnormalRet> queryAbnormal(KwAbnormalQueryArgv argv);
     void checkbalance();
     PageDataRet<KwWaterRet> queryAbnormalWater(KwWaterQueryArgv argv);
-    List<KwWaterRet> getAbnormalWater(String Id);
+    List<KwWaterRet> getWaterContext(String Id);
 
 }
