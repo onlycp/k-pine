@@ -2,6 +2,9 @@ package com.kingsware.kdev.biz.kw.service.impl;
 
 import com.kingsware.kdev.biz.kw.argv.KwAbnormalQueryArgv;
 import com.kingsware.kdev.biz.kw.argv.KwWaterQueryArgv;
+import com.kingsware.kdev.biz.kw.model.KwBankAccount;
+import com.kingsware.kdev.biz.kw.model.KwEdition;
+import com.kingsware.kdev.biz.kw.model.KwMechanism;
 import com.kingsware.kdev.biz.kw.model.KwWater;
 import com.kingsware.kdev.biz.kw.ret.KwAbnormalRet;
 import com.kingsware.kdev.biz.kw.ret.KwWaterRet;
@@ -10,6 +13,7 @@ import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.BaseSimpleRet;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.orm.PagedList;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.StringUtils;
@@ -23,17 +27,107 @@ import java.util.*;
 @Service
 public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormalService {
 
-
     /**
      * 异常总汇页面
-     *
      * @param argv
      * @return
      */
     @Override
     public PageDataRet<KwAbnormalRet> queryAbnormal(KwAbnormalQueryArgv argv) {
+        // 1 查询所有行别
+        // 2 查询行别下的版本
+        // 3 查询版本下的账号数量
+        // 4 账号的余额异常数量
+        // 5 账户的流水没有回单数量
+        // 6 账户的回单没有流水数量
+        // 查询条件 行别、版本、账号、时间范围
+
         return null;
     }
+
+    /**
+     * 查询行别，通过名称
+     * @return
+     */
+    private List<KwMechanism> findMechaism(){
+        String sql = "select * from kw_mechanism where 1 = 1 and id is not null ";
+        List<KwMechanism> mechanisms = DB.findList(KwMechanism.class, sql);
+        return mechanisms;
+    }
+
+    /**
+     * 查询版本,通过行别id
+     * @param mechaismId
+     * @return
+     */
+    private List<KwEdition> findEditionByMechaisId(String mechaismId){
+        String sql = "select * from kw_edition where 1=1 and mechaism_id = ? ";
+        List<KwEdition> editions = DB.findList(KwEdition.class, sql, mechaismId);
+        return editions;
+    }
+
+    /**
+     * 版本下, 账号数量
+     * @param editionId
+     * @return
+     */
+    private Integer countAccountByEditionId(String editionId){
+        String sql = "select COUNT(*) FROM kw_bank_account where edition_id = ?";
+        return DB.findOne(Integer.class, sql,editionId);
+    }
+
+    /**
+     * 版本下， 余额异常账号数量
+     * @param editionId
+     * @param argv
+     * @return
+     */
+    private Integer countBalanceException(String editionId, KwAbnormalQueryArgv argv){
+        String sql = "SELECT count(kw.id) from kw_water kw " +
+                "LEFT JOIN kw_bank_account kba on kba.id=kw.account_id " +
+                "LEFT JOIN kw_edition ke on ke.id =  kba.edition_id " +
+                "where abnormal=1 " +
+                "and ke.id = ? ";
+        SqlWrapper wrapper = new SqlWrapper(sql);
+        wrapper.getParams().add(editionId);
+        System.out.println(" -- "+wrapper.getParams());
+
+        if (argv.getStartDate()!=null && argv.getEndDate() !=null ){
+            wrapper.addCondition("transaction_date",Op.BETWEEN,argv.getStartDate(),argv.getEndDate());
+        }
+        Integer one = DB.findOne(Integer.class, wrapper.getSql(), wrapper.getParams());
+        return one;
+    }
+
+    private Integer countNoReceipt(String editionId, KwAbnormalQueryArgv argv){
+        String sql = "SELECT kw.id,kba.id,ke.id from kw_water kw " +
+                "LEFT JOIN kw_bank_account kba on kba.id=kw.account_id " +
+                "LEFT JOIN kw_edition ke on ke.id =  kba.edition_id " +
+                "where kw.has_receipt=0 " +
+                "and ke.id = ? ";
+
+
+        return 0;
+    }
+
+    /**
+     * 版本下， 没有流水的回单
+     * @param editionId
+     * @param argv
+     * @return
+     */
+    private Integer countNoWater(String editionId, KwAbnormalQueryArgv argv){
+        String sql = "SELECT kr.id,kba.id,ke.id from kw_receipt kr " +
+                "LEFT JOIN kw_bank_account kba on kba.id=kr.account_id " +
+                "LEFT JOIN kw_edition ke on ke.id =  kba.edition_id " +
+                "where kr.has_water=0 " +
+                "and ke.id = ? ";
+
+        return 0;
+    }
+
+
+
 
     /**
      * 检查异常余额,并标记
@@ -46,20 +140,18 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
 
         // 2 查找所有账号ID
         List<String> accountIds = this.findAllAccountId();
-        System.out.println(accountIds);
+//        System.out.println(accountIds);
         for (String accountId : accountIds) {
             // 3 查找账号下的所有流水
             List<KwWater> waters = this.findWaterByAccountId(accountId);
             // 4 检查异常流水
             ids = this.checkBalance(ids,waters);
         }
-        System.out.println(ids);
-
+//        System.out.println(ids);
         // 5 标记异常流水
         for (String id : ids) {
             this.flagAbnormalWater(id);
         }
-
     }
 
     /**
@@ -72,7 +164,6 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
 
     /**
      * 查找账号ID列表
-     *
      * @return
      */
     private List<String> findAllAccountId() {
@@ -84,7 +175,6 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
 
     /**
      * 查找账号下的流水，日期升序、数据次序升序
-     *
      * @param accountId
      * @return
      */
@@ -151,10 +241,8 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         DB.executeUpdateSql(sql,id);
     }
 
-
     /**
      * 异常余额页面
-     *
      * @param argv
      * @return
      */
@@ -167,7 +255,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
                 " LEFT JOIN kw_edition ke on kba.edition_id = ke.id " +
                 " LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id " +
                 " where 1=1 " +
-                " and kw.abnormal=1 " );
+                " and kw.abnormal = 1 " );
 
         // 拼装查询sql,并注入参数
         if (argv.getEditionId() != null) {
@@ -210,8 +298,8 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         // 2、查找前n条流水
         // 同一天 2
         List<KwWaterRet> nearlyWater1 = null;
-        List<KwWaterRet> nearlyWater2 = null;
-        List<KwWaterRet> nearlyWater3 = null;
+        List<KwWaterRet> nearlyWater2;
+        List<KwWaterRet> nearlyWater3;
         List<KwWaterRet> nearlyWater4 = null;
         nearlyWater2 = this.findNearlyWater(2, accountId, transactionDate, dateIndex);
 //        System.out.println(nearlyWater2);
@@ -233,38 +321,36 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
 
 
         // 拼接返回列表
-        // 早于本条
+        // 早于本日
         if(nearlyWater1 !=null && nearlyWater1.size() >0 ){
             Collections.reverse(nearlyWater1);
             for (KwWaterRet kwWaterRet : nearlyWater1) {
-                System.out.println("type 1 == "+kwWaterRet.getTransactionDate()+" -- "+kwWaterRet.getDateIndex());
+//                System.out.println("type 1 == "+kwWaterRet.getTransactionDate()+" -- "+kwWaterRet.getDateIndex());
                 retList.add(kwWaterRet);
             }
         }
-
+        // 同日，早于本条
         if (nearlyWater2 !=null && nearlyWater2.size() >0 ){
             Collections.reverse(nearlyWater2);
             for (KwWaterRet kwWaterRet : nearlyWater2) {
-                System.out.println("type 2 == "+kwWaterRet.getTransactionDate()+" -- "+kwWaterRet.getDateIndex());
+//                System.out.println("type 2 == "+kwWaterRet.getTransactionDate()+" -- "+kwWaterRet.getDateIndex());
                 retList.add(kwWaterRet);
             }
         }
-
         // 本条
-        System.out.println("本条 == "+curWaterRet.getTransactionDate()+" -- "+curWaterRet.getDateIndex());
+//        System.out.println("本条 == "+curWaterRet.getTransactionDate()+" -- "+curWaterRet.getDateIndex());
         retList.add(curWaterRet);
-
+        // 同日，晚于本条
         if (nearlyWater3 !=null && nearlyWater3.size() >0 ){
             for (KwWaterRet kwWaterRet : nearlyWater3) {
-                System.out.println("type 3 == "+kwWaterRet.getTransactionDate()+" -- "+kwWaterRet.getDateIndex());
+//                System.out.println("type 3 == "+kwWaterRet.getTransactionDate()+" -- "+kwWaterRet.getDateIndex());
                 retList.add(kwWaterRet);
             }
         }
-
+        // 晚于本日
         if (nearlyWater4 !=null && nearlyWater4.size() >0 ){
             for (KwWaterRet kwWaterRet : nearlyWater4) {
-                System.out.println("type 4 == "+kwWaterRet.getTransactionDate()+" -- "+kwWaterRet.getDateIndex());
-
+//                System.out.println("type 4 == "+kwWaterRet.getTransactionDate()+" -- "+kwWaterRet.getDateIndex());
                 retList.add(kwWaterRet);
             }
         }
@@ -307,9 +393,11 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
             default:
                 return null;
         }
-
         return list;
     }
+
+
+
 
 
 }

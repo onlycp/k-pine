@@ -14,8 +14,6 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Set;
-
 
 @Api(value = "流水管理", tags = {"流水管理"})
 @RestController
@@ -57,9 +55,6 @@ public class KwWaterController extends BaseController {
     public BaseRet<?> add(@RequestBody KwEditionArgv argv) {
         return BaseRet.success();
     }
-
-
-
 
     /**
      *  删除
