@@ -55,21 +55,11 @@ public class KwWaterController extends BaseController {
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
     public BaseRet<?> add(@RequestBody KwEditionArgv argv) {
-//        kwEditionService.add(argv);
         return BaseRet.success();
     }
 
 
-    /**
-     *  编辑
-     * @return 提示
-     */
-    @ApiOperation(value = "编辑 " ,notes = "编辑")
-    @PutMapping
-    public BaseRet<?> edit(@RequestBody KwEditionArgv argv) {
-//        kwEditionService.edit(argv);
-        return BaseRet.success();
-    }
+
 
     /**
      *  删除

@@ -26,7 +26,7 @@ public class KwAbnormalController extends BaseController {
     @ApiOperation(value = "检查流水余额" ,notes = "检查流水余额")
     @GetMapping("/checkBalance")
     public BaseRet checkBalance(){
-        abnormalService.checkbalance();
+        abnormalService.checkBalance();
         return BaseRet.success();
     }
 

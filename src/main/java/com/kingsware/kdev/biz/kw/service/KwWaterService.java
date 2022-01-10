@@ -26,27 +26,18 @@ public interface KwWaterService extends BaseService {
     KwWaterRet get(String id);
 
     /**
-     * 新增
+     * 新增（暂时保留）
      * @param argv 新增
      */
      void add(KwWaterQueryArgv argv);
 
-    /**
-     * 编辑
-     * @param argv 编辑
-     */
-    void edit(KwWaterQueryArgv argv);
 
     /**
-     * 编辑
-     * @param argv 编辑
+     * 查询
+     * @param argv 查询
      * @return 查询结果
      */
      PageDataRet<KwWaterRet> query(KwWaterQueryArgv argv);
 
-    /**
-     * 删除
-     * @param argv  查询
-     */
-    void delete(MultiIdArgv argv);
+
 }

@@ -30,6 +30,11 @@ import java.util.List;
 @Service
 public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterService {
 
+    /**
+     * 流水详情
+     * @param id    id
+     * @return
+     */
     @Override
     public KwWaterRet get(String id) {
         // 查询model
@@ -38,26 +43,12 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
         return (KwWaterRet) model2Ret(model, KwWaterRet.class);
     }
 
+    /**
+     * （暂时保留）
+     * @param argv 新增
+     */
     @Override
     public void add(KwWaterQueryArgv argv) {
-//        KwMechanism model = BeanUtils.copyObject(argv, KwWater.class);
-//        // 校验
-//        checkUnique(model);
-//        // 保存
-//        DB.save(model);
-    }
-
-    @Override
-    public void edit(KwWaterQueryArgv argv) {
-//        KwMechanism model = DB.findById(KwWater.class, argv.getId());
-//        model.setBankNumber(argv.getBankNumber());
-//        model.setBankName(argv.getBankName());
-//        model.setBankType(argv.getBankType());
-//        model.setBankShort(argv.getBankShort());
-//        // 校验
-//        checkUnique(model);
-//        // 保存
-//        DB.update(model);
     }
 
     /**
@@ -65,32 +56,10 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
      * @param model 模型
      */
     private void checkUnique(KwWater model) {
-//        // 唯一性校验
-//        DBChecker<KwWater> checker =DBChecker.build(model, KwWater.class);
-//        // 银行名称
-//        checker.uni("bankName", I18n.t("KwMechanism.bankName.unique", "银行名称必须唯一"));
-//        // 银行代码
-//        checker.uni("bankNumber", I18n.t("KwMechanism.bankNumber.unique", "银行代码必须唯一"));
-//        // 银行简称
-//        checker.uni("bankShort", I18n.t("KwMechanism.bankShort.unique", "银行简称必须唯一"));
-        // 执行校验
-//        checker.checkUnique();
     }
 
     /**
-     *
-             SELECT km.bank_name as mechanism_name,ke.name as edtion_name,kw.* FROM kw_water kw
-             LEFT JOIN kw_receipt kr on kw.receipt_id = kr.id
-             LEFT JOIN kw_bank_account kba on kw.account_id = kba.id
-             LEFT JOIN kw_edition ke on kba.edition_id = ke.id
-             LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id
-             where 1=1
-             -- and kba.edition_id = ?1
-             -- and kw.account like ?2
-             -- and kw.transaction_date >= ?3
-             -- and kw.transaction_date <= ?4
-             ORDER BY kw.transaction_date desc,date_index desc
-             -- LIMIT ?5,?6;
+     * 流水分页查询
      * @param argv 编辑
      * @return
      */
@@ -126,10 +95,4 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
         return (PageDataRet<KwWaterRet>) query;
     }
 
-    @Override
-    public void delete(MultiIdArgv argv) {
-        for (String id: argv.getIds()) {
-            DB.delete(KwWater.class, id);
-        }
-    }
 }

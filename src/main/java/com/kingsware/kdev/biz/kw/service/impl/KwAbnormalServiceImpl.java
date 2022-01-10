@@ -1,21 +1,13 @@
 package com.kingsware.kdev.biz.kw.service.impl;
 
 import com.kingsware.kdev.biz.kw.argv.KwAbnormalQueryArgv;
-import com.kingsware.kdev.biz.kw.argv.KwBankAccountArgv;
 import com.kingsware.kdev.biz.kw.argv.KwWaterQueryArgv;
-import com.kingsware.kdev.biz.kw.model.KwBankAccount;
-import com.kingsware.kdev.biz.kw.model.KwCompany;
 import com.kingsware.kdev.biz.kw.model.KwWater;
 import com.kingsware.kdev.biz.kw.ret.KwAbnormalRet;
-import com.kingsware.kdev.biz.kw.ret.KwBankAccountRet;
-import com.kingsware.kdev.biz.kw.ret.KwCompanyRet;
 import com.kingsware.kdev.biz.kw.ret.KwWaterRet;
 import com.kingsware.kdev.biz.kw.service.KwAbnormalService;
-import com.kingsware.kdev.biz.kw.service.KwWaterService;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
-import com.kingsware.kdev.core.bean.BasePageArgv;
 import com.kingsware.kdev.core.bean.BaseSimpleRet;
-import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
@@ -26,7 +18,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.zip.DeflaterOutputStream;
 
 
 @Service
@@ -48,7 +39,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
      * 检查异常余额,并标记
      */
     @Override
-    public void checkbalance() {
+    public void checkBalance() {
         // 1 清除异常流水标记
         this.resetAbnormal();
         List<String> ids = new ArrayList<>(); // 问题流水列表
