@@ -1,5 +1,7 @@
 package com.kingsware.kdev.core.bean;
 
+import java.util.Set;
+
 /**
  * 分页查询条件
  *
@@ -18,7 +20,8 @@ public class BasePageArgv {
     private String orderBy;
     /** 排序方式, asc或desc **/
     private String sort;
-
+    /** 被选择要导出的ID 或 指定要查的ID集合 */
+    private Set<String> ids;
 
     public Integer getPageSize() {
         return pageSize;

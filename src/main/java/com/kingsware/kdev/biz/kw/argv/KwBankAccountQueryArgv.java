@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  * @author andyzheng
@@ -24,10 +25,8 @@ public class KwBankAccountQueryArgv extends BasePageArgv {
     /** 所属公司 */
     private String companyName;
     /** 开始日期 */
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
-    private Timestamp updateDateStartDate;
+    private String updateDateStartDate;
     /** 结束日期 */
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
-    private Timestamp updateDateEndDate;
+    private String updateDateEndDate;
 
 }
