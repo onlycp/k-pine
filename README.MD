@@ -160,8 +160,37 @@ public class KwMechanismServiceImpl extends BaseServiceImpl implements KwMechani
 
 `创建Model类` --> `创建Ret类` --> `创建Argv类(分为增改的Argv和查询的Argv)` --> `创建service接口(可以拷贝已有的代码，然后统一查找替换)`--> `创建service实现(可以拷贝已有的代码，然后统一查找替换)`--> `创建Controller实现(可以拷贝已有的代码，然后统一查找替换)`
 
+# 7. 数据权限处理
+  如果某类数据需要进行数据权限处理，需要在SqlWrapper加上相关的SQL权限语言。
+```java
+/**
+ * 加入权限sql
+ * @param tableName  数据库表名
+ * @param alias      简写
+ */
+public void withAuthority(String tableName, String alias)；
 
+```
+  以下为使用示例
+```java
+     public PageDataRet<SysLoginLogRet> query(SysLoginLogQueryArgv argv) {
+        // 拼装sql
+        SqlWrapper wrapper = new SqlWrapper("select * from sys_login_log where 1=1 ");
+        // 拼装查询sql
+        if (StringUtils.isNotEmpty(argv.getOperator())) {
+        wrapper.addCondition("operator", Op.LIKE, "%" +argv.getOperator() +"%");
+        }
+        if (StringUtils.isNotEmpty(argv.getOperateTimes())) {
+        wrapper.between("operate_time", argv.getOperateTimes().split(",")[0], argv.getOperateTimes().split(",")[1]);
+        }
+        // 加入权限sql
+        wrapper.withAuthority("sys_login_log", "");
+        // 排序
+        wrapper.sortBy("order by operate_time desc");
 
+        return (PageDataRet<SysLoginLogRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysLoginLogRet.class);
+        }
+```
 
 
 
