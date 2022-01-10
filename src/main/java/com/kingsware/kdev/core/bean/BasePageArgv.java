@@ -1,5 +1,7 @@
 package com.kingsware.kdev.core.bean;
 
+import org.springframework.web.bind.annotation.RequestParam;
+
 import java.util.Set;
 
 /**
@@ -20,8 +22,8 @@ public class BasePageArgv {
     private String orderBy;
     /** 排序方式, asc或desc **/
     private String sort;
-    /** 被选择要导出的ID 或 指定要查的ID集合 */
-    private Set<String> ids;
+    /** 被选择要导出的ID 或 指定要查的ID集合,逗号分隔 */
+    private String ids;
 
     public Integer getPageSize() {
         return pageSize;
@@ -61,5 +63,13 @@ public class BasePageArgv {
 
     public void setPageQuery(boolean pageQuery) {
         this.pageQuery = pageQuery;
+    }
+
+    public String getIds() {
+        return ids;
+    }
+
+    public void setIds(String ids) {
+        this.ids = ids;
     }
 }

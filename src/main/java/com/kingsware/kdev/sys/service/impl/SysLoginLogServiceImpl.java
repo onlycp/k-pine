@@ -16,7 +16,10 @@ import com.kingsware.kdev.sys.service.SysLoginLogService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 角色业务实现类
@@ -48,6 +51,11 @@ public class SysLoginLogServiceImpl extends BaseServiceImpl implements SysLoginL
         }
         if (StringUtils.isNotEmpty(argv.getOperateTimes())) {
             wrapper.between("operate_time", argv.getOperateTimes().split(",")[0], argv.getOperateTimes().split(",")[1]);
+        }
+        if (argv.getIds() != null) {
+            String[] splits = argv.getIds().split(",");
+            Set<Object> ids = Arrays.asList(splits).stream().collect(Collectors.toSet());
+            wrapper.in("id", ids);
         }
         // 加入权限sql
         wrapper.withAuthority("sys_login_log", "");
