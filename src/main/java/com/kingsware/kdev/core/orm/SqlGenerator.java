@@ -128,8 +128,7 @@ public class SqlGenerator {
         builder.append(" values ");
         builder.append(StringUtils.joinToString(insertValues, ","));
         // 返回结果
-        SqlWrapper sqlWrapper = new SqlWrapper();
-        sqlWrapper.setSql(builder.toString());
+        SqlWrapper sqlWrapper = new SqlWrapper(builder.toString());
         sqlWrapper.setParams(params);
         return sqlWrapper;
     }
@@ -238,7 +237,7 @@ public class SqlGenerator {
                 "where " +
                 String.format("%s=?", StringUtils.humpToLine(idField.getName()));
         // 返回结果
-        SqlWrapper sqlWrapper = new SqlWrapper();
+        SqlWrapper sqlWrapper = new SqlWrapper(builder);
         sqlWrapper.setSql(builder);
         sqlWrapper.setParams(params);
         return sqlWrapper;
