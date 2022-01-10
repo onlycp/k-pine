@@ -27,4 +27,6 @@ public interface SysOperateLogService extends BaseService {
      * @return 查询结果
      */
      PageDataRet<SysOperateLogRet> query(SysOperateLogQueryArgv argv);
+
+    void export(SysOperateLogQueryArgv argv);
 }

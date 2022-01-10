@@ -72,6 +72,12 @@ public class SysLoginLogServiceImpl extends BaseServiceImpl implements SysLoginL
         PageDataRet<SysLoginLogRet> pageDataRet = query(argv);
         // 定义标题
         List<RegionDefine> defineList = new ArrayList<>();
+        defineList.add(RegionDefine.builder().propName("id").labelName("ID").build());
+        defineList.add(RegionDefine.builder().propName("ip").labelName("IP地址").build());
+        defineList.add(RegionDefine.builder().propName("times").labelName("耗时").build());
+        defineList.add(RegionDefine.builder().propName("requestBody").labelName("请求内容体").build());
+        defineList.add(RegionDefine.builder().propName("responseCode").labelName("响应码").build());
+        defineList.add(RegionDefine.builder().propName("responseMessage").labelName("响应消息").build());
         defineList.add(RegionDefine.builder().propName("operator").labelName("用户名").build());
         defineList.add(RegionDefine.builder().propName("operateTime").labelName("操作时间").build());
         // 导出
