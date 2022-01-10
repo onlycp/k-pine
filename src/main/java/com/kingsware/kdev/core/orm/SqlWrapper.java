@@ -81,7 +81,9 @@ public class SqlWrapper {
             params.add(obj);
         }
         // 移除最后一个"."
-        sqlBuffer.append( sqlBuffer.substring(0, sqlBuffer.length()-1));
+        String tempSql = sqlBuffer.substring(0, sqlBuffer.length()-1);
+        sqlBuffer.setLength(0);
+        sqlBuffer.append(tempSql);
         sqlBuffer.append(") ");
     }
 
