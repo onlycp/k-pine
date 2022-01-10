@@ -13,6 +13,10 @@ import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.BaseSimpleRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.excel.ExcelWorker;
+import com.kingsware.kdev.core.excel.KExcel;
+import com.kingsware.kdev.core.excel.RegionDefine;
+import com.kingsware.kdev.core.excel.format.RegionFormat;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
@@ -20,11 +24,12 @@ import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.sys.argv.SysLoginLogQueryArgv;
+import com.kingsware.kdev.sys.ret.SysLoginLogRet;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -87,12 +92,107 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
         if (argv.getStartDate()!=null&&StringUtils.isNotEmpty(argv.getStartDate())) {
             wrapper.addCondition("kw.transaction_date", Op.BETWEEN, argv.getStartDate(),argv.getEndDate());
         }
+        if (argv.getIds() != null) {
+            wrapper.in("kw.id", Arrays.asList(argv.getIds().split(",")));
+        }
         // 排序
         wrapper.sortBy("ORDER BY kw.transaction_date desc,date_index desc");
         // 执行查询
         PageDataRet<? extends BaseSimpleRet> query = query(wrapper.getSql(), wrapper.getParams(), argv, KwWaterRet.class);
 
         return (PageDataRet<KwWaterRet>) query;
+    }
+
+    @Override
+    public void exportImportTemplate() {
+        // 定义标题
+        List<RegionDefine> defineList = new ArrayList<>();
+        defineList.add(RegionDefine.builder().labelName("交易日期").example("2021-10-21").build());
+        defineList.add(RegionDefine.builder().labelName("交易时间").example("00:58:14").build());
+        defineList.add(RegionDefine.builder().labelName("交易类型").example("").build());
+        defineList.add(RegionDefine.builder().labelName("账户").example("337060100100211315").build());
+        defineList.add(RegionDefine.builder().labelName("户名").example("深圳同创伟业资产管理股份有限公司").build());
+        defineList.add(RegionDefine.builder().labelName("本方行名").example("").build());
+        defineList.add(RegionDefine.builder().labelName("收支方向").example("支出").build());
+        defineList.add(RegionDefine.builder().labelName("交易金额").example("10.1").build());
+        defineList.add(RegionDefine.builder().labelName("账户余额").example("10.1").build());
+        defineList.add(RegionDefine.builder().labelName("对方账号").example("").build());
+        defineList.add(RegionDefine.builder().labelName("对方名称").example("").build());
+        defineList.add(RegionDefine.builder().labelName("对方行名").example("").build());
+        defineList.add(RegionDefine.builder().labelName("用途").example("").build());
+        defineList.add(RegionDefine.builder().labelName("摘要").example("贷款回收").build());
+        defineList.add(RegionDefine.builder().labelName("流水号").example("12345").build());
+        defineList.add(RegionDefine.builder().labelName("备注").example("").build());
+        // 导出
+        KExcel kExcel = KExcel.fromHeaderList("标准流水.xls", "Sheet1", defineList);
+        ExcelWorker.getInstance().getHandler().writeToWeb(kExcel);
+    }
+
+    @Override
+    public void export(KwWaterQueryArgv argv) {
+        // 直接调用查询方法
+        argv.setPageQuery(false);
+        PageDataRet<KwWaterRet> pageDataRet = query(argv);
+        // 定义标题
+        List<RegionDefine> defineList = new ArrayList<>();
+        defineList.add(RegionDefine.textDefine("mechanismName","行别名称"));
+        defineList.add(RegionDefine.textDefine("editionName", "版本名称"));
+        defineList.add(RegionDefine.textDefine("account","账户"));
+        defineList.add(RegionDefine.dateDefine("transactionDate", "交易日期"));
+        defineList.add(RegionDefine.timeDefine("transactionTime", "交易时间"));
+        defineList.add(RegionDefine.textDefine("accountName","账户名称"));
+        // 借
+        defineList.add(RegionDefine.builder().propName("transactionAmount").labelName("借").format((value, model) -> {
+            // 收支方向
+            Integer revenue = (Integer) BeanUtils.getField("revenue", model);
+            if (revenue != null) {
+                if (revenue == 0) {
+                    return value;
+                }
+                else if (revenue == 1) {
+                    return "--";
+                }
+            }
+            return "异常";
+
+        }).build());
+        // 贷
+        defineList.add(RegionDefine.builder().propName("transactionAmount").labelName("贷").format((value, model) -> {
+            // 收支方向
+            Integer revenue = (Integer) BeanUtils.getField("revenue", model);
+            if (revenue != null) {
+                if (revenue == 0) {
+                    return "--";
+                }
+                else if (revenue == 1) {
+                    return value;
+                }
+            }
+            return "异常";
+
+        }).build());
+        // 余额
+        defineList.add(RegionDefine.textDefine("accountBalance", "余额"));
+        // 来源
+        defineList.add(RegionDefine.builder().propName("dataSource").labelName("数据来源").format((value, model) -> {
+            if (value != null) {
+                int intValue = Integer.parseInt(value.toString());
+                if (intValue == 0) {
+                    return "自动";
+                }
+                else if (intValue == 1) {
+                    return "手动";
+                }
+            }
+            return "异常";
+
+        }).build());
+
+        // 导出
+        KExcel kExcel = KExcel.fromDataList("流水查询.xls", "Sheet1", defineList, pageDataRet.getList());
+        ExcelWorker.getInstance().getHandler().writeToWeb(kExcel);
+
+
     }
 
 }

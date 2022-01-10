@@ -76,10 +76,33 @@ public class KExcel {
                     continue;
                 }
                 if (define.getFormat() != null) {
-                    cellValue = define.getFormat().format(cellValue);
+                    cellValue = define.getFormat().format(cellValue, obj);
                 }
                 sheet.addCellRegion(j + 2, i+1, cellValue);
             }
+        }
+        return excel;
+    }
+
+    /**
+     * 将表头转为数据表格
+     * @param fileName      文件名
+     * @param sheetName    面签名
+     * @param defines       表头定义
+     * @return              excel
+     */
+    public static KExcel fromHeaderList(String fileName, String sheetName ,List<RegionDefine> defines) {
+        // 创建表格对象
+        KExcel excel = new KExcel(fileName);
+        // 创建sheet
+        KSheet sheet = excel.createSheet(sheetName);
+        // 写入数据
+        for (int i = 0; i < defines.size(); i++) {
+            RegionDefine define = defines.get(i);
+            // 写表头
+            sheet.addCellRegion(1, i+1, define.getLabelName());
+            // 写数据
+            sheet.addCellRegion(2, i+1, define.getExample());
         }
         return excel;
     }

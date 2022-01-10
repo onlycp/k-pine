@@ -3,10 +3,7 @@ package com.kingsware.kdev.core.orm;
 import com.kingsware.kdev.core.orm.expression.Op;
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * SQL对象
@@ -72,7 +69,7 @@ public class SqlWrapper {
      * @param columnName 列表
      * @param inSet      id的集合
      */
-    public void in(String columnName, Set<Object> inSet) {
+    public void in(String columnName, Collection<Object> inSet) {
         sqlBuffer.append(" and ");
         sqlBuffer.append(columnName);
         sqlBuffer.append(" in ( ");
