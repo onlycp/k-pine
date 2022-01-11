@@ -19,10 +19,6 @@ public class SysDataResourceRet extends BaseManageRet {
     private String name;
     /** 表名 */
     private String tableName;
-    /** 标签列 **/
-    private String labelField;
-    /** 值列 **/
-    private String valueField;
     /** 查询sql **/
     private String querySql;
     /** 是否树形结构 **/
@@ -31,4 +27,6 @@ public class SysDataResourceRet extends BaseManageRet {
     private Integer isOnlyLeaf;
     /** 状态 */
     private Integer status;
+    /** 额外sql **/
+    private String extraSql;
 }
