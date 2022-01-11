@@ -81,7 +81,7 @@ public class KDataBase implements DataBase {
 
     @Override
     public <T> T findSingleAttribute(Class<T> tClass, String sql, Object... params) {
-        List<T> result = channel.queryForAttribute(sql, tClass, Arrays.asList(params));
+        List<T> result = this.findSingleAttributeList(tClass, sql, params);
         if (result.size() > 1) {
             throw new OrmDbException("查询数量时，应保持只有一条记录");
         }

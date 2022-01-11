@@ -181,6 +181,12 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         userInfo.setRoleIds(roleMap.get("roleIds"));
         userInfo.setRoleNames(roleMap.get("roleNames"));
         userInfo.setApiSystem(ApiSystemEnum.ADMIN);
+        // 获取数据权限id
+        String accessSql = "select sys_data_access_id from sys_data_access_user au inner join sys_data_access da on (da.id=au.sys_data_access_id and da.status=1) where au.sys_user_id=?";
+        List<String> accessIds = DB.findSingleAttributeList(String.class, accessSql, model.getId());
+        if (!accessIds.isEmpty()) {
+            userInfo.setAccessIds(StringUtils.joinToString(accessIds, ","));
+        }
 
         String token = TokenUtil.createToken(appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), KClientContext.getContext().getIp(), userInfo);
         SysUserLoginRet ret = new SysUserLoginRet();

@@ -83,6 +83,8 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
         if (argv.getIds() != null) {
             wrapper.in("kw.id", Arrays.asList(argv.getIds().split(",")));
         }
+        // 数据权限
+        wrapper.withAuthority("kw_bank_account", "kba");
         // 排序
         wrapper.sortBy("ORDER BY kw.transaction_date desc,date_index desc");
         // 执行查询
