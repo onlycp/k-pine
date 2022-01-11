@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.cache.dict;
 
+import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.sys.model.SysDictItem;
 import org.springframework.boot.CommandLineRunner;
@@ -16,13 +17,12 @@ import java.util.List;
  * @version 1.0.0
  * @date 2022/1/6 9:41 上午
  */
-@Component
-public class DictTask implements CommandLineRunner {
+public class DictTask implements KTask {
 
     /**
      * 定时拉取字典项
      */
-    @Scheduled(fixedRate=10000)
+    @Override
     public void execute() {
         // 查找所有字典
         List<SysDictItem> dictItemList = DB.findList(SysDictItem.class, new ArrayList<>());
@@ -32,7 +32,12 @@ public class DictTask implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
-        execute();
+    public String cron() {
+        return "0/20 * * * * ?";
+    }
+
+    @Override
+    public String name() {
+        return "DictTask";
     }
 }

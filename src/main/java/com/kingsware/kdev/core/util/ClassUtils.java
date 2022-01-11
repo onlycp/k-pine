@@ -51,7 +51,7 @@ public class ClassUtils {
                     MetadataReader reader = readerFactory.getMetadataReader(resource);
                     String className = reader.getClassMetadata().getClassName();
                     Class<?> clazz = Class.forName(className);
-                    if (parentClass.isAssignableFrom(clazz)) {
+                    if (parentClass.isAssignableFrom(clazz) && !clazz.isInterface()) {
                         result.add(clazz);
                     }
                 }
