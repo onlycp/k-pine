@@ -71,7 +71,7 @@ public class KExcel {
             // 写数据
             for (int j = 0; j < list.size(); j++) {
                 Object obj = list.get(j);
-                Object cellValue = BeanUtils.getField(define.getPropName(), obj);
+                Object cellValue = BeanUtils.getFieldValue(define.getPropName(), obj);
                 if (cellValue == null) {
                     continue;
                 }
@@ -106,4 +106,6 @@ public class KExcel {
         }
         return excel;
     }
+
+
 }

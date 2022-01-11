@@ -1,35 +1,23 @@
 package com.kingsware.kdev.biz.kw.service.impl;
 
-import com.kingsware.kdev.biz.kw.argv.KwMechanismArgv;
-import com.kingsware.kdev.biz.kw.argv.KwMechanismQueryArgv;
 import com.kingsware.kdev.biz.kw.argv.KwWaterQueryArgv;
-import com.kingsware.kdev.biz.kw.model.KwMechanism;
 import com.kingsware.kdev.biz.kw.model.KwWater;
-import com.kingsware.kdev.biz.kw.ret.KwMechanismRet;
 import com.kingsware.kdev.biz.kw.ret.KwWaterRet;
-import com.kingsware.kdev.biz.kw.service.KwMechanismService;
 import com.kingsware.kdev.biz.kw.service.KwWaterService;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.BaseSimpleRet;
-import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.excel.ExcelWorker;
 import com.kingsware.kdev.core.excel.KExcel;
 import com.kingsware.kdev.core.excel.RegionDefine;
-import com.kingsware.kdev.core.excel.format.RegionFormat;
-import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
-import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
-import com.kingsware.kdev.sys.argv.SysLoginLogQueryArgv;
-import com.kingsware.kdev.sys.ret.SysLoginLogRet;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -144,7 +132,7 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
         // 借
         defineList.add(RegionDefine.builder().propName("transactionAmount").labelName("借").format((value, model) -> {
             // 收支方向
-            Integer revenue = (Integer) BeanUtils.getField("revenue", model);
+            Integer revenue = (Integer) BeanUtils.getFieldValue("revenue", model);
             if (revenue != null) {
                 if (revenue == 0) {
                     return value;
@@ -159,7 +147,7 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
         // 贷
         defineList.add(RegionDefine.builder().propName("transactionAmount").labelName("贷").format((value, model) -> {
             // 收支方向
-            Integer revenue = (Integer) BeanUtils.getField("revenue", model);
+            Integer revenue = (Integer) BeanUtils.getFieldValue("revenue", model);
             if (revenue != null) {
                 if (revenue == 0) {
                     return "--";

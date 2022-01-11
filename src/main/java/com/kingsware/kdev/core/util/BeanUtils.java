@@ -4,7 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -39,6 +43,23 @@ public class BeanUtils {
         return allFields.toArray(new Field[0]);
 
     }
+
+    /**
+     * 获取Field定义
+     * @param clazz         目标类
+     * @param fieldName     属性名
+     * @return              Field
+     */
+    public static Field getField(Class<?> clazz, String fieldName) {
+        Field[] fields = getAllFields(clazz);
+        for (Field field: fields) {
+            if (field.getName().equals(fieldName)) {
+                return field;
+            }
+        }
+        return null;
+    }
+
     /**
      * 给对象的属性赋值
      * @param field     属性
@@ -48,8 +69,57 @@ public class BeanUtils {
     public static void setField(Field field, Object target, Object value) {
         try {
             field.setAccessible(true);
-            field.set(target, value);
-        } catch (IllegalAccessException e) {
+            // 当field的type不等于value的type时
+            Class<?> fieldType = field.getType();
+            if (value.getClass().equals(fieldType) || fieldType.isAssignableFrom(value.getClass())) {
+                field.set(target, value);
+            }
+            else {
+                // 区分不同的field类型处理
+                if (fieldType.isAssignableFrom(Integer.class)) {
+                    field.set(target, Integer.parseInt(value.toString()));
+                }
+                else if (fieldType.isAssignableFrom(Long.class)) {
+                    field.set(target, Long.parseLong(value.toString()));
+                }
+                else if (fieldType.isAssignableFrom(Float.class)) {
+                    field.set(target, Float.parseFloat(value.toString()));
+                }
+                else if (fieldType.isAssignableFrom(Double.class)) {
+                    field.set(target, Double.parseDouble(value.toString()));
+                }
+                else if (fieldType.isAssignableFrom(String.class)) {
+                    field.set(target, value.toString());
+                }
+                else if (fieldType.isAssignableFrom(Boolean.class)) {
+                    field.set(target, "1".equals(value.toString()));
+                }
+                else if (fieldType.isAssignableFrom(BigDecimal.class)) {
+                    field.set(target, new BigDecimal(value.toString()));
+                }
+                else if (fieldType.isAssignableFrom(Timestamp.class)) {
+                    // 如果值是整型
+                    if (value instanceof Long) {
+                        field.set(target, new Timestamp(Long.parseLong(value.toString())));
+                    }
+                    // 如果值是字符串
+                    else if (value instanceof  String) {
+                        Date date = DateUtils.toDate(value.toString(), DateUtils.DATE_TIME);
+                        if (date != null) {
+                            field.set(target, new Timestamp(date.getTime()));
+                        }
+                    }
+
+                }
+                else if (fieldType.isAssignableFrom(Date.class)) {
+                    field.set(target, new Date(Long.parseLong(value.toString())));
+                }
+                else {
+                    field.set(target, value);
+                }
+            }
+
+        } catch (Exception e) {
             logger.warn("对象属性赋值失败, 属性名:{}, 属性值:{}", field.getName(), value);
         }
     }
@@ -59,7 +129,7 @@ public class BeanUtils {
      * @param field     属性
      * @param target    目标对象
      */
-    public static Object getField(Field field, Object target) {
+    public static Object getFieldValue(Field field, Object target) {
         try {
             field.setAccessible(true);
             return field.get(target);
@@ -74,13 +144,13 @@ public class BeanUtils {
      * @param fieldName     属性
      * @param target    目标对象
      */
-    public static Object getField(String fieldName, Object target) {
+    public static Object getFieldValue(String fieldName, Object target) {
 
         try {
-            Field field = target.getClass().getDeclaredField(fieldName);
-            field.setAccessible(true);
+            Field field = getField(target.getClass(), fieldName);
+            assert field != null;
             return field.get(target);
-        } catch (IllegalAccessException | NoSuchFieldException e) {
+        } catch (IllegalAccessException e ) {
             logger.warn("获取对象属性值失败, 属性名:{}, 对象:{}", fieldName, target);
             return null;
         }

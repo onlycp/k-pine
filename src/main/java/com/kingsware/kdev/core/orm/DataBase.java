@@ -58,6 +58,15 @@ public interface DataBase {
     <T> T findOne(Class<T> tClass, String sql, Object... params);
 
     /**
+     * 查询单个对象
+     * @param tClass           实体泛型
+     * @param expressionList    表达式列表
+     * @param <T>               泛型
+     * @return                  单个对象，如果不存在，则返回null
+     */
+    <T> T findOne(Class<T> tClass, List<Expression> expressionList);
+
+    /**
      * 通过SQL查询单个属性
      * @param tClass    实体泛型
      * @param sql       查询sql

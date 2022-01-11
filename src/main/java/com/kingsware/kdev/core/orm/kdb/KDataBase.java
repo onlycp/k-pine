@@ -65,6 +65,21 @@ public class KDataBase implements DataBase {
     }
 
     @Override
+    public <T> T findOne(Class<T> tClass, List<Expression> expressionList) {
+        SqlWrapper sqlWrapper = SqlGenerator.findSql(tClass, expressionList);
+        List<T> list = this.findList(tClass, sqlWrapper.getSql(), sqlWrapper.getParams().toArray());
+        if (list.size() == 0) {
+            return null;
+        }
+        else if (list.size() == 1) {
+            return list.get(0);
+        }
+        else {
+            throw new OrmDbException("查询数量时，应保持只有一条记录");
+        }
+    }
+
+    @Override
     public <T> T findSingleAttribute(Class<T> tClass, String sql, Object... params) {
         List<T> result = channel.queryForAttribute(sql, tClass, Arrays.asList(params));
         if (result.size() > 1) {
