@@ -1,6 +1,7 @@
 package com.kingsware.kdev.core.orm;
 
 import com.kingsware.kdev.core.auth.DataAccessUtil;
+import com.kingsware.kdev.core.auth.SqlLink;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.Data;
@@ -107,7 +108,7 @@ public class SqlWrapper {
      */
     public void withAuthority(String tableName, String alias) {
         // 获取权限sql
-        String authoritySql = DataAccessUtil.getDataAccessSql(tableName, alias);
+        String authoritySql = DataAccessUtil.getDataAccessSql(tableName, alias, SqlLink.EXISTS);
         if (StringUtils.isNotEmpty(authoritySql)) {
             sqlBuffer.append(" and ");
             sqlBuffer.append(authoritySql);
