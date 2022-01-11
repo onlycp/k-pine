@@ -1,5 +1,6 @@
 package com.kingsware.kdev.biz.kw.web;
 
+import com.kingsware.kdev.biz.kw.argv.KwAbnormalQueryArgv;
 import com.kingsware.kdev.biz.kw.argv.KwWaterQueryArgv;
 import com.kingsware.kdev.biz.kw.ret.KwWaterRet;
 import com.kingsware.kdev.biz.kw.service.KwAbnormalService;
@@ -21,9 +22,19 @@ public class KwAbnormalController extends BaseController {
     private KwAbnormalService abnormalService;
 
     /**
-     *
+     * 异常总汇首页
+     * @param argv
+     * @return
+     */
+    @ApiOperation(value = "异常总汇首页 " ,notes = "异常总汇首页")
+    @GetMapping("/query")
+    public BaseRet query(KwAbnormalQueryArgv argv) {
+//        System.out.println(argv);
+        return BaseRet.success(abnormalService.queryAbnormal(argv));
+    }
+
+    /**
      *  手动调用检查流水余额方法
-     *
      * @return
      */
     @ApiOperation(value = "检查流水余额" ,notes = "检查流水余额")
@@ -39,7 +50,7 @@ public class KwAbnormalController extends BaseController {
      * @return
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
-    @GetMapping("/query")
+    @GetMapping("/queryWater")
         public BaseRet<PageDataRet<KwWaterRet>> page(KwWaterQueryArgv argv) {
         return BaseRet.success(abnormalService.queryAbnormalWater(argv));
     }
@@ -55,6 +66,9 @@ public class KwAbnormalController extends BaseController {
     public BaseRet getWaterContext(String waterId) {
         return BaseRet.success(abnormalService.getWaterContext(waterId));
     }
+
+
+
 
 
 

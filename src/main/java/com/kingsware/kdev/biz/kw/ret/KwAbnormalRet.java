@@ -26,7 +26,7 @@ public class KwAbnormalRet extends BaseManageRet {
     /** 余额异常 */
     private Integer balanceException;
     /** 流水无回单 */
-    private Integer noRecepit;
+    private Integer noReceipt;
     /** 回单无流水 */
     private Integer noWater;
 

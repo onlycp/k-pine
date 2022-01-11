@@ -2,18 +2,17 @@ package com.kingsware.kdev.biz.kw.service.impl;
 
 import com.kingsware.kdev.biz.kw.argv.KwAbnormalQueryArgv;
 import com.kingsware.kdev.biz.kw.argv.KwWaterQueryArgv;
-import com.kingsware.kdev.biz.kw.model.KwBankAccount;
 import com.kingsware.kdev.biz.kw.model.KwEdition;
 import com.kingsware.kdev.biz.kw.model.KwMechanism;
 import com.kingsware.kdev.biz.kw.model.KwWater;
 import com.kingsware.kdev.biz.kw.ret.KwAbnormalRet;
+import com.kingsware.kdev.biz.kw.ret.KwNumRet;
 import com.kingsware.kdev.biz.kw.ret.KwWaterRet;
 import com.kingsware.kdev.biz.kw.service.KwAbnormalService;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.BaseSimpleRet;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.orm.DB;
-import com.kingsware.kdev.core.orm.PagedList;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.StringUtils;
@@ -34,15 +33,67 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
      */
     @Override
     public PageDataRet<KwAbnormalRet> queryAbnormal(KwAbnormalQueryArgv argv) {
-        // 1 查询所有行别
-        // 2 查询行别下的版本
-        // 3 查询版本下的账号数量
-        // 4 账号的余额异常数量
-        // 5 账户的流水没有回单数量
-        // 6 账户的回单没有流水数量
-        // 查询条件 行别、版本、账号、时间范围
+        String mechanismName;
+        String mechanismId;
+        String editionName;
+        String editionId;
+        Integer accountNum;
+        Integer balanceException;
+        Integer noReceipt;
+        Integer noWater;
+        PageDataRet<KwAbnormalRet> pageDataRet = new PageDataRet<>();
+        List<KwAbnormalRet> list = new ArrayList<>();
 
-        return null;
+        // 1 查询所有行别
+        List<KwMechanism> mechanisms = this.findMechaism();
+        for (KwMechanism mechanism : mechanisms) {
+            mechanismName = mechanism.getBankName();
+            mechanismId = mechanism.getId();
+            // 2 查询所有版本
+            List<KwEdition> editions = this.findEditionByMechaisId(mechanismId);
+            for (KwEdition edition : editions) {
+                editionName = edition.getName();
+                editionId = edition.getId();
+
+                // （ 有传editionId 或 传的不是空串 ） 且 与本循环不一致
+                if ((argv.getEditionId()!=null || StringUtils.isNotEmpty(argv.getEditionId()) )&& !editionId.equals(argv.getEditionId()))
+                    continue;
+
+//                // 查询条件 行别、版本、账号、时间范围
+                // 3 账号数量
+                accountNum = this.countAccountByEditionId(editionId);
+                if (accountNum<=0) // 没有账号，跳过
+                    continue;
+
+                // 4 余额异常数量
+                balanceException = this.countBalanceException(editionId,argv);
+
+                // 5 没有回单的流水
+                noReceipt = this.countNoReceipt(editionId,argv);
+
+                // 6 没有流水的回单
+                noWater = this.countNoWater(editionId,argv);
+
+                if((noWater + noReceipt + balanceException)<=0) // 该版本下没有异常
+                    continue;
+
+                // 7 封装返回对象
+                KwAbnormalRet kwAbnormalRet = new KwAbnormalRet();
+                kwAbnormalRet.setMechanismId(mechanismId);
+                kwAbnormalRet.setMechanismName(mechanismName);
+                kwAbnormalRet.setEditionId(editionId);
+                kwAbnormalRet.setEditionName(editionName);
+                kwAbnormalRet.setAccountNum(accountNum);
+                kwAbnormalRet.setBalanceException(balanceException);
+                kwAbnormalRet.setNoReceipt(noReceipt);
+                kwAbnormalRet.setNoWater(noWater);
+
+                list.add(kwAbnormalRet);
+            }
+        }
+        pageDataRet.setList(list);
+
+        return pageDataRet;
     }
 
     /**
@@ -61,7 +112,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
      * @return
      */
     private List<KwEdition> findEditionByMechaisId(String mechaismId){
-        String sql = "select * from kw_edition where 1=1 and mechaism_id = ? ";
+        String sql = "select * from kw_edition where 1=1 and mechanism_id = ? ";
         List<KwEdition> editions = DB.findList(KwEdition.class, sql, mechaismId);
         return editions;
     }
@@ -72,8 +123,9 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
      * @return
      */
     private Integer countAccountByEditionId(String editionId){
-        String sql = "select COUNT(*) FROM kw_bank_account where edition_id = ?";
-        return DB.findOne(Integer.class, sql,editionId);
+        String sql = "select COUNT(id) as num1 FROM kw_bank_account where edition_id = ?";
+        KwNumRet one =DB.findOne(KwNumRet.class, sql,editionId);
+        return one.getNum1();
     }
 
     /**
@@ -83,31 +135,57 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
      * @return
      */
     private Integer countBalanceException(String editionId, KwAbnormalQueryArgv argv){
-        String sql = "SELECT count(kw.id) from kw_water kw " +
+        String sql = "SELECT count(kw.id) as num1 from kw_water kw " +
                 "LEFT JOIN kw_bank_account kba on kba.id=kw.account_id " +
-                "LEFT JOIN kw_edition ke on ke.id =  kba.edition_id " +
+                "LEFT JOIN kw_edition ke on ke.id = kba.edition_id " +
                 "where abnormal=1 " +
                 "and ke.id = ? ";
-        SqlWrapper wrapper = new SqlWrapper(sql);
-        wrapper.getParams().add(editionId);
-        System.out.println(" -- "+wrapper.getParams());
+        List<Object> params = new ArrayList<>();
+        params.add(editionId);
 
-        if (argv.getStartDate()!=null && argv.getEndDate() !=null ){
-            wrapper.addCondition("transaction_date",Op.BETWEEN,argv.getStartDate(),argv.getEndDate());
+
+        if (argv!=null && argv.getStartDate()!=null && argv.getEndDate() !=null && StringUtils.isNotEmpty(argv.getStartDate())){
+            sql += " and kw.transaction_date BETWEEN ? and ? ";
+            params.add(argv.getStartDate());
+            params.add(argv.getEndDate());
         }
-        Integer one = DB.findOne(Integer.class, wrapper.getSql(), wrapper.getParams());
-        return one;
+        if (argv!=null && argv.getAccount()!=null ){
+            sql += " and kw.account like ? ";
+            params.add("%"+argv.getAccount()+"%");
+
+        }
+
+        KwNumRet one = DB.findOne(KwNumRet.class, sql, params.toArray());
+//        System.out.println(editionId+" -- 余额异常 -- "+one.getNum1());
+
+        return one.getNum1();
     }
 
+    /**
+     * 版本下， 没有回单的流水
+     * @param editionId
+     * @param argv
+     * @return
+     */
     private Integer countNoReceipt(String editionId, KwAbnormalQueryArgv argv){
-        String sql = "SELECT kw.id,kba.id,ke.id from kw_water kw " +
+        String sql = "SELECT count(kw.id) as num1 from kw_water kw " +
                 "LEFT JOIN kw_bank_account kba on kba.id=kw.account_id " +
                 "LEFT JOIN kw_edition ke on ke.id =  kba.edition_id " +
                 "where kw.has_receipt=0 " +
                 "and ke.id = ? ";
+        SqlWrapper wrapper = new SqlWrapper(sql);
+        List<Object> params = wrapper.getParams();
+        params.add(editionId);
 
+        if (argv!=null && argv.getStartDate()!=null && argv.getEndDate() !=null && StringUtils.isNotEmpty(argv.getStartDate())){
+            wrapper.addCondition("kw.transaction_date",Op.BETWEEN,argv.getStartDate(),argv.getEndDate());
+        }
+        if (argv!=null && argv.getAccount()!=null ){
+            wrapper.addCondition("kw.account",Op.LIKE,"%"+argv.getAccount()+"%");
+        }
 
-        return 0;
+        KwNumRet one = DB.findOne(KwNumRet.class, wrapper.getSql(), params.toArray());
+        return one.getNum1();
     }
 
     /**
@@ -117,13 +195,26 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
      * @return
      */
     private Integer countNoWater(String editionId, KwAbnormalQueryArgv argv){
-        String sql = "SELECT kr.id,kba.id,ke.id from kw_receipt kr " +
+        String sql = "SELECT count(kr.id) as num1 from kw_receipt kr " +
                 "LEFT JOIN kw_bank_account kba on kba.id=kr.account_id " +
                 "LEFT JOIN kw_edition ke on ke.id =  kba.edition_id " +
                 "where kr.has_water=0 " +
                 "and ke.id = ? ";
+        SqlWrapper wrapper = new SqlWrapper(sql);
+        List<Object> params = wrapper.getParams();
 
-        return 0;
+        params.add(editionId);
+//        System.out.println(" -- "+wrapper.getParams());
+
+        if (argv!=null && argv.getStartDate()!=null && argv.getEndDate() !=null && StringUtils.isNotEmpty(argv.getStartDate())){
+            wrapper.addCondition("kr.book_date",Op.BETWEEN,argv.getStartDate(),argv.getEndDate());
+        }
+        if (argv!=null && argv.getAccount()!=null ){
+            wrapper.addCondition("kr.self_account",Op.LIKE,"%"+argv.getAccount()+"%");
+        }
+
+        KwNumRet one = DB.findOne(KwNumRet.class, wrapper.getSql(), params.toArray());
+        return one.getNum1();
     }
 
 
