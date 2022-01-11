@@ -28,8 +28,10 @@ public class KwBankAccountExpandArgv {
     private String trustAccounting;
     /** 信托会计账号 */
     private String trustAccountingAccount;
-    /** 项目下架日期 */
+    /** 项目上架日期 */
     private Timestamp upDate;
+    /** 项目下架日期 */
+    private Timestamp downDate;
     /** 项目录入日期 */
     private Timestamp inDate;
     /** 备用字段1 */
