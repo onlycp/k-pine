@@ -160,7 +160,10 @@ public class KwMechanismServiceImpl extends BaseServiceImpl implements KwMechani
 
 `创建Model类` --> `创建Ret类` --> `创建Argv类(分为增改的Argv和查询的Argv)` --> `创建service接口(可以拷贝已有的代码，然后统一查找替换)`--> `创建service实现(可以拷贝已有的代码，然后统一查找替换)`--> `创建Controller实现(可以拷贝已有的代码，然后统一查找替换)`
 
-# 7. 数据权限处理
+# 7. 开发常见问题
+
+## 7.1 数据权限处理
+
   如果某类数据需要进行数据权限处理，需要在SqlWrapper加上相关的SQL权限语言。
 ```java
 /**
@@ -192,6 +195,45 @@ public void withAuthority(String tableName, String alias)；
         }
 ```
 
+## 7.2 定时任务
+
+  实时任务实现`com.kingsware.kdev.core.cron`接口即可。友情提示，如果需要调用SpringBean，直接采用`SpringContext`工具类获取即可。
+
+如下为定时任务的示例
+```java
+/**
+ * 字典定时任务，从数据库定时加载
+ *
+ * @author chen peng
+ * @version 1.0.0
+ * @date 2022/1/6 9:41 上午
+ */
+public class DictTask implements KTask {
+
+    /**
+     * 定时拉取字典项
+     */
+    @Override
+    public void execute() {
+        // 查找所有字典
+        List<SysDictItem> dictItemList = DB.findList(SysDictItem.class, new ArrayList<>());
+        for (SysDictItem dictItem: dictItemList) {
+            DictManager.getInstance().addDict(dictItem.getCode(), dictItem.getName(), dictItem.getValue());
+        }
+    }
+
+    @Override
+    public String cron() {
+        return "0/20 * * * * ?";
+    }
+
+    @Override
+    public String name() {
+        return "DictTask";
+    }
+}
+
+```
 
 
 
