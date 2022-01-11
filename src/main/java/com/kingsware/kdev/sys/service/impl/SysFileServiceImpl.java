@@ -86,7 +86,10 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             // 文件名
             sysFile.setFileName(file.getOriginalFilename());
             // 真实文件名
-            String realName = file.getOriginalFilename() + "_" + System.currentTimeMillis();
+            String realName = file.getOriginalFilename();
+            String fileExt = "." + FileUtils.getFileExt(sysFile.getFileName());
+            realName = realName.substring(0, realName.indexOf(fileExt));
+            realName = realName + "_" + System.currentTimeMillis() + fileExt;
             sysFile.setFileOriginalName(realName);
             // 文件扩展名
             sysFile.setFileExt(FileUtils.getFileExt(sysFile.getFileName()));
