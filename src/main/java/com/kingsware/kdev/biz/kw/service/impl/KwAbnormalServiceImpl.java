@@ -12,10 +12,13 @@ import com.kingsware.kdev.biz.kw.service.KwAbnormalService;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.BaseSimpleRet;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.cache.dict.DictTask;
+import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -25,6 +28,7 @@ import java.util.*;
 
 @Service
 public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormalService {
+
 
     /**
      * 异常总汇页面
@@ -55,11 +59,10 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
                 editionName = edition.getName();
                 editionId = edition.getId();
 
-                // （ 有传editionId 或 传的不是空串 ） 且 与本循环不一致
-                if ((argv.getEditionId()!=null || StringUtils.isNotEmpty(argv.getEditionId()) )&& !editionId.equals(argv.getEditionId()))
+                // 查询条件 版本
+                if ((argv.getEditionId()!=null || StringUtils.isNotEmpty(argv.getEditionId()) )&& !editionId.equals(argv.getEditionId()))// （ 有传editionId 或 传的不是空串 ） 且 与本循环不一致
                     continue;
 
-//                // 查询条件 行别、版本、账号、时间范围
                 // 3 账号数量
                 accountNum = this.countAccountByEditionId(editionId);
                 if (accountNum<=0) // 没有账号，跳过
