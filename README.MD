@@ -197,7 +197,7 @@ public void withAuthority(String tableName, String alias)；
 
 ## 7.2 定时任务
 
-  实时任务实现`com.kingsware.kdev.core.cron`接口即可。友情提示，如果需要调用SpringBean，直接采用`SpringContext`工具类获取即可。
+  实时任务实现`com.kingsware.kdev.core.cron.KTask`接口即可。友情提示，如果需要调用SpringBean，直接采用`SpringContext`工具类获取即可。
 
 如下为定时任务的示例
 ```java

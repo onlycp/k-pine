@@ -48,7 +48,7 @@ public class ScheduledConfig implements SchedulingConfigurer {
                     try {
                         long t1 = System.currentTimeMillis();
                         task.execute();
-                        log.error("定时任务执行成功, 任务名: {}， Class: {}, 耗时:{} ms", task.name(), task.getClass().getName(), System.currentTimeMillis() - t1);
+                        log.info("定时任务执行成功, 任务名: {}， Class: {}, 耗时:{} ms", task.name(), task.getClass().getName(), System.currentTimeMillis() - t1);
                     }
                     catch (Exception e) {
                         log.error("定时任务执行失败, 任务名: {}， Class: {}, 错误信息:{}", task.name(), task.getClass().getName(), e.getMessage());
