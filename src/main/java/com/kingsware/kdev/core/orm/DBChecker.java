@@ -59,7 +59,7 @@ public class DBChecker<T> {
             Expr expr =  Expr.builder();
             for (String field: uni.getKey()) {
                 // 获取值
-                Object value = BeanUtils.getField(field, model);
+                Object value = BeanUtils.getFieldValue(field, model);
                 // 添加查询表达式
                 expr.add(field, "=", value);
 

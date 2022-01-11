@@ -9,5 +9,5 @@ package com.kingsware.kdev.core.excel.format;
  */
 public interface RegionFormat {
     /** 格式化 **/
-    Object format(Object value);
+    Object format(Object value, Object model);
 }

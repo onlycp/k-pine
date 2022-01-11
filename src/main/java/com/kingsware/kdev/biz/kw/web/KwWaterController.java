@@ -9,6 +9,7 @@ import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
+import com.kingsware.kdev.sys.argv.SysLoginLogQueryArgv;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,5 +67,24 @@ public class KwWaterController extends BaseController {
 //        kwEditionService.delete(argv);
 
         return BaseRet.success();
+    }
+
+
+    /**
+     * 导出
+     */
+    @ApiOperation(value = "导出导入模板 " ,notes = "导出导入模板")
+    @GetMapping("/exportImportTemplate")
+    public void exportImportTemplate() {
+        kwWaterService.exportImportTemplate();
+    }
+
+    /**
+     * 导出
+     */
+    @ApiOperation(value = "导出 " ,notes = "导出")
+    @GetMapping("/export")
+    public void export(KwWaterQueryArgv argv) {
+        kwWaterService.export(argv);
     }
 }

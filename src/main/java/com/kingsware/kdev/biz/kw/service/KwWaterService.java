@@ -8,6 +8,7 @@ import com.kingsware.kdev.biz.kw.ret.KwWaterRet;
 import com.kingsware.kdev.core.base.BaseService;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.sys.argv.SysLoginLogQueryArgv;
 
 /**
  * 行别管理业务类
@@ -40,4 +41,13 @@ public interface KwWaterService extends BaseService {
      PageDataRet<KwWaterRet> query(KwWaterQueryArgv argv);
 
 
+    /**
+     * 导出导入模板
+     */
+    void exportImportTemplate();
+
+    /**
+     * 导出
+     */
+    void export(KwWaterQueryArgv argv);
 }

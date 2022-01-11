@@ -16,7 +16,10 @@ import com.kingsware.kdev.sys.service.SysLoginLogService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 角色业务实现类
@@ -49,6 +52,11 @@ public class SysLoginLogServiceImpl extends BaseServiceImpl implements SysLoginL
         if (StringUtils.isNotEmpty(argv.getOperateTimes())) {
             wrapper.between("operate_time", argv.getOperateTimes().split(",")[0], argv.getOperateTimes().split(",")[1]);
         }
+        if (argv.getIds() != null) {
+            String[] splits = argv.getIds().split(",");
+            Set<Object> ids = Arrays.asList(splits).stream().collect(Collectors.toSet());
+            wrapper.in("id", ids);
+        }
         // 加入权限sql
         wrapper.withAuthority("sys_login_log", "");
         // 排序
@@ -64,6 +72,12 @@ public class SysLoginLogServiceImpl extends BaseServiceImpl implements SysLoginL
         PageDataRet<SysLoginLogRet> pageDataRet = query(argv);
         // 定义标题
         List<RegionDefine> defineList = new ArrayList<>();
+        defineList.add(RegionDefine.builder().propName("id").labelName("ID").build());
+        defineList.add(RegionDefine.builder().propName("ip").labelName("IP地址").build());
+        defineList.add(RegionDefine.builder().propName("times").labelName("耗时").build());
+        defineList.add(RegionDefine.builder().propName("requestBody").labelName("请求内容体").build());
+        defineList.add(RegionDefine.builder().propName("responseCode").labelName("响应码").build());
+        defineList.add(RegionDefine.builder().propName("responseMessage").labelName("响应消息").build());
         defineList.add(RegionDefine.builder().propName("operator").labelName("用户名").build());
         defineList.add(RegionDefine.builder().propName("operateTime").labelName("操作时间").build());
         // 导出

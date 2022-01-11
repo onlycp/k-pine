@@ -1,9 +1,6 @@
 package com.kingsware.kdev.core.excel;
 
-import com.kingsware.kdev.core.excel.format.RegionDateFormat;
-import com.kingsware.kdev.core.excel.format.RegionDateTimeFormat;
-import com.kingsware.kdev.core.excel.format.RegionDictFormat;
-import com.kingsware.kdev.core.excel.format.RegionFormat;
+import com.kingsware.kdev.core.excel.format.*;
 import lombok.Builder;
 import lombok.Data;
 
@@ -23,6 +20,8 @@ public class RegionDefine {
     private String labelName;
     /** 格式化 **/
     private RegionFormat format;
+    /** 示例值 **/
+    private String example;
 
     /**
      * 日期时间格式化
@@ -42,6 +41,26 @@ public class RegionDefine {
      */
     public static RegionDefine dateDefine(String propName, String labelName) {
         return RegionDefine.builder().propName(propName).labelName(labelName).format(new RegionDateFormat()).build();
+    }
+
+    /**
+     * 日期格式化
+     * @param propName  属性名
+     * @param labelName 标签
+     * @return          区域定义
+     */
+    public static RegionDefine timeDefine(String propName, String labelName) {
+        return RegionDefine.builder().propName(propName).labelName(labelName).format(new RegionTimeFormat()).build();
+    }
+
+    /**
+     * 日期格式化
+     * @param propName  属性名
+     * @param labelName 标签
+     * @return          区域定义
+     */
+    public static RegionDefine textDefine(String propName, String labelName) {
+        return RegionDefine.builder().propName(propName).labelName(labelName).build();
     }
 
     /**

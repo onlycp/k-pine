@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
+import com.kingsware.kdev.sys.argv.SysLoginLogQueryArgv;
 import com.kingsware.kdev.sys.argv.SysOperateLogQueryArgv;
 import com.kingsware.kdev.sys.ret.SysOperateLogRet;
 import com.kingsware.kdev.sys.service.SysOperateLogService;
@@ -47,6 +48,15 @@ public class SysOperateLogController extends BaseController {
     @GetMapping("/{id}")
     public BaseRet<SysOperateLogRet> get(@PathVariable String id) {
         return BaseRet.success(sysOperateLogService.get(id));
+    }
+
+    /**
+     * 导出
+     */
+    @ApiOperation(value = "导出 " ,notes = "导出")
+    @GetMapping("/export")
+    public void download(SysOperateLogQueryArgv argv) {
+        sysOperateLogService.export(argv);
     }
 
 }

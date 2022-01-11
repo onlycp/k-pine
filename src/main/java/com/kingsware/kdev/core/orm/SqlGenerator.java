@@ -90,7 +90,7 @@ public class SqlGenerator {
                 // 自动赋值
                 if (field2Column.getColumn() != null) {
                     // 先判断属性性是否为空，如果不为空，则跳过，不进行设置值
-                    Object distFieldValue = BeanUtils.getField(field, model);
+                    Object distFieldValue = BeanUtils.getFieldValue(field, model);
                     if (distFieldValue == null || StringUtils.isEmpty(distFieldValue.toString())) {
                         // 增加值
                         if (column.auto() == AutoEnum.ID) {
@@ -140,7 +140,7 @@ public class SqlGenerator {
      * @param params    参数
      */
     private static void addParams(Field field, Object model, List<Object> params) {
-        Object value = BeanUtils.getField(field, model);
+        Object value = BeanUtils.getFieldValue(field, model);
         if (value instanceof Timestamp) {
             Timestamp timestamp = (Timestamp) value;
             params.add(DateUtils.formatDate(new Date(timestamp.getTime()), DateUtils.DATE_TIME));
@@ -230,7 +230,7 @@ public class SqlGenerator {
             }
         }
         // 追加id
-        params.add(BeanUtils.getField(idField, model));
+        params.add(BeanUtils.getFieldValue(idField, model));
         // 构建sql
         String builder = "update " + tableName + " set " +
                 StringUtils.joinToString(updateList, ",") + " " +
@@ -328,7 +328,7 @@ public class SqlGenerator {
                 String.format("%s=?", StringUtils.humpToLine(idField.getName()));
         // 参数列表
         List<Object> params = new ArrayList<>();
-        params.add(BeanUtils.getField(idField, model));
+        params.add(BeanUtils.getFieldValue(idField, model));
         // 返回结果
         SqlWrapper sqlWrapper = new SqlWrapper();
         sqlWrapper.setSql(builder);

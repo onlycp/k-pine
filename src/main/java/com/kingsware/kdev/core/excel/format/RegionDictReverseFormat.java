@@ -19,7 +19,7 @@ public class RegionDictReverseFormat implements RegionFormat {
     }
 
     @Override
-    public Object format(Object value) {
+    public Object format(Object value, Object model) {
         // 值为空，就返回空值
         if (value == null) {
             return null;
