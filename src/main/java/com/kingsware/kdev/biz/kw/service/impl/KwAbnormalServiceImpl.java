@@ -12,8 +12,6 @@ import com.kingsware.kdev.biz.kw.service.KwAbnormalService;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.BaseSimpleRet;
 import com.kingsware.kdev.core.bean.PageDataRet;
-import com.kingsware.kdev.core.cache.dict.DictTask;
-import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
@@ -100,7 +98,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
     }
 
     /**
-     * 查询行别，通过名称
+     * 查询行别
      * @return
      */
     private List<KwMechanism> findMechaism(){
@@ -139,7 +137,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
      */
     private Integer countBalanceException(String editionId, KwAbnormalQueryArgv argv){
         String sql = "SELECT count(kw.id) as num1 from kw_water kw " +
-                "LEFT JOIN kw_bank_account kba on kba.id=kw.account_id " +
+                "LEFT JOIN kw_bank_account kba on kba.account=kw.account " +
                 "LEFT JOIN kw_edition ke on ke.id = kba.edition_id " +
                 "where abnormal=1 " +
                 "and ke.id = ? ";
@@ -172,7 +170,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
      */
     private Integer countNoReceipt(String editionId, KwAbnormalQueryArgv argv){
         String sql = "SELECT count(kw.id) as num1 from kw_water kw " +
-                "LEFT JOIN kw_bank_account kba on kba.id=kw.account_id " +
+                "LEFT JOIN kw_bank_account kba on kba.account=kw.account " +
                 "LEFT JOIN kw_edition ke on ke.id =  kba.edition_id " +
                 "where kw.has_receipt=0 " +
                 "and ke.id = ? ";
@@ -199,7 +197,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
      */
     private Integer countNoWater(String editionId, KwAbnormalQueryArgv argv){
         String sql = "SELECT count(kr.id) as num1 from kw_receipt kr " +
-                "LEFT JOIN kw_bank_account kba on kba.id=kr.account_id " +
+                "LEFT JOIN kw_bank_account kba on kba.account=kr.self_account " +
                 "LEFT JOIN kw_edition ke on ke.id =  kba.edition_id " +
                 "where kr.has_water=0 " +
                 "and ke.id = ? ";
@@ -232,12 +230,12 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         this.resetAbnormal();
         List<String> ids = new ArrayList<>(); // 问题流水列表
 
-        // 2 查找所有账号ID
-        List<String> accountIds = this.findAllAccountId();
+        // 2 查找所有账号
+        List<String> accounts = this.findAllAccountId();
 //        System.out.println(accountIds);
-        for (String accountId : accountIds) {
+        for (String account : accounts) {
             // 3 查找账号下的所有流水
-            List<KwWater> waters = this.findWaterByAccountId(accountId);
+            List<KwWater> waters = this.findWaterByAccountId(account);
             // 4 检查异常流水
             ids = this.checkBalance(ids,waters);
         }
@@ -261,7 +259,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
      * @return
      */
     private List<String> findAllAccountId() {
-        String sql = " select id from kw_bank_account where 1=1 and id is not null ";
+        String sql = " select account from kw_bank_account where 1=1 and id is not null ";
         SqlWrapper wrapper = new SqlWrapper(sql);
         List<String> list = DB.findSingleAttributeList(String.class, wrapper.getSql(), wrapper.getParams().toArray());
         return list;
@@ -269,12 +267,12 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
 
     /**
      * 查找账号下的流水，日期升序、数据次序升序
-     * @param accountId
+     * @param account
      * @return
      */
-    private List<KwWater> findWaterByAccountId(String accountId) {
-        String sql = " select * from kw_water kw where 1=1 and kw.account_id = ? order by kw.transaction_date asc,kw.date_index asc ";
-        List<KwWater> list = DB.findList(KwWater.class, sql, accountId);
+    private List<KwWater> findWaterByAccountId(String account) {
+        String sql = " select * from kw_water kw where 1=1 and kw.account = ? order by kw.transaction_date asc,kw.date_index asc ";
+        List<KwWater> list = DB.findList(KwWater.class, sql, account);
         return list;
     }
 
@@ -345,7 +343,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         // 基础sql
         SqlWrapper wrapper = new SqlWrapper(" SELECT km.bank_name as mechanism_name,ke.name as edition_name,kw.* FROM kw_water kw " +
                 " LEFT JOIN kw_receipt kr on kw.receipt_id = kr.id" +
-                " LEFT JOIN kw_bank_account kba on kw.account_id = kba.id " +
+                " LEFT JOIN kw_bank_account kba on kw.account = kba.account " +
                 " LEFT JOIN kw_edition ke on kba.edition_id = ke.id " +
                 " LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id " +
                 " where 1=1 " +
@@ -385,6 +383,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         KwWater model = DB.findById(KwWater.class, waterId);
         KwWaterRet curWaterRet = (KwWaterRet) model2Ret(model, KwWaterRet.class);
         final String accountId = curWaterRet.getAccountId();
+        final String account = curWaterRet.getAccount();
         final Date transactionDate = curWaterRet.getTransactionDate();
         final Integer dateIndex = curWaterRet.getDateIndex();
 
@@ -395,31 +394,26 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         List<KwWaterRet> nearlyWater2;
         List<KwWaterRet> nearlyWater3;
         List<KwWaterRet> nearlyWater4 = null;
-        nearlyWater2 = this.findNearlyWater(2, accountId, transactionDate, dateIndex);
+        nearlyWater2 = this.findNearlyWater(2, account, transactionDate, dateIndex);
 //        System.out.println(nearlyWater2);
-
         // 非同一天 1
         if(nearlyWater2.size()<5){
-            nearlyWater1 = this.findNearlyWater(1, accountId, transactionDate, dateIndex);
+            nearlyWater1 = this.findNearlyWater(1, account, transactionDate, dateIndex);
         }
-
-
         // 3、查找后n条流水
         // 同一天  3
-        nearlyWater3 = this.findNearlyWater(3, accountId, transactionDate, dateIndex);
+        nearlyWater3 = this.findNearlyWater(3, account, transactionDate, dateIndex);
 //        System.out.println(nearlyWater3);
         // 非同一天 4
         if (nearlyWater3.size() < 5){
-            nearlyWater4 = this.findNearlyWater(4, accountId, transactionDate, dateIndex);
+            nearlyWater4 = this.findNearlyWater(4, account, transactionDate, dateIndex);
         }
-
 
         // 拼接返回列表
         // 早于本日
         if(nearlyWater1 !=null && nearlyWater1.size() >0 ){
             Collections.reverse(nearlyWater1);
             for (KwWaterRet kwWaterRet : nearlyWater1) {
-//                System.out.println("type 1 == "+kwWaterRet.getTransactionDate()+" -- "+kwWaterRet.getDateIndex());
                 retList.add(kwWaterRet);
             }
         }
@@ -427,24 +421,20 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         if (nearlyWater2 !=null && nearlyWater2.size() >0 ){
             Collections.reverse(nearlyWater2);
             for (KwWaterRet kwWaterRet : nearlyWater2) {
-//                System.out.println("type 2 == "+kwWaterRet.getTransactionDate()+" -- "+kwWaterRet.getDateIndex());
                 retList.add(kwWaterRet);
             }
         }
         // 本条
-//        System.out.println("本条 == "+curWaterRet.getTransactionDate()+" -- "+curWaterRet.getDateIndex());
         retList.add(curWaterRet);
         // 同日，晚于本条
         if (nearlyWater3 !=null && nearlyWater3.size() >0 ){
             for (KwWaterRet kwWaterRet : nearlyWater3) {
-//                System.out.println("type 3 == "+kwWaterRet.getTransactionDate()+" -- "+kwWaterRet.getDateIndex());
                 retList.add(kwWaterRet);
             }
         }
         // 晚于本日
         if (nearlyWater4 !=null && nearlyWater4.size() >0 ){
             for (KwWaterRet kwWaterRet : nearlyWater4) {
-//                System.out.println("type 4 == "+kwWaterRet.getTransactionDate()+" -- "+kwWaterRet.getDateIndex());
                 retList.add(kwWaterRet);
             }
         }
@@ -453,7 +443,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
     }
 
 
-    private List<KwWaterRet> findNearlyWater(int type,String accountId,Date transactionDate,Integer dateIndex){
+    private List<KwWaterRet> findNearlyWater(int type,String account,Date transactionDate,Integer dateIndex){
         String sql;
         List<KwWaterRet> list;
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
@@ -462,27 +452,27 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         switch (type){
             case 1:
                 // 早于本日
-                sql="select * from kw_water where account_id = ? and transaction_date < ?  order by transaction_date desc,date_index desc limit 0,5 ";
+                sql="select * from kw_water where account = ? and transaction_date < ?  order by transaction_date desc,date_index desc limit 0,5 ";
                 dateStr+=" 00:00:00";
-                list = DB.findList(KwWaterRet.class,sql,accountId,dateStr);
+                list = DB.findList(KwWaterRet.class,sql,account,dateStr);
                 break;
             case 2:
                 // 同一天，次序在本条之前
-                sql="select * from kw_water where account_id = ? and transaction_date like ? and date_index<? order by transaction_date desc,date_index desc limit 0,5";
+                sql="select * from kw_water where account = ? and transaction_date like ? and date_index<? order by transaction_date desc,date_index desc limit 0,5";
                 dateStr+="%";
-                list = DB.findList(KwWaterRet.class,sql,accountId,dateStr,dateIndex);
+                list = DB.findList(KwWaterRet.class,sql,account,dateStr,dateIndex);
                 break;
             case 3:
                 // 同一天，次序在本条之后
-                sql="select * from kw_water where account_id = ? and transaction_date like ? and date_index>?  order by transaction_date asc,date_index asc limit 0,5 ";
+                sql="select * from kw_water where account = ? and transaction_date like ? and date_index>?  order by transaction_date asc,date_index asc limit 0,5 ";
                 dateStr+="%";
-                list = DB.findList(KwWaterRet.class,sql,accountId,dateStr,dateIndex);
+                list = DB.findList(KwWaterRet.class,sql,account,dateStr,dateIndex);
                 break;
             case 4:
                 // 晚于本日
-                sql="select * from kw_water where account_id = ? and transaction_date > ?   order by transaction_date asc,date_index asc limit 0,5 ";
+                sql="select * from kw_water where account = ? and transaction_date > ?   order by transaction_date asc,date_index asc limit 0,5 ";
                 dateStr+=" 23:59:59";
-                list = DB.findList(KwWaterRet.class,sql,accountId,dateStr);
+                list = DB.findList(KwWaterRet.class,sql,account,dateStr);
                 break;
             default:
                 return null;

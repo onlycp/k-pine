@@ -62,7 +62,7 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
         // 基础sql
         SqlWrapper wrapper = new SqlWrapper(" SELECT km.bank_name as mechanism_name,ke.name as edition_name,kw.* FROM kw_water kw " +
                 " LEFT JOIN kw_receipt kr on kw.receipt_id = kr.id" +
-                " LEFT JOIN kw_bank_account kba on kw.account_id = kba.id " +
+                " LEFT JOIN kw_bank_account kba on kw.account = kba.account " +
                 " LEFT JOIN kw_edition ke on kba.edition_id = ke.id " +
                 " LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id " +
                 " where 1=1 " );
@@ -182,8 +182,6 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
         // 导出
         KExcel kExcel = KExcel.fromDataList("流水查询.xls", "Sheet1", defineList, pageDataRet.getList());
         ExcelWorker.getInstance().getHandler().writeToWeb(kExcel);
-
-
     }
 
 }
