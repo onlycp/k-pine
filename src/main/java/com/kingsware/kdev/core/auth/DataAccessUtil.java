@@ -5,7 +5,9 @@ import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 数据权限工具类
@@ -28,6 +30,7 @@ public class DataAccessUtil {
      * @return          权限sql
      */
     public static String getDataAccessSql(String table, String alias, SqlLink sqlLink ) {
+
         // 获取用户信息
         BaseUserInfo userInfo = KClientContext.getContext().getUserInfo();
         // 如果不是web登录或者不登录
@@ -42,6 +45,21 @@ public class DataAccessUtil {
         if (StringUtils.isEmpty(userInfo.getAccessIds())) {
             return "1 != 1";
         }
+        // 如果不包括相关表，则不处理
+        if (!AccessManager.getInstance().getAccessTables().containsKey(table.toLowerCase())) {
+            return null;
+        }
+        // 获取附加sql
+        String extraSql = AccessManager.getInstance().getAccessTables().get(table.toLowerCase());
+        // 环境变量
+        if (StringUtils.isNotEmpty(extraSql)) {
+            Map<String, String> contextMap = new HashMap<>();
+            contextMap.put("userId", userInfo.getId());
+            for (Map.Entry<String, String> entry: contextMap.entrySet()) {
+                extraSql = extraSql.replaceAll("\\$\\{"+entry.getKey() +"}", entry.getValue());
+            }
+        }
+
         // 处理in
         String[] arr = userInfo.getAccessIds().split(",");
         List<String> inSet = new ArrayList<>(arr.length);
