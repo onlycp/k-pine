@@ -65,7 +65,7 @@ public class DictManager {
      */
     public String getDictValueByName(String code, String name) {
         String nameKey = code + "." + name;
-        return cache.getOrDefault(nameKey, null);
+        return nameCache.getOrDefault(nameKey, null);
     }
 
 }

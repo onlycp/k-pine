@@ -146,6 +146,7 @@ public class JsonUtil {
      */
     public static <T> T transformMap2Entity(Class<T> tClass, Map<String, Object> map)  throws Exception{
         // 实体化
+
         T entity = tClass.newInstance();
         // 由于postgresql会自动将大写转为小写，这里需要一个将实体属性名称转为小写处理
         Map<String, Field> fieldMap = new HashMap<>();
@@ -167,47 +168,7 @@ public class JsonUtil {
             if (entry.getValue() != null) {
                 if (fieldMap.containsKey(key)) {
                     Field field = fieldMap.get(key);
-                    if (field.getType().isAssignableFrom(Integer.class)) {
-                        field.set(entity, Integer.parseInt(entry.getValue().toString()));
-                    }
-                    else if (field.getType().isAssignableFrom(Long.class)) {
-                        field.set(entity, Long.parseLong(entry.getValue().toString()));
-                    }
-                    else if (field.getType().isAssignableFrom(Float.class)) {
-                        field.set(entity, Float.parseFloat(entry.getValue().toString()));
-                    }
-                    else if (field.getType().isAssignableFrom(Double.class)) {
-                        field.set(entity, Double.parseDouble(entry.getValue().toString()));
-                    }
-                    else if (field.getType().isAssignableFrom(String.class)) {
-                        field.set(entity, entry.getValue().toString());
-                    }
-                    else if (field.getType().isAssignableFrom(Boolean.class)) {
-                        field.set(entity, "1".equals(entry.getValue().toString()));
-                    }
-                    else if (field.getType().isAssignableFrom(BigDecimal.class)) {
-                        field.set(entity, new BigDecimal(entry.getValue().toString()));
-                    }
-                    else if (field.getType().isAssignableFrom(Timestamp.class)) {
-                        // 如果值是整型
-                        if (entry.getValue() instanceof Long) {
-                            field.set(entity, new Timestamp(Long.parseLong(entry.getValue().toString())));
-                        }
-                        // 如果值是字符串
-                        else if (entry.getValue() instanceof  String) {
-                            Date date = DateUtils.toDate(entry.getValue().toString(), DateUtils.DATE_TIME);
-                            if (date != null) {
-                                field.set(entity, new Timestamp(date.getTime()));
-                            }
-                        }
-
-                    }
-                    else if (field.getType().isAssignableFrom(Date.class)) {
-                        field.set(entity, new Date(Long.parseLong(entry.getValue().toString())));
-                    }
-                    else {
-                        field.set(entity, entry.getValue());
-                    }
+                    BeanUtils.setField(field, entity, entry.getValue());
 
                 }
             }
