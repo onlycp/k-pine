@@ -60,12 +60,16 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
     @SuppressWarnings("unchecked")
     public PageDataRet<KwWaterRet> query(KwWaterQueryArgv argv) {
         // 基础sql
-        SqlWrapper wrapper = new SqlWrapper(" SELECT km.bank_name as mechanism_name,ke.name as edition_name,kw.* FROM kw_water kw " +
+        SqlWrapper wrapper = new SqlWrapper(" SELECT kba.bank_deposit, kea.bank_account as edition_account, kbae.pro_name, km.bank_name as mechanism_name, ke.name as edition_name, " +
+                " kw.* FROM kw_water kw " +
                 " LEFT JOIN kw_receipt kr on kw.receipt_id = kr.id" +
-                " LEFT JOIN kw_bank_account kba on kw.account_id = kba.id " +
+                " LEFT JOIN kw_bank_account kba on kw.account = kba.account " +
+                " LEFT JOIN kw_bank_account_expand kbae on kba.account = kbae.account " +
                 " LEFT JOIN kw_edition ke on kba.edition_id = ke.id " +
+                " LEFT JOIN kw_edition_account kea on kea.edition_id = ke.id " +
                 " LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id " +
-                " where 1=1 " );
+                " where kba.deleted = 0 " +
+                " and ke.deleted = 0 ");
 
         // 拼装查询sql,并注入参数
         if (argv.getEditionId() != null) {
@@ -122,15 +126,17 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
     public void export(KwWaterQueryArgv argv) {
         // 直接调用查询方法
         argv.setPageQuery(false);
-        PageDataRet<KwWaterRet> pageDataRet = query(argv);
+        PageDataRet<KwWaterRet> pageDataRet = this.query(argv);
         // 定义标题
         List<RegionDefine> defineList = new ArrayList<>();
-        defineList.add(RegionDefine.textDefine("mechanismName","行别名称"));
-        defineList.add(RegionDefine.textDefine("editionName", "版本名称"));
-        defineList.add(RegionDefine.textDefine("account","账户"));
         defineList.add(RegionDefine.dateDefine("transactionDate", "交易日期"));
         defineList.add(RegionDefine.timeDefine("transactionTime", "交易时间"));
+        defineList.add(RegionDefine.textDefine("mechanismName","机构名称"));
+        defineList.add(RegionDefine.textDefine("editionName", "版本名称"));
+        defineList.add(RegionDefine.textDefine("account","账户"));
         defineList.add(RegionDefine.textDefine("accountName","账户名称"));
+        defineList.add(RegionDefine.textDefine("proName","项目名称"));
+        defineList.add(RegionDefine.textDefine("bankDeposit","开户行"));
         // 借
         defineList.add(RegionDefine.builder().propName("transactionAmount").labelName("借").format((value, model) -> {
             // 收支方向
@@ -175,9 +181,7 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
                 }
             }
             return "异常";
-
         }).build());
-
         // 导出
         KExcel kExcel = KExcel.fromDataList("流水查询.xls", "Sheet1", defineList, pageDataRet.getList());
         ExcelWorker.getInstance().getHandler().writeToWeb(kExcel);

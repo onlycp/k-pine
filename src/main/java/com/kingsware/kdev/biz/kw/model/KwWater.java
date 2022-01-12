@@ -31,6 +31,8 @@ public class KwWater extends BaseManageModel {
     private Date transactionDate;
     // 交易时间 transactionTime
     private Date transactionTime;
+    // 登记时间 register_time
+    private Date registerTime;
     // 金额 transaction_amount
     private String transactionAmount;
     // 收支方向 revenue
@@ -60,7 +62,7 @@ public class KwWater extends BaseManageModel {
     // 是否异常 abnormal
     private Integer abnormal;
     // 异常处理状态 abnormal_status
-    private Integer abnormalstatus;
+    private Integer abnormalStatus;
     // 是否有回单 has_receipt
     private Integer hasReceipt;
     // 数据次序 date_index
