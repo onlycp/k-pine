@@ -171,12 +171,12 @@ public class SqlWrapper {
     public String getSql() {
         String sql = sqlBuffer.toString();
         // 替换空格
-        sql = sql.replaceAll(" + ", "");
+        sql = sql.replaceAll(" + ", " ");
         // 去掉多余的 1=1
         sql = sql.replaceAll("1=1 and", "");
         sql = sql.replaceAll("1 = 1 and", "");
         // 再替换一下空格
-        sql = sql.replaceAll(" + ", "");
+        sql = sql.replaceAll(" + ", " ");
         return sql;
 
     }
