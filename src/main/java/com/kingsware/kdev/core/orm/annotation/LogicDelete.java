@@ -13,10 +13,12 @@ import java.lang.annotation.Target;
  * @date 2021/12/21 10:38 上午
  */
 @Target({ElementType.TYPE})
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface LogicDelete {
     /** 逻辑删除字段名 **/
     String column() default "deleted";
     /** 默认值 **/
     int defValue() default 0;
+    /** 已删除的字段 **/
+    int defDeleteValue() default 1;
 }

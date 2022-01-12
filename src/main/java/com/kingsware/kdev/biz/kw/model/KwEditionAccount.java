@@ -1,6 +1,7 @@
 package com.kingsware.kdev.biz.kw.model;
 
 import com.kingsware.kdev.core.bean.BaseManageModel;
+import com.kingsware.kdev.core.orm.annotation.LogicDelete;
 import com.kingsware.kdev.core.orm.annotation.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -14,6 +15,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Table
+@LogicDelete
 public class KwEditionAccount extends BaseManageModel {
 
     private String editionId;

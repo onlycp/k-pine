@@ -10,6 +10,9 @@ import com.kingsware.kdev.core.orm.kdb.KdbRet;
 import com.kingsware.kdev.core.orm.kdb.StepArgv;
 import com.kingsware.kdev.core.util.HttpUtil;
 import com.kingsware.kdev.core.util.JsonUtil;
+import lombok.SneakyThrows;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.statement.select.Select;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -129,6 +132,7 @@ public class KDBHttpChannel implements DbChannel{
      * @param objects   参数
      * @return          透传参数
      */
+    @SneakyThrows
     private KdbArgv makePassThrough(String sql, List<Object> objects) {
         KdbArgv argv = new KdbArgv();
         argv.setFlowID(passThroughFlowId);

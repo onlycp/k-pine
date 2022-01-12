@@ -5,6 +5,7 @@ import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.orm.annotation.AutoEnum;
 import com.kingsware.kdev.core.orm.annotation.Column;
 import com.kingsware.kdev.core.orm.annotation.ColumnIgnore;
+import com.kingsware.kdev.core.orm.annotation.LogicDelete;
 import com.kingsware.kdev.core.orm.expression.BetweenExpression;
 import com.kingsware.kdev.core.orm.expression.Expression;
 import com.kingsware.kdev.core.orm.expression.SimpleExpression;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.sql.Timestamp;
+import java.text.MessageFormat;
 import java.util.*;
 
 /**
@@ -80,6 +82,12 @@ public class SqlGenerator {
             Field2Column field2Column = new Field2Column(columnName, field, column);
             insertableFields.add(field2Column);
         }
+        // 获取是否逻辑删除
+        LogicDelete logicDelete = LogicDeleteTables.getInstance().getTable(tableName);
+        if (logicDelete != null) {
+            insertColumns.add(logicDelete.column());
+        }
+
         // 遍历赋值
         for (T model: models) {
             List<String> itemValues = new ArrayList<>();
@@ -117,6 +125,11 @@ public class SqlGenerator {
 
                 }
                 addParams(field2Column.getField(), model, params);
+
+            }
+            if (logicDelete != null) {
+                params.add(logicDelete.defValue());
+                itemValues.add("?");
             }
             String subValues = String.format("( %s )", StringUtils.joinToString(itemValues, ","));
             insertValues.add(subValues);
@@ -256,7 +269,15 @@ public class SqlGenerator {
         }
         // 获取表名
         String tableName = ModelUtil.getTableName(tClass);
-        return String.format("select * from %s where %s=?", tableName, StringUtils.humpToLine(idField.getName()));
+        // 逻辑删除
+        LogicDelete logicDelete = LogicDeleteTables.getInstance().getTable(tableName);
+        if (logicDelete == null) {
+            return String.format("select * from %s where %s=?", tableName, StringUtils.humpToLine(idField.getName()));
+        }
+        else {
+            return String.format("select * from %s where %s=? and %s=%d ", tableName, StringUtils.humpToLine(idField.getName()), logicDelete.column(), logicDelete.defValue());
+        }
+
     }
 
     /**
@@ -273,8 +294,15 @@ public class SqlGenerator {
         // 拼接sql
         StringBuilder builder = new StringBuilder();
         builder.append("select * from ").append(tableName).append(" ");
+        // 逻辑删除
+        LogicDelete logicDelete = LogicDeleteTables.getInstance().getTable(tableName);
+        if (logicDelete != null) {
+            builder.append(String.format("where %s=%d", logicDelete.column(), logicDelete.defValue()));
+        }
+        else {
+            builder.append("where 1=1 ");
+        }
         // 拼接查询条件
-        builder.append("where 1=1 ");
         for (Expression expression: expressionList) {
             // 简单表达式
             if (expression instanceof SimpleExpression) {
@@ -319,19 +347,23 @@ public class SqlGenerator {
         if (idField == null) {
             throw new RuntimeException("Model缺少id列定义, 详情见@Column的auto属性");
         }
+        // 返回结果
+        SqlWrapper sqlWrapper = new SqlWrapper();
         // 获取表名
         String tableName = ModelUtil.getTableName(model.getClass());
-        // 拼接sql
-        String builder = "delete from " +
-                tableName + " " +
-                "where " +
-                String.format("%s=?", StringUtils.humpToLine(idField.getName()));
+        // 逻辑删除
+        LogicDelete logicDelete = LogicDeleteTables.getInstance().getTable(tableName);
+        if (logicDelete == null) {
+            sqlWrapper.setSql(MessageFormat.format("delete from {0} where {1}", tableName, String.format("%s=?", StringUtils.humpToLine(idField.getName()))));
+
+        }
+        else {
+            String sql = MessageFormat.format("update {0} set {1}={2} where {3}=?", tableName, logicDelete.column(), logicDelete.defDeleteValue(),StringUtils.humpToLine(idField.getName()));
+            sqlWrapper.setSql(sql);
+        }
         // 参数列表
         List<Object> params = new ArrayList<>();
         params.add(BeanUtils.getFieldValue(idField, model));
-        // 返回结果
-        SqlWrapper sqlWrapper = new SqlWrapper();
-        sqlWrapper.setSql(builder);
         sqlWrapper.setParams(params);
         return sqlWrapper;
     }
@@ -344,7 +376,16 @@ public class SqlGenerator {
         }
         // 获取表名
         String tableName = ModelUtil.getTableName(tClass);
-        return String.format("delete from %s where %s=?", tableName, StringUtils.humpToLine(idField.getName()));
+        // 逻辑删除
+        LogicDelete logicDelete = LogicDeleteTables.getInstance().getTable(tableName);
+        if (logicDelete == null) {
+            return String.format("delete from %s where %s=?", tableName, StringUtils.humpToLine(idField.getName()));
+        }
+        else {
+            return MessageFormat.format("update {0} set {1}={2} where {3}=?", tableName, logicDelete.column(), logicDelete.defDeleteValue(),StringUtils.humpToLine(idField.getName()));
+
+        }
+
     }
 
 
@@ -367,8 +408,5 @@ public class SqlGenerator {
         }).findFirst();
         return optionalIdField.orElse(null);
     }
-
-
-
 
 }
