@@ -68,7 +68,8 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
                 " LEFT JOIN kw_edition ke on kba.edition_id = ke.id " +
                 " LEFT JOIN kw_edition_account kea on kea.edition_id = ke.id " +
                 " LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id " +
-                " where 1=1 " );
+                " where kba.deleted = 0 " +
+                " and ke.deleted = 0 ");
 
         // 拼装查询sql,并注入参数
         if (argv.getEditionId() != null) {
@@ -125,7 +126,7 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
     public void export(KwWaterQueryArgv argv) {
         // 直接调用查询方法
         argv.setPageQuery(false);
-        PageDataRet<KwWaterRet> pageDataRet = query(argv);
+        PageDataRet<KwWaterRet> pageDataRet = this.query(argv);
         // 定义标题
         List<RegionDefine> defineList = new ArrayList<>();
         defineList.add(RegionDefine.dateDefine("transactionDate", "交易日期"));

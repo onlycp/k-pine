@@ -1,6 +1,7 @@
 package com.kingsware.kdev.biz.kw.service;
 
 import com.kingsware.kdev.biz.kw.argv.KwWaterQueryArgv;
+import com.kingsware.kdev.biz.kw.ret.KwBankAccountRet;
 import com.kingsware.kdev.biz.kw.ret.KwWaterRet;
 import com.kingsware.kdev.core.base.BaseService;
 import com.kingsware.kdev.core.bean.PageDataRet;
@@ -33,7 +34,7 @@ public interface KwAccountHistoryBalanceService extends BaseService {
      * @param argv 查询
      * @return 查询结果
      */
-     PageDataRet<KwWaterRet> query(KwWaterQueryArgv argv);
+     PageDataRet<KwBankAccountRet> query(KwWaterQueryArgv argv);
 
 
 

@@ -128,7 +128,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
      * @return
      */
     private Integer countAccountByEditionId(String editionId) {
-        String sql = "select COUNT(id) as num1 FROM kw_bank_account kba where edition_id = ?";
+        String sql = "select COUNT(id) as num1 FROM kw_bank_account kba where deleted = 0 and edition_id = ?";
 
         SqlWrapper wrapper = new SqlWrapper(sql);
         wrapper.getParams().add(editionId);
@@ -149,25 +149,18 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         String sql = "SELECT count(kw.id) as num1 from kw_water kw " +
                 "LEFT JOIN kw_bank_account kba on kba.account=kw.account " +
                 "LEFT JOIN kw_edition ke on ke.id = kba.edition_id " +
-                "where abnormal=1 " +
+                "where kba.deleted=0 " +
+                "and abnormal=1 " +
                 "and ke.id = ? ";
 
         SqlWrapper wrapper = new SqlWrapper(sql);
         wrapper.getParams().add(editionId);
 
-//        List<Object> params = new ArrayList<>();
-//        params.add(editionId);
-
 
         if (argv != null && argv.getStartDate() != null && argv.getEndDate() != null && StringUtils.isNotEmpty(argv.getStartDate())) {
-//            sql += " and kw.transaction_date BETWEEN ? and ? ";
-//            params.add(argv.getStartDate());
-//            params.add(argv.getEndDate());
             wrapper.addCondition("kw.transaction_date", Op.BETWEEN, argv.getStartDate(), argv.getEndDate());
         }
         if (argv != null && argv.getAccount() != null) {
-//            sql += " and kw.account like ? ";
-//            params.add("%"+argv.getAccount()+"%");
             wrapper.addCondition("kw.account", Op.LIKE, "%" + argv.getAccount() + "%");
         }
 
@@ -190,21 +183,17 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         String sql = "SELECT count(kw.id) as num1 from kw_water kw " +
                 "LEFT JOIN kw_bank_account kba on kba.account=kw.account " +
                 "LEFT JOIN kw_edition ke on ke.id =  kba.edition_id " +
-                "where kw.has_receipt=0 " +
+                "where kba.deleted=0 " +
+                "and kw.has_receipt=0 " +
                 "and ke.id = ? ";
         SqlWrapper wrapper = new SqlWrapper(sql);
         wrapper.getParams().add(editionId);
 
 
         if (argv != null && argv.getStartDate() != null && argv.getEndDate() != null && StringUtils.isNotEmpty(argv.getStartDate())) {
-//            sql += " and kw.transaction_date BETWEEN ? and ? ";
-//            params.add(argv.getStartDate());
-//            params.add(argv.getEndDate());
             wrapper.addCondition("kw.transaction_date", Op.BETWEEN, argv.getStartDate(), argv.getEndDate());
         }
         if (argv != null && argv.getAccount() != null) {
-//            sql += " and kw.account like ? ";
-//            params.add("%"+argv.getAccount()+"%");
             wrapper.addCondition("kw.account", Op.LIKE, "%" + argv.getAccount() + "%");
         }
         wrapper.withAuthority("kw_bank_account", "kba");
@@ -223,7 +212,8 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         String sql = "SELECT count(kr.id) as num1 from kw_receipt kr " +
                 "LEFT JOIN kw_bank_account kba on kba.account=kr.self_account " +
                 "LEFT JOIN kw_edition ke on ke.id =  kba.edition_id " +
-                "where kr.has_water=0 " +
+                "where kba.deleted=0 " +
+                "and kr.has_water=0 " +
                 "and ke.id = ? ";
         SqlWrapper wrapper = new SqlWrapper(sql);
         wrapper.getParams().add(editionId);
@@ -276,7 +266,6 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
 
     /**
      * 查找账号ID列表
-     *
      * @return
      */
     private List<String> findAllAccountId() {
@@ -370,7 +359,8 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
                 " LEFT JOIN kw_edition ke on kba.edition_id = ke.id " +
                 " LEFT JOIN kw_edition_account kea on kea.edition_id = ke.id " +
                 " LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id " +
-                " where 1=1 " +
+                " where kba.deleted = 0 " +
+                " and ke.deleted = 0 " +
                 " and kw.abnormal = 1 ");
 
         // 拼装查询sql,并注入参数
