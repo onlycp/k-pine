@@ -3,6 +3,7 @@ package com.kingsware.kdev.core.orm;
 import com.kingsware.kdev.core.auth.DataAccessUtil;
 import com.kingsware.kdev.core.auth.SqlLink;
 import com.kingsware.kdev.core.bean.BaseModel;
+import com.kingsware.kdev.core.orm.annotation.LogicDelete;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.Data;
@@ -168,7 +169,16 @@ public class SqlWrapper {
      * @return      sql
      */
     public String getSql() {
-        return sqlBuffer.toString();
+        String sql = sqlBuffer.toString();
+        // 替换空格
+        sql = sql.replaceAll(" + ", "");
+        // 去掉多余的 1=1
+        sql = sql.replaceAll("1=1 and", "");
+        sql = sql.replaceAll("1 = 1 and", "");
+        // 再替换一下空格
+        sql = sql.replaceAll(" + ", "");
+        return sql;
+
     }
 
     /**
@@ -179,6 +189,45 @@ public class SqlWrapper {
         this.sqlBuffer.setLength(0);
         this.sqlBuffer.append(sql);
     }
-    
+
+    /**
+     * 获取查询的
+     * @param tClass    model类
+     * @param alias     简写
+     * @param selectBody    查询体
+     * @return          查询sql
+     */
+    public static <T> SqlWrapper selectWrapper(Class<T> tClass, String alias, String selectBody) {
+        // 获取表名
+        String tableName = ModelUtil.getTableName(tClass);
+        // 组装sql
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("select ");
+        buffer.append(selectBody).append(" ");
+        buffer.append(tableName).append(" ").append(alias).append(" ");
+        buffer.append("where ");
+        // 判断是否逻辑删除表
+        LogicDelete logicDelete = LogicDeleteTables.getInstance().getTable(tableName);
+        if (logicDelete == null) {
+            buffer.append("1=1 ");
+        }
+        else {
+            buffer.append(alias).append(".").append(logicDelete.column()).append("=").append(logicDelete.defDeleteValue());
+        }
+        return new SqlWrapper(buffer.toString());
+    }
+
+    /**
+     * 获取查询的
+     * @param tClass    model类
+     * @return          查询sql
+     */
+    public static <T> SqlWrapper selectWrapper(Class<T> tClass) {
+        return selectWrapper(tClass, "t", "*");
+    }
+
+
+
+
 
 }
