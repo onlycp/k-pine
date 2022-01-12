@@ -83,9 +83,8 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
         if (argv.getIds() != null) {
             wrapper.in("kw.id", Arrays.asList(argv.getIds().split(",")));
         }
-        // 只能看指定账户下的流水
-        wrapper.withAuthority("kw_bank_account","kba");
-
+        // 数据权限
+        wrapper.withAuthority("kw_bank_account", "kba");
         // 排序
         wrapper.sortBy("ORDER BY kw.transaction_date desc,date_index desc");
         // 执行查询
@@ -182,6 +181,8 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
         // 导出
         KExcel kExcel = KExcel.fromDataList("流水查询.xls", "Sheet1", defineList, pageDataRet.getList());
         ExcelWorker.getInstance().getHandler().writeToWeb(kExcel);
+
+
     }
 
 }

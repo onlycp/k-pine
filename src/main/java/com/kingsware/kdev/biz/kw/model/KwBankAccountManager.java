@@ -17,7 +17,6 @@ import java.sql.Timestamp;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Table
-@LogicDelete
 public class KwBankAccountManager extends BaseManageModel {
     /** 项目id */
     private String proId;
@@ -29,6 +28,8 @@ public class KwBankAccountManager extends BaseManageModel {
     private String customerManagerName;
     /** 客户名称 */
     private String customerName;
+    /** 预约金额（元） */
+    private String amount;
     /** 备用字段1 */
     private String reserve1;
     /** 备用字段2 */

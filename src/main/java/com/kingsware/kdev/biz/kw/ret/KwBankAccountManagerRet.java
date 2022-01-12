@@ -23,6 +23,8 @@ public class KwBankAccountManagerRet extends BaseManageRet {
     private String customerManagerName;
     /** 客户名称 */
     private String customerName;
+    /** 预约金额（元） */
+    private String amount;
     /** 备用字段1 */
     private String reserve1;
     /** 备用字段2 */
