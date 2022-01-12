@@ -40,19 +40,19 @@ class KwWaterArgv {
 class ExcelWorkerTest {
 
 
-    @Test
-    void readFromFile() {
-        String filePath = "/Users/mac/Documents/流水查询.xls";
-
-        // 定义标题
-        List<RegionDefine> defineList = new ArrayList<>();
-        defineList.add(RegionDefine.builder().propName("mechanismId").labelName("行别名称").format(new RegionModelIdFormat(KwMechanism.class, "bankName")).build());
-        defineList.add(RegionDefine.textDefine("editionName","版本名称"));
-        defineList.add(RegionDefine.textDefine("account","账户"));
-        defineList.add(RegionDefine.builder().propName("abnormal").labelName("是否异常").format(new RegionDictReverseFormat("sys_yes_no")).build());
-
-        List<KwWaterArgv> waterRets = ExcelWorker.getInstance().readFromFile(filePath, 0, defineList, KwWaterArgv.class);
-        System.out.println(JsonUtil.toJson(waterRets));
-
-    }
+//    @Test
+//    void readFromFile() {
+//        String filePath = "/Users/mac/Documents/流水查询.xls";
+//
+//        // 定义标题
+//        List<RegionDefine> defineList = new ArrayList<>();
+//        defineList.add(RegionDefine.builder().propName("mechanismId").labelName("行别名称").format(new RegionModelIdFormat(KwMechanism.class, "bankName")).build());
+//        defineList.add(RegionDefine.textDefine("editionName","版本名称"));
+//        defineList.add(RegionDefine.textDefine("account","账户"));
+//        defineList.add(RegionDefine.builder().propName("abnormal").labelName("是否异常").format(new RegionDictReverseFormat("sys_yes_no")).build());
+//
+//        List<KwWaterArgv> waterRets = ExcelWorker.getInstance().readFromFile(filePath, 0, defineList, KwWaterArgv.class);
+//        System.out.println(JsonUtil.toJson(waterRets));
+//
+//    }
 }
