@@ -43,7 +43,7 @@ public class ModelUtil {
             // 然后转为下划线
             tableName =  StringUtils.humpToLine(instName);
         }
-        return tableName;
+        return tableName.toLowerCase();
     }
 
     /**

@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.cache.access.AccessManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.util.StringUtils;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -68,10 +69,12 @@ public class DataAccessUtil {
         }
         // 拼接权限sql(由于id是uuid，这里忽略table_name)
         if (sqlLink == SqlLink.EXISTS) {
-            return "exists (select ar.data_id from sys_data_access_resource ar where " + alias + ".id=ar.data_id and ar.access_id in (" + StringUtils.joinToString(inSet, ",") + "))";
+            return MessageFormat.format("exists (" +
+                    "select ar.data_id from sys_data_access_resource ar where {0}.id=ar.data_id and ar.access_id in ({1})" +
+                    ")", alias, StringUtils.joinToString(inSet, ","));
         }
         else if (sqlLink == SqlLink.IN) {
-            return  alias +".id in (select ar.data_id from sys_data_access_resource ar where ar.table_name='"+ table+ "' and  ar.access_id in (" + StringUtils.joinToString(inSet, ",") + "))";
+            return MessageFormat.format("{0}.id in (select ar.data_id from sys_data_access_resource ar where ar.table_name=''{1}'' and  ar.access_id in ({2}))", alias, table, StringUtils.joinToString(inSet, ","));
         }
         return null;
     }

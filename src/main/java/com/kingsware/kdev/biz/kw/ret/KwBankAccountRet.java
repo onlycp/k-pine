@@ -19,6 +19,8 @@ import java.sql.Timestamp;
 public class KwBankAccountRet extends BaseManageRet {
     /** 版本id */
     private String editionId;
+    /** 版本名称 */
+    private String editionName;
     /** 版本账号id */
     private String editionAccountId;
     /** 账户 */

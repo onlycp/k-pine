@@ -70,6 +70,7 @@ public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankA
         sql.append(" select  ");
         sql.append(" 	kc.name as company_name, ");
         sql.append(" 	km.bank_name as mechanism_name, ");
+        sql.append(" 	ke.name as edition_name, ");
         sql.append(" 	kba.* ");
         sql.append(" from kw_bank_account kba  ");
         sql.append(" left join kw_edition ke on ke.id = kba.edition_id  ");
