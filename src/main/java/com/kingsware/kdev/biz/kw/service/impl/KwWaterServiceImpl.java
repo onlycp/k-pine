@@ -60,10 +60,13 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
     @SuppressWarnings("unchecked")
     public PageDataRet<KwWaterRet> query(KwWaterQueryArgv argv) {
         // 基础sql
-        SqlWrapper wrapper = new SqlWrapper(" SELECT km.bank_name as mechanism_name,ke.name as edition_name,kw.* FROM kw_water kw " +
+        SqlWrapper wrapper = new SqlWrapper(" SELECT kba.bank_deposit, kea.bank_account as edition_account, kbae.pro_name, km.bank_name as mechanism_name, ke.name as edition_name, " +
+                " kw.* FROM kw_water kw " +
                 " LEFT JOIN kw_receipt kr on kw.receipt_id = kr.id" +
                 " LEFT JOIN kw_bank_account kba on kw.account = kba.account " +
+                " LEFT JOIN kw_bank_account_expand kbae on kba.account = kbae.account " +
                 " LEFT JOIN kw_edition ke on kba.edition_id = ke.id " +
+                " LEFT JOIN kw_edition_account kea on kea.edition_id = ke.id " +
                 " LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id " +
                 " where 1=1 " );
 

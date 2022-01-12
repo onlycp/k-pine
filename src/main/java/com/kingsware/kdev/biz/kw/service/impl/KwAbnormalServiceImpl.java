@@ -364,10 +364,11 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
     @Override
     public PageDataRet<KwWaterRet> queryAbnormalWater(KwWaterQueryArgv argv) {
         // 基础sql
-        SqlWrapper wrapper = new SqlWrapper(" SELECT km.bank_name as mechanism_name,ke.name as edition_name,kw.* FROM kw_water kw " +
+        SqlWrapper wrapper = new SqlWrapper(" SELECT  kea.bank_account as edition_account, kba.bank_deposit ,km.bank_name as mechanism_name,ke.name as edition_name,kw.* FROM kw_water kw " +
                 " LEFT JOIN kw_receipt kr on kw.receipt_id = kr.id" +
                 " LEFT JOIN kw_bank_account kba on kw.account = kba.account " +
                 " LEFT JOIN kw_edition ke on kba.edition_id = ke.id " +
+                " LEFT JOIN kw_edition_account kea on kea.edition_id = ke.id " +
                 " LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id " +
                 " where 1=1 " +
                 " and kw.abnormal = 1 ");
@@ -386,6 +387,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
             wrapper.addCondition("kw.transaction_date", Op.BETWEEN, argv.getStartDate(), argv.getEndDate());
         }
 
+        // 访问权限
         wrapper.withAuthority("kw_bank_account","kba");
 
         // 排序

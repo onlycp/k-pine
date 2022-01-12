@@ -27,8 +27,7 @@ public class KwAbnormalQueryArgv extends BasePageArgv {
     private String editionAccount;
     private String editionAccountId;
 
-
-    /** 版本账号 */
+    /** 账户 */
     private String account;
     private String accountId;
 
