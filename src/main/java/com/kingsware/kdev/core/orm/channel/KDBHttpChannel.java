@@ -110,7 +110,10 @@ public class KDBHttpChannel implements DbChannel{
         List<T> result = new ArrayList<>(list.size());
         for (int i = 0; i < list.size(); i++) {
             Map<?, ?> map = list.get(i);
-            if (map.size() != 1) {
+            if (map.size() == 0) {
+                return new ArrayList<>();
+            }
+            else if (map.size() > 1) {
                 throw new OrmDbException("查询单个属性，但返回不等于1的结果：" + ret.getMessage());
             }
             map.forEach((key, value) -> {

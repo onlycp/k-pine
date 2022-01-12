@@ -76,7 +76,7 @@ public class DB {
      * @return          单个实体或空
      */
     public static <T> T findSingleAttribute(Class<T> tClass, String sql, Object... params) {
-        return getDefault().findOne(tClass, sql, params);
+        return getDefault().findSingleAttribute(tClass, sql, params);
     }
 
     /**
