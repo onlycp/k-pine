@@ -2,6 +2,7 @@ package com.kingsware.kdev.core.orm;
 
 import com.kingsware.kdev.core.auth.DataAccessUtil;
 import com.kingsware.kdev.core.auth.SqlLink;
+import com.kingsware.kdev.core.bean.BaseModel;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.Data;
@@ -26,6 +27,8 @@ public class SqlWrapper {
     public SqlWrapper() {
     }
 
+
+
     public SqlWrapper(String sql) {
         this.sqlBuffer.append(sql);
     }
@@ -36,11 +39,12 @@ public class SqlWrapper {
      * @param op            操作符
      * @param objects       参数
      */
-    public void addCondition(String columnName, Op op, Object... objects) {
+    public SqlWrapper addCondition(String columnName, Op op, Object... objects) {
         sqlBuffer.append(" and ");
         sqlBuffer.append(columnName).append(" ");
         sqlBuffer.append(op.bind());
         params.addAll(Arrays.asList(objects));
+        return this;
     }
 
     /**
@@ -49,11 +53,12 @@ public class SqlWrapper {
      * @param bind            操作符
      * @param objects       参数
      */
-    public void addCondition(String columnName, String bind, Object... objects) {
+    public SqlWrapper addCondition(String columnName, String bind, Object... objects) {
         sqlBuffer.append(" and ");
         sqlBuffer.append(columnName).append(" ");
         sqlBuffer.append(bind);
         params.addAll(Arrays.asList(objects));
+        return this;
     }
 
     /**
@@ -61,10 +66,11 @@ public class SqlWrapper {
      * @param condition 条件语句
      * @param objects   参数
      */
-    public void addCondition(String condition, Object... objects) {
+    public SqlWrapper addCondition(String condition, Object... objects) {
         sqlBuffer.append(" and ");
         sqlBuffer.append(condition);
         params.addAll(Arrays.asList(objects));
+        return this;
     }
 
     /**
@@ -72,7 +78,7 @@ public class SqlWrapper {
      * @param columnName 列表
      * @param inSet      id的集合
      */
-    public void in(String columnName, Collection<Object> inSet) {
+    public SqlWrapper in(String columnName, Collection<Object> inSet) {
         sqlBuffer.append(" and ");
         sqlBuffer.append(columnName);
         sqlBuffer.append(" in ( ");
@@ -85,6 +91,7 @@ public class SqlWrapper {
         sqlBuffer.setLength(0);
         sqlBuffer.append(tempSql);
         sqlBuffer.append(") ");
+        return this;
     }
 
     /**
@@ -93,12 +100,13 @@ public class SqlWrapper {
      * @param lowValue      低值
      * @param highValue     高值
      */
-    public void between(String columnName, Object lowValue, Object highValue) {
+    public SqlWrapper between(String columnName, Object lowValue, Object highValue) {
         sqlBuffer.append(" and ( ");
         sqlBuffer.append(columnName);
         sqlBuffer.append(" between ? and ? ) ");
         params.add(lowValue);
         params.add(highValue);
+        return this;
     }
 
     /**
@@ -106,20 +114,21 @@ public class SqlWrapper {
      * @param tableName  数据库表名
      * @param alias      简写
      */
-    public void withAuthority(String tableName, String alias) {
+    public SqlWrapper withAuthority(String tableName, String alias) {
         // 获取权限sql
         String authoritySql = DataAccessUtil.getDataAccessSql(tableName, alias, SqlLink.EXISTS);
         if (StringUtils.isNotEmpty(authoritySql)) {
             sqlBuffer.append(" and ");
             sqlBuffer.append(authoritySql);
         }
+        return this;
     }
 
     /**
      * 排序
      * @param sortBy
      */
-    public void sortBy(String sortBy) {
+    public SqlWrapper sortBy(String sortBy) {
         if (sortBy.trim().toLowerCase().startsWith("order by")) {
             sqlBuffer.append(" ");
             sqlBuffer.append(sortBy);
@@ -131,6 +140,7 @@ public class SqlWrapper {
             sqlBuffer.append(sortBy);
             sqlBuffer.append(" ");
         }
+        return this;
     }
 
 
@@ -138,7 +148,7 @@ public class SqlWrapper {
      * 增加group by
      * @param groupBy   group by字符串
      */
-    public void groupBy(String groupBy) {
+    public SqlWrapper groupBy(String groupBy) {
         if (groupBy.trim().toLowerCase().startsWith("group by")) {
             sqlBuffer.append( " ");
             sqlBuffer.append(groupBy);
@@ -150,6 +160,7 @@ public class SqlWrapper {
             sqlBuffer.append(groupBy);
             sqlBuffer.append(" ");
         }
+        return this;
     }
 
     /**
@@ -168,6 +179,6 @@ public class SqlWrapper {
         this.sqlBuffer.setLength(0);
         this.sqlBuffer.append(sql);
     }
-
+    
 
 }
