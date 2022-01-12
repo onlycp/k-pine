@@ -415,7 +415,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         final Date transactionDate = curWaterRet.getTransactionDate();
         final Integer dateIndex = curWaterRet.getDateIndex();
 
-        System.out.println(accountId + " -- " + transactionDate + " -- " + dateIndex);
+//        System.out.println(accountId + " -- " + transactionDate + " -- " + dateIndex);
         // 2、查找前n条流水
         // 同一天 2
         List<KwWaterRet> nearlyWater1 = null;
@@ -423,7 +423,6 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         List<KwWaterRet> nearlyWater3;
         List<KwWaterRet> nearlyWater4 = null;
         nearlyWater2 = this.findNearlyWater(2, account, transactionDate, dateIndex);
-//        System.out.println(nearlyWater2);
         // 非同一天 1
         if (nearlyWater2.size() < 5) {
             nearlyWater1 = this.findNearlyWater(1, account, transactionDate, dateIndex);
@@ -431,7 +430,6 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         // 3、查找后n条流水
         // 同一天  3
         nearlyWater3 = this.findNearlyWater(3, account, transactionDate, dateIndex);
-//        System.out.println(nearlyWater3);
         // 非同一天 4
         if (nearlyWater3.size() < 5) {
             nearlyWater4 = this.findNearlyWater(4, account, transactionDate, dateIndex);
@@ -507,6 +505,5 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         }
         return list;
     }
-
 
 }

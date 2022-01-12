@@ -6,7 +6,7 @@ import com.kingsware.kdev.core.base.BaseService;
 import com.kingsware.kdev.core.bean.PageDataRet;
 
 /**
- * 行别管理业务类
+ * 账户历史余额业务类
  *
  * @author chen peng
  * @version 1.0.0

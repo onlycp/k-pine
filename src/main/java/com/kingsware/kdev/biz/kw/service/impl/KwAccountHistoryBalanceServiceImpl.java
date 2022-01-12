@@ -6,6 +6,9 @@ import com.kingsware.kdev.biz.kw.service.KwAccountHistoryBalanceService;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.PageDataRet;
 
+/**
+ *
+ */
 public class KwAccountHistoryBalanceServiceImpl extends BaseServiceImpl implements KwAccountHistoryBalanceService {
     @Override
     public KwWaterRet get(String id) {
@@ -18,12 +21,15 @@ public class KwAccountHistoryBalanceServiceImpl extends BaseServiceImpl implemen
     }
 
     /**
-     * 分页查询历史余额
+     * 分页查询历史余额（从流水中）
      * @param argv 查询
      * @return
      */
     @Override
     public PageDataRet<KwWaterRet> query(KwWaterQueryArgv argv) {
+
+
+
         return null;
     }
 
