@@ -1,5 +1,6 @@
 package com.kingsware.kdev.biz.kw.ret;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kingsware.kdev.core.bean.BaseManageRet;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -30,10 +31,13 @@ public class KwBankAccountExpandRet extends BaseManageRet {
     /** 信托会计账号 */
     private String trustAccountingAccount;
     /** 项目上架日期 */
+    @JsonFormat(pattern="yyyy-MM-dd", timezone="GMT+8")
     private Timestamp upDate;
     /** 项目下架日期 */
+    @JsonFormat(pattern="yyyy-MM-dd", timezone="GMT+8")
     private Timestamp downDate;
     /** 项目录入日期 */
+    @JsonFormat(pattern="yyyy-MM-dd", timezone="GMT+8")
     private Timestamp inDate;
     /** 备用字段1 */
     private String reserve1;
