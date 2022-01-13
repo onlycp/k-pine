@@ -131,7 +131,7 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
         defineList.add(RegionDefine.builder().labelName("备注").example("").build());
         // 导出
         KExcel kExcel = KExcel.fromHeaderList("标准流水.xls", "Sheet1", defineList);
-        ExcelWorker.getInstance().getHandler().writeToWeb(kExcel);
+        ExcelWorker.getInstance().writeToWeb(kExcel);
     }
 
     @Override
@@ -196,7 +196,7 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
         }).build());
         // 导出
         KExcel kExcel = KExcel.fromDataList("流水查询.xls", "Sheet1", defineList, pageDataRet.getList());
-        ExcelWorker.getInstance().getHandler().writeToWeb(kExcel);
+        ExcelWorker.getInstance().writeToWeb(kExcel);
 
 
     }

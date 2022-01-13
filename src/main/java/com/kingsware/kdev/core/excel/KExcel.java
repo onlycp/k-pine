@@ -67,7 +67,7 @@ public class KExcel {
         for (int i = 0; i < defines.size(); i++) {
             RegionDefine define = defines.get(i);
             // 写表头
-            sheet.addCellRegion(1, i+1, define.getLabelName());
+            sheet.addCellRegion(0, i, define.getLabelName());
             // 写数据
             for (int j = 0; j < list.size(); j++) {
                 Object obj = list.get(j);
@@ -78,7 +78,7 @@ public class KExcel {
                 if (define.getFormat() != null) {
                     cellValue = define.getFormat().format(cellValue, obj);
                 }
-                sheet.addCellRegion(j + 2, i+1, cellValue);
+                sheet.addCellRegion(j + 1, i, cellValue);
             }
         }
         return excel;

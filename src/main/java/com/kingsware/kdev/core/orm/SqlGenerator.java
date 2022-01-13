@@ -105,7 +105,7 @@ public class SqlGenerator {
                             BeanUtils.setField(field, model, StringUtils.getUUID());
                         }
                         else if (column.auto() == AutoEnum.WHO) {
-                            if (KClientContext.getContext().getUserInfo() != null) {
+                            if (KClientContext.getContext() != null && KClientContext.getContext().getUserInfo() != null) {
                                 BeanUtils.setField(field, model, KClientContext.getContext().getUserInfo().getId());
                             }
                             else {
@@ -224,7 +224,7 @@ public class SqlGenerator {
                 updateList.add(String.format("%s=?", columnName));
                 // 增加值
                 if (column.auto() == AutoEnum.WHO) {
-                    if (KClientContext.getContext().getUserInfo() != null) {
+                    if (KClientContext.getContext() != null && KClientContext.getContext().getUserInfo() != null) {
                         BeanUtils.setField(field, model, KClientContext.getContext().getUserInfo().getId());
                     }
                     else {

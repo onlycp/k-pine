@@ -82,7 +82,7 @@ public class SysLoginLogServiceImpl extends BaseServiceImpl implements SysLoginL
         defineList.add(RegionDefine.builder().propName("operateTime").labelName("操作时间").build());
         // 导出
         KExcel kExcel = KExcel.fromDataList("登录日志.xls", "登录日志", defineList, pageDataRet.getList());
-        ExcelWorker.getInstance().getHandler().writeToWeb(kExcel);
+        ExcelWorker.getInstance().writeToWeb(kExcel);
     }
 
 }
