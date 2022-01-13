@@ -1,5 +1,6 @@
 package com.kingsware.kdev.biz.kw.service.impl;
 
+import com.github.xiaoymin.knife4j.core.util.StrUtil;
 import com.kingsware.kdev.biz.kw.argv.KwWaterQueryArgv;
 import com.kingsware.kdev.biz.kw.model.KwBankAccount;
 import com.kingsware.kdev.biz.kw.ret.KwBankAccountRet;
@@ -14,6 +15,7 @@ import com.kingsware.kdev.core.excel.KExcel;
 import com.kingsware.kdev.core.excel.RegionDefine;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
+import com.kingsware.kdev.core.util.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -53,10 +55,7 @@ public class KwAccountHistoryBalanceServiceImpl extends BaseServiceImpl implemen
                 "  WHERE 1=1 ";
 
         SqlWrapper wrapper = new SqlWrapper(sql);
-        if (argv.getAccount()!=null){
-            wrapper.addCondition("w.account", Op.LIKE,""+argv.getAccount()+"");
-        }
-        if (argv.getEndDate()!=null){
+        if (argv.getEndDate()!=null&& StringUtils.isNotEmpty(argv.getEndDate())){
             wrapper.addCondition("w.transaction_date", Op.LT_EQ,argv.getEndDate());
         }
 
@@ -68,7 +67,15 @@ public class KwAccountHistoryBalanceServiceImpl extends BaseServiceImpl implemen
                 "on t2.account = kba.account " +
                 "WHERE kba.deleted = 0 " );
 
+
+        if (argv.getAccount()!=null && StringUtils.isNotEmpty(argv.getAccount())){
+            wrapper.addCondition("kba.account", Op.LIKE,"%"+argv.getAccount()+"%");
+        }
+
         wrapper.withAuthority("kw_bank_account","kba");
+
+//        System.out.println(argv.getAccount());
+//        System.out.println(wrapper.getSql());
 
         PageDataRet<? extends BaseSimpleRet> query = query(wrapper.getSql(), wrapper.getParams(), argv, KwBankAccountRet.class);
 
