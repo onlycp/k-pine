@@ -18,6 +18,8 @@ import java.sql.Timestamp;
 @EqualsAndHashCode(callSuper = true)
 public class KwBankAccountRet extends BaseManageRet {
     /** 版本id */
+    private String mechanismId;
+    /** 版本id */
     private String editionId;
     /** 版本名称 */
     private String editionName;
