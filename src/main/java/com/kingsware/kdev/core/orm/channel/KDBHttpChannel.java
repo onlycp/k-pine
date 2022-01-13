@@ -35,7 +35,7 @@ public class KDBHttpChannel implements DbChannel{
     /** 透传sql的流程id **/
     private final static String executeStep = "execute";
     /** 透传sql的流程id **/
-    private final static String executeResult = "result@execute";
+    private final static String executeResult = "result_execute";
 
     @Override
     public String name() {

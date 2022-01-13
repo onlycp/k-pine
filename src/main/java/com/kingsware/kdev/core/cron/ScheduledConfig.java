@@ -2,6 +2,7 @@ package com.kingsware.kdev.core.cron;
 
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.util.ClassUtils;
+import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -48,7 +49,7 @@ public class ScheduledConfig implements SchedulingConfigurer {
                     try {
                         long t1 = System.currentTimeMillis();
                         task.execute();
-                        log.info("定时任务执行成功, 任务名: {}， Class: {}, 耗时:{} ms", task.name(), task.getClass().getName(), System.currentTimeMillis() - t1);
+                        log.debug("定时任务执行成功, 任务名: {}， Class: {}, 耗时:{} ms", task.name(), task.getClass().getName(), System.currentTimeMillis() - t1);
                     }
                     catch (Exception e) {
                         log.error("定时任务执行失败, 任务名: {}， Class: {}, 错误信息:{}", task.name(), task.getClass().getName(), e.getMessage());
@@ -59,7 +60,7 @@ public class ScheduledConfig implements SchedulingConfigurer {
                 });
             }
             catch (Exception e) {
-                log.info("定时任务初始化失败");
+                log.error("定时任务初始化失败:{}" , e.getMessage());
             }
         }
     }

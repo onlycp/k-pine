@@ -41,8 +41,8 @@ public class KDBConnectConfig extends DBConnectConfig {
             config.setExecuteSqlApi(this.getExecuteSqlApi());
             String[] arr = db.split(":");
             config.setDbName(arr[0]);
-            config.setInnerType(arr[1]);
-            config.setDataSource(arr[2]);
+            config.setInnerType(arr[2]);
+            config.setDataSource(arr[1]);
             configs.add(config);
         }
         return configs;
