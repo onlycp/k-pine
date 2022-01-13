@@ -79,7 +79,6 @@ public class SysFileController extends BaseController {
      */
     @PostMapping("/upload/{fileFrom}/{saveType}")
     @ResponseBody
-    @ApiIgnore
     public BaseRet<List<SysFileRet>> upload(@RequestParam("files") MultipartFile[] files, @PathVariable String fileFrom, @PathVariable Integer saveType) {
         return BaseRet.success(sysFileService.upload(files, fileFrom, saveType));
     }

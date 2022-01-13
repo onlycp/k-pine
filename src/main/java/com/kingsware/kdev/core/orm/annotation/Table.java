@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  * @date 2021/12/21 10:38 上午
  */
 @Target({ElementType.TYPE})
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Table {
     /** 表名 **/
     String value() default "";

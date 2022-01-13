@@ -100,6 +100,7 @@ public class SysDictServiceImpl extends BaseServiceImpl implements SysDictServic
         if (StringUtils.isNotEmpty(argv.getCode())) {
             wrapper.addCondition("code", Op.LIKE, "%" + argv.getCode() + "%");
         }
+        wrapper.sortBy(" order by when_created desc ");
         // 返回结果
         return (PageDataRet<SysDictRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysDict.class, SysDictRet.class);
     }

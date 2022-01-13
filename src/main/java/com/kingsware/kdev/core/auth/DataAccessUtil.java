@@ -4,8 +4,11 @@ import com.kingsware.kdev.core.cache.access.AccessManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.util.StringUtils;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 数据权限工具类
@@ -28,6 +31,7 @@ public class DataAccessUtil {
      * @return          权限sql
      */
     public static String getDataAccessSql(String table, String alias, SqlLink sqlLink ) {
+
         // 获取用户信息
         BaseUserInfo userInfo = KClientContext.getContext().getUserInfo();
         // 如果不是web登录或者不登录
@@ -42,6 +46,21 @@ public class DataAccessUtil {
         if (StringUtils.isEmpty(userInfo.getAccessIds())) {
             return "1 != 1";
         }
+        // 如果不包括相关表，则不处理
+        if (!AccessManager.getInstance().getAccessTables().containsKey(table.toLowerCase())) {
+            return null;
+        }
+        // 获取附加sql
+        String extraSql = AccessManager.getInstance().getAccessTables().get(table.toLowerCase());
+        // 环境变量
+        if (StringUtils.isNotEmpty(extraSql)) {
+            Map<String, String> contextMap = new HashMap<>();
+            contextMap.put("userId", userInfo.getId());
+            for (Map.Entry<String, String> entry: contextMap.entrySet()) {
+                extraSql = extraSql.replaceAll("\\$\\{"+entry.getKey() +"}", entry.getValue());
+            }
+        }
+
         // 处理in
         String[] arr = userInfo.getAccessIds().split(",");
         List<String> inSet = new ArrayList<>(arr.length);
@@ -50,10 +69,12 @@ public class DataAccessUtil {
         }
         // 拼接权限sql(由于id是uuid，这里忽略table_name)
         if (sqlLink == SqlLink.EXISTS) {
-            return "exists (select ar.data_id from sys_data_access_resource ar where " + alias + ".id=ar.data_id and ar.access_id in (" + StringUtils.joinToString(inSet, ",") + "))";
+            return MessageFormat.format("exists (" +
+                    "select ar.data_id from sys_data_access_resource ar where {0}.id=ar.data_id and ar.access_id in ({1})" +
+                    ")", alias, StringUtils.joinToString(inSet, ","));
         }
         else if (sqlLink == SqlLink.IN) {
-            return  alias +".id in (select ar.data_id from sys_data_access_resource ar where ar.table_name='"+ table+ "' and  ar.access_id in (" + StringUtils.joinToString(inSet, ",") + "))";
+            return MessageFormat.format("{0}.id in (select ar.data_id from sys_data_access_resource ar where ar.table_name=''{1}'' and  ar.access_id in ({2}))", alias, table, StringUtils.joinToString(inSet, ","));
         }
         return null;
     }

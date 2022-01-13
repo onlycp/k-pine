@@ -18,11 +18,11 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * 行别管理业务类
+ * 流水管理业务类
  *
- * @author chen peng
+ * @author zxw
  * @version 1.0.0
- * @date 2021/12/23 9:35 上午
+ * @date 2022/01/04
  */
 public interface KwWaterService extends BaseService {
 

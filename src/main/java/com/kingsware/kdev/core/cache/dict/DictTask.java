@@ -3,10 +3,11 @@ package com.kingsware.kdev.core.cache.dict;
 import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.sys.model.SysDictItem;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import com.kingsware.kdev.sys.service.SysUserService;
+import org.springframework.beans.factory.annotation.Autowired;
 
+
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 

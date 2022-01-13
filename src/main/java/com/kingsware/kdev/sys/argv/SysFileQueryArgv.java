@@ -19,6 +19,8 @@ public class SysFileQueryArgv extends BasePageArgv {
     private String fileFrom;
     /** 文件名 */
     private String fileExt;
+    /** 存储方式 **/
+    private Integer saveType;
     /** 上传时间 */
     private String uploadTimes;
 

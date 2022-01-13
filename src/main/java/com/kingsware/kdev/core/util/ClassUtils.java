@@ -1,5 +1,8 @@
 package com.kingsware.kdev.core.util;
 
+import com.kingsware.kdev.biz.kw.model.KwEditionAccount;
+import com.kingsware.kdev.core.orm.annotation.LogicDelete;
+import com.kingsware.kdev.core.orm.annotation.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
@@ -10,6 +13,7 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,6 +56,40 @@ public class ClassUtils {
                     String className = reader.getClassMetadata().getClassName();
                     Class<?> clazz = Class.forName(className);
                     if (parentClass.isAssignableFrom(clazz) && !clazz.isInterface()) {
+                        result.add(clazz);
+                    }
+                }
+            }
+
+        } catch (IOException | ClassNotFoundException e) {
+            logger.warn("扫描Class异常，异常信息：{}" , e.getLocalizedMessage());
+        }
+        return result;
+    }
+
+    /**
+     * 通过注解查询class
+     * @param basePackage   基础路径
+     * @param annotationClass   注解类
+     * @return              所有继承于父类的接口
+     */
+    public static List<Class<?>> getClassesByAnnotationClass(String basePackage, Class<? extends Annotation> annotationClass) {
+        // 返回结果列表
+        List<Class<?>> result = new ArrayList<>();
+        try {
+            // 扫描所有的class
+            String resourcePattern = "/**/*.class";
+            String pattern = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + org.springframework.util.ClassUtils.convertClassNameToResourcePath(basePackage) + resourcePattern;
+            ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
+            Resource[] resources = resourcePatternResolver.getResources(pattern);
+            MetadataReaderFactory readerFactory = new CachingMetadataReaderFactory(resourcePatternResolver);
+            // 遍历所有类，查询消费类
+            for (Resource resource : resources) {
+                if (resource.isReadable()) {
+                    MetadataReader reader = readerFactory.getMetadataReader(resource);
+                    String className = reader.getClassMetadata().getClassName();
+                    Class<?> clazz = Class.forName(className);
+                    if (clazz.isAnnotationPresent(annotationClass)) {
                         result.add(clazz);
                     }
                 }

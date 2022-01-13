@@ -3,6 +3,7 @@ package com.kingsware.kdev.biz.kw.service.impl;
 import com.kingsware.kdev.biz.kw.argv.KwBankAccountArgv;
 import com.kingsware.kdev.biz.kw.argv.KwBankAccountQueryArgv;
 import com.kingsware.kdev.biz.kw.model.KwBankAccount;
+import com.kingsware.kdev.biz.kw.model.KwEdition;
 import com.kingsware.kdev.biz.kw.ret.KwBankAccountRet;
 import com.kingsware.kdev.biz.kw.service.KwBankAccountService;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
@@ -34,8 +35,13 @@ public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankA
     public KwBankAccountRet get(String id) {
         // 查询model
         KwBankAccount model = DB.findById(KwBankAccount.class, id);
+        KwEdition edition = DB.findById(KwEdition.class, model.getEditionId());
         // 转换成ret对象
-        return (KwBankAccountRet) model2Ret(model, KwBankAccountRet.class);
+        KwBankAccountRet kwBankAccountRet = (KwBankAccountRet) model2Ret(model, KwBankAccountRet.class);
+        if (edition != null) {
+            kwBankAccountRet.setMechanismId(edition.getMechanismId());
+        }
+        return kwBankAccountRet;
     }
 
     @Override
@@ -60,6 +66,10 @@ public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankA
         BeanUtils.copyProperties(argv, model);
         // 保存
         DB.update(model);
+
+        SqlWrapper selectWrapper = SqlWrapper.selectWrapper(KwBankAccount.class);
+        selectWrapper.addCondition("name", Op.LIKE,  "%1%");
+
     }
 
 
@@ -70,6 +80,7 @@ public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankA
         sql.append(" select  ");
         sql.append(" 	kc.name as company_name, ");
         sql.append(" 	km.bank_name as mechanism_name, ");
+        sql.append(" 	ke.name as edition_name, ");
         sql.append(" 	kba.* ");
         sql.append(" from kw_bank_account kba  ");
         sql.append(" left join kw_edition ke on ke.id = kba.edition_id  ");

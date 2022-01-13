@@ -2,6 +2,8 @@ package com.kingsware.kdev.core.orm;
 
 import com.kingsware.kdev.core.auth.DataAccessUtil;
 import com.kingsware.kdev.core.auth.SqlLink;
+import com.kingsware.kdev.core.bean.BaseModel;
+import com.kingsware.kdev.core.orm.annotation.LogicDelete;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.Data;
@@ -26,6 +28,8 @@ public class SqlWrapper {
     public SqlWrapper() {
     }
 
+
+
     public SqlWrapper(String sql) {
         this.sqlBuffer.append(sql);
     }
@@ -36,11 +40,12 @@ public class SqlWrapper {
      * @param op            操作符
      * @param objects       参数
      */
-    public void addCondition(String columnName, Op op, Object... objects) {
+    public SqlWrapper addCondition(String columnName, Op op, Object... objects) {
         sqlBuffer.append(" and ");
         sqlBuffer.append(columnName).append(" ");
         sqlBuffer.append(op.bind());
         params.addAll(Arrays.asList(objects));
+        return this;
     }
 
     /**
@@ -49,11 +54,12 @@ public class SqlWrapper {
      * @param bind            操作符
      * @param objects       参数
      */
-    public void addCondition(String columnName, String bind, Object... objects) {
+    public SqlWrapper addCondition(String columnName, String bind, Object... objects) {
         sqlBuffer.append(" and ");
         sqlBuffer.append(columnName).append(" ");
         sqlBuffer.append(bind);
         params.addAll(Arrays.asList(objects));
+        return this;
     }
 
     /**
@@ -61,10 +67,11 @@ public class SqlWrapper {
      * @param condition 条件语句
      * @param objects   参数
      */
-    public void addCondition(String condition, Object... objects) {
+    public SqlWrapper addCondition(String condition, Object... objects) {
         sqlBuffer.append(" and ");
         sqlBuffer.append(condition);
         params.addAll(Arrays.asList(objects));
+        return this;
     }
 
     /**
@@ -72,7 +79,7 @@ public class SqlWrapper {
      * @param columnName 列表
      * @param inSet      id的集合
      */
-    public void in(String columnName, Collection<Object> inSet) {
+    public SqlWrapper in(String columnName, Collection<Object> inSet) {
         sqlBuffer.append(" and ");
         sqlBuffer.append(columnName);
         sqlBuffer.append(" in ( ");
@@ -85,6 +92,7 @@ public class SqlWrapper {
         sqlBuffer.setLength(0);
         sqlBuffer.append(tempSql);
         sqlBuffer.append(") ");
+        return this;
     }
 
     /**
@@ -93,12 +101,13 @@ public class SqlWrapper {
      * @param lowValue      低值
      * @param highValue     高值
      */
-    public void between(String columnName, Object lowValue, Object highValue) {
+    public SqlWrapper between(String columnName, Object lowValue, Object highValue) {
         sqlBuffer.append(" and ( ");
         sqlBuffer.append(columnName);
         sqlBuffer.append(" between ? and ? ) ");
         params.add(lowValue);
         params.add(highValue);
+        return this;
     }
 
     /**
@@ -106,20 +115,21 @@ public class SqlWrapper {
      * @param tableName  数据库表名
      * @param alias      简写
      */
-    public void withAuthority(String tableName, String alias) {
+    public SqlWrapper withAuthority(String tableName, String alias) {
         // 获取权限sql
         String authoritySql = DataAccessUtil.getDataAccessSql(tableName, alias, SqlLink.EXISTS);
         if (StringUtils.isNotEmpty(authoritySql)) {
             sqlBuffer.append(" and ");
             sqlBuffer.append(authoritySql);
         }
+        return this;
     }
 
     /**
      * 排序
      * @param sortBy
      */
-    public void sortBy(String sortBy) {
+    public SqlWrapper sortBy(String sortBy) {
         if (sortBy.trim().toLowerCase().startsWith("order by")) {
             sqlBuffer.append(" ");
             sqlBuffer.append(sortBy);
@@ -131,6 +141,7 @@ public class SqlWrapper {
             sqlBuffer.append(sortBy);
             sqlBuffer.append(" ");
         }
+        return this;
     }
 
 
@@ -138,7 +149,7 @@ public class SqlWrapper {
      * 增加group by
      * @param groupBy   group by字符串
      */
-    public void groupBy(String groupBy) {
+    public SqlWrapper groupBy(String groupBy) {
         if (groupBy.trim().toLowerCase().startsWith("group by")) {
             sqlBuffer.append( " ");
             sqlBuffer.append(groupBy);
@@ -150,6 +161,7 @@ public class SqlWrapper {
             sqlBuffer.append(groupBy);
             sqlBuffer.append(" ");
         }
+        return this;
     }
 
     /**
@@ -157,7 +169,16 @@ public class SqlWrapper {
      * @return      sql
      */
     public String getSql() {
-        return sqlBuffer.toString();
+        String sql = sqlBuffer.toString();
+        // 替换空格
+        sql = sql.replaceAll(" + ", " ");
+        // 去掉多余的 1=1
+        sql = sql.replaceAll("1=1 and", "");
+        sql = sql.replaceAll("1 = 1 and", "");
+        // 再替换一下空格
+        sql = sql.replaceAll(" + ", " ");
+        return sql;
+
     }
 
     /**
@@ -168,6 +189,45 @@ public class SqlWrapper {
         this.sqlBuffer.setLength(0);
         this.sqlBuffer.append(sql);
     }
+
+    /**
+     * 获取查询的
+     * @param tClass    model类
+     * @param alias     简写
+     * @param selectBody    查询体
+     * @return          查询sql
+     */
+    public static <T> SqlWrapper selectWrapper(Class<T> tClass, String alias, String selectBody) {
+        // 获取表名
+        String tableName = ModelUtil.getTableName(tClass);
+        // 组装sql
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("select ");
+        buffer.append(selectBody).append(" ");
+        buffer.append(tableName).append(" ").append(alias).append(" ");
+        buffer.append("where ");
+        // 判断是否逻辑删除表
+        LogicDelete logicDelete = LogicDeleteTables.getInstance().getTable(tableName);
+        if (logicDelete == null) {
+            buffer.append("1=1 ");
+        }
+        else {
+            buffer.append(alias).append(".").append(logicDelete.column()).append("=").append(logicDelete.defDeleteValue());
+        }
+        return new SqlWrapper(buffer.toString());
+    }
+
+    /**
+     * 获取查询的
+     * @param tClass    model类
+     * @return          查询sql
+     */
+    public static <T> SqlWrapper selectWrapper(Class<T> tClass) {
+        return selectWrapper(tClass, "t", "*");
+    }
+
+
+
 
 
 }

@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 /**
- * @author 账号参数查询
+ * @author 流水参数查询
  * @version 1.0.0
  * @date 2022/1/4 18:09
  */

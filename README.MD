@@ -234,6 +234,39 @@ public class DictTask implements KTask {
 }
 
 ```
+## 7.3 逻辑删除
 
+  写在最前面：如果是自己写SQL的查询，需要自行加入相关的逻辑删除的查询条件。(所有单表操作理论上都集成了逻辑删除处理，所以在处理单表操作时，不需要再额外处理逻辑删除)
+
+1. 逻辑删除通过在Model类上加入`@LogicDelete`注解即可，如下为`LogicDelete`注解定义
+
+```java
+public @interface LogicDelete {
+    /** 逻辑删除字段名 **/
+    String column() default "deleted";
+    /** 默认值 **/
+    int defValue() default 0;
+    /** 已删除的字段 **/
+    int defDeleteValue() default 1;
+}
+
+```
+2. 使用方式如下
+```java
+@Table
+@LogicDelete
+public class KwBankAccount extends BaseManageModel {
+  /** 版本id */
+  private String editionId;
+}
+```
+
+3. 直接使用的`SqlWrapper.selectWrapper()`生成的wrapper，都默认支持逻辑删除
+```java
+SqlWrapper selectWrapper = SqlWrapper.selectWrapper(KwBankAccount.class);
+selectWrapper.addCondition("name", Op.LIKE,  "%1%");
+```
+
+  
 
 

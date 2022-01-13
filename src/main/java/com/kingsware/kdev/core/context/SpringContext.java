@@ -58,4 +58,14 @@ public class SpringContext implements ApplicationContextAware {
         context.getBeanFactory().registerSingleton(beanName, bean);
     }
 
+    /**
+     * 获取配置项
+     * @param key           key
+     * @param defaultValue  默认值
+     * @return              返回配置项，如果不存在，返回默认值
+     */
+    public static String getProperties(String key, String defaultValue) {
+        return applicationContext.getEnvironment().getProperty(key, defaultValue);
+    }
+
 }

@@ -31,6 +31,8 @@ public class KwWater extends BaseManageModel {
     private Date transactionDate;
     // 交易时间 transactionTime
     private Date transactionTime;
+    // 登记时间 register_time
+    private Date registerTime;
     // 金额 transaction_amount
     private String transactionAmount;
     // 收支方向 revenue

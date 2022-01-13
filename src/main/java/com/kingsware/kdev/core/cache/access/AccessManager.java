@@ -2,7 +2,9 @@ package com.kingsware.kdev.core.cache.access;
 
 import com.kingsware.kdev.core.util.StringUtils;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -18,7 +20,7 @@ public class AccessManager {
     /** 超级管理员id **/
     private String supperAdminRoleId;
     /** 权限资源map **/
-    private Set<String> accessTables = new HashSet<>();
+    private Map<String, String> accessTables = new HashMap<>();
 
 
 
@@ -62,7 +64,11 @@ public class AccessManager {
         this.supperAdminRoleId = supperAdminRoleId;
     }
 
-    public void setAccessTables(Set<String> accessTables) {
+    public void setAccessTables(Map<String, String> accessTables) {
         this.accessTables = accessTables;
+    }
+
+    public Map<String, String> getAccessTables() {
+        return accessTables;
     }
 }

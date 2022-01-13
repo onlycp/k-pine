@@ -10,6 +10,7 @@ import com.kingsware.kdev.core.orm.kdb.KdbRet;
 import com.kingsware.kdev.core.orm.kdb.StepArgv;
 import com.kingsware.kdev.core.util.HttpUtil;
 import com.kingsware.kdev.core.util.JsonUtil;
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +35,7 @@ public class KDBHttpChannel implements DbChannel{
     /** 透传sql的流程id **/
     private final static String executeStep = "execute";
     /** 透传sql的流程id **/
-    private final static String executeResult = "result@execute";
+    private final static String executeResult = "result_execute";
 
     @Override
     public String name() {
@@ -129,6 +130,7 @@ public class KDBHttpChannel implements DbChannel{
      * @param objects   参数
      * @return          透传参数
      */
+    @SneakyThrows
     private KdbArgv makePassThrough(String sql, List<Object> objects) {
         KdbArgv argv = new KdbArgv();
         argv.setFlowID(passThroughFlowId);

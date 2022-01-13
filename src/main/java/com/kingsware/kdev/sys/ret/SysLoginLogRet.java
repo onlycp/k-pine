@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.ret;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kingsware.kdev.core.bean.BaseSimpleRet;
 import com.kingsware.kdev.core.orm.annotation.AutoEnum;
 import com.kingsware.kdev.core.orm.annotation.Column;
@@ -19,6 +20,7 @@ public class SysLoginLogRet extends BaseSimpleRet {
     /** id **/
     private String id;
     /** 操作时间 **/
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
     private Timestamp operateTime;
     /** 操作人员 **/
     private String operator;

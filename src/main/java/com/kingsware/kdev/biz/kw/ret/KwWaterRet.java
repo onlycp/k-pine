@@ -19,7 +19,7 @@ import java.util.Date;
 public class KwWaterRet extends BaseManageRet {
     // 行别（机构）
     private String mechanismName;
-    // 版本id
+    // 版本
     private String editionName;
     // 版本id
     private String editionId;
@@ -27,6 +27,18 @@ public class KwWaterRet extends BaseManageRet {
     private String account;
     // 账户id
     private String accountId;
+
+    // 版本账号
+    private String editionAccount;
+    // 版本账号id
+    private String editionAccountId;
+
+    // 开户行 bank_deposit
+    private String bankDeposit;
+
+    // 所属项目 pro_name
+    private String proName;
+
     // 回单id false
     private String receiptId;
     // 账户名称
@@ -37,6 +49,8 @@ public class KwWaterRet extends BaseManageRet {
     private Date transactionTime;
     // 金额 transaction_amount
     private String transactionAmount;
+    // 登记时间 register_time
+    private Date registerTime;
     // 收支方向 revenue
     private Integer revenue;
     // 收支方式 cash_transfer
