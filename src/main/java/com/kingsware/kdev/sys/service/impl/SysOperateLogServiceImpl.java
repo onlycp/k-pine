@@ -90,7 +90,7 @@ public class SysOperateLogServiceImpl extends BaseServiceImpl implements SysOper
         defineList.add(RegionDefine.builder().propName("operateTime").labelName("操作时间").build());
         // 导出
         KExcel kExcel = KExcel.fromDataList("服务日志.xls", "服务日志", defineList, pageDataRet.getList());
-        ExcelWorker.getInstance().getHandler().writeToWeb(kExcel);
+        ExcelWorker.getInstance().writeToWeb(kExcel);
     }
 
 }

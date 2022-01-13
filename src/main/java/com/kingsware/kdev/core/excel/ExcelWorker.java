@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.excel;
 
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.encrypt.EncryptProperties;
 import com.kingsware.kdev.core.encrypt.EncryptWorker;
@@ -8,10 +9,13 @@ import com.kingsware.kdev.core.encrypt.inst.Base64Instance;
 import com.kingsware.kdev.core.encrypt.inst.MD5Instance;
 import com.kingsware.kdev.core.excel.handler.JxlExcelHandler;
 import com.kingsware.kdev.core.excel.handler.KExcelHandler;
+import com.kingsware.kdev.core.excel.handler.PoiExcelHandler;
 import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,9 +57,30 @@ public class ExcelWorker {
                 if ("jxl".equalsIgnoreCase(INSTANCE.properties.getParser())) {
                     INSTANCE.excelHandler = new JxlExcelHandler();
                 }
+                else if ("poi".equalsIgnoreCase(INSTANCE.properties.getParser())) {
+                    INSTANCE.excelHandler = new PoiExcelHandler();
+                }
             }
         }
         return INSTANCE;
+    }
+
+    /**
+     * 输出到web，即直接下载
+     * @param excel excel数据
+     */
+    public void writeToWeb(KExcel excel) {
+        try {
+            HttpServletResponse response =  KClientContext.getContext().getResponse();
+            response.reset();
+            response.setContentType("application/octet-stream");
+            response.setCharacterEncoding("utf-8");
+            response.setHeader("Content-Disposition", "attachment;filename=" + new String(excel.getFileNme().getBytes(), "ISO8859-1"));
+            this.excelHandler.write(excel, response.getOutputStream());
+        }
+        catch (Exception e) {
+            log.info("excel导出失败，错误原因:{}", e.getMessage());
+        }
     }
 
     /**
@@ -75,6 +100,7 @@ public class ExcelWorker {
      * @param <T>           目标泛型
      * @return              解析之后的数据
      */
+    @SneakyThrows
     public <T> List<T> readFromFile(String filePath, int sheetIndex, List<RegionDefine> headerDefines, Class<T> tClass) {
         // 读取所有的数据
         List<List<String>> allContents = this.excelHandler.read(sheetIndex, filePath);

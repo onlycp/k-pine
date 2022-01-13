@@ -21,17 +21,12 @@ public interface KExcelHandler {
      */
     void write(KExcel excel, OutputStream out);
 
-    /**
-     * 输出到web，即直接下载
-     * @param excel excel数据
-     */
-    void writeToWeb(KExcel excel);
 
     /**
      * 从文件里读取数据
      * @param filePath      文件路径
      * @return              读取的数据
      */
-    List<List<String>> read(int sheetIndex, String filePath) ;
+    List<List<String>> read(int sheetIndex, String filePath) throws Exception ;
 
 }

@@ -25,7 +25,7 @@ public class KRegion {
      * @return  是否
      */
     public boolean isSingleCell() {
-        return startCell == endCell;
+        return startCell.getRowIndex() == endCell.getRowIndex() && startCell.getColumnIndex() == endCell.getColumnIndex();
     }
 
 
