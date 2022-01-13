@@ -5,6 +5,7 @@ import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
@@ -15,6 +16,7 @@ import com.kingsware.kdev.sys.argv.SysFileQueryArgv;
 import com.kingsware.kdev.sys.model.SysFile;
 import com.kingsware.kdev.sys.ret.SysFileRet;
 import com.kingsware.kdev.sys.service.SysFileService;
+import lombok.Cleanup;
 import lombok.SneakyThrows;
 import org.apache.tomcat.util.http.fileupload.FileUpload;
 import org.springframework.beans.factory.annotation.Value;
@@ -69,6 +71,8 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         if (StringUtils.isNotEmpty(argv.getUploadTimes())) {
             wrapper.between("when_created", argv.getUploadTimes().split(",")[0], argv.getUploadTimes().split(",")[1]);
         }
+        // 排序
+        wrapper.sortBy("when_created desc");
         return (PageDataRet<SysFileRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysFile.class, SysFileRet.class);
     }
 
@@ -109,13 +113,15 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                 sysFile.setFileContent(new String(Base64.getEncoder().encode(file.getBytes())));
             }
             else if (saveType == 1) {
-                String filePath = basePath + File.separator + fileFrom + File.separator;
+                // 相对路径
+                String relativePath = File.separator + fileFrom + File.separator;
+                // 磁盘存储路径
+                String filePath = basePath +  relativePath;
                 File path = new File(filePath);
-                if (!path.exists()) {
-                    path.mkdirs();
-                }
+                boolean status = path.mkdirs();
                 File saveFile = new File(filePath + realName);
-                sysFile.setFilePath(filePath + realName);
+                // 文件表只存储相对路径
+                sysFile.setFilePath(relativePath + realName);
                 file.transferTo(saveFile);
             }
             DB.save(sysFile);
@@ -130,6 +136,9 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
     public void download(String id) {
 
         SysFile file = DB.findById(SysFile.class, id);
+        if (file == null) {
+            throw BusinessException.serviceThrow("文件已被删除！");
+        }
         HttpServletResponse response =  KClientContext.getContext().getResponse();
         response.reset();
         response.setContentType("application/octet-stream");
@@ -141,14 +150,18 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             response.getOutputStream().flush();
         }
         else if (file.getSaveType() == 1) {
-            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file.getFilePath()));
+            String absFilePath = basePath + file.getFilePath();
+            File localFile = new File(absFilePath);
+            if (!localFile.exists()) {
+                throw BusinessException.serviceThrow("文件不存在，可能被移动或删除！");
+            }
+            @Cleanup BufferedInputStream bis = new BufferedInputStream(new FileInputStream(absFilePath));
             byte[] buff = new byte[1024];
             int i = 0;
             while ((i = bis.read(buff)) != -1) {
                 response.getOutputStream().write(buff, 0, i);
                 response.getOutputStream().flush();
             }
-
         }
 
     }
