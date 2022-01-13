@@ -56,7 +56,7 @@ public class KwCompanyServiceImpl extends BaseServiceImpl implements KwCompanySe
     @Override
     public PageDataRet<KwCompanyRet> query(KwCompanyQueryArgv argv) {
         // 拼装sql
-        SqlWrapper wrapper = new SqlWrapper(" select * from kw_company where 1=1 ");
+        SqlWrapper wrapper = new SqlWrapper(" select * from kw_company where 1=1 and deleted=0 ");
         // 拼装查询sql
         if (StringUtils.isNotEmpty(argv.getName())) {
             wrapper.addCondition("name", Op.LIKE, "%" +argv.getName() +"%");
