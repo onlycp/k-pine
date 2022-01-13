@@ -14,6 +14,7 @@ import com.kingsware.kdev.core.excel.KExcel;
 import com.kingsware.kdev.core.excel.RegionDefine;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.List;
 /**
  *
  */
+@Service
 public class KwAccountHistoryBalanceServiceImpl extends BaseServiceImpl implements KwAccountHistoryBalanceService {
     @Override
     public KwWaterRet get(String id) {
@@ -39,12 +41,16 @@ public class KwAccountHistoryBalanceServiceImpl extends BaseServiceImpl implemen
      */
     @Override
     public PageDataRet<KwBankAccountRet> query(KwWaterQueryArgv argv) {
-        String sql = "SELECT * from" +
-                "(SELECT b.*,w.account_balance as reserve1 " +
-                "FROM kw_water w " +
-                "LEFT JOIN kw_bank_account b ON w.account=b.account " +
-                "WHERE b.account IS NOT NULL " +
-                "and b.deleted = 0  " ;
+        String sql = "select kba.*, SUBSTRING_INDEX(t2.all_balance_info, \'|\', -1) as water_balance " +
+                "from kw_bank_account kba " +
+                "left JOIN " +
+                "( " +
+                " select t1.account, max(t1.balance_info) as all_balance_info " +
+                " from ( " +
+                "  SELECT " +
+                "  w.account, concat(w.transaction_date,\'|\',from_unixtime(w.date_index),\'|\',w.account_balance) as  balance_info " +
+                "  from kw_water w " +
+                "  WHERE 1=1 ";
 
         SqlWrapper wrapper = new SqlWrapper(sql);
         if (argv.getAccount()!=null){
@@ -54,11 +60,15 @@ public class KwAccountHistoryBalanceServiceImpl extends BaseServiceImpl implemen
             wrapper.addCondition("w.transaction_date", Op.LT_EQ,argv.getEndDate());
         }
 
-        wrapper.withAuthority("kw_bank_account","b");
+        wrapper.setSql(
+                wrapper.getSql() +
+                " ) t1 " +
+                " GROUP by t1.account " +
+                ") t2 " +
+                "on t2.account = kba.account " +
+                "WHERE kba.deleted = 0 " );
 
-        wrapper.sortBy("ORDER BY w.transaction_date desc,w.date_index desc " +
-                "limit 2100000000)a " +
-                "group by account");
+        wrapper.withAuthority("kw_bank_account","kba");
 
         PageDataRet<? extends BaseSimpleRet> query = query(wrapper.getSql(), wrapper.getParams(), argv, KwBankAccountRet.class);
 
@@ -74,7 +84,7 @@ public class KwAccountHistoryBalanceServiceImpl extends BaseServiceImpl implemen
         // 定义标题
         List<RegionDefine> defineList = new ArrayList<>();
         defineList.add(RegionDefine.dateDefine("account", "银行账户"));
-        defineList.add(RegionDefine.dateDefine("reserve1", "账户余额"));
+        defineList.add(RegionDefine.dateDefine("waterBalance", "账户余额"));
 
         // 导出
         KExcel kExcel = KExcel.fromDataList("流水查询.xls", "Sheet1", defineList, pageDataRet.getList());

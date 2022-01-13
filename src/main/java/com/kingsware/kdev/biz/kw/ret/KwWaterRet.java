@@ -45,12 +45,6 @@ public class KwWaterRet extends BaseManageRet {
     private String receiptId;
     // 账户名称
     private String accountName;
-    //    // 交易日期
-//    private Date transactionDate;
-//    // 交易时间
-//    private Date transactionTime;
-//    // 登记时间 register_time
-//    private Date registerTime;
 
     // 交易日期 transactionDate
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
@@ -61,7 +55,6 @@ public class KwWaterRet extends BaseManageRet {
     // 登记时间 register_time
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Timestamp registerTime;
-
 
     // 金额 transaction_amount
     private String transactionAmount;
