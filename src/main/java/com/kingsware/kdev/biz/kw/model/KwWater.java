@@ -60,13 +60,19 @@ public class KwWater extends BaseManageModel {
     // 是否异常 abnormal
     private Integer abnormal;
     // 异常处理状态 abnormal_status
-    private Integer abnormalstatus;
+    private Integer abnormalStatus;
     // 是否有回单 has_receipt
     private Integer hasReceipt;
     // 数据次序 date_index
     private Integer dateIndex;
     // 删除标志 deleted
     private Integer deleted;
+    // 登记时间
+    private Date registerTime;
+    //对方行名
+    private String otherBankName;
+    //备注
+    private String remark;
 
 
     /** 备用字段1 **/

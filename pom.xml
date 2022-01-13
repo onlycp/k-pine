@@ -45,6 +45,13 @@
 			<artifactId>jxl</artifactId>
 			<version>2.6.12</version>
 		</dependency>
+
+		<!-- 新增hutool工具依赖 -->
+		<dependency>
+			<groupId>cn.hutool</groupId>
+			<artifactId>hutool-all</artifactId>
+			<version>5.5.1</version>
+		</dependency>
 	</dependencies>
 
 	<build>
