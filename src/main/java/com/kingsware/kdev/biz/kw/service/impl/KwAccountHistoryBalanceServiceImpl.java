@@ -43,7 +43,8 @@ public class KwAccountHistoryBalanceServiceImpl extends BaseServiceImpl implemen
                 "(SELECT b.*,w.account_balance as reserve1 " +
                 "FROM kw_water w " +
                 "LEFT JOIN kw_bank_account b ON w.account=b.account " +
-                "WHERE b.account IS NOT NULL " ;
+                "WHERE b.account IS NOT NULL " +
+                "and b.deleted = 0  " ;
 
         SqlWrapper wrapper = new SqlWrapper(sql);
         if (argv.getAccount()!=null){
