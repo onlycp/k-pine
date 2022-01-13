@@ -63,6 +63,9 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         if (StringUtils.isNotEmpty(argv.getFileExt())) {
             wrapper.addCondition("code", Op.LIKE, "%" +argv.getFileExt() +"%");
         }
+        if (argv.getSaveType() != null) {
+            wrapper.addCondition("save_type", Op.EQ, argv.getSaveType());
+        }
         if (StringUtils.isNotEmpty(argv.getUploadTimes())) {
             wrapper.between("when_created", argv.getUploadTimes().split(",")[0], argv.getUploadTimes().split(",")[1]);
         }
