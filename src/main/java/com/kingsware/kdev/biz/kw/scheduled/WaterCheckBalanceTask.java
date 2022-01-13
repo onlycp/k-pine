@@ -14,7 +14,6 @@ public class WaterCheckBalanceTask implements KTask {
 
     private String cron;
 
-    @Autowired
     private static KwAbnormalService kwAbnormalService;
 
     public WaterCheckBalanceTask(){
