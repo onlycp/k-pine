@@ -287,7 +287,7 @@ public class SqlGenerator {
         // 逻辑删除
         LogicDelete logicDelete = LogicDeleteTables.getInstance().getTable(tableName);
         if (logicDelete != null) {
-            builder.append(String.format("where %s=%d", logicDelete.column(), logicDelete.defValue()));
+            builder.append(String.format("where %s=%d ", logicDelete.column(), logicDelete.defValue()));
         }
         else {
             builder.append("where 1=1 ");
