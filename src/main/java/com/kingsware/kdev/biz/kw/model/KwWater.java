@@ -1,6 +1,7 @@
 package com.kingsware.kdev.biz.kw.model;
 
 import com.kingsware.kdev.core.bean.BaseManageModel;
+import com.kingsware.kdev.core.bean.BaseModel;
 import com.kingsware.kdev.core.orm.annotation.Column;
 import com.kingsware.kdev.core.orm.annotation.Table;
 import lombok.Data;
@@ -17,8 +18,10 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Table
-public class KwWater extends BaseManageModel {
+public class KwWater extends BaseModel {
 
+    //id
+    private String id;
     // 账户 account
     private String account;
     // 账户id accountId
@@ -69,8 +72,6 @@ public class KwWater extends BaseManageModel {
     private Integer dateIndex;
     // 删除标志 deleted
     private Integer deleted;
-    // 登记时间
-    private Date registerTime;
     //对方行名
     private String otherBankName;
     //备注
@@ -78,14 +79,14 @@ public class KwWater extends BaseManageModel {
 
 
     /** 备用字段1 **/
-    private String reserve1;
-    /** 备用字段2 **/
-    private String reserve2;
-    /** 备用字段3 **/
-    private String reserve3;
-    /** 备用字段4 **/
-    private String reserve4;
-    /** 备用字段5 **/
-    private String reserve5;
+//    private String reserve1;
+//    /** 备用字段2 **/
+//    private String reserve2;
+//    /** 备用字段3 **/
+//    private String reserve3;
+//    /** 备用字段4 **/
+//    private String reserve4;
+//    /** 备用字段5 **/
+//    private String reserve5;
 
 }

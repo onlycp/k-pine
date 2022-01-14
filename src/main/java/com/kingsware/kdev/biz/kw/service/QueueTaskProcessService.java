@@ -23,8 +23,8 @@ import java.util.regex.Pattern;
 @Slf4j
 public class QueueTaskProcessService {
 
-    @Resource
-    private DailyReceiptWaterTaskService dailyReceiptWaterTaskService;
+    //@Resource
+    private DailyReceiptWaterTaskService dailyReceiptWaterTaskService = new DailyReceiptWaterTaskService();
 
     @Resource
     KwQueueTaskService queueTaskService;
@@ -35,7 +35,7 @@ public class QueueTaskProcessService {
     private Pattern pattern = Pattern.compile("\\\\\\\\((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}\\\\(.*)");
 
     // TODO: 2022/1/12 路径指定
-    String DailyReceiptWaterSinglePath = "";
+    String DailyReceiptWaterSinglePath = "E:\\";
 
     /**
      * 扫描单一目录的回单流水
@@ -47,6 +47,7 @@ public class QueueTaskProcessService {
         {
             log.info("扫描单一回单流水");
             String remotePath = task.getData().replaceAll("/", "\\\\");
+            System.out.println(remotePath);
             Matcher matcher = pattern.matcher(remotePath);
             if (!matcher.find()){
                 throw new Exception("路径不匹配：" + task.getData());
@@ -56,6 +57,9 @@ public class QueueTaskProcessService {
             File folder = new File(path);
             if (!folder.exists() || !folder.isDirectory()){
                 throw new Exception("路径不存在或者不是文件夹：" + path);
+            }
+            if(dailyReceiptWaterTaskService == null){
+                System.out.println("===dailyReceiptWaterTaskService为空===");
             }
             Tuple info = dailyReceiptWaterTaskService.convertExcel2ReceiptWater(new File(path));
 

@@ -65,11 +65,13 @@ public class KwQueueTaskServiceImpl extends BaseServiceImpl implements KwQueueTa
     //@Transactional
     @Override
     public void updateStatus(String id, QueueTaskStatusEnum status){
+        System.out.println(id);
         System.out.println("更新状态");
         KwQueueTask model = DB.findById(KwQueueTask.class, id);
         System.out.println("model=="+ model);
         System.out.println("status=="+status);
         model.setStatus(status.getValue());
+        System.out.println(DB.getDefault());
         DB.update(model);
     }
 }

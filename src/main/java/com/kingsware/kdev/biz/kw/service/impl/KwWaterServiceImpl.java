@@ -212,7 +212,7 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
         SqlWrapper wrapper = new SqlWrapper(" select * from kw_water kw where 1 = 1 ");
         wrapper.addCondition("kw.account", Op.EQ, account);
         wrapper.addCondition("kw.transaction_date", Op.EQ, date);
-        return DB.findList(KwWater.class, wrapper.getSql());
+        return DB.findList(KwWater.class, wrapper.getSql(), wrapper.getParams().toArray());
     }
 
     /**
@@ -411,6 +411,7 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
         try(ExcelReader reader = ExcelUtil.getReader(file)){
             readAllMap = reader.readAll();
         }
+
         List<KwWater> res = new ArrayList<>();
 
         for (Map<String, Object> map : readAllMap) {

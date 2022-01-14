@@ -4,6 +4,7 @@ import cn.hutool.core.lang.Tuple;
 import com.kingsware.kdev.biz.kw.exception.WrongFormatReceiptWaterException;
 import com.kingsware.kdev.biz.kw.model.KwReceipt;
 import com.kingsware.kdev.biz.kw.model.KwWater;
+import com.kingsware.kdev.biz.kw.service.impl.KwWaterServiceImpl;
 import com.kingsware.kdev.biz.kw.util.TimeUtil;
 import com.kingsware.kdev.core.orm.DB;
 import org.apache.juli.logging.Log;
@@ -30,8 +31,8 @@ import java.util.stream.Collectors;
 public class DailyReceiptWaterTaskService {
     private Log logger = LogFactory.getLog(this.getClass());
 
-    @Resource
-    KwWaterService waterService;
+    //@Resource
+    KwWaterService waterService = new KwWaterServiceImpl();
 
     //@Value("${ScheduledTask.DailyReceiptWaterBackupPath}")
     //private String dailyReceiptWaterBackupPath;
@@ -335,6 +336,7 @@ public class DailyReceiptWaterTaskService {
                     waterDtoList.addAll(waterService.excel2WaterDto(f));
                 }
             }
+            System.out.println(waterDtoList.toString());
             saveReceiptWaterByDate(receiptDtoList, waterDtoList);
 
             if (receiptDtoList.size() > 0){
