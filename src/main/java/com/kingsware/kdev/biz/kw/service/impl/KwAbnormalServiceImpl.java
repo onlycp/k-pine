@@ -357,10 +357,12 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
                 " LEFT JOIN kw_receipt kr on kw.receipt_id = kr.id" +
                 " LEFT JOIN kw_bank_account kba on kw.account = kba.account " +
                 " LEFT JOIN kw_edition ke on kba.edition_id = ke.id " +
-                " LEFT JOIN kw_edition_account kea on kea.edition_id = ke.id " +
+                " LEFT JOIN kw_edition_account kea on kea.id = kba.edition_account_id " +
                 " LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id " +
                 " where kba.deleted = 0 " +
                 " and ke.deleted = 0 " +
+                " and km.deleted = 0 " +
+                " and kea.deleted = 0 " +
                 " and kw.abnormal = 1 ");
 
         // 拼装查询sql,并注入参数
@@ -454,11 +456,18 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
                 retList.add(kwWaterRet);
             }
         }
-
         return retList;
     }
 
 
+    /**
+     * 查找相邻的流水
+     * @param type 1： 早于今天 2：同一天 ，本条之前 3：同一天，本条之后 4：本日之后
+     * @param account
+     * @param transactionDate
+     * @param dateIndex
+     * @return
+     */
     private List<KwWaterRet> findNearlyWater(int type, String account, Date transactionDate, Integer dateIndex) {
         String sql;
         List<KwWaterRet> list;
@@ -495,5 +504,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         }
         return list;
     }
+
+
 
 }

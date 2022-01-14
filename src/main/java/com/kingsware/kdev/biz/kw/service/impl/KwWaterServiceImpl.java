@@ -66,9 +66,11 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
                 " LEFT JOIN kw_bank_account kba on kw.account = kba.account " +
                 " LEFT JOIN kw_bank_account_expand kbae on kba.account = kbae.account " +
                 " LEFT JOIN kw_edition ke on kba.edition_id = ke.id " +
-                " LEFT JOIN kw_edition_account kea on kea.edition_id = ke.id " +
+                " LEFT JOIN kw_edition_account kea on kea.id = kba.edition_account_id " +
                 " LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id " +
                 " where kba.deleted = 0 " +
+                " and km.deleted = 0 " +
+                " and kea.deleted = 0 " +
                 " and ke.deleted = 0 ");
 
         // 拼装查询sql,并注入参数
@@ -150,7 +152,6 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
                 }
             }
             return "异常";
-
         }).build());
         // 贷
         defineList.add(RegionDefine.builder().propName("transactionAmount").labelName("贷").format((value, model) -> {
