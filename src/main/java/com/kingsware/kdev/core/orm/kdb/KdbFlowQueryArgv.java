@@ -10,18 +10,14 @@ import lombok.Data;
  * @date 2022/1/5 4:20 下午
  */
 @Data
-public class FlowInfo {
+public class KdbFlowQueryArgv {
 
     /** 流程id **/
-    private String flowId;
+    private String flowId = "";
     /** 流程内容 **/
-    private String content;
+    private String content = "";
     /** 名称 **/
-    private String name;
+    private String name = "";
     /** 父流程id **/
-    private String parentId = "0";
-    /** 创建时间 **/
-    private Long createTime;
-    /** 更新时间 **/
-    private Long updateTime;
+    private String parentId = "";
 }

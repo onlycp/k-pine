@@ -2,9 +2,9 @@ package com.kingsware.kdev.sys.service;
 
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
-import com.kingsware.kdev.sys.argv.SysFlowArgv;
-import com.kingsware.kdev.sys.argv.SysFlowQueryArgv;
-import com.kingsware.kdev.sys.ret.SysFlowRet;
+import com.kingsware.kdev.sys.argv.SysKdbDataSourceArgv;
+import com.kingsware.kdev.sys.argv.SysKdbDataSourceQueryArgv;
+import com.kingsware.kdev.sys.ret.SysKdbDataSourceRet;
 
 /**
  * 流程业务接口
@@ -13,33 +13,33 @@ import com.kingsware.kdev.sys.ret.SysFlowRet;
  * @version 1.0.0
  * @date 2022/1/5 4:06 下午
  */
-public interface SysFlowService {
+public interface SysKdbDataSourceService {
 
     /**
      * 通过id查询
      * @param id    id
      * @return      返回结果
      */
-    SysFlowRet get(String id);
+    SysKdbDataSourceRet get(String id);
 
     /**
      * 新增
      * @param argv 新增
      */
-    void add(SysFlowArgv argv);
+    void add(SysKdbDataSourceArgv argv);
 
     /**
      * 编辑
      * @param argv 编辑
      */
-    void edit(SysFlowArgv argv);
+    void edit(SysKdbDataSourceArgv argv);
 
     /**
      * 编辑
      * @param argv 编辑
      * @return 查询结果
      */
-    PageDataRet<SysFlowRet> query(SysFlowQueryArgv argv);
+    PageDataRet<SysKdbDataSourceRet> query(SysKdbDataSourceQueryArgv argv);
 
     /**
      * 删除

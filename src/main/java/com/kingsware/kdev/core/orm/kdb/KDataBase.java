@@ -16,7 +16,7 @@ import java.util.*;
  * @version 1.0.0
  * @date 2021/12/21 2:43 下午
  */
-public class KDataBase implements DataBase {
+public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
     /** 名称 **/
     private String name;
     /** 数据库连接信息 **/
@@ -197,5 +197,10 @@ public class KDataBase implements DataBase {
         channel.executeSql(sql,Arrays.asList(params));
         // 由于kdb没有返回具体行，所以统一返回1
         return 1;
+    }
+
+    @Override
+    String getServer() {
+        return this.dbConnectConfig.getServer();
     }
 }

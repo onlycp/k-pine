@@ -12,10 +12,8 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class SysFlowQueryArgv extends BasePageArgv {
-    /** 流程id **/
-    private String flowID;
-    /** 流程内容 **/
-    private String content;
+public class SysKdbDataSourceQueryArgv extends BasePageArgv {
+    /** 流程名称 **/
+    private String name = "";
 
 }

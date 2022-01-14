@@ -1,13 +1,11 @@
 package com.kingsware.kdev.core.orm.channel;
 
-import com.fasterxml.jackson.databind.JavaType;
 import com.kingsware.kdev.core.exception.HttpClientException;
 import com.kingsware.kdev.core.orm.DBConnectConfig;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.orm.kdb.KDBConnectConfig;
 import com.kingsware.kdev.core.orm.kdb.KdbArgv;
 import com.kingsware.kdev.core.orm.kdb.KdbRet;
-import com.kingsware.kdev.core.orm.kdb.StepArgv;
 import com.kingsware.kdev.core.util.HttpUtil;
 import com.kingsware.kdev.core.util.JsonUtil;
 import lombok.SneakyThrows;
@@ -70,7 +68,7 @@ public class KDBHttpChannel implements DbChannel{
         KdbRet<Map> ret = send(makePassThrough(sql, objects), Map.class);
         // 由于kdb响应结果始终为list，所以得先将为list
         String executeRequest = ret.getResponseBody().get(executeResult).toString();
-        List<Map> list = JsonUtil.toListBean(executeRequest, Map.class);
+        List<Map> list = JsonUtil.snakeCaseToListBean(executeRequest, Map.class);
         // 返回结果
         if (list == null || list.size() != 1) {
             throw new OrmDbException("查询数量时，应保持只有一条记录");
@@ -106,7 +104,7 @@ public class KDBHttpChannel implements DbChannel{
         KdbRet<Map> ret = send(makePassThrough(sql, objects), Map.class);
         // 由于kdb响应结果始终为list，所以得先将为list
         String executeRequest = ret.getResponseBody().get(executeResult).toString();
-        List<Map> list = JsonUtil.toListBean(executeRequest, Map.class);
+        List<Map> list = JsonUtil.snakeCaseToListBean(executeRequest, Map.class);
         assert list != null;
         List<T> result = new ArrayList<>(list.size());
         for (int i = 0; i < list.size(); i++) {
@@ -122,6 +120,11 @@ public class KDBHttpChannel implements DbChannel{
             });
         }
         return result;
+    }
+
+    @Override
+    public String httpPost(String url, Object params) {
+        return null;
     }
 
     /**

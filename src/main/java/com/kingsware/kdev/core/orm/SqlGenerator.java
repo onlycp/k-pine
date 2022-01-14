@@ -100,27 +100,7 @@ public class SqlGenerator {
                     // 先判断属性性是否为空，如果不为空，则跳过，不进行设置值
                     Object distFieldValue = BeanUtils.getFieldValue(field, model);
                     if (distFieldValue == null || StringUtils.isEmpty(distFieldValue.toString())) {
-                        // 增加值
-                        if (column.auto() == AutoEnum.ID) {
-                            BeanUtils.setField(field, model, StringUtils.getUUID());
-                        }
-                        else if (column.auto() == AutoEnum.WHO) {
-                            if (KClientContext.getContext() != null && KClientContext.getContext().getUserInfo() != null) {
-                                BeanUtils.setField(field, model, KClientContext.getContext().getUserInfo().getId());
-                            }
-                            else {
-                                BeanUtils.setField(field, model, "");
-                            }
-                        }
-                        else if (column.auto() == AutoEnum.WHEN) {
-                            if (field.getType().isAssignableFrom(Timestamp.class)) {
-                                BeanUtils.setField(field, model, new Timestamp(System.currentTimeMillis()));
-                            }
-                            else if (field.getType().isAssignableFrom(String.class)){
-                                BeanUtils.setField(field, model, DateUtils.getNow());
-                            }
-
-                        }
+                        autoWrite(column, field, model);
                     }
 
                 }
@@ -222,23 +202,9 @@ public class SqlGenerator {
 
                 // 增加列
                 updateList.add(String.format("%s=?", columnName));
-                // 增加值
-                if (column.auto() == AutoEnum.WHO) {
-                    if (KClientContext.getContext() != null && KClientContext.getContext().getUserInfo() != null) {
-                        BeanUtils.setField(field, model, KClientContext.getContext().getUserInfo().getId());
-                    }
-                    else {
-                        BeanUtils.setField(field, model, "");
-                    }
-                }
-                else if (column.auto() == AutoEnum.WHEN) {
-                    if (field.getType().isAssignableFrom(Timestamp.class)) {
-                        BeanUtils.setField(field, model, new Timestamp(System.currentTimeMillis()));
-                    }
-                    else if (field.getType().isAssignableFrom(String.class)){
-                        BeanUtils.setField(field, model, DateUtils.getNow());
-                    }
-                }
+                // 自动设置值
+                autoWrite(column, field, model);
+                // 增加参数
                 addParams(field, model, params);
             }
         }
@@ -254,6 +220,30 @@ public class SqlGenerator {
         sqlWrapper.setSql(builder);
         sqlWrapper.setParams(params);
         return sqlWrapper;
+    }
+
+    private static void autoWrite(Column column, Field field, Object model) {
+        // 增加值
+        if (column.auto() == AutoEnum.ID) {
+            BeanUtils.setField(field, model, StringUtils.getUUID());
+        }
+        else if (column.auto() == AutoEnum.WHO) {
+            if (KClientContext.getContext() != null && KClientContext.getContext().getUserInfo() != null) {
+                BeanUtils.setField(field, model, KClientContext.getContext().getUserInfo().getId());
+            }
+            else {
+                BeanUtils.setField(field, model, "");
+            }
+        }
+        else if (column.auto() == AutoEnum.WHEN) {
+            if (field.getType().isAssignableFrom(Timestamp.class)) {
+                BeanUtils.setField(field, model, new Timestamp(System.currentTimeMillis()));
+            }
+            else if (field.getType().isAssignableFrom(String.class)){
+                BeanUtils.setField(field, model, DateUtils.getNow());
+            }
+
+        }
     }
 
     /**
