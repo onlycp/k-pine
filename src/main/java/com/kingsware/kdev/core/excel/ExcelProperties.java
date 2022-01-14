@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 public class ExcelProperties {
 
     /** 解析器 poi、jxl**/
-    private String parser = "jxl";
+    private String parser = "poi";
     /** 临时文件夹 **/
     private String tmpPath = "tmp";
 

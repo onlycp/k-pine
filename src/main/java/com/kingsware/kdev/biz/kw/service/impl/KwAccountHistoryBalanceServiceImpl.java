@@ -95,7 +95,7 @@ public class KwAccountHistoryBalanceServiceImpl extends BaseServiceImpl implemen
 
         // 导出
         KExcel kExcel = KExcel.fromDataList("流水查询.xls", "Sheet1", defineList, pageDataRet.getList());
-        ExcelWorker.getInstance().getHandler().writeToWeb(kExcel);
+        ExcelWorker.getInstance().writeToWeb(kExcel);
 
     }
 }
