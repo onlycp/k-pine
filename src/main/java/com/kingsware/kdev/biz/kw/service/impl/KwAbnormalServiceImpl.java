@@ -150,7 +150,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
     private Integer countBalanceException(String editionId, KwAbnormalQueryArgv argv) {
         String sql = "SELECT count(kw.id) as num1 from kw_water kw " +
                 "LEFT JOIN kw_bank_account kba on kba.account = kw.account and kba.deleted =0  " +
-                "LEFT JOIN kw_edition ke on ke.id =  kba.edition_id ke.deleted = 0 " +
+                "LEFT JOIN kw_edition ke on ke.id =  kba.edition_id and ke.deleted = 0 " +
                 "where abnormal=1 " +
                 "and ke.id = ? ";
 
@@ -183,7 +183,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
     private Integer countNoReceipt(String editionId, KwAbnormalQueryArgv argv) {
         String sql = "SELECT count(kw.id) as num1 from kw_water kw " +
                 "LEFT JOIN kw_bank_account kba on kba.account=kw.account and kba.deleted =0  " +
-                "LEFT JOIN kw_edition ke on ke.id =  kba.edition_id ke.deleted = 0 " +
+                "LEFT JOIN kw_edition ke on ke.id =  kba.edition_id and ke.deleted = 0 " +
                 "where kw.has_receipt=0 " +
                 "and ke.id = ? ";
         SqlWrapper wrapper = new SqlWrapper(sql);
