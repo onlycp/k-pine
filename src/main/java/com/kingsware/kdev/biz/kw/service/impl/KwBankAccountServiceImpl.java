@@ -127,6 +127,10 @@ public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankA
         }
     }
 
+    /**
+     * 同步账户和银行版本的业务方法
+     * @param argv  查询
+     */
     // TODO: 事务2022/1/17
     //@Transaction
     @Override
@@ -135,7 +139,6 @@ public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankA
             return;
         }
         String editionId = kwEditionService.findIdByName(argv.getEditionName());
-        System.out.println("editionId==" + editionId);
         String editionAccountId = kwEditionAccountService.findIdByBankAccount(argv.getBankAccount());
         List<String> accountList = argv.getAccountList();
 
@@ -147,14 +150,12 @@ public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankA
          */
         accountList.forEach(a -> {
             if(StringUtils.isNotEmpty(a)){
-                System.out.println(a);
                 SqlWrapper wrapper = new SqlWrapper("select kba.* from kw_bank_account as kba where 1 = 1");
                 wrapper.addCondition("kba.account", Op.EQ, a);
                 KwBankAccount kbaResult = DB.findOne(KwBankAccount.class, wrapper.getSql(), wrapper.getParams().toArray());
                 if(kbaResult == null){
                     //如果不存在，则增加
                     KwBankAccount model = BeanUtils.copyObject(argv, KwBankAccount.class);
-                    System.out.println("model===" + model.toString());
                     model.setAccount(a);
                     model.setEditionId(editionId);
                     model.setEditionAccountId(editionAccountId);
@@ -164,7 +165,6 @@ public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankA
                     kbaResult.setEditionId(editionId);
                     kbaResult.setEditionAccountId(editionAccountId);
                     DB.update(kbaResult);
-                    System.out.println(kbaResult);
                 }
             }
         });
