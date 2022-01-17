@@ -1,7 +1,9 @@
 package com.kingsware.kdev.core.orm.kdb;
 
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.exception.HttpClientException;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
+import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.HttpUtil;
 import com.kingsware.kdev.core.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -84,6 +86,11 @@ public abstract class KdbApiAbstract implements  KdbApi {
 
     @Override
     public Map<String, String> executeFlow(KdbArgv argv) {
+        // 加入当前环境变量
+        argv.addVariable("who",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getId() : "");
+        argv.addVariable("username",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getUsername() : "");
+        argv.addVariable("when", DateUtils.getNow());
+
         KdbRet<Map> ret =  post(argv, EXCUTE_FLOW_URL, Map.class);
         Map<String, String> result = new HashMap<>();
         if (ret.getResponseBody() != null) {
