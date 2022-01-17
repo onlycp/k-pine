@@ -1,5 +1,6 @@
 package com.kingsware.kdev.biz.kw.service.impl;
 
+import com.kingsware.kdev.biz.kw.argv.KwWaterArgv;
 import com.kingsware.kdev.biz.kw.argv.KwWaterQueryArgv;
 import com.kingsware.kdev.biz.kw.model.KwWater;
 import com.kingsware.kdev.biz.kw.ret.KwWaterRet;
@@ -43,7 +44,7 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
      * @param argv 新增
      */
     @Override
-    public void add(KwWaterQueryArgv argv) {
+    public void add(KwWaterArgv argv) {
     }
 
     /**
@@ -52,6 +53,7 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
      * @param model 模型
      */
     private void checkUnique(KwWater model) {
+        // 回单id唯一
     }
 
     /**
@@ -66,16 +68,16 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
         // 基础sql
         SqlWrapper wrapper = new SqlWrapper(" SELECT kba.bank_deposit, kea.bank_account as edition_account, kbae.pro_name, km.bank_name as mechanism_name, ke.name as edition_name, " +
                 " kw.* FROM kw_water kw " +
-                " LEFT JOIN kw_receipt kr on kw.receipt_id = kr.id" +
-                " LEFT JOIN kw_bank_account kba on kw.account = kba.account " +
-                " LEFT JOIN kw_bank_account_expand kbae on kba.account = kbae.account and kba.deleted = 0  " +
+                " LEFT JOIN kw_receipt kr on kw.receipt_id = kr.id and kr.deleted = 0 " +
+                " LEFT JOIN kw_bank_account kba on kw.account = kba.account and kba.deleted = 0 " +
+                " LEFT JOIN kw_bank_account_expand kbae on kba.account = kbae.account and kba.deleted = 0 " +
                 " LEFT JOIN kw_edition ke on kba.edition_id = ke.id and ke.deleted = 0  " +
-                " LEFT JOIN kw_edition_account kea on kea.id = kba.edition_account_id and kea.deleted = 0  " +
+                " LEFT JOIN kw_edition_account kea on kea.id = kba.edition_account_id and kea.deleted = 0 " +
                 " LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id and km.deleted = 0  " +
-                " where 1=1 ");
+                " where kw.deleted=0 ");
 
         // 拼装查询sql,并注入参数
-        if (argv.getEditionId() != null) {
+        if (argv.getEditionId() != null && StringUtils.isNotEmpty(argv.getEditionName())) {
             wrapper.addCondition("kba.edition_id", Op.EQ, argv.getEditionId());
         }
         if (argv.getEditionName() != null && StringUtils.isNotEmpty(argv.getEditionName())) {

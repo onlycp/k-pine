@@ -354,11 +354,11 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
     public PageDataRet<KwWaterRet> queryAbnormalWater(KwWaterQueryArgv argv) {
         // 基础sql
         SqlWrapper wrapper = new SqlWrapper(" SELECT  kba.bank_deposit ,km.bank_name as mechanism_name,ke.name as edition_name,ke.path, " +
-                "kw.*, " +
-                "kea.bank_account as edition_account, kea.bank_account, kea.cert_number, kea.bank_password, kea.ukey_password ,kea.usb_port, kea.usb_ip, kea.usb_group, " +
-                "kea.is_ok_key , kea.usb_ip_ok ,kea.usb_port_ok, kea.usb_group_ok  " +
-                "FROM kw_water kw " +
-                " LEFT JOIN kw_receipt kr on kw.receipt_id = kr.id" +
+                " kw.*, " +
+                " kea.bank_account as edition_account, kea.bank_account, kea.cert_number, kea.bank_password, kea.ukey_password ,kea.usb_port, kea.usb_ip, kea.usb_group, " +
+                " kea.is_ok_key , kea.usb_ip_ok ,kea.usb_port_ok, kea.usb_group_ok  " +
+                " FROM kw_water kw " +
+                " LEFT JOIN kw_receipt kr on kw.receipt_id = kr.id and kr.deleted = 0 " +
                 " LEFT JOIN kw_bank_account kba on kw.account = kba.account and kba.deleted = 0  " +
                 " LEFT JOIN kw_edition ke on kba.edition_id = ke.id  and ke.deleted = 0 " +
                 " LEFT JOIN kw_edition_account kea on kea.id = kba.edition_account_id and kea.deleted = 0  " +
@@ -480,27 +480,27 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         switch (type) {
             case 1:
                 // 早于本日
-                sql = !flag ? "select * from kw_water where account = ? and transaction_date < ?  order by transaction_date desc,date_index desc limit 0,5 " :
-                        " select * from kw_water where account = ? and transaction_date < ? and abnormal=0  order by transaction_date desc,date_index desc limit 0,5 ";
+                sql = !flag ? "select * from kw_water where deleted=0 and account = ? and transaction_date < ?  order by transaction_date desc,date_index desc limit 0,5 " :
+                        " select * from kw_water where deleted=0 and account = ? and transaction_date < ? and abnormal=0  order by transaction_date desc,date_index desc limit 0,5 ";
                 dateStr += " 00:00:00";
                 list = DB.findList(KwWaterRet.class, sql, account, dateStr);
                 break;
             case 2:
                 // 同一天，次序在本条之前
-                sql = !flag ? "select * from kw_water where account = ? and transaction_date like ? and date_index<? order by transaction_date desc,date_index desc limit 0,5" :
-                        "select * from kw_water where account = ? and transaction_date like ? and date_index<? and abnormal=0 order by transaction_date desc,date_index desc limit 0,5";
+                sql = !flag ? "select * from kw_water where deleted=0 and account = ? and transaction_date like ? and date_index<? order by transaction_date desc,date_index desc limit 0,5" :
+                        "select * from kw_water where deleted=0 and account = ? and transaction_date like ? and date_index<? and abnormal=0 order by transaction_date desc,date_index desc limit 0,5";
                 dateStr += "%";
                 list = DB.findList(KwWaterRet.class, sql, account, dateStr, dateIndex);
                 break;
             case 3:
                 // 同一天，次序在本条之后
-                sql = "select * from kw_water where account = ? and transaction_date like ? and date_index>?  order by transaction_date asc,date_index asc limit 0,5 ";
+                sql = "select * from kw_water where deleted=0 and account = ? and transaction_date like ? and date_index>?  order by transaction_date asc,date_index asc limit 0,5 ";
                 dateStr += "%";
                 list = DB.findList(KwWaterRet.class, sql, account, dateStr, dateIndex);
                 break;
             case 4:
                 // 晚于本日
-                sql = "select * from kw_water where account = ? and transaction_date > ?   order by transaction_date asc,date_index asc limit 0,5 ";
+                sql = "select * from kw_water where deleted=0 and account = ? and transaction_date > ?   order by transaction_date asc,date_index asc limit 0,5 ";
                 dateStr += " 23:59:59";
                 list = DB.findList(KwWaterRet.class, sql, account, dateStr);
                 break;

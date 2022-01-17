@@ -1,15 +1,12 @@
 package com.kingsware.kdev.biz.kw.service;
 
-import com.kingsware.kdev.biz.kw.argv.KwMechanismArgv;
-import com.kingsware.kdev.biz.kw.argv.KwMechanismQueryArgv;
-import com.kingsware.kdev.biz.kw.argv.KwWaterArgv;
+import com.kingsware.kdev.biz.kw.argv.KwReceiptArgv;
+import com.kingsware.kdev.biz.kw.argv.KwReceiptQueryArgv;
 import com.kingsware.kdev.biz.kw.argv.KwWaterQueryArgv;
-import com.kingsware.kdev.biz.kw.ret.KwMechanismRet;
+import com.kingsware.kdev.biz.kw.ret.KwReceiptRet;
 import com.kingsware.kdev.biz.kw.ret.KwWaterRet;
 import com.kingsware.kdev.core.base.BaseService;
-import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
-import com.kingsware.kdev.sys.argv.SysLoginLogQueryArgv;
 
 /**
  * 流水管理业务类
@@ -18,7 +15,7 @@ import com.kingsware.kdev.sys.argv.SysLoginLogQueryArgv;
  * @version 1.0.0
  * @date 2022/01/04
  */
-public interface KwWaterService extends BaseService {
+public interface KwReceiptService extends BaseService {
 
     /**
      * 通过id查询
@@ -28,10 +25,10 @@ public interface KwWaterService extends BaseService {
     KwWaterRet get(String id);
 
     /**
-     * 新增（暂时保留）
+     * 新增
      * @param argv 新增
      */
-     void add(KwWaterArgv argv);
+     void add(KwReceiptArgv argv);
 
 
     /**
@@ -39,7 +36,7 @@ public interface KwWaterService extends BaseService {
      * @param argv 查询
      * @return 查询结果
      */
-     PageDataRet<KwWaterRet> query(KwWaterQueryArgv argv);
+     PageDataRet<KwReceiptRet> query(KwReceiptQueryArgv argv);
 
 
     /**
@@ -50,5 +47,5 @@ public interface KwWaterService extends BaseService {
     /**
      * 导出
      */
-    void export(KwWaterQueryArgv argv);
+    void export(KwReceiptQueryArgv argv);
 }
