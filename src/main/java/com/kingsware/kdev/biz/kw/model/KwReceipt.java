@@ -10,9 +10,10 @@ import java.sql.Timestamp;
 import java.util.Date;
 
 /**
- * @description: 回单实体类
- * @author: amzc
- * @date: 2022-01-12 10:24
+ * 回单表
+ * @author amzc
+ * @version 1.0.0
+ * @date 2022/1/12 10:24
  **/
 @Data
 @EqualsAndHashCode(callSuper = true)

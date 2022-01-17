@@ -15,9 +15,10 @@ import javax.annotation.Resource;
 import java.util.ResourceBundle;
 
 /**
- * @description:
- * @author: amzc
- * @date: 2022-01-11 17:32
+ * 定时从队列中获取任务处理
+ *
+ * @author amzc
+ * @date 2022/1/11 17:32
  **/
 @Slf4j
 public class QueueTaskSchedule implements KTask {

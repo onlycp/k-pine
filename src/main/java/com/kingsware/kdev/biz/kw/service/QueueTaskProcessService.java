@@ -18,9 +18,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * @description: 队列任务处理逻辑
- * @author: amzc
- * @date: 2022-01-11 18:02
+ * 队列任务处理逻辑
+ *
+ * @author amzc
+ * @version 1.0.0
+ * @date 2022/1/11 18:02
  **/
 @Service
 @Slf4j

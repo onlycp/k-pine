@@ -7,9 +7,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * @description:
- * @author: amzc
- * @date: 2022-01-11 16:32
+ * 队列任务表
+ * @author amzc
+ * @version 1.0.0
+ * @date 2022/1/11 16:32
  **/
 @Data
 @EqualsAndHashCode(callSuper = true)

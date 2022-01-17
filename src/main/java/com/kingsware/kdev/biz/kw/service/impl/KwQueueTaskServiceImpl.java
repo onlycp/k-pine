@@ -24,9 +24,11 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 /**
- * @description: 队列任务业务逻辑
- * @author: amzc
- * @date: 2022-01-11 15:58
+ * 队列任务的curd
+ *
+ * @author amzc
+ * @version 1.0.0
+ * @date 2022/1/13 15:58
  **/
 @Service
 public class KwQueueTaskServiceImpl extends BaseServiceImpl implements KwQueueTaskService {
@@ -44,12 +46,11 @@ public class KwQueueTaskServiceImpl extends BaseServiceImpl implements KwQueueTa
 
     /**
      * 获取一个未处理的队列任务
-     * @return          队列任务信息
+     * @return
      */
     @Override
     public KwQueueTaskRet getNewOne(){
         //根据时间倒序获取第一个状态是新增的任务
-        System.out.println("执行获取业务");
         SqlWrapper wrapper = new SqlWrapper(" select * from kw_queue_task as kqt where 1 = 1");
         wrapper.addCondition("kqt.status", Op.EQ, QueueTaskStatusEnum.NEW.getValue());
         wrapper.sortBy(" ORDER BY kqt.when_created asc limit 1 ");

@@ -7,10 +7,11 @@ import com.kingsware.kdev.biz.kw.ret.KwQueueTaskRet;
 import com.kingsware.kdev.core.base.BaseService;
 
 /**
- * @description:
- * @author: amzc
+ * 队列任务的curd
+ *
+ * @author amzc
  * @version 1.0.0
- * @date: 2022-01-11 15:05
+ * @date 2022/1/11 15:05
  **/
 public interface KwQueueTaskService extends BaseService {
 
@@ -22,14 +23,14 @@ public interface KwQueueTaskService extends BaseService {
 
     /**
      * 获取一个未处理的队列任务
-     * @return          队列任务信息
+     * @return     队列任务信息
      */
     KwQueueTaskRet getNewOne();
 
     /**
      * 更新状态
-     * @param id            队列任务ID
-     * @param status        状态
+     * @param id          队列任务ID
+     * @param status      状态
      */
     void updateStatus(String id, QueueTaskStatusEnum status);
 

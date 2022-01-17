@@ -4,10 +4,11 @@ import com.kingsware.kdev.core.bean.BaseManageRet;
 import lombok.Data;
 
 /**
- * @description: 任务
- * @author: amzc
+ * 任务信息返回
+ *
+ * @author amzc
  * @version 1.0.0
- * @date: 2022-01-11 15:28
+ * @date 2022/1/11 15:28
  **/
 @Data
 public class KwQueueTaskRet extends BaseManageRet {

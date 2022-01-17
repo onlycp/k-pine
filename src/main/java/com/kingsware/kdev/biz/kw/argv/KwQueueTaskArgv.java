@@ -4,10 +4,11 @@ import lombok.Data;
 import lombok.ToString;
 
 /**
- * @description: 任务队列表
+ *
+ * @author amzc
  * @version 1.0.0
- * @author: amzc
- * @date: 2022-01-11 15:49
+ * @description: 任务队列
+ * @date 2022/1/11 15:49
  **/
 @Data
 public class KwQueueTaskArgv {

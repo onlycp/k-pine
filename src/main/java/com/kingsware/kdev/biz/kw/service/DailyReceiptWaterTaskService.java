@@ -9,10 +9,8 @@ import com.kingsware.kdev.biz.kw.util.TimeUtil;
 import com.kingsware.kdev.core.orm.DB;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;;
 import java.nio.file.Paths;
@@ -22,11 +20,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * 功能描述：回单流水录入业务逻辑
+ * 回单流水录入业务逻辑
  *
  * @author amzc
  * @version 1.00
- * @Date 2021/2/12
+ * @Date 2022/1/14
  */
 @Service
 public class DailyReceiptWaterTaskService {
@@ -34,9 +32,6 @@ public class DailyReceiptWaterTaskService {
 
     //@Resource
     KwWaterService waterService = new KwWaterServiceImpl();
-
-    //@Value("${ScheduledTask.DailyReceiptWaterBackupPath}")
-    //private String dailyReceiptWaterBackupPath;
 
     /**
      * 构造昨天的目录路径
