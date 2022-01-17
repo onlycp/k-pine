@@ -70,4 +70,12 @@ public interface DbChannel {
      * @return          属性列表
      */
      <T> List<T> queryForAttribute(String sql, Class<T> tClass, List<Object> objects);
+
+    /**
+     * 调用http post接口
+     * @param url
+     * @param params
+     * @return
+     */
+    String httpPost(String url, Object params);
 }

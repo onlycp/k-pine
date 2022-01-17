@@ -11,9 +11,13 @@ import lombok.Data;
  * @date 2022/1/5 3:06 下午
  */
 @Data
-public class SysFlowArgv {
+public class SysKdbFlowArgv {
     /** 流程id **/
-    private String flowID;
+    private String id;
     /** 流程内容 **/
     private String content;
+    /** 名称 **/
+    private String name;
+    /** 父流程id **/
+    private String parentId;
 }

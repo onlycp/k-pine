@@ -114,6 +114,45 @@ public class JsonUtil {
     }
 
     /**
+     * 将对象转为map
+     * @param bean  对象
+     * @return      map
+     */
+    public static Map<String, Object> beanToMap(Object bean) {
+        Map<String, Object> map = new HashMap<>();
+        // 获取所有Fields
+        Field[] fields = BeanUtils.getAllFields(bean.getClass());
+        for (Field field: fields) {
+            map.put(field.getName(), BeanUtils.getFieldValue(field, bean));
+        }
+        return map;
+    }
+
+    /**
+     * 将 json转为list对象
+     * @param json          json字符串
+     * @param tClass        class
+     * @param <T>           泛型
+     * @return              list对象
+     */
+    public static <T> List<T> snakeCaseToListBean(String json, Class<T> tClass) {
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            objectMapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+            JavaType javaType =  objectMapper.getTypeFactory().constructParametricType(ArrayList.class, tClass);
+
+            return objectMapper.readValue(json, javaType);
+        } catch (JsonProcessingException e) {
+            logger.warn("字符串转为List对象失败, 源串:{}", json);
+            return null;
+        }
+
+
+    }
+
+    /**
      * 将 json转为list对象
      * @param json          json字符串
      * @param tClass        class
@@ -125,7 +164,6 @@ public class JsonUtil {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            objectMapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
             JavaType javaType =  objectMapper.getTypeFactory().constructParametricType(ArrayList.class, tClass);
 
             return objectMapper.readValue(json, javaType);
