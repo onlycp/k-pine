@@ -43,7 +43,7 @@ public class QueueTaskProcessService {
     String DailyReceiptWaterSinglePath;
 
     public QueueTaskProcessService(){
-        ResourceBundle res = ResourceBundle.getBundle("application-dev");
+        ResourceBundle res = ResourceBundle.getBundle("application");
         this.DailyReceiptWaterSinglePath = res.getString("file.WaterPath");
     }
 

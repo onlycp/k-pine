@@ -31,7 +31,7 @@ public class QueueTaskSchedule implements KTask {
     private String cron;
 
     public QueueTaskSchedule(){
-        ResourceBundle res = ResourceBundle.getBundle("application-dev");
+        ResourceBundle res = ResourceBundle.getBundle("application");
         this.cron = res.getString("schedule.QueueTask.cron");
     }
 

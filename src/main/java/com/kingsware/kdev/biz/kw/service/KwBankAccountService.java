@@ -47,4 +47,10 @@ public interface KwBankAccountService extends BaseService {
      * @param argv  查询
      */
     void delete(MultiIdArgv argv);
+
+    /**
+     * 批量更新银行版本、账户、账号的关系
+     * @param argv  查询
+     */
+    void addAccountListAndEditions(KwBankAccountArgv argv);
 }
