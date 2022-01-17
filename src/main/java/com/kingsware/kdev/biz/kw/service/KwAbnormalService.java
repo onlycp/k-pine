@@ -51,5 +51,11 @@ public interface KwAbnormalService extends BaseService {
      */
     void exportBalanceAbnormal(KwWaterQueryArgv argv);
 
+    /**
+     * 异常流水及区间
+     * @param argv
+     * @return
+     */
+    List<KwWaterRet> queryBalanceAbnormal(KwWaterQueryArgv argv);
 
 }

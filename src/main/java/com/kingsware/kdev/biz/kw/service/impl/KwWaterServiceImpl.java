@@ -68,14 +68,11 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
                 " kw.* FROM kw_water kw " +
                 " LEFT JOIN kw_receipt kr on kw.receipt_id = kr.id" +
                 " LEFT JOIN kw_bank_account kba on kw.account = kba.account " +
-                " LEFT JOIN kw_bank_account_expand kbae on kba.account = kbae.account " +
-                " LEFT JOIN kw_edition ke on kba.edition_id = ke.id " +
-                " LEFT JOIN kw_edition_account kea on kea.id = kba.edition_account_id " +
-                " LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id " +
-                " where kba.deleted = 0 " +
-                " and km.deleted = 0 " +
-                " and kea.deleted = 0 " +
-                " and ke.deleted = 0 ");
+                " LEFT JOIN kw_bank_account_expand kbae on kba.account = kbae.account and kba.deleted = 0  " +
+                " LEFT JOIN kw_edition ke on kba.edition_id = ke.id and ke.deleted = 0  " +
+                " LEFT JOIN kw_edition_account kea on kea.id = kba.edition_account_id and kea.deleted = 0  " +
+                " LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id and km.deleted = 0  " +
+                " where 1=1 ");
 
         // 拼装查询sql,并注入参数
         if (argv.getEditionId() != null) {

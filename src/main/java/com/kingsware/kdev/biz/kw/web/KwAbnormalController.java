@@ -74,7 +74,18 @@ public class KwAbnormalController extends BaseController {
     @ApiOperation(value = "导出余额异常" ,notes = "导出余额异常")
     @GetMapping("/exportBalanceAbnormal")
     public void exportBalanceAbnormal(KwWaterQueryArgv argv) {
+        argv.setPageQuery(false);
         abnormalService.exportBalanceAbnormal(argv);
+    }
+
+    /**
+     * 异常流水及区间
+     */
+    @ApiOperation(value = "查询余额异常" ,notes = "查询余额异常")
+    @GetMapping("/queryBalanceAbnormal")
+    public BaseRet queryBalanceAbnormal(KwWaterQueryArgv argv) {
+        argv.setPageQuery(false);
+        return BaseRet.success(abnormalService.queryBalanceAbnormal(argv));
     }
 
 
