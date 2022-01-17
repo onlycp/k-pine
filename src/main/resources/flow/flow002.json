@@ -1,0 +1,180 @@
+{
+  "name": "test001",
+  "node_definition": [
+    {
+      "id": "start",
+      "type": "start",
+      "name": "开始",
+      "variables": {
+        "script": {
+          "sourceName": "kingDB",
+          "content": "select * from customer",
+          "params": ["dd"],
+          "type": "sql"
+        }
+      }
+    },
+    {
+      "id": "step1",
+      "type": "task",
+      "name": "申请休假",
+      "variables": {}
+    },
+    {
+      "id": "branch1",
+      "type": "decision",
+      "name": "分支节点1",
+      "variables": {}
+    },
+    {
+      "id": "step2",
+      "type": "task",
+      "name": "部门经理审核",
+      "variables": {
+        "option": "基本同意，请总经理批示"
+      }
+    },
+    {
+      "id": "step3",
+      "type": "task",
+      "name": "总经理审核",
+      "variables": {
+        "option2": "同意"
+      }
+    },
+    {
+      "id": "step4",
+      "type": "task",
+      "name": "归档",
+      "variables": {}
+    },
+    {
+      "id": "step5",
+      "type": "fork",
+      "name": "并行计算",
+      "variables": {}
+    },
+    {
+      "id": "step6",
+      "type": "task",
+      "name": "并行计算子节点任务",
+      "variables": {}
+    },
+    {
+      "id": "step7",
+      "type": "task",
+      "name": "并行计算子节点任务",
+      "variables": {}
+    },
+    {
+      "id": "step8",
+      "type": "join",
+      "name": "合并计算",
+      "variables": {}
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "name": "结束",
+      "variables": {}
+    }
+  ],
+  "node_link": [
+    {
+      "id": "link1",
+      "name": "申请休假",
+      "from": "start",
+      "to": "step1",
+      "variables": {}
+    },
+    {
+      "id": "link2",
+      "name": "提交经理审批",
+      "from": "step1",
+      "to": "step2",
+      "variables": {}
+    },
+    {
+      "id": "link3",
+      "name": "判断是否需要总经理审批",
+      "from": "step2",
+      "to": "branch1",
+      "variables": {}
+    },
+    {
+      "id": "link4",
+      "name": "提交总经理审批",
+      "from": "branch1",
+      "to": "step3",
+      "conditions": {
+        "decision": {
+          "expr": "compare(${result[0].LASTNAME}=zhangsan)"
+        }
+      },
+      "variables": {
+      }
+    },
+    {
+      "id": "link5",
+      "name": "提交人事部归档",
+      "from": "step3",
+      "to": "step4",
+      "variables": {}
+    },
+    {
+      "id": "link6",
+      "name": "提交人事部归档",
+      "from": "branch1",
+      "to": "step4",
+      "conditions": {
+        "decision": {
+          "expr": "compare(${a}<zhangsan)"
+        }
+      },
+      "variables": {
+      }
+    },
+    {
+      "id": "link7",
+      "name": "归档->fork",
+      "from": "step4",
+      "to": "step5",
+      "variables": {}
+    },
+    {
+      "id": "link8",
+      "name": "并行分支1",
+      "from": "step5",
+      "to": "step6",
+      "variables": {}
+    },
+    {
+      "id": "link9",
+      "name": "并行分支2",
+      "from": "step5",
+      "to": "step7",
+      "variables": {}
+    },
+    {
+      "id": "link10",
+      "name": "合并分支1",
+      "from": "step6",
+      "to": "step8",
+      "variables": {}
+    },
+    {
+      "id": "link11",
+      "name": "合并分支2",
+      "from": "step7",
+      "to": "step8",
+      "variables": {}
+    },
+    {
+      "id": "link12",
+      "name": "结束",
+      "from": "step8",
+      "to": "end",
+      "variables": {}
+    }
+  ]
+}

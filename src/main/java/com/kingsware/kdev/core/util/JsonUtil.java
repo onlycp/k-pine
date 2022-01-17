@@ -114,6 +114,21 @@ public class JsonUtil {
     }
 
     /**
+     * 将对象转为map
+     * @param bean  对象
+     * @return      map
+     */
+    public static Map<String, Object> beanToMap(Object bean) {
+        Map<String, Object> map = new HashMap<>();
+        // 获取所有Fields
+        Field[] fields = BeanUtils.getAllFields(bean.getClass());
+        for (Field field: fields) {
+            map.put(field.getName(), BeanUtils.getFieldValue(field, bean));
+        }
+        return map;
+    }
+
+    /**
      * 将 json转为list对象
      * @param json          json字符串
      * @param tClass        class

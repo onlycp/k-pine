@@ -35,7 +35,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         KdbFlowQueryArgv argv = new KdbFlowQueryArgv();
         argv.setFlowId(id);
         // 查询model
-        KdbApi api = (KdbApi)(DB.getDefault());
+        KdbApi api = DB.kdbApi();
         List<FlowInfo> list = api.query(argv);
         // 转换成ret对象
         return toRet(list.get(0));
