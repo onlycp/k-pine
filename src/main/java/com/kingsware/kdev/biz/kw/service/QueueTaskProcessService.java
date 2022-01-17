@@ -4,13 +4,16 @@ import cn.hutool.core.lang.Tuple;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.kingsware.kdev.biz.kw.enums.QueueTaskStatusEnum;
 import com.kingsware.kdev.biz.kw.ret.KwQueueTaskRet;
+import com.kingsware.kdev.biz.kw.service.impl.KwQueueTaskServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,16 +29,21 @@ public class QueueTaskProcessService {
     //@Resource
     private DailyReceiptWaterTaskService dailyReceiptWaterTaskService = new DailyReceiptWaterTaskService();
 
-    @Resource
-    KwQueueTaskService queueTaskService;
+    //@Resource
+    private KwQueueTaskService queueTaskService = new KwQueueTaskServiceImpl();
 
     /**
      * 网络路径正则表达式
      */
     private Pattern pattern = Pattern.compile("\\\\\\\\((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}\\\\(.*)");
 
-    // TODO: 2022/1/12 路径指定
-    String DailyReceiptWaterSinglePath = "E:\\";
+    //@Value("${file.WaterPath}")
+    String DailyReceiptWaterSinglePath;
+
+    public QueueTaskProcessService(){
+        ResourceBundle res = ResourceBundle.getBundle("application-dev");
+        this.DailyReceiptWaterSinglePath = res.getString("file.WaterPath");
+    }
 
     /**
      * 扫描单一目录的回单流水
@@ -47,7 +55,6 @@ public class QueueTaskProcessService {
         {
             log.info("扫描单一回单流水");
             String remotePath = task.getData().replaceAll("/", "\\\\");
-            System.out.println(remotePath);
             Matcher matcher = pattern.matcher(remotePath);
             if (!matcher.find()){
                 throw new Exception("路径不匹配：" + task.getData());
@@ -57,9 +64,6 @@ public class QueueTaskProcessService {
             File folder = new File(path);
             if (!folder.exists() || !folder.isDirectory()){
                 throw new Exception("路径不存在或者不是文件夹：" + path);
-            }
-            if(dailyReceiptWaterTaskService == null){
-                System.out.println("===dailyReceiptWaterTaskService为空===");
             }
             Tuple info = dailyReceiptWaterTaskService.convertExcel2ReceiptWater(new File(path));
 

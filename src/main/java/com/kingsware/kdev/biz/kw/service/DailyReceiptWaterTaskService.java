@@ -16,6 +16,7 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;;
 import java.nio.file.Paths;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -223,16 +224,16 @@ public class DailyReceiptWaterTaskService {
         KwReceipt receiptDto = receiptDtoList.stream().findFirst().orElse(null);
 
         // 获取日期
-        Date date = null;
+        Timestamp date = null;
         if (waterDto != null){
             date = waterDto.getTransactionDate();
         }else if (receiptDto != null) {
-            date = TimeUtil.getDate(receiptDto.getBookDate());
+            //date = TimeUtil.getDate(receiptDto.getBookDate());
         }
 
-        final Date finalDate = date;
+        String finalDate = date.toString();
         List<KwWater> notMatchWater = waterDtoList.stream()
-                .filter(w -> !w.getTransactionDate().equals(finalDate)).collect(Collectors.toList());
+                .filter(w -> !w.getTransactionDate().toString().equals(finalDate)).collect(Collectors.toList());
 
         if (notMatchWater.size() > 0){
             throw new WrongFormatReceiptWaterException("流水数据有错误的日期"); // 存在不同的日期
@@ -249,7 +250,7 @@ public class DailyReceiptWaterTaskService {
 
         //找出当天所有关联的数据
         if (waterDto != null){
-            waterEntityList = waterService.findByDateAndAccount(waterDto.getAccount(), date);
+            waterEntityList = waterService.findByDateAndAccount(waterDto.getAccount(), finalDate);
         }
         if (receiptDto != null){
             //receiptEntityList = receiptService.findByDateAndAccount(receiptDto.getSelfAccount(), date);
@@ -259,8 +260,8 @@ public class DailyReceiptWaterTaskService {
         List<KwWater> autoWaterList = waterEntityList.stream().filter(w -> w.getDateIndex() % 100 == 0).collect(Collectors.toList());
         List<KwReceipt> autoReceiptList = receiptEntityList.stream().filter(r -> r.getDateIndex() % 100 == 0).collect(Collectors.toList());
 
-        List<KwWater> newWaterList = new ArrayList<KwWater>();
-        List<KwReceipt> newReceiptList = new ArrayList<KwReceipt>();
+        List<KwWater> newWaterList = new ArrayList<>();
+        List<KwReceipt> newReceiptList = new ArrayList<>();
 
         if (autoWaterList.size() == 0){
             newWaterList.addAll(waterService.batchUpdateNewWater(waterDtoList));
@@ -307,7 +308,7 @@ public class DailyReceiptWaterTaskService {
                 if (currentReceiptEntity == null || currentReceiptEntity.getDateIndex() % 100 == 0){
                     waterDto.setReceiptId(null);
                     waterDto.setHasReceipt(0);
-                    DB.save(waterDto);
+                    DB.update(waterDto);
                 }
             }
         }
@@ -336,7 +337,6 @@ public class DailyReceiptWaterTaskService {
                     waterDtoList.addAll(waterService.excel2WaterDto(f));
                 }
             }
-            System.out.println(waterDtoList.toString());
             saveReceiptWaterByDate(receiptDtoList, waterDtoList);
 
             if (receiptDtoList.size() > 0){

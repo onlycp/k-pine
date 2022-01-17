@@ -7,8 +7,12 @@ import com.kingsware.kdev.biz.kw.service.QueueTaskProcessService;
 import com.kingsware.kdev.biz.kw.service.impl.KwQueueTaskServiceImpl;
 import com.kingsware.kdev.core.cron.KTask;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ResourceBundle;
 
 /**
  * @description:
@@ -19,36 +23,30 @@ import javax.annotation.Resource;
 public class QueueTaskSchedule implements KTask {
     //@Resource
     KwQueueTaskServiceImpl kwQueueTaskService = new KwQueueTaskServiceImpl();
-    //todo
+
     //@Resource
     QueueTaskProcessService queueTaskProcessService = new QueueTaskProcessService();
 
-//    private String cron;
-//
-//    public QueueTaskSchedule(){
-//        ResourceBundle res = ResourceBundle.getBundle("application");
-//        this.cron = res.getString("schedule.QueueTask.cron");
-//    }
+    private String cron;
+
+    public QueueTaskSchedule(){
+        ResourceBundle res = ResourceBundle.getBundle("application-dev");
+        this.cron = res.getString("schedule.QueueTask.cron");
+    }
 
     @Override
     public void execute() {
         //持续获取新任务
         while (true){
-            System.out.println("持续获取任务");
-            if(kwQueueTaskService == null){
-                System.out.println(1232);
-            }
             KwQueueTaskRet task = kwQueueTaskService.getNewOne();
             if (task == null){
-                System.out.println("没有可用的任务");
                 break;
             }
             log.info("处理任务：" + task.getName() + " " + task.getId() + " data：" + task.getData());
             kwQueueTaskService.updateStatus(task.getId(), QueueTaskStatusEnum.PROCESSING);
-            System.out.println("QueueTaskTypeEnum.get"+QueueTaskTypeEnum.get(task.getType()));
             switch (QueueTaskTypeEnum.get(task.getType())){
                 case SINGLE_SCAN:
-                    System.out.println("执行扫描流水");
+                    log.info("执行扫描流水");
                     queueTaskProcessService.singleScanTask(task);
                     break;
 //                case ALL_SCAN:
@@ -89,7 +87,7 @@ public class QueueTaskSchedule implements KTask {
 
     @Override
     public String cron() {
-        return "0 0/1 * * * ?";
+        return cron;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.kingsware.kdev.biz.kw.web;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import com.kingsware.kdev.biz.kw.argv.KwQueueTaskArgv;
@@ -50,17 +51,19 @@ public class KwRpaController {
     public BaseRet<?> addNewTask(){
         //kwWaterService.excel2WaterDto(new File("E:\\迅雷云盘\\上传流水\\Users\\标准流水.xlsx"));
 //        List<Map<String,Object>> readAllMap = null;
-//        try(ExcelReader reader = ExcelUtil.getReader(new File("E:\\标准流水.xlsx"))){
+//        try(ExcelReader reader = ExcelUtil.getReader(new File("E:\\\\1.xlsx"))){
 //            readAllMap = reader.readAll();
 //        }
-        //System.out.println(readAllMap.toString());
-        List<List<String>> read = null;
-        try{
-            read = ExcelWorker.getInstance().getHandler().read(0, "E:\\\\1.xlsx");
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        System.out.println(read.toString());
+//        System.out.println(readAllMap.toString());
+//        List<List<String>> read = null;
+//        try{
+//            read = ExcelWorker.getInstance().getHandler().read(0, "E:\\\\1.xlsx");
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
+//        System.out.println(read.get(0).toString());
+        //kwQueueTaskService.updateStatus("d7e03edbc3164d2ea563f2ad9c7279d7",QueueTaskStatusEnum.PROCESSING);
+        kwWaterService.findByDateAndAccount("758872354272","2022-01-10 00:00:00.0");
         return BaseRet.success();
     }
 

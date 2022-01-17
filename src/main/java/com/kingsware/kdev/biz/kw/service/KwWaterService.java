@@ -65,7 +65,7 @@ public interface KwWaterService extends BaseService {
      * @param date          日期
      * @return              流水列表
      */
-    List<KwWater> findByDateAndAccount(String account, Date date);
+    List<KwWater> findByDateAndAccount(String account, String date);
 
     /**
      * 流水导入和匹配业务：批量插入新的流水

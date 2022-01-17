@@ -21,12 +21,14 @@ import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
+import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import org.springframework.stereotype.Service;
 
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -208,11 +210,12 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
      * @return              流水列表
      */
     @Override
-    public List<KwWater> findByDateAndAccount(String account, Date date){
+    public List<KwWater> findByDateAndAccount(String account, String date){
         SqlWrapper wrapper = new SqlWrapper(" select * from kw_water kw where 1 = 1 ");
         wrapper.addCondition("kw.account", Op.EQ, account);
         wrapper.addCondition("kw.transaction_date", Op.EQ, date);
-        return DB.findList(KwWater.class, wrapper.getSql(), wrapper.getParams().toArray());
+        List<KwWater> list = DB.findList(KwWater.class, wrapper.getSql(), wrapper.getParams().toArray());
+        return list;
     }
 
     /**
@@ -226,6 +229,7 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
     public List<KwWater> batchUpdateNewWater(List<KwWater> waterDtoList){
         List<KwWater> newWaterEntityList = new ArrayList<>();
         for (KwWater waterDto: waterDtoList){
+            newWaterEntityList.add(waterDto);
             DB.save(waterDto);
         }
         return newWaterEntityList;
@@ -368,7 +372,7 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
     // TODO: 2022/1/12 事务注解没导包
     //@Transactional
     public KwWater addNew(KwWater waterEntity){
-        waterEntity.setRegisterTime(new Date());
+        waterEntity.setRegisterTime(new Timestamp(new Date().getTime()));
         waterEntity.setReceiptId(null);
         waterEntity.setHasReceipt(0);
         waterEntity.setAbnormalStatus(0);
@@ -390,7 +394,7 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
         waterEntity.setHasReceipt(currentWaterEntity.getHasReceipt());
         waterEntity.setAbnormal(currentWaterEntity.getAbnormal());
         waterEntity.setAbnormalStatus(currentWaterEntity.getAbnormalStatus());
-        waterEntity.setRegisterTime(new Date());
+        waterEntity.setRegisterTime(new Timestamp(new Date().getTime()));
         waterEntity.setId(currentWaterEntity.getId());
         DB.save(waterEntity);
         return waterEntity;
@@ -441,8 +445,8 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
                 throw new WrongFormatReceiptWaterException("收支方向不能为空");
             }
 
-            waterDto.setTransactionDate(TimeUtil.strToDate(strDate));//交易日期  非空
-            waterDto.setTransactionTime(TimeUtil.cellToTime(map.get("交易时间")));//交易时间  可为空
+            waterDto.setTransactionDate(new Timestamp(TimeUtil.strToDate(strDate).getTime()));//交易日期  非空
+            waterDto.setTransactionTime(new Timestamp(TimeUtil.cellToTime(map.get("交易时间")).getTime()));//交易时间  可为空
             waterDto.setTransactionType(Optional.ofNullable(map.get("交易类型")).orElse("").toString());//交易类型      可为空
             waterDto.setCurrency(EnumSelectionUtil.getCurrency(Optional.ofNullable(map.get("币种")).orElse("").toString()));//币种 非空
             waterDto.setAccount(account);//账户  非空
@@ -457,6 +461,7 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
             waterDto.setAbstractInfo(Optional.ofNullable(map.get("摘要")).orElse("").toString());// 摘要   可为空
             waterDto.setSerialNumber(Optional.ofNullable(map.get("流水号")).orElse("").toString()); // 流水号  可为空
             waterDto.setRemark(Optional.ofNullable(map.get("备注")).orElse("").toString());// 备注  可为空
+            waterDto.setRegisterTime(new Timestamp(new Date().getTime())); //插入时间
             res.add(waterDto);
         }
         if (TimeUtil.hasWaterTime(res)){
