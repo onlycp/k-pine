@@ -68,7 +68,14 @@ public class KwAbnormalController extends BaseController {
     }
 
 
-
+    /**
+     * 导出
+     */
+    @ApiOperation(value = "导出余额异常" ,notes = "导出余额异常")
+    @GetMapping("/exportBalanceAbnormal")
+    public void exportBalanceAbnormal(KwWaterQueryArgv argv) {
+        abnormalService.exportBalanceAbnormal(argv);
+    }
 
 
 

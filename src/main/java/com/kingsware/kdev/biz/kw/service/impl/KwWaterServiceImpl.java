@@ -25,7 +25,8 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
 
     /**
      * 流水详情
-     * @param id    id
+     *
+     * @param id id
      * @return
      */
     @Override
@@ -38,6 +39,7 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
 
     /**
      * （暂时保留）
+     *
      * @param argv 新增
      */
     @Override
@@ -46,6 +48,7 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
 
     /**
      * 校验唯一性
+     *
      * @param model 模型
      */
     private void checkUnique(KwWater model) {
@@ -53,6 +56,7 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
 
     /**
      * 流水分页查询
+     *
      * @param argv 编辑
      * @return
      */
@@ -77,14 +81,14 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
         if (argv.getEditionId() != null) {
             wrapper.addCondition("kba.edition_id", Op.EQ, argv.getEditionId());
         }
-        if (argv.getEditionName()!=null&&StringUtils.isNotEmpty(argv.getEditionName())) {
-            wrapper.addCondition("ke.name", Op.LIKE, "%"+argv.getEditionName() +"%");
+        if (argv.getEditionName() != null && StringUtils.isNotEmpty(argv.getEditionName())) {
+            wrapper.addCondition("ke.name", Op.LIKE, "%" + argv.getEditionName() + "%");
         }
-        if (argv.getAccount()!=null&&StringUtils.isNotEmpty(argv.getAccount())) {
-            wrapper.addCondition("kw.account", Op.LIKE, "%"+argv.getAccount() +"%");
+        if (argv.getAccount() != null && StringUtils.isNotEmpty(argv.getAccount())) {
+            wrapper.addCondition("kw.account", Op.LIKE, "%" + argv.getAccount() + "%");
         }
-        if (argv.getStartDate()!=null&&StringUtils.isNotEmpty(argv.getStartDate())) {
-            wrapper.addCondition("kw.transaction_date", Op.BETWEEN, argv.getStartDate(),argv.getEndDate());
+        if (argv.getStartDate() != null && StringUtils.isNotEmpty(argv.getStartDate())) {
+            wrapper.addCondition("kw.transaction_date", Op.BETWEEN, argv.getStartDate(), argv.getEndDate());
         }
         if (argv.getIds() != null) {
             wrapper.in("kw.id", Arrays.asList(argv.getIds().split(",")));
@@ -133,26 +137,26 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
         List<RegionDefine> defineList = new ArrayList<>();
         defineList.add(RegionDefine.dateDefine("transactionDate", "交易日期"));
         defineList.add(RegionDefine.timeDefine("transactionTime", "交易时间"));
-        defineList.add(RegionDefine.textDefine("mechanismName","机构名称"));
+        defineList.add(RegionDefine.textDefine("mechanismName", "机构名称"));
         defineList.add(RegionDefine.textDefine("editionName", "版本名称"));
-        defineList.add(RegionDefine.textDefine("account","账户"));
-        defineList.add(RegionDefine.textDefine("accountName","账户名称"));
-        defineList.add(RegionDefine.textDefine("proName","项目名称"));
-        defineList.add(RegionDefine.textDefine("bankDeposit","开户行"));
+        defineList.add(RegionDefine.textDefine("account", "账户"));
+        defineList.add(RegionDefine.textDefine("accountName", "账户名称"));
+        defineList.add(RegionDefine.textDefine("proName", "项目名称"));
+        defineList.add(RegionDefine.textDefine("bankDeposit", "开户行"));
         // 借
-        defineList.add(RegionDefine.builder().propName("transactionAmount").labelName("借").format((value, model) -> {
-            // 收支方向
-            Integer revenue = (Integer) BeanUtils.getFieldValue("revenue", model);
-            if (revenue != null) {
-                if (revenue == 0) {
-                    return value;
-                }
-                else if (revenue == 1) {
-                    return "--";
-                }
-            }
-            return "异常";
-        }).build());
+        defineList.add(
+                RegionDefine.builder().propName("transactionAmount").labelName("借").format((value, model) -> {
+                    // 收支方向
+                    Integer revenue = (Integer) BeanUtils.getFieldValue("revenue", model);
+                    if (revenue != null) {
+                        if (revenue == 0) {
+                            return value;
+                        } else if (revenue == 1) {
+                            return "--";
+                        }
+                    }
+                    return "异常";
+                }).build());
         // 贷
         defineList.add(RegionDefine.builder().propName("transactionAmount").labelName("贷").format((value, model) -> {
             // 收支方向
@@ -160,13 +164,11 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
             if (revenue != null) {
                 if (revenue == 0) {
                     return "--";
-                }
-                else if (revenue == 1) {
+                } else if (revenue == 1) {
                     return value;
                 }
             }
             return "异常";
-
         }).build());
         // 余额
         defineList.add(RegionDefine.textDefine("accountBalance", "余额"));
@@ -176,8 +178,7 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
                 int intValue = Integer.parseInt(value.toString());
                 if (intValue == 0) {
                     return "自动";
-                }
-                else if (intValue == 1) {
+                } else if (intValue == 1) {
                     return "手动";
                 }
             }
@@ -186,8 +187,6 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
         // 导出
         KExcel kExcel = KExcel.fromDataList("流水查询.xls", "Sheet1", defineList, pageDataRet.getList());
         ExcelWorker.getInstance().writeToWeb(kExcel);
-
-
     }
 
 }

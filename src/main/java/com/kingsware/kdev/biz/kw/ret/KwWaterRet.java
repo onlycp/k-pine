@@ -85,4 +85,34 @@ public class KwWaterRet extends BaseManageRet {
     // 数据次序
     private Integer dateIndex;
 
+    /** 网银地址  path */// 网银路径
+    private String path;
+    /** 登录类型 */
+    private Integer loginType;
+    /** 登录网银账号 bankAccount**/ // 登录账号
+    private String bankAccount;
+    /** 登录网银密码 bankPassword**/// 网银密码
+    private String bankPassword;
+    /** 登录证书号 certNumber**/// 客户号
+    private String certNumber;
+    /** ukey密码 ukeyPassword**/// Ukey密码
+    private String ukeyPassword;
+    /** 云柜ip usbIp**/// 云柜ip
+    private String usbIp;
+    /** 云柜端口 usbPort**/ // 云柜端口
+    private String usbPort;
+    /** 云柜插口 usbGroup**/// ukey插口
+    private String usbGroup;
+    /** 是否需要按ok **/
+    private Integer isOkKey;
+    /** ok_云柜ip **/
+    private String usbIpOk;
+    /** ok_云柜端口 **/
+    private String usbPortOk;
+    /** ok_云柜插口 **/
+    private String usbGroupOk;
+    // 上条流水的发生日期 lastDate
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone="GMT+8")
+    private Timestamp lastDate;
+
 }
