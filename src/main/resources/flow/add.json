@@ -1,0 +1,55 @@
+{
+  "name": "add",
+  "node_definition": [
+    {
+      "id": "start",
+      "name": "开始",
+      "auto": true,
+      "state": "completed",
+      "debug": false,
+      "type": "start",
+      "variables": {}
+    },
+    {
+      "id": "execute",
+      "name": "执行脚本",
+      "auto": true,
+      "state": "completed",
+      "debug": false,
+      "type": "",
+      "variables": {
+        "script": {
+          "sourceName": "kingDB",
+          "content": "select flowId, content from flow",
+          "type": "sql",
+          "params": []
+        }
+      }
+    },
+    {
+      "id": "end",
+      "name": "结束",
+      "auto": true,
+      "state": "completed",
+      "debug": false,
+      "type": "end",
+      "variables": {}
+    }
+  ],
+  "node_link": [
+    {
+      "id": "link1",
+      "name": "to执行脚本",
+      "from": "start",
+      "to": "execute",
+      "variables": {}
+    },
+    {
+      "id": "link2",
+      "name": "to结束",
+      "from": "execute",
+      "to": "end",
+      "variables": {}
+    }
+  ]
+}

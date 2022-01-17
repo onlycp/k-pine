@@ -120,12 +120,35 @@ public class JsonUtil {
      * @param <T>           泛型
      * @return              list对象
      */
-    public static <T> List<T> toListBean(String json, Class<T> tClass) {
+    public static <T> List<T> snakeCaseToListBean(String json, Class<T> tClass) {
 
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             objectMapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+            JavaType javaType =  objectMapper.getTypeFactory().constructParametricType(ArrayList.class, tClass);
+
+            return objectMapper.readValue(json, javaType);
+        } catch (JsonProcessingException e) {
+            logger.warn("字符串转为List对象失败, 源串:{}", json);
+            return null;
+        }
+
+
+    }
+
+    /**
+     * 将 json转为list对象
+     * @param json          json字符串
+     * @param tClass        class
+     * @param <T>           泛型
+     * @return              list对象
+     */
+    public static <T> List<T> toListBean(String json, Class<T> tClass) {
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             JavaType javaType =  objectMapper.getTypeFactory().constructParametricType(ArrayList.class, tClass);
 
             return objectMapper.readValue(json, javaType);

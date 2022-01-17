@@ -11,6 +11,7 @@ import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
+import com.kingsware.kdev.core.util.PageUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysMenuArgv;
 import com.kingsware.kdev.sys.argv.SysMenuQueryArgv;
@@ -181,30 +182,7 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
 
         }
         // 转为分页查询结果（内存分页）
-        PageDataRet<SysMenuRet> pageDataRet = new PageDataRet<>();
-        pageDataRet.setPageSize(argv.getPageSize());
-        // 计算页数
-        int pageCount = retList.size() / argv.getPageSize();
-        if ( retList.size() % argv.getPageSize() != 0) {
-            pageCount ++;
-        }
-        pageDataRet.setPageCount(pageCount);
-        pageDataRet.setPage(argv.getPage());
-        pageDataRet.setTotal(retList.size());
-        // 计算截取的起始序号
-        int fromIndex = (argv.getPage()-1) * argv.getPageSize();
-        int toIndex = (argv.getPage()-1) * argv.getPageSize();
-        // 如果结果数量小于from
-        if (retList.size() < fromIndex) {
-            pageDataRet.setList(new ArrayList<>());
-        }
-        else if (retList.size() < toIndex) {
-            pageDataRet.setList(retList.subList(fromIndex, retList.size()));
-        }
-        else {
-            pageDataRet.setList(retList);
-        }
-        return pageDataRet;
+        return PageUtil.memoryPage(argv, retList, SysMenuRet.class);
 
 
     }
