@@ -2,6 +2,7 @@ package com.kingsware.kdev.biz.kw.service;
 
 import com.kingsware.kdev.biz.kw.argv.KwMechanismArgv;
 import com.kingsware.kdev.biz.kw.argv.KwMechanismQueryArgv;
+import com.kingsware.kdev.biz.kw.argv.KwWaterArgv;
 import com.kingsware.kdev.biz.kw.argv.KwWaterQueryArgv;
 import com.kingsware.kdev.biz.kw.model.KwWater;
 import com.kingsware.kdev.biz.kw.ret.KwMechanismRet;
@@ -37,7 +38,7 @@ public interface KwWaterService extends BaseService {
      * 新增（暂时保留）
      * @param argv 新增
      */
-     void add(KwWaterQueryArgv argv);
+     void add(KwWaterArgv argv);
 
 
     /**

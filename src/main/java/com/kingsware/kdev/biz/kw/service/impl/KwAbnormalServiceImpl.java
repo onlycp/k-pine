@@ -12,11 +12,13 @@ import com.kingsware.kdev.biz.kw.service.KwAbnormalService;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.BaseSimpleRet;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.excel.ExcelWorker;
+import com.kingsware.kdev.core.excel.KExcel;
+import com.kingsware.kdev.core.excel.RegionDefine;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -104,7 +106,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
      * @return
      */
     private List<KwMechanism> findMechaism() {
-        String sql = "select * from kw_mechanism where 1 = 1 and id is not null ";
+        String sql = "select * from kw_mechanism where deleted = 0 and id is not null ";
         List<KwMechanism> mechanisms = DB.findList(KwMechanism.class, sql);
         return mechanisms;
     }
@@ -116,7 +118,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
      * @return
      */
     private List<KwEdition> findEditionByMechaisId(String mechaismId) {
-        String sql = "select * from kw_edition where 1=1 and mechanism_id = ? ";
+        String sql = "select * from kw_edition where deleted = 0 and mechanism_id = ? ";
         List<KwEdition> editions = DB.findList(KwEdition.class, sql, mechaismId);
         return editions;
     }
@@ -147,10 +149,9 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
      */
     private Integer countBalanceException(String editionId, KwAbnormalQueryArgv argv) {
         String sql = "SELECT count(kw.id) as num1 from kw_water kw " +
-                "LEFT JOIN kw_bank_account kba on kba.account=kw.account " +
-                "LEFT JOIN kw_edition ke on ke.id = kba.edition_id " +
-                "where kba.deleted=0 " +
-                "and abnormal=1 " +
+                "LEFT JOIN kw_bank_account kba on kba.account = kw.account and kba.deleted =0  " +
+                "LEFT JOIN kw_edition ke on ke.id =  kba.edition_id and ke.deleted = 0 " +
+                "where abnormal=1 " +
                 "and ke.id = ? ";
 
         SqlWrapper wrapper = new SqlWrapper(sql);
@@ -181,10 +182,9 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
      */
     private Integer countNoReceipt(String editionId, KwAbnormalQueryArgv argv) {
         String sql = "SELECT count(kw.id) as num1 from kw_water kw " +
-                "LEFT JOIN kw_bank_account kba on kba.account=kw.account " +
-                "LEFT JOIN kw_edition ke on ke.id =  kba.edition_id " +
-                "where kba.deleted=0 " +
-                "and kw.has_receipt=0 " +
+                "LEFT JOIN kw_bank_account kba on kba.account=kw.account and kba.deleted =0  " +
+                "LEFT JOIN kw_edition ke on ke.id =  kba.edition_id and ke.deleted = 0 " +
+                "where kw.has_receipt=0 " +
                 "and ke.id = ? ";
         SqlWrapper wrapper = new SqlWrapper(sql);
         wrapper.getParams().add(editionId);
@@ -210,11 +210,10 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
      */
     private Integer countNoWater(String editionId, KwAbnormalQueryArgv argv) {
         String sql = "SELECT count(kr.id) as num1 from kw_receipt kr " +
-                "LEFT JOIN kw_bank_account kba on kba.account=kr.self_account " +
-                "LEFT JOIN kw_edition ke on ke.id =  kba.edition_id " +
-                "where kba.deleted=0 " +
-                "and kr.has_water=0 " +
-                "and ke.id = ? ";
+                " LEFT JOIN kw_bank_account kba on kba.account=kr.self_account and kba.deleted =0 " +
+                " LEFT JOIN kw_edition ke on ke.id =  kba.edition_id and ke.deleted = 0  " +
+                " where kr.has_water=0 " +
+                " and ke.id = ? ";
         SqlWrapper wrapper = new SqlWrapper(sql);
         wrapper.getParams().add(editionId);
 
@@ -266,6 +265,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
 
     /**
      * 查找账号ID列表
+     *
      * @return
      */
     private List<String> findAllAccountId() {
@@ -353,18 +353,20 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
     @Override
     public PageDataRet<KwWaterRet> queryAbnormalWater(KwWaterQueryArgv argv) {
         // 基础sql
-        SqlWrapper wrapper = new SqlWrapper(" SELECT  kea.bank_account as edition_account, kba.bank_deposit ,km.bank_name as mechanism_name,ke.name as edition_name,kw.* FROM kw_water kw " +
-                " LEFT JOIN kw_receipt kr on kw.receipt_id = kr.id" +
-                " LEFT JOIN kw_bank_account kba on kw.account = kba.account " +
-                " LEFT JOIN kw_edition ke on kba.edition_id = ke.id " +
-                " LEFT JOIN kw_edition_account kea on kea.edition_id = ke.id " +
-                " LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id " +
-                " where kba.deleted = 0 " +
-                " and ke.deleted = 0 " +
-                " and kw.abnormal = 1 ");
+        SqlWrapper wrapper = new SqlWrapper(" SELECT  kba.bank_deposit ,km.bank_name as mechanism_name,ke.name as edition_name,ke.path, " +
+                " kw.*, " +
+                " kea.bank_account as edition_account, kea.bank_account, kea.cert_number, kea.bank_password, kea.ukey_password ,kea.usb_port, kea.usb_ip, kea.usb_group, " +
+                " kea.is_ok_key , kea.usb_ip_ok ,kea.usb_port_ok, kea.usb_group_ok  " +
+                " FROM kw_water kw " +
+                " LEFT JOIN kw_receipt kr on kw.receipt_id = kr.id and kr.deleted = 0 " +
+                " LEFT JOIN kw_bank_account kba on kw.account = kba.account and kba.deleted = 0  " +
+                " LEFT JOIN kw_edition ke on kba.edition_id = ke.id  and ke.deleted = 0 " +
+                " LEFT JOIN kw_edition_account kea on kea.id = kba.edition_account_id and kea.deleted = 0  " +
+                " LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id and km.deleted = 0  " +
+                " where kw.abnormal = 1");
 
         // 拼装查询sql,并注入参数
-        if (argv.getEditionId() != null) {
+        if (argv.getEditionId() != null && StringUtils.isNotEmpty(argv.getEditionId())) {
             wrapper.addCondition("kba.edition_id", Op.EQ, argv.getEditionId());
         }
         if (argv.getEditionName() != null && StringUtils.isNotEmpty(argv.getEditionName())) {
@@ -376,9 +378,12 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         if (argv.getStartDate() != null && StringUtils.isNotEmpty(argv.getStartDate())) {
             wrapper.addCondition("kw.transaction_date", Op.BETWEEN, argv.getStartDate(), argv.getEndDate());
         }
+        if (argv.getIds() != null) {
+            wrapper.in("kw.id", Arrays.asList(argv.getIds().split(",")));
+        }
 
         // 访问权限
-        wrapper.withAuthority("kw_bank_account","kba");
+        wrapper.withAuthority("kw_bank_account", "kba");
 
         // 排序
         wrapper.sortBy("ORDER BY kw.transaction_date desc,date_index desc");
@@ -400,29 +405,28 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         // 1、查找本条流水
         KwWater model = DB.findById(KwWater.class, waterId);
         KwWaterRet curWaterRet = (KwWaterRet) model2Ret(model, KwWaterRet.class);
-        final String accountId = curWaterRet.getAccountId();
+//        final String accountId = curWaterRet.getAccountId();
         final String account = curWaterRet.getAccount();
         final Date transactionDate = curWaterRet.getTransactionDate();
         final Integer dateIndex = curWaterRet.getDateIndex();
 
-//        System.out.println(accountId + " -- " + transactionDate + " -- " + dateIndex);
         // 2、查找前n条流水
         // 同一天 2
         List<KwWaterRet> nearlyWater1 = null;
         List<KwWaterRet> nearlyWater2;
         List<KwWaterRet> nearlyWater3;
         List<KwWaterRet> nearlyWater4 = null;
-        nearlyWater2 = this.findNearlyWater(2, account, transactionDate, dateIndex);
+        nearlyWater2 = this.findNearlyWater(2,false, account, transactionDate, dateIndex);
         // 非同一天 1
         if (nearlyWater2.size() < 5) {
-            nearlyWater1 = this.findNearlyWater(1, account, transactionDate, dateIndex);
+            nearlyWater1 = this.findNearlyWater(1,false, account, transactionDate, dateIndex);
         }
         // 3、查找后n条流水
         // 同一天  3
-        nearlyWater3 = this.findNearlyWater(3, account, transactionDate, dateIndex);
+        nearlyWater3 = this.findNearlyWater(3, false,account, transactionDate, dateIndex);
         // 非同一天 4
         if (nearlyWater3.size() < 5) {
-            nearlyWater4 = this.findNearlyWater(4, account, transactionDate, dateIndex);
+            nearlyWater4 = this.findNearlyWater(4, false,account, transactionDate, dateIndex);
         }
 
         // 拼接返回列表
@@ -454,12 +458,20 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
                 retList.add(kwWaterRet);
             }
         }
-
         return retList;
     }
 
 
-    private List<KwWaterRet> findNearlyWater(int type, String account, Date transactionDate, Integer dateIndex) {
+    /**
+     * 查找相邻的流水
+     * @param type            1： 早于今天 2：同一天 ，本条之前 3：同一天，本条之后 4：本日之后
+     * @param flag            是否正常  false 全部  true 正常
+     * @param account
+     * @param transactionDate
+     * @param dateIndex
+     * @return
+     */
+    private List<KwWaterRet> findNearlyWater(int type, boolean flag, String account, Date transactionDate, Integer dateIndex) {
         String sql;
         List<KwWaterRet> list;
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
@@ -468,25 +480,27 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         switch (type) {
             case 1:
                 // 早于本日
-                sql = "select * from kw_water where account = ? and transaction_date < ?  order by transaction_date desc,date_index desc limit 0,5 ";
+                sql = !flag ? "select * from kw_water where deleted=0 and account = ? and transaction_date < ?  order by transaction_date desc,date_index desc limit 0,5 " :
+                        " select * from kw_water where deleted=0 and account = ? and transaction_date < ? and abnormal=0  order by transaction_date desc,date_index desc limit 0,5 ";
                 dateStr += " 00:00:00";
                 list = DB.findList(KwWaterRet.class, sql, account, dateStr);
                 break;
             case 2:
                 // 同一天，次序在本条之前
-                sql = "select * from kw_water where account = ? and transaction_date like ? and date_index<? order by transaction_date desc,date_index desc limit 0,5";
+                sql = !flag ? "select * from kw_water where deleted=0 and account = ? and transaction_date like ? and date_index<? order by transaction_date desc,date_index desc limit 0,5" :
+                        "select * from kw_water where deleted=0 and account = ? and transaction_date like ? and date_index<? and abnormal=0 order by transaction_date desc,date_index desc limit 0,5";
                 dateStr += "%";
                 list = DB.findList(KwWaterRet.class, sql, account, dateStr, dateIndex);
                 break;
             case 3:
                 // 同一天，次序在本条之后
-                sql = "select * from kw_water where account = ? and transaction_date like ? and date_index>?  order by transaction_date asc,date_index asc limit 0,5 ";
+                sql = "select * from kw_water where deleted=0 and account = ? and transaction_date like ? and date_index>?  order by transaction_date asc,date_index asc limit 0,5 ";
                 dateStr += "%";
                 list = DB.findList(KwWaterRet.class, sql, account, dateStr, dateIndex);
                 break;
             case 4:
                 // 晚于本日
-                sql = "select * from kw_water where account = ? and transaction_date > ?   order by transaction_date asc,date_index asc limit 0,5 ";
+                sql = "select * from kw_water where deleted=0 and account = ? and transaction_date > ?   order by transaction_date asc,date_index asc limit 0,5 ";
                 dateStr += " 23:59:59";
                 list = DB.findList(KwWaterRet.class, sql, account, dateStr);
                 break;
@@ -494,6 +508,78 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
                 return null;
         }
         return list;
+    }
+
+    @Override
+    public void exportBalanceAbnormal(KwWaterQueryArgv argv) {
+        // 直接调用查询方法
+        argv.setPageQuery(false);
+        List<KwWaterRet> list = this.queryBalanceAbnormal(argv);
+        // 定义标题
+        List<RegionDefine> defineList = new ArrayList<>();
+        // 银行名称 mechanismName  银行版本editionName 网银地址 path
+        // 登录账号 bankAccount  客户号 certNumber  网银密码 bankPassword  Ukey密码 ukeyPassword  云柜ip usbIp  云柜端口 usbPort  ukey插口 usbGroup
+        // 是否需要按ok键  isOkKey ok_云柜ip usbIpOk ok_云柜端口 usbPortOk ok_云柜插口 usbGroupOk
+        // 账户 account  上条流水日期 lastDate  当前流水日期 curDate
+        defineList.add(RegionDefine.textDefine("mechanismName", "机构名称"));
+        defineList.add(RegionDefine.textDefine("editionName", "版本名称"));
+        defineList.add(RegionDefine.textDefine("path", "网银地址"));
+        defineList.add(RegionDefine.textDefine("bankAccount", "登录账号"));
+        defineList.add(RegionDefine.textDefine("bankPassword", "网银密码"));
+        defineList.add(RegionDefine.textDefine("certNumber", "客户号"));
+        defineList.add(RegionDefine.textDefine("ukeyPassword", "Ukey密码"));
+        defineList.add(RegionDefine.textDefine("usbIp", "云柜ip"));
+        defineList.add(RegionDefine.textDefine("usbPort", "云柜端口"));
+        defineList.add(RegionDefine.textDefine("usbGroup", "ukey插口"));
+
+//        defineList.add(RegionDefine.textDefine("isOkKey", "是否需要按ok键"));
+        defineList.add(
+                RegionDefine.builder().propName("isOkKey").labelName("是否需要按ok键").format((value, model) -> {
+//                    Integer isOkKey = (Integer) BeanUtils.getFieldValue("isOkKey", model);
+                    Integer isOkKey = (Integer)value;
+                    if (value != null) {
+                        if (isOkKey == 0) {
+                            return "否";
+                        } else if (isOkKey == 1) {
+                            return "是";
+                        }
+                    }
+                    return "异常";
+                }).build());
+        defineList.add(RegionDefine.textDefine("usbIpOk", "ok_云柜ip"));
+        defineList.add(RegionDefine.textDefine("usbPortOk", "ok_云柜端口"));
+        defineList.add(RegionDefine.textDefine("usbGroupOk", "ok_云柜插口"));
+
+        defineList.add(RegionDefine.textDefine("account", "银行账户"));
+        defineList.add(RegionDefine.dateDefine("lastDate", "上条流水日期"));
+        defineList.add(RegionDefine.dateDefine("transactionDate", "当前流水日期"));
+        // 导出
+        KExcel kExcel = KExcel.fromDataList("异常流水.xls", "Sheet1", defineList, list);
+        ExcelWorker.getInstance().writeToWeb(kExcel);
+    }
+
+    /**
+     * 找出问题流水的前一天流水信息
+     * @param argv
+     * @return
+     */
+    public List<KwWaterRet> queryBalanceAbnormal(KwWaterQueryArgv argv) {
+        // 1、找到问题流水
+        PageDataRet<KwWaterRet> pageDataRet = this.queryAbnormalWater(argv);
+        List<KwWaterRet> curWaters = pageDataRet.getList();
+        for (KwWaterRet curWater : curWaters) {
+            // 2、找出问题流水的前一条
+            List<KwWaterRet> nearlyWater = this.findNearlyWater(2, true,curWater.getAccount(), curWater.getTransactionDate(), curWater.getDateIndex());
+            if (nearlyWater.size() < 1) {
+                nearlyWater = this.findNearlyWater(1, true, curWater.getAccount(), curWater.getTransactionDate(), curWater.getDateIndex());
+            }
+            if (nearlyWater.size() < 1) { // 没有前一条流水
+                throw new RuntimeException("该异常流水没有前一条数据");
+            }else {
+                curWater.setLastDate(nearlyWater.get(0).getTransactionDate());
+            }
+        }
+        return curWaters;
     }
 
 }
