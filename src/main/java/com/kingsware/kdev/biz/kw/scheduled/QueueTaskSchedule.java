@@ -5,6 +5,7 @@ import com.kingsware.kdev.biz.kw.enums.QueueTaskTypeEnum;
 import com.kingsware.kdev.biz.kw.ret.KwQueueTaskRet;
 import com.kingsware.kdev.biz.kw.service.QueueTaskProcessService;
 import com.kingsware.kdev.biz.kw.service.impl.KwQueueTaskServiceImpl;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.cron.KTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,8 +32,7 @@ public class QueueTaskSchedule implements KTask {
     private String cron;
 
     public QueueTaskSchedule(){
-        ResourceBundle res = ResourceBundle.getBundle("application");
-        this.cron = res.getString("schedule.QueueTask.cron");
+        this.cron = SpringContext.getProperties("schedule.QueueTask.cron",null);
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.kingsware.kdev.biz.kw.enums.QueueTaskStatusEnum;
 import com.kingsware.kdev.biz.kw.ret.KwQueueTaskRet;
 import com.kingsware.kdev.biz.kw.service.impl.KwQueueTaskServiceImpl;
+import com.kingsware.kdev.core.context.SpringContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,8 +44,7 @@ public class QueueTaskProcessService {
     String DailyReceiptWaterSinglePath;
 
     public QueueTaskProcessService(){
-        ResourceBundle res = ResourceBundle.getBundle("application");
-        this.DailyReceiptWaterSinglePath = res.getString("file.WaterPath");
+        this.DailyReceiptWaterSinglePath = SpringContext.getProperties("file.WaterPath",null);
     }
 
     /**
