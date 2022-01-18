@@ -82,4 +82,16 @@ public class KwEditionServiceImpl extends BaseServiceImpl implements KwEditionSe
             DB.delete(KwEdition.class, id);
         }
     }
+
+    @Override
+    public String findIdByName(String name){
+        if(name != null && StringUtils.isNotEmpty(name)){
+            SqlWrapper wrapper = new SqlWrapper("select ke.* from kw_edition as ke where 1 = 1");
+            wrapper.addCondition("ke.name", Op.EQ, name);
+            KwEdition kwEdition = DB.findOne(KwEdition.class, wrapper.getSql(), wrapper.getParams().toArray());
+            return kwEdition.getId();
+        }else{
+            return null;
+        }
+    }
 }

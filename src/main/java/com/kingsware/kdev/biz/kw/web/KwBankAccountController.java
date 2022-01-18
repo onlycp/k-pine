@@ -30,7 +30,6 @@ public class KwBankAccountController extends BaseController {
     @Resource
     private KwBankAccountService kwBankAccountService;
 
-
     /**
      *  查询
      * @return 分页
@@ -84,4 +83,18 @@ public class KwBankAccountController extends BaseController {
         kwBankAccountService.delete(argv);
         return BaseRet.success();
     }
+
+    /**
+     * 批量更新银行版本、账户、账号的关系
+     * @param argv
+     * @return
+     */
+    @ApiOperation(value = "批量更新银行版本、账户、账号的关系 " ,notes = "批量更新银行版本、账户、账号的关系")
+    @PostMapping(value = "/updateAccountList")
+    public BaseRet<?> addAccountListAndEditions(@RequestBody KwBankAccountArgv argv){
+        System.out.println(argv.toString());
+        kwBankAccountService.addAccountListAndEditions(argv);
+        return BaseRet.success();
+    }
+
 }
