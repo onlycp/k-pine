@@ -2,10 +2,13 @@ package com.kingsware.kdev.biz.kw.service;
 
 import com.kingsware.kdev.biz.kw.argv.KwEditionArgv;
 import com.kingsware.kdev.biz.kw.argv.KwEditionQueryArgv;
+import com.kingsware.kdev.biz.kw.model.KwEdition;
 import com.kingsware.kdev.biz.kw.ret.KwEditionRet;
 import com.kingsware.kdev.core.base.BaseService;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+
+import java.util.List;
 
 /**
  * 银行版本管理业务类
@@ -47,4 +50,10 @@ public interface KwEditionService extends BaseService {
      * @param argv  查询
      */
     void delete(MultiIdArgv argv);
+
+    /**
+     * 根据银行版本名称查找对应的id
+     * @param name  银行版本名称
+     */
+    String findIdByName(String name);
 }

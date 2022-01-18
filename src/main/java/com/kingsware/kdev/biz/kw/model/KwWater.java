@@ -1,11 +1,15 @@
 package com.kingsware.kdev.biz.kw.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kingsware.kdev.core.bean.BaseManageModel;
+import com.kingsware.kdev.core.bean.BaseModel;
+import com.kingsware.kdev.core.orm.annotation.AutoEnum;
 import com.kingsware.kdev.core.orm.annotation.Column;
 import com.kingsware.kdev.core.orm.annotation.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
 /**
@@ -17,7 +21,11 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Table
-public class KwWater extends BaseManageModel {
+public class KwWater extends BaseModel {
+
+    /** id **/
+    @Column(auto = AutoEnum.ID)
+    private String id;
 
     // 账户 account
     private String account;
@@ -28,11 +36,14 @@ public class KwWater extends BaseManageModel {
     // 账户名称 accountName
     private String accountName;
     // 交易日期 transactionDate
-    private Date transactionDate;
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone="GMT+8")
+    private Timestamp transactionDate;
     // 交易时间 transactionTime
-    private Date transactionTime;
+    @JsonFormat(pattern = "HH:mm:ss", timezone="GMT+8")
+    private Timestamp  transactionTime;
     // 登记时间 register_time
-    private Date registerTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
+    private Timestamp registerTime;
     // 金额 transaction_amount
     private String transactionAmount;
     // 收支方向 revenue
@@ -69,17 +80,21 @@ public class KwWater extends BaseManageModel {
     private Integer dateIndex;
     // 删除标志 deleted
     private Integer deleted;
+    //对方行名
+    private String otherBankName;
+    //备注
+    private String remark;
 
 
     /** 备用字段1 **/
-    private String reserve1;
-    /** 备用字段2 **/
-    private String reserve2;
-    /** 备用字段3 **/
-    private String reserve3;
-    /** 备用字段4 **/
-    private String reserve4;
-    /** 备用字段5 **/
-    private String reserve5;
+//    private String reserve1;
+//    /** 备用字段2 **/
+//    private String reserve2;
+//    /** 备用字段3 **/
+//    private String reserve3;
+//    /** 备用字段4 **/
+//    private String reserve4;
+//    /** 备用字段5 **/
+//    private String reserve5;
 
 }
