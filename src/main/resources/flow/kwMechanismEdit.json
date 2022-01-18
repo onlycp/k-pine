@@ -1,0 +1,178 @@
+{
+  "name": "add",
+  "node_definition": [
+    {
+      "id": "start",
+      "name": "开始",
+      "auto": true,
+      "state": "completed",
+      "debug": false,
+      "type": "start",
+      "variables": {}
+    },
+    {
+      "id": "name_uni_check",
+      "name": "银行名称唯一性判断",
+      "auto": true,
+      "state": "completed",
+      "debug": false,
+      "type": "",
+      "variables": {
+        "script": {
+          "sourceName": "MySql2",
+          "content": "select count(1) as cnt from kw_mechanism where deleted=0 and bank_name=#{bankName} and id != #{id}}",
+          "type": "sql",
+          "params": []
+        }
+      }
+    },
+    {
+      "id": "number_uni_check",
+      "name": "银行代码唯一性判断",
+      "auto": true,
+      "state": "completed",
+      "debug": false,
+      "type": "",
+      "variables": {
+        "script": {
+          "sourceName": "MySql2",
+          "content": "select count(1) as cnt from kw_mechanism where deleted=0 and bank_number=#{bankNumber} and id != #{id}}",
+          "type": "sql",
+          "params": []
+        }
+      }
+    },
+    {
+      "id": "sort_uni_check",
+      "name": "银行简称唯一性判断",
+      "auto": true,
+      "state": "completed",
+      "debug": false,
+      "type": "",
+      "variables": {
+        "script": {
+          "sourceName": "MySql2",
+          "content": "select count(1) as cnt from kw_mechanism where deleted=0 and bank_sort=#{bankSort} and id != #{id}}",
+          "type": "sql",
+          "params": []
+        }
+      }
+    },
+    {
+      "id": "save",
+      "name": "保存",
+      "auto": true,
+      "state": "completed",
+      "debug": false,
+      "type": "",
+      "variables": {
+        "script": {
+          "sourceName": "MySql2",
+          "content": "update kw_mechanism set bank_name=#{bankName}, bank_number=#{bankNumber}, bank_sort=#{bankSort}, bank_type=#{bankType}, who_modified=#{who}, who_modified=#{when} where id=#{id}}",
+          "type": "sql",
+          "params": []
+        }
+      }
+    },
+    {
+      "id": "end",
+      "name": "结束",
+      "auto": true,
+      "state": "completed",
+      "debug": false,
+      "type": "end",
+      "variables": {}
+    }
+  ],
+  "node_link": [
+    {
+      "id": "start->name_uni_check",
+      "name": "start->name_uni_check",
+      "from": "start",
+      "to": "name_uni_check",
+      "variables": {}
+    },
+    {
+      "id": "name_uni_check->number_uni_check",
+      "name": "name_uni_check->number_uni_check",
+      "from": "name_uni_check",
+      "to": "number_uni_check",
+      "variables": {},
+      "conditions": {
+        "decision": {
+          "expr": "compare(#{result[0].CNT}=0)"
+        }
+      }
+    },
+    {
+      "id": "name_uni_check->end",
+      "name": "银行名称不唯一",
+      "from": "name_uni_check",
+      "to": "end",
+      "end_reason": "银行名称已存在",
+      "conditions": {
+        "decision": {
+          "expr": "compare(#{result[0].CNT}>0)"
+        }
+      }
+    },
+    {
+      "id": "number_uni_check->sort_uni_check",
+      "name": "number_uni_check->sort_uni_check",
+      "from": "number_uni_check",
+      "to": "sort_uni_check",
+      "variables": {},
+      "conditions": {
+        "decision": {
+          "expr": "compare(#{result[0].CNT} = 0)"
+        }
+      }
+    },
+    {
+      "id": "number_uni_check->end",
+      "name": "银行代码不唯一",
+      "from": "number_uni_check",
+      "to": "end",
+      "end_reason": "银行代码已存在",
+      "variables": {},
+      "conditions": {
+        "decision": {
+          "expr": "compare(#{result[0].CNT} > 0)"
+        }
+      }
+    },
+    {
+      "id": "sort_uni_check->save",
+      "name": "sort_uni_check->save",
+      "from": "sort_uni_check",
+      "to": "save",
+      "variables": {},
+      "conditions": {
+        "decision": {
+          "expr": "compare(#{result[0].CNT}=0)"
+        }
+      }
+    },
+    {
+      "id": "sort_uni_check->end",
+      "name": "银行简称不唯一",
+      "from": "sort_uni_check",
+      "to": "end",
+      "end_reason": "银行简称已存在",
+      "variables": {},
+      "conditions": {
+        "decision": {
+          "expr": "compare(#{result[0].CNT}>0)"
+        }
+      }
+    },
+    {
+      "id": "save->end",
+      "name": "结束",
+      "from": "save",
+      "to": "end",
+      "end_reason": "保存成功",
+      "variables": {}
+    }
+  ]
+}

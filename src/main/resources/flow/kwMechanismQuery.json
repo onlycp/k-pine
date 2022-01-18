@@ -1,5 +1,5 @@
 {
-  "name": "add",
+  "name": "kwMechanismQuery",
   "node_definition": [
     {
       "id": "start",
@@ -11,16 +11,16 @@
       "variables": {}
     },
     {
-      "id": "execute",
-      "name": "执行脚本",
+      "id": "delete",
+      "name": "删除",
       "auto": true,
       "state": "completed",
       "debug": false,
       "type": "",
       "variables": {
         "script": {
-          "sourceName": "kingDB",
-          "content": "select flowId, content from flow",
+          "sourceName": "MySql2",
+          "content": "update kw_mechanism set deleted=1 where id in (#{ids})",
           "type": "sql",
           "params": []
         }
@@ -38,17 +38,18 @@
   ],
   "node_link": [
     {
-      "id": "link1",
-      "name": "to执行脚本",
+      "id": "start->delete",
+      "name": "start->delete",
       "from": "start",
-      "to": "execute",
+      "to": "delete",
       "variables": {}
     },
     {
-      "id": "link2",
-      "name": "to结束",
-      "from": "execute",
+      "id": "delete->end",
+      "name": "delete->end",
+      "from": "delete",
       "to": "end",
+      "end_reason": "保存成功",
       "variables": {}
     }
   ]

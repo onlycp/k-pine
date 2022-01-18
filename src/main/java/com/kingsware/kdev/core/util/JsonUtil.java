@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.expression.spel.ast.TypeReference;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -23,6 +24,7 @@ public class JsonUtil {
     private static final Logger logger  = LoggerFactory.getLogger(JsonUtil.class);
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
+
     static {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
@@ -64,6 +66,7 @@ public class JsonUtil {
             return null;
         }
     }
+
 
     /**
      * 将字符串转为对象
@@ -111,6 +114,21 @@ public class JsonUtil {
             return null;
         }
         return toBean(json, Map.class);
+    }
+
+    /**
+     * 将对象转为map
+     * @param bean  对象
+     * @return      map
+     */
+    public static Map<String, Object> beanToMap(Object bean) {
+        Map<String, Object> map = new HashMap<>();
+        // 获取所有Fields
+        Field[] fields = BeanUtils.getAllFields(bean.getClass());
+        for (Field field: fields) {
+            map.put(field.getName(), BeanUtils.getFieldValue(field, bean));
+        }
+        return map;
     }
 
     /**

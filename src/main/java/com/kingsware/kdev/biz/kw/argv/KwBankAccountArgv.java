@@ -6,6 +6,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.TimeZone;
 
 /**
@@ -61,4 +62,15 @@ public class KwBankAccountArgv {
     private String relationId;
     /** 是否流水发送到mbs系统 */
     private Integer mbsSend;
+
+    /** 银行账号 */
+    private String bankAccount;
+
+    /** 银行版本 */
+    private String editionName;
+
+    /** 银行账户列表 */
+    private List<String> accountList;
+
+
 }

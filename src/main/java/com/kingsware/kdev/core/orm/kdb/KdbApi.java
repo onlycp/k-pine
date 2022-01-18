@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.orm.kdb.FlowInfo;
 import com.kingsware.kdev.core.orm.kdb.KdbRet;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * kdb操作接口
@@ -70,6 +71,12 @@ public interface KdbApi {
      */
     List<DataSourceInfo> queryDataSource(DataSourceQueryArgv dataSourceInfo);
 
+    /**
+     * 执行流程
+     * @param argv        参数
+     * @return              流程执行结果
+     */
+    Map<String, String> executeFlow(KdbArgv argv);
 
 
 

@@ -47,4 +47,10 @@ public interface KwEditionAccountService extends BaseService {
      * @param argv  查询
      */
     void delete(MultiIdArgv argv);
+
+    /**
+     * 根据银行账号查找id
+     * @param bankAccount 银行账号
+     */
+    String findIdByBankAccount(String bankAccount);
 }

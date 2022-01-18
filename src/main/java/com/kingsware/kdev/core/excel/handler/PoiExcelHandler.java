@@ -69,23 +69,36 @@ public class PoiExcelHandler implements KExcelHandler{
     @Override
     public List<List<String>> read(int sheetIndex, String filePath) throws Exception {
         // 创建工作表
-        @Cleanup Workbook workbook = WorkbookFactory.create(new File(filePath));
-        // 获取sheet
-        Sheet sheet = workbook.getSheetAt(sheetIndex);
-        // 返回内容
-        List<List<String>> allContents = new ArrayList<>();
-        // 读取数据
-        for (int rowIndex = 0; rowIndex < sheet.getLastRowNum(); rowIndex ++) {
-            List<String> contents = new ArrayList<>();
-            Row row = sheet.getRow(rowIndex);
-            for (int columnIndex = 0; columnIndex < row.getLastCellNum(); columnIndex++ ) {
-                Cell cell = row.getCell(columnIndex);
-                cell.setCellType(CellType.STRING);
-                contents.add(cell.getStringCellValue().trim());
+        Workbook workbook = null;
+        try {
+            workbook = WorkbookFactory.create(new File(filePath));
+            // 获取sheet
+            Sheet sheet = workbook.getSheetAt(sheetIndex);
+            // 返回内容
+            List<List<String>> allContents = new ArrayList<>();
+            // 读取数据
+            for (int rowIndex = 0; rowIndex < sheet.getLastRowNum(); rowIndex ++) {
+                List<String> contents = new ArrayList<>();
+                Row row = sheet.getRow(rowIndex);
+                for (int columnIndex = 0; columnIndex < row.getLastCellNum(); columnIndex++ ) {
+                    Cell cell = row.getCell(columnIndex);
+                    cell.setCellType(CellType.STRING);
+                    contents.add(cell.getStringCellValue().trim());
+                }
+                allContents.add(contents);
             }
-            allContents.add(contents);
+            return allContents;
         }
-        return allContents;
+        catch (Exception e) {
+            throw e;
+        }
+        finally {
+            if (workbook != null) {
+                //workbook.close();
+            }
+        }
+
+
     }
 
 }

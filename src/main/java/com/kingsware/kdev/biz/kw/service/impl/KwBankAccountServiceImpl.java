@@ -4,8 +4,11 @@ import com.kingsware.kdev.biz.kw.argv.KwBankAccountArgv;
 import com.kingsware.kdev.biz.kw.argv.KwBankAccountQueryArgv;
 import com.kingsware.kdev.biz.kw.model.KwBankAccount;
 import com.kingsware.kdev.biz.kw.model.KwEdition;
+import com.kingsware.kdev.biz.kw.model.KwEditionAccount;
 import com.kingsware.kdev.biz.kw.ret.KwBankAccountRet;
 import com.kingsware.kdev.biz.kw.service.KwBankAccountService;
+import com.kingsware.kdev.biz.kw.service.KwEditionAccountService;
+import com.kingsware.kdev.biz.kw.service.KwEditionService;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
@@ -17,9 +20,12 @@ import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 银行版本管理业务实现类
@@ -30,6 +36,12 @@ import java.util.Set;
  */
 @Service
 public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankAccountService {
+
+    @Resource
+    private KwEditionService kwEditionService;
+
+    @Resource
+    private KwEditionAccountService kwEditionAccountService;
 
     @Override
     public KwBankAccountRet get(String id) {
@@ -113,5 +125,48 @@ public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankA
         for (String id: argv.getIds()) {
             DB.delete(KwBankAccount.class, id);
         }
+    }
+
+    /**
+     * 同步账户和银行版本的业务方法
+     * @param argv  查询
+     */
+    // TODO: 事务2022/1/17
+    //@Transaction
+    @Override
+    public void addAccountListAndEditions(KwBankAccountArgv argv){
+        if(argv == null || argv.getAccountList().size() == 0){
+            return;
+        }
+        String editionId = kwEditionService.findIdByName(argv.getEditionName());
+        String editionAccountId = kwEditionAccountService.findIdByBankAccount(argv.getBankAccount());
+        List<String> accountList = argv.getAccountList();
+
+        /**
+        List<Object> collect = accountList.stream().filter(s -> StringUtils.isNotEmpty(s)).map(s -> {
+            DB.findOne()
+            return null;
+        }).collect(Collectors.toList());
+         */
+        accountList.forEach(a -> {
+            if(StringUtils.isNotEmpty(a)){
+                SqlWrapper wrapper = new SqlWrapper("select kba.* from kw_bank_account as kba where 1 = 1");
+                wrapper.addCondition("kba.account", Op.EQ, a);
+                KwBankAccount kbaResult = DB.findOne(KwBankAccount.class, wrapper.getSql(), wrapper.getParams().toArray());
+                if(kbaResult == null){
+                    //如果不存在，则增加
+                    KwBankAccount model = BeanUtils.copyObject(argv, KwBankAccount.class);
+                    model.setAccount(a);
+                    model.setEditionId(editionId);
+                    model.setEditionAccountId(editionAccountId);
+                    DB.save(model);
+                }else{
+                    //如果存在，则更新
+                    kbaResult.setEditionId(editionId);
+                    kbaResult.setEditionAccountId(editionAccountId);
+                    DB.update(kbaResult);
+                }
+            }
+        });
     }
 }

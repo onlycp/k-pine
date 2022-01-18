@@ -1,5 +1,8 @@
 package com.kingsware.kdev.core.orm.kdb;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kingsware.kdev.core.util.BeanUtils;
+import com.kingsware.kdev.core.util.JsonUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -33,13 +36,44 @@ public class KdbArgv {
      * @param content   内容
      * @param params    参数
      */
-    public void addStep(String name, String content, String sourceName, List<Object> params) {
+    public KdbArgv addStep(String name, String content, String sourceName, List<Object> params) {
         StepArgv argv = new StepArgv();
         argv.setContent(content);
         argv.setParams(params);
         argv.setSourceName(sourceName);
         script.put(name, argv);
+        return this;
     }
 
+    /**
+     * 增加变量
+     * @param key       键名
+     * @param value     键值
+     * @return      当前对象
+     */
+    public KdbArgv addVariable(String key, Object value) {
+        this.variables.put(key, value);
+        return this;
+    }
+
+    /**
+     * 增加变量
+     * @param variables   变量集合
+     * @return      当前对象
+     */
+    public KdbArgv addVariable(Map<String, Object> variables) {
+        this.variables.putAll(variables);
+        return this;
+    }
+
+    /**
+     * 增加变量
+     * @param object    对象
+     * @return          当前变量
+     */
+    public KdbArgv addVariable(Object object) {
+        this.variables.putAll(JsonUtil.beanToMap(object));
+        return this;
+    }
 
 }

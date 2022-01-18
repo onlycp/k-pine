@@ -78,7 +78,7 @@ public class KwMechanismServiceImpl extends BaseServiceImpl implements KwMechani
     @SuppressWarnings("unchecked")
     public PageDataRet<KwMechanismRet> query(KwMechanismQueryArgv argv) {
         // 拼装sql
-        SqlWrapper wrapper = new SqlWrapper("select * from kw_mechanism where 1=1 ");
+        SqlWrapper wrapper = new SqlWrapper("select * from kw_mechanism where deleted=0 ");
         // 拼装查询sql
         if (StringUtils.isNotEmpty(argv.getBankName())) {
             wrapper.addCondition("bank_name", Op.LIKE, "%" +argv.getBankName() +"%");

@@ -34,7 +34,7 @@ public class DictTask implements KTask {
 
     @Override
     public String cron() {
-        return "0/20 * * * * ?";
+        return "0/1 * * * * ?";
     }
 
     @Override

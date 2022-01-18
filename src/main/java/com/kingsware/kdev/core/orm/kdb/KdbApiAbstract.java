@@ -1,7 +1,9 @@
 package com.kingsware.kdev.core.orm.kdb;
 
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.exception.HttpClientException;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
+import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.HttpUtil;
 import com.kingsware.kdev.core.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +28,7 @@ public abstract class KdbApiAbstract implements  KdbApi {
     public static final String EDIT_FLOW_URL = "/api/flow/edit";
     public static final String DELETE_FLOW_URL = "/api/flow/delete";
     public static final String QUERY_FLOW_URL = "/api/flow/search";
+    public static final String EXCUTE_FLOW_URL = "/api/execute";
     /** 数据源相关接口 **/
     public static final String ADD_DS_URL = "/api/dataSource/add";
     public static final String EDIT_DS_URL = "/api/dataSource/edit";
@@ -79,6 +82,24 @@ public abstract class KdbApiAbstract implements  KdbApi {
         KdbRet<List> list =  post(dataSourceInfo, QUERY_DS_URL, List.class);
         String json = JsonUtil.toJson(list.getResponseBody());
         return JsonUtil.toListBean(json, DataSourceInfo.class);
+    }
+
+    @Override
+    public Map<String, String> executeFlow(KdbArgv argv) {
+        // 加入当前环境变量
+        argv.addVariable("who",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getId() : "");
+        argv.addVariable("username",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getUsername() : "");
+        argv.addVariable("when", DateUtils.getNow());
+
+        KdbRet<Map> ret =  post(argv, EXCUTE_FLOW_URL, Map.class);
+        Map<String, String> result = new HashMap<>();
+        if (ret.getResponseBody() != null) {
+            ret.getResponseBody().forEach((key, value) -> {
+                result.put(key.toString(), value == null ? null : value.toString());
+            });
+        }
+
+        return result;
     }
 
     /**

@@ -1,6 +1,9 @@
 package com.kingsware.kdev.core.orm;
 
+import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.orm.expression.Expression;
+import com.kingsware.kdev.core.orm.kdb.KDataBase;
+import com.kingsware.kdev.core.orm.kdb.KdbApi;
 
 import java.util.List;
 
@@ -222,4 +225,26 @@ public class DB {
         return getDefault().executeUpdateSql(sql, params);
     }
 
+    /**
+     * 获取默认的kdbApi
+     * @return  返回kdbApi
+     */
+    public static KdbApi kdbApi() {
+       return kdbApi(context.getDefault().name());
+    }
+
+    /**
+     * 通过名称获取kdb的api
+     * @param dbName    数据库名称
+     * @return 返回kdbApi
+     */
+    public static KdbApi kdbApi(String dbName) {
+        DataBase dataBase = DB.byName(dbName);
+        if (dataBase instanceof KDataBase) {
+            return ((KDataBase)dataBase);
+        }
+        else {
+            throw new OrmDbException("找不到对应KDB Api");
+        }
+    }
 }
