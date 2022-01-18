@@ -12,9 +12,9 @@ class LcdApplicationTests {
 	@Resource
 	KwQueueTaskService kwQueueTaskService;
 
-	@Test
-	void contextLoads() {
-		kwQueueTaskService.updateStatus("d7e03edbc3164d2ea563f2ad9c7279d7", QueueTaskStatusEnum.PROCESSING);
-	}
+//	@Test
+//	void contextLoads() {
+//		kwQueueTaskService.updateStatus("d7e03edbc3164d2ea563f2ad9c7279d7", QueueTaskStatusEnum.PROCESSING);
+//	}
 
 }
