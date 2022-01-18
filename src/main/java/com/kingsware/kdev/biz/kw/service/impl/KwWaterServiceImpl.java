@@ -396,7 +396,7 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
         waterEntity.setAbnormalStatus(currentWaterEntity.getAbnormalStatus());
         waterEntity.setRegisterTime(new Timestamp(new Date().getTime()));
         waterEntity.setId(currentWaterEntity.getId());
-        DB.save(waterEntity);
+        DB.update(waterEntity);
         return waterEntity;
     }
 
