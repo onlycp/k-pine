@@ -32,7 +32,7 @@ public class QueueTaskSchedule implements KTask {
     private String cron;
 
     public QueueTaskSchedule(){
-        this.cron = SpringContext.getProperties("schedule.QueueTask.cron",null);
+
     }
 
     @Override
@@ -88,6 +88,7 @@ public class QueueTaskSchedule implements KTask {
 
     @Override
     public String cron() {
+        this.cron = SpringContext.getProperties("schedule.QueueTask.cron",null);
         return cron;
     }
 

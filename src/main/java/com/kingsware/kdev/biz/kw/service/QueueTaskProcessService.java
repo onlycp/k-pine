@@ -44,7 +44,7 @@ public class QueueTaskProcessService {
     String DailyReceiptWaterSinglePath;
 
     public QueueTaskProcessService(){
-        this.DailyReceiptWaterSinglePath = SpringContext.getProperties("file.WaterPath",null);
+
     }
 
     /**
@@ -61,6 +61,7 @@ public class QueueTaskProcessService {
             if (!matcher.find()){
                 throw new Exception("路径不匹配：" + task.getData());
             }
+            this.DailyReceiptWaterSinglePath = SpringContext.getProperties("file.WaterPath",null);
             String path = DailyReceiptWaterSinglePath + matcher.group(8);
             log.info("处理任务，本地路径：" + path);
             File folder = new File(path);
