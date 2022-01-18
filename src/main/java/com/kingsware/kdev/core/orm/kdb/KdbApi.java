@@ -76,7 +76,7 @@ public interface KdbApi {
      * @param argv        参数
      * @return              流程执行结果
      */
-    Map<String, String> executeFlow(KdbArgv argv);
+    List<Map<String, Object>> executeFlow(KdbArgv argv);
 
 
 
