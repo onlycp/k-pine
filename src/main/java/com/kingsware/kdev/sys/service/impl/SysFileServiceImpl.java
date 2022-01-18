@@ -119,7 +119,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                 String filePath = basePath +  relativePath;
                 File path = new File(filePath);
                 boolean status = path.mkdirs();
-                File saveFile = new File(filePath + realName);
+                File saveFile = new File(path.getAbsolutePath() + realName);
                 // 文件表只存储相对路径
                 sysFile.setFilePath(relativePath + realName);
                 file.transferTo(saveFile);
