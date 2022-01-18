@@ -2,8 +2,10 @@ package com.kingsware.kdev.biz.kw.service.impl;
 
 import com.kingsware.kdev.biz.kw.argv.KwBankAccountManagerArgv;
 import com.kingsware.kdev.biz.kw.argv.KwBankAccountManagerQueryArgv;
+import com.kingsware.kdev.biz.kw.argv.KwBankAccountQueryArgv;
 import com.kingsware.kdev.biz.kw.model.KwBankAccountManager;
 import com.kingsware.kdev.biz.kw.ret.KwBankAccountManagerRet;
+import com.kingsware.kdev.biz.kw.ret.KwBankAccountRet;
 import com.kingsware.kdev.biz.kw.service.KwBankAccountManagerService;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -11,6 +13,7 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
+import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -59,6 +62,20 @@ public class KwBankAccountManagerServiceImpl extends BaseServiceImpl implements 
 //        if (StringUtils.isNotEmpty(argv.getName())) {
 //            wrapper.addCondition("ke.name", Op.LIKE, "%" +argv.getName() +"%");
 //        }
+        return (PageDataRet<KwBankAccountManagerRet>) query(wrapper.getSql(), wrapper.getParams(), argv, KwBankAccountManagerRet.class);
+    }
+
+    @Override
+    public PageDataRet<KwBankAccountManagerRet> queryBankAccountManagerWithExpand(KwBankAccountManagerQueryArgv argv) {
+        // 拼装sql
+        StringBuilder sql = new StringBuilder();
+        sql.append(" select  ");
+        sql.append(" 	kbam.* ");
+        sql.append(" from kw_bank_account_manager kbam  ");
+        sql.append(" where 1=1 ");
+        SqlWrapper wrapper = new SqlWrapper(sql.toString());
+        // 拼装查询sql
+        wrapper.addCondition("kbam.book_number", Op.EQ, argv.getBookNumber());
         return (PageDataRet<KwBankAccountManagerRet>) query(wrapper.getSql(), wrapper.getParams(), argv, KwBankAccountManagerRet.class);
     }
 

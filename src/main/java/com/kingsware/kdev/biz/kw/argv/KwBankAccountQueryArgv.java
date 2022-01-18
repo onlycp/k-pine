@@ -22,6 +22,8 @@ public class KwBankAccountQueryArgv extends BasePageArgv {
     private String mechanismId;
     /** 账户 */
     private String account;
+    /** 项目编号 */
+    private String proNum;
     /** 所属公司 */
     private String companyName;
     /** 开始日期 */

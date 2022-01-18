@@ -7,15 +7,12 @@ import lombok.EqualsAndHashCode;
 /**
  * @author andyzheng
  * @version 1.0.0
- * @description: 项目客户经理列表参数
+ * @description: 公司信息表列表参数
  * @date 2022/1/4 18:09
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class KwBankAccountManagerQueryArgv extends BasePageArgv {
-    /** 预约编号 */
-    private String bookNumber;
-    /** 项目编号 */
-    private String proNum;
-
+public class KwUserQueryArgv extends BasePageArgv {
+    /** 用户ID */
+    private String username;
 }

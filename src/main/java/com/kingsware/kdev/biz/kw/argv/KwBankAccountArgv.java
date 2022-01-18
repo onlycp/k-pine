@@ -62,6 +62,8 @@ public class KwBankAccountArgv {
     private String relationId;
     /** 是否流水发送到mbs系统 */
     private Integer mbsSend;
+    /** 从视图获取的账户状态 */
+    private String accountStatus;
 
     /** 银行账号 */
     private String bankAccount;
