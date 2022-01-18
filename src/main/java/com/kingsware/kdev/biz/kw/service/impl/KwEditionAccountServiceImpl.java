@@ -108,13 +108,15 @@ public class KwEditionAccountServiceImpl extends BaseServiceImpl implements KwEd
     @Override
     public String findIdByBankAccount(String bankAccount){
         if(bankAccount == null || !StringUtils.isNotEmpty(bankAccount)) {
-            System.out.println(1111);
             return null;
         }else{
             //SqlWrapper wrapper = new SqlWrapper("select kea.id from kw_edition_account as kea where 1 = 1");
             SqlWrapper wrapper = new SqlWrapper("select kea.* from kw_edition_account as kea where 1 = 1");
             wrapper.addCondition("kea.bank_account", Op.EQ, bankAccount);
             KwEditionAccount kwEditionAccount = DB.findOne(KwEditionAccount.class, wrapper.getSql(), wrapper.getParams().toArray());
+            if(kwEditionAccount == null){
+                return null;
+            }
             return kwEditionAccount.getId();
         }
     }

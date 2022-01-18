@@ -89,6 +89,9 @@ public class KwEditionServiceImpl extends BaseServiceImpl implements KwEditionSe
             SqlWrapper wrapper = new SqlWrapper("select ke.* from kw_edition as ke where 1 = 1");
             wrapper.addCondition("ke.name", Op.EQ, name);
             KwEdition kwEdition = DB.findOne(KwEdition.class, wrapper.getSql(), wrapper.getParams().toArray());
+            if(kwEdition == null){
+                return null;
+            }
             return kwEdition.getId();
         }else{
             return null;
