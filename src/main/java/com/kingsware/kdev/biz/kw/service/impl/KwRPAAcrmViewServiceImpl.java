@@ -64,8 +64,8 @@ public class KwRPAAcrmViewServiceImpl extends BaseServiceImpl implements KwRPAAc
         sql.append(" 	产品名称 AS pro_pm, ");
         sql.append(" 	项目编号 AS pro_num, ");
         sql.append(" 	项目名称 AS pro_name ");
-        sql.append(" FROM MONITOR.\"RPAcrm_view\" ");
-//        sql.append(" FROM RPAcrm_view ");
+//        sql.append(" FROM MONITOR.\"RPAcrm_view\" ");
+        sql.append(" FROM RPAcrm_view ");
         sql.append(" where 1=1 ");
         SqlWrapper wrapper = new SqlWrapper(sql.toString());
         return DB.byName("oracle").findList(KwRPAAcrmViewRet.class, wrapper.getSql(), wrapper.getParams().toArray());
