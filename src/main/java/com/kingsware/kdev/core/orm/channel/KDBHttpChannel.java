@@ -1,5 +1,11 @@
 package com.kingsware.kdev.core.orm.channel;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kingsware.kdev.core.exception.HttpClientException;
 import com.kingsware.kdev.core.orm.DBConnectConfig;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
@@ -26,14 +32,19 @@ public class KDBHttpChannel implements DbChannel{
     /** 日志打印 **/
     private static final Logger logger  = LoggerFactory.getLogger(KDBHttpChannel.class);
 
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    static {
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
+
+
     /** 配置 **/
     private KDBConnectConfig kdbConnectConfig;
     /** 透传sql的流程id **/
     private final static String passThroughFlowId = "base_flow";
     /** 透传sql的流程id **/
     private final static String executeStep = "execute";
-    /** 透传sql的流程id **/
-    private final static String executeResult = "result_execute";
 
     @Override
     public String name() {
@@ -48,9 +59,7 @@ public class KDBHttpChannel implements DbChannel{
     @Override
     public <T> T queryForObject(String sql, Class<T> tClass, List<Object> objects) {
         // 从kdb请求数据
-        KdbRet<Map> ret = send(makePassThrough(sql, objects), Map.class);
-        // 由于kdb响应结果始终为list，所以得先将为list
-        String executeRequest = ret.getResponseBody().get(executeResult).toString();
+        String executeRequest =  send(makePassThrough(sql, objects));
         List<T> list = JsonUtil.transformJson2List(executeRequest, tClass);
         // 返回结果
         if (list == null || list.isEmpty()) {
@@ -65,9 +74,7 @@ public class KDBHttpChannel implements DbChannel{
     @Override
     public long queryForCount(String sql, List<Object> objects) {
         // 从kdb请求数据
-        KdbRet<Map> ret = send(makePassThrough(sql, objects), Map.class);
-        // 由于kdb响应结果始终为list，所以得先将为list
-        String executeRequest = ret.getResponseBody().get(executeResult).toString();
+        String executeRequest =  send(makePassThrough(sql, objects));
         List<Map> list = JsonUtil.snakeCaseToListBean(executeRequest, Map.class);
         // 返回结果
         if (list == null || list.size() != 1) {
@@ -83,27 +90,20 @@ public class KDBHttpChannel implements DbChannel{
 
     @Override
     public void executeSql(String sql, List<Object> objects) {
-        // 从kdb请求数据
-        KdbRet<Map> ret = send(makePassThrough(sql, objects), Map.class);
-        if (ret.getErrorCode() != 0) {
-            throw new OrmDbException("sql执行失败，错误信息:" + ret.getMessage());
-        }
+        send(makePassThrough(sql, objects));
+
     }
 
     public <T> List<T> queryForList(String sql, Class<T> tClass, List<Object> objects) {
         // 从kdb请求数据
-        KdbRet<Map> ret = send(makePassThrough(sql, objects), Map.class);
-        // 返回结果
-        String executeRequest = ret.getResponseBody().get(executeResult).toString();
+        String executeRequest =  send(makePassThrough(sql, objects));
         return JsonUtil.transformJson2List(executeRequest, tClass);
     }
 
     @Override
     public <T> List<T> queryForAttribute(String sql, Class<T> tClass, List<Object> objects) {
         // 从kdb请求数据
-        KdbRet<Map> ret = send(makePassThrough(sql, objects), Map.class);
-        // 由于kdb响应结果始终为list，所以得先将为list
-        String executeRequest = ret.getResponseBody().get(executeResult).toString();
+        String executeRequest =  send(makePassThrough(sql, objects));
         List<Map> list = JsonUtil.snakeCaseToListBean(executeRequest, Map.class);
         assert list != null;
         List<T> result = new ArrayList<>(list.size());
@@ -113,7 +113,7 @@ public class KDBHttpChannel implements DbChannel{
                 return new ArrayList<>();
             }
             else if (map.size() > 1) {
-                throw new OrmDbException("查询单个属性，但返回不等于1的结果：" + ret.getMessage());
+                throw new OrmDbException("查询单个属性，但返回不等于1的结果" );
             }
             map.forEach((key, value) -> {
                 result.add((T)value);
@@ -148,16 +148,14 @@ public class KDBHttpChannel implements DbChannel{
      * @param kdbArgv   kdb参数
      * @return          响应结果
      */
-    private <T> KdbRet<T> send(KdbArgv kdbArgv, Class<T> tClass) {
+    private String send(KdbArgv kdbArgv) {
         try {
             // 转为json
             String requestBody = JsonUtil.toJson(kdbArgv);
             // 拼接请求
             String url = kdbConnectConfig.getServer() +  kdbConnectConfig.getExecuteSqlApi();
-            // 发起进攻，杀
-
             long t1 = System.currentTimeMillis();
-            // 杀敌一万，满身是血
+            // 发起请求
             String  responseBody = HttpUtil.postBody(url, requestBody, Collections.emptyMap());
             long takeTime = System.currentTimeMillis() - t1;
             if (takeTime < 1000) {
@@ -166,21 +164,15 @@ public class KDBHttpChannel implements DbChannel{
             else {
                 logger.warn("url:{} , Take: {} ,请求体: {}", url, takeTime ,requestBody);
             }
-            // 洗洗，换身好衣服
-            KdbRet<T> ret = JsonUtil.toBean(responseBody, KdbRet.class, tClass);
-            // 看看死了没
-            // 灰都没了
+            KdbRet<String> ret = JsonUtil.toBean(responseBody, KdbRet.class, String.class);
             if (ret == null) {
                 throw new OrmDbException("kdb响应数据不合法，响应内容:" + responseBody);
             }
-            if (ret.getErrorCode() == 0) {
-                // 没死，高高兴兴回家
-                return ret;
-            }
-            else {
-                // 死了， 通知准备后事
+            if (ret.getErrorCode() != 0) {
                 throw new OrmDbException(ret.getMessage());
             }
+            return ret.getResponseBody();
+
         }
         catch (HttpClientException e) {
             logger.error("sql执行失败，响应码:{}, 响应信息：{}，接口:{}, 参数:{}", e.getCode(), e.getMessage(), e.getUrl(), e.getParams());
