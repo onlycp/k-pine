@@ -53,6 +53,7 @@ public class QueueTaskProcessService {
      */
     //@ExecuteTime(name = "扫描单个文件夹流水回单")
     public void singleScanTask(KwQueueTaskRet task){
+        this.DailyReceiptWaterSinglePath = SpringContext.getProperties("file.WaterPath",null);
         try
         {
             log.info("扫描单一回单流水");

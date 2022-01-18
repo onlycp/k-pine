@@ -22,15 +22,12 @@ import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
-import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import org.springframework.stereotype.Service;
 
 
 import java.io.File;
-import java.io.IOException;
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -75,8 +72,9 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
     @SuppressWarnings("unchecked")
     public PageDataRet<KwWaterRet> query(KwWaterQueryArgv argv) {
         // 基础sql
-        SqlWrapper wrapper = new SqlWrapper(" SELECT kba.bank_deposit, kea.bank_account as edition_account, kbae.pro_name, km.bank_name as mechanism_name, ke.name as edition_name, " +
-                " kw.* FROM kw_water kw " +
+        SqlWrapper wrapper = new SqlWrapper(" SELECT kba.bank_deposit, kea.bank_account as edition_account, kbae.pro_name, km.bank_name as mechanism_name, ke.name as edition_name,kr.file_id, " +
+                " kw.* " +
+                " FROM kw_water kw " +
                 " LEFT JOIN kw_receipt kr on kw.receipt_id = kr.id and kr.deleted = 0 " +
                 " LEFT JOIN kw_bank_account kba on kw.account = kba.account and kba.deleted = 0 " +
                 " LEFT JOIN kw_bank_account_expand kbae on kba.account = kbae.account and kba.deleted = 0 " +
