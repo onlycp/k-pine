@@ -64,7 +64,7 @@ public class KwEditionServiceImpl extends BaseServiceImpl implements KwEditionSe
         StringBuilder builder = new StringBuilder();
         builder.append(" select ke.*, km.bank_name as mechanism_Name from kw_edition as ke ");
         builder.append(" left join kw_mechanism as km on ke.mechanism_id = km.id ");
-        builder.append(" where 1=1 ");
+        builder.append(" where ke.deleted=0 ");
         SqlWrapper wrapper = new SqlWrapper(builder.toString());
         // 拼装查询sql
         if (StringUtils.isNotEmpty(argv.getName())) {
@@ -73,6 +73,7 @@ public class KwEditionServiceImpl extends BaseServiceImpl implements KwEditionSe
         if (StringUtils.isNotEmpty(argv.getMechanismId())) {
             wrapper.addCondition("ke.mechanism_id", Op.EQ, argv.getMechanismId());
         }
+        wrapper.sortBy("ke.when_created desc");
         return (PageDataRet<KwEditionRet>) query(wrapper.getSql(), wrapper.getParams(), argv, KwEditionRet.class);
     }
 

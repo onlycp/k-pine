@@ -93,7 +93,7 @@ public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankA
         sql.append(" left join kw_edition ke on ke.id = kba.edition_id  ");
         sql.append(" left join kw_company kc on kba.relation_type = 1 and kba.relation_id = kc.id ");
         sql.append(" left join kw_mechanism km on km.id = ke.mechanism_id  ");
-        sql.append(" where 1=1 ");
+        sql.append(" where kba.deleted=0 ");
 //        if (argv.getUpdateDateStartDate() != null && argv.getUpdateDateEndDate() != null) {
 //            sql.append(" and kba.balance_update_time between date('" + argv.getUpdateDateStartDate() + "') and date('" + argv.getUpdateDateEndDate() + "') ");
 //        }
