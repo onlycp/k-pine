@@ -1,18 +1,27 @@
 package com.kingsware.kdev.core.config;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kingsware.kdev.core.bean.BaseArgv;
+import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.cache.api.ApiManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.util.DateUtils;
+import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.model.SysApi;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Locale;
+import java.io.PrintWriter;
+import java.util.*;
 
 /**
 
@@ -22,7 +31,12 @@ import java.util.Locale;
  * @date 2022/1/18 4:53 下午
  */
 @Component
+@Slf4j
 public class KFilter implements Filter {
+
+    @Resource
+    private ObjectMapper objectMapper;
+
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
@@ -34,7 +48,8 @@ public class KFilter implements Filter {
         // 获取上下文路径
         String contextPath = request.getContextPath();
         // 获取配置的接口信息
-        SysApi api = ApiManager.getInstance().getApi(method, url, contextPath);
+        String path = url.replace(contextPath, "");
+        SysApi api = ApiManager.getInstance().getApi(method, url);
         // 如果找不到对应的接口配置
         if (api == null || api.getCallType() == 1) {
             filterChain.doFilter(servletRequest, servletResponse);
@@ -43,14 +58,129 @@ public class KFilter implements Filter {
         // 流程方式
         else if (api.getCallType() == 2) {
             KFlowContext context = new KFlowContext();
+            // 处理系统变量
             context.getSystemContext().put("who",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getId() : "");
             context.getSystemContext().put("username",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getUsername() : "");
             context.getSystemContext().put("when", DateUtils.getNow());
-            KdbFlowExecutor.getInstance().execute(api.getApiFlowId(), new HashMap<>(), context);
+            // 处理请求变量
+            Map<String, Object> argvMap = getRequestParams(api, path, request);
+            // 处理类
+            context.setHandleClass(api.getApiResultHandler());
+            // 调用流程
+            Object result = KdbFlowExecutor.getInstance().execute(api.getApiFlowId(), argvMap, context);
+            // 返回前端
+            BaseRet<?> ret = BaseRet.success(result);
+            responseJson(response, ret);
             return;
         }
+
         filterChain.doFilter(servletRequest, servletResponse);
 
+    }
 
+    /**
+     * 获取请求参数
+     * @param api       api信息
+     * @param path      路径
+     * @return          请求参数
+     */
+    private Map<String, Object> getRequestParams(SysApi api, String path, HttpServletRequest request) {
+
+        Map<String, Object> params = new HashMap<>();
+        // 获取query和form-data
+        Enumeration<String> names = request.getParameterNames();
+        while (names.hasMoreElements()) {
+            String name = names.nextElement();
+            String value = request.getParameter(name);
+            params.put(name, value);
+
+        }
+        // 获取body
+        String body = getBody(request);
+        if (StringUtils.isNotEmpty(body)) {
+            try {
+                Map<String, Object> argv = objectMapper.readValue(body, new TypeReference<Map<String, Object>>() {});
+                params.putAll(argv);
+            }
+            catch (Exception e) {
+                log.error("error", e);
+            }
+        }
+        // 获取path变量
+        Map<String, Object> pathVariables = new HashMap<>();
+        params.putAll(pathVariables);
+        // 返回
+        return params;
+    }
+
+    /**
+     * 获取Body
+     * @param request   Http请求
+     * @return  返回body
+     */
+    private String getBody(HttpServletRequest request) {
+        BufferedReader br = null;
+        StringBuilder sb = new StringBuilder("");
+        try {
+            br = request.getReader();
+            String str;
+            while ((str = br.readLine()) != null) {
+                sb.append(str);
+            }
+            br.close();
+        }
+        catch (IOException e) {
+            log.error("error", e);
+        }
+        finally {
+            if (null != br) {
+                try {
+                    br.close();
+                }
+                catch (IOException e) {
+                    log.error("error", e);
+                }
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * 输出json
+     * @param object    对象
+     */
+    private void responseJson(HttpServletResponse response, Object object) {
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json; charset=utf-8");
+        try (PrintWriter out = response.getWriter()) {
+            out.append(objectMapper.writeValueAsString(object));
+        } catch (IOException e) {
+            log.error("error", e);
+        }
+    }
+
+    /**
+     *
+     * @param path          路径
+     * @param patternUrl    匹配路径
+     * @return              返回路径变量
+     */
+    private Map<String, Object> getPathVariables(String path, String patternUrl) {
+        Map<String, Object> variables = new HashMap<>();
+        // 匹配路径
+        String[] pUrls = patternUrl.split("/");
+        // 前端传过来的路径
+        String[] uiUrls = path.split("/");
+        // 取最小长度
+        int minLength = Math.min(pUrls.length, uiUrls.length);;
+        for (int i = 0; i< minLength; i++) {
+            String pVar = pUrls[i].trim();
+            String uVar = uiUrls[i].trim();
+            if (pVar.startsWith("{") && pVar.endsWith("}")) {
+                String realName = pVar.substring(1, pVar.length()-1);
+                variables.put(realName, uVar);
+            }
+        }
+        return variables;
     }
 }

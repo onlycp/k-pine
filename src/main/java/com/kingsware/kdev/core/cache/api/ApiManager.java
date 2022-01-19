@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.cache.api;
 
+import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.model.SysApi;
 
 import java.util.ArrayList;
@@ -46,38 +47,42 @@ public class ApiManager {
      * 获取接口定义
      * @param apiMethod 接口方式
      * @param url       接口路径
-     * @param contextPath   上下文路径
      * @return      返回接口信息
      */
-    public SysApi getApi(String apiMethod, String url, String contextPath) {
-        String path = url.replace(contextPath, "");
-        // 先匹配相等的
-        Optional<SysApi> optional0 = apis.stream().filter(f -> f.getApiMethod().equalsIgnoreCase(apiMethod)).filter(api -> api.getApiUrl().equals(path)).findFirst();
-        if (optional0.isPresent()) {
-            return optional0.get();
+    public SysApi getApi(String apiMethod, String url) {
+        // 如果url为空
+        List<SysApi> myApis = new ArrayList<>();
+        for (SysApi api: apis) {
+            if (StringUtils.isNotEmpty(api.getApiUrl())) {
+                myApis.add(api);
+            }
         }
-        return null;
-//
-//        Optional<RestfulInfo> optional = apis.stream().filter(f -> f.getSegmentCount() > 0).filter(f -> f.getMethod().name().equalsIgnoreCase(method)).filter(api -> {
-//
-//            String[] reqArr = url.split("/");
-//            String[] restArr = api.getUrl().split("/");
-//            if (reqArr.length == restArr.length) {
-//                for (int i = 0; i < reqArr.length; i++) {
-//                    // segment部分跳过
-//                    if (restArr[i].contains("{")) {
-//                        continue;
-//                    }
-//                    if (!reqArr[i].equals(restArr[i])) {
-//                        return false;
-//                    }
-//                }
-//                return true;
-//            }
-//            return false;
-//
-//        }).findFirst();
-//        return optional.orElse(null);
+        // 先匹配相等的
+        Optional<SysApi> optional = myApis.stream().filter(f -> f.getApiMethod().equalsIgnoreCase(apiMethod)).filter(api -> api.getApiUrl().equals(url)).findFirst();
+        if (optional.isPresent()) {
+            return optional.get();
+        }
+        // 匹配正则
+        optional = apis.stream().filter(f -> f.getApiMethod().equalsIgnoreCase(apiMethod)).filter(api -> {
+            // url路径
+            String[] reqArr = url.split("/");
+            String[] restArr = api.getApiUrl().split("/");
+            if (reqArr.length == restArr.length) {
+                for (int i = 0; i < reqArr.length; i++) {
+                    // segment部分跳过
+                    if (restArr[i].startsWith("{") && reqArr[i].endsWith("}")) {
+                        continue;
+                    }
+                    if (!reqArr[i].equals(restArr[i])) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false;
+
+        }).findFirst();
+        return optional.orElse(null);
     }
 
 

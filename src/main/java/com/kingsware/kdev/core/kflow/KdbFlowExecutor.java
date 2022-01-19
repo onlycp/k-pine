@@ -1,7 +1,10 @@
 package com.kingsware.kdev.core.kflow;
 
+import com.kingsware.kdev.core.kflow.handler.KFlowResultHandlerFactory;
+import com.kingsware.kdev.core.kflow.handler.KObjectHandler;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.KdbArgv;
+import com.kingsware.kdev.core.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -50,7 +53,12 @@ public class KdbFlowExecutor {
         // 执行流程
         List<Map<String, Object>> mapObjectList = DB.kdbApi().executeFlow(argv);
         // 数据转换
-        return null;
+        String handleClass = context.getHandleClass();
+        if (StringUtils.isEmpty(handleClass)) {
+            handleClass = KObjectHandler.class.getName();
+        }
+        // 调用结果处理器
+        return KFlowResultHandlerFactory.getHandler(handleClass).execute(mapObjectList);
     }
 
 
