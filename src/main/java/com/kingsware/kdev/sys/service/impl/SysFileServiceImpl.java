@@ -102,7 +102,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             sysFile.setFileExt(FileUtils.getFileExt(sysFile.getFileName()));
             // 文件大小
             sysFile.setFileSize((int)file.getSize());
-            //  文件md5码
+            // 文件md5码
             sysFile.setFileMd5(FileUtils.getMD5(file.getInputStream()));
             // 文件来源
             sysFile.setFileFrom(fileFrom);

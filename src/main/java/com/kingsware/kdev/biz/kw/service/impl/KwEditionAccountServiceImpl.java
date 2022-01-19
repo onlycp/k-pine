@@ -61,6 +61,7 @@ public class KwEditionAccountServiceImpl extends BaseServiceImpl implements KwEd
         model.setUsbPortOk(argv.getUsbPortOk());
         model.setUsbGroupOk(argv.getUsbGroupOk());
         model.setStatus(argv.getStatus());
+        model.setReserve1(argv.getReserve1());// 备用1，客户号
         // 校验
         checkUnique(model);
         // 保存
@@ -108,13 +109,15 @@ public class KwEditionAccountServiceImpl extends BaseServiceImpl implements KwEd
     @Override
     public String findIdByBankAccount(String bankAccount){
         if(bankAccount == null || !StringUtils.isNotEmpty(bankAccount)) {
-            System.out.println(1111);
             return null;
         }else{
             //SqlWrapper wrapper = new SqlWrapper("select kea.id from kw_edition_account as kea where 1 = 1");
             SqlWrapper wrapper = new SqlWrapper("select kea.* from kw_edition_account as kea where 1 = 1");
             wrapper.addCondition("kea.bank_account", Op.EQ, bankAccount);
             KwEditionAccount kwEditionAccount = DB.findOne(KwEditionAccount.class, wrapper.getSql(), wrapper.getParams().toArray());
+            if(kwEditionAccount == null){
+                return null;
+            }
             return kwEditionAccount.getId();
         }
     }

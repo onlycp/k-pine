@@ -1,10 +1,12 @@
 package com.kingsware.kdev.biz.kw.ret;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kingsware.kdev.core.bean.BaseManageRet;
 import com.kingsware.kdev.core.orm.annotation.Column;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
 /**
@@ -43,14 +45,19 @@ public class KwWaterRet extends BaseManageRet {
     private String receiptId;
     // 账户名称
     private String accountName;
-    // 交易日期
-    private Date transactionDate;
-    // 交易时间
-    private Date transactionTime;
+
+    // 交易日期 transactionDate
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Timestamp transactionDate;
+    // 交易时间 transactionTime
+    @JsonFormat(pattern = "HH:mm:ss", timezone = "GMT+8")
+    private Timestamp transactionTime;
+    // 登记时间 register_time
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Timestamp registerTime;
+
     // 金额 transaction_amount
     private String transactionAmount;
-    // 登记时间 register_time
-    private Date registerTime;
     // 收支方向 revenue
     private Integer revenue;
     // 收支方式 cash_transfer
@@ -77,5 +84,37 @@ public class KwWaterRet extends BaseManageRet {
     private Integer abnormal;
     // 数据次序
     private Integer dateIndex;
+
+    /** 回单文件  file_id */
+    private String fileId;
+    /** 网银地址  path */
+    private String path;
+    /** 登录类型 */
+    private Integer loginType;
+    /** 登录网银账号 bankAccount**/
+    private String bankAccount;
+    /** 登录网银密码 bankPassword**/
+    private String bankPassword;
+    /** 登录证书号 certNumber**/
+    private String certNumber;
+    /** ukey密码 ukeyPassword**/
+    private String ukeyPassword;
+    /** 云柜ip usbIp**/
+    private String usbIp;
+    /** 云柜端口 usbPort**/
+    private String usbPort;
+    /** 云柜插口 usbGroup**/
+    private String usbGroup;
+    /** 是否需要按ok **/
+    private Integer isOkKey;
+    /** ok_云柜ip **/
+    private String usbIpOk;
+    /** ok_云柜端口 **/
+    private String usbPortOk;
+    /** ok_云柜插口 **/
+    private String usbGroupOk;
+    /** 上条流水的发生日期 lastDate */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone="GMT+8")
+    private Timestamp lastDate;
 
 }

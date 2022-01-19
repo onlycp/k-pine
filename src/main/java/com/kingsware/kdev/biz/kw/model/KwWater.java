@@ -40,10 +40,11 @@ public class KwWater extends BaseModel {
     private Timestamp transactionDate;
     // 交易时间 transactionTime
     @JsonFormat(pattern = "HH:mm:ss", timezone="GMT+8")
-    private Timestamp  transactionTime;
+    private Timestamp transactionTime;
     // 登记时间 register_time
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
     private Timestamp registerTime;
+
     // 金额 transaction_amount
     private String transactionAmount;
     // 收支方向 revenue
@@ -87,14 +88,14 @@ public class KwWater extends BaseModel {
 
 
     /** 备用字段1 **/
-//    private String reserve1;
-//    /** 备用字段2 **/
-//    private String reserve2;
-//    /** 备用字段3 **/
-//    private String reserve3;
-//    /** 备用字段4 **/
-//    private String reserve4;
-//    /** 备用字段5 **/
-//    private String reserve5;
+    private String reserve1;
+    /** 备用字段2 **/
+    private String reserve2;
+    /** 备用字段3 **/
+    private String reserve3;
+    /** 备用字段4 **/
+    private String reserve4;
+    /** 备用字段5 **/
+    private String reserve5;
 
 }

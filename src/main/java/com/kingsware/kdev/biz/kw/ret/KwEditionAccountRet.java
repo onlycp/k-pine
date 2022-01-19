@@ -43,7 +43,7 @@ public class KwEditionAccountRet extends BaseManageRet {
     private String usbGroupOk;
     /** 状态 **/
     private Integer status;
-    /** 备用字段1 **/
+    /** 备用字段1 客户号 **/
     private String reserve1;
     /** 备用字段2 **/
     private String reserve2;

@@ -9,12 +9,10 @@ import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
-import com.kingsware.kdev.sys.argv.SysLoginLogQueryArgv;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 
 @Api(value = "流水管理", tags = {"流水管理"})
 @RestController
@@ -24,7 +22,6 @@ public class KwWaterController extends BaseController {
     @Autowired
     private KwWaterService kwWaterService;
 
-
     /**
      *  查询
      * @return 分页
@@ -32,7 +29,6 @@ public class KwWaterController extends BaseController {
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
     public BaseRet<PageDataRet<KwWaterRet>> page(KwWaterQueryArgv argv) {
-//        System.out.println(argv);
         return BaseRet.success(kwWaterService.query(argv));
     }
 
@@ -43,7 +39,6 @@ public class KwWaterController extends BaseController {
     @ApiOperation(value = "详情 " ,notes = "详情")
     @GetMapping("/{id}")
     public BaseRet<KwWaterRet> get(@PathVariable String id) {
-//        return BaseRet.success(kwEditionService.get(id));
         return BaseRet.success(kwWaterService.get(id));
     }
 
@@ -64,11 +59,8 @@ public class KwWaterController extends BaseController {
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
-//        kwEditionService.delete(argv);
-
         return BaseRet.success();
     }
-
 
     /**
      * 导出
@@ -82,9 +74,10 @@ public class KwWaterController extends BaseController {
     /**
      * 导出
      */
-    @ApiOperation(value = "导出 " ,notes = "导出")
+    @ApiOperation(value = "导出流水" ,notes = "导出流水")
     @GetMapping("/export")
     public void export(KwWaterQueryArgv argv) {
         kwWaterService.export(argv);
     }
+
 }

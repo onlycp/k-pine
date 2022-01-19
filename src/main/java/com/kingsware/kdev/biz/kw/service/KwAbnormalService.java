@@ -3,7 +3,6 @@ package com.kingsware.kdev.biz.kw.service;
 import com.kingsware.kdev.biz.kw.argv.KwAbnormalQueryArgv;
 import com.kingsware.kdev.biz.kw.argv.KwWaterQueryArgv;
 import com.kingsware.kdev.biz.kw.ret.KwAbnormalRet;
-import com.kingsware.kdev.biz.kw.ret.KwBankAccountExpandRet;
 import com.kingsware.kdev.biz.kw.ret.KwWaterRet;
 import com.kingsware.kdev.core.base.BaseService;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -46,6 +45,17 @@ public interface KwAbnormalService extends BaseService {
      */
     List<KwWaterRet> getWaterContext(String Id);
 
+    /**
+     * 导出流水
+     * @param argv
+     */
+    void exportBalanceAbnormal(KwWaterQueryArgv argv);
 
+    /**
+     * 异常流水及区间
+     * @param argv
+     * @return
+     */
+    List<KwWaterRet> queryBalanceAbnormal(KwWaterQueryArgv argv);
 
 }
