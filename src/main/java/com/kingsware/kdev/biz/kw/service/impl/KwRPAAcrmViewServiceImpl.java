@@ -33,9 +33,6 @@ import java.util.List;
 public class KwRPAAcrmViewServiceImpl extends BaseServiceImpl implements KwRPAAcrmViewService {
 
     @Resource
-    private SysUserService sysUserService;
-
-    @Resource
     private KwBankAccountManagerService kwBankAccountManagerService;
 
     @Resource
@@ -64,8 +61,8 @@ public class KwRPAAcrmViewServiceImpl extends BaseServiceImpl implements KwRPAAc
         sql.append(" 	产品名称 AS pro_pm, ");
         sql.append(" 	项目编号 AS pro_num, ");
         sql.append(" 	项目名称 AS pro_name ");
-//        sql.append(" FROM MONITOR.\"RPAcrm_view\" ");
-        sql.append(" FROM RPAcrm_view ");
+        sql.append(" FROM MONITOR.\"RPAcrm_view\" ");
+//        sql.append(" FROM RPAcrm_view ");
         sql.append(" where 1=1 ");
         SqlWrapper wrapper = new SqlWrapper(sql.toString());
         return DB.byName("oracle").findList(KwRPAAcrmViewRet.class, wrapper.getSql(), wrapper.getParams().toArray());
@@ -97,47 +94,6 @@ public class KwRPAAcrmViewServiceImpl extends BaseServiceImpl implements KwRPAAc
 
             }
         }
-        // insert or update user
-        insertSysUser(querySysUserByManager());
-    }
-
-    private List<KwBankAccountManagerRet> querySysUserByManager() {
-        // 拼装sql
-        StringBuilder sql = new StringBuilder();
-        sql.append(" select kbam.customer_manager_number, kbam.customer_manager_name ");
-        sql.append(" 		from kw_bank_account_manager kbam  ");
-        sql.append(" 		left join sys_user su on su.username = kbam.customer_manager_number  ");
-        sql.append(" 		where su.id is null ");
-        SqlWrapper wrapper = new SqlWrapper(sql.toString());
-        // 拼装查询sql
-        return DB.findList(KwBankAccountManagerRet.class, wrapper.getSql(), wrapper.getParams().toArray());
-    }
-
-    private void insertSysUser(List<KwBankAccountManagerRet> list) {
-        for (KwBankAccountManagerRet ret : list) {
-            SysUserArgv user = new SysUserArgv();
-            user.setUsername(ret.getCustomerManagerNumber());
-            user.setRealName(ret.getCustomerManagerName());
-            user.setPassword("S0BBZm0yMDIy"); // K@Afm2022
-            user.setAvatar("https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif");
-            user.setSex(0);
-            user.setStatus(1);
-            sysUserService.add(user);
-
-            insertSysUserRole(ret.getCustomerManagerNumber());
-        }
-    }
-
-    private void insertSysUserRole(String customerManagerNumber) {
-        // 拼装sql
-        StringBuilder sql = new StringBuilder();
-        sql.append(" INSERT INTO sys_user_role (id, sys_user_id, sys_role_id, who_created, when_created) ");
-        sql.append(" 			select MD5(uuid()), su.id, '8c513fd287874efbbcec09ad503de7e3', '056fb0eeb9a44cb0953534b4c0ca01fa', CURRENT_TIMESTAMP() ");
-        sql.append(" 			from sys_user su ");
-        sql.append(" 			where 1=1 ");
-        SqlWrapper wrapper = new SqlWrapper(sql.toString());
-        wrapper.addCondition("su.username", Op.EQ, customerManagerNumber);
-        DB.executeUpdateSql(wrapper.getSql(), wrapper.getParams().toArray());
     }
 
     private KwBankAccountManagerArgv converBankAccountManagerArgv(KwRPAAcrmViewRet view) {

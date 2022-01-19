@@ -50,8 +50,8 @@ public class KwRPAUserViewServiceImpl extends BaseServiceImpl implements KwRPAUs
         sql.append(" 用户状态 AS status, ");
         sql.append(" 创建日期 AS when_created, ");
         sql.append(" 组织架构ID AS unit_id ");
-//        sql.append(" FROM MONITOR.\"RPAuser_view\" ");
-        sql.append(" FROM RPAuser_view ");
+        sql.append(" FROM MONITOR.\"RPAuser_view\" ");
+//        sql.append(" FROM RPAuser_view ");
         sql.append(" where 1=1 ");
         SqlWrapper wrapper = new SqlWrapper(sql.toString());
         return DB.byName("oracle").findList(KwRPAUserViewRet.class, wrapper.getSql(), wrapper.getParams().toArray());
