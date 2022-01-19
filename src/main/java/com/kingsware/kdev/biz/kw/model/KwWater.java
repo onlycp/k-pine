@@ -87,15 +87,5 @@ public class KwWater extends BaseModel {
     private String remark;
 
 
-    /** 备用字段1 **/
-    private String reserve1;
-    /** 备用字段2 **/
-    private String reserve2;
-    /** 备用字段3 **/
-    private String reserve3;
-    /** 备用字段4 **/
-    private String reserve4;
-    /** 备用字段5 **/
-    private String reserve5;
 
 }
