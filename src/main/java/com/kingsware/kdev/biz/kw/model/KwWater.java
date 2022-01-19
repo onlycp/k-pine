@@ -1,6 +1,7 @@
 package com.kingsware.kdev.biz.kw.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.kingsware.kdev.core.bean.BaseManageModel;
 import com.kingsware.kdev.core.bean.BaseModel;
 import com.kingsware.kdev.core.orm.annotation.AutoEnum;
 import com.kingsware.kdev.core.orm.annotation.Column;

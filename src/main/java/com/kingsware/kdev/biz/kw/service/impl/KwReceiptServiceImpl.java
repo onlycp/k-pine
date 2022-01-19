@@ -53,7 +53,7 @@ public class KwReceiptServiceImpl extends BaseServiceImpl implements KwReceiptSe
                 " kba.id as bank_account_id, kw.id as water_id, " +
                 " kr.* " +
                 " FROM kw_receipt kr " +
-                " LEFT JOIN kw_file kf on kf.id = kr.file_id and kf.deleted=0 " +
+                " LEFT JOIN sys_file kf on kf.id = kr.file_id " + //todo sys_file 没有软删除字段
                 " LEFT JOIN kw_water kw on kw.receipt_id = kr.id and kw.deleted = 0 " +
                 " LEFT JOIN kw_bank_account kba on kba.account = kr.self_account and kba.deleted = 0 " +
                 " LEFT JOIN kw_bank_account_expand kbae on kba.account = kbae.account " +
