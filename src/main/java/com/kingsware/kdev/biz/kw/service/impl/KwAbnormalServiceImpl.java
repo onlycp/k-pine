@@ -356,7 +356,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         SqlWrapper wrapper = new SqlWrapper(" SELECT  kba.bank_deposit ,km.bank_name as mechanism_name,ke.name as edition_name,ke.path, " +
                 " kw.*, " +
                 " kea.bank_account as edition_account, kea.bank_account, kea.cert_number, kea.bank_password, kea.ukey_password ,kea.usb_port, kea.usb_ip, kea.usb_group, " +
-                " kea.is_ok_key , kea.usb_ip_ok ,kea.usb_port_ok, kea.usb_group_ok  " +
+                " kea.is_ok_key , kea.usb_ip_ok ,kea.usb_port_ok, kea.usb_group_ok, kea.reserve1  " +
                 " FROM kw_water kw " +
                 " LEFT JOIN kw_receipt kr on kw.receipt_id = kr.id and kr.deleted = 0 " +
                 " LEFT JOIN kw_bank_account kba on kw.account = kba.account and kba.deleted = 0  " +
@@ -518,15 +518,16 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         // 定义标题
         List<RegionDefine> defineList = new ArrayList<>();
         // 银行名称 mechanismName  银行版本editionName 网银地址 path
-        // 登录账号 bankAccount  客户号 certNumber  网银密码 bankPassword  Ukey密码 ukeyPassword  云柜ip usbIp  云柜端口 usbPort  ukey插口 usbGroup
+        // 登录账号 bankAccount  客户号 reserve1 登录证书号 certNumber  网银密码 bankPassword  Ukey密码 ukeyPassword  云柜ip usbIp  云柜端口 usbPort  ukey插口 usbGroup
         // 是否需要按ok键  isOkKey ok_云柜ip usbIpOk ok_云柜端口 usbPortOk ok_云柜插口 usbGroupOk
         // 账户 account  上条流水日期 lastDate  当前流水日期 curDate
         defineList.add(RegionDefine.textDefine("mechanismName", "机构名称"));
         defineList.add(RegionDefine.textDefine("editionName", "版本名称"));
+        defineList.add(RegionDefine.textDefine("reserve1", "客户号"));
         defineList.add(RegionDefine.textDefine("path", "网银地址"));
         defineList.add(RegionDefine.textDefine("bankAccount", "登录账号"));
         defineList.add(RegionDefine.textDefine("bankPassword", "网银密码"));
-        defineList.add(RegionDefine.textDefine("certNumber", "客户号"));
+        defineList.add(RegionDefine.textDefine("certNumber", "登录证书号"));
         defineList.add(RegionDefine.textDefine("ukeyPassword", "Ukey密码"));
         defineList.add(RegionDefine.textDefine("usbIp", "云柜ip"));
         defineList.add(RegionDefine.textDefine("usbPort", "云柜端口"));
