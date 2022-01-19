@@ -79,8 +79,8 @@ public class KwRPABankViewServiceImpl extends BaseServiceImpl implements KwRPABa
         sql.append(" 项目经理名称 AS pro_pm, ");
         sql.append(" 信托会计编号 AS trust_accounting_account, ");
         sql.append(" 信托会计名称 AS trust_accounting ");
-        sql.append(" FROM MONITOR.\"RPAbank_view\" ");
-//        sql.append(" FROM RPAbank_view ");
+//        sql.append(" FROM MONITOR.\"RPAbank_view\" ");
+        sql.append(" FROM RPAbank_view ");
         sql.append(" where 1=1 ");
         SqlWrapper wrapper = new SqlWrapper(sql.toString());
         return DB.byName("oracle").findList(KwRPABankViewRet.class, wrapper.getSql(), wrapper.getParams().toArray());
