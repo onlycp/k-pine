@@ -11,7 +11,9 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
+import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
+import com.kingsware.kdev.core.util.StringUtils;
 import org.springframework.stereotype.Service;
 
 /**
@@ -56,9 +58,12 @@ public class KwBankAccountExpandServiceImpl extends BaseServiceImpl implements K
         // 拼装sql
         SqlWrapper wrapper = new SqlWrapper(" select * from kw_bank_account_expand where 1=1 ");
         // 拼装查询sql
-//        if (StringUtils.isNotEmpty(argv.getName())) {
-//            wrapper.addCondition("ke.name", Op.LIKE, "%" +argv.getName() +"%");
-//        }
+        if (StringUtils.isNotEmpty(argv.getAccount())) {
+            wrapper.addCondition("account", Op.EQ, argv.getAccount());
+        }
+        if (StringUtils.isNotEmpty(argv.getProNum())) {
+            wrapper.addCondition("pro_num", Op.EQ, argv.getProNum());
+        }
         return (PageDataRet<KwBankAccountExpandRet>) query(wrapper.getSql(), wrapper.getParams(), argv, KwBankAccountExpandRet.class);
     }
 

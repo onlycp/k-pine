@@ -16,12 +16,16 @@ public class KwBankAccountExpandArgv {
     private String id;
     /** 账户id */
     private String bankAccountId;
+    /** 账户 */
+    private String account;
     /** 项目编号 */
     private String proNum;
     /** 项目名称 */
     private String proName;
     /** 项目经理 */
     private String proPm;
+    /** 项目阶段 */
+    private String proPhase;
     /** 项目经理账号 */
     private String proPmAccount;
     /** 信托会计 */

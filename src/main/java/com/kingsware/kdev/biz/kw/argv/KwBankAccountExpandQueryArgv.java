@@ -17,4 +17,6 @@ public class KwBankAccountExpandQueryArgv extends BasePageArgv {
     private String proNum;
     /** 项目名称 */
     private String proName;
+    /** 银行账号 */
+    private String account;
 }

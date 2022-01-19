@@ -34,4 +34,12 @@ public class KwBankAccountManagerArgv {
     private String reserve4;
     /** 备用字段5 */
     private String reserve5;
+    /** 预约编号 */
+    private String bookNumber;
+    /** 客户编号 */
+    private String customerNumber;
+    /** 客户经理姓名 */
+    private String customerManagerNumber;
+    /** 预约时间 */
+    private String bookTime;
 }

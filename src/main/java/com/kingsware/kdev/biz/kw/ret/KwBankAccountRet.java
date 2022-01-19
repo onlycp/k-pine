@@ -73,6 +73,10 @@ public class KwBankAccountRet extends BaseManageRet {
     private Integer relationType;
     /** 关联id */
     private String relationId;
+    /** 关联id */
+    private String proId;
     /** 是否流水发送到mbs系统 */
     private Integer mbsSend;
+    /** 从视图获取的账户状态 */
+    private String accountStatus;
 }

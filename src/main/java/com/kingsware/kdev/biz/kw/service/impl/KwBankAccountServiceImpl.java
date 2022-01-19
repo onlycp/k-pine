@@ -4,7 +4,6 @@ import com.kingsware.kdev.biz.kw.argv.KwBankAccountArgv;
 import com.kingsware.kdev.biz.kw.argv.KwBankAccountQueryArgv;
 import com.kingsware.kdev.biz.kw.model.KwBankAccount;
 import com.kingsware.kdev.biz.kw.model.KwEdition;
-import com.kingsware.kdev.biz.kw.model.KwEditionAccount;
 import com.kingsware.kdev.biz.kw.ret.KwBankAccountRet;
 import com.kingsware.kdev.biz.kw.service.KwBankAccountService;
 import com.kingsware.kdev.biz.kw.service.KwEditionAccountService;
@@ -21,11 +20,7 @@ import com.kingsware.kdev.core.util.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * 银行版本管理业务实现类
@@ -117,6 +112,22 @@ public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankA
             wrapper.between("kba.balance_update_time", argv.getUpdateDateStartDate(), argv.getUpdateDateEndDate());
         }
         wrapper.groupBy(" kba.id ");
+        return (PageDataRet<KwBankAccountRet>) query(wrapper.getSql(), wrapper.getParams(), argv, KwBankAccountRet.class);
+    }
+
+    @Override
+    public PageDataRet<KwBankAccountRet> queryBankAccountWithExpand(KwBankAccountQueryArgv argv) {
+        // 拼装sql
+        StringBuilder sql = new StringBuilder();
+        sql.append(" select  ");
+        sql.append(" 	kba.*, kbae.id as pro_id ");
+        sql.append(" from kw_bank_account kba  ");
+        sql.append(" left join kw_bank_account_expand kbae on kbae.account = kba.account ");
+        sql.append(" where 1=1 ");
+        SqlWrapper wrapper = new SqlWrapper(sql.toString());
+        // 拼装查询sql
+        wrapper.addCondition("kbae.pro_num", Op.EQ, argv.getProNum());
+        wrapper.addCondition("kba.account", Op.EQ, argv.getAccount());
         return (PageDataRet<KwBankAccountRet>) query(wrapper.getSql(), wrapper.getParams(), argv, KwBankAccountRet.class);
     }
 
