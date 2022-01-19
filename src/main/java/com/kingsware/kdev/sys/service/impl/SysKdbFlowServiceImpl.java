@@ -4,9 +4,7 @@ import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.orm.DB;
-import com.kingsware.kdev.core.orm.kdb.FlowInfo;
-import com.kingsware.kdev.core.orm.kdb.KdbApi;
-import com.kingsware.kdev.core.orm.kdb.KdbFlowQueryArgv;
+import com.kingsware.kdev.core.orm.kdb.*;
 import com.kingsware.kdev.core.util.PageUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysKdbFlowArgv;
@@ -46,37 +44,38 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         flowRet.setId(info.getFlowId());
         flowRet.setContent(info.getContent());
         flowRet.setName(info.getName());
+        flowRet.setDescription(info.getDescription());
         if (info.getCreateTime() !=null ) {
             flowRet.setWhenCreated(new Timestamp(info.getCreateTime()));
         }
         if (info.getUpdateTime() != null) {
             flowRet.setWhenModified(new Timestamp(info.getUpdateTime()));
         }
-        flowRet.setParentId(info.getParentId());
         return flowRet;
     }
 
     @Override
     public void add(SysKdbFlowArgv argv) {
 
-        FlowInfo info = new FlowInfo();
-        info.setFlowId(StringUtils.getUUID());
+        AddFlowInfo info = new AddFlowInfo();
+//        info.setFlowId(StringUtils.getUUID());
         info.setContent(argv.getContent());
         info.setName(argv.getName());
-        info.setParentId("0");
+        info.setDescription(argv.getDescription());
+
         KdbApi api = (KdbApi)(DB.getDefault());
         api.addFlow(info);
     }
 
     @Override
     public void edit(SysKdbFlowArgv argv) {
-        FlowInfo info = new FlowInfo();
+        EditFlowInfo info = new EditFlowInfo();
         info.setContent(argv.getContent());
         info.setName(argv.getName());
-        info.setParentId("0");
         info.setFlowId(argv.getId());
+        info.setDescription(argv.getDescription());
         KdbApi api = (KdbApi)(DB.getDefault());
-        api.addFlow(info);
+        api.editFlow(info);
     }
 
     @Override

@@ -49,7 +49,7 @@ public class KFilter implements Filter {
         String contextPath = request.getContextPath();
         // 获取配置的接口信息
         String path = url.replace(contextPath, "");
-        SysApi api = ApiManager.getInstance().getApi(method, url);
+        SysApi api = ApiManager.getInstance().getApi(method, path);
         // 如果找不到对应的接口配置
         if (api == null || api.getCallType() == 1) {
             filterChain.doFilter(servletRequest, servletResponse);
@@ -99,7 +99,7 @@ public class KFilter implements Filter {
         String body = getBody(request);
         if (StringUtils.isNotEmpty(body)) {
             try {
-                Map<String, Object> argv = objectMapper.readValue(body, new TypeReference<Map<String, Object>>() {});
+                Map<String, String> argv = objectMapper.readValue(body, new TypeReference<Map<String, String>>() {});
                 params.putAll(argv);
             }
             catch (Exception e) {

@@ -20,14 +20,14 @@ public interface KdbApi {
      * @param flowInfo  流程信息
      * @return
      */
-    void addFlow(FlowInfo flowInfo);
+    void addFlow(AddFlowInfo flowInfo);
 
     /**
      * 编辑流程
      * @param flowInfo 流程信息
      * @return
      */
-    void editFlow(FlowInfo flowInfo);
+    void editFlow(EditFlowInfo flowInfo);
 
     /**
      * 删除流程

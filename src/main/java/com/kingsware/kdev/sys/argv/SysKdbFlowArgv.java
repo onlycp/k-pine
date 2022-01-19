@@ -20,4 +20,6 @@ public class SysKdbFlowArgv {
     private String name;
     /** 父流程id **/
     private String parentId;
+    /** 描述 **/
+    private String description;
 }

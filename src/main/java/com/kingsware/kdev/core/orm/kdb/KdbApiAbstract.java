@@ -35,12 +35,12 @@ public abstract class KdbApiAbstract implements  KdbApi {
     public static final String QUERY_DS_URL = "/api/dataSource/search";
 
     @Override
-    public void addFlow(FlowInfo flowInfo) {
+    public void addFlow(AddFlowInfo flowInfo) {
        post(flowInfo, ADD_FLOW_URL, String.class);
     }
 
     @Override
-    public void editFlow(FlowInfo flowInfo) {
+    public void editFlow(EditFlowInfo flowInfo) {
         post(flowInfo, EDIT_FLOW_URL, String.class);
 
     }
