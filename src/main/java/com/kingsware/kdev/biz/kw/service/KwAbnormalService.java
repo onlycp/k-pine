@@ -1,8 +1,10 @@
 package com.kingsware.kdev.biz.kw.service;
 
 import com.kingsware.kdev.biz.kw.argv.KwAbnormalQueryArgv;
+import com.kingsware.kdev.biz.kw.argv.KwReceiptQueryArgv;
 import com.kingsware.kdev.biz.kw.argv.KwWaterQueryArgv;
 import com.kingsware.kdev.biz.kw.ret.KwAbnormalRet;
+import com.kingsware.kdev.biz.kw.ret.KwReceiptRet;
 import com.kingsware.kdev.biz.kw.ret.KwWaterRet;
 import com.kingsware.kdev.core.base.BaseService;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -57,5 +59,20 @@ public interface KwAbnormalService extends BaseService {
      * @return
      */
     List<KwWaterRet> queryBalanceAbnormal(KwWaterQueryArgv argv);
+
+
+    /**
+     * 流水异常页面 无回单
+     * @param argv
+     * @return
+     */
+    PageDataRet<KwWaterRet> queryNoReceipt(KwWaterQueryArgv argv);
+
+    /**
+     * 回单异常页面 无流水
+     * @param argv
+     * @return
+     */
+    PageDataRet<KwReceiptRet> queryNoWater(KwReceiptQueryArgv argv);
 
 }
