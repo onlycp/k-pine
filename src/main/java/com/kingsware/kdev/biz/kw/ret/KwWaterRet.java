@@ -34,10 +34,8 @@ public class KwWaterRet extends BaseManageRet {
     private String editionAccount;
     /** 版本账号id*/
     private String editionAccountId;
-
     /** 开户行 bank_deposit*/
     private String bankDeposit;
-
     /** 所属项目 pro_name*/
     private String proName;
 
@@ -120,5 +118,7 @@ public class KwWaterRet extends BaseManageRet {
     /** 上条流水的发生日期 lastDate */
     @JsonFormat(pattern = "yyyy-MM-dd", timezone="GMT+8")
     private Timestamp lastDate;
+    /** 备用字段1 客户号 */
+    private String reserve1;
 
 }
