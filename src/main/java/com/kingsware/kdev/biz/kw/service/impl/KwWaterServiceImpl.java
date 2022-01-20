@@ -439,7 +439,9 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
             }
 
             waterDto.setTransactionDate(new Timestamp(TimeUtil.strToDate(strDate).getTime()));//交易日期  非空
-            waterDto.setTransactionTime(new Timestamp(TimeUtil.cellToTime(map.get("交易时间")).getTime()));//交易时间  可为空
+            if(map.get("交易时间") != null && !map.get("交易时间").equals("") ){
+                waterDto.setTransactionTime(new Timestamp(TimeUtil.cellToTime(map.get("交易时间")).getTime()));//交易时间  可为空
+            }
             waterDto.setTransactionType(Optional.ofNullable(map.get("交易类型")).orElse("").toString());//交易类型      可为空
             waterDto.setCurrency(EnumSelectionUtil.getCurrency(Optional.ofNullable(map.get("币种")).orElse("").toString()));//币种 非空
             waterDto.setAccount(account);//账户  非空
