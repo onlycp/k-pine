@@ -1,11 +1,18 @@
 package com.kingsware.kdev.core.kflow;
 
+import com.kingsware.kdev.core.bean.BaseRet;
+import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.kflow.handler.KFlowResultHandlerFactory;
 import com.kingsware.kdev.core.kflow.handler.KObjectHandler;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.KdbArgv;
+import com.kingsware.kdev.core.orm.kdb.KdbRet;
+import com.kingsware.kdev.core.util.JsonUtil;
+import com.kingsware.kdev.core.util.NumberUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,14 +58,43 @@ public class KdbFlowExecutor {
         // 将入系统变量
         context.getSystemContext().forEach((k, v)-> argv.getVariables().put("sys." + k, v));
         // 执行流程
-        List<Map<String, Object>> mapObjectList = DB.kdbApi().executeFlow(argv);
-        // 数据转换
-        String handleClass = context.getHandleClass();
-        if (StringUtils.isEmpty(handleClass)) {
-            handleClass = KObjectHandler.class.getName();
+        KdbRet<String> ret = DB.kdbApi().executeFlow(argv);
+        // 如果失败
+        if (ret.getErrorCode() != 0) {
+            return new ErrorResult(ret.getResponseBody());
         }
-        // 调用结果处理器
-        return KFlowResultHandlerFactory.getHandler(handleClass).execute(mapObjectList);
+        // 如果body为空，则直接返回null即可
+        if (StringUtils.isEmpty(ret.getResponseBody())) {
+            return null;
+        }
+        // 如果返回的数字，那么直接将结果返回给前端
+        else if (NumberUtils.isParsable(ret.getResponseBody())) {
+            return Long.parseLong(ret.getResponseBody());
+        }
+        // 如果是数组
+        else if (ret.getResponseBody().startsWith("[") && ret.getResponseBody().endsWith("]")) {
+            // 执行流程
+            List<Map<String, Object>> mapObjectList = new ArrayList<>();
+            List<Map> list = JsonUtil.snakeCaseToListBean(ret.getResponseBody(), Map.class);
+            for (Map<?,?> map: list) {
+                Map<String, Object> tmpMap = new HashMap<>();
+                map.forEach((k, v) -> tmpMap.put(StringUtils.lineToHump(k.toString().toLowerCase()), v));
+                mapObjectList.add(tmpMap);
+            }
+
+            // 数据转换
+            String handleClass = context.getHandleClass();
+            if (StringUtils.isEmpty(handleClass)) {
+                handleClass = KObjectHandler.class.getName();
+            }
+            // 调用结果处理器
+            return KFlowResultHandlerFactory.getHandler(handleClass).execute(mapObjectList);
+        }
+        else {
+            return new TipResult(ret.getResponseBody());
+        }
+
+
     }
 
 

@@ -24,7 +24,7 @@ public class VariableDefinition {
      * @param content
      * @return
      */
-    public static VariableDefinition createSqlScript(String sourceName, String content) {
+    public static VariableDefinition createJsScript(String sourceName, String content) {
         Script s = new Script();
         s.sourceName = sourceName;
         s.content = content;
@@ -33,6 +33,22 @@ public class VariableDefinition {
         variableDefinition.script = s;
         return variableDefinition;
     }
+
+    /**
+     * 创建Js变量
+     * @param js
+     * @return
+     */
+    public static VariableDefinition createJsScript(String js) {
+        Script s = new Script();
+        s.content = js;
+        s.type = "js";
+        VariableDefinition variableDefinition = new VariableDefinition();
+        variableDefinition.script = s;
+        return variableDefinition;
+    }
+
+
 
     /**
      * 脚本定义

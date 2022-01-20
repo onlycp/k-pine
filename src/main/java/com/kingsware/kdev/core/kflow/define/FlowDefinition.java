@@ -5,13 +5,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kingsware.kdev.core.util.StringUtils;
-import lombok.Data;
 import lombok.Getter;
 import lombok.SneakyThrows;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 流程
@@ -33,6 +33,12 @@ public class FlowDefinition {
     /** 当前节点 **/
     @JsonIgnore
     private NodeDefinition currentNode;
+    /** 节点id **/
+    @JsonIgnore
+    private AtomicInteger nodeIdAtomicInteger = new AtomicInteger(0);
+    /** 连线id **/
+    @JsonIgnore
+    private AtomicInteger linkIdAtomicInteger = new AtomicInteger(0);
 
     private FlowDefinition(String name) {
         this.name = name;
@@ -123,13 +129,13 @@ public class FlowDefinition {
         NodeDefinition node = nodeByName(name);
         if (node == null) {
             node = new NodeDefinition();
-            node.setId(StringUtils.getUUID());
+            node.setId(String.format("node-%d", nodeIdAtomicInteger.incrementAndGet()));
             node.setName(name);
             node.setAuto(true);
             node.setState(NodeStateEnum.COMPLETED.getValue());
             node.setDebug(false);
             node.setType(NodeTypeEnum.NODE.getValue());
-            node.setVariables(VariableDefinition.createSqlScript(sourceName, sql));
+            node.setVariables(VariableDefinition.createJsScript(sourceName, sql));
             addNode(node);
         }
 
@@ -143,6 +149,36 @@ public class FlowDefinition {
     }
 
     /**
+     * 创建js节点
+     * @param name  名称
+     * @param js    js内容
+     * @param expr  线表达式
+     * @return
+     */
+    public FlowDefinition toJs(String name, String js, String expr) {
+        // 创建节点
+        NodeDefinition node = nodeByName(name);
+        if (node == null) {
+            node = new NodeDefinition();
+            node.setId(String.format("node-%d", nodeIdAtomicInteger.incrementAndGet()));
+            node.setName(name);
+            node.setAuto(true);
+            node.setState(NodeStateEnum.COMPLETED.getValue());
+            node.setDebug(false);
+            node.setType(NodeTypeEnum.NODE.getValue());
+            node.setVariables(VariableDefinition.createJsScript(js));
+            addNode(node);
+        }
+
+        // 创建连接
+        createLink(currentNode, node, expr);
+        // 设置当前节点
+        this.currentNode = node;
+        // 返回
+        return this;
+    }
+
+    /**
      * 创建分支L节点
      * @return           节点
      */
@@ -153,7 +189,7 @@ public class FlowDefinition {
         NodeDefinition node = nodeByName(name);
         if (node == null) {
             node = new NodeDefinition();
-            node.setId(StringUtils.getUUID());
+            node.setId(String.format("node-%d", nodeIdAtomicInteger.incrementAndGet()));
             node.setName(name);
             node.setType(NodeTypeEnum.NODE.getValue());
             node.setVariables(new VariableDefinition());
@@ -189,7 +225,7 @@ public class FlowDefinition {
     private void createLink(NodeDefinition from, NodeDefinition to, String expr) {
         // 创建link
         NodeLink nodeLink = new NodeLink();
-        nodeLink.setId(StringUtils.getUUID());
+        nodeLink.setId(String.format("link-%d", linkIdAtomicInteger.incrementAndGet()));
         nodeLink.setName(String.format("%s->%s", from.getName(), to.getName()));
         nodeLink.setFrom(from.getId());
         nodeLink.setTo(to.getId());

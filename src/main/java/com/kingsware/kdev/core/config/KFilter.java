@@ -6,8 +6,10 @@ import com.kingsware.kdev.core.bean.BaseArgv;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.cache.api.ApiManager;
 import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.kflow.ErrorResult;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
+import com.kingsware.kdev.core.kflow.TipResult;
 import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.model.SysApi;
@@ -62,6 +64,7 @@ public class KFilter implements Filter {
             context.getSystemContext().put("who",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getId() : "");
             context.getSystemContext().put("username",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getUsername() : "");
             context.getSystemContext().put("when", DateUtils.getNow());
+            context.getSystemContext().put("uuid", StringUtils.getUUID());
             // 处理请求变量
             Map<String, Object> argvMap = getRequestParams(api, path, request);
             // 处理类
@@ -69,7 +72,16 @@ public class KFilter implements Filter {
             // 调用流程
             Object result = KdbFlowExecutor.getInstance().execute(api.getApiFlowId(), argvMap, context);
             // 返回前端
-            BaseRet<?> ret = BaseRet.success(result);
+            BaseRet<?> ret = new BaseRet<>();
+            if (result instanceof TipResult) {
+                ret = BaseRet.successMessage(((TipResult) result).getMessage());
+            }
+            else if (result instanceof ErrorResult) {
+                ret = BaseRet.failMessage(((ErrorResult) result).getMessage());
+            }
+            else {
+                ret = BaseRet.success(result);
+            }
             responseJson(response, ret);
             return;
         }
@@ -107,7 +119,8 @@ public class KFilter implements Filter {
             }
         }
         // 获取path变量
-        Map<String, Object> pathVariables = new HashMap<>();
+        Map<String, Object> pathVariables = getPathVariables(path, api.getApiUrl());
+
         params.putAll(pathVariables);
         // 返回
         return params;

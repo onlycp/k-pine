@@ -70,7 +70,7 @@ public class ApiManager {
             if (reqArr.length == restArr.length) {
                 for (int i = 0; i < reqArr.length; i++) {
                     // segment部分跳过
-                    if (restArr[i].startsWith("{") && reqArr[i].endsWith("}")) {
+                    if (restArr[i].startsWith("{") && restArr[i].endsWith("}")) {
                         continue;
                     }
                     if (!reqArr[i].equals(restArr[i])) {

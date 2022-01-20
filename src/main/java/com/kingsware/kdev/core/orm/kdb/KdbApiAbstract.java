@@ -84,21 +84,9 @@ public abstract class KdbApiAbstract implements  KdbApi {
     }
 
     @Override
-    public List<Map<String, Object>> executeFlow(KdbArgv argv) {
+    public KdbRet<String> executeFlow(KdbArgv argv) {
         // 加入当前环境变量
-
-        KdbRet<String> ret = post(argv, EXCUTE_FLOW_URL, String.class);
-        List<Map<String, Object>> result = new ArrayList<>();
-        if (StringUtils.isNotEmpty(ret.getResponseBody())) {
-            List<Map> list = JsonUtil.snakeCaseToListBean(ret.getResponseBody(), Map.class);
-            for (Map<?,?> map: list) {
-                Map<String, Object> tmpMap = new HashMap<>();
-                map.forEach((k, v) -> tmpMap.put(StringUtils.lineToHump(k.toString().toLowerCase()), v));
-                result.add(tmpMap);
-            }
-        }
-
-        return result;
+        return post(argv, EXCUTE_FLOW_URL, String.class);
     }
 
     /**
@@ -124,14 +112,7 @@ public abstract class KdbApiAbstract implements  KdbApi {
             if (ret == null) {
                 throw new OrmDbException("kdb响应数据不合法，响应内容:" + responseBody);
             }
-            if (ret.getErrorCode() == 0) {
-                // 没死，高高兴兴回家
-                return ret;
-            }
-            else {
-                // 死了， 通知准备后事
-                throw new OrmDbException(ret.getMessage());
-            }
+            return ret;
         }
         catch (HttpClientException e) {
             log.error("接口调用，响应码:{}, 响应信息：{}，接口:{}, 参数:{}", e.getCode(), e.getMessage(), e.getUrl(), e.getParams());

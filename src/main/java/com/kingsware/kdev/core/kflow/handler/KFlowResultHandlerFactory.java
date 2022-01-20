@@ -22,7 +22,7 @@ public class KFlowResultHandlerFactory {
 
         try {
             Class tClass = Class.forName(className);
-            if (KFlowResultHandler.class.isAssignableFrom(tClass)) {
+            if (tClass.isAssignableFrom(KFlowResultHandler.class)) {
                 throw BusinessException.serviceThrow(String.format("流程结果处理器不合法，应继承:%s, 当前类名: %s", KFlowResultHandler.class.getSimpleName(), className));
             }
             KFlowResultHandler handler = (KFlowResultHandler)tClass.newInstance();
