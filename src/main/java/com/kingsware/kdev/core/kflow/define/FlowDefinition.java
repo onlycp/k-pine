@@ -118,6 +118,14 @@ public class FlowDefinition {
     }
 
     /**
+     * 流程开始
+     * @return
+     */
+    public FlowDefinition toEnd() {
+        return toEnd("");
+    }
+
+    /**
      * 创建SQL节点
      * @param sourceName 数据源名称
      * @param sql        SQL
@@ -149,6 +157,16 @@ public class FlowDefinition {
     }
 
     /**
+     * 创建SQL节点
+     * @param sourceName 数据源名称
+     * @param sql        SQL
+     * @return           节点
+     */
+    public FlowDefinition toSql(String name, String sourceName, String sql) {
+        return toSql(name, sourceName, sql);
+    }
+
+    /**
      * 创建js节点
      * @param name  名称
      * @param js    js内容
@@ -176,6 +194,18 @@ public class FlowDefinition {
         this.currentNode = node;
         // 返回
         return this;
+    }
+
+    /**
+     * 创建js节点
+     * @param name  名称
+     * @param js    js内容
+     * @param expr  线表达式
+     * @return
+     */
+    public FlowDefinition toJs(String name, String js) {
+        // 创建节点
+        return toJs(name, js, "");
     }
 
     /**

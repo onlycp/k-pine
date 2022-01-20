@@ -105,13 +105,12 @@ public class KFilter implements Filter {
             String name = names.nextElement();
             String value = request.getParameter(name);
             params.put(name, value);
-
         }
         // 获取body
         String body = getBody(request);
         if (StringUtils.isNotEmpty(body)) {
             try {
-                Map<String, String> argv = objectMapper.readValue(body, new TypeReference<Map<String, String>>() {});
+                Map<String, Object> argv = objectMapper.readValue(body, Map.class);
                 params.putAll(argv);
             }
             catch (Exception e) {
@@ -120,7 +119,6 @@ public class KFilter implements Filter {
         }
         // 获取path变量
         Map<String, Object> pathVariables = getPathVariables(path, api.getApiUrl());
-
         params.putAll(pathVariables);
         // 返回
         return params;
