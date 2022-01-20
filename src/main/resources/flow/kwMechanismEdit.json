@@ -1,5 +1,5 @@
 {
-  "name": "add",
+  "name": "kwMechanismEdit",
   "node_definition": [
     {
       "id": "start",
@@ -11,8 +11,8 @@
       "variables": {}
     },
     {
-      "id": "name_uni_check",
-      "name": "银行名称唯一性判断",
+      "id": "name_uni_query",
+      "name": "银行名称数量查询",
       "auto": true,
       "state": "completed",
       "debug": false,
@@ -20,7 +20,29 @@
       "variables": {
         "script": {
           "sourceName": "MySql2",
-          "content": "select count(1) as cnt from kw_mechanism where deleted=0 and bank_name=#{bankName} and id != #{id}}",
+          "content": "select count(1) as cnt from kw_mechanism where deleted=0 and bank_name=#{bankName} and id != #{id}",
+          "type": "sql",
+          "params": []
+        }
+      }
+    },
+    {
+      "id": "name_uni_check",
+      "type": "decision",
+      "name": "银行名称唯一性判断",
+      "variables": {}
+    },
+    {
+      "id": "number_uni_query",
+      "name": "银行代码名称查询",
+      "auto": true,
+      "state": "completed",
+      "debug": false,
+      "type": "",
+      "variables": {
+        "script": {
+          "sourceName": "MySql2",
+          "content": "select count(1) as cnt from kw_mechanism where deleted=0 and bank_number=#{bankNumber} and id != #{id}",
           "type": "sql",
           "params": []
         }
@@ -28,22 +50,12 @@
     },
     {
       "id": "number_uni_check",
+      "type": "decision",
       "name": "银行代码唯一性判断",
-      "auto": true,
-      "state": "completed",
-      "debug": false,
-      "type": "",
-      "variables": {
-        "script": {
-          "sourceName": "MySql2",
-          "content": "select count(1) as cnt from kw_mechanism where deleted=0 and bank_number=#{bankNumber} and id != #{id}}",
-          "type": "sql",
-          "params": []
-        }
-      }
+      "variables": {}
     },
     {
-      "id": "sort_uni_check",
+      "id": "sort_uni_query",
       "name": "银行简称唯一性判断",
       "auto": true,
       "state": "completed",
@@ -52,11 +64,17 @@
       "variables": {
         "script": {
           "sourceName": "MySql2",
-          "content": "select count(1) as cnt from kw_mechanism where deleted=0 and bank_sort=#{bankSort} and id != #{id}}",
+          "content": "select count(1) as cnt from kw_mechanism where deleted=0 and bank_short=#{bankShort} and id != #{id}",
           "type": "sql",
           "params": []
         }
       }
+    },
+    {
+      "id": "sort_uni_check",
+      "type": "decision",
+      "name": "银行简称唯一性判断",
+      "variables": {}
     },
     {
       "id": "save",
@@ -68,7 +86,7 @@
       "variables": {
         "script": {
           "sourceName": "MySql2",
-          "content": "update kw_mechanism set bank_name=#{bankName}, bank_number=#{bankNumber}, bank_sort=#{bankSort}, bank_type=#{bankType}, who_modified=#{who}, who_modified=#{when} where id=#{id}}",
+          "content": "update kw_mechanism set bank_name=#{bankName}, bank_number=#{bankNumber}, bank_short=#{bankShort}, bank_type=#{bankType}, who_modified=#{sys.who}, when_modified=#{sys.when} where id=#{id}",
           "type": "sql",
           "params": []
         }
@@ -86,21 +104,28 @@
   ],
   "node_link": [
     {
-      "id": "start->name_uni_check",
-      "name": "start->name_uni_check",
+      "id": "start->name_uni_query",
+      "name": "start->name_uni_query",
       "from": "start",
+      "to": "name_uni_query",
+      "variables": {}
+    },
+    {
+      "id": "name_uni_query->name_uni_check",
+      "name": "name_uni_query->name_uni_check",
+      "from": "name_uni_query",
       "to": "name_uni_check",
       "variables": {}
     },
     {
-      "id": "name_uni_check->number_uni_check",
-      "name": "name_uni_check->number_uni_check",
+      "id": "name_uni_check->number_uni_query",
+      "name": "name_uni_check->number_uni_query",
       "from": "name_uni_check",
-      "to": "number_uni_check",
+      "to": "number_uni_query",
       "variables": {},
       "conditions": {
         "decision": {
-          "expr": "compare(#{result[0].CNT}=0)"
+          "expr": "compare(${result[0].cnt}=0)"
         }
       }
     },
@@ -109,22 +134,28 @@
       "name": "银行名称不唯一",
       "from": "name_uni_check",
       "to": "end",
-      "end_reason": "银行名称已存在",
       "conditions": {
         "decision": {
-          "expr": "compare(#{result[0].CNT}>0)"
+          "expr": "compare(${result[0].cnt}>0)"
         }
       }
     },
     {
-      "id": "number_uni_check->sort_uni_check",
-      "name": "number_uni_check->sort_uni_check",
+      "id": "number_uni_query->number_uni_check",
+      "name": "number_uni_query->number_uni_check",
+      "from": "number_uni_query",
+      "to": "number_uni_check",
+      "variables": {}
+    },
+    {
+      "id": "number_uni_check->sort_uni_query",
+      "name": "number_uni_check->sort_uni_query",
       "from": "number_uni_check",
-      "to": "sort_uni_check",
+      "to": "sort_uni_query",
       "variables": {},
       "conditions": {
         "decision": {
-          "expr": "compare(#{result[0].CNT} = 0)"
+          "expr": "compare(${result[0].cnt} = 0)"
         }
       }
     },
@@ -137,9 +168,16 @@
       "variables": {},
       "conditions": {
         "decision": {
-          "expr": "compare(#{result[0].CNT} > 0)"
+          "expr": "compare(${result[0].cnt} > 0)"
         }
       }
+    },
+    {
+      "id": "sort_uni_query->sort_uni_check",
+      "name": "sort_uni_query->sort_uni_check",
+      "from": "sort_uni_query",
+      "to": "sort_uni_check",
+      "variables": {}
     },
     {
       "id": "sort_uni_check->save",
@@ -149,7 +187,7 @@
       "variables": {},
       "conditions": {
         "decision": {
-          "expr": "compare(#{result[0].CNT}=0)"
+          "expr": "compare(${result[0].cnt}=0)"
         }
       }
     },
@@ -162,7 +200,7 @@
       "variables": {},
       "conditions": {
         "decision": {
-          "expr": "compare(#{result[0].CNT}>0)"
+          "expr": "compare(${result[0].cnt}>0)"
         }
       }
     },
