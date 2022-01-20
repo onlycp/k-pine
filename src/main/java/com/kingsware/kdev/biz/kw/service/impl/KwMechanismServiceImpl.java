@@ -65,11 +65,11 @@ public class KwMechanismServiceImpl extends BaseServiceImpl implements KwMechani
         // 唯一性校验
         DBChecker<KwMechanism> checker =DBChecker.build(model, KwMechanism.class);
         // 银行名称
-        checker.uni("bankName", I18n.t("KwMechanism.bankName.unique", "银行名称必须唯一"));
+        checker.uni("bankName", I18n.t("KwMechanism.bankName.unique", "机构全称必须唯一"));
         // 银行代码
-        checker.uni("bankNumber", I18n.t("KwMechanism.bankNumber.unique", "银行代码必须唯一"));
+        checker.uni("bankNumber", I18n.t("KwMechanism.bankNumber.unique", "机构代码必须唯一"));
         // 银行简称
-        checker.uni("bankShort", I18n.t("KwMechanism.bankShort.unique", "银行简称必须唯一"));
+        checker.uni("bankShort", I18n.t("KwMechanism.bankShort.unique", "机构简称必须唯一"));
         // 执行校验
         checker.checkUnique();
     }
