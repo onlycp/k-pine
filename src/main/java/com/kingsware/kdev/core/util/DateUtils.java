@@ -24,6 +24,8 @@ public class DateUtils {
     // 日期
     public static final String DATE = "yyyy-MM-dd";
 
+    private static final String templates[] = {"yyyy-MM-dd", "yyyy-MM-d", "yyyy-M-dd", "yyyy-M-d", "yyyyMMdd", "yyyyMMd", "yyyyMdd", "yyyyMd", "yyyy年MM月dd日", "yyyy年MM月d日", "yyyy年M月dd日", "yyyy年M月d日", "yyyy/MM/dd", "yyyy/MM/d", "yyyy/M/dd", "yyyy/M/d", "yyyy.MM.dd", "yyyy.MM.d", "yyyy.M.dd", "yyyy.M.d"};
+
     /**
      * 私有构造
      */
@@ -67,5 +69,31 @@ public class DateUtils {
             log.warn("字符串转日期失败，原始字符串：{}, 格式:{}", dateString, format);
             return null;
         }
+    }
+
+    /**
+     * 在不知道日期格式的情况下转日期
+     * @param dateString
+     * @return
+     */
+    public static Date toDateUnknowFormat(String dateString) {
+        if (StringUtils.isEmpty(dateString)) {
+            return null;
+        }
+
+        Date parse = null;
+        boolean isFlag = false;
+        for (int i = 0, size = templates.length; i < size; i++) {
+            String templatePattern = templates[i];
+            try {
+                SimpleDateFormat format = new SimpleDateFormat(templatePattern);
+                parse = format.parse(dateString);
+            } catch (Exception e) {
+                continue;
+            }
+            isFlag = true;
+            break;
+        }
+        return parse;
     }
 }

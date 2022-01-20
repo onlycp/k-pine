@@ -3,7 +3,6 @@ package com.kingsware.kdev.biz.kw.service.impl;
 import com.kingsware.kdev.biz.kw.argv.*;
 import com.kingsware.kdev.biz.kw.ret.*;
 import com.kingsware.kdev.biz.kw.service.*;
-import com.kingsware.kdev.biz.kw.task.UpdateBankByViewTask;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.orm.DB;
@@ -12,8 +11,6 @@ import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.sys.argv.SysUserArgv;
-import com.kingsware.kdev.sys.argv.SysUserQueryArgv;
-import com.kingsware.kdev.sys.ret.SysUserRet;
 import com.kingsware.kdev.sys.service.SysUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -147,7 +144,6 @@ public class KwRPABankViewServiceImpl extends BaseServiceImpl implements KwRPABa
             PageDataRet<KwBankAccountRet> retList = kwBankAccountService.queryBankAccountWithExpand(initBankAccountQueryArgv(ret.getAccount(), ret.getProNum()));
             if (retList != null && retList.getList() != null && retList.getList().size() > 0) {
                 KwBankAccountArgv argv = converBankAccountArgv(ret);
-                argv.setId(retList.getList().get(0).getId());
                 kwBankAccountService.edit(argv);
             } else {
                 PageDataRet<KwBankAccountExpandRet> proRetList = kwBankAccountExpandService.query(initBankAccountExpandQueryArgv(ret.getAccount(), ret.getProNum()));
@@ -159,10 +155,10 @@ public class KwRPABankViewServiceImpl extends BaseServiceImpl implements KwRPABa
             }
         }
         // 添加用户by bank_account中的项目经理&项目经理编号
-        insertSysUser(querySysUserByManager(true), true);
-        insertSysUser(querySysUserByManager(false), false);
+        insertSysUser(querySysUserByAccount(true), true);
+        insertSysUser(querySysUserByAccount(false), false);
     }
-    private List<KwBankAccountExpandRet> querySysUserByManager(boolean isPm) {
+    private List<KwBankAccountExpandRet> querySysUserByAccount(boolean isPm) {
         // 拼装sql
         StringBuilder sql = new StringBuilder();
 
@@ -184,9 +180,11 @@ public class KwRPABankViewServiceImpl extends BaseServiceImpl implements KwRPABa
     private void insertSysUser(List<KwBankAccountExpandRet> list, boolean isPm) {
         for (KwBankAccountExpandRet ret : list) {
             SysUserArgv user = new SysUserArgv();
-
             user.setUsername(isPm ? ret.getProPmAccount() : ret.getTrustAccountingAccount());
             user.setRealName(isPm ? ret.getProPm() : ret.getTrustAccounting());
+            if (user.getRealName() == null) {
+                user.setRealName("未知");
+            }
             user.setPassword("S0BBZm0yMDIy"); // K@Afm2022
             user.setAvatar("https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif");
             user.setSex(0);
@@ -235,10 +233,12 @@ public class KwRPABankViewServiceImpl extends BaseServiceImpl implements KwRPABa
         argv.setRelationType(2);
         argv.setBankDeposit(view.getBankName());
         argv.setAccountStatus(view.getAccountStatus());
-        Date createTime = DateUtils.toDate(view.getCreateAccountTime(), "yyyy/M/d");
+        logger.info(" 开户日期 --- ", view.getAccount(), view.getCreateAccountTime());
+        logger.info(" 销户日期 --- ", view.getAccount(), view.getCreateAccountTime());
+        Date createTime = DateUtils.toDateUnknowFormat(view.getCreateAccountTime());
         Timestamp createAccountTime = createTime != null ? new Timestamp(createTime.getTime()) : null;
-        Date cancelTime = DateUtils.toDate(view.getCreateAccountTime(), "yyyy/M/d");
-        Timestamp cancelAccountTime = createTime != null ? new Timestamp(cancelTime.getTime()) : null;
+        Date cancelTime = DateUtils.toDateUnknowFormat(view.getCancelAccountTime());
+        Timestamp cancelAccountTime = cancelTime != null ? new Timestamp(cancelTime.getTime()) : null;
         argv.setCreateAccountTime(createAccountTime);
         argv.setCancelAccountTime(cancelAccountTime);
         return argv;
