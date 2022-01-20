@@ -86,6 +86,7 @@ public class KwMechanismServiceImpl extends BaseServiceImpl implements KwMechani
         if (argv.getBankType() != null) {
             wrapper.addCondition("bank_type", Op.EQ, argv.getBankType());
         }
+        wrapper.sortBy("when_created desc");
         return (PageDataRet<KwMechanismRet>) query(wrapper.getSql(), wrapper.getParams(), argv, KwMechanism.class, KwMechanismRet.class);
     }
 
