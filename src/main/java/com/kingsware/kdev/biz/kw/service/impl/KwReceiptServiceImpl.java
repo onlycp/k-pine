@@ -88,13 +88,30 @@ public class KwReceiptServiceImpl extends BaseServiceImpl implements KwReceiptSe
         return (PageDataRet<KwReceiptRet>) query;
     }
 
-    @Override
-    public void exportImportTemplate() {
-
-    }
 
     @Override
     public void export(KwReceiptQueryArgv argv) {
 
+        // 直接调用查询方法
+        argv.setPageQuery(false);
+        PageDataRet<KwReceiptRet> pageDataRet = this.query(argv);
+
+
+        // 定义标题
+        List<RegionDefine> defineList = new ArrayList<>();
+        defineList.add(RegionDefine.textDefine("proName", "项目名称"));
+        defineList.add(RegionDefine.textDefine("bankDeposit", "开户行"));
+        defineList.add(RegionDefine.dateTimeDefine("bookDate", "交易日期"));
+        defineList.add(RegionDefine.textDefine("draweeName", "付款人名称"));
+        defineList.add(RegionDefine.textDefine("draweeAccountNumber", "付款人账户"));
+        defineList.add(RegionDefine.textDefine("payeeName", "收款人名称"));
+        defineList.add(RegionDefine.textDefine("payeeAccountNumber", "收款人账户"));
+        defineList.add(RegionDefine.textDefine("amount", "交易金额"));
+        defineList.add(RegionDefine.dateDefine("hasWater", "有无流水","kw_receipt_has_water"));
+        defineList.add(RegionDefine.textDefine("selfAccount", "归属账户"));
+
+        // 导出
+        KExcel kExcel = KExcel.fromDataList("回单查询.xls", "Sheet1", defineList, pageDataRet.getList());
+        ExcelWorker.getInstance().writeToWeb(kExcel);
     }
 }

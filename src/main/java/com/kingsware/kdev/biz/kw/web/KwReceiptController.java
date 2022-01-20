@@ -2,6 +2,7 @@ package com.kingsware.kdev.biz.kw.web;
 
 import com.kingsware.kdev.biz.kw.argv.KwReceiptQueryArgv;
 import com.kingsware.kdev.biz.kw.argv.KwWaterQueryArgv;
+import com.kingsware.kdev.biz.kw.model.KwReceipt;
 import com.kingsware.kdev.biz.kw.model.KwWater;
 import com.kingsware.kdev.biz.kw.ret.KwReceiptRet;
 import com.kingsware.kdev.biz.kw.ret.KwWaterRet;
@@ -45,12 +46,12 @@ public class KwReceiptController {
     }
 
     /**
-     * 下载回单
+     * 导出回单
      */
-    @ApiOperation(value = "下载回单" ,notes = "下载回单")
-    @GetMapping("/download/{id}")
-    public void downloadReceipt(@PathVariable("id") String id){
-
+    @ApiOperation(value = "导出回单" ,notes = "导出回单")
+    @GetMapping("/export")
+    public void export(KwReceiptQueryArgv arge){
+        receiptService.export(arge);
     }
 
     @ApiOperation(value = "回单的流水" ,notes = "回单的流水")
