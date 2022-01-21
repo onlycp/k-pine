@@ -144,6 +144,7 @@ public class KwRPABankViewServiceImpl extends BaseServiceImpl implements KwRPABa
             PageDataRet<KwBankAccountRet> retList = kwBankAccountService.queryBankAccountWithExpand(initBankAccountQueryArgv(ret.getAccount(), ret.getProNum()));
             if (retList != null && retList.getList() != null && retList.getList().size() > 0) {
                 KwBankAccountArgv argv = converBankAccountArgv(ret);
+                argv.setId(retList.getList().get(0).getId());
                 kwBankAccountService.edit(argv);
             } else {
                 PageDataRet<KwBankAccountExpandRet> proRetList = kwBankAccountExpandService.query(initBankAccountExpandQueryArgv(ret.getAccount(), ret.getProNum()));
