@@ -127,7 +127,7 @@ class KwEditionTest {
                 // 启动
                 .start("机构管理-删除")
                 // 成功支线
-                .toSql("删除", "MySql2", "update kw_edition set deleted=1 where deleted=0 and id in (#{id})")
+                .toSql("删除", "MySql2", "update kw_edition set deleted=1 where deleted=0 and id in (${ids})")
                 .toEnd("");
 
         sysKdbFlowService.addOrUpdate(flowName, flowDefinition.toJson());
