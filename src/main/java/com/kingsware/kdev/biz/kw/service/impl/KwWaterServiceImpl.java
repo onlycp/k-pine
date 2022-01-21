@@ -189,7 +189,7 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
                     return "手动";
                 }
             }
-            return "异常";
+            return "";
         }).build());
         // 导出
         KExcel kExcel = KExcel.fromDataList("流水查询.xls", "Sheet1", defineList, pageDataRet.getList());

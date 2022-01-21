@@ -36,6 +36,14 @@ public class KwAccountHistoryBalanceController extends BaseController {
         return BaseRet.success(accountHistoryBalanceService.query(argv));
     }
 
+    /**
+     * 导出
+     */
+    @ApiOperation(value = "导出账户历史余额" ,notes = "账户历史余额")
+    @GetMapping("/export")
+    public void export(KwWaterQueryArgv argv) {
+        accountHistoryBalanceService.export(argv);
+    }
 
 
 
