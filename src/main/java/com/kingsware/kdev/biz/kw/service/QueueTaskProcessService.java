@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.kingsware.kdev.biz.kw.enums.QueueTaskStatusEnum;
 import com.kingsware.kdev.biz.kw.ret.KwQueueTaskRet;
 import com.kingsware.kdev.biz.kw.service.impl.KwQueueTaskServiceImpl;
+import com.kingsware.kdev.core.context.SpringContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,8 +44,7 @@ public class QueueTaskProcessService {
     String DailyReceiptWaterSinglePath;
 
     public QueueTaskProcessService(){
-        ResourceBundle res = ResourceBundle.getBundle("application");
-        this.DailyReceiptWaterSinglePath = res.getString("file.WaterPath");
+
     }
 
     /**
@@ -53,6 +53,7 @@ public class QueueTaskProcessService {
      */
     //@ExecuteTime(name = "扫描单个文件夹流水回单")
     public void singleScanTask(KwQueueTaskRet task){
+        this.DailyReceiptWaterSinglePath = SpringContext.getProperties("file.WaterPath",null);
         try
         {
             log.info("扫描单一回单流水");
@@ -61,6 +62,7 @@ public class QueueTaskProcessService {
             if (!matcher.find()){
                 throw new Exception("路径不匹配：" + task.getData());
             }
+            this.DailyReceiptWaterSinglePath = SpringContext.getProperties("file.WaterPath",null);
             String path = DailyReceiptWaterSinglePath + matcher.group(8);
             log.info("处理任务，本地路径：" + path);
             File folder = new File(path);

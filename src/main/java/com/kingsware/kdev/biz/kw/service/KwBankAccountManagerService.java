@@ -42,6 +42,8 @@ public interface KwBankAccountManagerService extends BaseService {
      */
      PageDataRet<KwBankAccountManagerRet> query(KwBankAccountManagerQueryArgv argv);
 
+    PageDataRet<KwBankAccountManagerRet> queryBankAccountManagerWithExpand(KwBankAccountManagerQueryArgv argv);
+
     /**
      * 删除
      * @param argv  查询

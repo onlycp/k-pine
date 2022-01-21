@@ -63,7 +63,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             wrapper.addCondition("file_name", Op.LIKE, "%" +argv.getFileName() +"%");
         }
         if (StringUtils.isNotEmpty(argv.getFileExt())) {
-            wrapper.addCondition("code", Op.LIKE, "%" +argv.getFileExt() +"%");
+            wrapper.addCondition("file_ext", Op.LIKE, "%" +argv.getFileExt() +"%");
         }
         if (argv.getSaveType() != null) {
             wrapper.addCondition("save_type", Op.EQ, argv.getSaveType());
@@ -102,7 +102,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             sysFile.setFileExt(FileUtils.getFileExt(sysFile.getFileName()));
             // 文件大小
             sysFile.setFileSize((int)file.getSize());
-            //  文件md5码
+            // 文件md5码
             sysFile.setFileMd5(FileUtils.getMD5(file.getInputStream()));
             // 文件来源
             sysFile.setFileFrom(fileFrom);
@@ -119,7 +119,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                 String filePath = basePath +  relativePath;
                 File path = new File(filePath);
                 boolean status = path.mkdirs();
-                File saveFile = new File(filePath + realName);
+                File saveFile = new File(path.getAbsolutePath() + realName);
                 // 文件表只存储相对路径
                 sysFile.setFilePath(relativePath + realName);
                 file.transferTo(saveFile);

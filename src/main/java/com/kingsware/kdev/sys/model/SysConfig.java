@@ -23,6 +23,8 @@ public class SysConfig extends BaseManageModel {
     private String name;
     /** 参数键名 */
     private String code;
+    /** 参数类型 */
+    private Integer valueType;
     /** 参数键值 */
     private String value;
     /** 是否系统内置 */

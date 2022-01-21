@@ -3,6 +3,7 @@ package com.kingsware.kdev.biz.kw.service.impl;
 import com.kingsware.kdev.biz.kw.argv.KwEditionArgv;
 import com.kingsware.kdev.biz.kw.argv.KwEditionQueryArgv;
 import com.kingsware.kdev.biz.kw.model.KwEdition;
+import com.kingsware.kdev.biz.kw.model.KwMechanism;
 import com.kingsware.kdev.biz.kw.ret.KwEditionRet;
 import com.kingsware.kdev.biz.kw.service.KwEditionService;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
@@ -38,6 +39,7 @@ public class KwEditionServiceImpl extends BaseServiceImpl implements KwEditionSe
     @Override
     public void add(KwEditionArgv argv) {
         KwEdition model = BeanUtils.copyObject(argv, KwEdition.class);
+        checkUnique(model);
         // 保存
         DB.save(model);
     }
@@ -53,8 +55,22 @@ public class KwEditionServiceImpl extends BaseServiceImpl implements KwEditionSe
         model.setStatus(argv.getStatus());
         model.setDescription(argv.getDescription());
         model.setMechanismId(argv.getMechanismId());
+        checkUnique(model);
         // 保存
         DB.update(model);
+    }
+
+    /**
+     * 校验唯一性
+     * @param model 模型
+     */
+    private void checkUnique(KwEdition model) {
+        // 唯一性校验
+        DBChecker<KwEdition> checker =DBChecker.build(model, KwEdition.class);
+        // 银行名称
+        checker.uni(new String[]{"name", "mechanismId"}, I18n.t("KwEdition.name.unique", "版本不唯一"));
+        // 执行校验
+        checker.checkUnique();
     }
 
 
@@ -64,7 +80,7 @@ public class KwEditionServiceImpl extends BaseServiceImpl implements KwEditionSe
         StringBuilder builder = new StringBuilder();
         builder.append(" select ke.*, km.bank_name as mechanism_Name from kw_edition as ke ");
         builder.append(" left join kw_mechanism as km on ke.mechanism_id = km.id ");
-        builder.append(" where 1=1 ");
+        builder.append(" where ke.deleted=0 ");
         SqlWrapper wrapper = new SqlWrapper(builder.toString());
         // 拼装查询sql
         if (StringUtils.isNotEmpty(argv.getName())) {
@@ -73,6 +89,7 @@ public class KwEditionServiceImpl extends BaseServiceImpl implements KwEditionSe
         if (StringUtils.isNotEmpty(argv.getMechanismId())) {
             wrapper.addCondition("ke.mechanism_id", Op.EQ, argv.getMechanismId());
         }
+        wrapper.sortBy("ke.when_created desc");
         return (PageDataRet<KwEditionRet>) query(wrapper.getSql(), wrapper.getParams(), argv, KwEditionRet.class);
     }
 
@@ -89,6 +106,9 @@ public class KwEditionServiceImpl extends BaseServiceImpl implements KwEditionSe
             SqlWrapper wrapper = new SqlWrapper("select ke.* from kw_edition as ke where 1 = 1");
             wrapper.addCondition("ke.name", Op.EQ, name);
             KwEdition kwEdition = DB.findOne(KwEdition.class, wrapper.getSql(), wrapper.getParams().toArray());
+            if(kwEdition == null){
+                return null;
+            }
             return kwEdition.getId();
         }else{
             return null;

@@ -44,4 +44,7 @@ public class KwEditionAccountArgv {
     /** 状态 **/
     private Integer status;
 
+    /** 客户号 */
+    private String reserve1;
+
 }

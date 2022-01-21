@@ -52,6 +52,13 @@ public class KwBankAccountRet extends BaseManageRet {
     /** 销户时间 */
     @JsonFormat(pattern="yyyy-MM-dd", timezone="GMT+8")
     private Timestamp cancelAccountTime;
+
+    // 账户流水余额 water_balance
+    private String waterBalance;
+    // 版本登录账号 edition_account
+    private String editionAccount;
+
+
     /** 备用字段1 */
     private String reserve1;
     /** 备用字段2 */
@@ -66,6 +73,10 @@ public class KwBankAccountRet extends BaseManageRet {
     private Integer relationType;
     /** 关联id */
     private String relationId;
+    /** 关联id */
+    private String proId;
     /** 是否流水发送到mbs系统 */
     private Integer mbsSend;
+    /** 从视图获取的账户状态 */
+    private String accountStatus;
 }

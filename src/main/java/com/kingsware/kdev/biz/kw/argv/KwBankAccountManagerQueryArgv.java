@@ -13,5 +13,9 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class KwBankAccountManagerQueryArgv extends BasePageArgv {
+    /** 预约编号 */
+    private String bookNumber;
+    /** 项目编号 */
+    private String proNum;
 
 }

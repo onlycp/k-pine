@@ -2,6 +2,7 @@ package com.kingsware.kdev.biz.kw.service.impl;
 
 import com.kingsware.kdev.biz.kw.argv.KwEditionAccountArgv;
 import com.kingsware.kdev.biz.kw.argv.KwEditionAccountQueryArgv;
+import com.kingsware.kdev.biz.kw.model.KwEdition;
 import com.kingsware.kdev.biz.kw.model.KwEditionAccount;
 import com.kingsware.kdev.biz.kw.ret.KwEditionAccountRet;
 import com.kingsware.kdev.biz.kw.service.KwEditionAccountService;
@@ -61,6 +62,7 @@ public class KwEditionAccountServiceImpl extends BaseServiceImpl implements KwEd
         model.setUsbPortOk(argv.getUsbPortOk());
         model.setUsbGroupOk(argv.getUsbGroupOk());
         model.setStatus(argv.getStatus());
+        model.setReserve1(argv.getReserve1());// 备用1,客户号
         // 校验
         checkUnique(model);
         // 保存
@@ -72,6 +74,12 @@ public class KwEditionAccountServiceImpl extends BaseServiceImpl implements KwEd
      * @param model 模型
      */
     private void checkUnique(KwEditionAccount model) {
+        // 唯一性校验
+        DBChecker<KwEditionAccount> checker =DBChecker.build(model, KwEditionAccount.class);
+        // 银行名称
+        checker.uni(new String[]{"bankAccount", "editionId"}, I18n.t("KwEditionAccount.name.unique", "账号不唯一"));
+        // 执行校验
+        checker.checkUnique();
     }
 
     @Override
@@ -108,13 +116,15 @@ public class KwEditionAccountServiceImpl extends BaseServiceImpl implements KwEd
     @Override
     public String findIdByBankAccount(String bankAccount){
         if(bankAccount == null || !StringUtils.isNotEmpty(bankAccount)) {
-            System.out.println(1111);
             return null;
         }else{
             //SqlWrapper wrapper = new SqlWrapper("select kea.id from kw_edition_account as kea where 1 = 1");
             SqlWrapper wrapper = new SqlWrapper("select kea.* from kw_edition_account as kea where 1 = 1");
             wrapper.addCondition("kea.bank_account", Op.EQ, bankAccount);
             KwEditionAccount kwEditionAccount = DB.findOne(KwEditionAccount.class, wrapper.getSql(), wrapper.getParams().toArray());
+            if(kwEditionAccount == null){
+                return null;
+            }
             return kwEditionAccount.getId();
         }
     }

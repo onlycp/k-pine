@@ -1,10 +1,12 @@
 package com.kingsware.kdev.biz.kw.ret;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kingsware.kdev.core.bean.BaseManageRet;
 import com.kingsware.kdev.core.orm.annotation.Column;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
 /**
@@ -17,65 +19,106 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class KwWaterRet extends BaseManageRet {
-    // 行别（机构）
+    /** 行别（机构）*/
     private String mechanismName;
-    // 版本
+    /** 版本*/
     private String editionName;
-    // 版本id
+    /** 版本id*/
     private String editionId;
-    // 账户
+    /** 账户*/
     private String account;
-    // 账户id
+    /** 账户id*/
     private String accountId;
 
-    // 版本账号
+    /** 版本账号*/
     private String editionAccount;
-    // 版本账号id
+    /** 版本账号id*/
     private String editionAccountId;
-
-    // 开户行 bank_deposit
+    /** 开户行 bank_deposit*/
     private String bankDeposit;
-
-    // 所属项目 pro_name
+    /** 所属项目 pro_name*/
     private String proName;
 
-    // 回单id false
+    /** 回单id */
     private String receiptId;
-    // 账户名称
+    /** 有无回单 */
+    private Integer hasReceipt;
+    /** 回单文件  file_id */
+    private String fileId;
+
+    /**账户名称*/
     private String accountName;
-    // 交易日期
-    private Date transactionDate;
-    // 交易时间
-    private Date transactionTime;
-    // 金额 transaction_amount
+
+    /** 交易日期 transactionDate */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Timestamp transactionDate;
+    /** 交易时间 transactionTime */
+    @JsonFormat(pattern = "HH:mm:ss", timezone = "GMT+8")
+    private Timestamp transactionTime;
+    /** 登记时间 register_time */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Timestamp registerTime;
+
+    /** 金额 transaction_amount */
     private String transactionAmount;
-    // 登记时间 register_time
-    private Date registerTime;
-    // 收支方向 revenue
+    /** 收支方向 revenue */
     private Integer revenue;
-    // 收支方式 cash_transfer
+    /** 收支方式 cash_transfer */
     private Integer cashTransfer;
-    // 余额 account_balance
+    /** 余额 account_balance */
     private String accountBalance;
-    // 数据来源 data_source
+    /** 数据来源 data_source */
     private String dataSource;
-    // 流水编号 serial_number
+    /** 流水编号 serial_number */
     private String serialNumber;
-    // 交易类型 transaction_type
+    /** 交易类型 transaction_type */
     private String transactionType;
-    // 交易币种 currency
+    /** 交易币种 currency */
     private Integer currency;
-    // 对方名称 other_name
+    /** 对方名称 other_name */
     private String otherName;
-    // 对方账户 other_account
+    /** 对方账户 other_account */
     private String otherAccount;
-    // 用途 purpose
+    /** 用途 purpose */
     private String purpose;
-    // 摘要 abstract
+    /** 摘要 abstract */
     private String abstractInfo;
-    // 是否异常 abnormal
+    /** 是否异常 abnormal */
     private Integer abnormal;
-    // 数据次序
+    /** 数据次序 */
     private Integer dateIndex;
+
+
+    /** 网银地址  path */
+    private String path;
+    /** 登录类型 */
+    private Integer loginType;
+    /** 登录网银账号 bankAccount**/
+    private String bankAccount;
+    /** 登录网银密码 bankPassword**/
+    private String bankPassword;
+    /** 登录证书号 certNumber**/
+    private String certNumber;
+    /** ukey密码 ukeyPassword**/
+    private String ukeyPassword;
+    /** 云柜ip usbIp**/
+    private String usbIp;
+    /** 云柜端口 usbPort**/
+    private String usbPort;
+    /** 云柜插口 usbGroup**/
+    private String usbGroup;
+    /** 是否需要按ok **/
+    private Integer isOkKey;
+    /** ok_云柜ip **/
+    private String usbIpOk;
+    /** ok_云柜端口 **/
+    private String usbPortOk;
+    /** ok_云柜插口 **/
+    private String usbGroupOk;
+    /** 上条流水的发生日期 lastDate */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone="GMT+8")
+    private Timestamp lastDate;
+    /** 备用字段1 客户号 */
+    private String reserve1;
 
 }
