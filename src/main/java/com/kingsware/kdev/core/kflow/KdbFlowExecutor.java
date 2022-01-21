@@ -91,7 +91,13 @@ public class KdbFlowExecutor {
             return KFlowResultHandlerFactory.getHandler(handleClass).execute(mapObjectList);
         }
         else {
-            return new TipResult(ret.getResponseBody());
+            if (ret.getResponseBody().startsWith("error|")) {
+                return new ErrorResult(ret.getResponseBody().replaceAll("error\\|", ""));
+            }
+            else {
+                return new TipResult(ret.getResponseBody());
+            }
+
         }
 
 

@@ -109,7 +109,7 @@ class KwMechanismTest {
                 // 启动
                 .start(flowName)
                 // 成功支线
-                .toSql("删除", "MySql2", "update kw_mechanism set deleted=1 where deleted=0 and id in (${ids})")
+                .toSql("删除", "MySql2", "update kw_mechanism set deleted=1 where deleted=0 and id in (#{ids})")
                 .toEnd("");
 
         sysKdbFlowService.addOrUpdate(flowName, flowDefinition.toJson());
