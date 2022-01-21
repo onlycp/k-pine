@@ -65,12 +65,12 @@ public class KwRPABankViewServiceImpl extends BaseServiceImpl implements KwRPABa
         sql.append(" 支行银行名称 AS bank_name, ");
         sql.append(" 账户类型 AS account_type, ");
         sql.append(" 账户状态 AS account_status, ");
-        sql.append(" 开户日期 AS create_account_time, ");
-        sql.append(" 销户日期 AS cancel_account_time, ");
+        sql.append(" to_char(开户日期, 'yyyy-MM-dd') AS create_account_time, ");
+        sql.append(" to_char(销户日期, 'yyyy-MM-dd') AS cancel_account_time, ");
         sql.append(" 项目编号 AS pro_num, ");
         sql.append(" 项目名称 AS pro_name, ");
-        sql.append(" 上架日期 AS up_date, ");
-        sql.append(" 下架日期 AS down_date, ");
+        sql.append(" to_char(上架日期, 'yyyy-MM-dd') AS up_date, ");
+        sql.append(" to_char(下架日期, 'yyyy-MM-dd') AS down_date, ");
         sql.append(" 项目阶段 AS pro_phase, ");
         sql.append(" 项目经理编号 AS pro_pm_account, ");
         sql.append(" 项目经理名称 AS pro_pm, ");
