@@ -54,7 +54,7 @@ public class KwWater extends BaseModel {
     // 余额 account_balance
     private String accountBalance;
     // 数据来源 data_source
-    private String dataSource;
+    private Integer dataSource;
     // 流水编号 serial_number
     private String serialNumber;
     // 交易类型 transaction_type
