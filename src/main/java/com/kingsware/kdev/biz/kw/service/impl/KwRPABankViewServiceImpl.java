@@ -182,6 +182,9 @@ public class KwRPABankViewServiceImpl extends BaseServiceImpl implements KwRPABa
         for (KwBankAccountExpandRet ret : list) {
             SysUserArgv user = new SysUserArgv();
             user.setUsername(isPm ? ret.getProPmAccount() : ret.getTrustAccountingAccount());
+            if (user.getUsername() == null || "".equals(user.getUsername())) {
+                continue;
+            }
             user.setRealName(isPm ? ret.getProPm() : ret.getTrustAccounting());
             if (user.getRealName() == null) {
                 user.setRealName("未知");
