@@ -2,6 +2,9 @@ package com.kingsware.kdev.core.kflow.define;
 
 import lombok.Data;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 节点定义
  *
@@ -24,5 +27,7 @@ public class NodeDefinition {
     /** 节点类型 **/
     private String type;
     /** 节点变量 **/
-    private VariableDefinition variables;
+    private ExecuteDefinition execute;
+    /** 变量 **/
+    private Map<String, Object> variables = new HashMap<>();
 }

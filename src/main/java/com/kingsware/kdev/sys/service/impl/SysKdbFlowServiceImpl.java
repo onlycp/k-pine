@@ -3,6 +3,7 @@ package com.kingsware.kdev.sys.service.impl;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.*;
 import com.kingsware.kdev.core.util.PageUtil;
@@ -115,6 +116,31 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         KdbApi api = (KdbApi)(DB.getDefault());
         for (String id: argv.getIds()) {
            api.deleteFlow(id);
+        }
+    }
+
+    @Override
+    public void addOrUpdate(String name, String content) {
+        // 参数
+        KdbFlowQueryArgv argvName = new KdbFlowQueryArgv();
+        argvName.setName(name);
+        // 查询model
+        KdbApi api = DB.kdbApi();
+        List<FlowInfo> list = api.query(argvName);
+        if (list.size() > 1) {
+            throw BusinessException.serviceThrow("存在多个名称相同的流程");
+        }
+        // 如果是空，则是新增
+        SysKdbFlowArgv argv = new SysKdbFlowArgv();
+        argv.setName(name);
+        argv.setContent(content);
+        argv.setDescription("这个人很懒，什么都没有留下");
+        if (list.isEmpty()) {
+            add(argv);
+        }
+        else {
+            argv.setId(list.get(0).getFlowId());
+            edit(argv);
         }
     }
 

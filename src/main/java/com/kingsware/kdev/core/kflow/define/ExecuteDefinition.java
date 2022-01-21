@@ -13,7 +13,7 @@ import java.util.List;
  * @date 2022/1/19 6:13 下午
  */
 @Data
-public class VariableDefinition {
+public class ExecuteDefinition {
 
     /** 脚本定义 **/
     private Script script;
@@ -24,14 +24,14 @@ public class VariableDefinition {
      * @param content
      * @return
      */
-    public static VariableDefinition createJsScript(String sourceName, String content) {
+    public static ExecuteDefinition createSqlScript(String sourceName, String content) {
         Script s = new Script();
         s.sourceName = sourceName;
         s.content = content;
         s.type = "sql";
-        VariableDefinition variableDefinition = new VariableDefinition();
-        variableDefinition.script = s;
-        return variableDefinition;
+        ExecuteDefinition executeDefinition = new ExecuteDefinition();
+        executeDefinition.script = s;
+        return executeDefinition;
     }
 
     /**
@@ -39,13 +39,13 @@ public class VariableDefinition {
      * @param js
      * @return
      */
-    public static VariableDefinition createJsScript(String js) {
+    public static ExecuteDefinition createJsScript(String js) {
         Script s = new Script();
         s.content = js;
         s.type = "js";
-        VariableDefinition variableDefinition = new VariableDefinition();
-        variableDefinition.script = s;
-        return variableDefinition;
+        ExecuteDefinition executeDefinition = new ExecuteDefinition();
+        executeDefinition.script = s;
+        return executeDefinition;
     }
 
 

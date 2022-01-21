@@ -14,8 +14,13 @@ public enum NodeTypeEnum {
     END("end"),
     /** 分支 **/
     DECISION("decision"),
-    /** Node **/
-    NODE("");
+    /** Task **/
+    TASK("task"),
+    /** Fork **/
+    FORK("fork"),
+    /** Join **/
+    JOIN("join"),
+    ;
 
     private String value;
 

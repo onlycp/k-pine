@@ -60,7 +60,7 @@ public class FlowDefinition {
         node.setState(NodeStateEnum.COMPLETED.getValue());
         node.setDebug(false);
         node.setType(NodeTypeEnum.START.getValue());
-        node.setVariables(new VariableDefinition());
+        node.setExecute(new ExecuteDefinition());
         flow.addNode(node);
         // 设置当前节点
         flow.currentNode = node;
@@ -106,7 +106,7 @@ public class FlowDefinition {
             node.setState(NodeStateEnum.COMPLETED.getValue());
             node.setDebug(false);
             node.setType(NodeTypeEnum.END.getValue());
-            node.setVariables(new VariableDefinition());
+            node.setExecute(new ExecuteDefinition());
             addNode(node);
         }
         // 创建连接
@@ -142,8 +142,8 @@ public class FlowDefinition {
             node.setAuto(true);
             node.setState(NodeStateEnum.COMPLETED.getValue());
             node.setDebug(false);
-            node.setType(NodeTypeEnum.NODE.getValue());
-            node.setVariables(VariableDefinition.createJsScript(sourceName, sql));
+            node.setType(NodeTypeEnum.TASK.getValue());
+            node.setExecute(ExecuteDefinition.createSqlScript(sourceName, sql));
             addNode(node);
         }
 
@@ -163,7 +163,7 @@ public class FlowDefinition {
      * @return           节点
      */
     public FlowDefinition toSql(String name, String sourceName, String sql) {
-        return toSql(name, sourceName, sql);
+        return toSql(name, sourceName, sql, "");
     }
 
     /**
@@ -183,8 +183,8 @@ public class FlowDefinition {
             node.setAuto(true);
             node.setState(NodeStateEnum.COMPLETED.getValue());
             node.setDebug(false);
-            node.setType(NodeTypeEnum.NODE.getValue());
-            node.setVariables(VariableDefinition.createJsScript(js));
+            node.setType(NodeTypeEnum.TASK.getValue());
+            node.setExecute(ExecuteDefinition.createJsScript(js));
             addNode(node);
         }
 
@@ -200,7 +200,6 @@ public class FlowDefinition {
      * 创建js节点
      * @param name  名称
      * @param js    js内容
-     * @param expr  线表达式
      * @return
      */
     public FlowDefinition toJs(String name, String js) {
@@ -215,17 +214,15 @@ public class FlowDefinition {
     public FlowDefinition toDecision(String name) {
 
         // 创建节点
-        // 创建节点
         NodeDefinition node = nodeByName(name);
         if (node == null) {
             node = new NodeDefinition();
             node.setId(String.format("node-%d", nodeIdAtomicInteger.incrementAndGet()));
             node.setName(name);
-            node.setType(NodeTypeEnum.NODE.getValue());
-            node.setVariables(new VariableDefinition());
+            node.setType(NodeTypeEnum.DECISION.getValue());
+            node.setExecute(new ExecuteDefinition());
             addNode(node);
         }
-
         // 创建连接
         createLink(currentNode, node, "");
         // 设置当前节点
@@ -233,6 +230,26 @@ public class FlowDefinition {
         // 返回
         return this;
     }
+
+    public FlowDefinition toNode(NodeTypeEnum type, String name) {
+        // 创建节点
+        NodeDefinition node = nodeByName(name);
+        if (node == null) {
+            node = new NodeDefinition();
+            node.setId(String.format("node-%d", nodeIdAtomicInteger.incrementAndGet()));
+            node.setName(name);
+            node.setType(NodeTypeEnum.TASK.getValue());
+            node.setExecute(new ExecuteDefinition());
+            addNode(node);
+        }
+        // 创建连接
+        createLink(currentNode, node, "");
+        // 设置当前节点
+        this.currentNode = node;
+        // 返回
+        return this;
+    }
+
 
     public FlowDefinition resetCurrentNode(String name) {
         NodeDefinition nodeDefinition = nodeByName(name);

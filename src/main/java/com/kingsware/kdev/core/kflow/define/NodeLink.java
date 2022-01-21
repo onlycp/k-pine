@@ -20,7 +20,7 @@ public class NodeLink {
     /** to **/
     private String to;
     /** 变量 **/
-    private VariableDefinition variables;
+    private ExecuteDefinition variables;
     /** 条件 **/
     private ConditionDefinition conditions;
 }

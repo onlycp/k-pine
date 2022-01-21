@@ -2,9 +2,14 @@ package com.kingsware.kdev.kw.flow;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kingsware.kdev.LcdApplication;
 import com.kingsware.kdev.core.kflow.define.FlowDefinition;
+import com.kingsware.kdev.sys.service.SysKdbFlowService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import javax.annotation.Resource;
 
 /**
  *  单元测试
@@ -13,35 +18,41 @@ import org.junit.jupiter.api.Test;
  * @version 1.0.0
  * @date 2022/1/19 7:12 下午
  */
+@SpringBootTest(classes = LcdApplication.class)
 class KwMechanismTest {
+
+    @Resource
+    private SysKdbFlowService sysKdbFlowService;
+    /** 模块名称 **/
+    private String moduleName = "机构管理";
 
     @SneakyThrows
     @Test
     void getMechanism() {
+        String flowName = moduleName + "-详细";
         // 创建实例
         FlowDefinition flowDefinition = FlowDefinition
 
                 // 启动
-                .start("机构管理-详细")
+                .start(flowName)
                 // 成功支线
                 .toSql("查询详细信息", "MySql2", "select * from kw_mechanism where deleted=0 and id=#{id}", "")
                 .toEnd("");
 
-        System.out.println(flowDefinition.toJson());
+        sysKdbFlowService.addOrUpdate(flowName, flowDefinition.toJson());
 
     }
 
     @SneakyThrows
     @Test
     void addMechanism() {
-
+        String flowName = moduleName + "-新增";
         String insertSql = "insert into kw_mechanism (id, bank_name, bank_number, bank_short, bank_type, when_created, when_modified, who_created, who_modified, deleted) values (#{sys.uuid}, #{bankName}, #{bankNumber}, #{bankShort}, #{bankType}, #{sys.when}, #{sys.when}, #{sys.who}, #{sys.who}, 0)";
 
         // 创建实例
         FlowDefinition flowDefinition = FlowDefinition
-
                 // 启动
-                .start("机构管理-新增")
+                .start(flowName)
                 // 成功支线
                 .toSql("通过名称查询数量", "MySql2", "select count(1) as cnt from kw_mechanism where deleted=0 and bank_name=#{bankName}")
                 .toDecision("银行名称唯一性校验")
@@ -52,24 +63,24 @@ class KwMechanismTest {
                 .toSql("保存", "MySql2", insertSql, "compare(${result[0].cnt}=0)")
                 .toEnd("")
                 // 名称不唯一
-                .resetCurrentNode("银行名称唯一性校验").toJs("银行名称唯一提示", "setResult('result','机构名称已存在！');","compare(${result[0].cnt}>0)").toEnd()
+                .resetCurrentNode("银行名称唯一性校验").toJs("银行名称唯一提示", "setResult('result','error|机构名称已存在！');", "compare(${result[0].cnt}>0)").toEnd()
                 // 代码不唯一
-                .resetCurrentNode("银行代码唯一性校验").toJs("银行代码唯一提示", "setResult('result','机构代码已存在！');","compare(${result[0].cnt}>0)").toEnd()
+                .resetCurrentNode("银行代码唯一性校验").toJs("银行代码唯一提示", "setResult('result','error|机构代码已存在！');","compare(${result[0].cnt}>0)").toEnd()
                 // 代码不唯一
-                .resetCurrentNode("银行简称唯一性校验").toJs("银行简称唯一提示", "setResult('result','机构简称已存在！');","compare(${result[0].cnt}>0)").toEnd();
+                .resetCurrentNode("银行简称唯一性校验").toJs("银行简称唯一提示", "setResult('result','error|机构简称已存在！');","compare(${result[0].cnt}>0)").toEnd();
 
-        System.out.println(flowDefinition.toJson());
+        sysKdbFlowService.addOrUpdate(flowName, flowDefinition.toJson());
 
     }
 
     @SneakyThrows
     @Test
     void editMechanism() {
-
+        String flowName = moduleName + "-编辑";
         // 创建实例
         FlowDefinition flowDefinition = FlowDefinition
                 // 启动
-                .start("机构管理-编辑")
+                .start(flowName)
                 // 成功支线
                 .toSql("通过名称查询数量", "MySql2", "select count(1) as cnt from kw_mechanism where deleted=0 and bank_name=#{bankName} and id != #{id}")
                 .toDecision("银行名称唯一性校验")
@@ -80,28 +91,28 @@ class KwMechanismTest {
                 .toSql("保存", "MySql2", "update kw_mechanism set bank_name=#{bankName}, bank_number=#{bankNumber}, bank_short=#{bankShort}, bank_type=#{bankType}, who_modified=#{sys.who}, when_modified=#{sys.when} where id=#{id}", "compare(${result[0].cnt}=0)")
                 .toEnd("")
                 // 名称不唯一
-                .resetCurrentNode("银行名称唯一性校验").toJs("银行名称唯一提示", "setResult('result','{\"code\":200, \"message\":\"机构名称已存在！\"}');","compare(${result[0].cnt}>0)").toEnd()
+                .resetCurrentNode("银行名称唯一性校验").toJs("银行名称唯一提示", "setResult('result','error|机构名称已存在！');", "compare(${result[0].cnt}>0)").toEnd()
                 // 代码不唯一
-                .resetCurrentNode("银行代码唯一性校验").toJs("银行代码唯一提示", "setResult('result','机构代码已存在！');","compare(${result[0].cnt}>0)").toEnd()
+                .resetCurrentNode("银行代码唯一性校验").toJs("银行代码唯一提示", "setResult('result','error|机构代码已存在！');","compare(${result[0].cnt}>0)").toEnd()
                 // 代码不唯一
-                .resetCurrentNode("银行简称唯一性校验").toJs("银行简称唯一提示", "setResult('result','机构简称已存在！');","compare(${result[0].cnt}>0)").toEnd();
+                .resetCurrentNode("银行简称唯一性校验").toJs("银行简称唯一提示", "setResult('result','error|机构简称已存在！');","compare(${result[0].cnt}>0)").toEnd();
 
-        System.out.println(flowDefinition.toJson());
-
+        sysKdbFlowService.addOrUpdate(flowName, flowDefinition.toJson());
     }
 
     @SneakyThrows
     @Test
     void deleteMechanism() {
+        String flowName = moduleName + "-删除";
         // 创建实例
         FlowDefinition flowDefinition = FlowDefinition
                 // 启动
-                .start("机构管理-删除")
+                .start(flowName)
                 // 成功支线
                 .toSql("删除", "MySql2", "update kw_mechanism set deleted=1 where deleted=0 and id in (${ids})")
                 .toEnd("");
 
-        System.out.println(flowDefinition.toJson());
+        sysKdbFlowService.addOrUpdate(flowName, flowDefinition.toJson());
 
     }
 
