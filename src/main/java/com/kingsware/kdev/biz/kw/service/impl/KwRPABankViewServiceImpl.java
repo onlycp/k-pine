@@ -235,7 +235,7 @@ public class KwRPABankViewServiceImpl extends BaseServiceImpl implements KwRPABa
         argv.setBankDeposit(view.getBankName());
         argv.setAccountStatus(view.getAccountStatus());
         logger.info(" 开户日期 --- ", view.getAccount(), view.getCreateAccountTime());
-        logger.info(" 销户日期 --- ", view.getAccount(), view.getCreateAccountTime());
+        logger.info(" 销户日期 --- ", view.getAccount(), view.getCancelAccountTime());
         Date createTime = DateUtils.toDateUnknowFormat(view.getCreateAccountTime());
         Timestamp createAccountTime = createTime != null ? new Timestamp(createTime.getTime()) : null;
         Date cancelTime = DateUtils.toDateUnknowFormat(view.getCancelAccountTime());
