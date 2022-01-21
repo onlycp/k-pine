@@ -1,6 +1,7 @@
 package com.kingsware.kdev.sys.service;
 
 import com.kingsware.kdev.core.base.BaseService;
+import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.sys.argv.SysNoticeRecordQueryArgv;
 import com.kingsware.kdev.sys.ret.SysNoticeRecordRet;
@@ -26,5 +27,11 @@ public interface SysNoticeRecordService extends BaseService {
      * @return 查询结果
      */
     PageDataRet<SysNoticeRecordRet> query(SysNoticeRecordQueryArgv argv);
+
+    /**
+     * 删除
+     * @param argv  查询
+     */
+    void delete(MultiIdArgv argv);
 
 }

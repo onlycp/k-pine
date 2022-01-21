@@ -47,10 +47,12 @@ public interface SysNoticeService extends BaseService {
      * @param argv  查询
      */
     void delete(MultiIdArgv argv);
-    /**
-     * 删除
-     * @param argv  查询
-     */
 
+    /**
+     * 发送通知
+     * @param argv  参数
+     * @param token  token
+     * @param ip  ip
+     */
     void sendNotice(SysNoticeRelationArgv argv, String token, String ip);
 }

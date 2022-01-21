@@ -14,9 +14,13 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class SysNoticeRecordQueryArgv extends BasePageArgv {
     /** 发送人名称 */
+    private String fromWho;
+    /** 发送人名称 */
     private String fromWhoName;
     /** 接收人 */
     private String toWhoName;
+    /** 通知标题 */
+    private String noticeId;
     /** 通知标题 */
     private String title;
     /** 通知内容 */

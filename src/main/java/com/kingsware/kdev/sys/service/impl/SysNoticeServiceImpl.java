@@ -8,7 +8,6 @@ import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.orm.DB;
-import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
@@ -69,7 +68,7 @@ public class SysNoticeServiceImpl extends BaseServiceImpl implements SysNoticeSe
     @SuppressWarnings("unchecked")
     public PageDataRet<SysNoticeRet> query(SysNoticeQueryArgv argv) {
         // 拼装sql
-        SqlWrapper wrapper = new SqlWrapper("select * from sys_notice where 1=1 and deleted = 0");
+        SqlWrapper wrapper = new SqlWrapper("select sn.*,(select count(notice_id) from sys_notice_record where notice_id = sn.id) as sends from sys_notice sn where 1=1 and sn.deleted = 0");
         // 拼装查询sql
         if (StringUtils.isNotEmpty(argv.getTitle())) {
             wrapper.addCondition("title", Op.LIKE, "%" +argv.getTitle() +"%");
@@ -80,7 +79,8 @@ public class SysNoticeServiceImpl extends BaseServiceImpl implements SysNoticeSe
         if (argv.getType()!=null) {
             wrapper.addCondition("type", Op.EQ, argv.getType());
         }
-        return (PageDataRet<SysNoticeRet>) query(wrapper.getSql(), wrapper.getParams(), argv,SysNotice.class, SysNoticeRet.class);
+        wrapper.sortBy(" order by when_created desc ");
+        return (PageDataRet<SysNoticeRet>) query(wrapper.getSql(), wrapper.getParams(), argv,SysNoticeRet.class);
     }
 
     @Override

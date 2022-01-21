@@ -1,6 +1,7 @@
 package com.kingsware.kdev.sys.web;
 
 import com.kingsware.kdev.core.bean.BaseRet;
+import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
 import com.kingsware.kdev.sys.argv.SysNoticeRecordQueryArgv;
@@ -44,6 +45,17 @@ public class SysNoticeRecordController {
     @GetMapping("/{id}")
     public BaseRet<SysNoticeRecordRet> get(@PathVariable String id) {
         return BaseRet.success(sysNoticeRecordService.get(id));
+    }
+
+    /**
+     *  删除
+     * @return 提示
+     */
+    @ApiOperation(value = "删除 " ,notes = "删除")
+    @PostMapping(value = "/delete")
+    public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
+        sysNoticeRecordService.delete(argv);
+        return BaseRet.success();
     }
 
 }

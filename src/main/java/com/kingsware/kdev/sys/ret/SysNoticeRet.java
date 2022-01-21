@@ -23,4 +23,6 @@ public class SysNoticeRet extends BaseManageRet {
     private Integer status;
     /** 逻辑删除，0：未删除，1：已删除 */
     private Integer deleted;
+    /** 发送数量*/
+    private String sends;
 }

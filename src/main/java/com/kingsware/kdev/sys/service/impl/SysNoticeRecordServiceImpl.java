@@ -1,6 +1,7 @@
 package com.kingsware.kdev.sys.service.impl;
 
 import com.kingsware.kdev.core.base.BaseServiceImpl;
+import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
@@ -37,6 +38,9 @@ public class SysNoticeRecordServiceImpl extends BaseServiceImpl implements SysNo
         if (StringUtils.isNotEmpty(argv.getFromWhoName())) {
             wrapper.addCondition("from_who_name", Op.EQ, argv.getFromWhoName());
         }
+        if (StringUtils.isNotEmpty(argv.getFromWho())) {
+            wrapper.addCondition("from_who", Op.EQ, argv.getFromWho());
+        }
         if (StringUtils.isNotEmpty(argv.getToWhoName())) {
             wrapper.addCondition("to_who_name", Op.EQ, argv.getToWhoName());
         }
@@ -46,7 +50,18 @@ public class SysNoticeRecordServiceImpl extends BaseServiceImpl implements SysNo
         if (StringUtils.isNotEmpty(argv.getContent())) {
             wrapper.addCondition("content", Op.LIKE, "%" +argv.getContent() +"%");
         }
+        if (StringUtils.isNotEmpty(argv.getNoticeId())) {
+            wrapper.addCondition("notice_id", Op.EQ, argv.getNoticeId());
+        }
+        wrapper.sortBy(" order by notice_time desc ");
         return (PageDataRet<SysNoticeRecordRet>) query(wrapper.getSql(), wrapper.getParams(), argv,SysNoticeRecord.class, SysNoticeRecordRet.class);
+    }
+
+    @Override
+    public void delete(MultiIdArgv argv) {
+        for (String id: argv.getIds()) {
+            DB.delete(SysNoticeRecord.class, id);
+        }
     }
 
 }
