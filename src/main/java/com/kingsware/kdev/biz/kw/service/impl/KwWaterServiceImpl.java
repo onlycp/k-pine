@@ -456,6 +456,13 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
             waterDto.setSerialNumber(Optional.ofNullable(map.get("流水号")).orElse("").toString()); // 流水号  可为空
             waterDto.setRemark(Optional.ofNullable(map.get("备注")).orElse("").toString());// 备注  可为空
             waterDto.setRegisterTime(new Timestamp(new Date().getTime())); //插入时间
+            //todo 暂时设默认值，后续根据业务调整
+            waterDto.setDeleted(0); //逻辑删除
+            waterDto.setStatus(0); //数据状态
+            waterDto.setDataSource(0); //数据来源
+            waterDto.setAbnormal(0); //是否异常
+            waterDto.setAbnormalStatus(0); //异常状态
+            waterDto.setCashTransfer(0); //收支方式
             res.add(waterDto);
         }
         if (TimeUtil.hasWaterTime(res)){
