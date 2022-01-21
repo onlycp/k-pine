@@ -62,7 +62,7 @@ public class KwEditionAccountServiceImpl extends BaseServiceImpl implements KwEd
         model.setUsbPortOk(argv.getUsbPortOk());
         model.setUsbGroupOk(argv.getUsbGroupOk());
         model.setStatus(argv.getStatus());
-        model.setReserve1(argv.getReserve1());// 备用1，客户号
+        model.setReserve1(argv.getReserve1());// 备用1,客户号
         // 校验
         checkUnique(model);
         // 保存

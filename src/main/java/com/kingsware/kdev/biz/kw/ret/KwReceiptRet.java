@@ -53,9 +53,9 @@ public class KwReceiptRet extends BaseManageRet {
     /**付款人姓名 drawee_name*/
     private String draweeName;
     /**付款人帐号 drawee_account_number */
-    private String draweeaccountnumber;
+    private String draweeAccountNumber;
     /**付款人开户银行 drawee_bank */
-    private String draweebank;
+    private String draweeBank;
     /**收款人姓名 payee_name*/
     private String payeeName;
     /**收款人帐号 payee_account_number*/
