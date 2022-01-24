@@ -71,6 +71,7 @@ public class KwRPABankViewServiceImpl extends BaseServiceImpl implements KwRPABa
         sql.append(" 项目名称 AS pro_name, ");
         sql.append(" to_char(上架日期, 'yyyy-MM-dd') AS up_date, ");
         sql.append(" to_char(下架日期, 'yyyy-MM-dd') AS down_date, ");
+        sql.append(" 项目状态 AS reserve1, ");
         sql.append(" 项目阶段 AS pro_phase, ");
         sql.append(" 项目经理编号 AS pro_pm_account, ");
         sql.append(" 项目经理名称 AS pro_pm, ");
@@ -142,15 +143,18 @@ public class KwRPABankViewServiceImpl extends BaseServiceImpl implements KwRPABa
     public void updateBankAccount(List<KwRPABankViewRet> list) {
         for (KwRPABankViewRet ret : list) {
             PageDataRet<KwBankAccountRet> retList = kwBankAccountService.queryBankAccountWithExpand(initBankAccountQueryArgv(ret.getAccount(), ret.getProNum()));
+
             if (retList != null && retList.getList() != null && retList.getList().size() > 0) {
                 KwBankAccountArgv argv = converBankAccountArgv(ret);
                 argv.setId(retList.getList().get(0).getId());
+                argv.setCxpl("2".equals(ret.getReserve1())?"高频":"低频");
                 kwBankAccountService.edit(argv);
             } else {
                 PageDataRet<KwBankAccountExpandRet> proRetList = kwBankAccountExpandService.query(initBankAccountExpandQueryArgv(ret.getAccount(), ret.getProNum()));
                 if (proRetList != null && proRetList.getList() != null && proRetList.getList().size() > 0) {
                     KwBankAccountArgv argv = converBankAccountArgv(ret);
                     argv.setRelationId(proRetList.getList().get(0).getId());
+                    argv.setCxpl("2".equals(ret.getReserve1())?"高频":"低频");
                     kwBankAccountService.add(argv);
                 }
             }

@@ -24,7 +24,7 @@ public class WaterCheckBalanceTask implements KTask {
     @Override
     public void execute() {
         if (kwAbnormalService==null)
-            this.kwAbnormalService = SpringContext.getBean(KwAbnormalService.class);// kwAbnormalService = new KwAbnormalServiceImpl();
+            this.kwAbnormalService = SpringContext.getBean(KwAbnormalService.class);
         kwAbnormalService.checkBalance();
     }
 
