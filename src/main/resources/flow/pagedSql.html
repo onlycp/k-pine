@@ -1,0 +1,11 @@
+select * from kw_mechanism where deleted=0
+<script>
+    if(context.bankName != nil && context.bankName != '') {
+        context.bankName = "%" + context.bankName + "%";
+        return " and bank_name like #{bankName}";
+    }
+    else {
+        return '';
+    }
+</script>
+

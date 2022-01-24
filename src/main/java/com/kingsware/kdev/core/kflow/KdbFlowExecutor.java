@@ -49,6 +49,7 @@ public class KdbFlowExecutor {
      * @return             执行结果
      */
     public Object execute(String flowId, Map<String, Object> params, KFlowContext context) {
+
         // 流程参数
         KdbArgv argv = new KdbArgv();
         // 设置流程id
@@ -89,6 +90,9 @@ public class KdbFlowExecutor {
             }
             // 调用结果处理器
             return KFlowResultHandlerFactory.getHandler(handleClass).execute(mapObjectList);
+        }
+        else if (ret.getResponseBody().startsWith("{") && ret.getResponseBody().endsWith("}")) {
+            return JsonUtil.toMap(ret.getResponseBody());
         }
         else {
             if (ret.getResponseBody().startsWith("error|")) {

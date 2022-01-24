@@ -86,7 +86,7 @@ public class FileUtils {
             reader = new BufferedReader(new FileReader(file));
             String tempStr;
             while ((tempStr = reader.readLine()) != null) {
-                sbf.append(tempStr);
+                sbf.append(tempStr).append(" ");
             }
             reader.close();
             return sbf.toString();

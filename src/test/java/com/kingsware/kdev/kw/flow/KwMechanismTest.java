@@ -119,15 +119,14 @@ class KwMechanismTest {
     @Test
     void query() {
         String flowName = moduleName + "-查询";
-        StringBuffer sql = new StringBuffer();
-        sql.append("select * from kw_mechanism where deleted=0 ");
+        String sql = FileUtils.readFileText(ResourceUtils.getFile("classpath:flow/pagedSql.html"));
         // 创建实例
         // 分页结果处理js， 从文件中读取
-        String pagedJs = FileUtils.readFileText(ResourceUtils.getFile("classpath:flow/pageList1.js"));
+        String pagedJs = FileUtils.readFileText(ResourceUtils.getFile("classpath:flow/pageList.js"));
         FlowDefinition flowDefinition = FlowDefinition
                 .start(flowName)
                 .toNode(NodeTypeEnum.FORK, "并行开始")
-                .toSqlWithAfter("查询列表数据", "MySql2", sql.toString(), "setResult('list',context.get('result'));" )
+                .toSqlWithAfter("查询列表数据", "MySql2", sql, "setResult('list',context.get('result'));" )
                 .toNode(NodeTypeEnum.JOIN, "并行结束")
                 .toNodeWithAfter(NodeTypeEnum.TASK, "处理结果", pagedJs)
                 .toEnd()
@@ -135,7 +134,7 @@ class KwMechanismTest {
 //                .toDecision("是否分页查询")
 //                .toNode(NodeTypeEnum.JOIN, "并行结束")
 //                .resetCurrentNode("是否分页查询")
-                .toSqlWithAfter("查询总数", "MySql2", "select count(1) as total from (" + sql.toString() + ") tmp",  "var cntList = eval(context.get('result')); setResult('total',cntList[0]['total']);")
+                .toSqlWithAfter("查询总数", "MySql2", "select count(1) as total from (" + sql + ") tmp",  "var cntList = eval(context.get('result')); setResult('total',cntList[0]['total']);")
                 .toNode(NodeTypeEnum.JOIN, "并行结束");
         sysKdbFlowService.addOrUpdate(flowName, flowDefinition.toJson());
     }
