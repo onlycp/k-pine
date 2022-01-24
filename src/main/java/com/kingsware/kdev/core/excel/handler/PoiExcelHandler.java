@@ -77,7 +77,8 @@ public class PoiExcelHandler implements KExcelHandler{
             // 返回内容
             List<List<String>> allContents = new ArrayList<>();
             // 读取数据
-            for (int rowIndex = 0; rowIndex < sheet.getLastRowNum(); rowIndex ++) {
+            int rowCount = sheet.getLastRowNum() + 1;
+            for (int rowIndex = 0; rowIndex < rowCount; rowIndex ++) {
                 List<String> contents = new ArrayList<>();
                 Row row = sheet.getRow(rowIndex);
                 for (int columnIndex = 0; columnIndex < row.getLastCellNum(); columnIndex++ ) {
