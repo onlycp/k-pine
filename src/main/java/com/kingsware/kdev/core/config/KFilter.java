@@ -67,6 +67,12 @@ public class KFilter implements Filter {
             context.getSystemContext().put("uuid", StringUtils.getUUID());
             // 处理请求变量
             Map<String, Object> argvMap = getRequestParams(api, path, request);
+            if (argvMap.containsKey("page") && argvMap.containsKey("pageSize")) {
+                int page = Integer.parseInt(argvMap.getOrDefault("page", "1").toString());
+                int pageSize = Integer.parseInt(argvMap.getOrDefault("pageSize", "10").toString());
+                argvMap.put("start", (page-1)*pageSize + "") ;
+                argvMap.put("limit", pageSize + "");
+            }
             // 处理类
             context.setHandleClass(api.getApiResultHandler());
             // 调用流程

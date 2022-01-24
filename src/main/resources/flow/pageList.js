@@ -10,6 +10,10 @@ if (pageQuery == undefined && pageQuery == false) {
     page = 1;
     pageSize = total;
 }
+else {
+    page = parseInt(page);
+    pageSize = parseInt(pageSize);
+}
 var arrayList = eval(list);
 var retList = [];
 for (var i = 0; i < arrayList.length; i++) {
