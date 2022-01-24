@@ -14,6 +14,7 @@ import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.yaml.snakeyaml.util.UriEncoder;
 
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Field;
@@ -75,7 +76,7 @@ public class ExcelWorker {
             response.reset();
             response.setContentType("application/octet-stream");
             response.setCharacterEncoding("utf-8");
-            response.setHeader("Content-Disposition", "attachment;filename=" + new String(excel.getFileNme().getBytes(), "ISO8859-1"));
+            response.setHeader("Content-Disposition", "attachment;filename=" + UriEncoder.encode(excel.getFileNme()));
             this.excelHandler.write(excel, response.getOutputStream());
         }
         catch (Exception e) {
