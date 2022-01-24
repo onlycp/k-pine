@@ -51,7 +51,7 @@ public class KwAccountHistoryBalanceServiceImpl extends BaseServiceImpl implemen
                 "  SELECT " +
                 "  w.account, concat(w.transaction_date,\'|\',from_unixtime(w.date_index),\'|\',w.account_balance) as  balance_info " +
                 "  from kw_water w " +
-                "  WHERE 1=1 ";
+                "  WHERE w.deleted = 0 ";
 
         SqlWrapper wrapper = new SqlWrapper(sql);
         if (StringUtils.isNotEmpty(argv.getEndDate())) {
