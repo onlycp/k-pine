@@ -22,6 +22,7 @@ import org.apache.tomcat.util.http.fileupload.FileUpload;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.yaml.snakeyaml.util.UriEncoder;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -119,7 +120,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                 String filePath = basePath +  relativePath;
                 File path = new File(filePath);
                 boolean status = path.mkdirs();
-                File saveFile = new File(path.getAbsolutePath() + realName);
+                File saveFile = new File(path.getAbsolutePath() + File.separator + realName);
                 // 文件表只存储相对路径
                 sysFile.setFilePath(relativePath + realName);
                 file.transferTo(saveFile);
@@ -144,7 +145,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         response.setContentType("application/octet-stream");
         response.setCharacterEncoding("utf-8");
         response.setContentLength((int) file.getFileSize());
-        response.setHeader("Content-Disposition", "attachment;filename=" + new String(file.getFileName().getBytes(), "ISO8859-1"));
+        response.setHeader("Content-Disposition", "attachment;filename=" + UriEncoder.encode(file.getFileName()));
         if (file.getSaveType() == 0) {
             response.getOutputStream().write(Base64.getDecoder().decode(file.getFileContent()));
             response.getOutputStream().flush();
