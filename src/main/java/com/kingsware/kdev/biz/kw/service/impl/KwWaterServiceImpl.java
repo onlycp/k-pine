@@ -152,21 +152,7 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
         defineList.add(RegionDefine.textDefine("proName", "项目名称"));
         defineList.add(RegionDefine.textDefine("bankDeposit", "开户行"));
         // 借
-        defineList.add(
-                RegionDefine.builder().propName("transactionAmount").labelName("借").format((value, model) -> {
-                    // 收支方向
-                    Integer revenue = (Integer) BeanUtils.getFieldValue("revenue", model);
-                    if (revenue != null) {
-                        if (revenue == 0) {
-                            return value;
-                        } else if (revenue == 1) {
-                            return "--";
-                        }
-                    }
-                    return "异常";
-                }).build());
-        // 贷
-        defineList.add(RegionDefine.builder().propName("transactionAmount").labelName("贷").format((value, model) -> {
+        defineList.add(RegionDefine.builder().propName("transactionAmount").labelName("借").format((value, model) -> {
             // 收支方向
             Integer revenue = (Integer) BeanUtils.getFieldValue("revenue", model);
             if (revenue != null) {
@@ -178,6 +164,20 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
             }
             return "异常";
         }).build());
+        // 贷
+        defineList.add(
+                RegionDefine.builder().propName("transactionAmount").labelName("贷").format((value, model) -> {
+                    // 收支方向
+                    Integer revenue = (Integer) BeanUtils.getFieldValue("revenue", model);
+                    if (revenue != null) {
+                        if (revenue == 0) {
+                            return value;
+                        } else if (revenue == 1) {
+                            return "--";
+                        }
+                    }
+                    return "异常";
+                }).build());
         // 余额
         defineList.add(RegionDefine.textDefine("accountBalance", "余额"));
         // 来源
