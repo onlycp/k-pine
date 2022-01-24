@@ -94,9 +94,15 @@ public class PoiExcelHandler implements KExcelHandler{
                     else {
                         Cell cell = row.getCell(columnIndex);
                         cell.setCellType(CellType.STRING);
-                        if (StringUtils.isNotEmpty(cell.getStringCellValue().trim())) {
-                            contents.add(cell.getStringCellValue().trim());
+                        if (rowIndex == 0) {
+                            if (StringUtils.isNotEmpty(cell.getStringCellValue().trim())) {
+                                contents.add(cell.getStringCellValue().trim());
+                            }
                         }
+                        else  {
+                            contents.add(cell.getStringCellValue()== null ? "": cell.getStringCellValue().trim());
+                        }
+
                     }
                 }
                 if (rowIndex == 0) {
