@@ -13,8 +13,8 @@ import javax.annotation.Resource;
 /**
  * @author andyzheng
  * @version 1.0.0
- * @description: TODO
- * @date 2022/1/19 16:49
+ * @description:
+ * @date 2022/1/19TODO 16:49
  */
 public class UpdateBankByViewTask implements KTask {
     /** 日志打印 **/

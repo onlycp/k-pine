@@ -42,7 +42,7 @@ public class KwBankAccountExpand extends BaseManageModel {
     private Timestamp downDate;
     /** 项目录入日期 */
     private Timestamp inDate;
-    /** 备用字段1 */
+    /** 备用字段1 项目状态 */
     private String reserve1;
     /** 备用字段2 */
     private String reserve2;
