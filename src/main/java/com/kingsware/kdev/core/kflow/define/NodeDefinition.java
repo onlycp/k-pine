@@ -30,4 +30,6 @@ public class NodeDefinition {
     private ExecuteDefinition execute;
     /** 变量 **/
     private Map<String, Object> variables = new HashMap<>();
+    /** 监听器 **/
+    private FlowNodeLister listener;
 }

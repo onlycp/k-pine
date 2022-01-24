@@ -4,10 +4,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kingsware.kdev.LcdApplication;
 import com.kingsware.kdev.core.kflow.define.FlowDefinition;
+import com.kingsware.kdev.core.kflow.define.NodeTypeEnum;
+import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.sys.service.SysKdbFlowService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.util.ResourceUtils;
 
 import javax.annotation.Resource;
 
@@ -26,7 +29,6 @@ class KwMechanismTest {
     /** 模块名称 **/
     private String moduleName = "机构管理";
 
-    @SneakyThrows
     @Test
     void getMechanism() {
         String flowName = moduleName + "-详细";
@@ -43,7 +45,6 @@ class KwMechanismTest {
 
     }
 
-    @SneakyThrows
     @Test
     void addMechanism() {
         String flowName = moduleName + "-新增";
@@ -73,7 +74,6 @@ class KwMechanismTest {
 
     }
 
-    @SneakyThrows
     @Test
     void editMechanism() {
         String flowName = moduleName + "-编辑";
@@ -100,7 +100,6 @@ class KwMechanismTest {
         sysKdbFlowService.addOrUpdate(flowName, flowDefinition.toJson());
     }
 
-    @SneakyThrows
     @Test
     void deleteMechanism() {
         String flowName = moduleName + "-删除";
@@ -114,6 +113,31 @@ class KwMechanismTest {
 
         sysKdbFlowService.addOrUpdate(flowName, flowDefinition.toJson());
 
+    }
+
+    @SneakyThrows
+    @Test
+    void query() {
+        String flowName = moduleName + "-查询";
+        StringBuffer sql = new StringBuffer();
+        sql.append("select * from kw_mechanism where deleted=0 ");
+        // 创建实例
+        // 分页结果处理js， 从文件中读取
+        String pagedJs = FileUtils.readFileText(ResourceUtils.getFile("classpath:flow/pageList1.js"));
+        FlowDefinition flowDefinition = FlowDefinition
+                .start(flowName)
+                .toNode(NodeTypeEnum.FORK, "并行开始")
+                .toSqlWithAfter("查询列表数据", "MySql2", sql.toString(), "setResult('list',context.get('result'));" )
+                .toNode(NodeTypeEnum.JOIN, "并行结束")
+                .toNodeWithAfter(NodeTypeEnum.TASK, "处理结果", pagedJs)
+                .toEnd()
+                .resetCurrentNode("并行开始")
+//                .toDecision("是否分页查询")
+//                .toNode(NodeTypeEnum.JOIN, "并行结束")
+//                .resetCurrentNode("是否分页查询")
+                .toSqlWithAfter("查询总数", "MySql2", "select count(1) as total from (" + sql.toString() + ") tmp",  "var cntList = eval(context.get('result')); setResult('total',cntList[0]['total']);")
+                .toNode(NodeTypeEnum.JOIN, "并行结束");
+        sysKdbFlowService.addOrUpdate(flowName, flowDefinition.toJson());
     }
 
 

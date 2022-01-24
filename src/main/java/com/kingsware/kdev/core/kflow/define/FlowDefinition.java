@@ -167,6 +167,46 @@ public class FlowDefinition {
     }
 
     /**
+     * 创建SQL节点
+     * @param sourceName 数据源名称
+     * @param sql        SQL
+     * @return           节点
+     */
+    public FlowDefinition toSqlWithAfter(String name, String sourceName, String sql, String expr, String afterJavaScript) {
+        // 创建节点
+        NodeDefinition node = nodeByName(name);
+        if (node == null) {
+            node = new NodeDefinition();
+            node.setId(String.format("node-%d", nodeIdAtomicInteger.incrementAndGet()));
+            node.setName(name);
+            node.setAuto(true);
+            node.setState(NodeStateEnum.COMPLETED.getValue());
+            node.setDebug(false);
+            node.setType(NodeTypeEnum.TASK.getValue());
+            node.setExecute(ExecuteDefinition.createSqlScript(sourceName, sql));
+            node.setListener(FlowNodeLister.createWithAfter(afterJavaScript));
+            addNode(node);
+        }
+
+        // 创建连接
+        createLink(currentNode, node, expr);
+        // 设置当前节点
+        this.currentNode = node;
+        // 返回
+        return this;
+    }
+
+    /**
+     * 创建SQL节点
+     * @param sourceName 数据源名称
+     * @param sql        SQL
+     * @return           节点
+     */
+    public FlowDefinition toSqlWithAfter(String name, String sourceName, String sql, String afterJavaScript) {
+        return toSqlWithAfter(name, sourceName, sql, "", afterJavaScript);
+    }
+
+    /**
      * 创建js节点
      * @param name  名称
      * @param js    js内容
@@ -231,6 +271,25 @@ public class FlowDefinition {
         return this;
     }
 
+    public FlowDefinition toNodeWithAfter(NodeTypeEnum type, String name, String afterJavascript) {
+        // 创建节点
+        NodeDefinition node = nodeByName(name);
+        if (node == null) {
+            node = new NodeDefinition();
+            node.setId(String.format("node-%d", nodeIdAtomicInteger.incrementAndGet()));
+            node.setName(name);
+            node.setType(type.getValue());
+            node.setExecute(new ExecuteDefinition());
+            node.setExecute(ExecuteDefinition.createJsScript(afterJavascript));
+            addNode(node);
+        }
+        // 创建连接
+        createLink(currentNode, node, "");
+        // 设置当前节点
+        this.currentNode = node;
+        // 返回
+        return this;
+    }
     public FlowDefinition toNode(NodeTypeEnum type, String name) {
         // 创建节点
         NodeDefinition node = nodeByName(name);
@@ -238,7 +297,7 @@ public class FlowDefinition {
             node = new NodeDefinition();
             node.setId(String.format("node-%d", nodeIdAtomicInteger.incrementAndGet()));
             node.setName(name);
-            node.setType(NodeTypeEnum.TASK.getValue());
+            node.setType(type.getValue());
             node.setExecute(new ExecuteDefinition());
             addNode(node);
         }

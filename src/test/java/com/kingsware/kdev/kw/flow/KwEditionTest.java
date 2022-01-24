@@ -134,14 +134,7 @@ class KwEditionTest {
 
     }
 
-//    @Test
-//    void query() {
-//        // 创建实例
-//        FlowDefinition flowDefinition = FlowDefinition
-//                .start("分页查询")
-//                .toNode(NodeTypeEnum.FORK, "并行计算")
-//                .toSql("查询总")
-//    }
+
 
 
 }

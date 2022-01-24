@@ -2,10 +2,7 @@ package com.kingsware.kdev.core.util;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.security.MessageDigest;
 
 /**
@@ -74,5 +71,36 @@ public class FileUtils {
             r.append(hexCode[(b & 0xF)]);
         }
         return r.toString();
+    }
+
+
+    /**
+     * 读取文本内容
+     * @param file  文件路径
+     * @return      返回文本内容
+     */
+    public static String readFileText(File file) {
+        BufferedReader reader = null;
+        StringBuffer sbf = new StringBuffer();
+        try {
+            reader = new BufferedReader(new FileReader(file));
+            String tempStr;
+            while ((tempStr = reader.readLine()) != null) {
+                sbf.append(tempStr);
+            }
+            reader.close();
+            return sbf.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }
+        return sbf.toString();
     }
 }
