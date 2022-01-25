@@ -39,10 +39,6 @@ public interface KwReceiptService extends BaseService {
      PageDataRet<KwReceiptRet> query(KwReceiptQueryArgv argv);
 
 
-    /**
-     * 导出导入模板
-     */
-    void exportImportTemplate();
 
     /**
      * 导出

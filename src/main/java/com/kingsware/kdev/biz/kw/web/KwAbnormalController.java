@@ -1,7 +1,9 @@
 package com.kingsware.kdev.biz.kw.web;
 
 import com.kingsware.kdev.biz.kw.argv.KwAbnormalQueryArgv;
+import com.kingsware.kdev.biz.kw.argv.KwReceiptQueryArgv;
 import com.kingsware.kdev.biz.kw.argv.KwWaterQueryArgv;
+import com.kingsware.kdev.biz.kw.ret.KwReceiptRet;
 import com.kingsware.kdev.biz.kw.ret.KwWaterRet;
 import com.kingsware.kdev.biz.kw.service.KwAbnormalService;
 import com.kingsware.kdev.core.base.BaseController;
@@ -88,6 +90,25 @@ public class KwAbnormalController extends BaseController {
         return BaseRet.success(abnormalService.queryBalanceAbnormal(argv));
     }
 
+    /**
+     * 流水异常页面 无回单
+     * @param argv
+     * @return
+     */
+    @ApiOperation(value = "查询流水异常 " ,notes = "查询流水异常")
+    @GetMapping("/queryNoReceipt")
+    public BaseRet<PageDataRet<KwWaterRet>> queryNoReceipt(KwWaterQueryArgv argv) {
+        return BaseRet.success(abnormalService.queryNoReceipt(argv));
+    }
 
+    /**
+     * 回单异常页面 无流水
+     * @return 分页
+     */
+    @ApiOperation(value = "查询回单异常" ,notes = "查询回单异常")
+    @GetMapping("/queryNoWater")
+    public BaseRet<PageDataRet<KwReceiptRet>> queryNoWater(KwReceiptQueryArgv argv) {
+        return BaseRet.success(abnormalService.queryNoWater(argv));
+    }
 
 }

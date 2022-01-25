@@ -19,6 +19,8 @@ import java.sql.Timestamp;
 public class KwBankAccountRet extends BaseManageRet {
     /** 版本id */
     private String mechanismId;
+    /** 机构名称 */
+    private String mechanismName;
     /** 版本id */
     private String editionId;
     /** 版本名称 */
@@ -31,10 +33,8 @@ public class KwBankAccountRet extends BaseManageRet {
     private Integer accountType;
     /** 账户查询频率 */
     private String cxpl;
-    /** 开户行ID */
+    /** 开户行 */
     private String bankDeposit;
-    /** 开户行名 */
-    private String mechanismName;
     /** 公司名 */
     private String companyName;
     /** 账户余额 */
@@ -53,9 +53,9 @@ public class KwBankAccountRet extends BaseManageRet {
     @JsonFormat(pattern="yyyy-MM-dd", timezone="GMT+8")
     private Timestamp cancelAccountTime;
 
-    // 账户流水余额 water_balance
+    /** 账户流水余额 water_balance*/
     private String waterBalance;
-    // 版本登录账号 edition_account
+    /** 版本登录账号 edition_account*/
     private String editionAccount;
 
 

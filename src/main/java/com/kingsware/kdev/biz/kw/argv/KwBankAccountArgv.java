@@ -67,10 +67,8 @@ public class KwBankAccountArgv {
 
     /** 银行账号 */
     private String bankAccount;
-
     /** 银行版本 */
     private String editionName;
-
     /** 银行账户列表 */
     private List<String> accountList;
 

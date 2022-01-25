@@ -12,11 +12,12 @@ import com.kingsware.kdev.core.excel.KExcel;
 import com.kingsware.kdev.core.excel.RegionDefine;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
+import com.kingsware.kdev.core.util.BeanUtils;
+import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  *
@@ -50,10 +51,10 @@ public class KwAccountHistoryBalanceServiceImpl extends BaseServiceImpl implemen
                 "  SELECT " +
                 "  w.account, concat(w.transaction_date,\'|\',from_unixtime(w.date_index),\'|\',w.account_balance) as  balance_info " +
                 "  from kw_water w " +
-                "  WHERE 1=1 ";
+                "  WHERE w.deleted = 0 ";
 
         SqlWrapper wrapper = new SqlWrapper(sql);
-        if (argv.getEndDate() != null && StringUtils.isNotEmpty(argv.getEndDate())) {
+        if (StringUtils.isNotEmpty(argv.getEndDate())) {
             wrapper.addCondition("w.transaction_date", Op.LT_EQ, argv.getEndDate());
         }
 
@@ -70,8 +71,12 @@ public class KwAccountHistoryBalanceServiceImpl extends BaseServiceImpl implemen
                         "and kea.deleted = 0 " +
                         "and km.deleted = 0 ");
 
-        if (argv.getAccount() != null && StringUtils.isNotEmpty(argv.getAccount())) {
+        if (StringUtils.isNotEmpty(argv.getAccount())) {
             wrapper.addCondition("kba.account", Op.LIKE, "%" + argv.getAccount() + "%");
+        }
+        //
+        if (argv.getIds() != null) {
+            wrapper.in("kba.id", Arrays.asList(argv.getIds().split(",")));
         }
 
         wrapper.withAuthority("kw_bank_account", "kba");
@@ -86,14 +91,29 @@ public class KwAccountHistoryBalanceServiceImpl extends BaseServiceImpl implemen
 
         // 直接调用查询方法
         argv.setPageQuery(false);
+        if(StringUtils.isEmpty(argv.getEndDate())){
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.HOUR_OF_DAY,-24);
+            argv.setEndDate(DateUtils.formatDate(calendar.getTime(),DateUtils.DATE));
+        }
+
         PageDataRet<KwBankAccountRet> pageDataRet = this.query(argv);
+        
         // 定义标题
         List<RegionDefine> defineList = new ArrayList<>();
-        defineList.add(RegionDefine.dateDefine("account", "银行账户"));
-        defineList.add(RegionDefine.dateDefine("waterBalance", "账户余额"));
+        defineList.add(
+                RegionDefine.builder().propName("account").labelName("日期").format((value, model) -> {
+                    return argv.getEndDate();
+                }).build());
+        defineList.add(RegionDefine.textDefine("mechanismName", "机构名称"));
+        defineList.add(RegionDefine.textDefine("editionName", "版本名称"));
+        defineList.add(RegionDefine.textDefine("editionAccount", "版本账号"));
+        defineList.add(RegionDefine.textDefine("account", "账户"));
+        defineList.add(RegionDefine.textDefine("waterBalance", "账户余额"));
+        defineList.add(RegionDefine.dateDefine("accountType", "账户性质","kw_bank_account_account_type"));
 
         // 导出
-        KExcel kExcel = KExcel.fromDataList("流水查询.xls", "Sheet1", defineList, pageDataRet.getList());
+        KExcel kExcel = KExcel.fromDataList("账户历史余额查询.xls", "Sheet1", defineList, pageDataRet.getList());
         ExcelWorker.getInstance().writeToWeb(kExcel);
 
     }

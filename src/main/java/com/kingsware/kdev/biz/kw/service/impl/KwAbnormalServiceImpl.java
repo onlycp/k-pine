@@ -1,12 +1,14 @@
 package com.kingsware.kdev.biz.kw.service.impl;
 
 import com.kingsware.kdev.biz.kw.argv.KwAbnormalQueryArgv;
+import com.kingsware.kdev.biz.kw.argv.KwReceiptQueryArgv;
 import com.kingsware.kdev.biz.kw.argv.KwWaterQueryArgv;
 import com.kingsware.kdev.biz.kw.model.KwEdition;
 import com.kingsware.kdev.biz.kw.model.KwMechanism;
 import com.kingsware.kdev.biz.kw.model.KwWater;
 import com.kingsware.kdev.biz.kw.ret.KwAbnormalRet;
 import com.kingsware.kdev.biz.kw.ret.KwNumRet;
+import com.kingsware.kdev.biz.kw.ret.KwReceiptRet;
 import com.kingsware.kdev.biz.kw.ret.KwWaterRet;
 import com.kingsware.kdev.biz.kw.service.KwAbnormalService;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
@@ -356,7 +358,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         SqlWrapper wrapper = new SqlWrapper(" SELECT  kba.bank_deposit ,km.bank_name as mechanism_name,ke.name as edition_name,ke.path, " +
                 " kw.*, " +
                 " kea.bank_account as edition_account, kea.bank_account, kea.cert_number, kea.bank_password, kea.ukey_password ,kea.usb_port, kea.usb_ip, kea.usb_group, " +
-                " kea.is_ok_key , kea.usb_ip_ok ,kea.usb_port_ok, kea.usb_group_ok  " +
+                " kea.is_ok_key , kea.usb_ip_ok ,kea.usb_port_ok, kea.usb_group_ok, kea.reserve1  " +
                 " FROM kw_water kw " +
                 " LEFT JOIN kw_receipt kr on kw.receipt_id = kr.id and kr.deleted = 0 " +
                 " LEFT JOIN kw_bank_account kba on kw.account = kba.account and kba.deleted = 0  " +
@@ -416,17 +418,17 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         List<KwWaterRet> nearlyWater2;
         List<KwWaterRet> nearlyWater3;
         List<KwWaterRet> nearlyWater4 = null;
-        nearlyWater2 = this.findNearlyWater(2,false, account, transactionDate, dateIndex);
+        nearlyWater2 = this.findNearlyWater(2, false, account, transactionDate, dateIndex);
         // 非同一天 1
         if (nearlyWater2.size() < 5) {
-            nearlyWater1 = this.findNearlyWater(1,false, account, transactionDate, dateIndex);
+            nearlyWater1 = this.findNearlyWater(1, false, account, transactionDate, dateIndex);
         }
         // 3、查找后n条流水
         // 同一天  3
-        nearlyWater3 = this.findNearlyWater(3, false,account, transactionDate, dateIndex);
+        nearlyWater3 = this.findNearlyWater(3, false, account, transactionDate, dateIndex);
         // 非同一天 4
         if (nearlyWater3.size() < 5) {
-            nearlyWater4 = this.findNearlyWater(4, false,account, transactionDate, dateIndex);
+            nearlyWater4 = this.findNearlyWater(4, false, account, transactionDate, dateIndex);
         }
 
         // 拼接返回列表
@@ -464,6 +466,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
 
     /**
      * 查找相邻的流水
+     *
      * @param type            1： 早于今天 2：同一天 ，本条之前 3：同一天，本条之后 4：本日之后
      * @param flag            是否正常  false 全部  true 正常
      * @param account
@@ -518,15 +521,16 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         // 定义标题
         List<RegionDefine> defineList = new ArrayList<>();
         // 银行名称 mechanismName  银行版本editionName 网银地址 path
-        // 登录账号 bankAccount  客户号 certNumber  网银密码 bankPassword  Ukey密码 ukeyPassword  云柜ip usbIp  云柜端口 usbPort  ukey插口 usbGroup
+        // 登录账号 bankAccount  客户号 reserve1 登录证书号 certNumber  网银密码 bankPassword  Ukey密码 ukeyPassword  云柜ip usbIp  云柜端口 usbPort  ukey插口 usbGroup
         // 是否需要按ok键  isOkKey ok_云柜ip usbIpOk ok_云柜端口 usbPortOk ok_云柜插口 usbGroupOk
         // 账户 account  上条流水日期 lastDate  当前流水日期 curDate
         defineList.add(RegionDefine.textDefine("mechanismName", "机构名称"));
         defineList.add(RegionDefine.textDefine("editionName", "版本名称"));
+        defineList.add(RegionDefine.textDefine("reserve1", "客户号"));
         defineList.add(RegionDefine.textDefine("path", "网银地址"));
         defineList.add(RegionDefine.textDefine("bankAccount", "登录账号"));
         defineList.add(RegionDefine.textDefine("bankPassword", "网银密码"));
-        defineList.add(RegionDefine.textDefine("certNumber", "客户号"));
+        defineList.add(RegionDefine.textDefine("certNumber", "登录证书号"));
         defineList.add(RegionDefine.textDefine("ukeyPassword", "Ukey密码"));
         defineList.add(RegionDefine.textDefine("usbIp", "云柜ip"));
         defineList.add(RegionDefine.textDefine("usbPort", "云柜端口"));
@@ -536,7 +540,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         defineList.add(
                 RegionDefine.builder().propName("isOkKey").labelName("是否需要按ok键").format((value, model) -> {
 //                    Integer isOkKey = (Integer) BeanUtils.getFieldValue("isOkKey", model);
-                    Integer isOkKey = (Integer)value;
+                    Integer isOkKey = (Integer) value;
                     if (value != null) {
                         if (isOkKey == 0) {
                             return "否";
@@ -560,6 +564,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
 
     /**
      * 找出问题流水的前一天流水信息
+     *
      * @param argv
      * @return
      */
@@ -569,17 +574,113 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         List<KwWaterRet> curWaters = pageDataRet.getList();
         for (KwWaterRet curWater : curWaters) {
             // 2、找出问题流水的前一条
-            List<KwWaterRet> nearlyWater = this.findNearlyWater(2, true,curWater.getAccount(), curWater.getTransactionDate(), curWater.getDateIndex());
+            List<KwWaterRet> nearlyWater = this.findNearlyWater(2, true, curWater.getAccount(), curWater.getTransactionDate(), curWater.getDateIndex());
             if (nearlyWater.size() < 1) {
                 nearlyWater = this.findNearlyWater(1, true, curWater.getAccount(), curWater.getTransactionDate(), curWater.getDateIndex());
             }
             if (nearlyWater.size() < 1) { // 没有前一条流水
                 throw new RuntimeException("该异常流水没有前一条数据");
-            }else {
+            } else {
                 curWater.setLastDate(nearlyWater.get(0).getTransactionDate());
             }
         }
         return curWaters;
+    }
+
+    /**
+     * 流水异常页面 无回单
+     *
+     * @param argv
+     * @return
+     */
+    @Override
+    public PageDataRet<KwWaterRet> queryNoReceipt(KwWaterQueryArgv argv) {
+        // 基础sql
+        SqlWrapper wrapper = new SqlWrapper(" SELECT kba.bank_deposit, kea.bank_account as edition_account," +
+                " kbae.pro_name, km.bank_name as mechanism_name, ke.name as edition_name,kr.file_id, " +
+                " kw.* " +
+                " FROM kw_water kw " +
+                " LEFT JOIN kw_receipt kr on kw.receipt_id = kr.id and kr.deleted = 0 " +
+                " LEFT JOIN kw_bank_account kba on kw.account = kba.account and kba.deleted = 0 " +
+                " LEFT JOIN kw_bank_account_expand kbae on kba.account = kbae.account and kba.deleted = 0 " +
+                " LEFT JOIN kw_edition ke on kba.edition_id = ke.id and ke.deleted = 0  " +
+                " LEFT JOIN kw_edition_account kea on kea.id = kba.edition_account_id and kea.deleted = 0 " +
+                " LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id and km.deleted = 0  " +
+                " where kw.deleted=0 " +
+                " and kw.has_receipt=0 ");
+        // 拼装查询sql,并注入参数
+        if (StringUtils.isNotEmpty(argv.getEditionId())) {
+            wrapper.addCondition("kba.edition_id", Op.EQ, argv.getEditionId());
+        }
+        if (StringUtils.isNotEmpty(argv.getEditionName())) {
+            wrapper.addCondition("ke.name", Op.LIKE, "%" + argv.getEditionName() + "%");
+        }
+        if (StringUtils.isNotEmpty(argv.getAccount())) {
+            wrapper.addCondition("kw.account", Op.LIKE, "%" + argv.getAccount() + "%");
+        }
+        if (StringUtils.isNotEmpty(argv.getStartDate())) {
+            wrapper.addCondition("kw.transaction_date", Op.BETWEEN, argv.getStartDate(), argv.getEndDate());
+        }
+        if (argv.getIds() != null) {
+            wrapper.in("kw.id", Arrays.asList(argv.getIds().split(",")));
+        }
+        // 数据权限
+        wrapper.withAuthority("kw_bank_account", "kba");
+        // 排序
+        wrapper.sortBy("ORDER BY kw.transaction_date desc,date_index desc");
+        // 执行查询
+        PageDataRet<? extends BaseSimpleRet> query = query(wrapper.getSql(), wrapper.getParams(), argv, KwWaterRet.class);
+
+        return (PageDataRet<KwWaterRet>) query;
+    }
+
+    /**
+     * 回单异常页面 无流水
+     *
+     * @param argv
+     * @return
+     */
+    @Override
+    public PageDataRet<KwReceiptRet> queryNoWater(KwReceiptQueryArgv argv) {
+        String sql = "SELECT kba.bank_deposit, kea.bank_account as edition_account, kbae.pro_name," +
+                " km.bank_name as mechanism_name, km.id as mechanism_id, ke.name as edition_name,ke.id as edition_id, " +
+                " kba.id as bank_account_id, kw.id as water_id, " +
+                " kr.* " +
+                " FROM kw_receipt kr " +
+                " LEFT JOIN sys_file kf on kf.id = kr.file_id " +
+                " LEFT JOIN kw_water kw on kw.receipt_id = kr.id and kw.deleted = 0 " +
+                " LEFT JOIN kw_bank_account kba on kba.account = kr.self_account and kba.deleted = 0 " +
+                " LEFT JOIN kw_bank_account_expand kbae on kba.account = kbae.account " +
+                " LEFT JOIN kw_edition ke on kba.edition_id = ke.id and ke.deleted = 0 " +
+                " LEFT JOIN kw_edition_account kea on kea.id = kba.edition_account_id and kea.deleted = 0 " +
+                " LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id and km.deleted = 0 " +
+                " where kr.deleted = 0 " +
+                " and kr.has_water = 0 ";
+        SqlWrapper wrapper = new SqlWrapper(sql);
+        if (StringUtils.isNotEmpty(argv.getEditionId())) {
+            wrapper.addCondition("ke.id", Op.EQ, argv.getEditionId());
+        }
+        if (StringUtils.isNotEmpty(argv.getEditionName())) {
+            wrapper.addCondition("ke.name", Op.LIKE, "%" + argv.getEditionName() + "%");
+        }
+        if (StringUtils.isNotEmpty(argv.getAccount())) {
+            wrapper.addCondition("kr.self_account", Op.LIKE, "%" + argv.getAccount() + "%");
+        }
+        if (StringUtils.isNotEmpty(argv.getStartDate())) {
+            wrapper.addCondition("kw.transaction_date", Op.BETWEEN, argv.getStartDate(), argv.getEndDate());
+        }
+        if (argv.getIds() != null) {
+            wrapper.in("kr.id", Arrays.asList(argv.getIds().split(",")));
+        }
+
+        // 数据权限
+        wrapper.withAuthority("kw_bank_account", "kba");
+        // 排序
+        wrapper.sortBy("ORDER BY kr.book_date desc");
+        // 执行查询
+        PageDataRet<? extends BaseSimpleRet> query = query(wrapper.getSql(), wrapper.getParams(), argv, KwReceiptRet.class);
+
+        return (PageDataRet<KwReceiptRet>) query;
     }
 
 }

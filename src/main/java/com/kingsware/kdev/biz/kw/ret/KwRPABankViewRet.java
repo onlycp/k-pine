@@ -36,6 +36,10 @@ public class KwRPABankViewRet extends BaseSimpleRet {
     private String proNum;
     /** 项目名称 */
     private String proName;
+
+    /** 项目状态 = 账户查询频率 */
+    private String reserve1;
+
     /** 项目阶段 */
     private String proPhase;
     /** 上架日期 */
@@ -50,4 +54,5 @@ public class KwRPABankViewRet extends BaseSimpleRet {
     private String trustAccountingAccount;
     /** 信托会计名称 */
     private String trustAccounting;
+
 }
