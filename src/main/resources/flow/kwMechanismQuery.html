@@ -1,0 +1,18 @@
+select * from kw_mechanism where deleted=0
+<script>
+    if(context.bankName != nil && context.bankName != '') {
+        return ' and bank_name like %' + context.bankName + '%';
+    }
+    else {
+        return '';
+    }
+</script>
+<script>
+    if(context.bankType != nil && context.bankType != '') {
+        return ' and bank_type = ' + context.bankType;
+    }
+    else {
+        return '';
+    }
+</script>
+order by when_created desc

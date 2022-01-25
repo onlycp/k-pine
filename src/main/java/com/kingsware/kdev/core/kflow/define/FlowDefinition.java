@@ -290,7 +290,12 @@ public class FlowDefinition {
         // 返回
         return this;
     }
+
     public FlowDefinition toNode(NodeTypeEnum type, String name) {
+       return toNode(type, name, "");
+    }
+
+    public FlowDefinition toNode(NodeTypeEnum type, String name, String expr) {
         // 创建节点
         NodeDefinition node = nodeByName(name);
         if (node == null) {
@@ -302,7 +307,7 @@ public class FlowDefinition {
             addNode(node);
         }
         // 创建连接
-        createLink(currentNode, node, "");
+        createLink(currentNode, node, expr);
         // 设置当前节点
         this.currentNode = node;
         // 返回

@@ -1,0 +1,8 @@
+<script>
+    if(context.start != nil && context.limit != nil && context.pageQuery !=nil && context.pageQuery == 'true')  {
+        return ' limit ' +  context.start + ',' + context.limit;
+    }
+    else {
+        return '';
+    }
+</script>

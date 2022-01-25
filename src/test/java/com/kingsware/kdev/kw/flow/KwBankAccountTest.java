@@ -2,7 +2,6 @@ package com.kingsware.kdev.kw.flow;
 
 import com.kingsware.kdev.LcdApplication;
 import com.kingsware.kdev.biz.kw.web.KwEditionAccountController;
-import com.kingsware.kdev.biz.kw.web.KwEditionController;
 import com.kingsware.kdev.core.kflow.define.FlowDefinition;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.ApiUtils;
@@ -24,14 +23,16 @@ import java.util.List;
  * @date 2022/1/19 7:12 下午
  */
 @SpringBootTest(classes = LcdApplication.class)
-class KwEditionActionTest {
+class KwBankAccountTest extends BaseFlowTest{
 
     @Resource
     private SysApiService sysApiService;
     @Resource
     private SysKdbFlowService sysKdbFlowService;
     /** 模块名称 **/
-    private String moduleName = "银行账号";
+    private String moduleName = "账户管理";
+    /** 模块 **/
+    private String tableName = "kw_bank_account";
 
     /**
      * 扫描controller，自动自动api
@@ -125,14 +126,11 @@ class KwEditionActionTest {
 
     }
 
-//    @Test
-//    void query() {
-//        // 创建实例
-//        FlowDefinition flowDefinition = FlowDefinition
-//                .start("分页查询")
-//                .toNode(NodeTypeEnum.FORK, "并行计算")
-//                .toSql("查询总")
-//    }
-
+    @Test
+    void query() {
+        String flowName = moduleName + "-查询";
+        String flowContext = createQueryFlow(flowName, this.moduleName, this.tableName);
+        sysKdbFlowService.addOrUpdate(flowName, flowContext);
+    }
 
 }

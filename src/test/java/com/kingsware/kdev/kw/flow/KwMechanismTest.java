@@ -6,6 +6,7 @@ import com.kingsware.kdev.LcdApplication;
 import com.kingsware.kdev.core.kflow.define.FlowDefinition;
 import com.kingsware.kdev.core.kflow.define.NodeTypeEnum;
 import com.kingsware.kdev.core.util.FileUtils;
+import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.service.SysKdbFlowService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -22,12 +23,14 @@ import javax.annotation.Resource;
  * @date 2022/1/19 7:12 下午
  */
 @SpringBootTest(classes = LcdApplication.class)
-class KwMechanismTest {
+class KwMechanismTest extends BaseFlowTest{
 
     @Resource
     private SysKdbFlowService sysKdbFlowService;
-    /** 模块名称 **/
+    /** 模块名称描述 **/
     private String moduleName = "机构管理";
+    /** 模块 **/
+    private String tableName = "kw_mechanism";
 
     @Test
     void getMechanism() {
@@ -115,28 +118,11 @@ class KwMechanismTest {
 
     }
 
-    @SneakyThrows
     @Test
     void query() {
         String flowName = moduleName + "-查询";
-        String sql = FileUtils.readFileText(ResourceUtils.getFile("classpath:flow/pagedSql.html"));
-        // 创建实例
-        // 分页结果处理js， 从文件中读取
-        String pagedJs = FileUtils.readFileText(ResourceUtils.getFile("classpath:flow/pageList.js"));
-        FlowDefinition flowDefinition = FlowDefinition
-                .start(flowName)
-                .toNode(NodeTypeEnum.FORK, "并行开始")
-                .toSqlWithAfter("查询列表数据", "MySql2", sql, "setResult('list',context.get('result'));" )
-                .toNode(NodeTypeEnum.JOIN, "并行结束")
-                .toNodeWithAfter(NodeTypeEnum.TASK, "处理结果", pagedJs)
-                .toEnd()
-                .resetCurrentNode("并行开始")
-//                .toDecision("是否分页查询")
-//                .toNode(NodeTypeEnum.JOIN, "并行结束")
-//                .resetCurrentNode("是否分页查询")
-                .toSqlWithAfter("查询总数", "MySql2", "select count(1) as total from (" + sql + ") tmp",  "var cntList = eval(context.get('result')); setResult('total',cntList[0]['total']);")
-                .toNode(NodeTypeEnum.JOIN, "并行结束");
-        sysKdbFlowService.addOrUpdate(flowName, flowDefinition.toJson());
+        String flowContext = createQueryFlow(flowName, this.moduleName, this.tableName);
+        sysKdbFlowService.addOrUpdate(flowName, flowContext);
     }
 
 
