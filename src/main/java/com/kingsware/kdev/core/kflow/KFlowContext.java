@@ -20,6 +20,8 @@ public class KFlowContext {
     private final Map<String, KdbFlowFieldConverter> converterMap = new HashMap<>();
     /** 当前系统变量 **/
     private final Map<String, Object> systemContext = new HashMap<>();
+    /** 模型列处理器 **/
+    private final Map<String, ModelFieldDefine> modelFieldDefineMap = new HashMap<>();
     /** 处理类 **/
     private String handleClass;
 }

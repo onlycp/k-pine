@@ -1,7 +1,7 @@
 select * from kw_mechanism where deleted=0
 <script>
     if(context.bankName != nil && context.bankName != '') {
-        return ' and bank_name like %' + context.bankName + '%';
+        return " and bank_name like '%" + context.bankName + "%'";
     }
     else {
         return '';

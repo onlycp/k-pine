@@ -106,6 +106,9 @@ public class StringUtils {
      * @return      驼峰字符串
      */
     public static String lineToHump(String str) {
+        if (!str.contains("_")) {
+            return str;
+        }
         str = str.toLowerCase();
         Matcher matcher = linePattern.matcher(str);
         StringBuffer sb = new StringBuffer();

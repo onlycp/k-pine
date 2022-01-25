@@ -3,7 +3,7 @@ left join kw_mechanism as km on ke.mechanism_id = km.id
 where ke.deleted=0
 <script>
     if(context.name != nil && context.name != '') {
-        return ' and ke.name like %' + context.name + '%';
+        return " and ke.name like '%" + context.name + "%'";
     }
     else {
         return '';
@@ -11,7 +11,7 @@ where ke.deleted=0
 </script>
 <script>
     if(context.mechanismId != nil && context.mechanismId != '') {
-        return ' and ke.mechanism_id = ' + context.mechanismId;
+        return " and ke.mechanism_id = '" + context.mechanismId + "'" ;
     }
     else {
         return '';

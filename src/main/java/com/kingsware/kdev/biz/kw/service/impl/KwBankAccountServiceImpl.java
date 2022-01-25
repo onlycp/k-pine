@@ -73,10 +73,6 @@ public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankA
         BeanUtils.copyProperties(argv, model);
         // 保存
         DB.update(model);
-
-        SqlWrapper selectWrapper = SqlWrapper.selectWrapper(KwBankAccount.class);
-        selectWrapper.addCondition("name", Op.LIKE,  "%1%");
-
     }
 
 
