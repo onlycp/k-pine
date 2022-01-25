@@ -64,12 +64,10 @@ public class KwAccountHistoryBalanceServiceImpl extends BaseServiceImpl implemen
                         " GROUP by t1.account " +
                         ") t2 " +
                         "on t2.account = kba.account " +
-                        "LEFT JOIN kw_edition ke on ke.id=kba.edition_id " +
-                        "LEFT JOIN kw_edition_account kea on kea.id=kba.edition_account_id " +
-                        "LEFT JOIN kw_mechanism km on km.id = ke.mechanism_id " +
-                        "WHERE kba.deleted = 0 " +
-                        "and kea.deleted = 0 " +
-                        "and km.deleted = 0 ");
+                        "LEFT JOIN kw_edition ke on ke.id=kba.edition_id and ke.deleted =0 " +
+                        "LEFT JOIN kw_edition_account kea on kea.id=kba.edition_account_id and kea.deleted = 0 " +
+                        "LEFT JOIN kw_mechanism km on km.id = ke.mechanism_id and km.deleted = 0 " +
+                        "WHERE kba.deleted = 0 ");
 
         if (StringUtils.isNotEmpty(argv.getAccount())) {
             wrapper.addCondition("kba.account", Op.LIKE, "%" + argv.getAccount() + "%");
