@@ -163,6 +163,7 @@ public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankA
             if(StringUtils.isNotEmpty(a)){
                 SqlWrapper wrapper = new SqlWrapper("select kba.* from kw_bank_account as kba where 1 = 1");
                 wrapper.addCondition("kba.account", Op.EQ, a);
+                wrapper.addCondition("kba.deleted", Op.EQ, 0);
                 KwBankAccount kbaResult = DB.findOne(KwBankAccount.class, wrapper.getSql(), wrapper.getParams().toArray());
                 if(kbaResult == null){
                     //如果不存在，则增加

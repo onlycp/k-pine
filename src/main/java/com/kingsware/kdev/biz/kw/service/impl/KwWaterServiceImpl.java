@@ -406,9 +406,11 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
     public List<KwWater> excel2WaterDto(File file){
         if (file==null)return new ArrayList<KwWater>();
         List<Map<String,Object>> readAllMap = null;
+        /**
         try(ExcelReader reader = ExcelUtil.getReader(file)){
             readAllMap = reader.readAll();
-        }
+        }*/
+        readAllMap = getReaderMap(file);
 
         List<KwWater> res = new ArrayList<>();
 
@@ -483,4 +485,26 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
         return res;
     }
 
+    /**
+     * 将excel读取返回的list转存为List<Map<String,Object>>的形式
+     * @return
+     */
+    public List<Map<String,Object>> getReaderMap(File file){
+        String filePath = file.getAbsolutePath();
+        List<Map<String,Object>> readMap = new ArrayList<>();
+        HashMap<String, Object> map = new HashMap<>();
+        try {
+            List<List<String>> read = ExcelWorker.getInstance().getHandler().read(0, filePath);
+            for (int i = 1; i < read.size(); i++){
+                map.clear();
+                for(int j = 0; j < read.get(0).size(); j++){
+                    map.put(read.get(0).get(j), read.get(i).get(j));
+                }
+                readMap.add(map);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return readMap;
+    }
 }

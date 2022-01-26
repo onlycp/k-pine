@@ -8,12 +8,6 @@ import com.kingsware.kdev.biz.kw.service.impl.KwQueueTaskServiceImpl;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.cron.KTask;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
-import java.util.ResourceBundle;
 
 /**
  * 定时从队列中获取任务处理
@@ -24,10 +18,10 @@ import java.util.ResourceBundle;
 @Slf4j
 public class QueueTaskSchedule implements KTask {
     //@Resource
-    KwQueueTaskServiceImpl kwQueueTaskService = new KwQueueTaskServiceImpl();
+    static KwQueueTaskServiceImpl kwQueueTaskService;
 
     //@Resource
-    QueueTaskProcessService queueTaskProcessService = new QueueTaskProcessService();
+    static QueueTaskProcessService queueTaskProcessService;
 
     private String cron;
 
@@ -37,7 +31,11 @@ public class QueueTaskSchedule implements KTask {
 
     @Override
     public void execute() {
+        queueTaskProcessService = SpringContext.getBean(QueueTaskProcessService.class);
+        kwQueueTaskService = SpringContext.getBean(KwQueueTaskServiceImpl.class);
+
         //持续获取新任务
+        log.info("==持续获取新任务==");
         while (true){
             KwQueueTaskRet task = kwQueueTaskService.getNewOne();
             if (task == null){
