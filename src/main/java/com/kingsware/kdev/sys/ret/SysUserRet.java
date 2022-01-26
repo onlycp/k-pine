@@ -34,6 +34,8 @@ public class SysUserRet extends BaseManageRet {
     private String sysUnitPath;
     /** 角色ids **/
     private String sysRoleIds;
+    /** 角色名 **/
+    private String sysRoleNames;
     /** 岗位 **/
     private String post;
     /** 状态 **/
