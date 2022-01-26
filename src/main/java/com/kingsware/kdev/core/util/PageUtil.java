@@ -22,7 +22,7 @@ public class PageUtil {
     /**
      * 内存分页工具类
      * @param argv      分页参数
-     * @param list      列表
+     * @param retList      列表
      * @param tClass    目标类
      * @param <T>       泛型
      * @return          分页结果
@@ -58,7 +58,7 @@ public class PageUtil {
                 pageDataRet.setList(retList.subList(fromIndex, retList.size()));
             }
             else {
-                pageDataRet.setList(retList);
+                pageDataRet.setList(retList.subList(fromIndex, toIndex));
             }
 
         }
