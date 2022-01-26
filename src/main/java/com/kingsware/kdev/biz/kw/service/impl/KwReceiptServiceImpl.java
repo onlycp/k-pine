@@ -62,17 +62,17 @@ public class KwReceiptServiceImpl extends BaseServiceImpl implements KwReceiptSe
                 " LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id and km.deleted = 0 " +
                 " where kr.deleted = 0 ";
         SqlWrapper wrapper = new SqlWrapper(sql);
-        if (argv.getEditionId() !=null && StringUtils.isNotEmpty(argv.getEditionId())){
+        if (StringUtils.isNotEmpty(argv.getEditionId())){
             wrapper.addCondition("ke.id", Op.EQ,argv.getEditionId());
         }
-        if (argv.getEditionName() != null && StringUtils.isNotEmpty(argv.getEditionName())) {
+        if (StringUtils.isNotEmpty(argv.getEditionName())) {
             wrapper.addCondition("ke.name", Op.LIKE, "%" + argv.getEditionName() + "%");
         }
-        if (argv.getAccount() != null && StringUtils.isNotEmpty(argv.getAccount())) {
+        if (StringUtils.isNotEmpty(argv.getAccount())) {
             wrapper.addCondition("kr.self_account", Op.LIKE, "%" + argv.getAccount() + "%");
         }
-        if (argv.getStartDate() != null && StringUtils.isNotEmpty(argv.getStartDate())) {
-            wrapper.addCondition("kw.transaction_date", Op.BETWEEN, argv.getStartDate(), argv.getEndDate());
+        if (StringUtils.isNotEmpty(argv.getStartDate())) {
+            wrapper.addCondition("kr.book_date", Op.BETWEEN, argv.getStartDate(), argv.getEndDate());
         }
         if (argv.getIds() != null) {
             wrapper.in("kr.id", Arrays.asList(argv.getIds().split(",")));

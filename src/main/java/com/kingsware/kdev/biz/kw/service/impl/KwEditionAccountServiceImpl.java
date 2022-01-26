@@ -97,7 +97,7 @@ public class KwEditionAccountServiceImpl extends BaseServiceImpl implements KwEd
         if (StringUtils.isNotEmpty(argv.getEditionId())) {
             wrapper.addCondition("ea.edition_id", Op.EQ, argv.getEditionId());
         }
-        wrapper.sortBy("order by ea.when_created desc");
+        wrapper.sortBy("ed.name desc");
 
         return (PageDataRet<KwEditionAccountRet>) query(wrapper.getSql(), wrapper.getParams(), argv, KwEditionAccountRet.class);
     }
