@@ -73,4 +73,8 @@ public class KwBankAccountArgv {
     private List<String> accountList;
 
 
+    /** 是否余额检查 */
+    private Integer isBalanceCheck;
+
+
 }

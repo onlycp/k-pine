@@ -56,6 +56,9 @@ public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankA
         if (argv.getRelationType() == null) {
             argv.setRelationType(0);
         }
+        if (argv.getIsBalanceCheck() == null) {
+            argv.setIsBalanceCheck(1);
+        }
         KwBankAccount model = BeanUtils.copyObject(argv, KwBankAccount.class);
         // 保存
         DB.save(model);
