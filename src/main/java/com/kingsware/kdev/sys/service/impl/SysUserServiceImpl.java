@@ -134,7 +134,13 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     @SuppressWarnings("unchecked")
     public PageDataRet<SysUserRet> query(SysUserQueryArgv argv) {
         // 拼装sql
-        SqlWrapper wrapper = new SqlWrapper("select u.*, un.name as sys_unit_name, un.path as sys_unit_path from sys_user u left join sys_unit un on un.id=u.sys_unit_id where 1=1 ");
+        SqlWrapper wrapper = new SqlWrapper("select u.*, group_concat(sr.name) as sys_role_names, un.name as sys_unit_name, " +
+                "un.path as sys_unit_path " +
+                "from sys_user u " +
+                "left join sys_unit un on un.id=u.sys_unit_id " +
+                "left join sys_user_role sur on sur.sys_user_id = u.id " +
+                "left join sys_role sr on sr.id = sur.sys_role_id " +
+                "where 1=1 ");
         // 拼装查询sql
         if (StringUtils.isNotEmpty(argv.getUsername())) {
             wrapper.addCondition("u.username", Op.LIKE, "%" +argv.getUsername() +"%");
@@ -148,6 +154,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         if (argv.getStatus() != null) {
             wrapper.addCondition("u.status", Op.EQ, argv.getStatus());
         }
+        wrapper.groupBy("u.id");
         return (PageDataRet<SysUserRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysUserRet.class);
     }
 
