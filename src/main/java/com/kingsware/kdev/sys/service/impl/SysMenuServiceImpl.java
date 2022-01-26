@@ -201,7 +201,7 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
             isSuperAdmin = isSuperAdmin(ids);
         }
         StringBuilder sql = new StringBuilder();
-        sql.append(" select sm.*  ");
+        sql.append(" select DISTINCT sm.*  ");
         sql.append(" from sys_menu sm ");
         if (!isSuperAdmin && ids != null) {
             sql.append(" right join sys_role_menu srm on srm.sys_menu_id = sm.id ");
