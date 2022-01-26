@@ -85,7 +85,7 @@ class KwBankAccountTest extends BaseFlowTest{
         FlowDefinition flowDefinition = FlowDefinition
                 // 启动
                 .start(flowName)
-                .toJs("数据预处理", "var relationType = context.get('relationType'); if(relationType == undefined || relationType=='0') {context.set('relationType', 0)}")
+                .toJs("数据预处理", "var relationType = context.get('relationType'); if(relationType == undefined || relationType=='') {context.set('relationType', 0);}")
                 // 成功支线
                 .toSql("通过版本和账户查询数量", "MySql2", "select count(1) as cnt from kw_bank_account where deleted=0 and account=#{account} and edition_id=#{editionId}")
                 .toDecision("唯一性校验")
@@ -107,7 +107,7 @@ class KwBankAccountTest extends BaseFlowTest{
         FlowDefinition flowDefinition = FlowDefinition
                 // 启动
                 .start(flowName)
-                .toJs("数据预处理", "var relationType = context.get('relationType'); if(relationType == undefined || relationType=='0') {context.set('relationType', 0)}")
+                .toJs("数据预处理", "var relationType = context.get('relationType'); if(relationType == undefined || relationType=='') {context.set('relationType', 0);}")
                 // 成功支线
                 .toSql("通过版本和账户查询数量", "MySql2", "select count(1) as cnt from kw_bank_account where deleted=0 and account=#{account} and edition_id=#{editionId} and id != #{id}")
                 .toDecision("唯一性校验")
