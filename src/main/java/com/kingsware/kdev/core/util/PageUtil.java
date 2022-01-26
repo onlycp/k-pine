@@ -22,7 +22,7 @@ public class PageUtil {
     /**
      * 内存分页工具类
      * @param argv      分页参数
-     * @param list      列表
+     * @param retList      列表
      * @param tClass    目标类
      * @param <T>       泛型
      * @return          分页结果
@@ -49,7 +49,7 @@ public class PageUtil {
             pageDataRet.setTotal(retList.size());
             // 计算截取的起始序号
             int fromIndex = (argv.getPage()-1) * argv.getPageSize();
-            int toIndex = (argv.getPage()-1) * argv.getPageSize();
+            int toIndex = argv.getPage() * argv.getPageSize();
             // 如果结果数量小于from
             if (retList.size() < fromIndex) {
                 pageDataRet.setList(new ArrayList<>());
@@ -58,7 +58,7 @@ public class PageUtil {
                 pageDataRet.setList(retList.subList(fromIndex, retList.size()));
             }
             else {
-                pageDataRet.setList(retList);
+                pageDataRet.setList(retList.subList(fromIndex, toIndex));
             }
 
         }
