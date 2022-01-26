@@ -2,6 +2,9 @@ package com.kingsware.kdev.biz.kw.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kingsware.kdev.core.bean.BaseManageModel;
+import com.kingsware.kdev.core.bean.BaseModel;
+import com.kingsware.kdev.core.orm.annotation.AutoEnum;
+import com.kingsware.kdev.core.orm.annotation.Column;
 import com.kingsware.kdev.core.orm.annotation.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,14 +21,18 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Table
-public class KwReceipt extends BaseManageModel {
+public class KwReceipt extends BaseModel {
+    /** id **/
+    @Column(auto = AutoEnum.ID)
+    private String id;
+
     /** 账户id accountId */
     private String accountId;
     /** 回单编号*/
     private String receiptNumber;
     /** 记帐日期*/
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
-    private Date bookDate;
+    private Timestamp bookDate;
     /** 付款人姓名*/
     private String draweeName;
     /** 付款人帐号*/

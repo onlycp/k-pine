@@ -35,11 +35,17 @@ public interface KwWaterService extends BaseService {
     KwWaterRet get(String id);
 
     /**
-     * 新增（暂时保留）
-     * @param argv 新增
+     *
+     * @param argv
+     * @return id
      */
-     void add(KwWaterArgv argv);
+    String add(KwWaterArgv argv);
 
+    /**
+     * 编辑流水
+     * @param argv
+     */
+    void edit(KwWaterArgv argv);
 
     /**
      * 查询

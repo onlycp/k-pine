@@ -1,7 +1,12 @@
 package com.kingsware.kdev.biz.kw.argv;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.kingsware.kdev.core.orm.annotation.AutoEnum;
+import com.kingsware.kdev.core.orm.annotation.Column;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.sql.Timestamp;
 
 /**
  * @author 接收前端流水
@@ -11,9 +16,63 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode
 public class KwWaterArgv {
-    private String editionId;
-    private String editionName;
+    /** id */
+    private String id;
+    /** 账户 account*/
     private String account;
-    private String startDate;
-    private String endDate;
+    /** 账户id accountId*/
+    private String accountId;
+    /** 回单id false*/
+    private String receiptId;
+    /** 账户名称 accountName*/
+    private String accountName;
+    /** 交易日期 transactionDate*/
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone="GMT+8")
+    private Timestamp transactionDate;
+    /** 交易时间 transactionTime*/
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
+    private Timestamp transactionTime;
+    /** 登记时间 register_time*/
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
+    private Timestamp registerTime;
+    /** 金额 transaction_amount*/
+    private String transactionAmount;
+    /** 收支方向 revenue*/
+    private Integer revenue;
+    /** 收支方式 cash_transfer*/
+    private Integer cashTransfer;
+    /** 余额 account_balance*/
+    private String accountBalance;
+    /** 数据来源 data_source*/
+    private Integer dataSource;
+    /** 流水编号 serial_number*/
+    private String serialNumber;
+    /** 交易类型 transaction_type*/
+    private String transactionType;
+    /** 交易币种 currency*/
+    private Integer currency;
+    /** 对方名称 other_name*/
+    private String otherName;
+    /** 对方账户 other_account*/
+    private String otherAccount;
+    /** 用途 purpose*/
+    private String purpose;
+    /** 摘要 abstract*/
+    private String abstractInfo;
+    /** 数据状态 status*/
+    private Integer status;
+    /** 是否异常 abnormal*/
+    private Integer abnormal;
+    /** 异常处理状态 abnormal_status*/
+    private Integer abnormalStatus;
+    /** 是否有回单 has_receipt*/
+    private Integer hasReceipt;
+    /** 数据次序 date_index*/
+    private Integer dateIndex;
+    /** 删除标志 deleted*/
+    private Integer deleted;
+    /**对方行名*/
+    private String otherBankName;
+    /**备注*/
+    private String remark;
 }
