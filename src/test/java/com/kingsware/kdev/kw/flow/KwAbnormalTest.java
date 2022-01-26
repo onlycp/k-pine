@@ -1,6 +1,7 @@
 package com.kingsware.kdev.kw.flow;
 
 import com.kingsware.kdev.LcdApplication;
+import com.kingsware.kdev.biz.kw.web.KwAbnormalController;
 import com.kingsware.kdev.biz.kw.web.KwReceiptController;
 import com.kingsware.kdev.biz.kw.web.KwWaterController;
 import com.kingsware.kdev.core.kflow.define.FlowDefinition;
@@ -27,16 +28,16 @@ import java.util.List;
  * @date 2022/1/19 7:12 下午
  */
 @SpringBootTest(classes = LcdApplication.class)
-class KwReceiptTest extends BaseFlowTest{
+class KwAbnormalTest extends BaseFlowTest{
 
     @Resource
     private SysApiService sysApiService;
     @Resource
     private SysKdbFlowService sysKdbFlowService;
     /** 模块名称 **/
-    private String moduleName = "回单查询管理";
+    private String moduleName = "异常管理";
     /** 模块 **/
-    private String tableName = "kw_receipt";
+    private String tableName = "kw_abnormal";
 
     /**
      * 扫描controller，自动自动api
@@ -44,7 +45,7 @@ class KwReceiptTest extends BaseFlowTest{
     @Test
     void registerApis() {
         // 获取所有的接口
-        List<SysApiArgv> argvs = ApiUtils.scanApis(KwReceiptController.class);
+        List<SysApiArgv> argvs = ApiUtils.scanApis(KwAbnormalController.class);
         // 增加系统
         for (SysApiArgv argv: argvs) {
             // 先判断有无
@@ -59,12 +60,43 @@ class KwReceiptTest extends BaseFlowTest{
         }
     }
 
-
+    /**
+     * 查询余额异常
+     */
     @Test
-    void query() {
-        String flowName = moduleName + "-查询";
-        String flowContext = createQueryFlow(flowName, this.moduleName, this.tableName);
+    void balanceAbnormal() {
+        String flowName = moduleName + "-余额异常查询";
+        String flowContext = createQueryFlow(flowName, this.moduleName, this.tableName + "_balance");
         sysKdbFlowService.addOrUpdate(flowName, flowContext);
     }
+
+    /**
+     * 流水异常余额异常
+     */
+    @Test
+    void waterAbnormal() {
+        String flowName = moduleName + "-流水异常查询";
+        String flowContext = createQueryFlow(flowName, this.moduleName, this.tableName + "_water");
+        sysKdbFlowService.addOrUpdate(flowName, flowContext);
+    }
+
+    /**
+     * 流水异常余额异常
+     */
+    @Test
+    void receiptAbnormal() {
+        String flowName = moduleName + "-回单异常查询";
+        String flowContext = createQueryFlow(flowName, this.moduleName, this.tableName + "_receipt");
+        sysKdbFlowService.addOrUpdate(flowName, flowContext);
+    }
+
+
+
+//    @Test
+//    void query() {
+//        String flowName = moduleName + "-查询";
+//        String flowContext = createQueryFlow(flowName, this.moduleName, this.tableName);
+//        sysKdbFlowService.addOrUpdate(flowName, flowContext);
+//    }
 
 }
