@@ -56,7 +56,12 @@ public class KwRpaController {
      */
     @PostMapping(path = "/test")
     public BaseRet<?> addNewTask(){
-        //List<List<String>> read = ExcelWorker.getInstance().getHandler().read(0, "E:\\\\1.xlsx");
+        try {
+            List<List<String>> read = ExcelWorker.getInstance().getHandler().read(0, "E:\\\\标准流水.xlsx");
+            System.out.println(read.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         //kwWaterService.findByDateAndAccount("758872354272","2022-01-10 00:00:00.0");
         return BaseRet.success();
     }
