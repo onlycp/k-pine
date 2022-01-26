@@ -49,7 +49,7 @@ public class PageUtil {
             pageDataRet.setTotal(retList.size());
             // 计算截取的起始序号
             int fromIndex = (argv.getPage()-1) * argv.getPageSize();
-            int toIndex = (argv.getPage()-1) * argv.getPageSize();
+            int toIndex = argv.getPage() * argv.getPageSize();
             // 如果结果数量小于from
             if (retList.size() < fromIndex) {
                 pageDataRet.setList(new ArrayList<>());
