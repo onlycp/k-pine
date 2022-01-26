@@ -78,6 +78,7 @@ public class KwAccountHistoryBalanceServiceImpl extends BaseServiceImpl implemen
         }
 
         wrapper.withAuthority("kw_bank_account", "kba");
+        wrapper.sortBy("ke.name desc, kea.bank_account asc");
 
         PageDataRet<? extends BaseSimpleRet> query = query(wrapper.getSql(), wrapper.getParams(), argv, KwBankAccountRet.class);
 

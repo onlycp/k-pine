@@ -16,17 +16,18 @@ import org.springframework.web.bind.annotation.*;
 
 @Api(value = "流水管理", tags = {"流水管理"})
 @RestController
-@RequestMapping("/"+ Version.V1 + "/kw-water")
+@RequestMapping("/" + Version.V1 + "/kw-water")
 public class KwWaterController extends BaseController {
 
     @Autowired
     private KwWaterService kwWaterService;
 
     /**
-     *  查询
+     * 查询
+     *
      * @return 分页
      */
-    @ApiOperation(value = "查询 " ,notes = "查询")
+    @ApiOperation(value = "查询 ", notes = "查询")
     @GetMapping("/query")
     public BaseRet<PageDataRet<KwWaterRet>> page(KwWaterQueryArgv argv) {
         return BaseRet.success(kwWaterService.query(argv));
@@ -34,29 +35,32 @@ public class KwWaterController extends BaseController {
 
     /**
      * 详细信息
+     *
      * @return 详细信息
      */
-    @ApiOperation(value = "详情 " ,notes = "详情")
+    @ApiOperation(value = "详情 ", notes = "详情")
     @GetMapping("/{id}")
     public BaseRet<KwWaterRet> get(@PathVariable String id) {
         return BaseRet.success(kwWaterService.get(id));
     }
 
     /**
-     *  新增
+     * 新增
+     *
      * @return 提示
      */
-    @ApiOperation(value = "新增 " ,notes = "新增")
+    @ApiOperation(value = "新增 ", notes = "新增")
     @PostMapping
     public BaseRet<?> add(@RequestBody KwEditionArgv argv) {
         return BaseRet.success();
     }
 
     /**
-     *  删除
+     * 删除
+     *
      * @return 提示
      */
-    @ApiOperation(value = "删除 " ,notes = "删除")
+    @ApiOperation(value = "删除 ", notes = "删除")
     @PostMapping(value = "/delete")
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         return BaseRet.success();
@@ -65,7 +69,7 @@ public class KwWaterController extends BaseController {
     /**
      * 导出
      */
-    @ApiOperation(value = "导出导入模板 " ,notes = "导出导入模板")
+    @ApiOperation(value = "导出导入模板 ", notes = "导出导入模板")
     @GetMapping("/exportImportTemplate")
     public void exportImportTemplate() {
         kwWaterService.exportImportTemplate();
@@ -74,7 +78,7 @@ public class KwWaterController extends BaseController {
     /**
      * 导出
      */
-    @ApiOperation(value = "导出流水" ,notes = "导出流水")
+    @ApiOperation(value = "导出流水", notes = "导出流水")
     @GetMapping("/export")
     public void export(KwWaterQueryArgv argv) {
         kwWaterService.export(argv);
