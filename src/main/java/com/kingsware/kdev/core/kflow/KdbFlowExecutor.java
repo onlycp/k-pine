@@ -11,6 +11,7 @@ import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.NumberUtils;
 import com.kingsware.kdev.core.util.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 
@@ -21,6 +22,7 @@ import java.util.*;
  * @version 1.0.0
  * @date 2022/1/17 5:57 下午
  */
+@Slf4j
 public class KdbFlowExecutor {
 
     private static KdbFlowExecutor instance;
@@ -78,7 +80,8 @@ public class KdbFlowExecutor {
         // 如果失败
         Object result = null;
         if (ret.getErrorCode() != 0) {
-            result = new ErrorResult(ret.getResponseBody() == null ? "流程处理失败": ret.getResponseBody());
+            log.error("kdb响应错误:" + ret.getMessage());
+            result = new ErrorResult(ret.getMessage() == null ? "流程处理失败": ret.getMessage());
         }
         // 如果返回的数字，那么直接将结果返回给前端
         else if (NumberUtils.isParsable(ret.getResponseBody())) {
