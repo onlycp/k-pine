@@ -89,7 +89,8 @@ public class KwEditionServiceImpl extends BaseServiceImpl implements KwEditionSe
         if (StringUtils.isNotEmpty(argv.getMechanismId())) {
             wrapper.addCondition("ke.mechanism_id", Op.EQ, argv.getMechanismId());
         }
-        wrapper.sortBy("ke.when_created desc");
+        wrapper.sortBy("km.bank_name desc");
+
         return (PageDataRet<KwEditionRet>) query(wrapper.getSql(), wrapper.getParams(), argv, KwEditionRet.class);
     }
 

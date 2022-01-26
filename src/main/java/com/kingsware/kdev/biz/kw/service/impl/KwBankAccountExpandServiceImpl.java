@@ -62,7 +62,10 @@ public class KwBankAccountExpandServiceImpl extends BaseServiceImpl implements K
             wrapper.addCondition("account", Op.EQ, argv.getAccount());
         }
         if (StringUtils.isNotEmpty(argv.getProNum())) {
-            wrapper.addCondition("pro_num", Op.EQ, argv.getProNum());
+            wrapper.addCondition("pro_num", Op.LIKE, "%"+argv.getProNum()+"%");
+        }
+        if (StringUtils.isNotEmpty(argv.getProName())) {
+            wrapper.addCondition("pro_name", Op.LIKE,"%"+ argv.getProName()+"%");
         }
         return (PageDataRet<KwBankAccountExpandRet>) query(wrapper.getSql(), wrapper.getParams(), argv, KwBankAccountExpandRet.class);
     }

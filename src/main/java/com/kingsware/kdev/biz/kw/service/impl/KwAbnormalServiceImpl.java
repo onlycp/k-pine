@@ -1,6 +1,7 @@
 package com.kingsware.kdev.biz.kw.service.impl;
 
 import com.kingsware.kdev.biz.kw.argv.KwAbnormalQueryArgv;
+import com.kingsware.kdev.biz.kw.argv.KwReceiptArgv;
 import com.kingsware.kdev.biz.kw.argv.KwReceiptQueryArgv;
 import com.kingsware.kdev.biz.kw.argv.KwWaterQueryArgv;
 import com.kingsware.kdev.biz.kw.model.KwEdition;
@@ -681,6 +682,30 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         PageDataRet<? extends BaseSimpleRet> query = query(wrapper.getSql(), wrapper.getParams(), argv, KwReceiptRet.class);
 
         return (PageDataRet<KwReceiptRet>) query;
+    }
+
+    /**
+     * 流水回单绑定
+     * @param waterId
+     * @param receiptId
+     */
+    @Override
+    public void bind(String waterId, String receiptId) {
+
+    }
+
+    /**
+     * 给流水新增回单
+     * @param argv
+     */
+    @Override
+    public void newReceipt(KwReceiptArgv argv) {
+
+    }
+
+    @Override
+    public void handleReceipt(KwReceiptArgv argv) {
+
     }
 
 }
