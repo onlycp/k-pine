@@ -80,10 +80,6 @@ public class KdbFlowExecutor {
         if (ret.getErrorCode() != 0) {
             result = new ErrorResult(ret.getResponseBody() == null ? "流程处理失败": ret.getResponseBody());
         }
-        // 如果body为空，则直接返回null即可
-        else if (StringUtils.isEmpty(ret.getResponseBody())) {
-            result = null;
-        }
         // 如果返回的数字，那么直接将结果返回给前端
         else if (NumberUtils.isParsable(ret.getResponseBody())) {
             result = Long.parseLong(ret.getResponseBody());
