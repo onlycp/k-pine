@@ -19,25 +19,34 @@ public interface KwReceiptService extends BaseService {
 
     /**
      * 通过id查询
-     * @param id    id
-     * @return      返回结果
+     *
+     * @param id id
+     * @return 返回结果
      */
     KwWaterRet get(String id);
 
     /**
      * 新增
+     *
      * @param argv 新增
      */
-     void add(KwReceiptArgv argv);
+    String add(KwReceiptArgv argv);
+
+    /**
+     * 编辑
+     *
+     * @param argv
+     */
+    void edit(KwReceiptArgv argv);
 
 
     /**
      * 查询
+     *
      * @param argv 查询
      * @return 查询结果
      */
-     PageDataRet<KwReceiptRet> query(KwReceiptQueryArgv argv);
-
+    PageDataRet<KwReceiptRet> query(KwReceiptQueryArgv argv);
 
 
     /**
