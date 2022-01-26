@@ -411,6 +411,7 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
             readAllMap = reader.readAll();
         }*/
         readAllMap = getReaderMap(file);
+        System.out.println(readAllMap);
 
         List<KwWater> res = new ArrayList<>();
 
@@ -492,11 +493,12 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
     public List<Map<String,Object>> getReaderMap(File file){
         String filePath = file.getAbsolutePath();
         List<Map<String,Object>> readMap = new ArrayList<>();
-        HashMap<String, Object> map = new HashMap<>();
+
         try {
             List<List<String>> read = ExcelWorker.getInstance().getHandler().read(0, filePath);
+            System.out.println(read);
             for (int i = 1; i < read.size(); i++){
-                map.clear();
+                HashMap<String, Object> map = new HashMap<>();
                 for(int j = 0; j < read.get(0).size(); j++){
                     map.put(read.get(0).get(j), read.get(i).get(j));
                 }
