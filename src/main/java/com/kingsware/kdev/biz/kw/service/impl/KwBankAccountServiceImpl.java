@@ -107,7 +107,8 @@ public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankA
         if (argv.getUpdateDateStartDate() != null && argv.getUpdateDateEndDate() != null) {
             wrapper.between("kba.balance_update_time", argv.getUpdateDateStartDate(), argv.getUpdateDateEndDate());
         }
-        wrapper.groupBy(" kba.id ");
+//        wrapper.groupBy(" kba.id ");
+        wrapper.sortBy("ke.name desc");
         return (PageDataRet<KwBankAccountRet>) query(wrapper.getSql(), wrapper.getParams(), argv, KwBankAccountRet.class);
     }
 

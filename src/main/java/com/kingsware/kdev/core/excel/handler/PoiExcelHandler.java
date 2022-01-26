@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.excel.KExcel;
 import com.kingsware.kdev.core.excel.KRegion;
 import com.kingsware.kdev.core.excel.KSheet;
+import com.kingsware.kdev.core.util.StringUtils;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -77,13 +78,35 @@ public class PoiExcelHandler implements KExcelHandler{
             // 返回内容
             List<List<String>> allContents = new ArrayList<>();
             // 读取数据
-            for (int rowIndex = 0; rowIndex < sheet.getLastRowNum(); rowIndex ++) {
+            int rowCount = sheet.getLastRowNum() + 1;
+            int colCount = 0;
+            for (int rowIndex = 0; rowIndex < rowCount; rowIndex ++) {
+
                 List<String> contents = new ArrayList<>();
                 Row row = sheet.getRow(rowIndex);
-                for (int columnIndex = 0; columnIndex < row.getLastCellNum(); columnIndex++ ) {
-                    Cell cell = row.getCell(columnIndex);
-                    cell.setCellType(CellType.STRING);
-                    contents.add(cell.getStringCellValue().trim());
+                if (rowIndex == 0) {
+                    colCount = row.getLastCellNum();
+                }
+                for (int columnIndex = 0; columnIndex < colCount; columnIndex++ ) {
+                    if (columnIndex >= row.getLastCellNum()) {
+                        contents.add("");
+                    }
+                    else {
+                        Cell cell = row.getCell(columnIndex);
+                        cell.setCellType(CellType.STRING);
+                        if (rowIndex == 0) {
+                            if (StringUtils.isNotEmpty(cell.getStringCellValue().trim())) {
+                                contents.add(cell.getStringCellValue().trim());
+                            }
+                        }
+                        else  {
+                            contents.add(cell.getStringCellValue()== null ? "": cell.getStringCellValue().trim());
+                        }
+
+                    }
+                }
+                if (rowIndex == 0) {
+                    colCount = contents.size();
                 }
                 allContents.add(contents);
             }

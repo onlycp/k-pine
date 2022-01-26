@@ -22,6 +22,7 @@ import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
+import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -151,21 +152,7 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
         defineList.add(RegionDefine.textDefine("proName", "项目名称"));
         defineList.add(RegionDefine.textDefine("bankDeposit", "开户行"));
         // 借
-        defineList.add(
-                RegionDefine.builder().propName("transactionAmount").labelName("借").format((value, model) -> {
-                    // 收支方向
-                    Integer revenue = (Integer) BeanUtils.getFieldValue("revenue", model);
-                    if (revenue != null) {
-                        if (revenue == 0) {
-                            return value;
-                        } else if (revenue == 1) {
-                            return "--";
-                        }
-                    }
-                    return "异常";
-                }).build());
-        // 贷
-        defineList.add(RegionDefine.builder().propName("transactionAmount").labelName("贷").format((value, model) -> {
+        defineList.add(RegionDefine.builder().propName("transactionAmount").labelName("借").format((value, model) -> {
             // 收支方向
             Integer revenue = (Integer) BeanUtils.getFieldValue("revenue", model);
             if (revenue != null) {
@@ -177,6 +164,20 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
             }
             return "异常";
         }).build());
+        // 贷
+        defineList.add(
+                RegionDefine.builder().propName("transactionAmount").labelName("贷").format((value, model) -> {
+                    // 收支方向
+                    Integer revenue = (Integer) BeanUtils.getFieldValue("revenue", model);
+                    if (revenue != null) {
+                        if (revenue == 0) {
+                            return value;
+                        } else if (revenue == 1) {
+                            return "--";
+                        }
+                    }
+                    return "异常";
+                }).build());
         // 余额
         defineList.add(RegionDefine.textDefine("accountBalance", "余额"));
         // 来源
@@ -189,7 +190,7 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
                     return "手动";
                 }
             }
-            return "异常";
+            return "";
         }).build());
         // 导出
         KExcel kExcel = KExcel.fromDataList("流水查询.xls", "Sheet1", defineList, pageDataRet.getList());
@@ -439,8 +440,13 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
             }
 
             waterDto.setTransactionDate(new Timestamp(TimeUtil.strToDate(strDate).getTime()));//交易日期  非空
-            if(map.get("交易时间") != null && !map.get("交易时间").equals("") ){
-                waterDto.setTransactionTime(new Timestamp(TimeUtil.cellToTime(map.get("交易时间")).getTime()));//交易时间  可为空
+            String dateString = String.valueOf(map.get("交易日期"));
+            String timeString = String.valueOf(map.get("交易时间"));
+            if(map.get("交易时间") != null && !map.get("交易时间").equals("")
+                && dateString != null && !"".equals(dateString)){
+                String concatDatetime = dateString + " " + timeString;
+                Date transactionTime = DateUtils.toDate(concatDatetime, "yyyy-MM-dd HH:mm:ss");
+                waterDto.setTransactionTime(new Timestamp(transactionTime.getTime()));//交易时间  可为空
             }
             waterDto.setTransactionType(Optional.ofNullable(map.get("交易类型")).orElse("").toString());//交易类型      可为空
             waterDto.setCurrency(EnumSelectionUtil.getCurrency(Optional.ofNullable(map.get("币种")).orElse("").toString()));//币种 非空
@@ -457,6 +463,13 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
             waterDto.setSerialNumber(Optional.ofNullable(map.get("流水号")).orElse("").toString()); // 流水号  可为空
             waterDto.setRemark(Optional.ofNullable(map.get("备注")).orElse("").toString());// 备注  可为空
             waterDto.setRegisterTime(new Timestamp(new Date().getTime())); //插入时间
+            //todo 暂时设默认值，后续根据业务调整
+            waterDto.setDeleted(0); //逻辑删除
+            waterDto.setStatus(0); //数据状态
+            waterDto.setDataSource(0); //数据来源
+            waterDto.setAbnormal(0); //是否异常
+            waterDto.setAbnormalStatus(0); //异常状态
+            waterDto.setCashTransfer(0); //收支方式
             res.add(waterDto);
         }
         if (TimeUtil.hasWaterTime(res)){

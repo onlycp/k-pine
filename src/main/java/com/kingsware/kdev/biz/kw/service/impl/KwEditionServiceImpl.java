@@ -68,7 +68,7 @@ public class KwEditionServiceImpl extends BaseServiceImpl implements KwEditionSe
         // 唯一性校验
         DBChecker<KwEdition> checker =DBChecker.build(model, KwEdition.class);
         // 银行名称
-        checker.uni(new String[]{"name", "mechanismId"}, I18n.t("KwEdition.name.unique", "版本不唯一"));
+        checker.uni(new String[]{"name", "mechanismId"}, I18n.t("KwEdition.name.unique", "该机构下已经存在该版本名称。"));
         // 执行校验
         checker.checkUnique();
     }
@@ -89,7 +89,8 @@ public class KwEditionServiceImpl extends BaseServiceImpl implements KwEditionSe
         if (StringUtils.isNotEmpty(argv.getMechanismId())) {
             wrapper.addCondition("ke.mechanism_id", Op.EQ, argv.getMechanismId());
         }
-        wrapper.sortBy("ke.when_created desc");
+        wrapper.sortBy("km.bank_name desc");
+
         return (PageDataRet<KwEditionRet>) query(wrapper.getSql(), wrapper.getParams(), argv, KwEditionRet.class);
     }
 
