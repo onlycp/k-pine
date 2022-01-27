@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.util;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,6 +70,9 @@ public class BeanUtils {
     public static void setField(Field field, Object target, Object value) {
         try {
             field.setAccessible(true);
+            if (value == null) {
+                field.set(target, null);
+            }
             // 当field的type不等于value的type时
             Class<?> fieldType = field.getType();
             if (value.getClass().equals(fieldType) || fieldType.isAssignableFrom(value.getClass())) {
@@ -77,7 +81,24 @@ public class BeanUtils {
             else {
                 // 区分不同的field类型处理
                 if (fieldType.isAssignableFrom(Integer.class)) {
-                    field.set(target, Integer.parseInt(value.toString()));
+                    if (value instanceof Boolean) {
+                        field.set(target, (Boolean)value ? 1 : 0);
+                    }
+                    else if (value instanceof String) {
+                        String strValue = (String) value;
+                        if ("true".equals(strValue)) {
+                            field.set(target, 1);
+                        }
+                        else if ("false".equals(strValue)) {
+                            field.set(target, 0);
+                        }
+                        else {
+                            field.set(target, Integer.parseInt(value.toString()));
+                        }
+                    }
+                    else {
+                        field.set(target, Integer.parseInt(value.toString()));
+                    }
                 }
                 else if (fieldType.isAssignableFrom(Long.class)) {
                     field.set(target, Long.parseLong(value.toString()));
@@ -92,27 +113,33 @@ public class BeanUtils {
                     field.set(target, value.toString());
                 }
                 else if (fieldType.isAssignableFrom(Boolean.class)) {
-                    field.set(target, "1".equals(value.toString()));
+                    String strValue = value.toString();
+                    if (NumberUtils.isParsable(strValue)) {
+                        field.set(target, "1".equals(value.toString()));
+                    }
+                    else if ("true".equals(strValue)) {
+                        field.set(target, true);
+                    }
+                    else if ("false".equals(strValue)) {
+                        field.set(target, false);
+                    }
+
                 }
                 else if (fieldType.isAssignableFrom(BigDecimal.class)) {
                     field.set(target, new BigDecimal(value.toString()));
                 }
                 else if (fieldType.isAssignableFrom(Timestamp.class)) {
                     // 如果值是整型
-                    if (value instanceof Long) {
+                    if (value instanceof Long || NumberUtils.isParsable(value.toString())) {
                         field.set(target, new Timestamp(Long.parseLong(value.toString())));
                     }
                     // 如果值是字符串
-                    else if (value instanceof  String) {
+                    else  {
                         Date date = DateUtils.toDate(value.toString(), DateUtils.DATE_TIME);
                         if (date != null) {
                             field.set(target, new Timestamp(date.getTime()));
                         }
                     }
-
-                }
-                else if (fieldType.isAssignableFrom(Date.class)) {
-                    field.set(target, new Date(Long.parseLong(value.toString())));
                 }
                 else {
                     field.set(target, value);
@@ -120,6 +147,7 @@ public class BeanUtils {
             }
 
         } catch (Exception e) {
+            // 此处应抛出异常
             logger.warn("对象属性赋值失败, 属性名:{}, 属性值:{}", field.getName(), value);
         }
     }
