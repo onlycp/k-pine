@@ -5,54 +5,54 @@ LEFT JOIN kw_edition ke on kba.edition_id = ke.id  and ke.deleted = 0
 LEFT JOIN kw_edition_account kea on kea.id = kba.edition_account_id and kea.deleted = 0
 LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id and km.deleted = 0
 where kw.abnormal = 1
-<script>
+<rule>
     if(context.editionId != nil && context.editionId != '') {
         return " and kba.edition_id ='" + context.editionId + "'";
     }
     else {
         return '';
     }
-</script>
-<script>
+</rule>
+<rule>
     if(context.editionName != nil && context.editionName != '') {
         return " and ke.name like '%" + context.editionName + "%'";
     }
     else {
         return '';
     }
-</script>
-<script>
+</rule>
+<rule>
     if(context.account != nil && context.account != '') {
         return " and kw.account like '%" + context.account + "%'";
     }
     else {
         return '';
     }
-</script>
-<script>
+</rule>
+<rule>
     if(context.startDate != nil && context.startDate != '') {
         return " and kw.transaction_date between '" + context.startDate + "' and '" + context.endDate + "'";
     }
     else {
         return '';
     }
-</script>
+</rule>
 
-<script>
+<rule>
     if(context.ids != nil) {
         return 'and kw.id in ('+array2str( context.ids )+')';
     }
     else {
         return '';
     }
-</script>
-<script>
+</rule>
+<rule>
     if(context.authority_kwBankAccount != nil) {
         return context.authority_kwBankAccount;
     }
     else {
         return '';
     }
-</script>
+</rule>
 
 ORDER BY kw.transaction_date desc,date_index desc

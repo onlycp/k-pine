@@ -8,37 +8,37 @@ left join kw_edition ke on ke.id = kba.edition_id
 left join kw_company kc on kba.relation_type = 1 and kba.relation_id = kc.id
 left join kw_mechanism km on km.id = ke.mechanism_id
 where kba.deleted=0
-<script>
+<rule>
     if(context.mechanismId != nil && context.mechanismId != '') {
         return " and ke.mechanism_id = '" + context.mechanismId + "'" ;
     }
     else {
         return '';
     }
-</script>
-<script>
+</rule>
+<rule>
     if(context.account != nil && context.account != '') {
         return " and kba.account like '%" + context.account + "%'";
     }
     else {
         return '';
     }
-</script>
-<script>
+</rule>
+<rule>
     if(context.companyName != nil && context.companyName != '') {
         return " and kc.name like '%" + context.companyName + "%'";
     }
     else {
         return '';
     }
-</script>
-<script>
+</rule>
+<rule>
     if(context.updateDateStartDate != nil && context.updateDateStartDate != '' && context.updateDateEndDate != nil && context.updateDateEndDate != '') {
         return " and kba.balance_update_time between '" + context.updateDateStartDate + "' and '" + context.updateDateEndDate + "'" ;
     }
     else {
         return '';
     }
-</script>
+</rule>
 
 order by kba.when_created desc

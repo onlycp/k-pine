@@ -1,35 +1,35 @@
 select ea.*, ed.name as edition_name, me.bank_name from kw_edition_account ea left join kw_edition ed on ed.id=ea.edition_id left join kw_mechanism me on me.id=ed.mechanism_id where ea.deleted=0
-<script>
+<rule>
     if(context.bankAccount != nil && context.bankAccount != '') {
         return ' ea.bank_account like %' + context.bankAccount + '%';
     }
     else {
         return '';
     }
-</script>
-<script>
+</rule>
+<rule>
     if(context.usbIp != nil && context.usbIp != '') {
         return ' ea.usb_ip like %' + context.usbIp + '%';
     }
     else {
         return '';
     }
-</script>
-<script>
+</rule>
+<rule>
     if(context.usbIp != nil && context.usbIp != '') {
         return ' ea.usb_ip like %' + context.usbIp + '%';
     }
     else {
         return '';
     }
-</script>
-<script>
+</rule>
+<rule>
     if(context.editionId != nil && context.editionId != '') {
         return ' and ea.edition_id = ' + context.editionId;
     }
     else {
         return '';
     }
-</script>
+</rule>
 order by ea.when_created desc
 

@@ -1,0 +1,26 @@
+select * from kw_bank_account_expand where 1=1
+<rule>
+    if(context.account != nil && context.account != '') {
+        return " and account = \\#{account}";
+    }
+    else {
+        return '';
+    }
+</rule>
+<rule>
+    if(context.proNum != nil && context.proNum != '') {
+        return " and pro_num like '%" + context.proNum + "%'";
+    }
+    else {
+        return '';
+    }
+</rule>
+<rule>
+    if(context.proName != nil && context.proName != '') {
+        return " and pro_name like '%" + context.proName + "%'";
+    }
+    else {
+        return '';
+    }
+</rule>
+order by when_created desc

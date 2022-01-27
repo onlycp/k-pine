@@ -1,0 +1,26 @@
+select * from kw_company where deleted=0
+<rule>
+    if(context.name != nil && context.name != '') {
+        return " and name like \\#{account_like}";
+    }
+    else {
+        return '';
+    }
+</rule>
+<rule>
+    if(context.serialNumber != nil && context.serialNumber != '') {
+        return " and serial_number like \\#{serialNumber_like}";
+    }
+    else {
+        return '';
+    }
+</rule>
+<rule>
+    if(context.shortName != nil && context.shortName != '') {
+        return " and short_name like \\#{serialNumber_like}";
+    }
+    else {
+        return '';
+    }
+</rule>
+order by when_created desc
