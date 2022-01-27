@@ -443,12 +443,15 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
      * @throws:
      */
     @Override
-    public List<KwWater> excel2WaterDto(File file) {
-        if (file == null) return new ArrayList<KwWater>();
-        List<Map<String, Object>> readAllMap = null;
-        try (ExcelReader reader = ExcelUtil.getReader(file)) {
+    public List<KwWater> excel2WaterDto(File file){
+        if (file==null)return new ArrayList<KwWater>();
+        List<Map<String,Object>> readAllMap = null;
+        /**
+        try(ExcelReader reader = ExcelUtil.getReader(file)){
             readAllMap = reader.readAll();
-        }
+        }*/
+        readAllMap = getReaderMap(file);
+        System.out.println(readAllMap);
 
         List<KwWater> res = new ArrayList<>();
 
@@ -523,4 +526,27 @@ public class KwWaterServiceImpl extends BaseServiceImpl implements KwWaterServic
         return res;
     }
 
+    /**
+     * 将excel读取返回的list转存为List<Map<String,Object>>的形式
+     * @return
+     */
+    public List<Map<String,Object>> getReaderMap(File file){
+        String filePath = file.getAbsolutePath();
+        List<Map<String,Object>> readMap = new ArrayList<>();
+
+        try {
+            List<List<String>> read = ExcelWorker.getInstance().getHandler().read(0, filePath);
+            System.out.println(read);
+            for (int i = 1; i < read.size(); i++){
+                HashMap<String, Object> map = new HashMap<>();
+                for(int j = 0; j < read.get(0).size(); j++){
+                    map.put(read.get(0).get(j), read.get(i).get(j));
+                }
+                readMap.add(map);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return readMap;
+    }
 }
