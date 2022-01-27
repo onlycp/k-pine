@@ -225,7 +225,7 @@ public class DailyReceiptWaterTaskService {
         }else if (receiptDto != null) {
             //date = TimeUtil.getDate(receiptDto.getBookDate());
         }
-
+        System.out.println("waterDto === "+ waterDto);
         String finalDate = date.toString();
         List<KwWater> notMatchWater = waterDtoList.stream()
                 .filter(w -> !w.getTransactionDate().toString().equals(finalDate)).collect(Collectors.toList());
@@ -246,6 +246,7 @@ public class DailyReceiptWaterTaskService {
         //找出当天所有关联的数据
         if (waterDto != null){
             waterEntityList = waterService.findByDateAndAccount(waterDto.getAccount(), finalDate);
+            System.out.println("当天关联的数据 === " + waterEntityList.toString());
         }
         if (receiptDto != null){
             //receiptEntityList = receiptService.findByDateAndAccount(receiptDto.getSelfAccount(), date);
