@@ -79,4 +79,7 @@ public class KwBankAccountRet extends BaseManageRet {
     private Integer mbsSend;
     /** 从视图获取的账户状态 */
     private String accountStatus;
+
+    /** 是否余额检查 */
+    private Integer balanceCheck;
 }

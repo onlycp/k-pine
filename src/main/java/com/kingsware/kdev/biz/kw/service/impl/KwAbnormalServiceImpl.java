@@ -248,9 +248,11 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         List<String> ids = new ArrayList<>(); // 问题流水列表
 
         // 2 查找所有账号
-        List<String> accounts = this.findAllAccountId();
+        List<String> accounts = this.findCheckAccounts();
 //        System.out.println(accountIds);
         for (String account : accounts) {
+            System.out.print("-- 正在检查 -- account: ");
+            System.out.println(account);
             // 3 查找账号下的所有流水
             List<KwWater> waters = this.findWaterByAccountId(account);
             // 4 检查异常流水
@@ -270,13 +272,14 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         DB.executeUpdateSql(sql);
     }
 
+
     /**
      * 查找账号ID列表
      *
      * @return
      */
-    private List<String> findAllAccountId() {
-        String sql = " select account from kw_bank_account where 1=1 and id is not null ";
+    private List<String> findCheckAccounts() {
+        String sql = " select account from kw_bank_account where balance_check = 1 and deleted = 0 ";
         SqlWrapper wrapper = new SqlWrapper(sql);
         List<String> list = DB.findSingleAttributeList(String.class, wrapper.getSql(), wrapper.getParams().toArray());
         return list;
@@ -289,7 +292,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
      * @return
      */
     private List<KwWater> findWaterByAccountId(String account) {
-        String sql = " select * from kw_water kw where 1=1 and kw.account = ? order by kw.transaction_date asc,kw.date_index asc ";
+        String sql = " select * from kw_water kw where 1=1 and kw.account = ? order by kw.transaction_date asc, kw.date_index asc ";
         List<KwWater> list = DB.findList(KwWater.class, sql, account);
         return list;
     }
@@ -342,8 +345,15 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
     }
 
     private BigDecimal changeBigDecimal(String sBalance) {
-        double dBalance = Double.valueOf(sBalance);//数值过大时会自动转科学计数法
-        return new BigDecimal(dBalance).setScale(2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal ret = new BigDecimal(-1);
+        try {
+            double dBalance = Double.valueOf(sBalance);//数值过大时会自动转科学计数法
+            ret = new BigDecimal(dBalance).setScale(2, BigDecimal.ROUND_HALF_UP);
+        }catch (Exception e){
+            System.out.println("-- 异常流水 -- " + "发现空余额");
+        }
+
+        return ret;
     }
 
     private void flagAbnormalWater(String id) {
