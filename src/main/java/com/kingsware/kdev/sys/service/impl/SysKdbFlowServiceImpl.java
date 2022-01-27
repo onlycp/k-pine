@@ -49,6 +49,9 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         if (info.getCreateTime() !=null ) {
             flowRet.setWhenCreated(new Timestamp(info.getCreateTime()));
         }
+        else {
+            flowRet.setWhenCreated(new Timestamp(0));
+        }
         if (info.getUpdateTime() != null) {
             flowRet.setWhenModified(new Timestamp(info.getUpdateTime()));
         }
@@ -96,17 +99,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         }
         // 排序
         if (!retList.isEmpty()) {
-            retList.sort(((o1, o2) -> {
-                Timestamp t1 = o1.getWhenCreated();
-                Timestamp t2 = o2.getWhenModified();
-                if (t1 == null) {
-                    t1 = new Timestamp(0);
-                }
-                if (t2 == null) {
-                    t2 = new Timestamp(0);
-                }
-                return t2.compareTo(t1);
-            }));
+            retList.sort(((o1, o2) -> o2.getWhenCreated().compareTo(o1.getWhenCreated())));
         }
         return PageUtil.memoryPage(argv, retList, SysKdbFlowRet.class);
     }
