@@ -251,6 +251,8 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         List<String> accounts = this.findCheckAccounts();
 //        System.out.println(accountIds);
         for (String account : accounts) {
+            System.out.print("-- 正在检查 -- account: ");
+            System.out.println(account);
             // 3 查找账号下的所有流水
             List<KwWater> waters = this.findWaterByAccountId(account);
             // 4 检查异常流水
@@ -270,13 +272,14 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         DB.executeUpdateSql(sql);
     }
 
+
     /**
      * 查找账号ID列表
      *
      * @return
      */
     private List<String> findCheckAccounts() {
-        String sql = " select account from kw_bank_account where is_balance_check = 1 and id is not null ";
+        String sql = " select account from kw_bank_account where balance_check = 1 and deleted = 0 ";
         SqlWrapper wrapper = new SqlWrapper(sql);
         List<String> list = DB.findSingleAttributeList(String.class, wrapper.getSql(), wrapper.getParams().toArray());
         return list;

@@ -56,8 +56,8 @@ public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankA
         if (argv.getRelationType() == null) {
             argv.setRelationType(0);
         }
-        if (argv.getIsBalanceCheck() == null) {
-            argv.setIsBalanceCheck(1);
+        if (argv.getBalanceCheck() == null) {
+            argv.setBalanceCheck(1);
         }
         KwBankAccount model = BeanUtils.copyObject(argv, KwBankAccount.class);
         // 保存
@@ -127,6 +127,7 @@ public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankA
         sql.append(" 	kba.*, kbae.id as pro_id ");
         sql.append(" from kw_bank_account kba  ");
         sql.append(" left join kw_bank_account_expand kbae on kbae.account = kba.account ");
+        sql.append(" where 1=1 ");
         sql.append(" where 1=1 ");
         SqlWrapper wrapper = new SqlWrapper(sql.toString());
         // 拼装查询sql

@@ -74,7 +74,7 @@ public class KwBankAccountArgv {
 
 
     /** 是否余额检查 */
-    private Integer isBalanceCheck;
+    private Integer balanceCheck;
 
 
 }
