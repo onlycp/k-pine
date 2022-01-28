@@ -19,6 +19,10 @@ public class KwReceiptQueryArgv extends BasePageArgv {
     private String editionId;
     private String editionName;
     private String account;
+
     private String startDate;
     private String endDate;
+    private String payeeAccountNumber;
+    private String draweeAccountNumber;
+    private String amount;
 }

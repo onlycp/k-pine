@@ -15,6 +15,8 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @Api(value = "异常管理", tags = {"异常管理"})
 @RestController
@@ -114,7 +116,12 @@ public class KwAbnormalController extends BaseController {
     @ApiOperation(value = "查询回单异常", notes = "查询回单异常")
     @GetMapping("/queryNoWater")
     public BaseRet<PageDataRet<KwReceiptRet>> queryNoWater(KwReceiptQueryArgv argv) {
-        return BaseRet.success(abnormalService.queryNoWater(argv));
+        PageDataRet<KwReceiptRet> kwReceiptRetPageDataRet = abnormalService.queryNoWater(argv);
+//        List<KwReceiptRet> list = kwReceiptRetPageDataRet.getList();
+//        for (KwReceiptRet item :list){
+//            System.out.println(item);
+//        }
+        return BaseRet.success(kwReceiptRetPageDataRet);
     }
 
     /**
@@ -131,7 +138,11 @@ public class KwAbnormalController extends BaseController {
         System.out.print(" -- ");
         System.out.println(argv.getReceiptId());
 
-        abnormalService.bind(argv.getId(), argv.getReceiptId());
+        try {
+            abnormalService.bind(argv.getId(), argv.getReceiptId());
+        }catch (Exception e){
+            return BaseRet.fail(e.getMessage(),500);
+        }
         return BaseRet.success();
     }
 
