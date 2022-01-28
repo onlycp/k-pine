@@ -17,6 +17,10 @@ public class KwWaterQueryArgv extends BasePageArgv {
     private String editionId;
     private String editionName;
     private String account;
+    private String otherAccount;
+    private String transactionAmount;
     private String startDate;
     private String endDate;
+
+
 }

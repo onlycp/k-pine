@@ -631,7 +631,13 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
             wrapper.addCondition("ke.name", Op.LIKE, "%" + argv.getEditionName() + "%");
         }
         if (StringUtils.isNotEmpty(argv.getAccount())) {
-            wrapper.addCondition("kw.account", Op.LIKE, "%" + argv.getAccount() + "%");
+            wrapper.addCondition("kw.account", Op.LIKE, "%" + argv.getAccount().trim() + "%");
+        }
+        if (StringUtils.isNotEmpty(argv.getOtherAccount())) {
+            wrapper.addCondition("kw.other_account", Op.LIKE, "%" + argv.getOtherAccount().trim() + "%");
+        }
+        if (StringUtils.isNotEmpty(argv.getTransactionAmount())) {
+            wrapper.addCondition("kw.transaction_amount", Op.LIKE, "%" + argv.getTransactionAmount().trim() + "%");
         }
         if (StringUtils.isNotEmpty(argv.getStartDate())) {
             wrapper.addCondition("kw.transaction_date", Op.BETWEEN, argv.getStartDate(), argv.getEndDate());

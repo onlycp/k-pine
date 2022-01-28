@@ -25,7 +25,7 @@ public class KwReceiptArgv {
     private String accountId;
     /** 回单编号*/
     private String receiptNumber;
-    /** 记帐日期*/
+    /** 记帐日期 */
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Timestamp bookDate;
     /** 付款人姓名*/
