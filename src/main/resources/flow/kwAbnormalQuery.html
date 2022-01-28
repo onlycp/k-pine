@@ -1,0 +1,44 @@
+
+select
+tm0.mechanism_id, tm0.edition_id, tm0.bank_name as mechanism_name, tm0.edition_name, ifnull(tm0.t0, 0) as account_num, ifnull(tm1.t1,0) as balance_exception, ifnull(tm1.t2,0) as no_receipt, tm2.t3 as no_water
+from
+( select km.id as mechanism_id, ke.id as edition_id, km.bank_name, ke.name as edition_name, count(1) t0 from kw_bank_account kba
+inner join kw_edition ke on kba.edition_id = ke.id and ke.deleted=0
+inner join kw_mechanism km on ke.mechanism_id = km.id and km.deleted=0
+where kba.deleted=0
+group by km.id, ke.id ) tm0
+left join  (
+select kba.edition_id, sum(if(kw.abnormal=1, 1, 0)) as t1, sum(if(kw.has_receipt=0, 1,0)) as t2 from kw_water kw left join  kw_bank_account kba on kba.account= kw.account
+<rule>
+    if(context.startDate != nil && context.startDate != '') {
+    return ' kw.transaction_date between \\#{startDate} and \\#{endDate}';
+    }
+    else {
+    return '';
+    }
+</rule>
+group by kba.edition_id
+) tm1 on tm1.edition_id = tm0.edition_id
+
+left join (
+select kba.edition_id, sum(if(kr.has_water=0, 1, 0)) as t3 from kw_receipt kr  left join  kw_bank_account kba on kba.account= kr.self_account
+<rule>
+    if(context.startDate != nil && context.startDate != '') {
+        return ' kr.transaction_date between \\#{startDate} and \\#{endDate}';
+    }
+    else {
+        return '';
+    }
+</rule>
+group by kba.edition_id
+) tm2 on tm2.edition_id=tm0.edition_id
+
+where  (tm1.t1 is not  null or tm1.t2 is not null or tm2.t3 is not null)
+<rule>
+    if(context.mechanismId != nil && context.mechanismId != '') {
+        return ' tm0.mechanism_id = \\#{mechanismId}';
+    }
+    else {
+        return '';
+    }
+</rule>

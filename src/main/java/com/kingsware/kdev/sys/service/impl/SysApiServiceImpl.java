@@ -82,7 +82,7 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
         if (StringUtils.isNotEmpty(argv.getApiFlowId())) {
             wrapper.addCondition("api_flow_id", Op.LIKE, "%" +argv.getApiFlowId() +"%");
         }
-        if (StringUtils.isNotEmpty(argv.getApiFlowId())) {
+        if (StringUtils.isNotEmpty(argv.getApiMethod())) {
             wrapper.addCondition("api_method", Op.LIKE, "%" +argv.getApiMethod() +"%");
         }
         if (StringUtils.isNotEmpty(argv.getApiUrl())) {
@@ -90,6 +90,9 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
         }
         if (StringUtils.isNotEmpty(argv.getApiTags())) {
             wrapper.addCondition("api_tags", Op.LIKE, "%" +argv.getApiTags() +"%");
+        }
+        if (argv.getCallType() != null) {
+            wrapper.addCondition("call_type", Op.EQ, argv.getCallType());
         }
         return (PageDataRet<SysApiRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysApi.class, SysApiRet.class);
     }

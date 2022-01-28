@@ -4,6 +4,7 @@ import com.kingsware.kdev.biz.kw.argv.KwEditionArgv;
 import com.kingsware.kdev.biz.kw.argv.KwWaterQueryArgv;
 import com.kingsware.kdev.biz.kw.ret.KwWaterRet;
 import com.kingsware.kdev.biz.kw.service.KwWaterService;
+import com.kingsware.kdev.core.auth.UselessApi;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -48,6 +49,7 @@ public class KwWaterController extends BaseController {
      */
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
+    @UselessApi
     public BaseRet<?> add(@RequestBody KwEditionArgv argv) {
         return BaseRet.success();
     }
@@ -58,6 +60,7 @@ public class KwWaterController extends BaseController {
      */
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
+    @UselessApi
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         return BaseRet.success();
     }

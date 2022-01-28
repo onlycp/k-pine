@@ -92,11 +92,11 @@ class KwAbnormalTest extends BaseFlowTest{
 
 
 
-//    @Test
-//    void query() {
-//        String flowName = moduleName + "-查询";
-//        String flowContext = createQueryFlow(flowName, this.moduleName, this.tableName);
-//        sysKdbFlowService.addOrUpdate(flowName, flowContext);
-//    }
+    @Test
+    void query() {
+        String flowName = moduleName + "-查询";
+        String flowContext = createQueryFlow(flowName, this.moduleName, this.tableName);
+        sysKdbFlowService.addOrUpdate(flowName, flowContext);
+    }
 
 }

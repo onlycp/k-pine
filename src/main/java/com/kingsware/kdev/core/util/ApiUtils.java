@@ -1,6 +1,7 @@
 package com.kingsware.kdev.core.util;
 
 import com.kingsware.kdev.biz.kw.web.KwEditionController;
+import com.kingsware.kdev.core.auth.UselessApi;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.sys.argv.SysApiArgv;
 import io.swagger.annotations.Api;
@@ -37,6 +38,9 @@ public class ApiUtils {
         Method[] methods = clazz.getMethods();
         for (Method method: methods) {
             if (!method.isAnnotationPresent(ApiOperation.class)) {
+                continue;
+            }
+            if (method.isAnnotationPresent(UselessApi.class)) {
                 continue;
             }
             ApiOperation operation = (ApiOperation) method.getDeclaredAnnotation(ApiOperation.class);

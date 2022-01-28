@@ -25,5 +25,7 @@ public class SysApiQueryArgv extends BasePageArgv {
     private String apiFlowId;
     /** 接口编码 **/
     private String apiCode;
+    /** 调用方式 **/
+    private Integer callType;
 
 }
