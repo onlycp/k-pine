@@ -15,6 +15,8 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @Api(value = "异常管理", tags = {"异常管理"})
 @RestController
@@ -114,7 +116,9 @@ public class KwAbnormalController extends BaseController {
     @ApiOperation(value = "查询回单异常", notes = "查询回单异常")
     @GetMapping("/queryNoWater")
     public BaseRet<PageDataRet<KwReceiptRet>> queryNoWater(KwReceiptQueryArgv argv) {
-        return BaseRet.success(abnormalService.queryNoWater(argv));
+        PageDataRet<KwReceiptRet> kwReceiptRetPageDataRet = abnormalService.queryNoWater(argv);
+
+        return BaseRet.success(kwReceiptRetPageDataRet);
     }
 
     /**
@@ -126,12 +130,16 @@ public class KwAbnormalController extends BaseController {
     @ApiOperation(value = "流水回单绑定", notes = "流水回单绑定")
     @GetMapping("/bind")
     public BaseRet bind(KwWaterArgv argv) {
-        System.out.print(" 流水回单绑定 ");
-        System.out.print(argv.getId());
-        System.out.print(" -- ");
-        System.out.println(argv.getReceiptId());
+//        System.out.print(" 流水回单绑定 ");
+//        System.out.print(argv.getId());
+//        System.out.print(" -- ");
+//        System.out.println(argv.getReceiptId());
 
-        abnormalService.bind(argv.getId(), argv.getReceiptId());
+        try {
+            abnormalService.bind(argv.getId(), argv.getReceiptId());
+        }catch (Exception e){
+            return BaseRet.fail(e.getMessage(),500);
+        }
         return BaseRet.success();
     }
 
@@ -144,11 +152,10 @@ public class KwAbnormalController extends BaseController {
     @ApiOperation(value = "新增回单，并绑定流水", notes = "新增回单，并绑定流水")
     @PostMapping("/newReceipt")
     public BaseRet newReceipt(KwReceiptArgv argv) {
-        System.out.print(" 新增回单，并绑定流水 ");
-        System.out.print(argv.getWaterId());
-        System.out.print(" -- ");
-        System.out.println(argv.getFileId());
-
+//        System.out.print(" 新增回单，并绑定流水 ");
+//        System.out.print(argv.getWaterId());
+//        System.out.print(" -- ");
+//        System.out.println(argv.getFileId());
         if (StringUtils.isEmpty(argv.getWaterId())||StringUtils.isEmpty(argv.getFileId()))
             return BaseRet.fail("流水或文件不存在",500);
 
@@ -166,12 +173,13 @@ public class KwAbnormalController extends BaseController {
     @PostMapping("/handleReceipt")
     public BaseRet handleReceipt(KwReceiptArgv argv) {
 
-        System.out.print(" 处理回单 ");
-        System.out.print(argv.getId());
-        System.out.print(" -- ");
-        System.out.println(argv.getOtherData());
+//        System.out.print(" 处理回单 ");
+//        System.out.print(argv.getId());
+//        System.out.print(" -- ");
+//        System.out.println(argv.getOtherData());
 
         abnormalService.handleReceipt(argv);
+
         return BaseRet.success();
     }
 

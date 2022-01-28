@@ -77,7 +77,7 @@ public class KwReceiptServiceImpl extends BaseServiceImpl implements KwReceiptSe
 //                " LEFT JOIN sys_file kf on kf.id = kr.file_id " + //todo sys_file 没有软删除字段
 //                " LEFT JOIN kw_water kw on kw.receipt_id = kr.id and kw.deleted = 0 " +
 //                " LEFT JOIN kw_bank_account kba on kba.account = kr.self_account and kba.deleted = 0 " +
-//                " LEFT JOIN kw_bank_account_expand kbae on kba.account = kbae.account " +
+//                " LEFT JOIN kw_bank_account_expand kbae on kba.account = kbae.account " + //todo kbae没有软删除字段
 //                " LEFT JOIN kw_edition ke on kba.edition_id = ke.id and ke.deleted = 0 " +
 //                " LEFT JOIN kw_edition_account kea on kea.id = kba.edition_account_id and kea.deleted = 0 " +
 //                " LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id and km.deleted = 0 " +
@@ -90,7 +90,7 @@ public class KwReceiptServiceImpl extends BaseServiceImpl implements KwReceiptSe
         sbsql.append(" LEFT JOIN sys_file kf on kf.id = kr.file_id ");
         sbsql.append(" LEFT JOIN kw_water kw on kw.receipt_id = kr.id and kw.deleted = 0 ");
         sbsql.append(" LEFT JOIN kw_bank_account kba on kba.account = kr.self_account and kba.deleted = 0 ");
-        sbsql.append(" LEFT JOIN kw_bank_account_expand kbae on kba.account = kbae.account ");
+        sbsql.append(" LEFT JOIN kw_bank_account_expand kbae on kbae.account = kr.self_account ");
         sbsql.append(" LEFT JOIN kw_edition ke on kba.edition_id = ke.id and ke.deleted = 0 ");
         sbsql.append(" LEFT JOIN kw_edition_account kea on kea.id = kba.edition_account_id and kea.deleted = 0 ");
         sbsql.append(" LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id and km.deleted = 0 ");

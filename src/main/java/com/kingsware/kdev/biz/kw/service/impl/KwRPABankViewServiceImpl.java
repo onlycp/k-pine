@@ -194,6 +194,7 @@ public class KwRPABankViewServiceImpl extends BaseServiceImpl implements KwRPABa
                 user.setRealName("未知");
             }
             user.setPassword("K@Afm2022"); // K@Afm2022
+            user.setPassword("K@Afm2022"); // K@Afm2022
             user.setAvatar("https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif");
             user.setSex(0);
             user.setStatus(1);

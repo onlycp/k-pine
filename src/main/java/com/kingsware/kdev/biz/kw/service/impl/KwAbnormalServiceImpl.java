@@ -631,7 +631,13 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
             wrapper.addCondition("ke.name", Op.LIKE, "%" + argv.getEditionName() + "%");
         }
         if (StringUtils.isNotEmpty(argv.getAccount())) {
-            wrapper.addCondition("kw.account", Op.LIKE, "%" + argv.getAccount() + "%");
+            wrapper.addCondition("kw.account", Op.LIKE, "%" + argv.getAccount().trim() + "%");
+        }
+        if (StringUtils.isNotEmpty(argv.getOtherAccount())) {
+            wrapper.addCondition("kw.other_account", Op.LIKE, "%" + argv.getOtherAccount().trim() + "%");
+        }
+        if (StringUtils.isNotEmpty(argv.getTransactionAmount())) {
+            wrapper.addCondition("kw.transaction_amount", Op.LIKE, "%" + argv.getTransactionAmount().trim() + "%");
         }
         if (StringUtils.isNotEmpty(argv.getStartDate())) {
             wrapper.addCondition("kw.transaction_date", Op.BETWEEN, argv.getStartDate(), argv.getEndDate());
@@ -665,7 +671,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
                 " LEFT JOIN sys_file kf on kf.id = kr.file_id " +
                 " LEFT JOIN kw_water kw on kw.receipt_id = kr.id and kw.deleted = 0 " +
                 " LEFT JOIN kw_bank_account kba on kba.account = kr.self_account and kba.deleted = 0 " +
-                " LEFT JOIN kw_bank_account_expand kbae on kba.account = kbae.account " +
+                " LEFT JOIN kw_bank_account_expand kbae on kbae.account = kr.self_account " +
                 " LEFT JOIN kw_edition ke on kba.edition_id = ke.id and ke.deleted = 0 " +
                 " LEFT JOIN kw_edition_account kea on kea.id = kba.edition_account_id and kea.deleted = 0 " +
                 " LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id and km.deleted = 0 " +
@@ -680,6 +686,15 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         }
         if (StringUtils.isNotEmpty(argv.getAccount())) {
             wrapper.addCondition("kr.self_account", Op.LIKE, "%" + argv.getAccount() + "%");
+        }
+        if (StringUtils.isNotEmpty(argv.getPayeeAccountNumber())) {
+            wrapper.addCondition("kr.payee_account_number", Op.LIKE, "%" + argv.getPayeeAccountNumber() + "%");
+        }
+        if (StringUtils.isNotEmpty(argv.getDraweeAccountNumber())) {
+            wrapper.addCondition("kr.drawee_account_number", Op.LIKE, "%" + argv.getDraweeAccountNumber() + "%");
+        }
+        if (StringUtils.isNotEmpty(argv.getAmount())) {
+            wrapper.addCondition("kr.amount", Op.EQ, argv.getAmount());
         }
         if (StringUtils.isNotEmpty(argv.getStartDate())) {
             wrapper.addCondition("kw.transaction_date", Op.BETWEEN, argv.getStartDate(), argv.getEndDate());
@@ -706,13 +721,18 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
     @Override
     public void bind(String waterId, String receiptId) {
         // 流水设置 receipt_id = ?  has_receipt = 1
-        String sql1 = " update kw_water set receipt_id = ? ,has_receipt = 1 where id = ? and deleted = 0 ";
-        DB.executeUpdateSql(sql1,receiptId,waterId);
+        String sql1 = " update kw_water set receipt_id = ? ,has_receipt = 1 where id = ? and has_receipt = 0 and deleted = 0 ";
+        long l1 = DB.executeUpdateSql(sql1, receiptId, waterId);
+        if (l1!=1){
+            throw new RuntimeException("流水不存在,或已被绑定");
+        }
 
         // 回单设置 has_water = 1
-        String sql2 = " update kw_receipt set has_water = 1 where id = ? and deleted = 0 ";
-        DB.executeUpdateSql(sql2, receiptId);
-
+        String sql2 = " update kw_receipt set has_water = 1 where id = ? and has_water = 0 and deleted = 0 ";
+        long l2 = DB.executeUpdateSql(sql2, receiptId);
+        if (l2!=1){
+            throw new RuntimeException("回单不存在,或已被绑定");
+        }
     }
 
     /**
