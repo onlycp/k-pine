@@ -1,9 +1,6 @@
 package com.kingsware.kdev.biz.kw.service.impl;
 
-import com.kingsware.kdev.biz.kw.argv.KwAbnormalQueryArgv;
-import com.kingsware.kdev.biz.kw.argv.KwReceiptArgv;
-import com.kingsware.kdev.biz.kw.argv.KwReceiptQueryArgv;
-import com.kingsware.kdev.biz.kw.argv.KwWaterQueryArgv;
+import com.kingsware.kdev.biz.kw.argv.*;
 import com.kingsware.kdev.biz.kw.model.KwEdition;
 import com.kingsware.kdev.biz.kw.model.KwMechanism;
 import com.kingsware.kdev.biz.kw.model.KwWater;
@@ -12,6 +9,8 @@ import com.kingsware.kdev.biz.kw.ret.KwNumRet;
 import com.kingsware.kdev.biz.kw.ret.KwReceiptRet;
 import com.kingsware.kdev.biz.kw.ret.KwWaterRet;
 import com.kingsware.kdev.biz.kw.service.KwAbnormalService;
+import com.kingsware.kdev.biz.kw.service.KwReceiptService;
+import com.kingsware.kdev.biz.kw.service.KwWaterService;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.BaseSimpleRet;
 import com.kingsware.kdev.core.bean.PageDataRet;
@@ -22,6 +21,7 @@ import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -32,6 +32,10 @@ import java.util.*;
 @Service
 public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormalService {
 
+    @Autowired
+    private KwReceiptService receiptService;
+    @Autowired
+    private KwWaterService waterService;
 
     /**
      * 异常总汇页面
@@ -244,9 +248,11 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         List<String> ids = new ArrayList<>(); // 问题流水列表
 
         // 2 查找所有账号
-        List<String> accounts = this.findAllAccountId();
+        List<String> accounts = this.findCheckAccounts();
 //        System.out.println(accountIds);
         for (String account : accounts) {
+            System.out.print("-- 正在检查 -- account: ");
+            System.out.println(account);
             // 3 查找账号下的所有流水
             List<KwWater> waters = this.findWaterByAccountId(account);
             // 4 检查异常流水
@@ -266,13 +272,14 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         DB.executeUpdateSql(sql);
     }
 
+
     /**
      * 查找账号ID列表
      *
      * @return
      */
-    private List<String> findAllAccountId() {
-        String sql = " select account from kw_bank_account where 1=1 and id is not null ";
+    private List<String> findCheckAccounts() {
+        String sql = " select account from kw_bank_account where balance_check = 1 and deleted = 0 ";
         SqlWrapper wrapper = new SqlWrapper(sql);
         List<String> list = DB.findSingleAttributeList(String.class, wrapper.getSql(), wrapper.getParams().toArray());
         return list;
@@ -285,7 +292,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
      * @return
      */
     private List<KwWater> findWaterByAccountId(String account) {
-        String sql = " select * from kw_water kw where 1=1 and kw.account = ? order by kw.transaction_date asc,kw.date_index asc ";
+        String sql = " select * from kw_water kw where 1=1 and kw.account = ? order by kw.transaction_date asc, kw.date_index asc ";
         List<KwWater> list = DB.findList(KwWater.class, sql, account);
         return list;
     }
@@ -338,8 +345,15 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
     }
 
     private BigDecimal changeBigDecimal(String sBalance) {
-        double dBalance = Double.valueOf(sBalance);//数值过大时会自动转科学计数法
-        return new BigDecimal(dBalance).setScale(2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal ret = new BigDecimal(-1);
+        try {
+            double dBalance = Double.valueOf(sBalance);//数值过大时会自动转科学计数法
+            ret = new BigDecimal(dBalance).setScale(2, BigDecimal.ROUND_HALF_UP);
+        }catch (Exception e){
+            System.out.println("-- 异常流水 -- " + "发现空余额");
+        }
+
+        return ret;
     }
 
     private void flagAbnormalWater(String id) {
@@ -617,7 +631,13 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
             wrapper.addCondition("ke.name", Op.LIKE, "%" + argv.getEditionName() + "%");
         }
         if (StringUtils.isNotEmpty(argv.getAccount())) {
-            wrapper.addCondition("kw.account", Op.LIKE, "%" + argv.getAccount() + "%");
+            wrapper.addCondition("kw.account", Op.LIKE, "%" + argv.getAccount().trim() + "%");
+        }
+        if (StringUtils.isNotEmpty(argv.getOtherAccount())) {
+            wrapper.addCondition("kw.other_account", Op.LIKE, "%" + argv.getOtherAccount().trim() + "%");
+        }
+        if (StringUtils.isNotEmpty(argv.getTransactionAmount())) {
+            wrapper.addCondition("kw.transaction_amount", Op.LIKE, "%" + argv.getTransactionAmount().trim() + "%");
         }
         if (StringUtils.isNotEmpty(argv.getStartDate())) {
             wrapper.addCondition("kw.transaction_date", Op.BETWEEN, argv.getStartDate(), argv.getEndDate());
@@ -651,7 +671,7 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
                 " LEFT JOIN sys_file kf on kf.id = kr.file_id " +
                 " LEFT JOIN kw_water kw on kw.receipt_id = kr.id and kw.deleted = 0 " +
                 " LEFT JOIN kw_bank_account kba on kba.account = kr.self_account and kba.deleted = 0 " +
-                " LEFT JOIN kw_bank_account_expand kbae on kba.account = kbae.account " +
+                " LEFT JOIN kw_bank_account_expand kbae on kbae.account = kr.self_account " +
                 " LEFT JOIN kw_edition ke on kba.edition_id = ke.id and ke.deleted = 0 " +
                 " LEFT JOIN kw_edition_account kea on kea.id = kba.edition_account_id and kea.deleted = 0 " +
                 " LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id and km.deleted = 0 " +
@@ -666,6 +686,15 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
         }
         if (StringUtils.isNotEmpty(argv.getAccount())) {
             wrapper.addCondition("kr.self_account", Op.LIKE, "%" + argv.getAccount() + "%");
+        }
+        if (StringUtils.isNotEmpty(argv.getPayeeAccountNumber())) {
+            wrapper.addCondition("kr.payee_account_number", Op.LIKE, "%" + argv.getPayeeAccountNumber() + "%");
+        }
+        if (StringUtils.isNotEmpty(argv.getDraweeAccountNumber())) {
+            wrapper.addCondition("kr.drawee_account_number", Op.LIKE, "%" + argv.getDraweeAccountNumber() + "%");
+        }
+        if (StringUtils.isNotEmpty(argv.getAmount())) {
+            wrapper.addCondition("kr.amount", Op.EQ, argv.getAmount());
         }
         if (StringUtils.isNotEmpty(argv.getStartDate())) {
             wrapper.addCondition("kw.transaction_date", Op.BETWEEN, argv.getStartDate(), argv.getEndDate());
@@ -691,21 +720,60 @@ public class KwAbnormalServiceImpl extends BaseServiceImpl implements KwAbnormal
      */
     @Override
     public void bind(String waterId, String receiptId) {
+        // 流水设置 receipt_id = ?  has_receipt = 1
+        String sql1 = " update kw_water set receipt_id = ? ,has_receipt = 1 where id = ? and has_receipt = 0 and deleted = 0 ";
+        long l1 = DB.executeUpdateSql(sql1, receiptId, waterId);
+        if (l1!=1){
+            throw new RuntimeException("流水不存在,或已被绑定");
+        }
 
+        // 回单设置 has_water = 1
+        String sql2 = " update kw_receipt set has_water = 1 where id = ? and has_water = 0 and deleted = 0 ";
+        long l2 = DB.executeUpdateSql(sql2, receiptId);
+        if (l2!=1){
+            throw new RuntimeException("回单不存在,或已被绑定");
+        }
     }
 
     /**
-     * 给流水新增回单
+     * 新增回单,并绑定流水
      * @param argv
      */
     @Override
     public void newReceipt(KwReceiptArgv argv) {
+        argv.setCurrency(0); // 币种： 现金
+        argv.setSource(1); // 来源： 手动
+        argv.setHasWater(1); // 有无流水： 有
+        argv.setStatus(0); // 状态：不知道是啥
 
+        // 插入回单，返回回单id
+        String receiptId = receiptService.add(argv);
+        System.out.print(" 新增回单 ");
+        System.out.print(" -- ");
+        System.out.println(receiptId);
+        if (StringUtils.isEmpty(receiptId))
+            throw new RuntimeException("回单插入失败");
+
+        // 流水设置
+        KwWaterArgv waterArgv = new KwWaterArgv();
+        waterArgv.setId(argv.getWaterId());
+        waterArgv.setHasReceipt(1);
+        waterArgv.setReceiptId(receiptId);
+
+        waterService.edit(waterArgv);
     }
 
     @Override
     public void handleReceipt(KwReceiptArgv argv) {
+        // 修改回单
+        // 将处理意见存入 other_data 并把 has_water 设置为1
+        argv.setHasWater(1);
+        receiptService.edit(argv);
+
+
 
     }
+
+
 
 }

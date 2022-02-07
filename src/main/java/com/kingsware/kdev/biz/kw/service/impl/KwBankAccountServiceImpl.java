@@ -56,6 +56,9 @@ public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankA
         if (argv.getRelationType() == null) {
             argv.setRelationType(0);
         }
+        if (argv.getBalanceCheck() == null) {
+            argv.setBalanceCheck(1);
+        }
         KwBankAccount model = BeanUtils.copyObject(argv, KwBankAccount.class);
         // 保存
         DB.save(model);
@@ -126,6 +129,7 @@ public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankA
         sql.append(" from kw_bank_account kba  ");
         sql.append(" left join kw_bank_account_expand kbae on kbae.account = kba.account ");
         sql.append(" where 1=1 ");
+        sql.append(" where 1=1 ");
         SqlWrapper wrapper = new SqlWrapper(sql.toString());
         // 拼装查询sql
         wrapper.addCondition("kbae.pro_num", Op.EQ, argv.getProNum());
@@ -165,6 +169,7 @@ public class KwBankAccountServiceImpl extends BaseServiceImpl implements KwBankA
             if(StringUtils.isNotEmpty(a)){
                 SqlWrapper wrapper = new SqlWrapper("select kba.* from kw_bank_account as kba where 1 = 1");
                 wrapper.addCondition("kba.account", Op.EQ, a);
+                wrapper.addCondition("kba.deleted", Op.EQ, 0);
                 KwBankAccount kbaResult = DB.findOne(KwBankAccount.class, wrapper.getSql(), wrapper.getParams().toArray());
                 if(kbaResult == null){
                     //如果不存在，则增加
