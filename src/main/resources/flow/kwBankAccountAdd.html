@@ -1,0 +1,4 @@
+insert into kw_bank_account
+( edition_id,edition_account_id,account,account_type,cxpl,bank_deposit,status,create_account_time,cancel_account_time,relation_type,relation_id,id,who_created,when_created,who_modified,when_modified,deleted )
+values
+( #{edition_id},#{editionAccountId},#{account},#{accountType},#{cxpl},#{bankDeposit},#{status},#{createAccountTime},#{cancelAccountTime},#{relationType},#{relationId},#{sys.uuid},#{sys.who},#{sys.when},#{sys.who},#{sys.when},0)

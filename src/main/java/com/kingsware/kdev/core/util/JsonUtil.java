@@ -132,6 +132,20 @@ public class JsonUtil {
     }
 
     /**
+     * 转为map
+     * @param json
+     * @return
+     */
+    public static Map<String, Object> toMap(String json) {
+        try {
+            return objectMapper.readValue(json, Map.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            logger.warn("字符串转map失败, 源串:{}", json);
+        }
+        return null;
+    }
+    /**
      * 将 json转为list对象
      * @param json          json字符串
      * @param tClass        class

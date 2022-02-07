@@ -21,8 +21,8 @@ public class SysKdbFlowRet extends BaseSimpleRet {
     private String content;
     /** 名称 **/
     private String name;
-    /** 父流程id **/
-    private String parentId;
+    /** 描述 **/
+    private String description = "";
     /** 创建时间 **/
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
     private Timestamp whenCreated;

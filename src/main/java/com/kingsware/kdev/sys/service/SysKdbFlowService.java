@@ -46,4 +46,10 @@ public interface SysKdbFlowService {
      * @param argv  查询
      */
     void delete(MultiIdArgv argv);
+
+    /**
+     * 新增或编辑
+     * @param argv  参数
+     */
+    void addOrUpdate(String name, String content);
 }

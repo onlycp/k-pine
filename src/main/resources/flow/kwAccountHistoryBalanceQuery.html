@@ -1,0 +1,53 @@
+select
+    kea.bank_account                              as edition_account,
+    ke.name                                       as edition_name,
+    km.bank_name                                  as mechanism_name,
+    kba.*,
+    SUBSTRING_INDEX(t2.all_balance_info, '|', -1) as water_balance
+from
+    kw_bank_account kba
+left JOIN (select t1.account, max(t1.balance_info) as all_balance_info
+    from (SELECT w.account,
+    concat(w.transaction_date, '|', from_unixtime(w.date_index), '|',
+    w.account_balance) as balance_info
+    from kw_water w
+    WHERE w.deleted = 0
+<rule>
+    if(context.endDate != nil && context.endDate != '') {
+        return " and w.transaction_date <='" + context.endDate + "'";
+    }
+    else {
+        return '';
+    }
+</rule>
+    ) t1
+    GROUP by t1.account) t2 on t2.account = kba.account
+LEFT JOIN kw_edition ke on ke.id = kba.edition_id and ke.deleted = 0
+LEFT JOIN kw_edition_account kea on kea.id = kba.edition_account_id and kea.deleted = 0
+LEFT JOIN kw_mechanism km on km.id = ke.mechanism_id and km.deleted = 0
+WHERE kba.deleted = 0
+<rule>
+    if(context.account != nil && context.account != '') {
+        return " and kba.account like '%" + context.account + "%'";
+    }
+    else {
+        return '';
+    }
+</rule>
+<rule>
+    if(context.ids != nil) {
+        return 'and kba.id in ('+array2str( context.ids )+')';
+    }
+    else {
+        return '';
+    }
+</rule>
+<rule>
+    if(context.authority_kwBankAccount != nil) {
+        return context.authority_kwBankAccount;
+    }
+    else {
+        return '';
+    }
+</rule>
+order by kba.when_created desc

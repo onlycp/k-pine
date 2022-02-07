@@ -1,0 +1,62 @@
+SELECT
+    kba.bank_deposit, kea.bank_account as edition_account, kbae.pro_name, km.bank_name as mechanism_name, km.id as mechanism_id, ke.name as edition_name,ke.id as edition_id,  kba.id as bank_account_id, kw.id as water_id,  kr.*
+FROM kw_receipt kr
+LEFT JOIN sys_file kf on kf.id = kr.file_id
+LEFT JOIN kw_water kw on kw.receipt_id = kr.id and kw.deleted = 0
+LEFT JOIN kw_bank_account kba on kba.account = kr.self_account and kba.deleted = 0
+LEFT JOIN kw_bank_account_expand kbae on kba.account = kbae.account
+LEFT JOIN kw_edition ke on kba.edition_id = ke.id and ke.deleted = 0
+LEFT JOIN kw_edition_account kea on kea.id = kba.edition_account_id and kea.deleted = 0
+LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id and km.deleted = 0
+where kr.deleted = 0  and kr.has_water = 0
+<rule>
+    if(context.editionId != nil && context.editionId != '') {
+        return " and ke.id ='" + context.editionId + "'";
+    }
+    else {
+        return '';
+    }
+</rule>
+<rule>
+    if(context.editionName != nil && context.editionName != '') {
+        return " and ke.name like '%" + context.editionName + "%'";
+    }
+    else {
+        return '';
+    }
+</rule>
+<rule>
+    if(context.account != nil && context.account != '') {
+        return " and kr.self_account like '%" + context.account + "%'";
+    }
+    else {
+        return '';
+    }
+</rule>
+<rule>
+    if(context.startDate != nil && context.startDate != '') {
+        return " and kw.transaction_date between '" + context.startDate + "' and '" + context.endDate + "'";
+    }
+    else {
+        return '';
+    }
+</rule>
+
+<rule>
+    if(context.ids != nil) {
+        return 'and kr.id in ('+array2str( context.ids )+')';
+    }
+    else {
+        return '';
+    }
+</rule>
+<rule>
+    if(context.authority_kwBankAccount != nil) {
+        return context.authority_kwBankAccount;
+    }
+    else {
+        return '';
+    }
+</rule>
+
+ORDER BY kr.book_date desc

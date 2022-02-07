@@ -18,8 +18,9 @@ public class FlowInfo {
     private String content;
     /** 名称 **/
     private String name;
-    /** 父流程id **/
-    private String parentId = "0";
+    /** 描述 **/
+    private String description = "";
+
     /** 创建时间 **/
     private Long createTime;
     /** 更新时间 **/

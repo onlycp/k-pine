@@ -90,6 +90,7 @@ public class KDBHttpChannel implements DbChannel{
 
     @Override
     public void executeSql(String sql, List<Object> objects) {
+        logger.info("execute:" + sql);
         send(makePassThrough(sql, objects));
 
     }

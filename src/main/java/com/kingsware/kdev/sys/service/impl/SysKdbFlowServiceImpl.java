@@ -3,10 +3,9 @@ package com.kingsware.kdev.sys.service.impl;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.orm.DB;
-import com.kingsware.kdev.core.orm.kdb.FlowInfo;
-import com.kingsware.kdev.core.orm.kdb.KdbApi;
-import com.kingsware.kdev.core.orm.kdb.KdbFlowQueryArgv;
+import com.kingsware.kdev.core.orm.kdb.*;
 import com.kingsware.kdev.core.util.PageUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysKdbFlowArgv;
@@ -46,37 +45,41 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         flowRet.setId(info.getFlowId());
         flowRet.setContent(info.getContent());
         flowRet.setName(info.getName());
+        flowRet.setDescription(info.getDescription());
         if (info.getCreateTime() !=null ) {
             flowRet.setWhenCreated(new Timestamp(info.getCreateTime()));
+        }
+        else {
+            flowRet.setWhenCreated(new Timestamp(0));
         }
         if (info.getUpdateTime() != null) {
             flowRet.setWhenModified(new Timestamp(info.getUpdateTime()));
         }
-        flowRet.setParentId(info.getParentId());
         return flowRet;
     }
 
     @Override
     public void add(SysKdbFlowArgv argv) {
 
-        FlowInfo info = new FlowInfo();
-        info.setFlowId(StringUtils.getUUID());
+        AddFlowInfo info = new AddFlowInfo();
+//        info.setFlowId(StringUtils.getUUID());
         info.setContent(argv.getContent());
         info.setName(argv.getName());
-        info.setParentId("0");
+        info.setDescription(argv.getDescription());
+
         KdbApi api = (KdbApi)(DB.getDefault());
         api.addFlow(info);
     }
 
     @Override
     public void edit(SysKdbFlowArgv argv) {
-        FlowInfo info = new FlowInfo();
+        EditFlowInfo info = new EditFlowInfo();
         info.setContent(argv.getContent());
         info.setName(argv.getName());
-        info.setParentId("0");
         info.setFlowId(argv.getId());
+        info.setDescription(argv.getDescription());
         KdbApi api = (KdbApi)(DB.getDefault());
-        api.addFlow(info);
+        api.editFlow(info);
     }
 
     @Override
@@ -96,17 +99,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         }
         // 排序
         if (!retList.isEmpty()) {
-            retList.sort(((o1, o2) -> {
-                Timestamp t1 = o1.getWhenCreated();
-                Timestamp t2 = o2.getWhenModified();
-                if (t1 == null) {
-                    t1 = new Timestamp(0);
-                }
-                if (t2 == null) {
-                    t2 = new Timestamp(0);
-                }
-                return t2.compareTo(t1);
-            }));
+            retList.sort(((o1, o2) -> o2.getWhenCreated().compareTo(o1.getWhenCreated())));
         }
         return PageUtil.memoryPage(argv, retList, SysKdbFlowRet.class);
     }
@@ -116,6 +109,31 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         KdbApi api = (KdbApi)(DB.getDefault());
         for (String id: argv.getIds()) {
            api.deleteFlow(id);
+        }
+    }
+
+    @Override
+    public void addOrUpdate(String name, String content) {
+        // 参数
+        KdbFlowQueryArgv argvName = new KdbFlowQueryArgv();
+        argvName.setName(name);
+        // 查询model
+        KdbApi api = DB.kdbApi();
+        List<FlowInfo> list = api.query(argvName);
+        if (list.size() > 1) {
+            throw BusinessException.serviceThrow("存在多个名称相同的流程");
+        }
+        // 如果是空，则是新增
+        SysKdbFlowArgv argv = new SysKdbFlowArgv();
+        argv.setName(name);
+        argv.setContent(content);
+        argv.setDescription("这个人很懒，什么都没有留下");
+        if (list.isEmpty()) {
+            add(argv);
+        }
+        else {
+            argv.setId(list.get(0).getFlowId());
+            edit(argv);
         }
     }
 

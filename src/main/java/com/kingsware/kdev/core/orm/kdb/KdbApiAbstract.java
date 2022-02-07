@@ -1,17 +1,16 @@
 package com.kingsware.kdev.core.orm.kdb;
 
 import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.HttpClientException;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.HttpUtil;
 import com.kingsware.kdev.core.util.JsonUtil;
+import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * kdb抽象类
@@ -36,12 +35,12 @@ public abstract class KdbApiAbstract implements  KdbApi {
     public static final String QUERY_DS_URL = "/api/dataSource/search";
 
     @Override
-    public void addFlow(FlowInfo flowInfo) {
+    public void addFlow(AddFlowInfo flowInfo) {
        post(flowInfo, ADD_FLOW_URL, String.class);
     }
 
     @Override
-    public void editFlow(FlowInfo flowInfo) {
+    public void editFlow(EditFlowInfo flowInfo) {
         post(flowInfo, EDIT_FLOW_URL, String.class);
 
     }
@@ -85,21 +84,9 @@ public abstract class KdbApiAbstract implements  KdbApi {
     }
 
     @Override
-    public Map<String, String> executeFlow(KdbArgv argv) {
+    public KdbRet<String> executeFlow(KdbArgv argv) {
         // 加入当前环境变量
-        argv.addVariable("who",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getId() : "");
-        argv.addVariable("username",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getUsername() : "");
-        argv.addVariable("when", DateUtils.getNow());
-
-        KdbRet<Map> ret =  post(argv, EXCUTE_FLOW_URL, Map.class);
-        Map<String, String> result = new HashMap<>();
-        if (ret.getResponseBody() != null) {
-            ret.getResponseBody().forEach((key, value) -> {
-                result.put(key.toString(), value == null ? null : value.toString());
-            });
-        }
-
-        return result;
+        return post(argv, EXCUTE_FLOW_URL, String.class);
     }
 
     /**
@@ -125,14 +112,7 @@ public abstract class KdbApiAbstract implements  KdbApi {
             if (ret == null) {
                 throw new OrmDbException("kdb响应数据不合法，响应内容:" + responseBody);
             }
-            if (ret.getErrorCode() == 0) {
-                // 没死，高高兴兴回家
-                return ret;
-            }
-            else {
-                // 死了， 通知准备后事
-                throw new OrmDbException(ret.getMessage());
-            }
+            return ret;
         }
         catch (HttpClientException e) {
             log.error("接口调用，响应码:{}, 响应信息：{}，接口:{}, 参数:{}", e.getCode(), e.getMessage(), e.getUrl(), e.getParams());

@@ -57,8 +57,6 @@ public class ClientContextAspect {
         KClientContext.setContext(clientInfo);
         // 放开
         return pjd.proceed();
-
-
     }
 
     /**
