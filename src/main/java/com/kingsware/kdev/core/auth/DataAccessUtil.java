@@ -42,39 +42,45 @@ public class DataAccessUtil {
         if (AccessManager.getInstance().isSupperAdmin(userInfo.getRoleIds())) {
             return null;
         }
-        // 如果用户的数据id为空， 返回永远不可能成真的条件
-        if (StringUtils.isEmpty(userInfo.getAccessIds())) {
-            return "1 != 1";
-        }
+
         // 如果不包括相关表，则不处理
         if (!AccessManager.getInstance().getAccessTables().containsKey(table.toLowerCase())) {
             return null;
         }
+
         // 获取附加sql
         String extraSql = AccessManager.getInstance().getAccessTables().get(table.toLowerCase());
+        // 如果用户的数据id为空， 返回永远不可能成真的条件
+        if (StringUtils.isEmpty(userInfo.getAccessIds()) && StringUtils.isEmpty(extraSql)) {
+            return "1 != 1";
+        }
+
         // 环境变量
         if (StringUtils.isNotEmpty(extraSql)) {
             Map<String, String> contextMap = new HashMap<>();
-            contextMap.put("userId", userInfo.getId());
+            contextMap.put("userId", "'" + userInfo.getId() + "'");
+            contextMap.put("username", "'" + userInfo.getUsername() + "'");
+            contextMap.put("alias", alias);
             for (Map.Entry<String, String> entry: contextMap.entrySet()) {
                 extraSql = extraSql.replaceAll("\\$\\{"+entry.getKey() +"}", entry.getValue());
             }
         }
-
         // 处理in
         String[] arr = userInfo.getAccessIds().split(",");
         List<String> inSet = new ArrayList<>(arr.length);
+        // 加一个不可能存在的id进去，避免出现in空的问题
+        inSet.add("'-1'");
         for (String a: arr) {
             inSet.add("'" + a + "'");
         }
         // 拼接权限sql(由于id是uuid，这里忽略table_name)
         if (sqlLink == SqlLink.EXISTS) {
             return MessageFormat.format("exists (" +
-                    "select ar.data_id from sys_data_access_resource ar where {0}.id=ar.data_id and ar.access_id in ({1})" +
-                    ")", alias, StringUtils.joinToString(inSet, ","));
+                    "select ar.data_id from sys_data_access_resource ar where ({0}.id=ar.data_id and ar.access_id in ({1}) ) {2} " +
+                    ")", alias, StringUtils.joinToString(inSet, ","), extraSql);
         }
         else if (sqlLink == SqlLink.IN) {
-            return MessageFormat.format("{0}.id in (select ar.data_id from sys_data_access_resource ar where ar.table_name=''{1}'' and  ar.access_id in ({2}))", alias, table, StringUtils.joinToString(inSet, ","));
+            return MessageFormat.format("{0}.id in (select ar.data_id from sys_data_access_resource ar where (ar.table_name=''{1}'' and  ar.access_id in ({2})) {3})", alias, table, StringUtils.joinToString(inSet, ","), extraSql);
         }
         return null;
     }
