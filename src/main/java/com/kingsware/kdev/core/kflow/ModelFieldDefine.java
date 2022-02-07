@@ -16,9 +16,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ModelFieldDefine {
     /** 键名 **/
-    private String key;
+    private String field;
+    /** 标签 **/
+    private String label;
     /** 数据类型 **/
     private String type;
+    /** 格式类型 **/
+    private String formatType;
     /** 格式 **/
-    private String format;
+    private String formatPattern;
 }

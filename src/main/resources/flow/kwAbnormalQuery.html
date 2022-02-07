@@ -9,9 +9,10 @@ where kba.deleted=0
 group by km.id, ke.id ) tm0
 left join  (
 select kba.edition_id, sum(if(kw.abnormal=1, 1, 0)) as t1, sum(if(kw.has_receipt=0, 1,0)) as t2 from kw_water kw left join  kw_bank_account kba on kba.account= kw.account
+where 1=1
 <rule>
     if(context.startDate != nil && context.startDate != '') {
-    return ' kw.transaction_date between \\#{startDate} and \\#{endDate}';
+    return ' and kw.transaction_date between \\#{startDate} and \\#{endDate}';
     }
     else {
     return '';
@@ -22,9 +23,10 @@ group by kba.edition_id
 
 left join (
 select kba.edition_id, sum(if(kr.has_water=0, 1, 0)) as t3 from kw_receipt kr  left join  kw_bank_account kba on kba.account= kr.self_account
+where 1=1
 <rule>
     if(context.startDate != nil && context.startDate != '') {
-        return ' kr.transaction_date between \\#{startDate} and \\#{endDate}';
+        return ' and kr.book_date between \\#{startDate} and \\#{endDate}';
     }
     else {
         return '';

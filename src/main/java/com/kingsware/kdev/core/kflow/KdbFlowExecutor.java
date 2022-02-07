@@ -1,6 +1,8 @@
 package com.kingsware.kdev.core.kflow;
 
 import com.kingsware.kdev.core.bean.BaseRet;
+import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.excel.KExcel;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.kflow.handler.KFlowResultHandlerFactory;
 import com.kingsware.kdev.core.kflow.handler.KObjectHandler;
@@ -11,6 +13,7 @@ import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.NumberUtils;
 import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.sys.model.SysViewModel;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -50,11 +53,11 @@ public class KdbFlowExecutor {
      * 公共的属性列定义
      */
     private void initPublicModelField() {
-        publicModelFieldMap.put("whenCreated", new ModelFieldDefine("whenCreated","Timestamp", DateUtils.DATE_TIME));
-        publicModelFieldMap.put("whenModified", new ModelFieldDefine("whenModified","Timestamp", DateUtils.DATE_TIME));
-        publicModelFieldMap.put("balanceUpdateTime", new ModelFieldDefine("balanceUpdateTime","Timestamp", DateUtils.DATE_TIME));
-        publicModelFieldMap.put("createAccountTime", new ModelFieldDefine("createAccountTime","Timestamp", DateUtils.DATE));
-        publicModelFieldMap.put("cancelAccountTime", new ModelFieldDefine("cancelAccountTime","Timestamp", DateUtils.DATE));
+        publicModelFieldMap.put("whenCreated", new ModelFieldDefine("whenCreated","创建时间" ,"Timestamp", "time",  DateUtils.DATE_TIME));
+        publicModelFieldMap.put("whenModified", new ModelFieldDefine("whenModified","修改时间","Timestamp", "time", DateUtils.DATE_TIME));
+        publicModelFieldMap.put("balanceUpdateTime", new ModelFieldDefine("balanceUpdateTime","余额更新时间","Timestamp","time", DateUtils.DATE_TIME));
+        publicModelFieldMap.put("createAccountTime", new ModelFieldDefine("createAccountTime","账户建立时间","Timestamp","time", DateUtils.DATE));
+        publicModelFieldMap.put("cancelAccountTime", new ModelFieldDefine("cancelAccountTime","账户销户时间","Timestamp", "time", DateUtils.DATE));
     }
 
 
@@ -136,6 +139,7 @@ public class KdbFlowExecutor {
         return mapObjectList;
     }
 
+
     /**
      * 转换处理列表
      * @param text
@@ -173,7 +177,7 @@ public class KdbFlowExecutor {
                         if ("Timestamp".equals(modelFieldDefine.getType())) {
                             String strValue = value.toString();
                             if (NumberUtils.isParsable(strValue)) {
-                                value = DateUtils.formatDate(new Date(Long.parseLong(strValue)), modelFieldDefine.getFormat());
+                                value = DateUtils.formatDate(new Date(Long.parseLong(strValue)), modelFieldDefine.getFormatPattern());
                             }
                         }
                     }

@@ -1,4 +1,4 @@
-package com.kingsware.kdev.core.config;
+package com.kingsware.kdev.core.kflow;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,9 +10,11 @@ import com.kingsware.kdev.core.kflow.ErrorResult;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.kflow.TipResult;
+import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.model.SysApi;
+import com.kingsware.kdev.sys.model.SysViewModelField;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -34,13 +36,22 @@ import java.util.*;
  */
 @Component
 @Slf4j
-public class KFilter implements Filter {
+public class KFlowFilter implements Filter {
+
+    private static final String RET_TYPE_KEY = "ret@type";
 
     @Resource
     private ObjectMapper objectMapper;
+    @Resource
+    private KFlowProperties kFlowProperties;
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+        // 如果不启用流程
+        if (!kFlowProperties.isEnable()) {
+            filterChain.doFilter(servletRequest, servletResponse);
+            return;
+        }
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         // 获取请求路径
@@ -59,6 +70,8 @@ public class KFilter implements Filter {
         }
         // 流程方式
         else if (api.getCallType() == 2) {
+            // 获取视图模型
+
             KFlowContext context = new KFlowContext();
             // 处理系统变量
             context.getSystemContext().put("who",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getId() : "");
@@ -84,6 +97,9 @@ public class KFilter implements Filter {
             }
             else if (result instanceof ErrorResult) {
                 ret = BaseRet.failMessage(((ErrorResult) result).getMessage());
+            }
+            else if (result instanceof Map && ((Map<?, ?>) result).containsKey("RET_TYPE_KEY")) {
+
             }
             else {
                 ret = BaseRet.success(result);

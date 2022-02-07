@@ -49,4 +49,25 @@ public class BaseFlowTest {
                 .toNode(NodeTypeEnum.JOIN, "并行结束");
         return flowDefinition.toJson();
     }
+
+    /**
+     * 创建导出流程
+     * @param flowName      流程名称
+     * @param tableName     表名
+     * @return
+     */
+    @SneakyThrows
+    String createExportFlow(String flowName, String tableName) {
+        // 查询数据sql
+        String querySql = FileUtils.readFileText(ResourceUtils.getFile(String.format("classpath:flow/%sQuery.html", StringUtils.lineToHump(tableName))));
+        // 分页结果处理js， 从文件中读取
+        String pagedJs = FileUtils.readFileText(ResourceUtils.getFile("classpath:flow/export.js"));
+        FlowDefinition flowDefinition = FlowDefinition
+                .start(flowName)
+                .toSqlWithAfter("查询列表数据", "MySql2", querySql, "setResult('list',context.get('result'));" )
+                .toNodeWithAfter(NodeTypeEnum.TASK, "处理结果", pagedJs)
+                .toEnd();
+        return flowDefinition.toJson();
+
+    }
 }

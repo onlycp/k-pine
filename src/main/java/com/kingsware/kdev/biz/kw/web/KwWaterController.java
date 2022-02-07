@@ -70,6 +70,7 @@ public class KwWaterController extends BaseController {
      */
     @ApiOperation(value = "导出导入模板 " ,notes = "导出导入模板")
     @GetMapping("/exportImportTemplate")
+    @UselessApi
     public void exportImportTemplate() {
         kwWaterService.exportImportTemplate();
     }

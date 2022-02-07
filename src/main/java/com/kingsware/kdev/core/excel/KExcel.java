@@ -3,6 +3,7 @@ import com.kingsware.kdev.core.util.BeanUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -72,6 +73,37 @@ public class KExcel {
             for (int j = 0; j < list.size(); j++) {
                 Object obj = list.get(j);
                 Object cellValue = BeanUtils.getFieldValue(define.getPropName(), obj);
+                if (cellValue == null) {
+                    continue;
+                }
+                if (define.getFormat() != null) {
+                    cellValue = define.getFormat().format(cellValue, obj);
+                }
+                sheet.addCellRegion(j + 1, i, cellValue);
+            }
+        }
+        return excel;
+    }
+
+    /**
+     * 将列表转为表格数据
+     * @param defines       列定义
+     * @param list         数据
+     */
+    public static KExcel fromMapList(String fileName, String sheetName ,List<RegionDefine> defines, List<Map<String, Object>> list) {
+        // 创建表格对象
+        KExcel excel = new KExcel(fileName);
+        // 创建sheet
+        KSheet sheet = excel.createSheet(sheetName);
+        // 写入数据
+        for (int i = 0; i < defines.size(); i++) {
+            RegionDefine define = defines.get(i);
+            // 写表头
+            sheet.addCellRegion(0, i, define.getLabelName());
+            // 写数据
+            for (int j = 0; j < list.size(); j++) {
+                Map<String, Object> obj = list.get(j);
+                Object cellValue = obj.get(define.getPropName());
                 if (cellValue == null) {
                     continue;
                 }
