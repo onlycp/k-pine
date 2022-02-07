@@ -21,7 +21,7 @@ public class DictTask implements KTask {
     @Override
     public void execute() {
         // 查找所有字典
-        List<DictItemInfo> dictItemList = DB.findList(DictItemInfo.class, new ArrayList<>());
+        List<DictItemInfo> dictItemList = DB.findList(DictItemInfo.class, "select * from sys_dict_item");
         for (DictItemInfo dictItem: dictItemList) {
             DictManager.getInstance().addDict(dictItem.getCode(), dictItem.getName(), dictItem.getValue());
         }
