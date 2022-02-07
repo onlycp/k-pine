@@ -2,4 +2,5 @@
 /.classpath
 /logs/
 /.idea/
+/*/target/
 /k-dev.iml

@@ -2,19 +2,27 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<parent>
+    <packaging>pom</packaging>
+    <modules>
+        <module>k-dev-core</module>
+		<module>k-dev-sys</module>
+        <module>k-dev-app</module>
+	</modules>
+    <parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.5.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.kingsware.dev</groupId>
-	<artifactId>k-dev-cli-api</artifactId>
+	<artifactId>k-dev-parent</artifactId>
 	<version>1.0.0</version>
 	<name>k-dev-cli-api</name>
 	<description>金智维简易开发平台</description>
 	<properties>
 		<java.version>1.8</java.version>
+		<maven.compiler.source>8</maven.compiler.source>
+		<maven.compiler.target>8</maven.compiler.target>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -58,22 +66,37 @@
 			<version>5.5.1</version>
 		</dependency>
 	</dependencies>
+	<distributionManagement>
+		<repository>
+			<id>releases</id>
+			<name>Internal Releases</name>
+			<url>http://192.168.2.69:83/repository/maven-third/</url>
+		</repository>
+		<snapshotRepository>
+			<id>snapshots</id>
+			<name>Internal Releases</name>
+			<url>http://192.168.2.69:83/repository/maven-third-snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<artifactId>k-dev-core</artifactId>
+				<groupId>com.kingsware.dev</groupId>
+				<version>1.0.0</version>
+			</dependency>
+			<dependency>
+				<artifactId>k-dev-sys</artifactId>
+				<groupId>com.kingsware.dev</groupId>
+				<version>1.0.0</version>
+			</dependency>
+			<dependency>
+				<artifactId>k-dev-biz-kw</artifactId>
+				<groupId>com.kingsware.dev</groupId>
+				<version>1.0.0</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<exclude>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
 
 </project>
