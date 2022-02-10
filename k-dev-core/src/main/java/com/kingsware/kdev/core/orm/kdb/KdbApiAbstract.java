@@ -31,8 +31,9 @@ public abstract class KdbApiAbstract implements  KdbApi {
     public static final String QUERY_DS_URL = "/api/dataSource/search";
 
     @Override
-    public void addFlow(AddFlowInfo flowInfo) {
-       post(flowInfo, ADD_FLOW_URL, String.class);
+    public String addFlow(AddFlowInfo flowInfo) {
+       KdbRet<AddFlowInfoRet> ret = post(flowInfo, ADD_FLOW_URL, AddFlowInfoRet.class);
+       return ret.getResponseBody().getFlowId();
     }
 
     @Override

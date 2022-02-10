@@ -14,9 +14,9 @@ public interface KdbApi {
     /**
      * 新增流程
      * @param flowInfo  流程信息
-     * @return
+     * @return 流程id
      */
-    void addFlow(AddFlowInfo flowInfo);
+    String addFlow(AddFlowInfo flowInfo);
 
     /**
      * 编辑流程

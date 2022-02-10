@@ -13,18 +13,11 @@
         <dependency>
             <artifactId>k-dev-core</artifactId>
             <groupId>com.kingsware.dev</groupId>
-            <version>1.0.0</version>
         </dependency>
         <dependency>
             <artifactId>k-dev-sys</artifactId>
             <groupId>com.kingsware.dev</groupId>
-            <version>1.0.0</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <artifactId>k-dev-biz-kw</artifactId>-->
-<!--            <groupId>com.kingsware.dev</groupId>-->
-<!--            <version>1.0.0</version>-->
-<!--        </dependency>-->
     </dependencies>
 
     <build>
