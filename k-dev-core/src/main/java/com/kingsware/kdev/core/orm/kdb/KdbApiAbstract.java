@@ -29,6 +29,12 @@ public abstract class KdbApiAbstract implements  KdbApi {
     public static final String EDIT_DS_URL = "/api/dataSource/edit";
     public static final String DELETE_DS_URL = "/api/dataSource/delete";
     public static final String QUERY_DS_URL = "/api/dataSource/search";
+    /** 函数相关 **/
+    public static final String QUERY_FUN_URL = "/api/function/search";
+    public static final String ADD_FUN_URL = "/api/function/add";
+    public static final String EDIT_FUN_URL = "/api/function/edit";
+    public static final String DELETE_FUN_URL = "/api/function/delete";
+
 
     @Override
     public String addFlow(AddFlowInfo flowInfo) {
@@ -84,6 +90,30 @@ public abstract class KdbApiAbstract implements  KdbApi {
     public KdbRet<String> executeFlow(KdbArgv argv) {
         // 加入当前环境变量
         return post(argv, EXCUTE_FLOW_URL, String.class);
+    }
+
+    @Override
+    public void addFun(AddFunctionInfo argv) {
+        post(argv, ADD_FUN_URL, String.class);
+    }
+
+    @Override
+    public void editFun(EditFunctionInfo argv) {
+        post(argv, EDIT_FUN_URL, String.class);
+    }
+
+    @Override
+    public void deleteFun(String funId) {
+        Map<String, Object> params = new HashMap<>(1);
+        params.put("id", funId);
+        post(params, DELETE_FUN_URL, String.class);
+    }
+
+    @Override
+    public List<FunctionInfo> queryFunction(FunctionQueryArgv argv) {
+        KdbRet<List> list =  post(argv, QUERY_FUN_URL, List.class);
+        String json = JsonUtil.toJson(list.getResponseBody());
+        return JsonUtil.toListBean(json, FunctionInfo.class);
     }
 
     /**

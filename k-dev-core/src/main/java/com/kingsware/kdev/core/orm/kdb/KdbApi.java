@@ -74,6 +74,31 @@ public interface KdbApi {
      */
     KdbRet<String>  executeFlow(KdbArgv argv);
 
+    /**
+     * 新增函数
+     * @param argv  函数
+     */
+    void addFun(AddFunctionInfo argv);
+
+    /**
+     * 编辑函数
+     * @param argv 参数
+     */
+    void editFun(EditFunctionInfo argv);
+
+    /**
+     * 删除函数
+     * @param funId 函数id
+     */
+    void deleteFun(String funId);
+
+    /**
+     * 函数查询
+     * @param argv  参数
+     * @return 查询结果
+     */
+    List<FunctionInfo> queryFunction(FunctionQueryArgv argv);
+
 
 
 }
