@@ -174,8 +174,10 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             throw BusinessException.serviceThrow("请填写完整的登录信息！");
         }
         // 拼装sql
+        final Integer ENABLE_STATUS = 1;
         SqlWrapper wrapper = new SqlWrapper("select * from sys_user where 1=1 ");
         wrapper.addCondition("username", Op.EQ, argv.getUsername());
+        wrapper.addCondition("status", Op.EQ, ENABLE_STATUS);
         SysUser model = DB.findOne(SysUser.class, wrapper.getSql(), wrapper.getParams().toArray());
         if (model == null) {
             throw BusinessException.serviceThrow("用户名或密码有误！");
@@ -275,8 +277,10 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
 
     private List<SysRole> getRolesByUserId(String userId) {
         // 拼装sql
+        final Integer ENABLE_STATUS = 1;
         SqlWrapper wrapper = new SqlWrapper("select sr.* from sys_user_role sur left join sys_role sr on sr.id = sur.sys_role_id where 1=1 ");
         wrapper.addCondition("sys_user_id", Op.EQ, userId);
+        wrapper.addCondition("sr.status", Op.EQ, ENABLE_STATUS);
         return DB.findList(SysRole.class, wrapper.getSql(), wrapper.getParams().toArray());
     }
 
