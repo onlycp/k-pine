@@ -17,4 +17,7 @@ public class SysDataAccessQueryArgv extends BasePageArgv {
     /** 名称 */
     private String name;
 
+    /** 状态 */
+    private Integer status;
+
 }
