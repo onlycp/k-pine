@@ -77,7 +77,7 @@ public class DataAccessUtil {
         if (sqlLink == SqlLink.EXISTS) {
             return MessageFormat.format("exists (" +
                     "select ar.data_id from sys_data_access_resource ar where ({0}.id=ar.data_id and ar.access_id in ({1}) ) {2} " +
-                    ")", alias, StringUtils.joinToString(inSet, ","), extraSql);
+                    ")", alias, StringUtils.joinToString(inSet, ","), extraSql == null ? "" : extraSql);
         }
         else if (sqlLink == SqlLink.IN) {
             return MessageFormat.format("{0}.id in (select ar.data_id from sys_data_access_resource ar where (ar.table_name=''{1}'' and  ar.access_id in ({2})) {3})", alias, table, StringUtils.joinToString(inSet, ","), extraSql);
