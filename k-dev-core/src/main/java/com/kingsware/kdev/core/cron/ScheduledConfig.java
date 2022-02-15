@@ -1,10 +1,13 @@
 package com.kingsware.kdev.core.cron;
 
+import com.kingsware.kdev.core.model.SysTask;
+import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.ClassUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
@@ -22,6 +25,7 @@ import java.util.concurrent.Executor;
  */
 @Slf4j
 @Configuration
+@EnableScheduling
 public class ScheduledConfig implements SchedulingConfigurer {
 
     @Value("${schedule.corePoolSize:10}")
@@ -35,33 +39,22 @@ public class ScheduledConfig implements SchedulingConfigurer {
 
     @Override
     public void configureTasks(ScheduledTaskRegistrar scheduledTaskRegistrar) {
-        // 扫描所有的定时器类
-        List<Class<?>> classList =  ClassUtils.getClassesByParentClass(scanPackage, KTask.class);
-        for (Class<?> tClass: classList) {
-            KTask task;
-            try {
-                // 生成实例
-                task = (KTask) tClass.newInstance();
-                // 执行任务
-                scheduledTaskRegistrar.addTriggerTask(() -> {
-                    try {
-                        long t1 = System.currentTimeMillis();
-                        task.execute();
-                        log.debug("定时任务执行成功, 任务名: {}， Class: {}, 耗时:{} ms", task.name(), task.getClass().getName(), System.currentTimeMillis() - t1);
-                    }
-                    catch (Exception e) {
-                        log.error("定时任务执行失败, 任务名: {}， Class: {}, 错误信息:{}", task.name(), task.getClass().getName(), e.getMessage());
-                    }
+        // 先加载类
+        scanJavaClassTask();
+        // 从数据库里加载所有定时任务
+        List<SysTask> tasks = DB.findList(SysTask.class, "select * from sys_task where enable=1");
+        for (SysTask sysTask: tasks) {
+            // 执行任务
+            scheduledTaskRegistrar.addTriggerTask(() -> {
+                KTaskManager.getInstance().runTask(sysTask);
 
-                }, triggerContext -> {
-                    return new CronTrigger(task.cron()).nextExecutionTime(triggerContext);
-                });
-            }
-            catch (Exception e) {
-                log.error("定时任务初始化失败:{}" , e.getMessage());
-            }
+            }, triggerContext -> {
+                SysTask myTask = DB.findById(SysTask.class, sysTask.getId());
+                return new CronTrigger(myTask.getCron()).nextExecutionTime(triggerContext);
+            });
         }
     }
+
 
     @Bean
     public Executor taskExecutor() {
@@ -71,5 +64,36 @@ public class ScheduledConfig implements SchedulingConfigurer {
         executor.setQueueCapacity(queueCapacity);
         executor.initialize();
         return executor;
+    }
+
+    /**
+     * 扫描Class类
+     */
+    public void scanJavaClassTask() {
+        // 扫描所有的定时器类
+        List<Class<?>> classList =  ClassUtils.getClassesByParentClass(scanPackage, KTask.class);
+        for (Class<?> tClass: classList) {
+            // 生成实例
+            try {
+                KTask task = (KTask) tClass.newInstance();
+                // 查找平台已经是否存在此任务
+                long count = DB.findCount("select count(1) from sys_task where task_type=1 and name=?", task.name());
+                // 如果已存在就不处理
+                if (count == 0) {
+                    SysTask sysTask = new SysTask();
+                    sysTask.setName(task.name());
+                    sysTask.setTaskType(1);
+                    sysTask.setCron(task.cron());
+                    sysTask.setEnable(1);
+                    sysTask.setDistributed(1);
+                    sysTask.setClassName(tClass.getName());
+                    // 保存
+                    DB.save(sysTask);
+                    log.info("发现任务，任务名称:{}, cron:{}, Class: {}", sysTask.getName(), sysTask.getCron(), sysTask.getClassName());
+                }
+            } catch (Exception e) {
+                log.error("定时类扫描初始化失败:{}" , e.getMessage());
+            }
+        }
     }
 }
