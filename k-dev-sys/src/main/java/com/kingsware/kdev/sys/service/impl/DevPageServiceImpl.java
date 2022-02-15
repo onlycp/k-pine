@@ -9,6 +9,7 @@ import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
+import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.DevPageArgv;
 import com.kingsware.kdev.sys.argv.DevPageQueryArgv;
 import com.kingsware.kdev.sys.model.DevApplication;
@@ -71,8 +72,10 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
     @SuppressWarnings("unchecked")
     public PageDataRet<DevPageRet> query(DevPageQueryArgv argv) {
         // 拼装sql
-        SqlWrapper wrapper = new SqlWrapper("select * from dev_page where 1=1 ");
-
+        SqlWrapper wrapper = new SqlWrapper("select * from dev_page where 1=1 and deleted=0 ");
+        if (StringUtils.isNotEmpty(argv.getName())) {
+            wrapper.addCondition("name", Op.LIKE, "%" + argv.getName() + "%");
+        }
         return (PageDataRet<DevPageRet>) query(wrapper.getSql(), wrapper.getParams(), argv, DevPage.class, DevPageRet.class);
     }
 
