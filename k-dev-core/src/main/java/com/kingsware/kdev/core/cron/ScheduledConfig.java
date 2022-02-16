@@ -87,6 +87,8 @@ public class ScheduledConfig implements SchedulingConfigurer {
                     sysTask.setEnable(1);
                     sysTask.setDistributed(1);
                     sysTask.setClassName(tClass.getName());
+                    sysTask.setLockForLeast(1);
+                    sysTask.setLockForMost(30);
                     // 保存
                     DB.save(sysTask);
                     log.info("发现任务，任务名称:{}, cron:{}, Class: {}", sysTask.getName(), sysTask.getCron(), sysTask.getClassName());

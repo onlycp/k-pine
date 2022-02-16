@@ -16,15 +16,14 @@
 	</parent>
 	<groupId>com.kingsware.dev</groupId>
 	<artifactId>k-dev-parent</artifactId>
-	<version>1.0.0.20220708-01</version>
+	<version>1.0.0.20220216-01</version>
 	<name>k-dev-cli-api</name>
 	<description>金智维简易开发平台</description>
 	<properties>
 		<java.version>1.8</java.version>
 		<maven.compiler.source>8</maven.compiler.source>
 		<maven.compiler.target>8</maven.compiler.target>
-		<kdev.core.version>1.0.0.20220708-01</kdev.core.version>
-		<kdev.sys.version>1.0.0.20220708-01</kdev.sys.version>
+		<kdev.verion>1.0.0.20220216-01</kdev.verion>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -78,12 +77,12 @@
 			<dependency>
 				<artifactId>k-dev-core</artifactId>
 				<groupId>com.kingsware.dev</groupId>
-				<version>${kdev.core.version}</version>
+				<version>${kdev.verion}</version>
 			</dependency>
 			<dependency>
 				<artifactId>k-dev-sys</artifactId>
 				<groupId>com.kingsware.dev</groupId>
-				<version>${kdev.sys.version}</version>
+				<version>${kdev.verion}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

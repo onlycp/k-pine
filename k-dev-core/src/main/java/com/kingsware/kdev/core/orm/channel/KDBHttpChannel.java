@@ -55,8 +55,8 @@ public class KDBHttpChannel implements DbChannel{
     @Override
     public <T> T queryForObject(String sql, Class<T> tClass, List<Object> objects) {
         // 从kdb请求数据
-        String executeRequest =  send(makePassThrough(sql, objects));
-        List<T> list = JsonUtil.transformJson2List(executeRequest, tClass);
+        String executeResponse =  send(makePassThrough(sql, objects));
+        List<T> list = JsonUtil.transformJson2List(executeResponse, tClass);
         // 返回结果
         if (list == null || list.isEmpty()) {
             return null;
@@ -70,8 +70,8 @@ public class KDBHttpChannel implements DbChannel{
     @Override
     public long queryForCount(String sql, List<Object> objects) {
         // 从kdb请求数据
-        String executeRequest =  send(makePassThrough(sql, objects));
-        List<Map> list = JsonUtil.snakeCaseToListBean(executeRequest, Map.class);
+        String executeResponse =  send(makePassThrough(sql, objects));
+        List<Map> list = JsonUtil.snakeCaseToListBean(executeResponse, Map.class);
         // 返回结果
         if (list == null || list.size() != 1) {
             throw new OrmDbException("查询数量时，应保持只有一条记录");
@@ -85,22 +85,23 @@ public class KDBHttpChannel implements DbChannel{
     }
 
     @Override
-    public void executeSql(String sql, List<Object> objects) {
-        send(makePassThrough(sql, objects));
+    public Long executeSql(String sql, List<Object> objects) {
+        String executeResponse = send(makePassThrough(sql, objects));
+        return Long.parseLong(executeResponse);
 
     }
 
     public <T> List<T> queryForList(String sql, Class<T> tClass, List<Object> objects) {
         // 从kdb请求数据
-        String executeRequest =  send(makePassThrough(sql, objects));
-        return JsonUtil.transformJson2List(executeRequest, tClass);
+        String executeResponse =  send(makePassThrough(sql, objects));
+        return JsonUtil.transformJson2List(executeResponse, tClass);
     }
 
     @Override
     public <T> List<T> queryForAttribute(String sql, Class<T> tClass, List<Object> objects) {
         // 从kdb请求数据
-        String executeRequest =  send(makePassThrough(sql, objects));
-        List<Map> list = JsonUtil.snakeCaseToListBean(executeRequest, Map.class);
+        String executeResponse =  send(makePassThrough(sql, objects));
+        List<Map> list = JsonUtil.snakeCaseToListBean(executeResponse, Map.class);
         assert list != null;
         List<T> result = new ArrayList<>(list.size());
         for (int i = 0; i < list.size(); i++) {

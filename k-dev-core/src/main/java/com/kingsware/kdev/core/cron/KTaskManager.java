@@ -43,6 +43,14 @@ public class KTaskManager {
      */
     public void runTask(SysTask sysTask) {
 
+        // 设置锁，通过返回的数量才判断是否被锁
+        long cnt = DB.executeUpdateSql("update sys_task set lock_status=1, lock_for_time=now() where id=? and lock_status=0", sysTask.getId());
+        // 如果影响行数为0，说明当前是锁定状态
+        if (cnt == 0) {
+            log.info("任务:{} 处于锁定状态", sysTask.getName());
+            return;
+        }
+
         SysTask myTask = DB.findById(SysTask.class, sysTask.getId());
         if (myTask.getEnable() == 0) {
             return;
@@ -67,11 +75,10 @@ public class KTaskManager {
         }
         finally {
             long t2 = System.currentTimeMillis();
-            String sql = "update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ?,  last_execute_time=? where id=?";
+            String sql = "update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ?,  last_execute_time=?, lock_status=0 where id=?";
             DB.executeUpdateSql(sql, executeStatus, (t2 - t1),  errorMessage, DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME), sysTask.getId());
             //log.debug("定时任务执行, 任务名: {}", sysTask.getName());
         }
-
     }
 
     /**

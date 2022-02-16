@@ -48,7 +48,7 @@ public interface DbChannel {
      * @param sql       sql语句
      * @param objects   参数列表
      */
-    void executeSql(String sql, List<Object> objects);
+    Long executeSql(String sql, List<Object> objects);
 
     /**
      * 执行SQL，返回列表
