@@ -6,11 +6,13 @@ import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.model.SysTask;
 import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.util.ClassUtils;
 import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * 任务管理器
@@ -97,5 +99,38 @@ public class KTaskManager {
     private void runFlowTask(SysTask sysTask) {
         KFlowContext context = KFlowContext.createBaseContext();
         KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), Maps.newHashMap(), context);
+    }
+
+    /**
+     * 扫描Class类
+     */
+    public void scanJavaClassTask(String scanPackage) {
+        // 扫描所有的定时器类
+        List<Class<?>> classList =  ClassUtils.getClassesByParentClass(scanPackage, KTask.class);
+        for (Class<?> tClass: classList) {
+            // 生成实例
+            try {
+                KTask task = (KTask) tClass.newInstance();
+                // 查找平台已经是否存在此任务
+                long count = DB.findCount("select count(1) from sys_task where task_type=1 and name=?", task.name());
+                // 如果已存在就不处理
+                if (count == 0) {
+                    SysTask sysTask = new SysTask();
+                    sysTask.setName(task.name());
+                    sysTask.setTaskType(1);
+                    sysTask.setCron(task.cron());
+                    sysTask.setEnable(1);
+                    sysTask.setDistributed(1);
+                    sysTask.setClassName(tClass.getName());
+                    sysTask.setLockForLeast(1);
+                    sysTask.setLockForMost(30);
+                    // 保存
+                    DB.save(sysTask);
+                    log.info("发现任务，任务名称:{}, cron:{}, Class: {}", sysTask.getName(), sysTask.getCron(), sysTask.getClassName());
+                }
+            } catch (Exception e) {
+                log.error("定时类扫描初始化失败:{}" , e.getMessage());
+            }
+        }
     }
 }

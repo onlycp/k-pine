@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
 
@@ -40,7 +41,7 @@ public class ScheduledConfig implements SchedulingConfigurer {
     @Override
     public void configureTasks(ScheduledTaskRegistrar scheduledTaskRegistrar) {
         // 先加载类
-        scanJavaClassTask();
+        KTaskManager.getInstance().scanJavaClassTask(scanPackage);
         // 从数据库里加载所有定时任务
         List<SysTask> tasks = DB.findList(SysTask.class, "select * from sys_task where enable=1");
         for (SysTask sysTask: tasks) {
@@ -66,36 +67,5 @@ public class ScheduledConfig implements SchedulingConfigurer {
         return executor;
     }
 
-    /**
-     * 扫描Class类
-     */
-    public void scanJavaClassTask() {
-        // 扫描所有的定时器类
-        List<Class<?>> classList =  ClassUtils.getClassesByParentClass(scanPackage, KTask.class);
-        for (Class<?> tClass: classList) {
-            // 生成实例
-            try {
-                KTask task = (KTask) tClass.newInstance();
-                // 查找平台已经是否存在此任务
-                long count = DB.findCount("select count(1) from sys_task where task_type=1 and name=?", task.name());
-                // 如果已存在就不处理
-                if (count == 0) {
-                    SysTask sysTask = new SysTask();
-                    sysTask.setName(task.name());
-                    sysTask.setTaskType(1);
-                    sysTask.setCron(task.cron());
-                    sysTask.setEnable(1);
-                    sysTask.setDistributed(1);
-                    sysTask.setClassName(tClass.getName());
-                    sysTask.setLockForLeast(1);
-                    sysTask.setLockForMost(30);
-                    // 保存
-                    DB.save(sysTask);
-                    log.info("发现任务，任务名称:{}, cron:{}, Class: {}", sysTask.getName(), sysTask.getCron(), sysTask.getClassName());
-                }
-            } catch (Exception e) {
-                log.error("定时类扫描初始化失败:{}" , e.getMessage());
-            }
-        }
-    }
+
 }
