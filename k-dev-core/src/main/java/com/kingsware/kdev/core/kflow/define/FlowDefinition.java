@@ -40,6 +40,9 @@ public class FlowDefinition {
     @JsonIgnore
     private AtomicInteger linkIdAtomicInteger = new AtomicInteger(0);
 
+    public FlowDefinition() {
+    }
+
     private FlowDefinition(String name) {
         this.name = name;
     }

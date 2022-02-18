@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.sys.argv.SysKdbFlowArgv;
 import com.kingsware.kdev.sys.argv.SysKdbFlowQueryArgv;
+import com.kingsware.kdev.sys.ret.SysFlowDefineRet;
 import com.kingsware.kdev.sys.ret.SysKdbFlowRet;
 
 /**
@@ -21,6 +22,13 @@ public interface SysKdbFlowService {
      * @return      返回结果
      */
     SysKdbFlowRet get(String id);
+
+    /**
+     * 获取流程定义
+     * @param id    流程id
+     * @return      流程定义
+     */
+    SysFlowDefineRet getDefine(String id);
 
     /**
      * 新增

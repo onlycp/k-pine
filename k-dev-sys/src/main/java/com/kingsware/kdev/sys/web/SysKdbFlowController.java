@@ -7,6 +7,7 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
 import com.kingsware.kdev.sys.argv.SysKdbFlowArgv;
 import com.kingsware.kdev.sys.argv.SysKdbFlowQueryArgv;
+import com.kingsware.kdev.sys.ret.SysFlowDefineRet;
 import com.kingsware.kdev.sys.ret.SysKdbFlowRet;
 import com.kingsware.kdev.sys.service.SysKdbFlowService;
 import io.swagger.annotations.Api;
@@ -49,6 +50,17 @@ public class SysKdbFlowController extends BaseController {
     @GetMapping("/{id}")
     public BaseRet<SysKdbFlowRet> get(@PathVariable String id) {
         return BaseRet.success(sysKdbFlowService.get(id));
+    }
+
+
+    /**
+     * 详细信息
+     * @return 详细信息
+     */
+    @ApiOperation(value = "流程定义 " ,notes = "流程定义")
+    @GetMapping("/define/{id}")
+    public BaseRet<SysFlowDefineRet> getDefine(@PathVariable String id) {
+        return BaseRet.success(sysKdbFlowService.getDefine(id));
     }
 
     /**

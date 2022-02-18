@@ -4,12 +4,18 @@ import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.kflow.define.FlowDefinition;
+import com.kingsware.kdev.core.kflow.define.NodeDefinition;
+import com.kingsware.kdev.core.kflow.define.NodeLink;
+import com.kingsware.kdev.core.kflow.define.NodeTypeEnum;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.*;
+import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.PageUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysKdbFlowArgv;
 import com.kingsware.kdev.sys.argv.SysKdbFlowQueryArgv;
+import com.kingsware.kdev.sys.ret.SysFlowDefineRet;
 import com.kingsware.kdev.sys.ret.SysKdbFlowRet;
 import com.kingsware.kdev.sys.service.SysKdbFlowService;
 import org.springframework.stereotype.Service;
@@ -40,6 +46,48 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         return toRet(list.get(0));
     }
 
+    @Override
+    public SysFlowDefineRet getDefine(String id) {
+        // 参数
+        KdbFlowQueryArgv argv = new KdbFlowQueryArgv();
+        argv.setFlowId(id);
+        // 查询model
+        KdbApi api = DB.kdbApi();
+        List<FlowInfo> list = api.query(argv);
+        FlowInfo flowInfo = list.get(0);
+        // 转为流程定义
+        SysFlowDefineRet defineRet = new SysFlowDefineRet();
+        defineRet.setId(flowInfo.getFlowId());
+        defineRet.setName(flowInfo.getName());
+        defineRet.setDescription(flowInfo.getDescription());
+        // 处理节点
+        FlowDefinition flowDefinition = JsonUtil.toBean(flowInfo.getContent(), FlowDefinition.class);
+        for(NodeDefinition nodeDefinition: flowDefinition.getNodeDefinitions()) {
+            String executeType = "";
+            String dataSource = "";
+            String content = "";
+            String afterContent = "";
+            if (nodeDefinition.getExecute() != null && nodeDefinition.getExecute().getScript() != null) {
+                executeType = nodeDefinition.getExecute().getScript().getType();
+                dataSource = nodeDefinition.getExecute().getScript().getSourceName();
+                content = nodeDefinition.getExecute().getScript().getContent();
+            }
+            if (nodeDefinition.getListener() != null && nodeDefinition.getListener().getAfter() != null && nodeDefinition.getListener().getAfter().getScript() != null) {
+                afterContent = nodeDefinition.getListener().getAfter().getScript().getContent();
+            }
+            defineRet.addNode(nodeDefinition.getId(), nodeDefinition.getName(), nodeDefinition.getType(), executeType, dataSource, content, afterContent );
+        }
+        // 处理连线
+        for (NodeLink link: flowDefinition.getNodeLinks()) {
+            String expr = "";
+            if (link.getConditions() != null && link.getConditions().getDecision() != null ) {
+                expr = link.getConditions().getDecision().getExpr();
+            }
+            defineRet.addLink(link.getId(), link.getName(), link.getFrom(), link.getTo(), expr);
+        }
+        return defineRet;
+    }
+
     private SysKdbFlowRet toRet(FlowInfo info) {
         SysKdbFlowRet flowRet = new SysKdbFlowRet();
         flowRet.setId(info.getFlowId());
@@ -66,6 +114,10 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         info.setContent(argv.getContent());
         info.setName(argv.getName());
         info.setDescription(argv.getDescription());
+        if (StringUtils.isEmpty(argv.getContent())) {
+            FlowDefinition definition = FlowDefinition.start(argv.getName()).toNode(NodeTypeEnum.TASK, "空节点").toEnd();
+            info.setContent(definition.toJson());
+        }
 
         KdbApi api = (KdbApi)(DB.getDefault());
         api.addFlow(info);
