@@ -69,9 +69,7 @@ public class KFlowFilter implements Filter {
             context.getSystemContext().put("username",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getUsername() : "");
             context.getSystemContext().put("when", DateUtils.getNow());
             context.getSystemContext().put("uuid", StringUtils.getUUID());
-            // 加入Request信息
-            context.getSystemContext().put("request.url", url);
-            context.getSystemContext().put("request.time", DateUtils.getNow());
+
             // 处理请求变量
             Map<String, Object> argvMap = getRequestParams(api, path, request);
             if (argvMap.containsKey("page") && argvMap.containsKey("pageSize")) {
@@ -80,6 +78,9 @@ public class KFlowFilter implements Filter {
                 argvMap.put("start", (page-1)*pageSize + "") ;
                 argvMap.put("limit", pageSize + "");
             }
+            // 加入Request信息
+            argvMap.put("request.url", url);
+            argvMap.put("request.time", DateUtils.getNow());
             // 处理类
             context.setHandleClass(api.getApiResultHandler());
             // 调用流程
