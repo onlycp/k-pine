@@ -131,6 +131,8 @@ public class KFlowFilter implements Filter {
                 log.error("error", e);
             }
         }
+        // 将body加到变量中
+        params.put("request.body", body);
         // 获取path变量
         Map<String, Object> pathVariables = getPathVariables(path, api.getApiUrl());
         params.putAll(pathVariables);
