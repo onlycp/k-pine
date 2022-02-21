@@ -29,7 +29,7 @@ public class ConfigTask implements KTask {
 
     @Override
     public String cron() {
-        return "0/1 * * * * ?";
+        return "0/10 * * * * ?";
     }
 
     @Override

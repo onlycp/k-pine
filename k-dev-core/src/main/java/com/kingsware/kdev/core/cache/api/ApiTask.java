@@ -26,7 +26,7 @@ public class ApiTask implements KTask {
 
     @Override
     public String cron() {
-        return "0/5 * * * * ?";
+        return "0/10 * * * * ?";
     }
 
     @Override

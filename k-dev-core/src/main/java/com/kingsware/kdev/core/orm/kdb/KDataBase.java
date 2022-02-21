@@ -149,37 +149,32 @@ public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
     @Override
     public <T> long delete(Class<T> tClass, Object id) {
         String sql = SqlGenerator.deleteById(tClass);
-        channel.executeSql(sql,Collections.singletonList(id));
-        return 1;
+        return channel.executeSql(sql,Collections.singletonList(id));
     }
 
     @Override
     public <T> long delete(T entity) {
         SqlWrapper sqlWrapper = SqlGenerator.deleteSql((BaseModel) entity);
-        channel.executeSql(sqlWrapper.getSql(), sqlWrapper.getParams());
-        return 1;
+        return channel.executeSql(sqlWrapper.getSql(), sqlWrapper.getParams());
     }
 
     @Override
     public <T> long save(T entity) {
         SqlWrapper sqlWrapper = SqlGenerator.insertSql((BaseModel) entity, DataBaseTypeEnum.KDB);
-        channel.executeSql(sqlWrapper.getSql(),  sqlWrapper.getParams());
-        return 1;
+        return channel.executeSql(sqlWrapper.getSql(),  sqlWrapper.getParams());
 
     }
 
     @Override
     public <T> long saveAll(List<T> list) {
         SqlWrapper sqlWrapper = SqlGenerator.insertListSql(list , DataBaseTypeEnum.KDB);
-        channel.executeSql(sqlWrapper.getSql(), sqlWrapper.getParams());
-        return list.size();
+        return channel.executeSql(sqlWrapper.getSql(), sqlWrapper.getParams());
     }
 
     @Override
     public <T> long update(T entity) {
         SqlWrapper sqlWrapper = SqlGenerator.updateSql(entity , DataBaseTypeEnum.KDB);
-        channel.executeSql(sqlWrapper.getSql(), sqlWrapper.getParams());
-        return 1;
+        return channel.executeSql(sqlWrapper.getSql(), sqlWrapper.getParams());
     }
 
     @Override
@@ -194,9 +189,7 @@ public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
 
     @Override
     public long executeUpdateSql(String sql, Object... params) {
-        channel.executeSql(sql,Arrays.asList(params));
-        // 由于kdb没有返回具体行，所以统一返回1
-        return 1;
+        return channel.executeSql(sql,Arrays.asList(params));
     }
 
     @Override

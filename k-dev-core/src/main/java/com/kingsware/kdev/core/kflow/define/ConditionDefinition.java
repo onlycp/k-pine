@@ -23,9 +23,4 @@ public class ConditionDefinition {
         return conditionDefinition;
     }
 
-    @Data
-    static class Decision {
-        /** 表达式 **/
-        private String expr;
-    }
 }
