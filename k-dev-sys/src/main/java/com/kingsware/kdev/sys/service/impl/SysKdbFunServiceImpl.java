@@ -6,6 +6,7 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.*;
 import com.kingsware.kdev.core.util.PageUtil;
+import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysKdbFunArgv;
 import com.kingsware.kdev.sys.argv.SysKdbFunQueryArgv;
 import com.kingsware.kdev.sys.ret.SysKdbFunRet;
@@ -53,6 +54,23 @@ public class SysKdbFunServiceImpl extends BaseServiceImpl implements SysKdbFunSe
         }
         if (info.getUpdateTime() != null) {
             ret.setWhenModified(new Timestamp(info.getUpdateTime()));
+        }
+        if (StringUtils.isNotEmpty(info.getScript())) {
+            String startRegion = "// region sample";
+            String endRegion = "// endregion sample";
+            if (info.getScript().startsWith(startRegion) && info.getScript().contains(endRegion)) {
+                int startIndex = startRegion.length();
+                int endIndex = info.getScript().indexOf(endRegion);
+                // 获取样例代码
+                String sample = info.getScript().substring(startIndex, endIndex);
+                String[] lines = sample.split("\r?\n") ;
+                StringBuilder buffer = new StringBuilder();
+                for (String line: lines) {
+                    buffer.append(line.replaceFirst("// ", "")).append("\n");
+                }
+                ret.setSample(buffer.toString());
+
+            }
         }
         return ret;
     }

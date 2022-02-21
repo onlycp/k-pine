@@ -25,10 +25,13 @@ public class SysKdbFunRet extends BaseSimpleRet {
     private String type;
     /** 描述 **/
     private String desc;
+    /** 示例 **/
+    private String sample;
     /** 创建时间 **/
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
     private Timestamp whenCreated;
     /** 更新时间 **/
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
     private Timestamp whenModified;
+
 }

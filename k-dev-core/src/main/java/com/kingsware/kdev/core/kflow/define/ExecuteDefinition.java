@@ -26,9 +26,9 @@ public class ExecuteDefinition {
      */
     public static ExecuteDefinition createSqlScript(String sourceName, String content) {
         Script s = new Script();
-        s.sourceName = sourceName;
-        s.content = content;
-        s.type = "sql";
+        s.setSourceName(sourceName);
+        s.setContent(content);
+        s.setType("sql");
         ExecuteDefinition executeDefinition = new ExecuteDefinition();
         executeDefinition.script = s;
         return executeDefinition;
@@ -41,27 +41,11 @@ public class ExecuteDefinition {
      */
     public static ExecuteDefinition createJsScript(String js) {
         Script s = new Script();
-        s.content = js;
-        s.type = "js";
+        s.setContent(js);
+        s.setType("js");
         ExecuteDefinition executeDefinition = new ExecuteDefinition();
         executeDefinition.script = s;
         return executeDefinition;
     }
 
-
-
-    /**
-     * 脚本定义
-     */
-    @Data
-    static class Script {
-        /** 数据源名称 **/
-        private String sourceName;
-        /** 脚本内容 **/
-        private String content;
-        /** 类型 **/
-        private String type;
-        /** 参数 **/
-        private List<Object> params = new ArrayList<>();
-    }
 }

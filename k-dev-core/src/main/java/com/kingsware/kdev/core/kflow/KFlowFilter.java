@@ -63,13 +63,8 @@ public class KFlowFilter implements Filter {
         // 流程方式
         else if (api.getCallType() == 2) {
             // 获取视图模型
-            KFlowContext context = new KFlowContext();
-            // 处理系统变量
-            context.getSystemContext().put("who",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getId() : "");
-            context.getSystemContext().put("username",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getUsername() : "");
-            context.getSystemContext().put("when", DateUtils.getNow());
-            context.getSystemContext().put("uuid", StringUtils.getUUID());
 
+            KFlowContext context = KFlowContext.createBaseContext();
             // 处理请求变量
             Map<String, Object> argvMap = getRequestParams(api, path, request);
             if (argvMap.containsKey("page") && argvMap.containsKey("pageSize")) {
