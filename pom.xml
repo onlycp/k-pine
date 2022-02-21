@@ -16,15 +16,16 @@
 	</parent>
 	<groupId>com.kingsware.dev</groupId>
 	<artifactId>k-dev-parent</artifactId>
-	<version>1.0.0.20220218-01</version>
+	<version>${kdev.version}</version>
 	<name>k-dev-cli-api</name>
-	<description>金智维简易开发平台</description>
+	<description>金智维青松平台</description>
 	<properties>
 		<java.version>1.8</java.version>
 		<maven.compiler.source>8</maven.compiler.source>
 		<maven.compiler.target>8</maven.compiler.target>
-		<kdev.core.version>1.0.0.20220218-01</kdev.core.version>
-		<kdev.sys.version>1.0.0.20220218-01</kdev.sys.version>
+		<poi.version>3.17</poi.version>
+		<jxl.version>2.6.12</jxl.version>
+		<kdev.version>1.0.0.20220218-01</kdev.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -53,12 +54,12 @@
 		<dependency>
 			<groupId>net.sourceforge.jexcelapi</groupId>
 			<artifactId>jxl</artifactId>
-			<version>2.6.12</version>
+			<version>${jxl.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-ooxml</artifactId>
-			<version>3.17</version>
+			<version>${poi.version}</version>
 		</dependency>
 	</dependencies>
 	<distributionManagement>
@@ -78,15 +79,44 @@
 			<dependency>
 				<artifactId>k-dev-core</artifactId>
 				<groupId>com.kingsware.dev</groupId>
-				<version>${kdev.core.version}</version>
+				<version>${kdev.version}</version>
 			</dependency>
 			<dependency>
 				<artifactId>k-dev-sys</artifactId>
 				<groupId>com.kingsware.dev</groupId>
-				<version>${kdev.sys.version}</version>
+				<version>${kdev.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>flatten-maven-plugin</artifactId>
+				<version>1.1.0</version>
+				<configuration>
+					<updatePomFile>true</updatePomFile>
+					<flattenMode>resolveCiFriendliesOnly</flattenMode>
+				</configuration>
+				<executions>
+					<execution>
+						<id>flatten</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>flatten</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>flatten.clean</id>
+						<phase>clean</phase>
+						<goals>
+							<goal>clean</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
 
 </project>
