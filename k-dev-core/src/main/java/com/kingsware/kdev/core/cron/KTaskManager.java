@@ -45,6 +45,16 @@ public class KTaskManager {
      */
     public void runTask(SysTask sysTask) {
 
+        // 如果不是分布式任务，直接运行
+        if (sysTask.getDistributed() == 0) {
+            try {
+                executeTask(sysTask);
+            } catch (Exception e) {
+                log.error("定时任务执行失败, 任务名: {}， 错误信息:{}", sysTask.getName(), e.getMessage());
+            }
+            return;
+        }
+
         // 设置锁，通过返回的数量才判断是否被锁
         long cnt = DB.executeUpdateSql("update sys_task set lock_status=1, lock_for_time=now() where id=? and lock_status=0", sysTask.getId());
         // 如果影响行数为0，说明当前是锁定状态
@@ -62,13 +72,7 @@ public class KTaskManager {
         int executeStatus = 1;
         String errorMessage = "";
         try {
-            // 如果是java类
-            if (myTask.getTaskType() == 1) {
-                runJavaTask(myTask);
-            }
-            else if (myTask.getTaskType() == 2) {
-                runFlowTask(myTask);
-            }
+            executeTask(myTask);
         }
         catch (Exception e) {
             log.error("定时任务执行失败, 任务名: {}， 错误信息:{}", sysTask.getName(), e.getMessage());
@@ -80,6 +84,20 @@ public class KTaskManager {
             String sql = "update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ?,  last_execute_time=?, lock_status=0 where id=?";
             DB.executeUpdateSql(sql, executeStatus, (t2 - t1),  errorMessage, DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME), sysTask.getId());
             //log.debug("定时任务执行, 任务名: {}", sysTask.getName());
+        }
+    }
+
+    /**
+     * 运行任务
+     * @param myTask
+     */
+    private void executeTask(SysTask myTask) throws Exception {
+        // 如果是java类
+        if (myTask.getTaskType() == 1) {
+            runJavaTask(myTask);
+        }
+        else if (myTask.getTaskType() == 2) {
+            runFlowTask(myTask);
         }
     }
 
