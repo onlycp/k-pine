@@ -24,11 +24,7 @@ public class AccessManager {
 
     public static AccessManager getInstance() {
         if (instance == null) {
-            synchronized (AccessManager.class) {
-                if (instance == null) {
-                    instance = new AccessManager();
-                }
-            }
+            instance = new AccessManager();
         }
         return instance;
     }

@@ -1,9 +1,6 @@
 package com.kingsware.kdev.core.cache.api;
 
-import com.kingsware.kdev.core.bean.BaseManageModel;
-import com.kingsware.kdev.core.orm.annotation.Table;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * 接口表

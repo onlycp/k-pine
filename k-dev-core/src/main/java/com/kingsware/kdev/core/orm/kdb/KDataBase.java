@@ -7,7 +7,10 @@ import com.kingsware.kdev.core.orm.channel.KDBHttpChannel;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.orm.expression.Expression;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * KDB数据库实现
@@ -68,7 +71,7 @@ public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
     public <T> T findOne(Class<T> tClass, List<Expression> expressionList) {
         SqlWrapper sqlWrapper = SqlGenerator.findSql(tClass, expressionList);
         List<T> list = this.findList(tClass, sqlWrapper.getSql(), sqlWrapper.getParams().toArray());
-        if (list.size() == 0) {
+        if (list.isEmpty()) {
             return null;
         }
         else if (list.size() == 1) {

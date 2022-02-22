@@ -7,5 +7,5 @@ package com.kingsware.kdev.core.encrypt.config;
  * @version 1.0.0
  * @date 2021/12/27 2:41 下午
  */
-public class AlgorithmConfig {
+public interface AlgorithmConfig {
 }

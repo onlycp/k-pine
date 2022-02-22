@@ -9,6 +9,8 @@ package com.kingsware.kdev.core.kmq.websocket;
  */
 public class WebsocketConstants {
 
+    private WebsocketConstants() {}
+
     /** 系统主题 **/
     public static final String TOPIC_SYSTEM = "system";
     /** 心跳类型 **/

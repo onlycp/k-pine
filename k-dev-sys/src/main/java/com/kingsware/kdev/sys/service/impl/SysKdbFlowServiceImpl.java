@@ -4,15 +4,13 @@ import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.exception.BusinessException;
-import com.kingsware.kdev.core.kflow.define.FlowDefinition;
-import com.kingsware.kdev.core.kflow.define.NodeDefinition;
-import com.kingsware.kdev.core.kflow.define.NodeLink;
-import com.kingsware.kdev.core.kflow.define.NodeTypeEnum;
+import com.kingsware.kdev.core.kflow.define.*;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.*;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.PageUtil;
 import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.sys.argv.SysFlowDefineArgv;
 import com.kingsware.kdev.sys.argv.SysKdbFlowArgv;
 import com.kingsware.kdev.sys.argv.SysKdbFlowQueryArgv;
 import com.kingsware.kdev.sys.ret.SysFlowDefineRet;
@@ -88,6 +86,67 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         return defineRet;
     }
 
+    @Override
+    public void editDefine(SysFlowDefineArgv argv) {
+        // 重新生成流程文件
+        FlowDefinition flowDefinition = new FlowDefinition();
+        // 设置流程名称
+        flowDefinition.setName(argv.getName());
+        // 处理节点
+        for (SysFlowDefineArgv.Node node: argv.getNodes()) {
+            NodeDefinition nodeDefinition = new NodeDefinition();
+            nodeDefinition.setAuto(true);
+            nodeDefinition.setDebug(false);
+            nodeDefinition.setType(node.getType());
+            nodeDefinition.setName(node.getLabel());
+            nodeDefinition.setId(node.getId());
+            // 判断执行类型
+            if (StringUtils.isNotEmpty(node.getExecuteType())) {
+                // 根据不同的执行类型，生成不同的执行内容
+                if (ScriptTypeEnum.SQL.getValue().equals(node.getExecuteType())) {
+                    nodeDefinition.setExecute(ExecuteDefinition.createSqlScript(node.getSourceName(), node.getContent()));
+                }
+                else if (ScriptTypeEnum.JS.getValue().equals(node.getExecuteType())) {
+                    nodeDefinition.setExecute(ExecuteDefinition.createJsScript(node.getContent()));
+                }
+            }
+            // 判断后置脚本
+            if (StringUtils.isNotEmpty(node.getAfterContent())) {
+                nodeDefinition.setListener(FlowNodeLister.createWithAfter(node.getAfterContent()));
+            }
+            flowDefinition.getNodeDefinitions().add(nodeDefinition);
+        }
+        // 处理连线
+        for (SysFlowDefineArgv.Link link: argv.getLinks()) {
+            // 先校验
+            if(StringUtils.isEmpty(link.getSource()) || StringUtils.isEmpty(link.getTarget())) {
+                throw BusinessException.serviceThrow(String.format("连线:%s的开始和结束节点均不能为空！", link.getLabel()));
+            }
+            if (link.getTarget().equals(link.getSource())) {
+                throw BusinessException.serviceThrow(String.format("连线:%s的开始和结束节点不能是同一个！", link.getLabel()));
+            }
+            NodeLink nodeLink = new NodeLink();
+            nodeLink.setId(link.getId());
+            nodeLink.setName(link.getLabel());
+            nodeLink.setFrom(link.getSource());
+            nodeLink.setTo(link.getTarget());
+            if (StringUtils.isNotEmpty(link.getExpr())) {
+                nodeLink.setConditions(ConditionDefinition.createDecisionCondition(link.getExpr()));
+            }
+            flowDefinition.getNodeLinks().add(nodeLink);
+        }
+
+        // 保存到kdb
+        EditFlowInfo info = new EditFlowInfo();
+        info.setContent(flowDefinition.toJson());
+        info.setName(argv.getName());
+        info.setFlowId(argv.getId());
+        info.setDescription(argv.getDescription());
+        KdbApi api = (KdbApi)(DB.getDefault());
+        api.editFlow(info);
+
+    }
+
     private SysKdbFlowRet toRet(FlowInfo info) {
         SysKdbFlowRet flowRet = new SysKdbFlowRet();
         flowRet.setId(info.getFlowId());
@@ -110,12 +169,11 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
     public void add(SysKdbFlowArgv argv) {
 
         AddFlowInfo info = new AddFlowInfo();
-//        info.setFlowId(StringUtils.getUUID());
         info.setContent(argv.getContent());
         info.setName(argv.getName());
         info.setDescription(argv.getDescription());
         if (StringUtils.isEmpty(argv.getContent())) {
-            FlowDefinition definition = FlowDefinition.start(argv.getName()).toNode(NodeTypeEnum.TASK, "空节点").toEnd();
+            FlowDefinition definition = FlowDefinition.start(argv.getName()).toEnd();
             info.setContent(definition.toJson());
         }
 

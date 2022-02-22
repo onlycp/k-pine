@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kingsware.kdev.core.util.StringUtils;
+import lombok.Data;
 import lombok.Getter;
 import lombok.SneakyThrows;
 
@@ -20,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @version 1.0.0
  * @date 2022/1/19 6:04 下午
  */
-@Getter
+@Data
 public class FlowDefinition {
     /** 流程名称 **/
     private String name;

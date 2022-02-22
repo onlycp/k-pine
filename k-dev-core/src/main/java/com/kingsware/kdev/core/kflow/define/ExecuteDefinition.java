@@ -2,9 +2,6 @@ package com.kingsware.kdev.core.kflow.define;
 
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * 流程定义
  *

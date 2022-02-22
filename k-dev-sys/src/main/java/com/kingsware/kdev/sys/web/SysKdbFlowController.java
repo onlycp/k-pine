@@ -5,6 +5,7 @@ import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
+import com.kingsware.kdev.sys.argv.SysFlowDefineArgv;
 import com.kingsware.kdev.sys.argv.SysKdbFlowArgv;
 import com.kingsware.kdev.sys.argv.SysKdbFlowQueryArgv;
 import com.kingsware.kdev.sys.ret.SysFlowDefineRet;
@@ -83,6 +84,17 @@ public class SysKdbFlowController extends BaseController {
     @PutMapping
     public BaseRet<?> edit(@RequestBody SysKdbFlowArgv argv) {
         sysKdbFlowService.edit(argv);
+        return BaseRet.success();
+    }
+
+    /**
+     *  编辑流程定义
+     * @return 提示
+     */
+    @ApiOperation(value = "编辑流程定义 " ,notes = "编辑流程定义")
+    @PutMapping("/define")
+    public BaseRet<?> edit(@RequestBody SysFlowDefineArgv argv) {
+        sysKdbFlowService.editDefine(argv);
         return BaseRet.success();
     }
 

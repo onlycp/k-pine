@@ -7,7 +7,7 @@ package com.kingsware.kdev.core.encrypt.config;
  * @version 1.0.0
  * @date 2021/12/27 2:28 下午
  */
-public class AESConfig extends AlgorithmConfig {
+public class AESConfig implements AlgorithmConfig {
     /** 密钥 **/
     private String secret;
     /** 算法/模式/补码方式 **/

@@ -1,9 +1,5 @@
 package com.kingsware.kdev.core.bean;
 
-import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.Set;
-
 /**
  * 分页查询条件
  *

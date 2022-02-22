@@ -2,6 +2,7 @@ package com.kingsware.kdev.sys.service;
 
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.sys.argv.SysFlowDefineArgv;
 import com.kingsware.kdev.sys.argv.SysKdbFlowArgv;
 import com.kingsware.kdev.sys.argv.SysKdbFlowQueryArgv;
 import com.kingsware.kdev.sys.ret.SysFlowDefineRet;
@@ -31,6 +32,12 @@ public interface SysKdbFlowService {
     SysFlowDefineRet getDefine(String id);
 
     /**
+     * 编辑定义文件
+     * @param argv 编辑
+     */
+    void editDefine(SysFlowDefineArgv argv);
+
+    /**
      * 新增
      * @param argv 新增
      */
@@ -57,7 +64,8 @@ public interface SysKdbFlowService {
 
     /**
      * 新增或编辑
-     * @param argv  参数
+     * @param name  名称
+     * @param content  内容
      */
     void addOrUpdate(String name, String content);
 }

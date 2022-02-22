@@ -20,6 +20,10 @@ import java.util.List;
  */
 public class BeanUtils {
 
+    private BeanUtils() {
+
+    }
+
     /** 日志打印 **/
     private static final Logger logger  = LoggerFactory.getLogger(BeanUtils.class);
 

@@ -2,8 +2,6 @@ package com.kingsware.kdev.core.orm.kdb;
 
 import lombok.Data;
 
-import java.util.Map;
-
 /**
  * kdb响应结果
  *

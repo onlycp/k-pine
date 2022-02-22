@@ -19,7 +19,7 @@ public class DB {
     /** 数据库上下文字 **/
     private static final DbContext context = DbContext.getInstance();
     /** 默认构造函数 **/
-    private DB() {};
+    private DB() {}
     /**
      * 获取默认数据库
      * @return  数据库

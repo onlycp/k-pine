@@ -2,6 +2,7 @@ package com.kingsware.kdev.core.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -21,10 +22,14 @@ import java.util.Base64;
  */
 public class AESUtil {
 
+    private AESUtil() {
+
+    }
+
     /** 日志打印 **/
     private static final Logger logger  = LoggerFactory.getLogger(AESUtil.class);
     /** 默认补码方式 **/
-    private static final String defaultCipherMode = "AES/ECB/PKCS5Padding";
+    private static final String DEFAULT_CIPHER_MODE = "AES/ECB/PKCS5Padding";
 
 
 
@@ -35,7 +40,7 @@ public class AESUtil {
      * @return          加密后的字符串
      */
     public static String encrypt(String src, String secret) {
-        return encrypt(src, secret, defaultCipherMode);
+        return encrypt(src, secret, DEFAULT_CIPHER_MODE);
     }
 
     /**
@@ -64,7 +69,7 @@ public class AESUtil {
             byte[] encrypted = cipher.doFinal(src.getBytes(StandardCharsets.UTF_8));
             return new String(Base64.getEncoder().encode(encrypted));
         } catch (NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
-            logger.warn("AES加密失败，原因：" + e.getMessage());
+            logger.warn("AES加密失败，原因：{}" , e.getMessage());
             return null;
         }
     }
@@ -76,7 +81,7 @@ public class AESUtil {
      * @return          解密后的字符串
      */
     public static String decrypt(String src, String secret) {
-        return decrypt(src, secret, defaultCipherMode);
+        return decrypt(src, secret, DEFAULT_CIPHER_MODE);
     }
 
     /**
@@ -102,15 +107,10 @@ public class AESUtil {
             Cipher cipher = Cipher.getInstance(cipherMode);
             cipher.init(Cipher.DECRYPT_MODE, skeySpec);
             byte[] encrypted1 = Base64.getDecoder().decode(src);//先用base64解密
-            try {
-                byte[] original = cipher.doFinal(encrypted1);
-                return new String(original, StandardCharsets.UTF_8);
-            } catch (Exception e) {
-                logger.warn("AES解密失败，原因：" + e.getMessage());
-                return null;
-            }
+            byte[] original = cipher.doFinal(encrypted1);
+            return new String(original, StandardCharsets.UTF_8);
         } catch (Exception ex) {
-            logger.warn("AES解密失败，原因：" + ex.getMessage());
+            logger.warn("AES解密失败，原因：{}" , ex.getMessage());
             return null;
         }
     }

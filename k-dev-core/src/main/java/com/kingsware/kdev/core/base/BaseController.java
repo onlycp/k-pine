@@ -8,4 +8,7 @@ package com.kingsware.kdev.core.base;
  * @date 2021/12/23 11:22 上午
  */
 public class BaseController {
+
+    public BaseController(){
+    }
 }

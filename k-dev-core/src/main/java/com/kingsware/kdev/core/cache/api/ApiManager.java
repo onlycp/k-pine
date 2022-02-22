@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * //todo 描述当前类是干什么用的.
  *
  * @author chen peng
  * @version 1.0.0
@@ -22,11 +21,7 @@ public class ApiManager {
 
     public static ApiManager getInstance() {
         if (instance == null) {
-            synchronized (ApiManager.class) {
-                if (instance == null) {
-                    instance = new ApiManager();
-                }
-            }
+            instance = new ApiManager();
         }
         return instance;
     }

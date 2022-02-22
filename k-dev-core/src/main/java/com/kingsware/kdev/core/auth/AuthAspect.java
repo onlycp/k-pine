@@ -48,7 +48,7 @@ public class AuthAspect {
         MethodSignature methodSignature = (MethodSignature)signature;
         Method targetMethod = methodSignature.getMethod();
         // 如果全局跳过权限
-        if (!appAuthProperties.getEnable()) {
+        if (Boolean.FALSE.equals(appAuthProperties.getEnable())) {
             return pjd.proceed();
         }
         // 不验证权限

@@ -3,7 +3,6 @@ package com.kingsware.kdev.core.cache.dict;
 import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.core.orm.DB;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

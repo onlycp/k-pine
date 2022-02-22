@@ -18,6 +18,10 @@ import org.slf4j.LoggerFactory;
  */
 public class TokenUtil {
 
+    private TokenUtil() {
+
+    }
+
     /** 日志打印 **/
     private static final Logger logger  = LoggerFactory.getLogger(TokenUtil.class);
 
@@ -42,7 +46,7 @@ public class TokenUtil {
             // 将令牌字符串使用AES加密（128位)
             return AESUtil.encrypt(token, dataSecret);
         } catch (JsonProcessingException e) {
-            logger.warn("生成Token失败, 源串:{}", userInfo.toString());
+            logger.warn("生成Token失败, 源串:{}", userInfo);
             return null;
         }
     }

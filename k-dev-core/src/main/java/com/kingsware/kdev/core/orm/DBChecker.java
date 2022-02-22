@@ -41,7 +41,7 @@ public class DBChecker<T> {
      * @return 当前对象
      */
     public static <T> DBChecker<T> build(BaseManageModel model, Class<T> tClass) {
-        DBChecker<T> checker = new DBChecker<T>();
+        DBChecker<T> checker = new DBChecker<>();
         checker.setModel(model);
         checker.setTClass(tClass);
         return checker;
@@ -74,7 +74,7 @@ public class DBChecker<T> {
                 }
             }
             else {
-                if (list.size() > 0) {
+                if (!list.isEmpty()) {
                     BaseManageModel queryEntity = (BaseManageModel) list.get(0);
                     if (!queryEntity.getId().equals(model.getId())) {
                         throw BusinessException.serviceThrow(uni.getErrorMessage());

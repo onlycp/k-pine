@@ -8,6 +8,9 @@ package com.kingsware.kdev.core.constants;
  * @date 2021/12/23 2:48 下午
  */
 public class Version {
+
+    private Version() {
+    }
     /** V1 **/
-    public final static String V1 = "v1";
+    public static final String V1 = "v1";
 }
