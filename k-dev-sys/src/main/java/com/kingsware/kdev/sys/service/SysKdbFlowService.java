@@ -2,9 +2,11 @@ package com.kingsware.kdev.sys.service;
 
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.sys.argv.SysFlowDebugArgv;
 import com.kingsware.kdev.sys.argv.SysFlowDefineArgv;
 import com.kingsware.kdev.sys.argv.SysKdbFlowArgv;
 import com.kingsware.kdev.sys.argv.SysKdbFlowQueryArgv;
+import com.kingsware.kdev.sys.ret.SysFlowDebugRet;
 import com.kingsware.kdev.sys.ret.SysFlowDefineRet;
 import com.kingsware.kdev.sys.ret.SysKdbFlowRet;
 
@@ -68,4 +70,11 @@ public interface SysKdbFlowService {
      * @param content  内容
      */
     void addOrUpdate(String name, String content);
+
+    /**
+     * 流程调试
+     * @param argv  参数
+     * @return      返回调试结果
+     */
+    SysFlowDebugRet debug(SysFlowDebugArgv argv);
 }

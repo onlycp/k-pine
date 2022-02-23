@@ -1,18 +1,24 @@
 package com.kingsware.kdev.sys.service.impl;
 
+import com.google.common.collect.Maps;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.kflow.KFlowContext;
+import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.kflow.define.*;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.*;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.PageUtil;
 import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.sys.argv.SysFlowDebugArgv;
 import com.kingsware.kdev.sys.argv.SysFlowDefineArgv;
 import com.kingsware.kdev.sys.argv.SysKdbFlowArgv;
 import com.kingsware.kdev.sys.argv.SysKdbFlowQueryArgv;
+import com.kingsware.kdev.sys.ret.SysFlowDebugRet;
 import com.kingsware.kdev.sys.ret.SysFlowDefineRet;
 import com.kingsware.kdev.sys.ret.SysKdbFlowRet;
 import com.kingsware.kdev.sys.service.SysKdbFlowService;
@@ -104,15 +110,16 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             if (StringUtils.isNotEmpty(node.getExecuteType())) {
                 // 根据不同的执行类型，生成不同的执行内容
                 if (ScriptTypeEnum.SQL.getValue().equals(node.getExecuteType())) {
-                    nodeDefinition.setExecute(ExecuteDefinition.createSqlScript(node.getSourceName(), node.getContent()));
+                    nodeDefinition.setExecute(ExecuteDefinition.createSqlScript(node.getSourceName(), node.getContent().replaceAll("[\\s\\t\\n\\r]", " ")));
                 }
                 else if (ScriptTypeEnum.JS.getValue().equals(node.getExecuteType())) {
-                    nodeDefinition.setExecute(ExecuteDefinition.createJsScript(node.getContent()));
+                    nodeDefinition.setExecute(ExecuteDefinition.createJsScript(node.getContent().replaceAll("[\\s\\t\\n\\r]", " ")));
                 }
             }
             // 判断后置脚本
+
             if (StringUtils.isNotEmpty(node.getAfterContent())) {
-                nodeDefinition.setListener(FlowNodeLister.createWithAfter(node.getAfterContent()));
+                nodeDefinition.setListener(FlowNodeLister.createWithAfter(node.getAfterContent().replaceAll("[\\s\\t\\n\\r]", " ")));
             }
             flowDefinition.getNodeDefinitions().add(nodeDefinition);
         }
@@ -245,6 +252,23 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             argv.setId(list.get(0).getFlowId());
             edit(argv);
         }
+    }
+
+    @Override
+    public SysFlowDebugRet debug(SysFlowDebugArgv argv) {
+        KFlowContext context = KFlowContext.createBaseContext();
+        String json = argv.getJson();
+        if (StringUtils.isEmpty(json)) {
+            json = "{}";
+        }
+        long t1 = System.currentTimeMillis();
+        Object result = KdbFlowExecutor.getInstance().execute(argv.getFlowId(), JsonUtil.toMap(json), context);
+        Object apiResult = KdbFlowExecutor.getInstance().toApiResult(result);
+        long t2 = System.currentTimeMillis();
+        SysFlowDebugRet ret = new SysFlowDebugRet();
+        ret.setTakeMs(t2 - t1);
+        ret.setResponseBody(JsonUtil.toJson(apiResult));
+        return ret;
     }
 
 }

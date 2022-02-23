@@ -5,9 +5,11 @@ import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
+import com.kingsware.kdev.sys.argv.SysFlowDebugArgv;
 import com.kingsware.kdev.sys.argv.SysFlowDefineArgv;
 import com.kingsware.kdev.sys.argv.SysKdbFlowArgv;
 import com.kingsware.kdev.sys.argv.SysKdbFlowQueryArgv;
+import com.kingsware.kdev.sys.ret.SysFlowDebugRet;
 import com.kingsware.kdev.sys.ret.SysFlowDefineRet;
 import com.kingsware.kdev.sys.ret.SysKdbFlowRet;
 import com.kingsware.kdev.sys.service.SysKdbFlowService;
@@ -107,6 +109,16 @@ public class SysKdbFlowController extends BaseController {
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         sysKdbFlowService.delete(argv);
         return BaseRet.success();
+    }
+
+    /**
+     *  流程调试
+     * @return 提示
+     */
+    @ApiOperation(value = "流程调试 " ,notes = "流程调试")
+    @PostMapping("/debug")
+    public BaseRet<SysFlowDebugRet> debug(@RequestBody SysFlowDebugArgv argv) {
+        return BaseRet.success(sysKdbFlowService.debug(argv));
     }
 
 }

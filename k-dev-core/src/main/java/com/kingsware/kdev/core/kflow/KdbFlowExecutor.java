@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.kflow;
 
+import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.KdbArgv;
 import com.kingsware.kdev.core.orm.kdb.KdbRet;
@@ -114,6 +115,29 @@ public class KdbFlowExecutor {
         });
 
         return processData(result, context);
+    }
+
+    /**
+     * 转向api格式
+     * @param result 源名称
+     * @return
+     */
+    public Object toApiResult(Object result) {
+        // 返回前端
+        BaseRet<?> ret = new BaseRet<>();
+        if (result instanceof TipResult) {
+            ret = BaseRet.successMessage(((TipResult) result).getMessage());
+        }
+        else if (result instanceof ErrorResult) {
+            ret = BaseRet.failMessage(((ErrorResult) result).getMessage());
+        }
+        else if (result instanceof Map && ((Map<?, ?>) result).containsKey("RET_TYPE_KEY")) {
+
+        }
+        else {
+            ret = BaseRet.success(result);
+        }
+        return ret;
     }
 
     /**
