@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 角色业务实现类
@@ -262,7 +263,8 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             json = "{}";
         }
         long t1 = System.currentTimeMillis();
-        Object result = KdbFlowExecutor.getInstance().execute(argv.getFlowId(), JsonUtil.toMap(json), context);
+        Map<String, Object> argvMap = JsonUtil.toMap(json);
+        Object result = KdbFlowExecutor.getInstance().execute(argv.getFlowId(), argvMap, context);
         Object apiResult = KdbFlowExecutor.getInstance().toApiResult(result);
         long t2 = System.currentTimeMillis();
         SysFlowDebugRet ret = new SysFlowDebugRet();

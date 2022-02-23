@@ -17,6 +17,7 @@ import com.kingsware.kdev.sys.ret.SysFileRet;
 import com.kingsware.kdev.sys.service.SysFileService;
 import lombok.Cleanup;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,6 +37,7 @@ import java.util.List;
  * @date 2021/12/23 9:36 上午
  */
 @Service
+@Slf4j
 public class SysFileServiceImpl extends BaseServiceImpl implements SysFileService {
 
     /** 基础目录 **/
@@ -128,7 +130,6 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         return retList;
     }
 
-    @SneakyThrows
     @Override
     public void download(String id) {
 
@@ -140,11 +141,16 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         response.reset();
         response.setContentType("application/octet-stream");
         response.setCharacterEncoding("utf-8");
-        response.setContentLength((int) file.getFileSize());
         response.setHeader("Content-Disposition", "attachment;filename=" + UriEncoder.encode(file.getFileName()));
         if (file.getSaveType() == 0) {
-            response.getOutputStream().write(Base64.getDecoder().decode(file.getFileContent()));
-            response.getOutputStream().flush();
+            try {
+                byte[] content = Base64.getDecoder().decode(file.getFileContent());
+                response.setContentLength((int) content.length);
+                response.getOutputStream().write(Base64.getDecoder().decode(file.getFileContent()));
+                response.getOutputStream().flush();
+            } catch (IOException e) {
+                throw BusinessException.serviceThrow("文件读取失败");
+            }
         }
         else if (file.getSaveType() == 1) {
             String absFilePath = basePath + file.getFilePath();
@@ -152,13 +158,42 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             if (!localFile.exists()) {
                 throw BusinessException.serviceThrow("文件不存在，可能被移动或删除！");
             }
-            @Cleanup BufferedInputStream bis = new BufferedInputStream(new FileInputStream(absFilePath));
-            byte[] buff = new byte[1024];
-            int i = 0;
-            while ((i = bis.read(buff)) != -1) {
-                response.getOutputStream().write(buff, 0, i);
-                response.getOutputStream().flush();
+            FileInputStream ins = null;
+            BufferedInputStream bis = null;
+            try {
+                response.setContentLength((int)new File(absFilePath).length());
+                ins = new FileInputStream(absFilePath);
+                bis = new BufferedInputStream(ins);
+                byte[] buff = new byte[1024];
+                int i = 0;
+                while ((i = bis.read(buff)) != -1) {
+                    response.getOutputStream().write(buff, 0, i);
+                    response.getOutputStream().flush();
+                }
+                response.getOutputStream().close();
+
             }
+            catch (FileNotFoundException e) {
+                throw BusinessException.serviceThrow("文件不存在");
+            }
+            catch (IOException e) {
+                throw BusinessException.serviceThrow("文件读取失败");
+            }
+            finally {
+                try {
+                    if (ins != null) {
+                        ins.close();
+                    }
+                    if (bis != null) {
+                        bis.close();
+                    }
+                }
+                catch (Exception e) {
+                    log.info("文件关闭失败");
+                }
+
+            }
+
         }
 
     }

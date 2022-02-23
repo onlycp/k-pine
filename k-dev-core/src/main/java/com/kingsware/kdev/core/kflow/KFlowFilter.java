@@ -68,12 +68,6 @@ public class KFlowFilter implements Filter {
             KFlowContext context = KFlowContext.createBaseContext();
             // 处理请求变量
             Map<String, Object> argvMap = getRequestParams(api, path, request);
-            if (argvMap.containsKey("page") && argvMap.containsKey("pageSize")) {
-                int page = Integer.parseInt(argvMap.getOrDefault("page", "1").toString());
-                int pageSize = Integer.parseInt(argvMap.getOrDefault("pageSize", "10").toString());
-                argvMap.put("start", (page-1)*pageSize + "") ;
-                argvMap.put("limit", pageSize + "");
-            }
             // 加入Request信息
             argvMap.put("request.url", url);
             argvMap.put("request.time", DateUtils.getNow());

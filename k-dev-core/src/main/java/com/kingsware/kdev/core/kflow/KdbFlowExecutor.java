@@ -69,6 +69,15 @@ public class KdbFlowExecutor {
         // 设置流程id
         argv.setFlowID(flowId);
         // 设备流程参数
+        if (params.containsKey("page") && params.containsKey("pageSize")) {
+            int page = Integer.parseInt(params.getOrDefault("page", "1").toString());
+            int pageSize = Integer.parseInt(params.getOrDefault("pageSize", "10").toString());
+            params.put("start", (page-1)*pageSize + "") ;
+            params.put("limit", pageSize + "");
+        }
+        if (params.containsKey("pageQuery")) {
+            params.put("pageQuery", params.getOrDefault("pageQuery", false).toString());
+        }
         argv.getVariables().putAll(params);
         // 将入系统变量
         context.getSystemContext().forEach((k, v)-> argv.getVariables().put("sys." + k, v));
