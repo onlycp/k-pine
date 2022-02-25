@@ -196,6 +196,15 @@ public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
     }
 
     @Override
+    public TableDefine getTableDefine(String tableName) {
+        // 如果是mysql
+        if (dbConnectConfig.getDatabaseType().equals(DataBaseTypeEnum.MYSQL.getValue())) {
+
+        }
+        return null;
+    }
+
+    @Override
     String getServer() {
         return this.dbConnectConfig.getServer();
     }

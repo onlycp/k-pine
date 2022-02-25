@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.i18n.I18n;
+import com.kingsware.kdev.core.jsonschema.JsonSchemeDefine;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
@@ -113,5 +114,10 @@ public class SysViewModelServiceImpl extends BaseServiceImpl implements SysViewM
             DB.delete(SysViewModel.class, id);
             DB.executeUpdateSql("delete from sys_view_model_field where view_model_id=?", id);
         }
+    }
+
+    @Override
+    public JsonSchemeDefine createSchemaByTable(String table) {
+        return null;
     }
 }

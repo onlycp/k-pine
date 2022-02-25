@@ -10,11 +10,13 @@ package com.kingsware.kdev.core.orm;
 public enum DataBaseTypeEnum {
     // kdb
     KDB("kdb"),
+    // kdb
+    POSTGRESQL("postgresql"),
     // mysql
     MYSQL("mysql");
 
     /** 数据库类型名称 **/
-    private String value;
+    private final String value;
 
     /**
      * 默认构造函数

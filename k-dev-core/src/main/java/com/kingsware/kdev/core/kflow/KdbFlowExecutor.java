@@ -89,11 +89,14 @@ public class KdbFlowExecutor {
             log.error("kdb响应错误:" + ret.getMessage());
             result = new ErrorResult(ret.getMessage() == null ? "流程处理失败": ret.getMessage());
         }
+        else if (ret.getResponseBody() == null) {
+            result = null;
+        }
         // 如果返回的数字，那么直接将结果返回给前端
         else if (NumberUtils.isParsable(ret.getResponseBody())) {
             result = Long.parseLong(ret.getResponseBody());
         }
-        else if (ret.getResponseBody().startsWith("{") && ret.getResponseBody().endsWith("}")) {
+         else if (ret.getResponseBody().startsWith("{") && ret.getResponseBody().endsWith("}")) {
             result = JsonUtil.toMap(ret.getResponseBody());
         }
         // 如果是数组

@@ -3,6 +3,7 @@ package com.kingsware.kdev.sys.service;
 import com.kingsware.kdev.core.base.BaseService;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.jsonschema.JsonSchemeDefine;
 import com.kingsware.kdev.sys.argv.SysViewModelArgv;
 import com.kingsware.kdev.sys.argv.SysViewModelQueryArgv;
 import com.kingsware.kdev.sys.ret.SysViewModelRet;
@@ -47,4 +48,11 @@ public interface SysViewModelService extends BaseService {
      * @param argv  查询
      */
     void delete(MultiIdArgv argv);
+
+    /**
+     * 通过数据库生成jsonschema
+     * @param table 表名
+     * @return  返回json定义
+     */
+    JsonSchemeDefine createSchemaByTable(String table);
 }

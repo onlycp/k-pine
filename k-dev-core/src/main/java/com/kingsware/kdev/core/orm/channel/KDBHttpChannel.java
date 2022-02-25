@@ -137,7 +137,11 @@ public class KDBHttpChannel implements DbChannel{
     private KdbArgv makePassThrough(String sql, List<Object> objects) {
         KdbArgv argv = new KdbArgv();
         argv.setFlowID(passThroughFlowId);
-        argv.addStep(executeStep, sql, kdbConnectConfig.getDataSource(), objects);
+        // 将数据源名称作为节点id
+        argv.addStep(kdbConnectConfig.getDataSource(), sql, kdbConnectConfig.getDataSource(), objects);
+//        argv.addStep(executeStep, sql, kdbConnectConfig.getDataSource(), objects);
+        // 将数据源名作为变量名加入进去
+        argv.getVariables().put("nodeId", kdbConnectConfig.getDataSource());
         return argv;
 
     }

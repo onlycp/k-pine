@@ -194,6 +194,12 @@ public interface DataBase {
      */
     long executeUpdateSql(String sql, Object... params);
 
+    /**
+     * 获取表定义
+     * @param tableName 表名
+     * @return  表定义
+     */
+    TableDefine getTableDefine(String tableName);
 
 
 }
