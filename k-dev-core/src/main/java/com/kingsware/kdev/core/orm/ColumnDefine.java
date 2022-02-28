@@ -16,7 +16,7 @@ public class ColumnDefine {
     /**字符最大长度**/
     private Integer maxLength;
     /**是否允许为空 **/
-    private boolean isNullable;
+    private Boolean isNullable;
     /** 列 key **/
     private String columnKey;
     /** 注释 **/

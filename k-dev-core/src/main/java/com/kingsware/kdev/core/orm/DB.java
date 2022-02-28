@@ -247,4 +247,22 @@ public class DB {
             throw new OrmDbException("找不到对应KDB Api");
         }
     }
+
+    /**
+     * 获取表定义
+     * @param tableName 表名
+     * @return  表定义
+     */
+    public static TableDefine table(String tableName) {
+        return getDefault().table(tableName);
+    }
+
+    /**
+     * 获取表的列定义
+     * @param tableName 表名
+     * @return  表定义
+     */
+    public static List<ColumnDefine> columns(String tableName) {
+        return getDefault().columns(tableName);
+    }
 }

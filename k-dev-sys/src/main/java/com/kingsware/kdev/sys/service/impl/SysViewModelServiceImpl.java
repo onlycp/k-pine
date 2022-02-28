@@ -4,7 +4,7 @@ import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.i18n.I18n;
-import com.kingsware.kdev.core.jsonschema.JsonSchemeDefine;
+import com.kingsware.kdev.core.jsonschema.BaseSchemaDefine;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
@@ -117,7 +117,7 @@ public class SysViewModelServiceImpl extends BaseServiceImpl implements SysViewM
     }
 
     @Override
-    public JsonSchemeDefine createSchemaByTable(String table) {
+    public BaseSchemaDefine createSchemaByTable(String table) {
         return null;
     }
 }

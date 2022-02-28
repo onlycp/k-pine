@@ -108,19 +108,19 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             nodeDefinition.setName(node.getLabel());
             nodeDefinition.setId(node.getId());
             // 判断执行类型
-            if (StringUtils.isNotEmpty(node.getExecuteType())) {
+            if (StringUtils.isNotEmpty(node.getExecuteType())  && StringUtils.isNotEmpty(node.getContent())) {
                 // 根据不同的执行类型，生成不同的执行内容
                 if (ScriptTypeEnum.SQL.getValue().equals(node.getExecuteType())) {
-                    nodeDefinition.setExecute(ExecuteDefinition.createSqlScript(node.getSourceName(), node.getContent().replaceAll("[\\s\\t\\n\\r]", " ")));
+                    nodeDefinition.setExecute(ExecuteDefinition.createSqlScript(node.getSourceName(), node.getContent()));
                 }
                 else if (ScriptTypeEnum.JS.getValue().equals(node.getExecuteType())) {
-                    nodeDefinition.setExecute(ExecuteDefinition.createJsScript(node.getContent().replaceAll("[\\s\\t\\n\\r]", " ")));
+                    nodeDefinition.setExecute(ExecuteDefinition.createJsScript(node.getContent()));
                 }
             }
             // 判断后置脚本
 
             if (StringUtils.isNotEmpty(node.getAfterContent())) {
-                nodeDefinition.setListener(FlowNodeLister.createWithAfter(node.getAfterContent().replaceAll("[\\s\\t\\n\\r]", " ")));
+                nodeDefinition.setListener(FlowNodeLister.createWithAfter(node.getAfterContent()));
             }
             flowDefinition.getNodeDefinitions().add(nodeDefinition);
         }

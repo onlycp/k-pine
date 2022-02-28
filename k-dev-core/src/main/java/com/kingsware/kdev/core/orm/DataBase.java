@@ -199,7 +199,14 @@ public interface DataBase {
      * @param tableName 表名
      * @return  表定义
      */
-    TableDefine getTableDefine(String tableName);
+    TableDefine table(String tableName);
+
+    /**
+     * 获取表的列定义
+     * @param tableName 表名
+     * @return  表定义
+     */
+    List<ColumnDefine> columns(String tableName);
 
 
 }

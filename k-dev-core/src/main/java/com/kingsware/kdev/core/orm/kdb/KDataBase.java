@@ -196,13 +196,25 @@ public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
     }
 
     @Override
-    public TableDefine getTableDefine(String tableName) {
+    public TableDefine table(String tableName) {
         // 如果是mysql
-        if (dbConnectConfig.getDatabaseType().equals(DataBaseTypeEnum.MYSQL.getValue())) {
-
+        String sql = "";
+        if (dbConnectConfig.getInnerType().equalsIgnoreCase(DataBaseTypeEnum.MYSQL.getValue())) {
+            sql = "select table_name as table_name,table_comment as comments from information_schema.tables where table_schema = database() and table_name = ?";
         }
-        return null;
+        return this.findOne(TableDefine.class, sql, tableName);
     }
+
+    @Override
+    public List<ColumnDefine> columns(String tableName) {
+        // 如果是mysql
+        String sql = "";
+        if (dbConnectConfig.getInnerType().equalsIgnoreCase(DataBaseTypeEnum.MYSQL.getValue())) {
+            sql = "select column_name as name,data_type as type,column_comment as comment,character_maximum_length as max_length,if(is_nullable='YES', true, false) as is_nullable, column_key as column_key from information_schema.columns where table_schema = database() and table_name = ?";
+        }
+        return this.findList(ColumnDefine.class, sql, tableName);
+    }
+
 
     @Override
     String getServer() {

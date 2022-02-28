@@ -142,6 +142,9 @@ public abstract class KdbApiAbstract implements  KdbApi {
             if (ret == null) {
                 throw new OrmDbException("kdb响应数据不合法，响应内容:" + responseBody);
             }
+            else if (ret.getErrorCode() != 0) {
+                throw new OrmDbException("kdb响应数据不合法，响应内容:" + ret.getMessage());
+            }
             return ret;
         }
         catch (HttpClientException e) {

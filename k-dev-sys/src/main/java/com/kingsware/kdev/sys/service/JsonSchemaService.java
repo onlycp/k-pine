@@ -1,6 +1,6 @@
 package com.kingsware.kdev.sys.service;
 
-import com.kingsware.kdev.core.jsonschema.JsonSchemeDefine;
+import com.kingsware.kdev.core.jsonschema.BaseSchemaDefine;
 
 /**
  * Json schema 业务类
@@ -18,5 +18,5 @@ public interface JsonSchemaService {
      * @param inOut 输入输出
      * @return  json定义
      */
-    JsonSchemeDefine createByTable(String tableName, String curd, String inOut);
+    BaseSchemaDefine createByTable(String tableName, String curd, String inOut);
 }

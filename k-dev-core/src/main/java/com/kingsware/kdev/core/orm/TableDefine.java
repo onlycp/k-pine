@@ -18,6 +18,4 @@ public class TableDefine {
     private String tableName;
     /** 注释描述 **/
     private String comments;
-    /** 属性列 **/
-    private List<ColumnDefine> columns = new ArrayList<>();
 }
