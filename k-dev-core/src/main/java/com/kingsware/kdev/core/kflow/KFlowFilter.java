@@ -68,9 +68,9 @@ public class KFlowFilter implements Filter {
             KFlowContext context = KFlowContext.createBaseContext();
             // 处理请求变量
             Map<String, Object> argvMap = getRequestParams(api, path, request);
-            // 加入Request信息
-            argvMap.put("request.url", url);
-            argvMap.put("request.time", DateUtils.getNow());
+//            // 加入Request信息
+//            argvMap.put("request.url", url);
+//            argvMap.put("request.time", DateUtils.getNow());
             // 处理类
             context.setHandleClass(api.getApiResultHandler());
             // 调用流程
@@ -113,7 +113,9 @@ public class KFlowFilter implements Filter {
             }
         }
         // 将body加到变量中
-        params.put("request.body", body);
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("body", body);
+        params.put("request", requestMap);
         // 获取path变量
         Map<String, Object> pathVariables = getPathVariables(path, api.getApiUrl());
         params.putAll(pathVariables);

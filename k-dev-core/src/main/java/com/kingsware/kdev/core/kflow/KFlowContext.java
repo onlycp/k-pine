@@ -31,11 +31,14 @@ public class KFlowContext {
     public static KFlowContext createBaseContext() {
 
         KFlowContext context = new KFlowContext();
+        Map<String, Object> sysMap = new HashMap<>();
+
         // 处理系统变量
-        context.getSystemContext().put("who",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getId() : "");
-        context.getSystemContext().put("username",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getUsername() : "");
-        context.getSystemContext().put("when", DateUtils.getNow());
-        context.getSystemContext().put("uuid", StringUtils.getUUID());
+        sysMap.put("who",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getId() : "");
+        sysMap.put("username",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getUsername() : "");
+        sysMap.put("when", DateUtils.getNow());
+        sysMap.put("uuid", StringUtils.getUUID());
+        context.getSystemContext().put("sys", sysMap);
         return context;
     }
 }
