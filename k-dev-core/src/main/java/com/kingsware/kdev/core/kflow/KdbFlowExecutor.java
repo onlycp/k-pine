@@ -80,7 +80,7 @@ public class KdbFlowExecutor {
         }
         argv.getVariables().putAll(params);
         // 将入系统变量
-        context.getSystemContext().forEach((k, v)-> argv.getVariables().put("sys." + k, v));
+        argv.getVariables().putAll(context.getSystemContext());
         // 执行流程
         KdbRet<String> ret = DB.kdbApi().executeFlow(argv);
         // 如果失败
