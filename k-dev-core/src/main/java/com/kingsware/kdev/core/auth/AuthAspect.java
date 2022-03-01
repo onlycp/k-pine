@@ -1,6 +1,9 @@
 package com.kingsware.kdev.core.auth;
 
+import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.exception.UnauthorizedException;
+import com.kingsware.kdev.core.i18n.I18n;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Around;
@@ -63,6 +66,12 @@ public class AuthAspect {
                 KClientContext.getContext().getIp(),
                 appAuthProperties.getTokenExpireMinutes()
         );
+        // 检查是否只有一个会话
+        if (appAuthProperties.getLoginSessionOne()) {
+            if (!SessionManager.getInstance().checkSession(userInfo.getId(), KClientContext.getContext().getToken())) {
+                throw new UnauthorizedException(I18n.t("auth. unauthorized-e007", "用户已在别处登录"));
+            }
+        }
         // 将用户信息写到上下文
         KClientContext.getContext().setUserInfo(userInfo);
         return pjd.proceed();

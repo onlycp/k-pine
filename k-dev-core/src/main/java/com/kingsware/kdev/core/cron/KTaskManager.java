@@ -25,11 +25,7 @@ public class KTaskManager {
 
     public static KTaskManager getInstance() {
         if (instance == null) {
-            synchronized (KTaskManager.class) {
-                if (instance == null) {
-                    instance = new KTaskManager();
-                }
-            }
+            instance = new KTaskManager();
         }
         return instance;
     }
@@ -136,7 +132,7 @@ public class KTaskManager {
                     sysTask.setTaskType(1);
                     sysTask.setCron(task.cron());
                     sysTask.setEnable(1);
-                    sysTask.setDistributed(1);
+                    sysTask.setDistributed(0);
                     sysTask.setClassName(tClass.getName());
                     sysTask.setLockForLeast(1);
                     sysTask.setLockForMost(30);

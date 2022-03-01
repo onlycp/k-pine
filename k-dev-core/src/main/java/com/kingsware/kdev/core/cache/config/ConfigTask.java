@@ -14,6 +14,10 @@ import java.util.List;
  */
 public class ConfigTask implements KTask {
 
+    public ConfigTask() {
+        this.execute();
+    }
+
     /**
      * 定时拉取字典项
      */

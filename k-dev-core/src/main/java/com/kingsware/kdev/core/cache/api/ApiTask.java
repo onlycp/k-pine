@@ -14,6 +14,10 @@ import java.util.List;
  */
 public class ApiTask implements KTask {
 
+    public ApiTask() {
+        this.execute();
+    }
+
     /**
      * 定时拉取字典项
      */

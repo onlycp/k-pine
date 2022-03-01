@@ -59,4 +59,16 @@ public interface SysUserService extends BaseService {
     void editProfile(SysUserProfileArgv argv);
 
     SysUserProfileRet getProfile(String token, String ip);
+
+    /**
+     * 登出
+     */
+    void logout();
+
+    /**
+     * 登录的用户数
+     * @param username
+     * @return
+     */
+    Long onlineCount(String username);
 }

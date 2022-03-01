@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.auth;
 
+import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @ConfigurationProperties(prefix = "app.auth")
+@Data
 public class AppAuthProperties {
     /** 是否启动权限认证 **/
     private Boolean enable = true;
@@ -21,36 +23,7 @@ public class AppAuthProperties {
     private int tokenExpireMinutes = 120;
     /** 加密密钥 **/
     private String tokenSecret;
+    /** 是否只允许一个会话 **/
+    private Boolean loginSessionOne = false;
 
-    public Boolean getEnable() {
-        return enable;
-    }
-
-    public void setEnable(Boolean enable) {
-        this.enable = enable;
-    }
-
-    public String getIss() {
-        return iss;
-    }
-
-    public void setIss(String iss) {
-        this.iss = iss;
-    }
-
-    public int getTokenExpireMinutes() {
-        return tokenExpireMinutes;
-    }
-
-    public void setTokenExpireMinutes(int tokenExpireMinutes) {
-        this.tokenExpireMinutes = tokenExpireMinutes;
-    }
-
-    public String getTokenSecret() {
-        return tokenSecret;
-    }
-
-    public void setTokenSecret(String tokenSecret) {
-        this.tokenSecret = tokenSecret;
-    }
 }

@@ -61,6 +61,7 @@ public class SysUserController extends BaseController {
     @ApiOperation(value = "登出 " ,notes = "登出")
     @PostMapping(value = "logout")
     public BaseRet<?> logout() {
+        sysUserService.logout();
         return BaseRet.success();
     }
 
@@ -152,5 +153,12 @@ public class SysUserController extends BaseController {
         String token = ClientContextAspect.getTokenString(request);
         sysUserService.changePassword(argv, token, ip);
         return BaseRet.success();
+    }
+
+    @ApiOperation(value = "登录会话数量 " ,notes = "登录会话数量")
+    @GetMapping("/session-count/{username}")
+    @ApiIgnore
+    public BaseRet<Long> getOnlineSessionCount(@PathVariable String username) {
+        return BaseRet.success(sysUserService.onlineCount(username));
     }
 }

@@ -14,6 +14,10 @@ import java.util.List;
  */
 public class DictTask implements KTask {
 
+    public DictTask() {
+        this.execute();
+    }
+
     /**
      * 定时拉取字典项
      */

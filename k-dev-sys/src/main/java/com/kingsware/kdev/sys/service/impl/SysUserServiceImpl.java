@@ -6,12 +6,14 @@ import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.encrypt.EncryptWorker;
 import com.kingsware.kdev.core.enums.ApiSystemEnum;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.UnauthorizedException;
 import com.kingsware.kdev.core.i18n.I18n;
+import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
@@ -30,6 +32,7 @@ import com.kingsware.kdev.sys.ret.SysUserRet;
 import com.kingsware.kdev.sys.service.SysUserService;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.*;
 
 import javax.annotation.Resource;
@@ -203,6 +206,23 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         String token = TokenUtil.createToken(appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), KClientContext.getContext().getIp(), userInfo);
         SysUserLoginRet ret = new SysUserLoginRet();
         ret.setToken(token);
+        // 保存登录会话
+        // 如果只允许一个登录会话, 那么先将之前的会话删除
+        if (appAuthProperties.getLoginSessionOne()) {
+            DB.executeUpdateSql("delete from sys_online_user where user_id = ?", model.getId());
+            SessionManager.getInstance().removeByUserId(model.getId());
+        }
+        SysOnlineUser onlineUser = new SysOnlineUser();
+        onlineUser.setUserId(model.getId());
+        onlineUser.setLoginIp(KClientContext.getContext().getIp());
+        onlineUser.setLoginTime(new Timestamp(System.currentTimeMillis()));
+        onlineUser.setLoginToken(token);
+        onlineUser.setExpireTime(new Timestamp(System.currentTimeMillis() +  ((long) appAuthProperties.getTokenExpireMinutes() * 60 * 1000)));
+        DB.save(onlineUser);
+        // 保存到缓存
+        SessionManager.getInstance().addSession(onlineUser);
+
+
         return ret;
     }
 
@@ -237,6 +257,26 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         ret.setRoleIds(roleMap.get("roleIds"));
         ret.setRoleNames(roleMap.get("roleNames"));
         return ret;
+    }
+
+    @Override
+    public void logout() {
+        // 清空登录会话
+        SysOnlineUser onlineUser = DB.findOne(SysOnlineUser.class, Expr.builder().add("loginToken", "=", KClientContext.getContext().getToken()).build());
+        if (onlineUser != null) {
+            DB.delete(onlineUser);
+            SessionManager.getInstance().removeSession(onlineUser.getUserId(), onlineUser.getLoginToken());
+        }
+    }
+
+    @Override
+    public Long onlineCount(String username) {
+        // 如果不启用检验，那么直接返回0
+        if (!appAuthProperties.getLoginSessionOne()) {
+            return 0L;
+        }
+        String sql = "select count(1) from sys_online_user t0 left join sys_user t1 on t0.user_id = t1.id where t1.username = ?";
+        return DB.findCount(sql, username);
     }
 
     @Override
