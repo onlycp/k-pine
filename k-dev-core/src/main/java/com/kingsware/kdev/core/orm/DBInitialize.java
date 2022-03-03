@@ -30,7 +30,7 @@ public class DBInitialize {
         if (!connectConfigs.isEmpty()) {
             for (Map.Entry<String, DBConnectConfig> entry: connectConfigs.entrySet()) {
                 DbContext.getInstance().createDataBase(entry.getKey(), entry.getValue());
-                logger.info("初始化数据库连接成功，连接名称:" + entry.getKey());
+                logger.info("初始化数据库连接成功，连接名称:" + entry.getKey() + "-" + entry.getValue());
             }
         }
     }
