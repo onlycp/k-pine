@@ -44,6 +44,7 @@ public class KTaskManager {
             try {
                 executeTask(sysTask);
             } catch (Exception e) {
+                log.error("error", e);
                 log.error("定时任务执行失败, 任务名: {}， 错误信息:{}", sysTask.getName(), e.getMessage());
             }
             return;

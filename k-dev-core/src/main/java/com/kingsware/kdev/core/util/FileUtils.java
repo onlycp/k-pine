@@ -1,5 +1,7 @@
 package com.kingsware.kdev.core.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.*;
 import java.security.MessageDigest;
 
@@ -10,6 +12,7 @@ import java.security.MessageDigest;
  * @version 1.0.0
  * @date 2021/12/31 4:30 下午
  */
+@Slf4j
 public class FileUtils {
     /** hex码 **/
     private static final char[] hexCode = "0123456789ABCDEF".toCharArray();
@@ -89,13 +92,13 @@ public class FileUtils {
             reader.close();
             return sbf.toString();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("error", e);
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
                 } catch (IOException e1) {
-                    e1.printStackTrace();
+                    log.error("error", e1);
                 }
             }
         }

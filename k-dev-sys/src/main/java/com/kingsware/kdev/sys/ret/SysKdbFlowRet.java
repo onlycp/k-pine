@@ -23,6 +23,10 @@ public class SysKdbFlowRet extends BaseSimpleRet {
     private String name;
     /** 描述 **/
     private String description = "";
+    /**  应用名称 **/
+    private String applicationId;
+    /**  应用名称 **/
+    private String applicationName;
     /** 标签 **/
     private String tags;
     /** 输入参数 **/

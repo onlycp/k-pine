@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 角色业务实现类
@@ -52,7 +53,8 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         // 转换成ret对象
         FlowInfo kdbFlow = list.get(0);
         // 从数据库查询
-        SysLogicFlow logicFlow = DB.findOne(SysLogicFlow.class, Expr.builder().add("flowId", "=", id).build());
+        String sql = "select t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name from sys_logic_flow t0 left join dev_application t1 on t1.id=t0.application_id where flow_id=?";
+        SysKdbFlowRet logicFlow = DB.findOne(SysKdbFlowRet.class, sql, id);
         return toRet(kdbFlow, logicFlow);
     }
 
@@ -170,7 +172,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
 
     }
 
-    private SysKdbFlowRet toRet(FlowInfo info, SysLogicFlow logicFlow) {
+    private SysKdbFlowRet toRet(FlowInfo info, SysKdbFlowRet logicFlow) {
         SysKdbFlowRet flowRet = new SysKdbFlowRet();
         flowRet.setId(info.getFlowId());
         flowRet.setContent(info.getContent());
@@ -189,6 +191,8 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             flowRet.setInArgv(logicFlow.getInArgv());
             flowRet.setOutArgv(logicFlow.getOutArgv());
             flowRet.setTags(logicFlow.getTags());
+            flowRet.setApplicationName(logicFlow.getApplicationName());
+            flowRet.setApplicationId(logicFlow.getApplicationId());
         }
         return flowRet;
     }
@@ -258,26 +262,45 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
     @SuppressWarnings("unchecked")
     public PageDataRet<SysKdbFlowRet> query(SysKdbFlowQueryArgv argv) {
         KdbFlowQueryArgv info = new KdbFlowQueryArgv();
-        info.setContent(argv.getContent());
-        info.setName(argv.getName());
-        info.setParentId(argv.getParentId());
+        // 全部查出来再内存过滤
+//        info.setContent(argv.getContent());
+//        info.setName(argv.getName());
+//        info.setParentId(argv.getParentId());
         // 查询所有数据
         KdbApi api = (KdbApi)(DB.getDefault());
         List<FlowInfo> list = api.query(info);
         // 从数据库里查询所有数据
-        List<SysLogicFlow> logicFlows = DB.findList(SysLogicFlow.class, Collections.emptyList());
-        Map<String, SysLogicFlow> dbMap = new HashMap<>();
-        logicFlows.forEach(it -> dbMap.put(it.getFlowId(), it));
+        String sql = "select t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name from sys_logic_flow t0 left join dev_application t1 on t1.id=t0.application_id";
+        List<SysKdbFlowRet> logicFlows  = DB.findList(SysKdbFlowRet.class, sql );
+        Map<String, SysKdbFlowRet> dbMap = new HashMap<>();
+        logicFlows.forEach(it -> dbMap.put(it.getId(), it));
         // 转为ret类
         List<SysKdbFlowRet> retList = new ArrayList<>();
         for (FlowInfo infoL: list) {
             retList.add(toRet(infoL, dbMap.get(infoL.getFlowId())));
         }
+        // 查询过滤
+        List<SysKdbFlowRet> filterList = retList.stream().filter(it -> {
+            if (StringUtils.isNotEmpty(argv.getName())) {
+                return it.getName().contains(argv.getName());
+            }
+            return true;
+        }).filter(it -> {
+            if (StringUtils.isNotEmpty(argv.getApplicationId()) ) {
+                return it.getApplicationId() != null && it.getApplicationId().equalsIgnoreCase(argv.getApplicationId());
+            }
+            return true;
+        }).filter(it -> {
+            if (StringUtils.isNotEmpty(argv.getTags())) {
+                return it.getTags() != null && it.getTags().contains(argv.getTags());
+            }
+            return true;
+        }).collect(Collectors.toList());
         // 排序
-        if (!retList.isEmpty()) {
-            retList.sort(((o1, o2) -> o2.getWhenCreated().compareTo(o1.getWhenCreated())));
+        if (!filterList.isEmpty()) {
+            filterList.sort(((o1, o2) -> o2.getWhenCreated().compareTo(o1.getWhenCreated())));
         }
-        return PageUtil.memoryPage(argv, retList, SysKdbFlowRet.class);
+        return PageUtil.memoryPage(argv, filterList, SysKdbFlowRet.class);
     }
 
     @Override

@@ -19,5 +19,9 @@ public class SysKdbFlowQueryArgv extends BasePageArgv {
     private String parentId = "";
     /** 流程内容 **/
     private String content = "";
+    /** 应用id **/
+    private String applicationId;
+    /** 标签 **/
+    private String tags;
 
 }

@@ -1,5 +1,7 @@
 package com.kingsware.kdev.core.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -11,6 +13,7 @@ import java.security.NoSuchAlgorithmException;
  * @version 1.0.0
  * @date 2021/12/27 3:00 下午
  */
+@Slf4j
 public class MD5Utils {
 
     /**
@@ -29,7 +32,7 @@ public class MD5Utils {
                 sb.append(Integer.toHexString(b & 0xff));
             }
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            log.error("error", e);
         }
         return sb.toString();
     }
