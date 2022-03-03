@@ -6,10 +6,12 @@ import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.jsonschema.JsonschemaMock;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.kflow.define.*;
 import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.orm.kdb.*;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.PageUtil;
@@ -18,6 +20,7 @@ import com.kingsware.kdev.sys.argv.SysFlowDebugArgv;
 import com.kingsware.kdev.sys.argv.SysFlowDefineArgv;
 import com.kingsware.kdev.sys.argv.SysKdbFlowArgv;
 import com.kingsware.kdev.sys.argv.SysKdbFlowQueryArgv;
+import com.kingsware.kdev.sys.model.SysLogicFlow;
 import com.kingsware.kdev.sys.ret.SysFlowDebugRet;
 import com.kingsware.kdev.sys.ret.SysFlowDefineRet;
 import com.kingsware.kdev.sys.ret.SysKdbFlowRet;
@@ -25,9 +28,7 @@ import com.kingsware.kdev.sys.service.SysKdbFlowService;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 角色业务实现类
@@ -47,8 +48,12 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         // 查询model
         KdbApi api = DB.kdbApi();
         List<FlowInfo> list = api.query(argv);
+
         // 转换成ret对象
-        return toRet(list.get(0));
+        FlowInfo kdbFlow = list.get(0);
+        // 从数据库查询
+        SysLogicFlow logicFlow = DB.findOne(SysLogicFlow.class, Expr.builder().add("flowId", "=", id).build());
+        return toRet(kdbFlow, logicFlow);
     }
 
     @Override
@@ -65,6 +70,15 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         defineRet.setId(flowInfo.getFlowId());
         defineRet.setName(flowInfo.getName());
         defineRet.setDescription(flowInfo.getDescription());
+        // 从数据库查询
+        SysLogicFlow logicFlow = DB.findOne(SysLogicFlow.class, Expr.builder().add("flowId", "=", id).build());
+        if (logicFlow != null) {
+            defineRet.setInArgv(logicFlow.getInArgv());
+            defineRet.setOutArgv(logicFlow.getOutArgv());
+            if (StringUtils.isNotEmpty(logicFlow.getInArgv())) {
+                defineRet.setInExample(JsonschemaMock.getInstance().mock(logicFlow.getInArgv()));
+            }
+        }
         // 处理节点
         FlowDefinition flowDefinition = JsonUtil.toBean(flowInfo.getContent(), FlowDefinition.class);
         for(NodeDefinition nodeDefinition: flowDefinition.getNodeDefinitions()) {
@@ -90,6 +104,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             }
             defineRet.addLink(link.getId(), link.getName(), link.getFrom(), link.getTo(), expr);
         }
+
         return defineRet;
     }
 
@@ -155,7 +170,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
 
     }
 
-    private SysKdbFlowRet toRet(FlowInfo info) {
+    private SysKdbFlowRet toRet(FlowInfo info, SysLogicFlow logicFlow) {
         SysKdbFlowRet flowRet = new SysKdbFlowRet();
         flowRet.setId(info.getFlowId());
         flowRet.setContent(info.getContent());
@@ -169,6 +184,11 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         }
         if (info.getUpdateTime() != null) {
             flowRet.setWhenModified(new Timestamp(info.getUpdateTime()));
+        }
+        if (logicFlow != null) {
+            flowRet.setInArgv(logicFlow.getInArgv());
+            flowRet.setOutArgv(logicFlow.getOutArgv());
+            flowRet.setTags(logicFlow.getTags());
         }
         return flowRet;
     }
@@ -184,9 +204,19 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             FlowDefinition definition = FlowDefinition.start(argv.getName()).toEnd();
             info.setContent(definition.toJson());
         }
-
+        // 保存到kdb
         KdbApi api = (KdbApi)(DB.getDefault());
-        api.addFlow(info);
+        String flowId = api.addFlow(info);
+        // 将平台信息保存
+        SysLogicFlow logicFlow = new SysLogicFlow();
+        logicFlow.setName(argv.getName());
+        logicFlow.setApplicationId(argv.getApplicationId());
+        logicFlow.setNote(argv.getDescription());
+        logicFlow.setInArgv(argv.getInArgv());
+        logicFlow.setOutArgv(argv.getOutArgv());
+        logicFlow.setTags(argv.getTags());
+        logicFlow.setFlowId(flowId);
+        DB.save(logicFlow);
     }
 
     @Override
@@ -196,8 +226,32 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         info.setName(argv.getName());
         info.setFlowId(argv.getId());
         info.setDescription(argv.getDescription());
+        // 保存到kdb
         KdbApi api = (KdbApi)(DB.getDefault());
         api.editFlow(info);
+        // 保存到数据库
+        SysLogicFlow logicFlow = DB.findOne(SysLogicFlow.class, Expr.builder().add("flowId", "=", argv.getId()).build());
+        if (logicFlow == null) {
+            logicFlow = new SysLogicFlow();
+            logicFlow.setName(argv.getName());
+            logicFlow.setApplicationId(argv.getApplicationId());
+            logicFlow.setNote(argv.getDescription());
+            logicFlow.setInArgv(argv.getInArgv());
+            logicFlow.setOutArgv(argv.getOutArgv());
+            logicFlow.setTags(argv.getTags());
+            logicFlow.setFlowId(argv.getId());
+            DB.save(logicFlow);
+        }
+        else {
+            logicFlow.setName(argv.getName());
+            logicFlow.setApplicationId(argv.getApplicationId());
+            logicFlow.setNote(argv.getDescription());
+            logicFlow.setInArgv(argv.getInArgv());
+            logicFlow.setOutArgv(argv.getOutArgv());
+            logicFlow.setTags(argv.getTags());
+            logicFlow.setFlowId(argv.getId());
+            DB.update(logicFlow);
+        }
     }
 
     @Override
@@ -210,10 +264,14 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         // 查询所有数据
         KdbApi api = (KdbApi)(DB.getDefault());
         List<FlowInfo> list = api.query(info);
+        // 从数据库里查询所有数据
+        List<SysLogicFlow> logicFlows = DB.findList(SysLogicFlow.class, Collections.emptyList());
+        Map<String, SysLogicFlow> dbMap = new HashMap<>();
+        logicFlows.forEach(it -> dbMap.put(it.getFlowId(), it));
         // 转为ret类
         List<SysKdbFlowRet> retList = new ArrayList<>();
         for (FlowInfo infoL: list) {
-            retList.add(toRet(infoL));
+            retList.add(toRet(infoL, dbMap.get(infoL.getFlowId())));
         }
         // 排序
         if (!retList.isEmpty()) {
@@ -226,7 +284,11 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
     public void delete(MultiIdArgv argv) {
         KdbApi api = (KdbApi)(DB.getDefault());
         for (String id: argv.getIds()) {
-           api.deleteFlow(id);
+            api.deleteFlow(id);
+            SysLogicFlow logicFlow = DB.findOne(SysLogicFlow.class, Expr.builder().add("flowId", "=", id).build());
+            if (logicFlow != null) {
+                DB.delete(logicFlow);
+            }
         }
     }
 

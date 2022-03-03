@@ -90,6 +90,9 @@ public class KDBHttpChannel implements DbChannel{
     @Override
     public Long executeSql(String sql, List<Object> objects) {
         String executeResponse = send(makePassThrough(sql, objects));
+        if (executeResponse == null) {
+            return 0L;
+        }
         return Long.parseLong(executeResponse);
 
     }

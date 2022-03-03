@@ -23,6 +23,12 @@ public class SysKdbFlowRet extends BaseSimpleRet {
     private String name;
     /** 描述 **/
     private String description = "";
+    /** 标签 **/
+    private String tags;
+    /** 输入参数 **/
+    private String inArgv;
+    /** 输出参数 **/
+    private String outArgv;
     /** 创建时间 **/
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
     private Timestamp whenCreated;

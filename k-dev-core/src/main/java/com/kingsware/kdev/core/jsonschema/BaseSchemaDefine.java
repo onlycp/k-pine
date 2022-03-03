@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 /**
  * schema根定义
@@ -22,5 +25,9 @@ public class BaseSchemaDefine {
     private String description = "";
     /** 类型 **/
     private String type = "";
+    /** 扩展数据类型 **/
+    private String externType = "";
+    /** 扩展信息 **/
+    private Map<String, Object> extern = new HashMap<>();
 
 }

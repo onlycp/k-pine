@@ -56,6 +56,14 @@ public class SysFlowDefineRet extends BaseSimpleRet {
     private String name;
     /** 描述 **/
     private String description = "";
+    /** 标签 **/
+    private String tags;
+    /** 输入参数 **/
+    private String inArgv;
+    /** 输出参数 **/
+    private String outArgv;
+    /** 输入参数示例 **/
+    private String inExample;
     /** 节点列表 **/
     private List<Node> nodes = new ArrayList<>();
     /** 连续 **/

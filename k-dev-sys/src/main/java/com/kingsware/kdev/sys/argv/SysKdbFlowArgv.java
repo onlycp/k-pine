@@ -18,6 +18,14 @@ public class SysKdbFlowArgv {
     private String content;
     /** 名称 **/
     private String name;
+    /** 标签 **/
+    private String tags;
+    /** 输入参数 **/
+    private String inArgv;
+    /** 输出参数 **/
+    private String outArgv;
+    /** 应用id **/
+    private String applicationId;
     /** 描述 **/
     private String description;
 }

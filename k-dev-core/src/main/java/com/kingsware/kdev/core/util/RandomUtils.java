@@ -40,15 +40,16 @@ public class RandomUtils {
         // 生成样本字符串
         StringBuilder chars = new StringBuilder();
         // 收集大写字母
-        for (int ch = 0x41; ch<=0x5A; ch++ ) {
+        for (char ch = 0x41; ch<=0x5A; ch++ ) {
             chars.append(ch);
         }
         // 收集小写字母
-        for (int ch = 0x41; ch<=0x5A; ch++ ) {
+        for (char ch = 0x61; ch<=0x7A; ch++ ) {
             chars.append(ch);
         }
         // 返回随机字符串
-        return randString(count, chars.toString());
+        String str = chars.toString();
+        return randString(count, str);
     }
 
 
@@ -66,7 +67,7 @@ public class RandomUtils {
         // 遍历生成字符串
         for (int i = 0; i < count; i++) {
             int chIndex = RANDOM.nextInt(length);
-            int ch = chars.charAt(chIndex);
+            char ch = chars.charAt(chIndex);
             builder.append(ch);
         }
         return builder.toString();
