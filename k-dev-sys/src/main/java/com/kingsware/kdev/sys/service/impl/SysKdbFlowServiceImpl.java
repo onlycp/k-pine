@@ -1,14 +1,13 @@
 package com.kingsware.kdev.sys.service.impl;
 
-import com.google.common.collect.Maps;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
-import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.jsonschema.JsonschemaMock;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
+import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.kflow.define.*;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.expression.Expr;
@@ -342,19 +341,19 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
 
     @Override
     public SysFlowDebugRet debug(SysFlowDebugArgv argv) {
-        KFlowContext context = KFlowContext.createBaseContext();
+        SysLogicFlow logicFlow = DB.findOne(SysLogicFlow.class, Expr.builder().add("flowId", "=", argv.getFlowId()).build());
+        KFlowContext context = KFlowContext.createBaseContext(logicFlow == null ? null : logicFlow.getInArgv(), logicFlow == null ? null : logicFlow.getOutArgv());
         String json = argv.getJson();
         if (StringUtils.isEmpty(json)) {
             json = "{}";
         }
         long t1 = System.currentTimeMillis();
         Map<String, Object> argvMap = JsonUtil.toMap(json);
-        Object result = KdbFlowExecutor.getInstance().execute(argv.getFlowId(), argvMap, context);
-        Object apiResult = KdbFlowExecutor.getInstance().toApiResult(result);
+        KdbFlowResult result = KdbFlowExecutor.getInstance().execute(argv.getFlowId(), argvMap, context);
         long t2 = System.currentTimeMillis();
         SysFlowDebugRet ret = new SysFlowDebugRet();
         ret.setTakeMs(t2 - t1);
-        ret.setResponseBody(JsonUtil.toJson(apiResult));
+        ret.setResponseBody(JsonUtil.toJson(result));
         return ret;
     }
 

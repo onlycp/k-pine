@@ -24,7 +24,7 @@ public class ApiTask implements KTask {
     @Override
     public void execute() {
         // 查找所有字典
-        List<ApiInfo> apis = DB.findList(ApiInfo.class, "select * from sys_api");
+        List<ApiInfo> apis = DB.findList(ApiInfo.class, "select t0.*, t1.in_argv, t1.out_argv from sys_api t0 left join sys_logic_flow t1 on t1.flow_id=t0.api_flow_id");
         ApiManager.getInstance().addApi(apis);
     }
 

@@ -71,4 +71,12 @@ public interface SysUserService extends BaseService {
      * @return
      */
     Long onlineCount(String username);
+
+    /**
+     * 密码转换
+     * @param from
+     * @param to
+     * @param secret
+     */
+    void encryptChange(String from, String to, String secret);
 }

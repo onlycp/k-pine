@@ -1,5 +1,7 @@
 package com.kingsware.kdev.core.util;
 
+import org.apache.commons.lang3.CharUtils;
+
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -35,6 +37,34 @@ public class StringUtils {
     public static boolean isEmpty(CharSequence cs) {
         return cs == null || cs.length() == 0;
     }
+
+    /**
+     * 是否可以打印
+     * @param ch 字符
+     * @return 是否
+     */
+    public static boolean isAsciiPrintable(final char ch) {
+        return ch >= 32 && ch < 127;
+    }
+
+    /**
+     * 字符串是否可以打印
+     * @param cs 字符串
+     * @return 是否
+     */
+    public static boolean isAsciiPrintable(final CharSequence cs) {
+        if (cs == null) {
+            return false;
+        }
+        final int sz = cs.length();
+        for (int i = 0; i < sz; i++) {
+            if (!CharUtils.isAsciiPrintable(cs.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     /**
      * 判断字符串不为空

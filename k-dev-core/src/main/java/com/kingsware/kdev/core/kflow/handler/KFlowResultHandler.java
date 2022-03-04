@@ -1,7 +1,7 @@
 package com.kingsware.kdev.core.kflow.handler;
 
-import java.util.List;
-import java.util.Map;
+import com.kingsware.kdev.core.kflow.KFlowContext;
+import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 
 /**
  * 流程执行器
@@ -14,8 +14,15 @@ public interface KFlowResultHandler {
 
     /**
      *  执行流程
-     * @param list         流程id
-     * @return             执行结果
+     * @param responseBody  kdb响应字符串
+     * @param context  流程上下文
+     * @return  结果
      */
-    Object execute(List<Map<String, Object>> list);
+    KdbFlowResult parser(String responseBody, KFlowContext context);
+
+    /**
+     * 处理器名称
+     * @return  返回名称
+     */
+    String name();
 }

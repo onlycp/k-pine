@@ -35,5 +35,9 @@ public class ApiInfo{
     private String apiFlowId;
     /** 接口编码 **/
     private String apiCode;
+    /** 输入参数定义 **/
+    private String inArgv;
+    /** 输出参数定义 **/
+    private String outArgv;
 
 }

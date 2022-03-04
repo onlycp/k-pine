@@ -1,0 +1,37 @@
+package com.kingsware.kdev.core.kflow;
+
+/**
+ * 变量定义
+ *
+ * @author chen peng
+ * @version 1.0.0
+ * @date 2022/3/3 2:16 下午
+ */
+public class KFlowConstant {
+    /** 数组开始 **/
+    public final static String ARRAY_START = "[";
+    /** 数组结束 **/
+    public final static String ARRAY_END = "]";
+    /** 对象开始 **/
+    public final static String OBJECT_START = "{";
+    /** 对象结束 **/
+    public final static String OBJECT_END = "}";
+    /** 对象标志 **/
+    public final static String OBJECT_FLAG = "object|";
+    /** 列表标志 **/
+    public final static String LIST_FLAG = "list|";
+    /** 错误标志 **/
+    public final static String ERROR_FLAG = "error|";
+    /** 提示标志 **/
+    public final static String MESSAGE_FLAG = "message|";
+    /** 导出excel **/
+    public final static String EXCEL_FLAG = "excel|";
+
+    /** 结果类型 json **/
+    public final static String RESULT_JSON = "json";
+    /** 结果类型 excel **/
+    public final static String RESULT_EXCEL = "excel";
+    /** 结果类型 file **/
+    public final static String RESULT_FILE = "file";
+
+}

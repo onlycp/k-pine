@@ -1,10 +1,7 @@
 package com.kingsware.kdev.core.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +45,20 @@ public class JsonUtil {
             return objectMapper.readValue(jsonString, tClass);
         } catch (JsonProcessingException e) {
             logger.warn("字符串转为对象失败, 源串:{}", jsonString);
+            return null;
+        }
+    }
+
+    /**
+     * 读取json node
+     * @param json json 字符串
+     * @return  json node
+     */
+    public static JsonNode toTree(String json) {
+        try {
+            return objectMapper.readTree(json);
+        } catch (JsonProcessingException e) {
+            logger.warn("字符串转为对象失败, 源串:{}", json);
             return null;
         }
     }

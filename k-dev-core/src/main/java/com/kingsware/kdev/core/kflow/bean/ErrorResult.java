@@ -1,4 +1,4 @@
-package com.kingsware.kdev.core.kflow;
+package com.kingsware.kdev.core.kflow.bean;
 
 import lombok.Data;
 

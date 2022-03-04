@@ -8,6 +8,7 @@ import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.encrypt.EncryptProperties;
 import com.kingsware.kdev.core.encrypt.EncryptWorker;
 import com.kingsware.kdev.core.enums.ApiSystemEnum;
 import com.kingsware.kdev.core.exception.BusinessException;
@@ -19,6 +20,7 @@ import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.orm.expression.Op;
+import com.kingsware.kdev.core.util.AESUtil;
 import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.*;
@@ -32,6 +34,7 @@ import com.kingsware.kdev.sys.ret.SysUserRet;
 import com.kingsware.kdev.sys.service.SysUserService;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -51,6 +54,8 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
 
     @Resource
     private AppAuthProperties appAuthProperties;
+    @Resource
+    private EncryptProperties encryptProperties;
 
     @Override
     public SysUserRet get(String id) {
@@ -277,6 +282,58 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         }
         String sql = "select count(1) from sys_online_user t0 left join sys_user t1 on t0.user_id = t1.id where t1.username = ?";
         return DB.findCount(sql, username);
+    }
+
+    @Override
+    public void encryptChange(String from, String to, String secret) {
+        if (StringUtils.isEmpty(secret)) {
+            throw BusinessException.serviceThrow("AES密码不能为空");
+        }
+        if (StringUtils.isEmpty(from)) {
+            throw BusinessException.serviceThrow("源加密方法不能为空");
+        }
+        if (StringUtils.isEmpty(from)) {
+            throw BusinessException.serviceThrow("目标加密方法不能为空");
+        }
+        if (!secret.equals(encryptProperties.getAes().getSecret())) {
+            throw BusinessException.serviceThrow("AES密钥不正确");
+        }
+        Set<String> supportEncrypts = new HashSet<>();
+        supportEncrypts.add("aes");
+        supportEncrypts.add("base64");
+        if (!supportEncrypts.contains(from) || !supportEncrypts.contains(to)) {
+            throw BusinessException.serviceThrow("当前只支持aes和base64加解密方式");
+        }
+        // 读取所有的用户
+        List<SysUser> users = DB.findList(SysUser.class, Collections.emptyList());
+        for (SysUser user: users) {
+            String originPassword = null;
+            if (from.equals("base64")) {
+                originPassword = new String(Base64.getDecoder().decode(user.getPassword().getBytes(StandardCharsets.UTF_8)));
+            }
+            else {
+                originPassword = AESUtil.decrypt(user.getPassword(), encryptProperties.getAes().getSecret());
+            }
+            if (!StringUtils.isAsciiPrintable(originPassword)) {
+                throw BusinessException.serviceThrow("解密之后的字符串不可读，请重新确认加解密方法");
+            }
+            if (StringUtils.isEmpty(originPassword)) {
+                throw BusinessException.serviceThrow("存在密码无法解密，请重新确认加解密方法");
+            }
+
+            String afterPassword = null;
+            if ("base64".equals(to)) {
+                afterPassword = new String(Base64.getEncoder().encode(originPassword.getBytes(StandardCharsets.UTF_8)));
+            }
+            else {
+                afterPassword = AESUtil.encrypt(originPassword, encryptProperties.getAes().getSecret());
+            }
+            if (StringUtils.isEmpty(afterPassword)) {
+                throw BusinessException.serviceThrow("存在密码无法加密，请重新确认加解密方法");
+            }
+            user.setPassword(afterPassword);
+        }
+        DB.updateAll(users);
     }
 
     @Override

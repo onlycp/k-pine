@@ -27,18 +27,24 @@ public class KFlowContext {
     private final Map<String, ModelFieldDefine> modelFieldDefineMap = new HashMap<>();
     /** 处理类 **/
     private String handleClass;
+    /** 输入参数定义 **/
+    private String inArgv;
+    /** 输出参数定义 **/
+    private String outArgv;
 
-    public static KFlowContext createBaseContext() {
+    public static KFlowContext createBaseContext(String inArgv, String outArgv) {
 
         KFlowContext context = new KFlowContext();
         Map<String, Object> sysMap = new HashMap<>();
-
         // 处理系统变量
         sysMap.put("who",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getId() : "");
         sysMap.put("username",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getUsername() : "");
         sysMap.put("when", DateUtils.getNow());
         sysMap.put("uuid", StringUtils.getUUID());
         context.getSystemContext().put("sys", sysMap);
+        // 设置输入参数
+        context.inArgv = inArgv;
+        context.outArgv = outArgv;
         return context;
     }
 }

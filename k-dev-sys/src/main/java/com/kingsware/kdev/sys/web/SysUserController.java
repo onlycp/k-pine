@@ -161,4 +161,17 @@ public class SysUserController extends BaseController {
     public BaseRet<Long> getOnlineSessionCount(@PathVariable String username) {
         return BaseRet.success(sysUserService.onlineCount(username));
     }
+
+    /**
+     *  获取用户基本信息
+     * @return 提示
+     */
+    @ApiOperation(value = "加密转换 " ,notes = "加密转换")
+    @GetMapping(value = "/encryptChange/{from}/{to}/{secret}")
+    @ApiIgnore
+    public BaseRet<?> encryptChange(@PathVariable String from, @PathVariable String to, @PathVariable String secret)  {
+        sysUserService.encryptChange(from, to, secret);
+        return BaseRet.success();
+    }
+
 }

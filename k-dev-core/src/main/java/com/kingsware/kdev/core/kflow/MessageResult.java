@@ -9,11 +9,11 @@ import lombok.Data;
  * @date    2022/1/20 11:18 上午
  */
 @Data
-public class TipResult {
+public class MessageResult {
 
     private String message;
 
-    public TipResult(String message) {
+    public MessageResult(String message) {
         this.message = message;
     }
 }

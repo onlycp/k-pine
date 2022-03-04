@@ -110,7 +110,7 @@ public class SysKdbFunServiceImpl extends BaseServiceImpl implements SysKdbFunSe
             retList.add(toRet(infoL));
         }
         // 排序
-        retList.sort(Comparator.comparing(SysKdbFunRet::getId));
+        retList.sort(Comparator.comparing(SysKdbFunRet::getWhenCreated).reversed());
         return PageUtil.memoryPage(argv, retList, SysKdbFunRet.class);
     }
 

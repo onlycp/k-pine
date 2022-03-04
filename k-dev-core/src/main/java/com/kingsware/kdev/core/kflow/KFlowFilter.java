@@ -1,10 +1,11 @@
 package com.kingsware.kdev.core.kflow;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.cache.api.ApiManager;
-import com.kingsware.kdev.core.util.DateUtils;
+import com.kingsware.kdev.core.excel.ExcelWorker;
+import com.kingsware.kdev.core.excel.KExcel;
+import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -65,7 +66,7 @@ public class KFlowFilter implements Filter {
         else if (api.getCallType() == 2) {
             // 获取视图模型
 
-            KFlowContext context = KFlowContext.createBaseContext();
+            KFlowContext context = KFlowContext.createBaseContext(api.getInArgv(), api.getOutArgv());
             // 处理请求变量
             Map<String, Object> argvMap = getRequestParams(api, path, request);
 //            // 加入Request信息
@@ -74,10 +75,14 @@ public class KFlowFilter implements Filter {
             // 处理类
             context.setHandleClass(api.getApiResultHandler());
             // 调用流程
-            Object result = KdbFlowExecutor.getInstance().execute(api.getApiFlowId(), argvMap, context);
+            KdbFlowResult result = KdbFlowExecutor.getInstance().execute(api.getApiFlowId(), argvMap, context);
             // 转为api格式
-            Object ret = KdbFlowExecutor.getInstance().toApiResult(result);
-            responseJson(response, ret);
+            if (result.getType().equals(KFlowConstant.RESULT_JSON)) {
+                responseJson(response, FlowUtils.toJsonResult(result.getData()));
+            }
+            else if (result.getType().equals(KFlowConstant.RESULT_EXCEL)) {
+                ExcelWorker.getInstance().writeToWeb((KExcel) result.getData());
+            }
             return;
         }
 
