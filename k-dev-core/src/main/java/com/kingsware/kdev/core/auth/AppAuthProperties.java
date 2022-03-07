@@ -21,6 +21,8 @@ public class AppAuthProperties {
     private String iss = "kingsware";
     /** 令牌有效时长 **/
     private int tokenExpireMinutes = 120;
+    /** 模拟session会话有效时长 **/
+    private int mockSessionExpireMinutes = 30;
     /** 加密密钥 **/
     private String tokenSecret;
     /** 是否只允许一个会话 **/

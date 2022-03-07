@@ -27,6 +27,8 @@ public class SessionTask implements KTask {
      */
     @Override
     public void execute() {
+        // 更新会话有效期
+
         // 移除过期的会话
         DB.executeUpdateSql("delete from sys_online_user where expire_time < now()");
         // 重置加载
