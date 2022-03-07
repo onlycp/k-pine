@@ -1,6 +1,7 @@
 package com.kingsware.kdev.core.cache.config;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,6 +45,21 @@ public class ConfigManager {
     public SysConfigInfo getItem(String code) {
         String key = code;
         return cache.getOrDefault(key, null);
+    }
+
+    /**
+     * 获取所有的文本类型配置
+     * @return 返回
+     */
+    public Map<String, String> getAllTextConfig() {
+        Map<String, String> params = new HashMap<>();
+        cache.forEach((k, v) -> {
+            if (v.getValueType() == 0) {
+                params.put(k, v.getValue());
+            }
+        });
+        return params;
+
     }
 
 }

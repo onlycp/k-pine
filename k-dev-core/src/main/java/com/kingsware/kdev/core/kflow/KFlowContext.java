@@ -20,8 +20,6 @@ public class KFlowContext {
 
     /** 当前系统变量 **/
     private final Map<String, Object> systemContext = new HashMap<>();
-    /** 模型列处理器 **/
-    private final Map<String, ModelFieldDefine> modelFieldDefineMap = new HashMap<>();
     /** 处理类 **/
     private String handleClass;
     /** 输入参数定义 **/

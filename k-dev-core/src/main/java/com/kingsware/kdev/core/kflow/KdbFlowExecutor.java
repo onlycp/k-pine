@@ -25,35 +25,17 @@ public class KdbFlowExecutor {
 
     private static KdbFlowExecutor instance;
 
-    /** 公共模型列表定义 **/
-    private static Map<String, ModelFieldDefine> publicModelFieldMap = new HashMap<>();
 
     public static KdbFlowExecutor getInstance() {
         if (instance == null) {
-            synchronized (KdbFlowExecutor.class) {
-                if (instance == null) {
-                    instance = new KdbFlowExecutor();
-                }
-            }
+            instance = new KdbFlowExecutor();
         }
         return instance;
     }
 
     private KdbFlowExecutor() {
-        initPublicModelField();
     }
 
-
-    /**
-     * 公共的属性列定义
-     */
-    private void initPublicModelField() {
-        publicModelFieldMap.put("whenCreated", new ModelFieldDefine("whenCreated","创建时间" ,"Timestamp", "time",  DateUtils.DATE_TIME));
-        publicModelFieldMap.put("whenModified", new ModelFieldDefine("whenModified","修改时间","Timestamp", "time", DateUtils.DATE_TIME));
-        publicModelFieldMap.put("balanceUpdateTime", new ModelFieldDefine("balanceUpdateTime","余额更新时间","Timestamp","time", DateUtils.DATE_TIME));
-        publicModelFieldMap.put("createAccountTime", new ModelFieldDefine("createAccountTime","账户建立时间","Timestamp","time", DateUtils.DATE));
-        publicModelFieldMap.put("cancelAccountTime", new ModelFieldDefine("cancelAccountTime","账户销户时间","Timestamp", "time", DateUtils.DATE));
-    }
 
 
     /**
@@ -82,6 +64,8 @@ public class KdbFlowExecutor {
         argv.getVariables().putAll(params);
         // 将入系统变量
         argv.getVariables().putAll(context.getSystemContext());
+        // 通过输入模型处理输入参数
+        FlowUtils.handleInArgv(argv.getVariables(), context.getInArgv());
         // 执行流程
         KdbRet<String> ret = DB.kdbApi().executeFlow(argv);
         // 如果失败
@@ -91,11 +75,6 @@ public class KdbFlowExecutor {
             result.setData(new ErrorResult(ret.getMessage() == null ? "流程处理失败": ret.getMessage()));
         }
         else if (StringUtils.isNotEmpty(ret.getResponseBody())){
-            publicModelFieldMap.forEach((k, v) -> {
-                if (!context.getModelFieldDefineMap().containsKey(k)) {
-                    context.getModelFieldDefineMap().put(k, v);
-                }
-            });
             KFlowMessage message = FlowUtils.getHandlerName(ret.getResponseBody());
             result = KResultHandlers.getInstance().getHandler(message.getHandlerName()).parser(message.getData(), context);
         }
