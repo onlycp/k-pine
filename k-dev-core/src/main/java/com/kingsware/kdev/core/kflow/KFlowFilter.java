@@ -65,8 +65,7 @@ public class KFlowFilter implements Filter {
         // 流程方式
         else if (api.getCallType() == 2) {
             // 获取视图模型
-
-            KFlowContext context = KFlowContext.createBaseContext(api.getInArgv(), api.getOutArgv());
+            KFlowContext context = KFlowContext.createBaseContext(StringUtils.isNotEmpty(api.getInArgv()) ? api.getInArgv() : "{}", StringUtils.isNotEmpty(api.getOutArgv()) ? api.getOutArgv() : "{}");
             // 处理请求变量
             Map<String, Object> argvMap = getRequestParams(api, path, request);
 //            // 加入Request信息

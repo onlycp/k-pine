@@ -34,4 +34,10 @@ public class KFlowConstant {
     /** 结果类型 file **/
     public final static String RESULT_FILE = "file";
 
+    /** 扩展类型-dict **/
+    public final static String EXTERN_TYPE_DICT = "dict";
+    /** 扩展类型-timestamp **/
+    public final static String EXTERN_TYPE_TIMESTAMP= "timestamp";
+
+
 }

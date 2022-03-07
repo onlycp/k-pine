@@ -110,7 +110,7 @@ public class KTaskManager {
      * @param sysTask 流程
      */
     private void runFlowTask(SysTask sysTask) {
-        KFlowContext context = KFlowContext.createBaseContext(null, null);
+        KFlowContext context = KFlowContext.createBaseContext("{}", "{}");
         KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), Maps.newHashMap(), context);
     }
 

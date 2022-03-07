@@ -34,6 +34,19 @@ public class KSheet {
     }
 
     /**
+     * 增加行
+     * @param rowIndex
+     * @param strings
+     * @return
+     */
+    public void addRow(int rowIndex, List<String> strings) {
+        for (int i = 0; i< strings.size(); i++) {
+            addRegion(rowIndex, i, rowIndex, i, strings.get(i));
+        }
+    }
+
+
+    /**
      *  增加区域
      * @param rowIndex1      行号1
      * @param columnIndex1   列号1

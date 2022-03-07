@@ -1,6 +1,9 @@
 package com.kingsware.kdev.core.kflow;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.kingsware.kdev.core.bean.BaseRet;
+import com.kingsware.kdev.core.cache.dict.DictManager;
+import com.kingsware.kdev.core.kflow.bean.ComplexValue;
 import com.kingsware.kdev.core.kflow.bean.ErrorResult;
 import com.kingsware.kdev.core.kflow.bean.KFlowMessage;
 import com.kingsware.kdev.core.util.DateUtils;
@@ -55,41 +58,95 @@ public class FlowUtils {
      * @param object 待处理的结果
      * @return
      */
-    public static Object processData(Object object, KFlowContext context) {
+    public static Object processData(Object object, KFlowContext context, JsonNode jsonNode) {
         if (object == null ) {
             return null;
         }
         if (object instanceof Map) {
             Map<Object, Object> resultMap = new HashMap<>();
+            JsonNode childNode = jsonNode != null ? jsonNode.get("properties") : null;
             for (Map.Entry<?,?> entry: ((Map<?, ?>) object).entrySet()) {
                 String humpKey = StringUtils.lineToHump(entry.getKey().toString());
-                Object value = processData(entry.getValue(), context);
+                JsonNode pNode = childNode != null ? childNode.get(humpKey) : null;
+                Object value = processData(entry.getValue(), context, pNode);
                 // 如果不是map和list，再进行属性处理
                 if (!(value instanceof Map) && !(value instanceof Collection) && value!= null && StringUtils.isNotEmpty(value.toString()) ) {
-                    if (context.getModelFieldDefineMap().containsKey(humpKey)) {
-                        ModelFieldDefine modelFieldDefine = context.getModelFieldDefineMap().get(humpKey);
-                        if ("Timestamp".equals(modelFieldDefine.getType())) {
-                            String strValue = value.toString();
-                            if (NumberUtils.isParsable(strValue)) {
-                                value = DateUtils.formatDate(new Date(Long.parseLong(strValue)), modelFieldDefine.getFormatPattern());
-                            }
-                        }
-                    }
+                    value = parserWithSchema(pNode, value);
                 }
-                resultMap.put(humpKey, value);
+                // 如果是复合值，需要将label和value同时返回
+                if (value instanceof ComplexValue) {
+                    ComplexValue complexValue = (ComplexValue)value;
+                    // 原始值
+                    resultMap.put(humpKey, complexValue.getValue());
+                    // 标签
+                    resultMap.put(String.format("%s$label", humpKey), complexValue.getLabel());
+                }
+                else {
+                    resultMap.put(humpKey, value);
+                }
+
+
             }
             return resultMap;
         }
         else if (object instanceof Collection) {
             List<Object> resultList = new ArrayList<>();
-            for (Object item: (Collection)object) {
-                resultList.add(processData(item, context));
+            // 获取jsonNode
+            JsonNode childNode = jsonNode != null ? jsonNode.get("items") : null;
+            for (Object item: (Collection<?>)object) {
+                resultList.add(processData(item, context, childNode));
             }
             return resultList;
         }
         else {
             return object;
         }
+    }
+
+    private static Object parserWithSchema(JsonNode jsonNode, Object value) {
+        if (jsonNode == null) {
+            return value;
+        }
+        // 获取扩展类型
+        String externType = jsonNode.get("externType").asText();
+        if (StringUtils.isEmpty(externType)) {
+            return value;
+        }
+        // 扩展信息node
+        JsonNode externNode = jsonNode.get("extern");
+        if (externNode == null) {
+            return value;
+        }
+        // 字典
+        if (externType.equalsIgnoreCase(KFlowConstant.EXTERN_TYPE_DICT)) {
+
+            // 获取字典码
+            JsonNode codeNode = externNode.get("code");
+            if (codeNode == null) {
+                return value;
+            }
+            String dictCode = codeNode.asText();
+            // 字典转义
+            String label = DictManager.getInstance().getDict(dictCode, value.toString());
+            // 复合值返回
+            ComplexValue complexValue= new ComplexValue();
+            complexValue.setValue(value);
+            complexValue.setLabel(label);
+            return complexValue;
+        }
+        // Timestamp
+        else if (externType.equalsIgnoreCase(KFlowConstant.EXTERN_TYPE_TIMESTAMP)) {
+            // 获取格式化
+            JsonNode formatNode = externNode.get("format");
+            if (formatNode == null) {
+                return value;
+            }
+            String strValue = value.toString();
+            if (NumberUtils.isParsable(strValue)) {
+                value = DateUtils.formatDate(new Date(Long.parseLong(strValue)), formatNode.asText());
+            }
+        }
+        return value;
     }
 
     /**

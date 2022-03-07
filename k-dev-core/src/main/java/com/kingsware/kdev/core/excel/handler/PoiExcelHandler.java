@@ -6,6 +6,8 @@ import com.kingsware.kdev.core.excel.KSheet;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -39,6 +41,14 @@ public class PoiExcelHandler implements KExcelHandler{
             for (KSheet ks: excel.getSheetList()) {
                 // 生成一个表格
                 Sheet sheet = workbook.createSheet(ks.getName());
+                // 设置字体
+                CellStyle cellStyle = workbook.createCellStyle();
+                Font font = workbook.createFont();
+                font.setCharSet(HSSFFont.DEFAULT_CHARSET);
+                //更改默认字体大小
+                font.setFontHeightInPoints((short) 11);
+                font.setFontName("微软雅黑");
+                cellStyle.setFont(font);
                 // 写入单元格数据
                 for (KRegion region: ks.getRegions()) {
 
@@ -49,11 +59,18 @@ public class PoiExcelHandler implements KExcelHandler{
                     // 创建单元格
                     Cell cell = row.createCell(region.getStartCell().getColumnIndex());
                     cell.setCellValue(region.getValue() == null ? "" : region.getValue().toString());
+                    // 设置格式
+                    cell.setCellStyle(cellStyle);
                     // 合并单元格
                     if (!region.isSingleCell()) {
                         sheet.addMergedRegion(new CellRangeAddress(region.getStartCell().getRowIndex(), region.getEndCell().getRowIndex()
                                 , region.getStartCell().getColumnIndex(), region.getEndCell().getColumnIndex()));
                     }
+                }
+                // 自适应列宽
+                short columnNum = sheet.getRow(0).getLastCellNum();
+                for (short i=0; i< columnNum; i++) {
+                    sheet.autoSizeColumn(i);
                 }
             }
             workbook.write(out);
@@ -71,6 +88,9 @@ public class PoiExcelHandler implements KExcelHandler{
         Workbook workbook = null;
         try {
             workbook = WorkbookFactory.create(new File(filePath));
+
+            //设置格式
+            CellStyle style1 = workbook.createCellStyle();
             // 获取sheet
             Sheet sheet = workbook.getSheetAt(sheetIndex);
             // 返回内容

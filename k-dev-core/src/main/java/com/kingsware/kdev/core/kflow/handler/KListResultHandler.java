@@ -1,9 +1,11 @@
 package com.kingsware.kdev.core.kflow.handler;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.kingsware.kdev.core.kflow.FlowUtils;
 import com.kingsware.kdev.core.kflow.KFlowConstant;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
+import com.kingsware.kdev.core.util.JsonUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -23,7 +25,8 @@ public class KListResultHandler implements KFlowResultHandler {
         result.setType(KFlowConstant.RESULT_JSON);
         // 解析数据
         List<Map<String, Object>> data = FlowUtils.parseList(responseBody);
-        result.setData(FlowUtils.processData(data, context));
+        JsonNode jsonNode = JsonUtil.toTree(context.getOutArgv());
+        result.setData(FlowUtils.processData(data, context, jsonNode));
         // 返回数据
         return result;
     }

@@ -6,12 +6,14 @@ import com.kingsware.kdev.core.excel.handler.JxlExcelHandler;
 import com.kingsware.kdev.core.excel.handler.KExcelHandler;
 import com.kingsware.kdev.core.excel.handler.PoiExcelHandler;
 import com.kingsware.kdev.core.util.BeanUtils;
+import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.yaml.snakeyaml.util.UriEncoder;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.ws.Service;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +69,7 @@ public class ExcelWorker {
      */
     public void writeToWeb(KExcel excel) {
         try {
-            HttpServletResponse response =  KClientContext.getContext().getResponse();
+            HttpServletResponse response = ServletUtil.response();
             response.reset();
             response.setContentType("application/octet-stream");
             response.setCharacterEncoding("utf-8");
