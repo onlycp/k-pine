@@ -1,7 +1,6 @@
 package com.kingsware.kdev.core.kflow;
 
 import com.kingsware.kdev.core.context.KClientContext;
-import com.kingsware.kdev.core.kflow.converter.KdbFlowFieldConverter;
 import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.Data;
@@ -19,8 +18,6 @@ import java.util.Map;
 @Data
 public class KFlowContext {
 
-    /** 数据处理器 **/
-    private final Map<String, KdbFlowFieldConverter> converterMap = new HashMap<>();
     /** 当前系统变量 **/
     private final Map<String, Object> systemContext = new HashMap<>();
     /** 模型列处理器 **/

@@ -2,12 +2,21 @@ package com.kingsware.kdev.core.auth;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kingsware.kdev.core.cache.session.SessionManager;
+import com.kingsware.kdev.core.cache.session.TokenSession;
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.exception.UnauthorizedException;
 import com.kingsware.kdev.core.i18n.I18n;
+import com.kingsware.kdev.core.model.SysOnlineUser;
+import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.util.AESUtil;
+import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Date;
 
 /**
  * 令牌工具类，用于生成令牌及令牌验证
@@ -59,7 +68,7 @@ public class TokenUtil {
      * @param ip            ip
      * @param tokenExpireMinutes    令牌有效时长（分)）
      */
-    public static BaseUserInfo getUserInfoByToken(String token, String dataSecret,  String iss, String ip, int tokenExpireMinutes) {
+    public static BaseUserInfo getUserInfoByToken(String token, String dataSecret,  String iss, String ip, int tokenExpireMinutes, int mockSessionExpireMinutes) {
         // 如果令牌为空
         if (StringUtils.isEmpty(token)) {
             throw new UnauthorizedException(I18n.t("auth. unauthorized-e001", "用户未登录，错误码: E001"));
@@ -85,11 +94,33 @@ public class TokenUtil {
         if (!ip.equals(authToken.getIp())) {
             throw new UnauthorizedException(I18n.t("auth. unauthorized-e005", "用户未登录，错误码: E005"));
         }
-        // 校验令牌有效性
-        long expireTime = authToken.getWhenCreated() + ((long) tokenExpireMinutes * 60 * 1000);
-        if (expireTime < System.currentTimeMillis()) {
-            throw new UnauthorizedException(I18n.t("auth. unauthorized-e006", "登录已失效"));
+        // 当模拟session的有效时间小于0时，走jwt的校验
+        if (mockSessionExpireMinutes <= 0) {
+            // 校验令牌有效性
+            long expireTime = authToken.getWhenCreated() + ((long) tokenExpireMinutes * 60 * 1000);
+            if (expireTime < System.currentTimeMillis()) {
+                throw new UnauthorizedException(I18n.t("auth. unauthorized-e006", "登录已失效"));
+            }
         }
+        // 否则，走传统的session方案
+        else {
+            TokenSession ts = SessionManager.getInstance().getbyToken(authToken.getUserInfo().getId(), token);
+            if (ts == null) {
+                throw new UnauthorizedException(I18n.t("auth. unauthorized-e007", "登录会话不存在，请重新登录"));
+            }
+            long expireTime = ts.getActiveTime().getTime() + ((long) mockSessionExpireMinutes * 60 * 1000);
+            logger.warn("会话上次活动时间: {}，过期时间：{}", DateUtils.formatDate(new Date(ts.getActiveTime().getTime()), DateUtils.DATE_TIME), DateUtils.formatDate(new Date(expireTime), DateUtils.DATE_TIME));
+            if (expireTime < System.currentTimeMillis()) {
+                // 删除登录会话
+                SysOnlineUser onlineUser = DB.findOne(SysOnlineUser.class, Expr.builder().add("loginToken", "=", token).build());
+                if (onlineUser != null) {
+                    DB.delete(onlineUser);
+                    SessionManager.getInstance().removeSession(onlineUser.getUserId(), onlineUser.getLoginToken());
+                }
+                throw new UnauthorizedException(I18n.t("auth. unauthorized-e006", "登录已失效"));
+            }
+        }
+
         // 返回用户信息
         return authToken.getUserInfo();
     }

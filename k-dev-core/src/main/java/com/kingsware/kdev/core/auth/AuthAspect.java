@@ -64,7 +64,8 @@ public class AuthAspect {
                 appAuthProperties.getTokenSecret(),
                 appAuthProperties.getIss(),
                 KClientContext.getContext().getIp(),
-                appAuthProperties.getTokenExpireMinutes()
+                appAuthProperties.getTokenExpireMinutes(),
+                appAuthProperties.getMockSessionExpireMinutes()
         );
         // 检查是否只有一个会话
         if (appAuthProperties.getLoginSessionOne()) {
@@ -72,6 +73,8 @@ public class AuthAspect {
                 throw new UnauthorizedException(I18n.t("auth. unauthorized-e007", "用户已在别处登录"));
             }
         }
+        // 更新活动时间
+        SessionManager.getInstance().updateActiveTime(userInfo.getId(), KClientContext.getContext().getToken(), appAuthProperties.getMockSessionExpireMinutes());
         // 将用户信息写到上下文
         KClientContext.getContext().setUserInfo(userInfo);
         return pjd.proceed();

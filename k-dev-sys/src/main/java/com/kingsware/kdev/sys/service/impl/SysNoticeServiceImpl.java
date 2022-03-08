@@ -92,7 +92,7 @@ public class SysNoticeServiceImpl extends BaseServiceImpl implements SysNoticeSe
 
     @Override
     public void sendNotice(SysNoticeRelationArgv argv, String token, String ip) {
-        BaseUserInfo userInfo = TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), ip, appAuthProperties.getTokenExpireMinutes());
+        BaseUserInfo userInfo = TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), ip, appAuthProperties.getTokenExpireMinutes(), appAuthProperties.getMockSessionExpireMinutes());
         SysUser model = DB.findById(SysUser.class, userInfo.getId());
         if (model == null) {
             throw BusinessException.serviceThrow("登录凭证已失效，请重新登录！");

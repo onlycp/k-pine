@@ -222,7 +222,13 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         onlineUser.setLoginIp(KClientContext.getContext().getIp());
         onlineUser.setLoginTime(new Timestamp(System.currentTimeMillis()));
         onlineUser.setLoginToken(token);
-        onlineUser.setExpireTime(new Timestamp(System.currentTimeMillis() +  ((long) appAuthProperties.getTokenExpireMinutes() * 60 * 1000)));
+        // 区分是jwt还是session
+        if (appAuthProperties.getMockSessionExpireMinutes() <= 0) {
+            onlineUser.setExpireTime(new Timestamp(System.currentTimeMillis() +  ((long) appAuthProperties.getTokenExpireMinutes() * 60 * 1000)));
+        }
+        else {
+            onlineUser.setExpireTime(new Timestamp(System.currentTimeMillis() +  ((long) appAuthProperties.getMockSessionExpireMinutes() * 60 * 1000)));
+        }
         DB.save(onlineUser);
         // 保存到缓存
         SessionManager.getInstance().addSession(onlineUser);
@@ -233,7 +239,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
 
     @Override
     public void changePassword(SysUserChangePasswordArgv argv, String token, String ip) {
-        BaseUserInfo userInfo = TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), ip, appAuthProperties.getTokenExpireMinutes());
+        BaseUserInfo userInfo = TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), ip, appAuthProperties.getTokenExpireMinutes(), appAuthProperties.getMockSessionExpireMinutes());
         SysUser model = DB.findById(SysUser.class, userInfo.getId());
         if (model == null) {
             throw BusinessException.serviceThrow("登录凭证已失效，请重新登录！");
@@ -248,14 +254,14 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
 
     @Override
     public BaseUserInfo getBaseUserInfo(String token, String ip) {
-        BaseUserInfo userInfo = TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), ip, appAuthProperties.getTokenExpireMinutes());
+        BaseUserInfo userInfo = TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), ip, appAuthProperties.getTokenExpireMinutes(), appAuthProperties.getMockSessionExpireMinutes());
 //        userInfo.setAvatar("https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif");
         return userInfo;
     }
 
     @Override
     public SysUserProfileRet getProfile(String token, String ip) {
-        BaseUserInfo userInfo = TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), ip, appAuthProperties.getTokenExpireMinutes());
+        BaseUserInfo userInfo = TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), ip, appAuthProperties.getTokenExpireMinutes(), appAuthProperties.getMockSessionExpireMinutes());
         SysUser model = DB.findById(SysUser.class, userInfo.getId());
         SysUserProfileRet ret = BeanUtils.copyObject(model, SysUserProfileRet.class);
         Map<String, String> roleMap = getRoleIds(getRolesByUserId(model.getId()));
