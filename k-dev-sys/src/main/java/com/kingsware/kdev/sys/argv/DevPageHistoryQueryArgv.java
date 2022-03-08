@@ -5,14 +5,14 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * 应用表
+ * 页面修改记录表
  * @author AndyZheng
  * @version 1.0.0
  * @date 2022-02-13 10:20
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class DevApplicationQueryArgv extends BasePageArgv {
+public class DevPageHistoryQueryArgv extends BasePageArgv {
 
     // 搜索关键字
     private String keywords;
