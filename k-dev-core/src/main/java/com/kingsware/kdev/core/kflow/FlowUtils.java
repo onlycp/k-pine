@@ -185,6 +185,10 @@ public class FlowUtils {
                     String defaultValue = defaultNode.asText().trim();
                     if (defaultValue.startsWith("${") && defaultValue.endsWith("}")) {
                         String key = defaultValue.replace("${", "").replaceAll("}", "").trim();
+                        String configDefaultValue = null;
+                        if (key.contains("|")) {
+                            configDefaultValue = key.split("\\|")[1].trim();
+                        }
                         SysConfigInfo configInfo = ConfigManager.getInstance().getItem(key);
                         String itemValue = null;
                         // 从系统配置中读取
@@ -193,7 +197,7 @@ public class FlowUtils {
                         }
                         // 从环境变量里读取
                         else {
-                            itemValue = SpringContext.getProperties(key, null);
+                            itemValue = SpringContext.getProperties(key, configDefaultValue);
                         }
                         if ("integer".equalsIgnoreCase(type)) {
                             retValue = Integer.parseInt(itemValue);

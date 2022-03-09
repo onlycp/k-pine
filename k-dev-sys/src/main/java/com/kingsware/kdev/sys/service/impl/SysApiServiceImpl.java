@@ -90,6 +90,7 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
         if (argv.getCallType() != null) {
             wrapper.addCondition("call_type", Op.EQ, argv.getCallType());
         }
+        wrapper.sortBy("when_created desc");
         return (PageDataRet<SysApiRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysApi.class, SysApiRet.class);
     }
 

@@ -65,7 +65,7 @@ public class KdbFlowExecutor {
         // 将入系统变量
         argv.getVariables().putAll(context.getSystemContext());
         // 通过输入模型处理输入参数
-        FlowUtils.handleInArgv(argv.getVariables(), context.getInArgv());
+        FlowUtils.handleInArgv(argv.getVariables(), context.getInArgv() == null ? "{}" : context.getInArgv());
         // 执行流程
         KdbRet<String> ret = DB.kdbApi().executeFlow(argv);
         // 如果失败
@@ -77,6 +77,10 @@ public class KdbFlowExecutor {
         else if (StringUtils.isNotEmpty(ret.getResponseBody())){
             KFlowMessage message = FlowUtils.getHandlerName(ret.getResponseBody());
             result = KResultHandlers.getInstance().getHandler(message.getHandlerName()).parser(message.getData(), context);
+        }
+        else {
+            result.setType(KFlowConstant.RESULT_JSON);
+            result.setData(null);
         }
         return result;
     }

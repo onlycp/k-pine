@@ -38,8 +38,8 @@ public class KFlowContext {
         sysMap.put("uuid", StringUtils.getUUID());
         context.getSystemContext().put("sys", sysMap);
         // 设置输入参数
-        context.inArgv = inArgv;
-        context.outArgv = outArgv;
+        context.inArgv = StringUtils.isEmpty(inArgv) ? "{}" : inArgv;
+        context.outArgv = StringUtils.isEmpty(outArgv) ? "{}" : outArgv;
         return context;
     }
 }
