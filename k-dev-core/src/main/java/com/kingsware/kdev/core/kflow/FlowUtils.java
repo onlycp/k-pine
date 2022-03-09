@@ -2,7 +2,10 @@ package com.kingsware.kdev.core.kflow;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.kingsware.kdev.core.bean.BaseRet;
+import com.kingsware.kdev.core.cache.config.ConfigManager;
+import com.kingsware.kdev.core.cache.config.SysConfigInfo;
 import com.kingsware.kdev.core.cache.dict.DictManager;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.kflow.bean.ComplexValue;
 import com.kingsware.kdev.core.kflow.bean.ErrorResult;
 import com.kingsware.kdev.core.kflow.bean.KFlowMessage;
@@ -101,6 +104,120 @@ public class FlowUtils {
         else {
             return object;
         }
+    }
+
+    /**
+     * 处理输入参数
+     * @param variables 变量
+     * @param inArgv    输入参数定义
+     */
+    public static void handleInArgv(Map<String, Object> variables, String inArgv) {
+        // 根节点定义
+        JsonNode rootNode = JsonUtil.toTree(inArgv);
+        // 处理
+        handleNodeValue(variables, rootNode);
+    }
+
+    /**
+     * 解析节点值
+     * @param variable  变量值
+     * @param jsonNode  节点
+     * @return          返回值
+     */
+    @SuppressWarnings("unchecked")
+    private static Object handleNodeValue(Object variable, JsonNode jsonNode) {
+        if (jsonNode == null) {
+            return variable;
+        }
+        // 获取类型
+        JsonNode typeNode = jsonNode.get("type");
+        if (typeNode == null) {
+            return variable;
+        }
+        String type = typeNode.asText();
+        // 定义返回值
+        Object retValue = variable;
+        // 根据不同类型进行处理
+        // object，对应的是值里的map
+        if ("object".equalsIgnoreCase(type)) {
+
+            Map<String, Object> map = (Map<String, Object>) variable;
+            // 获取属性
+            JsonNode propertiesNode = jsonNode.get("properties");
+            Iterator<String> propertyNames = propertiesNode.fieldNames();
+            // 新值
+            Map<String, Object> newValueMap = new HashMap<>();
+            while (propertyNames.hasNext()) {
+                String pName = propertyNames.next();
+                JsonNode pNode = propertiesNode.get(pName);
+                // 只有值不存在的时候，才会使用默认值填充
+                if (!map.containsKey(pName)) {
+                    // 获取值
+                    Object entryValue = handleNodeValue(null, pNode);
+                    newValueMap.put(pName, entryValue);
+                }
+
+            }
+            // 覆盖原先的值
+            map.putAll(newValueMap);
+        }
+        // 列表
+        else if ("array".equalsIgnoreCase(type)) {
+            // 获取list定义
+            JsonNode itemNode = jsonNode.get("items");
+            // 转为list
+            List<Object> objects = JsonUtil.toListBean(JsonUtil.toJson(variable), Object.class);
+            if (objects != null) {
+                for (int i = 0; i < objects.size() ; i++) {
+                    Object itemValue = handleNodeValue(objects.get(i), itemNode);
+                    objects.set(i, itemValue);
+                }
+            }
+            retValue = objects;
+        }
+        else {
+            // 如果此有值
+            JsonNode externNode = jsonNode.get("extern");
+            if (externNode != null) {
+                JsonNode defaultNode = externNode.get("default");
+                if (defaultNode != null) {
+                    // 获取默认值
+                    String defaultValue = defaultNode.asText().trim();
+                    if (defaultValue.startsWith("${") && defaultValue.endsWith("}")) {
+                        String key = defaultValue.replace("${", "").replaceAll("}", "").trim();
+                        String configDefaultValue = null;
+                        if (key.contains("|")) {
+                            configDefaultValue = key.split("\\|")[1].trim();
+                        }
+                        SysConfigInfo configInfo = ConfigManager.getInstance().getItem(key);
+                        String itemValue = null;
+                        // 从系统配置中读取
+                        if (configInfo != null) {
+                            itemValue = configInfo.getValue();
+                        }
+                        // 从环境变量里读取
+                        else {
+                            itemValue = SpringContext.getProperties(key, configDefaultValue);
+                        }
+                        if ("integer".equalsIgnoreCase(type)) {
+                            retValue = Integer.parseInt(itemValue);
+                        }
+                        else if ("number".equalsIgnoreCase(type)) {
+                            retValue = Float.parseFloat(itemValue);
+                        }
+                        else {
+                            retValue = itemValue;
+                        }
+
+                    }
+                    else {
+                        retValue = defaultValue;
+                    }
+                }
+            }
+        }
+
+        return retValue;
     }
 
     private static Object parserWithSchema(JsonNode jsonNode, Object value) {
@@ -221,5 +338,6 @@ public class FlowUtils {
         }
         return ret;
     }
+
 
 }

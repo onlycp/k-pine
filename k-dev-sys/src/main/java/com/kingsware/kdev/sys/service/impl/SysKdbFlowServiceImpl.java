@@ -342,7 +342,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
     @Override
     public SysFlowDebugRet debug(SysFlowDebugArgv argv) {
         SysLogicFlow logicFlow = DB.findOne(SysLogicFlow.class, Expr.builder().add("flowId", "=", argv.getFlowId()).build());
-        KFlowContext context = KFlowContext.createBaseContext(logicFlow == null ? null : logicFlow.getInArgv(), logicFlow == null ? null : logicFlow.getOutArgv());
+        KFlowContext context = KFlowContext.createBaseContext(logicFlow == null ? "{}" : logicFlow.getInArgv(), logicFlow == null ? "{}" : logicFlow.getOutArgv());
         String json = argv.getJson();
         if (StringUtils.isEmpty(json)) {
             json = "{}";

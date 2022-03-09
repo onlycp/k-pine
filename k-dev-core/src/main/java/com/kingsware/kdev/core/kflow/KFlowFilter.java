@@ -5,10 +5,16 @@ import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.cache.api.ApiManager;
 import com.kingsware.kdev.core.excel.ExcelWorker;
 import com.kingsware.kdev.core.excel.KExcel;
+import com.kingsware.kdev.core.kflow.bean.KFlowUploadFile;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Base64Utils;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 
 import javax.annotation.Resource;
 import javax.servlet.*;
@@ -60,17 +66,14 @@ public class KFlowFilter implements Filter {
         // 如果找不到对应的接口配置
         if (api == null || api.getCallType() == 1) {
             filterChain.doFilter(servletRequest, servletResponse);
-            return;
         }
         // 流程方式
-        else if (api.getCallType() == 2) {
+        else {
             // 获取视图模型
             KFlowContext context = KFlowContext.createBaseContext(StringUtils.isNotEmpty(api.getInArgv()) ? api.getInArgv() : "{}", StringUtils.isNotEmpty(api.getOutArgv()) ? api.getOutArgv() : "{}");
             // 处理请求变量
             Map<String, Object> argvMap = getRequestParams(api, path, request);
-//            // 加入Request信息
-//            argvMap.put("request.url", url);
-//            argvMap.put("request.time", DateUtils.getNow());
+//            // 加入Req
             // 处理类
             context.setHandleClass(api.getApiResultHandler());
             // 调用流程
@@ -82,11 +85,7 @@ public class KFlowFilter implements Filter {
             else if (result.getType().equals(KFlowConstant.RESULT_EXCEL)) {
                 ExcelWorker.getInstance().writeToWeb((KExcel) result.getData());
             }
-            return;
         }
-
-        filterChain.doFilter(servletRequest, servletResponse);
-
     }
 
     /**
@@ -95,6 +94,7 @@ public class KFlowFilter implements Filter {
      * @param path      路径
      * @return          请求参数
      */
+    @SuppressWarnings("unchecked")
     private Map<String, Object> getRequestParams(ApiInfo api, String path, HttpServletRequest request) {
 
         Map<String, Object> params = new HashMap<>();
@@ -105,24 +105,57 @@ public class KFlowFilter implements Filter {
             String value = request.getParameter(name);
             params.put(name, value);
         }
-        // 获取body
-        String body = getBody(request);
-        if (StringUtils.isNotEmpty(body)) {
-            try {
-                Map<String, Object> argv = objectMapper.readValue(body, Map.class);
-                params.putAll(argv);
-            }
-            catch (Exception e) {
-                log.error("error", e);
-            }
-        }
-        // 将body加到变量中
-        Map<String, Object> requestMap = new HashMap<>();
-        requestMap.put("body", body);
-        params.put("request", requestMap);
         // 获取path变量
         Map<String, Object> pathVariables = getPathVariables(path, api.getApiUrl());
         params.putAll(pathVariables);
+        // 判断是文件还是raw提交
+        String contentType = request.getContentType();
+
+        // 获取文件
+        if (StringUtils.isNotEmpty(contentType) && contentType.toLowerCase().contains("multipart/form-data")) {
+            MultipartResolver resolver = new StandardServletMultipartResolver();
+            MultipartHttpServletRequest multipartHttpServletRequest = resolver.resolveMultipart(request);
+            // 获取所有文件
+            Map<String, MultipartFile> fileMap = multipartHttpServletRequest.getFileMap();
+            for (Map.Entry<String, MultipartFile> multipartFileEntry: fileMap.entrySet()) {
+                KFlowUploadFile uploadFile = new KFlowUploadFile();
+                // 原始文件名
+                uploadFile.setOriginFileName(multipartFileEntry.getValue().getOriginalFilename());
+                // 文件大小
+                uploadFile.setFileSize(multipartFileEntry.getValue().getSize());
+                // 名称
+                uploadFile.setName(multipartFileEntry.getValue().getName());
+                // content type
+                uploadFile.setContentType(multipartFileEntry.getValue().getContentType());
+                // 文件内容
+                try {
+                    uploadFile.setFileContent(Base64Utils.encodeToString(multipartFileEntry.getValue().getBytes()));
+                }
+                catch (IOException e) {
+                    log.error("文件转换成功，原始文件名:{}，名称:{}，{}", uploadFile.getOriginFileName(), uploadFile.getName(), e );
+                }
+                // 将文件加入到流程变量中
+                params.put(multipartFileEntry.getKey(), uploadFile);
+            }
+        }
+        else {
+            // 获取body
+            String body = getBody(request);
+            if (StringUtils.isNotEmpty(body)) {
+                try {
+                    Map<String, Object> argv = objectMapper.readValue(body, Map.class);
+                    params.putAll(argv);
+                }
+                catch (Exception e) {
+                    log.error("error", e);
+                }
+            }
+            // 将body加到变量中
+            Map<String, Object> requestMap = new HashMap<>();
+            requestMap.put("body", body);
+            params.put("request", requestMap);
+        }
+
         // 返回
         return params;
     }
