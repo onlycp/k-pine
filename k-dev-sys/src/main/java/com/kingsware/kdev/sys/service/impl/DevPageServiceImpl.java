@@ -73,6 +73,9 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
     public PageDataRet<DevPageRet> query(DevPageQueryArgv argv) {
         // 拼装sql
         SqlWrapper wrapper = new SqlWrapper("select * from dev_page where 1=1 and deleted=0 ");
+        if (StringUtils.isNotEmpty(argv.getAppId())) {
+            wrapper.addCondition("app_id", Op.EQ, argv.getAppId());
+        }
         if (StringUtils.isNotEmpty(argv.getName())) {
             wrapper.addCondition("name", Op.LIKE, "%" + argv.getName() + "%");
         }

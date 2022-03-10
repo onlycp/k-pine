@@ -13,6 +13,8 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class DevPageQueryArgv extends BasePageArgv {
+    /** 应用 */
+    private String appId;
     /** 页面名 */
     private String name;
 }
