@@ -198,6 +198,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         Map<String, String> roleMap = getRoleIds(getRolesByUserId(model.getId()));
         userInfo.setRoleIds(roleMap.get("roleIds"));
         userInfo.setRoleNames(roleMap.get("roleNames"));
+        userInfo.setRoleCodes(roleMap.get("roleCodes"));
         userInfo.setApiSystem(ApiSystemEnum.ADMIN);
         // 获取数据权限id
         String accessSql = "select sys_data_access_id from sys_data_access_user au inner join sys_data_access da on (da.id=au.sys_data_access_id and da.status=1) where au.sys_user_id=?";
@@ -363,6 +364,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         Map<String, String> roleMap = new HashMap<>();
         StringBuilder roleIds = new StringBuilder();
         StringBuilder roleNames = new StringBuilder();
+        StringBuilder roleCodes = new StringBuilder();
         list.forEach(item -> {
             if (roleIds.length() != 0) {
                 roleIds.append(",");
@@ -372,9 +374,14 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 roleNames.append(",");
             }
             roleNames.append(item.getName());
+            if (roleCodes.length() != 0) {
+                roleCodes.append(",");
+            }
+            roleCodes.append(item.getCode());
         });
         roleMap.put("roleIds", roleIds.toString());
         roleMap.put("roleNames", roleNames.toString());
+        roleMap.put("roleCodes", roleCodes.toString());
         return roleMap;
     }
 

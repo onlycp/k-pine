@@ -28,6 +28,8 @@ public class BaseUserInfo {
     private String email;
     /** 角色id,多个用逗号分隔 **/
     private String roleIds;
+    /** 角色code,多个用逗号分隔 **/
+    private String roleCodes;
     /** 数据权限id **/
     private String accessIds;
     /** 角色名,多个用逗号分隔 **/

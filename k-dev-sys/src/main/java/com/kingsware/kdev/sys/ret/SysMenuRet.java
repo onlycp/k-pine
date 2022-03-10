@@ -46,6 +46,20 @@ public class SysMenuRet extends BaseManageRet {
     private Integer orderNum;
     /** 可用状态 **/
     private Boolean status;
+    /** 所属应用ID **/
+    private String appId;
+    /** 数据类型：0系统，1业务应用, 2开发平台 **/
+    private Integer dataType;
+    /** layout主题 **/
+    private String theme;
+    /** 页面渲染方式：0 Vue， 1 JSON **/
+    private Integer pageType;
+    /** 侧边菜单显示模式：0 不显示，1 从一级菜单开始显示，2 从二级菜单开始显示 **/
+    private Integer sidebar_nav_mode;
+    /** 顶部菜单显示模式：0 完全不显示, 1 不显示nav，2 从一级菜单开始显示，3 从二级菜单开始显示 **/
+    private Integer top_nav_mode;
+    /** 内容区显示样式：0 自动撑开，1 居中 **/
+    private Integer main_mode;
     /** 子节点 **/
     private List<SysMenuRet> children = new ArrayList<>();
 }
