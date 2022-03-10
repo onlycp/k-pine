@@ -16,6 +16,11 @@
       <url>https://www.apache.org/licenses/LICENSE-2.0</url>
     </license>
   </licenses>
+  <properties>
+    <docker.registry.name>k-pine</docker.registry.name>
+    <docker.maven.plugin.version>1.4.10</docker.maven.plugin.version>
+    <docker.repostory>192.168.6.11</docker.repostory>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>com.kingsware.dev</groupId>
@@ -38,6 +43,23 @@
               <artifactId>lombok</artifactId>
             </exclude>
           </excludes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.spotify</groupId>
+        <artifactId>dockerfile-maven-plugin</artifactId>
+        <version>${docker.maven.plugin.version}</version>
+        <executions>
+          <execution />
+        </executions>
+        <configuration>
+          <contextDirectory>${project.basedir}</contextDirectory>
+          <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
+          <repository>${docker.repostory}/${docker.registry.name}/${project.artifactId}</repository>
+          <tag>1.0.0.20220309-01</tag>
+          <buildArgs>
+            <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
+          </buildArgs>
         </configuration>
       </plugin>
     </plugins>

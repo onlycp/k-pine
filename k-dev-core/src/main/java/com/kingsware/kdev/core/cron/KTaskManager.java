@@ -41,12 +41,7 @@ public class KTaskManager {
 
         // 如果不是分布式任务，直接运行
         if (sysTask.getDistributed() == 0) {
-            try {
-                executeTask(sysTask);
-            } catch (Exception e) {
-                log.error("error", e);
-                log.error("定时任务执行失败, 任务名: {}， 错误信息:{}", sysTask.getName(), e.getMessage());
-            }
+            executeTask(sysTask);
             return;
         }
 
@@ -62,38 +57,39 @@ public class KTaskManager {
         if (myTask.getEnable() == 0) {
             return;
         }
+        executeTask(myTask);
 
-        long t1 = System.currentTimeMillis();
-        int executeStatus = 1;
-        String errorMessage = "";
-        try {
-            executeTask(myTask);
-        }
-        catch (Exception e) {
-            log.error("定时任务执行失败, 任务名: {}， 错误信息:{}", sysTask.getName(), e.getMessage());
-            executeStatus = 0;
-            errorMessage = e.getMessage();
-        }
-        finally {
-            long t2 = System.currentTimeMillis();
-            String sql = "update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ?,  last_execute_time=?, lock_status=0 where id=?";
-            DB.executeUpdateSql(sql, executeStatus, (t2 - t1),  errorMessage, DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME), sysTask.getId());
-            //log.debug("定时任务执行, 任务名: {}", sysTask.getName());
-        }
     }
 
     /**
      * 运行任务
      * @param myTask
      */
-    private void executeTask(SysTask myTask) throws Exception {
-        // 如果是java类
-        if (myTask.getTaskType() == 1) {
-            runJavaTask(myTask);
+    private void executeTask(SysTask myTask)  {
+        long t1 = System.currentTimeMillis();
+        int executeStatus = 1;
+        String errorMessage = "";
+        try {
+            // 如果是java类
+            if (myTask.getTaskType() == 1) {
+                runJavaTask(myTask);
+            }
+            else if (myTask.getTaskType() == 2) {
+                runFlowTask(myTask);
+            }
         }
-        else if (myTask.getTaskType() == 2) {
-            runFlowTask(myTask);
+        catch (Exception e) {
+            log.error("定时任务执行失败, 任务名: {}， 错误信息:{}", myTask.getName(), e.getMessage());
+            executeStatus = 0;
+            errorMessage = e.getMessage();
         }
+        finally {
+            long t2 = System.currentTimeMillis();
+            String sql = "update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ?,  last_execute_time=?, lock_status=0 where id=?";
+            DB.executeUpdateSql(sql, executeStatus, (t2 - t1),  errorMessage, DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME), myTask.getId());
+            //log.debug("定时任务执行, 任务名: {}", sysTask.getName());
+        }
+
     }
 
     /**
