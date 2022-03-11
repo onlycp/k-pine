@@ -13,6 +13,7 @@ import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.NumberUtils;
 import com.kingsware.kdev.core.util.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 
@@ -23,6 +24,7 @@ import java.util.*;
  * @version 1.0.0
  * @date 2022/3/3 3:43 下午
  */
+@Slf4j
 public class FlowUtils {
 
     /**
@@ -115,8 +117,9 @@ public class FlowUtils {
         // 根节点定义
         JsonNode rootNode = JsonUtil.toTree(inArgv);
         // 处理
-        handleNodeValue(variables, rootNode);
+        handleNodeValue(variables, rootNode, false);
     }
+
 
     /**
      * 解析节点值
@@ -125,7 +128,7 @@ public class FlowUtils {
      * @return          返回值
      */
     @SuppressWarnings("unchecked")
-    private static Object handleNodeValue(Object variable, JsonNode jsonNode) {
+    public static Object handleNodeValue(Object variable, JsonNode jsonNode, boolean mock) {
         if (jsonNode == null) {
             return variable;
         }
@@ -149,14 +152,21 @@ public class FlowUtils {
             Map<String, Object> newValueMap = new HashMap<>();
             while (propertyNames.hasNext()) {
                 String pName = propertyNames.next();
+                log.info("PName = {}" ,pName);
                 JsonNode pNode = propertiesNode.get(pName);
                 // 只有值不存在的时候，才会使用默认值填充
-                if (!map.containsKey(pName)) {
+                if (!mock) {
+                    if (!map.containsKey(pName)) {
+                        // 获取值
+                        Object entryValue = handleNodeValue(new HashMap<>(), pNode, mock);
+                        newValueMap.put(pName, entryValue);
+                    }
+                }
+                else {
                     // 获取值
-                    Object entryValue = handleNodeValue(null, pNode);
+                    Object entryValue = handleNodeValue(new HashMap<>(), pNode, mock);
                     newValueMap.put(pName, entryValue);
                 }
-
             }
             // 覆盖原先的值
             map.putAll(newValueMap);
@@ -169,7 +179,7 @@ public class FlowUtils {
             List<Object> objects = JsonUtil.toListBean(JsonUtil.toJson(variable), Object.class);
             if (objects != null) {
                 for (int i = 0; i < objects.size() ; i++) {
-                    Object itemValue = handleNodeValue(objects.get(i), itemNode);
+                    Object itemValue = handleNodeValue(objects.get(i), itemNode, mock);
                     objects.set(i, itemValue);
                 }
             }
