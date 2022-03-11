@@ -38,15 +38,15 @@ public class EncryptWorker {
                 INSTANCE = new EncryptWorker();
                 // 创建具体加解密实例
                 EncryptProperties encryptProperties = SpringContext.getBean(EncryptProperties.class);
-                if ("base64".equalsIgnoreCase(encryptProperties.getMode())) {
+                if ("base64".equalsIgnoreCase(encryptProperties.getMode().trim())) {
                     INSTANCE.algorithmConfig = encryptProperties.getBase64();
                     INSTANCE.encryptInterface = new Base64Instance();
                 }
-                else if ("md5".equalsIgnoreCase(encryptProperties.getMode())) {
+                else if ("md5".equalsIgnoreCase(encryptProperties.getMode().trim())) {
                     INSTANCE.algorithmConfig = encryptProperties.getMd5();
                     INSTANCE.encryptInterface = new MD5Instance();
                 }
-                else if ("aes".equalsIgnoreCase(encryptProperties.getMode())) {
+                else if ("aes".equalsIgnoreCase(encryptProperties.getMode().trim())) {
                     INSTANCE.algorithmConfig = encryptProperties.getAes();
                     INSTANCE.encryptInterface = new AESInstance();
                 }

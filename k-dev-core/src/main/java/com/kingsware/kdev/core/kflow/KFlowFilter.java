@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Base64;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -119,6 +120,7 @@ public class KFlowFilter implements Filter {
             Map<String, MultipartFile> fileMap = multipartHttpServletRequest.getFileMap();
             for (Map.Entry<String, MultipartFile> multipartFileEntry: fileMap.entrySet()) {
                 KFlowUploadFile uploadFile = new KFlowUploadFile();
+                Base64.getEncoder().encodeToString("1".getBytes());
                 // 原始文件名
                 uploadFile.setOriginFileName(multipartFileEntry.getValue().getOriginalFilename());
                 // 文件大小

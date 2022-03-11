@@ -87,6 +87,7 @@ public class PoiExcelHandler implements KExcelHandler{
         // 创建工作表
         Workbook workbook = null;
         try {
+
             workbook = WorkbookFactory.create(new File(filePath));
 
             //设置格式
@@ -139,7 +140,7 @@ public class PoiExcelHandler implements KExcelHandler{
         }
         finally {
             if (workbook != null) {
-                //workbook.close();
+                workbook.close();
             }
         }
 

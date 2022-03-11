@@ -39,6 +39,7 @@ public class KTaskManager {
      */
     public void runTask(SysTask sysTask) {
 
+        log.info("task:{}", sysTask);
         // 如果不是分布式任务，直接运行
         if (sysTask.getDistributed() == 0) {
             executeTask(sysTask);
