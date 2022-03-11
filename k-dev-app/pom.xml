@@ -59,7 +59,7 @@
                     <!-- harbor 仓库用户名及密码-->
                     <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
                     <repository>${docker.repostory}/${docker.registry.name}/${project.artifactId}</repository>
-                    <tag>1.0.0.20220309-01</tag>
+                    <tag>${kdev.version}</tag>
                     <buildArgs>
                         <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
                     </buildArgs>
