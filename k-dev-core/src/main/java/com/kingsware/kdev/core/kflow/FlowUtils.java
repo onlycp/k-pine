@@ -32,8 +32,8 @@ public class FlowUtils {
      * @param text
      * @return
      */
-    public static Map<String, Object> parseList2Object(String text) {
-        List<Map<String, Object>> mapObjectList = parseList(text);
+    public static Object parseList2Object(String text) {
+        List<Object> mapObjectList = parseList(text);
         if (!mapObjectList.isEmpty()) {
             return mapObjectList.get(0);
         }
@@ -45,15 +45,8 @@ public class FlowUtils {
      * @param text
      * @return
      */
-    public static List<Map<String, Object>> parseList(String text) {
-        List<Map<String, Object>> mapObjectList = new ArrayList<>();
-        List<Map> list = JsonUtil.snakeCaseToListBean(text, Map.class);
-        for (Map<?,?> map: list) {
-            Map<String, Object> tmpMap = new HashMap<>();
-            map.forEach((k, v) -> tmpMap.put(StringUtils.lineToHump(k.toString().toLowerCase()), v));
-            mapObjectList.add(tmpMap);
-        }
-        return mapObjectList;
+    public static List<Object> parseList(String text) {
+        return JsonUtil.snakeCaseToListBean(text, Object.class);
     }
 
     /**

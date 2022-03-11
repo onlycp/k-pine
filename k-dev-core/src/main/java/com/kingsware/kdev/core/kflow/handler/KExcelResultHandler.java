@@ -64,7 +64,7 @@ public class KExcelResultHandler implements KFlowResultHandler {
         // 调整行号
         rowIndex = 1;
         // 解析数据
-        List<Map<String, Object>> data = FlowUtils.parseList(body);
+        Object data = FlowUtils.parseList(body);
         // 转换之后的数据
         List<Map<String, Object>> rows = (List<Map<String, Object>>)FlowUtils.processData(data, context, jsonNode);
         // 遍历写到excel

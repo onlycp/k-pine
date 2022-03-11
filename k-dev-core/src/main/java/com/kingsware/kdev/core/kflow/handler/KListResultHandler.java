@@ -24,7 +24,7 @@ public class KListResultHandler implements KFlowResultHandler {
         KdbFlowResult result = new KdbFlowResult();
         result.setType(KFlowConstant.RESULT_JSON);
         // 解析数据
-        List<Map<String, Object>> data = FlowUtils.parseList(responseBody);
+        List<Object> data = FlowUtils.parseList(responseBody);
         JsonNode jsonNode = JsonUtil.toTree(context.getOutArgv());
         result.setData(FlowUtils.processData(data, context, jsonNode));
         // 返回数据
