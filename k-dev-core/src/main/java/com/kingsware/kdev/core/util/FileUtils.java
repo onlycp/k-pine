@@ -50,13 +50,6 @@ public class FileUtils {
             return toHexString(MD5.digest());
         } catch (Exception e) {
             return null;
-        } finally {
-            try {
-                if (fileInputStream != null){
-                    fileInputStream.close();
-                }
-            } catch (IOException ignored) {
-            }
         }
     }
 
