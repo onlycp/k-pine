@@ -6,6 +6,7 @@ import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.model.SysFile;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StreamUtils;
@@ -83,8 +84,6 @@ public class FileManager {
             sysFile.setFileExt(FileUtils.getFileExt(sysFile.getFileName()));
             // 文件大小
             sysFile.setFileSize(fileSize) ;
-            // 文件md5码
-            sysFile.setFileMd5(FileUtils.getMD5(inputStream));
             // 文件来源
             sysFile.setFileFrom(fileFrom);
             // 存储方式
@@ -92,6 +91,8 @@ public class FileManager {
             // 如果存在方式为数据库，那么这里将文件转为base54
             if(saveType == 0) {
                 sysFile.setFileContent(new String(Base64.getEncoder().encode(FileCopyUtils.copyToByteArray(inputStream))));
+                // 文件md5码
+                sysFile.setFileMd5(FileUtils.getMD5(inputStream));
             }
             else if (saveType == 1) {
                 // 相对路径
@@ -105,6 +106,8 @@ public class FileManager {
                 // 拷贝文件
                 File saveFile = new File(path.getAbsolutePath() + File.separator + realName);
                 FileCopyUtils.copy(inputStream, new FileOutputStream(saveFile));
+                sysFile.setFileMd5(DigestUtils.md5Hex(new FileInputStream(saveFile)));
+
                 // 文件表只存储相对路径
                 sysFile.setFilePath(relativePath + realName);
             }

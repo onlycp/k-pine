@@ -9,10 +9,13 @@ import com.kingsware.kdev.core.util.PageUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysKdbFunArgv;
 import com.kingsware.kdev.sys.argv.SysKdbFunQueryArgv;
+import com.kingsware.kdev.sys.manager.FileManager;
+import com.kingsware.kdev.sys.model.SysFile;
 import com.kingsware.kdev.sys.ret.SysKdbFunRet;
 import com.kingsware.kdev.sys.service.SysKdbFunService;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -88,11 +91,13 @@ public class SysKdbFunServiceImpl extends BaseServiceImpl implements SysKdbFunSe
 
     @Override
     public void edit(SysKdbFunArgv argv) {
+
         EditFunctionInfo info = new EditFunctionInfo();
         info.setName(argv.getName());
         info.setScript(argv.getScript());
         info.setType(argv.getType());
         info.setDesc(argv.getDesc());
+        info.setId(argv.getId());
         DB.kdbApi().editFun(info);
     }
 
