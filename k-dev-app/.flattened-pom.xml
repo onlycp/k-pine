@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.kingsware.dev</groupId>
+    <artifactId>k-dev-parent</artifactId>
+    <version>1.0.0.20220315-01</version>
+  </parent>
+  <groupId>com.kingsware.dev</groupId>
+  <artifactId>k-dev-app</artifactId>
+  <version>1.0.0.20220315-01</version>
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+    </license>
+  </licenses>
+  <properties>
+    <docker.repostory>192.168.6.11</docker.repostory>
+    <docker.maven.plugin.version>1.4.10</docker.maven.plugin.version>
+    <docker.registry.name>k-pine</docker.registry.name>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>com.kingsware.dev</groupId>
+      <artifactId>k-dev-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.kingsware.dev</groupId>
+      <artifactId>k-dev-sys</artifactId>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+            </exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.spotify</groupId>
+        <artifactId>dockerfile-maven-plugin</artifactId>
+        <version>${docker.maven.plugin.version}</version>
+        <executions>
+          <execution />
+        </executions>
+        <configuration>
+          <contextDirectory>${project.basedir}</contextDirectory>
+          <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
+          <repository>${docker.repostory}/${docker.registry.name}/${project.artifactId}</repository>
+          <tag>${kdev.version}</tag>
+          <buildArgs>
+            <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
+          </buildArgs>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
