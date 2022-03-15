@@ -4,6 +4,10 @@ import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.excel.ExcelWorker;
+import com.kingsware.kdev.core.excel.RegionDefine;
+import com.kingsware.kdev.core.excel.format.RegionDictReverseFormat;
+import com.kingsware.kdev.core.excel.format.RegionModelIdFormat;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
@@ -12,10 +16,12 @@ import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysFileQueryArgv;
+import com.kingsware.kdev.sys.manager.FileManager;
 import com.kingsware.kdev.sys.model.SysFile;
 import com.kingsware.kdev.sys.ret.SysFileRet;
 import com.kingsware.kdev.sys.service.SysFileService;
 import lombok.Cleanup;
+import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +34,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 文件实现类
@@ -88,42 +95,10 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         List<SysFileRet> retList = new ArrayList<>();
         // 遍历处理文件
         for (MultipartFile file: files) {
-            SysFile sysFile = new SysFile();
-            // 文件名
-            sysFile.setFileName(file.getOriginalFilename());
-            // 真实文件名
-            String realName = file.getOriginalFilename();
-            String fileExt = "." + FileUtils.getFileExt(sysFile.getFileName());
-            realName = realName.substring(0, realName.indexOf(fileExt));
-            realName = realName + "_" + System.currentTimeMillis() + fileExt;
-            sysFile.setFileOriginalName(realName);
-            // 文件扩展名
-            sysFile.setFileExt(FileUtils.getFileExt(sysFile.getFileName()));
-            // 文件大小
-            sysFile.setFileSize((int)file.getSize());
-            // 文件md5码
-            sysFile.setFileMd5(FileUtils.getMD5(file.getInputStream()));
-            // 文件来源
-            sysFile.setFileFrom(fileFrom);
-            // 存储方式
-            sysFile.setSaveType(saveType);
-            // 如果存在方式为数据库，那么这里将文件转为base54
-            if(saveType == 0) {
-                sysFile.setFileContent(new String(Base64.getEncoder().encode(file.getBytes())));
+            SysFile sysFile = FileManager.getInstance().register(file.getInputStream(), file.getOriginalFilename(), (int)file.getSize(), fileFrom, saveType);
+            if (sysFile == null) {
+                throw BusinessException.serviceThrow("文件保存失败");
             }
-            else if (saveType == 1) {
-                // 相对路径
-                String relativePath = File.separator + fileFrom + File.separator;
-                // 磁盘存储路径
-                String filePath = basePath +  relativePath;
-                File path = new File(filePath);
-                boolean status = path.mkdirs();
-                File saveFile = new File(path.getAbsolutePath() + File.separator + realName);
-                // 文件表只存储相对路径
-                sysFile.setFilePath(relativePath + realName);
-                file.transferTo(saveFile);
-            }
-            DB.save(sysFile);
             retList.add(BeanUtils.copyObject(sysFile, SysFileRet.class));
         }
 

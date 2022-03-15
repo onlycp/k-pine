@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.service.impl;
 
+import com.google.common.collect.Sets;
 import com.kingsware.kdev.core.auth.AppAuthProperties;
 import com.kingsware.kdev.core.auth.BaseUserInfo;
 import com.kingsware.kdev.core.auth.TokenUtil;
@@ -107,8 +108,10 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     private void saveUserRoles(String userId, String sysRoleIds) {
         if (StringUtils.isNotEmpty(sysRoleIds)) {
             String[] roleIds = sysRoleIds.trim().split(",");
+            // 去重用
+            Set<String> idSet = Sets.newHashSet(roleIds);
             List<SysUserRole> userRoles = new ArrayList<>();
-            for (String roleId: roleIds) {
+            for (String roleId: idSet) {
                 SysUserRole userRole = new SysUserRole();
                 userRole.setSysUserId(userId);
                 userRole.setSysRoleId(roleId);

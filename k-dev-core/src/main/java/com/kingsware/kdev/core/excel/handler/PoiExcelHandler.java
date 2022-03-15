@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.excel.handler;
 
+import ch.qos.logback.core.rolling.helper.FileStoreUtil;
 import com.kingsware.kdev.core.excel.KExcel;
 import com.kingsware.kdev.core.excel.KRegion;
 import com.kingsware.kdev.core.excel.KSheet;
@@ -12,9 +13,13 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.util.FileCopyUtils;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,10 +91,11 @@ public class PoiExcelHandler implements KExcelHandler{
     public List<List<String>> read(int sheetIndex, String filePath) throws Exception {
         // 创建工作表
         Workbook workbook = null;
+        File file = null;
         try {
-
-            workbook = WorkbookFactory.create(new File(filePath));
-
+            file = File.createTempFile("excel" +System.currentTimeMillis(), "");
+            FileCopyUtils.copy(new File(filePath), file);
+            workbook = WorkbookFactory.create(file, "", true);
             //设置格式
             CellStyle style1 = workbook.createCellStyle();
             // 获取sheet
@@ -140,7 +146,10 @@ public class PoiExcelHandler implements KExcelHandler{
         }
         finally {
             if (workbook != null) {
-                workbook.close();
+//                workbook.close();
+            }
+            if (file != null) {
+                Files.deleteIfExists(file.toPath());
             }
         }
 

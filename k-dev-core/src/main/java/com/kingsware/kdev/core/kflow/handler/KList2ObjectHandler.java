@@ -23,7 +23,7 @@ public class KList2ObjectHandler implements KFlowResultHandler {
         KdbFlowResult result = new KdbFlowResult();
         result.setType(KFlowConstant.RESULT_JSON);
         // 解析数据
-        Map<String, Object> data = FlowUtils.parseList2Object(responseBody);
+        Object data = FlowUtils.parseList2Object(responseBody);
         JsonNode jsonNode = JsonUtil.toTree(context.getOutArgv());
         result.setData(FlowUtils.processData(data, context, jsonNode));
         // 返回数据
