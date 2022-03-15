@@ -76,6 +76,7 @@ public class SysFileController extends BaseController {
      * @param saveType     存储方式
      * @return             文件信息列表
      */
+    @ApiOperation(value = "文件上传 " ,notes = "文件上传")
     @PostMapping("/upload/{fileFrom}/{saveType}")
     @ResponseBody
     public BaseRet<List<SysFileRet>> upload(@RequestParam("files") MultipartFile[] files, @PathVariable String fileFrom, @PathVariable Integer saveType) {
@@ -86,6 +87,7 @@ public class SysFileController extends BaseController {
      * 文件下载
      * @param id         文件id
      */
+    @ApiOperation(value = "文件下载 " ,notes = "文件下载")
     @GetMapping("/download/{id}")
     @ApiIgnore
     public void download(@PathVariable String id) {
