@@ -86,6 +86,7 @@ public class SysConfigServiceImpl extends BaseServiceImpl implements SysConfigSe
         if (argv.getIsSys()!=null) {
             wrapper.addCondition("is_sys", Op.EQ, argv.getIsSys());
         }
+        wrapper.sortBy("when_created desc");
         return (PageDataRet<SysConfigRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysConfig.class, SysConfigRet.class);
     }
 

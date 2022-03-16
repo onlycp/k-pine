@@ -22,8 +22,6 @@ public interface DevPageHistoryService extends BaseService {
      */
     DevPageHistoryRet get(String id);
 
-    DevPageHistoryRet getByPath(String path);
-
     /**
      * 新增
      * @param argv 新增

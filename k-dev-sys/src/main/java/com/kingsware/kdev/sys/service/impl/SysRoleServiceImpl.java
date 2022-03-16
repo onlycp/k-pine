@@ -90,6 +90,7 @@ public class SysRoleServiceImpl extends BaseServiceImpl implements SysRoleServic
         if (argv.getStatus() != null) {
             wrapper.addCondition("status", Op.EQ, argv.getStatus());
         }
+        wrapper.sortBy("when_created desc");
         return (PageDataRet<SysRoleRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysRole.class, SysRoleRet.class);
     }
 

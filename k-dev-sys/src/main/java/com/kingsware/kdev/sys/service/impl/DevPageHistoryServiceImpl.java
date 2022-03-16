@@ -35,11 +35,6 @@ public class DevPageHistoryServiceImpl extends BaseServiceImpl implements DevPag
     }
 
     @Override
-    public DevPageHistoryRet getByPath(String path) {
-        return DB.findOne(DevPageHistoryRet.class, " select * from dev_page where path = ? ", path);
-    }
-
-    @Override
     public void add(DevPageHistoryArgv argv) {
         DevPageHistory model = BeanUtils.copyObject(argv, DevPageHistory.class);
         // 保存
@@ -58,7 +53,7 @@ public class DevPageHistoryServiceImpl extends BaseServiceImpl implements DevPag
     @SuppressWarnings("unchecked")
     public PageDataRet<DevPageHistoryRet> query(DevPageHistoryQueryArgv argv) {
         // 拼装sql
-        SqlWrapper wrapper = new SqlWrapper("select * from dev_page where 1=1  ");
+        SqlWrapper wrapper = new SqlWrapper("select * from dev_page_history where 1=1  ");
         wrapper.sortBy("when_created desc");
         return (PageDataRet<DevPageHistoryRet>) query(wrapper.getSql(), wrapper.getParams(), argv, DevPageHistory.class, DevPageHistoryRet.class);
     }

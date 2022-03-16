@@ -89,6 +89,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         if (argv.getAppType() != null) {
             wrapper.addCondition("app_type", Op.EQ, argv.getAppType());
         }
+        wrapper.sortBy("when_created desc");
 
         return (PageDataRet<DevApplicationRet>) query(wrapper.getSql(), wrapper.getParams(), argv, DevApplication.class, DevApplicationRet.class);
     }

@@ -105,6 +105,7 @@ public class SysViewModelServiceImpl extends BaseServiceImpl implements SysViewM
         if (StringUtils.isNotEmpty(argv.getTag())) {
             wrapper.addCondition("tag", Op.LIKE, "%" +argv.getTag() +"%");
         }
+        wrapper.sortBy("when_created desc");
         return (PageDataRet<SysViewModelRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysViewModel.class, SysViewModelRet.class);
     }
 

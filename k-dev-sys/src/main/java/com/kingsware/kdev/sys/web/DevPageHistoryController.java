@@ -52,16 +52,6 @@ public class DevPageHistoryController extends BaseController {
     }
 
     /**
-     * 详细信息
-     * @return 详细信息
-     */
-    @ApiOperation(value = "根据路径查询页面 " ,notes = "根据路径查询页面")
-    @GetMapping("/getByPath")
-    public BaseRet<DevPageHistoryRet> getByPath(String path) {
-        return BaseRet.success(DevPageHistoryService.getByPath(path));
-    }
-
-    /**
      *  新增
      * @return 提示
      */

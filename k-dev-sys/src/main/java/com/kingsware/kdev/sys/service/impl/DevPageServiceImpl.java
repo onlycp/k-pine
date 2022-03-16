@@ -79,6 +79,7 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
         if (StringUtils.isNotEmpty(argv.getName())) {
             wrapper.addCondition("name", Op.LIKE, "%" + argv.getName() + "%");
         }
+        wrapper.sortBy("when_created desc");
         return (PageDataRet<DevPageRet>) query(wrapper.getSql(), wrapper.getParams(), argv, DevPage.class, DevPageRet.class);
     }
 

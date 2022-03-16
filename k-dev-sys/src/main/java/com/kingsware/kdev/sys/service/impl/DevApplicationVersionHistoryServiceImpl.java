@@ -53,6 +53,7 @@ public class DevApplicationVersionHistoryServiceImpl extends BaseServiceImpl imp
         // 拼装sql
         SqlWrapper wrapper = new SqlWrapper("select * from dev_application_version_history where 1=1 ");
 
+        wrapper.sortBy("when_created desc");
         return (PageDataRet<DevApplicationVersionHistoryRet>) query(wrapper.getSql(), wrapper.getParams(), argv, DevApplicationVersionHistory.class, DevApplicationVersionHistoryRet.class);
     }
 
