@@ -109,7 +109,6 @@ public class TokenUtil {
                 throw new UnauthorizedException(I18n.t("auth. unauthorized-e007", "登录会话不存在，请重新登录"));
             }
             long expireTime = ts.getActiveTime().getTime() + ((long) mockSessionExpireMinutes * 60 * 1000);
-            logger.warn("会话上次活动时间: {}，过期时间：{}", DateUtils.formatDate(new Date(ts.getActiveTime().getTime()), DateUtils.DATE_TIME), DateUtils.formatDate(new Date(expireTime), DateUtils.DATE_TIME));
             if (expireTime < System.currentTimeMillis()) {
                 // 删除登录会话
                 SysOnlineUser onlineUser = DB.findOne(SysOnlineUser.class, Expr.builder().add("loginToken", "=", token).build());

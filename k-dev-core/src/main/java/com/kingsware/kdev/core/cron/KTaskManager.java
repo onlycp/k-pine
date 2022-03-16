@@ -5,6 +5,8 @@ import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.model.SysTask;
 import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.orm.kdb.FlowInfo;
+import com.kingsware.kdev.core.orm.kdb.KdbFlowQueryArgv;
 import com.kingsware.kdev.core.util.ClassUtils;
 import com.kingsware.kdev.core.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -69,6 +71,7 @@ public class KTaskManager {
     private void executeTask(SysTask myTask)  {
         long t1 = System.currentTimeMillis();
         int executeStatus = 1;
+        int enable = 1;
         String errorMessage = "";
         try {
             // 如果是java类
@@ -79,6 +82,14 @@ public class KTaskManager {
                 runFlowTask(myTask);
             }
         }
+        catch (CronException e) {
+           if (e.getErrorCode() == 1 || e.getErrorCode() == 2 ) {
+               executeStatus = 0;
+               errorMessage = e.getMessage();
+               // 将任务设为禁用，否则影响行情
+               enable = 0;
+           }
+        }
         catch (Exception e) {
             log.error("定时任务执行失败, 任务名: {}， 错误信息:{}", myTask.getName(), e.getMessage());
             executeStatus = 0;
@@ -86,8 +97,8 @@ public class KTaskManager {
         }
         finally {
             long t2 = System.currentTimeMillis();
-            String sql = "update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ?,  last_execute_time=?, lock_status=0 where id=?";
-            DB.executeUpdateSql(sql, executeStatus, (t2 - t1),  errorMessage, DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME), myTask.getId());
+            String sql = "update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ?,  last_execute_time=?, lock_status=0, enable=? where id=?";
+            DB.executeUpdateSql(sql, executeStatus, (t2 - t1),  errorMessage, DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME), enable, myTask.getId());
             //log.debug("定时任务执行, 任务名: {}", sysTask.getName());
         }
 
@@ -98,8 +109,14 @@ public class KTaskManager {
      * @param sysTask   任务
      */
     private void runJavaTask(SysTask sysTask) throws Exception {
-        KTask kTask = (KTask) Class.forName(sysTask.getClassName()).newInstance();
-        kTask.execute();
+        try {
+            KTask kTask = (KTask) Class.forName(sysTask.getClassName()).newInstance();
+            kTask.execute();
+        } catch (ClassNotFoundException e) {
+            throw new CronException("调度Class不存在", 1);
+        }
+
+
     }
 
     /**
@@ -107,8 +124,18 @@ public class KTaskManager {
      * @param sysTask 流程
      */
     private void runFlowTask(SysTask sysTask) {
-        KFlowContext context = KFlowContext.createBaseContext("{}", "{}");
-        KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), Maps.newHashMap(), context);
+        // 先查找一下看流程是否存在
+        KdbFlowQueryArgv flowInfo = new KdbFlowQueryArgv();
+        flowInfo.setFlowId(sysTask.getTaskResourceId());
+        List<FlowInfo> flowInfos = DB.kdbApi().query(flowInfo);
+        if (!flowInfos.isEmpty()) {
+            KFlowContext context = KFlowContext.createBaseContext("{}", "{}");
+            KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), Maps.newHashMap(), context);
+        }
+        else {
+            throw new CronException("流程不存在", 2);
+        }
+
     }
 
     /**
