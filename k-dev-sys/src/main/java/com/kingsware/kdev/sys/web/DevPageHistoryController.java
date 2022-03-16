@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -57,6 +58,7 @@ public class DevPageHistoryController extends BaseController {
      */
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
+    @ApiIgnore
     public BaseRet<?> add(@RequestBody DevPageHistoryArgv argv) {
         DevPageHistoryService.add(argv);
         return BaseRet.success();
