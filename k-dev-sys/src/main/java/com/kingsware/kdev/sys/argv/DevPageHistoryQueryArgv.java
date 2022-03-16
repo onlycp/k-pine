@@ -4,6 +4,8 @@ import com.kingsware.kdev.core.bean.BasePageArgv;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.sql.Timestamp;
+
 /**
  * 页面修改记录表
  * @author AndyZheng
@@ -14,21 +16,15 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class DevPageHistoryQueryArgv extends BasePageArgv {
 
-    // 搜索关键字
-    private String keywords;
+    /** 页面ID */
+    private String pageId;
 
-    /** 可用状态 */
-    private Integer enableStatus;
+    /** 页面JSON */
+    private String pageJson;
 
-    /** 开发状态 */
-    private Integer devStatus;
+    /** 创建人员 **/
+    private String whoCreated;
 
-    /** 当前发布版本 */
-    private String version;
-
-    /** 负责人 */
-    private String whoInCharge;
-
-    /** 应用类型 */
-    private String appType;
+    /** 创建时间 **/
+    private Timestamp whenCreated;
 }

@@ -3,9 +3,7 @@ package com.kingsware.kdev.sys.service.impl;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
-import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
-import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
@@ -53,9 +51,12 @@ public class DevPageHistoryServiceImpl extends BaseServiceImpl implements DevPag
     @SuppressWarnings("unchecked")
     public PageDataRet<DevPageHistoryRet> query(DevPageHistoryQueryArgv argv) {
         // 拼装sql
-        SqlWrapper wrapper = new SqlWrapper("select * from dev_page_history where 1=1  ");
-        wrapper.sortBy("when_created desc");
-        return (PageDataRet<DevPageHistoryRet>) query(wrapper.getSql(), wrapper.getParams(), argv, DevPageHistory.class, DevPageHistoryRet.class);
+        SqlWrapper wrapper = new SqlWrapper("select dph.*, su.real_name as created_user_name, su.avatar as created_user_avatar from dev_page_history dph left join sys_user su on su.id = dph.who_created where 1=1   ");
+        if (StringUtils.isNotEmpty(argv.getPageId())) {
+            wrapper.addCondition("dph.page_id", Op.EQ, argv.getPageId());
+        }
+        wrapper.sortBy("dph.when_created desc");
+        return (PageDataRet<DevPageHistoryRet>) query(wrapper.getSql(), wrapper.getParams(), argv, DevPageHistoryRet.class);
     }
 
     @Override

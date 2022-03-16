@@ -1,14 +1,8 @@
 package com.kingsware.kdev.sys.ret;
 
-import com.kingsware.kdev.core.bean.BaseModel;
-import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.BaseSimpleRet;
-import com.kingsware.kdev.core.orm.annotation.AutoEnum;
-import com.kingsware.kdev.core.orm.annotation.Column;
-import com.kingsware.kdev.core.orm.annotation.LogicDelete;
 import com.kingsware.kdev.core.orm.annotation.Table;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.sql.Timestamp;
 
@@ -36,5 +30,12 @@ public class DevPageHistoryRet extends BaseSimpleRet {
 
     /** 创建时间 **/
     private Timestamp whenCreated;
+
+    /** 创建人员 **/
+    private String createdUserName;
+
+    /** 创建人员 **/
+    private String createdUserAvatar;
+
 
 }
