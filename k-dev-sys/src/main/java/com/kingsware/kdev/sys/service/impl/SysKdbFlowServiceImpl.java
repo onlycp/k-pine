@@ -1,5 +1,8 @@
 package com.kingsware.kdev.sys.service.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
@@ -341,14 +344,30 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
 
     @Override
     public SysFlowDebugRet debug(SysFlowDebugArgv argv) {
+        // 查询流程信息
         SysLogicFlow logicFlow = DB.findOne(SysLogicFlow.class, Expr.builder().add("flowId", "=", argv.getFlowId()).build());
+        // 创建上下文
         KFlowContext context = KFlowContext.createBaseContext(logicFlow == null ? "{}" : logicFlow.getInArgv(), logicFlow == null ? "{}" : logicFlow.getOutArgv());
         String json = argv.getJson();
         if (StringUtils.isEmpty(json)) {
             json = "{}";
         }
         long t1 = System.currentTimeMillis();
-        Map<String, Object> argvMap = JsonUtil.toMap(json);
+        // 上下文参数
+        Map<String, Object> argvMap = new HashMap<>();
+        // 判断是list还是object
+        JsonNode jsonNode = JsonUtil.toTree(json);
+        if (jsonNode instanceof ObjectNode) {
+            Map<String, Object> fieldMap = JsonUtil.toMap(json);
+            if (fieldMap != null) {
+                argvMap.putAll(fieldMap);
+            }
+        }
+        // 将请求的body加进去
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("body", json);
+        argvMap.put("request", requestMap);
+        // 调用流程
         KdbFlowResult result = KdbFlowExecutor.getInstance().execute(argv.getFlowId(), argvMap, context);
         long t2 = System.currentTimeMillis();
         SysFlowDebugRet ret = new SysFlowDebugRet();

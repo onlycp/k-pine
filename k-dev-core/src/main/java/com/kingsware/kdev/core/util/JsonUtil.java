@@ -150,6 +150,7 @@ public class JsonUtil {
      * @param json
      * @return
      */
+    @SuppressWarnings("unchecked")
     public static Map<String, Object> toMap(String json) {
         try {
             return objectMapper.readValue(json, Map.class);
