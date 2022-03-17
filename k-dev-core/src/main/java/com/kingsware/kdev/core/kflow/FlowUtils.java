@@ -284,9 +284,8 @@ public class FlowUtils {
             message.setHandlerName("object");
             message.setData(responseBody);
         }
-        // todo 此处不应该这样处理，应该是直接返回list
         else if (responseBody.startsWith(KFlowConstant.ARRAY_START) && responseBody.endsWith(KFlowConstant.ARRAY_END)) {
-            message.setHandlerName("list2object");
+            message.setHandlerName("list");
             message.setData(responseBody);
         }
         else if (responseBody.startsWith(KFlowConstant.LIST_FLAG)) {
