@@ -261,13 +261,9 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("")
     public PageDataRet<SysKdbFlowRet> query(SysKdbFlowQueryArgv argv) {
         KdbFlowQueryArgv info = new KdbFlowQueryArgv();
-        // 全部查出来再内存过滤
-//        info.setContent(argv.getContent());
-//        info.setName(argv.getName());
-//        info.setParentId(argv.getParentId());
         // 查询所有数据
         KdbApi api = (KdbApi)(DB.getDefault());
         List<FlowInfo> list = api.query(info);

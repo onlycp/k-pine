@@ -296,8 +296,15 @@ public class FlowUtils {
         }
         else if (responseBody.startsWith(KFlowConstant.OBJECT_FLAG)) {
             String text = responseBody.substring(KFlowConstant.OBJECT_FLAG.length());
-            message.setHandlerName("object");
-            message.setData(text);
+            // 如果是数组，则调用数组转对象
+            if (text.startsWith(KFlowConstant.ARRAY_START)) {
+                message.setHandlerName("list2object");
+                message.setData(text);
+            }
+            else {
+                message.setHandlerName("object");
+                message.setData(text);
+            }
         }
         else if (responseBody.startsWith(KFlowConstant.EXCEL_FLAG)) {
             String text = responseBody.substring(KFlowConstant.EXCEL_FLAG.length());
