@@ -145,14 +145,26 @@ public class FlowUtils {
             Map<String, Object> newValueMap = new HashMap<>();
             while (propertyNames.hasNext()) {
                 String pName = propertyNames.next();
-                log.info("PName = {}" ,pName);
                 JsonNode pNode = propertiesNode.get(pName);
                 // 只有值不存在的时候，才会使用默认值填充
                 if (!mock) {
+                    // 获取值
                     if (!map.containsKey(pName)) {
-                        // 获取值
                         Object entryValue = handleNodeValue(new HashMap<>(), pNode, mock);
                         newValueMap.put(pName, entryValue);
+                    }
+                    // 根据类型进行数据转换
+                    else {
+                        Object inObject = map.get(pName);
+                        if (inObject != null && StringUtils.isNotEmpty(inObject.toString())) {
+                            String strValue = inObject.toString();
+                            JsonNode pTypeNode = pNode.get("type");
+                            String pType = pTypeNode.asText().trim();
+                            if ("integer".equalsIgnoreCase(pType)) {
+                                newValueMap.put(pName, Integer.parseInt(strValue));
+                            }
+                        }
+
                     }
                 }
                 else {

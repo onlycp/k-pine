@@ -128,7 +128,6 @@ public class JsonSchemaServiceImpl implements JsonSchemaService {
 
     private void inAndU(List<ColumnDefine> columnDefines, ObjectSchemaSchemaDefine objectSchemaDefine) {
         Set<String> ignoreSet = getBasicIgnoreColumns();
-        ignoreSet.add("id");
         for (ColumnDefine column: columnDefines) {
             // 转换成json schema的数据类型
             String schemeDataType = TypeMapping.getInstance().getSchemaType(column.getType());
