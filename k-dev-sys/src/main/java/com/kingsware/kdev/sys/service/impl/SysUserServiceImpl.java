@@ -10,6 +10,7 @@ import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.encrypt.EncryptProperties;
 import com.kingsware.kdev.core.encrypt.EncryptWorker;
+import com.kingsware.kdev.core.encrypt.inst.Base64Instance;
 import com.kingsware.kdev.core.enums.ApiSystemEnum;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.UnauthorizedException;
@@ -84,6 +85,8 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     public void add(SysUserArgv argv) {
         SysUser model = BeanUtils.copyObject(argv, SysUser.class);
         model.setId(StringUtils.getUUID());
+        // 把参数里的加密密码解密出来
+        model.setPassword(decodeBase64(argv.getPassword()));
         // 设置密码
         model.setPassword(EncryptWorker.getInstance().encrypt(model.getPassword()));
         // 唯一性校验
@@ -193,6 +196,8 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         if (model == null) {
             throw BusinessException.serviceThrow("用户名或密码有误！");
         }
+        // 把参数里的加密密码解密出来
+        argv.setPassword(decodeBase64(argv.getPassword()));
         if (!EncryptWorker.getInstance().validate(argv.getPassword(), model.getPassword())) {
             throw BusinessException.serviceThrow("用户名或密码有误！");
         }
@@ -248,8 +253,15 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         if (model == null) {
             throw BusinessException.serviceThrow("登录凭证已失效，请重新登录！");
         }
+        // 把参数里的加密密码解密出来
+        argv.setOldPassword(decodeBase64(argv.getOldPassword()));
+        argv.setNewPassword(decodeBase64(argv.getNewPassword()));
+
         if (!EncryptWorker.getInstance().validate(argv.getOldPassword(), model.getPassword())) {
             throw BusinessException.serviceThrow("旧密码有误！");
+        }
+        if (EncryptWorker.getInstance().validate(argv.getNewPassword(), model.getPassword())) {
+            throw BusinessException.serviceThrow("重置的密码不可以与旧密码一样！");
         }
         model.setPassword(EncryptWorker.getInstance().encrypt(argv.getNewPassword()));
         // 保存
@@ -352,6 +364,11 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         if (model == null) {
             throw BusinessException.serviceThrow("用户不存在！");
         }
+        // 把参数里的加密密码解密出来
+        argv.setPassword(decodeBase64(argv.getPassword()));
+        if (EncryptWorker.getInstance().validate(argv.getPassword(), model.getPassword())) {
+            throw BusinessException.serviceThrow("重置的密码不可以与旧密码一样！");
+        }
         model.setPassword(EncryptWorker.getInstance().encrypt(argv.getPassword()));
         // 保存
         DB.update(model);
@@ -406,6 +423,10 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         wrapper.addCondition("sys_user_id", Op.EQ, userId);
         wrapper.addCondition("sr.status", Op.EQ, ENABLE_STATUS);
         return DB.findList(SysRole.class, wrapper.getSql(), wrapper.getParams().toArray());
+    }
+
+    private String decodeBase64(String source) {
+        return new String(Base64.getDecoder().decode(source));
     }
 
 }
