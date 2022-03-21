@@ -1,6 +1,5 @@
 package com.kingsware.kdev.core.cron;
 
-import com.google.common.collect.Maps;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.model.SysTask;
@@ -12,6 +11,7 @@ import com.kingsware.kdev.core.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -22,17 +22,17 @@ import java.util.List;
  * @date 2022/2/15 3:38 下午
  */
 @Slf4j
-public class KTaskManager {
-    private static KTaskManager instance;
+public class KTaskRunnerManager {
+    private static KTaskRunnerManager instance;
 
-    public static KTaskManager getInstance() {
+    public static KTaskRunnerManager getInstance() {
         if (instance == null) {
-            instance = new KTaskManager();
+            instance = new KTaskRunnerManager();
         }
         return instance;
     }
 
-    private KTaskManager() {
+    private KTaskRunnerManager() {
     }
 
     /**
@@ -130,7 +130,7 @@ public class KTaskManager {
         List<FlowInfo> flowInfos = DB.kdbApi().query(flowInfo);
         if (!flowInfos.isEmpty()) {
             KFlowContext context = KFlowContext.createBaseContext("{}", "{}");
-            KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), Maps.newHashMap(), context);
+            KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), new HashMap<>(), context);
         }
         else {
             throw new CronException("流程不存在", 2);

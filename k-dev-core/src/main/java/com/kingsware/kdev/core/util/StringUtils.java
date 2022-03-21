@@ -1,7 +1,5 @@
 package com.kingsware.kdev.core.util;
 
-import org.apache.commons.lang3.CharUtils;
-
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -58,7 +56,7 @@ public class StringUtils {
         }
         final int sz = cs.length();
         for (int i = 0; i < sz; i++) {
-            if (!CharUtils.isAsciiPrintable(cs.charAt(i))) {
+            if (!StringUtils.isAsciiPrintable(cs.charAt(i))) {
                 return false;
             }
         }

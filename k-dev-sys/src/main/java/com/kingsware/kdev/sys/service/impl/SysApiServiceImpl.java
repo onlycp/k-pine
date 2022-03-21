@@ -3,6 +3,8 @@ package com.kingsware.kdev.sys.service.impl;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.cache.api.ApiInfo;
+import com.kingsware.kdev.core.cache.api.ApiManager;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
@@ -42,6 +44,8 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
         checkUnique(model);
         // 保存
         DB.save(model);
+        // 缓存api
+        cacheApi(model.getId());
     }
 
     @Override
@@ -52,6 +56,23 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
         checkUnique(model);
         // 保存
         DB.update(model);
+        // 缓存api
+        cacheApi(model.getId());
+
+    }
+
+    /**
+     * 同步api到缓存
+     * @param id id
+     */
+    private void cacheApi(String id) {
+        // 同步到缓存中
+        String sql = "select t0.*, t1.in_argv, t1.out_argv from sys_api t0 left join sys_logic_flow t1 on t1.flow_id=t0.api_flow_id where t0.api_url is not null and t0.api_method is not null and t0.id=?";
+        ApiInfo apiInfo = DB.findOne(ApiInfo.class, sql, id);
+        if (apiInfo != null) {
+            ApiManager.getInstance().addOrUpdateApi(apiInfo);
+        }
+
     }
 
     private void checkUnique(SysApi model) {
@@ -98,6 +119,7 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
     public void delete(MultiIdArgv argv) {
         for (String id: argv.getIds()) {
             DB.delete(SysApi.class, id);
+            ApiManager.getInstance().removeApi(id);
         }
     }
 }

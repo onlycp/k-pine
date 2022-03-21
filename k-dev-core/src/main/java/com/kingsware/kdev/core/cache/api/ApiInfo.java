@@ -10,7 +10,8 @@ import lombok.Data;
  */
 @Data
 public class ApiInfo{
-
+    /** 接口 **/
+    private String id;
     /** 接口名称 */
     private String apiName;
     /** 接口路径 */

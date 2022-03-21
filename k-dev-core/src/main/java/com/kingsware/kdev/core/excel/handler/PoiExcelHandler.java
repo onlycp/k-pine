@@ -146,10 +146,15 @@ public class PoiExcelHandler implements KExcelHandler{
         }
         finally {
             if (workbook != null) {
-//                workbook.close();
+                workbook.close();
             }
             if (file != null) {
-                Files.deleteIfExists(file.toPath());
+                try {
+                    Files.deleteIfExists(file.toPath());
+                }
+                catch (Exception e) {
+
+                }
             }
         }
 

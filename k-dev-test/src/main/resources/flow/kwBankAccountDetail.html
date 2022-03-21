@@ -1,6 +1,0 @@
-select
-ke.mechanism_id,
-kba.*
-from kw_bank_account kba
-left join kw_edition ke on ke.id = kba.edition_id
-where kba.deleted=0 and kba.id=#{id}

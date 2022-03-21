@@ -1,7 +1,5 @@
 package com.kingsware.kdev.core.util;
 
-import org.apache.commons.lang3.StringUtils;
-
 /**
  * 数字工具
  *
