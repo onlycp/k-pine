@@ -154,6 +154,17 @@ public class SysUserController extends BaseController {
         return BaseRet.success();
     }
 
+    /**
+     *  修改密码
+     * @return 提示
+     */
+    @ApiOperation(value = "重置密码 " ,notes = "重置密码")
+    @PostMapping(value = "/reset-password")
+    public BaseRet<?> resetPassword(HttpServletRequest request, @RequestBody SysUserResetPasswordArgv argv) {
+        sysUserService.resetPassword(argv);
+        return BaseRet.success();
+    }
+
     @ApiOperation(value = "登录会话数量 " ,notes = "登录会话数量")
     @GetMapping("/session-count/{username}")
     @ApiIgnore
