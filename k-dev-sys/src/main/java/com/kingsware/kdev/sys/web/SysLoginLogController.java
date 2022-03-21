@@ -1,6 +1,5 @@
 package com.kingsware.kdev.sys.web;
 
-import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.PageDataRet;

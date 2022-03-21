@@ -1,11 +1,13 @@
 package com.kingsware.kdev.core.cron;
 
+import com.kingsware.kdev.core.cache.task.TaskListManager;
 import com.kingsware.kdev.core.model.SysTask;
 import com.kingsware.kdev.core.orm.DB;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -25,6 +27,7 @@ import java.util.concurrent.Executor;
 @Slf4j
 @Configuration
 @EnableScheduling
+@Order(1)
 public class ScheduledConfig implements SchedulingConfigurer {
 
     @Value("${schedule.corePoolSize:10}")
@@ -39,16 +42,16 @@ public class ScheduledConfig implements SchedulingConfigurer {
     @Override
     public void configureTasks(ScheduledTaskRegistrar scheduledTaskRegistrar) {
         // 先加载类
-        KTaskManager.getInstance().scanJavaClassTask(scanPackage);
+        KTaskRunnerManager.getInstance().scanJavaClassTask(scanPackage);
         // 从数据库里加载所有定时任务
-        List<SysTask> tasks = DB.findList(SysTask.class, "select * from sys_task where enable=1");
+        List<SysTask> tasks = TaskListManager.getInstance().getAllTask();
         for (SysTask sysTask: tasks) {
             // 执行任务
             scheduledTaskRegistrar.addTriggerTask(() -> {
-                KTaskManager.getInstance().runTask(sysTask);
+                KTaskRunnerManager.getInstance().runTask(sysTask);
 
             }, triggerContext -> {
-                SysTask myTask = DB.findById(SysTask.class, sysTask.getId());
+                SysTask myTask = TaskListManager.getInstance().getTask(sysTask.getId());
                 return new CronTrigger(myTask.getCron()).nextExecutionTime(triggerContext);
             });
         }
