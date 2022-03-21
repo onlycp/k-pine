@@ -5,6 +5,7 @@ import com.kingsware.kdev.core.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import java.util.Map;
  */
 @Component
 @ConfigurationProperties(prefix = "database")
+@Order(-1)
 public class DataBaseProperties {
 
     /** 日志打印 **/

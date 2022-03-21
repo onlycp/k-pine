@@ -1,8 +1,10 @@
 package com.kingsware.kdev.core.util;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.security.MessageDigest;
 
 /**
@@ -96,5 +98,43 @@ public class FileUtils {
             }
         }
         return sbf.toString();
+    }
+
+    /**
+     * 创建临时文件
+     * @param fileName  临时文件名
+     * @return  返回临时文件
+     */
+    public static File createTempFile(String fileName) {
+        // 获取文件名和后续名
+        String prefix = "";
+        String suffix = "";
+        int lastDotIndex = fileName.lastIndexOf(".");
+        if (lastDotIndex < 0) {
+            prefix = fileName;
+        }
+        else {
+            prefix = fileName.substring(0, lastDotIndex);
+            suffix = fileName.substring(lastDotIndex);
+        }
+        try {
+            return File.createTempFile(prefix, suffix);
+        } catch (IOException e) {
+            log.error("临时文件创建失败，文件名:{}", fileName);
+            return null;
+        }
+    }
+
+    /**
+     * 写入文件
+     * @param file  目标文件
+     * @param buf   buf
+     */
+    public static void writeToFile(File file, byte[] buf) {
+        try {
+            Files.write(file.toPath(), buf);
+        } catch (IOException e) {
+            log.error("文件写入失败，文件名:{}", file.getName());
+        }
     }
 }

@@ -27,7 +27,7 @@ import java.util.List;
 public class TaskListTask  {
 
     public TaskListTask() {
-        this.execute();
+
     }
 
     /**
@@ -37,8 +37,7 @@ public class TaskListTask  {
     public void execute() {
         // 查找所有接口
         try {
-            List<SysTask> tasks = DB.findList(SysTask.class, "select * from sys_task where enable=1");
-            TaskListManager.getInstance().addTask(tasks);
+            TaskListManager.getInstance().loadAllTask();
         }
         catch (Exception e) {
             log.warn("任务同步出错， 错误信息: {}", e.getMessage());

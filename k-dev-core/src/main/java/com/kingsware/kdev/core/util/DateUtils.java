@@ -18,6 +18,8 @@ public class DateUtils {
     // 时间日期
     public static final String DATE_TIME = "yyyy-MM-dd HH:mm:ss";
     // 时间日期
+    public static final String DATE_TIME_1 = "yyyyMMddHHmmss";
+    // 时间日期
     public static final String TIME = "HH:mm:ss";
     // 时间日期
     public static final String DATE_TIME_MS = "yyyy-MM-dd HH:mm:ss SSS";

@@ -44,6 +44,7 @@ public class ScheduledConfig implements SchedulingConfigurer {
         // 先加载类
         KTaskRunnerManager.getInstance().scanJavaClassTask(scanPackage);
         // 从数据库里加载所有定时任务
+        TaskListManager.getInstance().loadAllTask();
         List<SysTask> tasks = TaskListManager.getInstance().getAllTask();
         for (SysTask sysTask: tasks) {
             // 执行任务

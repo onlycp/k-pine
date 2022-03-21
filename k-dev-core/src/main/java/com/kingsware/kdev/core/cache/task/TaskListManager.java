@@ -35,6 +35,13 @@ public class TaskListManager {
     }
 
     /**
+     * 加载所有的任务
+     */
+    public void loadAllTask() {
+        List<SysTask> tasks = DB.findList(SysTask.class, "select * from sys_task where enable=1");
+        addTask(tasks);
+    }
+    /**
      * 增加任务
      * @param sysTasks  任务列表
      */

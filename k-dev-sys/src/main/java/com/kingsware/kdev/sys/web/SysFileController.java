@@ -93,4 +93,15 @@ public class SysFileController extends BaseController {
     public void download(@PathVariable String id) {
         sysFileService.download(id);
     }
+
+    /**
+     * 文件下载
+     * @param id         文件id
+     */
+    @ApiOperation(value = "文件下载 " ,notes = "文件下载")
+    @GetMapping("/downloadZip/{ids}")
+    @ApiIgnore
+    public void downloadZip(@PathVariable String ids) {
+        sysFileService.downloadZip(ids);
+    }
 }

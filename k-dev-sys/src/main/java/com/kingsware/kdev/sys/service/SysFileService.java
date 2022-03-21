@@ -52,4 +52,11 @@ public interface SysFileService extends BaseService {
      * @param id    文件id
      */
     void download(String id);
+
+    /**
+     * 下载zip
+     * 多个文件压缩后下载
+     * @param ids   id列表，用逗号分隔
+     */
+    void downloadZip(String ids);
 }

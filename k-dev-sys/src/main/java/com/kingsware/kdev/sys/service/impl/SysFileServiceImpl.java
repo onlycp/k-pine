@@ -1,6 +1,7 @@
 package com.kingsware.kdev.sys.service.impl;
 
 import com.kingsware.kdev.core.base.BaseServiceImpl;
+import com.kingsware.kdev.core.bean.FileEntry;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.context.KClientContext;
@@ -12,9 +13,7 @@ import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
-import com.kingsware.kdev.core.util.BeanUtils;
-import com.kingsware.kdev.core.util.FileUtils;
-import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.sys.argv.SysFileQueryArgv;
 import com.kingsware.kdev.sys.manager.FileManager;
 import com.kingsware.kdev.sys.model.SysFile;
@@ -26,15 +25,15 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.yaml.snakeyaml.util.UriEncoder;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
+import java.nio.file.Files;
+import java.util.*;
 
 /**
  * 文件实现类
@@ -105,6 +104,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         return retList;
     }
 
+
     @Override
     public void download(String id) {
 
@@ -120,8 +120,8 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         if (file.getSaveType() == 0) {
             try {
                 byte[] content = Base64.getDecoder().decode(file.getFileContent());
-                response.setContentLength((int) content.length);
-                response.getOutputStream().write(Base64.getDecoder().decode(file.getFileContent()));
+                response.setContentLength(content.length);
+                response.getOutputStream().write(content);
                 response.getOutputStream().flush();
             } catch (IOException e) {
                 throw BusinessException.serviceThrow("文件读取失败");
@@ -130,46 +130,93 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         else if (file.getSaveType() == 1) {
             String absFilePath = basePath + file.getFilePath();
             File localFile = new File(absFilePath);
+            ServletUtil.responseFile(localFile, file.getFileName());
+        }
+    }
+
+    @Override
+    public void downloadZip(String ids) {
+
+        List<FileEntry> fileList = new ArrayList<>();
+        String[] idArr = ids.trim().split(",");
+        // 遍历生成文件
+        for (String id: idArr) {
+            FileEntry file = buildFile(id);
+            // 先判断文件名是否有重复
+            String fileName = checkAndModifyName(file.getFileName(), fileList);
+            fileList.add(new FileEntry(file.getFile(), fileName));
+        }
+        String fileName = DateUtils.formatDate(new Date(), DateUtils.DATE_TIME_1)+ ".zip";
+        File zipFile = ZipUtils.zip(fileList, fileName);
+        if (zipFile == null) {
+            throw BusinessException.serviceThrow("文件压缩失败");
+        }
+        ServletUtil.responseFile(zipFile, fileName);
+
+    }
+
+    /**
+     * 检查并修改文件名
+     * @param fileName  文件名
+     * @param fileList  已有文件列表
+     * @return   返回新的文件名
+     */
+    private String checkAndModifyName(String fileName, List<FileEntry> fileList) {
+        if (fileList.isEmpty()) {
+            return fileName;
+        }
+        for (FileEntry file: fileList) {
+            if (file.getFileName().equalsIgnoreCase(fileName)) {
+                String prefix = "";
+                String suffix = "";
+                int lastDotIndex = fileName.lastIndexOf(".");
+                if (lastDotIndex < 0) {
+                    prefix = fileName;
+                }
+                else {
+                    prefix = fileName.substring(0, lastDotIndex);
+                    suffix = fileName.substring(lastDotIndex);
+                }
+
+                String newFileName = prefix + "(1)";
+                if (StringUtils.isNotEmpty(suffix)) {
+                    newFileName += ("." + suffix);
+                }
+                return checkAndModifyName(newFileName, fileList);
+            }
+        }
+        return fileName;
+    }
+
+    /**
+     * 根据系统保存的文件，创建File
+     * @param id    文件id
+     * @return  返回文件
+     */
+    private FileEntry buildFile(String id) {
+        // 查找文件
+        SysFile sysFile = DB.findById(SysFile.class, id);
+        // 如果文件不存在，直接异常
+        if (sysFile == null) {
+            throw BusinessException.serviceThrow(String.format("文件不存在，文件标识:%s", id));
+        }
+        // 如果是直接存数据库， 则需要创建文件
+        if (sysFile.getSaveType() == 0) {
+            byte[] content = Base64.getDecoder().decode(sysFile.getFileContent());
+            File tempFile = FileUtils.createTempFile(sysFile.getFileName());
+            if (tempFile == null) {
+                throw BusinessException.serviceThrow(String.format("临时文件创建失败:%s", sysFile.getFileName()));
+            }
+            FileUtils.writeToFile(tempFile, content);
+            return new FileEntry(tempFile, sysFile.getFileName());
+        }
+        else {
+            String absFilePath = basePath + sysFile.getFilePath();
+            File localFile = new File(absFilePath);
             if (!localFile.exists()) {
                 throw BusinessException.serviceThrow("文件不存在，可能被移动或删除！");
             }
-            FileInputStream ins = null;
-            BufferedInputStream bis = null;
-            try {
-                response.setContentLength((int)new File(absFilePath).length());
-                ins = new FileInputStream(absFilePath);
-                bis = new BufferedInputStream(ins);
-                byte[] buff = new byte[1024];
-                int i = 0;
-                while ((i = bis.read(buff)) != -1) {
-                    response.getOutputStream().write(buff, 0, i);
-                    response.getOutputStream().flush();
-                }
-                response.getOutputStream().close();
-
-            }
-            catch (FileNotFoundException e) {
-                throw BusinessException.serviceThrow("文件不存在");
-            }
-            catch (IOException e) {
-                throw BusinessException.serviceThrow("文件读取失败");
-            }
-            finally {
-                try {
-                    if (ins != null) {
-                        ins.close();
-                    }
-                    if (bis != null) {
-                        bis.close();
-                    }
-                }
-                catch (Exception e) {
-                    log.info("文件关闭失败");
-                }
-
-            }
-
+            return new FileEntry(localFile, sysFile.getFileName());
         }
-
     }
 }
