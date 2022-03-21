@@ -347,6 +347,17 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     }
 
     @Override
+    public void resetPassword(SysUserResetPasswordArgv argv) {
+        SysUser model = DB.findById(SysUser.class, argv.getUserId());
+        if (model == null) {
+            throw BusinessException.serviceThrow("用户不存在！");
+        }
+        model.setPassword(EncryptWorker.getInstance().encrypt(argv.getPassword()));
+        // 保存
+        DB.update(model);
+    }
+
+    @Override
     public void editProfile(SysUserProfileArgv argv) {
         SysUser model = DB.findById(SysUser.class, argv.getId());
         model.setRealName(argv.getRealName());

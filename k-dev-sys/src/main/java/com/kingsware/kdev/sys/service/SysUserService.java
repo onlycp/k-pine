@@ -79,4 +79,6 @@ public interface SysUserService extends BaseService {
      * @param secret
      */
     void encryptChange(String from, String to, String secret);
+
+    void resetPassword(SysUserResetPasswordArgv argv);
 }
