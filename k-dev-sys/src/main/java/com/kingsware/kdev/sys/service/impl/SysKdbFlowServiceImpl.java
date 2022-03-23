@@ -261,6 +261,33 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
     }
 
     @Override
+    public void copy(String id) {
+        // 参数
+        KdbFlowQueryArgv argv = new KdbFlowQueryArgv();
+        argv.setFlowId(id);
+        // 查询model
+        KdbApi api = DB.kdbApi();
+        List<FlowInfo> list = api.query(argv);
+        // 转换成ret对象
+        FlowInfo kdbFlow = list.get(0);
+        // 拷贝
+        SysKdbFlowArgv kdbFlowArgv = new SysKdbFlowArgv();
+        // 查找本地库的信息
+        SysLogicFlow logicFlow = DB.findOne(SysLogicFlow.class, Expr.builder().add("flowId", "=", id).build());
+        if (logicFlow != null) {
+            kdbFlowArgv.setInArgv(logicFlow.getInArgv());
+            kdbFlowArgv.setOutArgv(logicFlow.getOutArgv());
+            kdbFlowArgv.setApplicationId(logicFlow.getApplicationId());
+            kdbFlowArgv.setTags(logicFlow.getTags());
+        }
+        kdbFlowArgv.setContent(kdbFlow.getContent());
+        kdbFlowArgv.setName(kdbFlow.getName() + "副本");
+        kdbFlowArgv.setDescription(kdbFlow.getDescription());
+        // 直接调用新增接口
+        add(kdbFlowArgv);
+    }
+
+    @Override
     @SuppressWarnings("")
     public PageDataRet<SysKdbFlowRet> query(SysKdbFlowQueryArgv argv) {
         KdbFlowQueryArgv info = new KdbFlowQueryArgv();

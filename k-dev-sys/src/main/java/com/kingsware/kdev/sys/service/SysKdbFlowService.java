@@ -52,6 +52,12 @@ public interface SysKdbFlowService {
     void edit(SysKdbFlowArgv argv);
 
     /**
+     * 拷贝流程
+     * @param id    流程id
+     */
+    void copy(String id);
+
+    /**
      * 编辑
      * @param argv 编辑
      * @return 查询结果

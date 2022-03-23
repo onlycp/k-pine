@@ -55,6 +55,17 @@ public class SysKdbFlowController extends BaseController {
         return BaseRet.success(sysKdbFlowService.get(id));
     }
 
+    /**
+     * 拷贝
+     * @return 拷贝
+     */
+    @ApiOperation(value = "拷贝 " ,notes = "拷贝")
+    @GetMapping("/copy/{id}")
+    public BaseRet<?> copy(@PathVariable String id) {
+        sysKdbFlowService.copy(id);
+        return BaseRet.success();
+    }
+
 
     /**
      * 详细信息

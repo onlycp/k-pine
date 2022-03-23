@@ -96,7 +96,7 @@ public class SysFileController extends BaseController {
 
     /**
      * 文件下载
-     * @param id         文件id
+     * @param ids         文件ids，多个用逗号隔开
      */
     @ApiOperation(value = "文件下载 " ,notes = "文件下载")
     @GetMapping("/downloadZip/{ids}")
