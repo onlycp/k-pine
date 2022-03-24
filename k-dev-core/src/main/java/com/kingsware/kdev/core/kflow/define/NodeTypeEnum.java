@@ -20,6 +20,8 @@ public enum NodeTypeEnum {
     FORK("fork"),
     /** Join **/
     JOIN("join"),
+    /** 子流程 **/
+    SUB("sub")
     ;
 
     private String value;

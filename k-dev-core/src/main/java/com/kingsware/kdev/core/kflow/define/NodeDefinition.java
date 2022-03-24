@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.kflow.define;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.util.HashMap;
@@ -32,4 +33,7 @@ public class NodeDefinition {
     private Map<String, Object> variables = new HashMap<>();
     /** 监听器 **/
     private FlowNodeLister listener;
+    /** 子流程id **/
+    @JsonProperty("flowID")
+    private String flowId;
 }

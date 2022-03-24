@@ -1,6 +1,8 @@
 package com.kingsware.kdev.core.kflow;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.cache.config.ConfigManager;
 import com.kingsware.kdev.core.cache.config.SysConfigInfo;
@@ -169,12 +171,23 @@ public class FlowUtils {
                 }
                 else {
                     // 获取值
-                    Object entryValue = handleNodeValue(new HashMap<>(), pNode, mock);
+                    Object varData = null;
+                    String pType = pNode.get("type").asText();
+                    if ("array".equalsIgnoreCase(pType)) {
+                        varData = new ArrayList<>();
+                    }
+                    else if ("object".equalsIgnoreCase(pType)) {
+                        varData = new HashMap<>();
+                    }
+                    Object entryValue = handleNodeValue(varData, pNode, mock);
                     newValueMap.put(pName, entryValue);
                 }
             }
             // 覆盖原先的值
-            map.putAll(newValueMap);
+            if (map != null) {
+                map.putAll(newValueMap);
+            }
+
         }
         // 列表
         else if ("array".equalsIgnoreCase(type)) {

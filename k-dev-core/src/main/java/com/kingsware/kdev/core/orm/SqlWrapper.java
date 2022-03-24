@@ -206,6 +206,7 @@ public class SqlWrapper {
         StringBuilder buffer = new StringBuilder();
         buffer.append("select ");
         buffer.append(selectBody).append(" ");
+        buffer.append("from ");
         buffer.append(tableName).append(" ").append(alias).append(" ");
         buffer.append("where ");
         // 判断是否逻辑删除表
@@ -214,7 +215,7 @@ public class SqlWrapper {
             buffer.append("1=1 ");
         }
         else {
-            buffer.append(alias).append(".").append(logicDelete.column()).append("=").append(logicDelete.defDeleteValue());
+            buffer.append(alias).append(".").append(logicDelete.column()).append("=").append(logicDelete.defDeleteValue()).append(" ");
         }
         return new SqlWrapper(buffer.toString());
     }

@@ -27,6 +27,8 @@ public class SysFlowDefineArgv extends BasePageArgv {
         private String label;
         /** 节点类型 **/
         private String type;
+        /** 子流程流程id **/
+        private String flowId;
         /** 执行类型 **/
         private String executeType;
         /** 数据源名称 **/
@@ -57,6 +59,14 @@ public class SysFlowDefineArgv extends BasePageArgv {
     private String name;
     /** 描述 **/
     private String description = "";
+    /** app id **/
+    private String applicationId;
+    /** 标签 **/
+    private String tags;
+    /** 输入参数 **/
+    private String inArgv;
+    /** 输出参数 **/
+    private String outArgv;
     /** 节点列表 **/
     private List<Node> nodes = new ArrayList<>();
     /** 连续 **/

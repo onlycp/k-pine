@@ -26,6 +26,8 @@ public class SysFlowDefineRet extends BaseSimpleRet {
         private String label;
         /** 节点类型 **/
         private String type;
+        /** flowId **/
+        private String flowId;
         /** 执行类型 **/
         private String executeType;
         /** 数据源名称 **/
@@ -56,6 +58,8 @@ public class SysFlowDefineRet extends BaseSimpleRet {
     private String name;
     /** 描述 **/
     private String description = "";
+    /** app id **/
+    private String applicationId;
     /** 标签 **/
     private String tags;
     /** 输入参数 **/
@@ -70,7 +74,7 @@ public class SysFlowDefineRet extends BaseSimpleRet {
     private List<Link> links = new ArrayList<>();
 
     /** 设置 **/
-    public void addNode(String id, String label, String type,  String executeType, String sourceName, String content, String afterContent) {
+    public void addNode(String id, String label, String type,  String executeType, String sourceName, String content, String afterContent, String flowId) {
         Node node = new Node();
         node.setId(id);
         node.setType(type);
@@ -79,6 +83,7 @@ public class SysFlowDefineRet extends BaseSimpleRet {
         node.setSourceName(sourceName);
         node.setContent(content);
         node.setAfterContent(afterContent);
+        node.setFlowId(flowId);
         this.nodes.add(node);
     }
 

@@ -31,5 +31,7 @@ public class SysLogicFlow extends BaseManageModel {
     private String inArgv;
     /** 输出参数定义 **/
     private String outArgv;
+    /** 子流程ids **/
+    private String subFlowIds;
 
 }

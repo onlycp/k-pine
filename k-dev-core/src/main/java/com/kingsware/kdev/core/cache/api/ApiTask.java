@@ -33,7 +33,7 @@ public class ApiTask implements KTask {
         }
         // 查找所有接口
         try {
-            List<ApiInfo> apis = DB.findList(ApiInfo.class, "select t0.*, t1.in_argv, t1.out_argv from sys_api t0 left join sys_logic_flow t1 on t1.flow_id=t0.api_flow_id where t0.api_url is not null and t0.api_method is not null");
+            List<ApiInfo> apis = DB.findList(ApiInfo.class, "select t0.*, t1.in_argv, t1.out_argv, t1.sub_flow_ids from sys_api t0 left join sys_logic_flow t1 on t1.flow_id=t0.api_flow_id where t0.api_url is not null and t0.api_method is not null");
             ApiManager.getInstance().addApi(apis);
         }
         catch (Exception e) {
