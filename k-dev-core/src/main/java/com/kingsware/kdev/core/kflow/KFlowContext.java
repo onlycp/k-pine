@@ -36,6 +36,9 @@ public class KFlowContext {
         sysMap.put("username",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getUsername() : "");
         sysMap.put("when", DateUtils.getNow());
         sysMap.put("uuid", StringUtils.getUUID());
+        sysMap.put("realName",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getRealName() : "");
+        sysMap.put("roleIds",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getRoleIds() : "");
+        sysMap.put("roleCodes",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getRoleCodes() : "");
         context.getSystemContext().put("sys", sysMap);
         // 设置输入参数
         context.inArgv = StringUtils.isEmpty(inArgv) ? "{}" : inArgv;
