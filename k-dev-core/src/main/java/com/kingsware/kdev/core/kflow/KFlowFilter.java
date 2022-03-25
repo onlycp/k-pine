@@ -78,7 +78,7 @@ public class KFlowFilter implements Filter {
             // 处理类
             context.setHandleClass(api.getApiResultHandler());
             // 调用流程
-            KdbFlowResult result = KdbFlowExecutor.getInstance().execute(api.getApiFlowId(), argvMap, context);
+            KdbFlowResult result = KdbFlowExecutor.getInstance().execute(api.getApiFlowId(), api.getSubFlowIds(), argvMap, context);
             // 转为api格式
             if (result.getType().equals(KFlowConstant.RESULT_JSON)) {
                 responseJson(response, FlowUtils.toJsonResult(result.getData()));

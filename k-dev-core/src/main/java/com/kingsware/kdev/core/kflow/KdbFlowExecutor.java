@@ -1,14 +1,19 @@
 package com.kingsware.kdev.core.kflow;
 
+import com.kingsware.kdev.core.jsonschema.JsonschemaMock;
 import com.kingsware.kdev.core.kflow.bean.ErrorResult;
 import com.kingsware.kdev.core.kflow.bean.KFlowMessage;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.kflow.handler.KResultHandlers;
 import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
+import com.kingsware.kdev.core.orm.kdb.FlowInfo;
 import com.kingsware.kdev.core.orm.kdb.KdbArgv;
 import com.kingsware.kdev.core.orm.kdb.KdbRet;
 import com.kingsware.kdev.core.util.DateUtils;
+import com.kingsware.kdev.core.util.JsonUtil;
+import com.kingsware.kdev.core.util.MapUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -46,7 +51,7 @@ public class KdbFlowExecutor {
      * @param context      上下文信息
      * @return             执行结果
      */
-    public KdbFlowResult execute(String flowId, Map<String, Object> params, KFlowContext context) {
+    public KdbFlowResult execute(String flowId, String subFlowIds, Map<String, Object> params, KFlowContext context) {
 
         try {
             // 流程参数
@@ -67,9 +72,22 @@ public class KdbFlowExecutor {
             // 将入系统变量
             argv.getVariables().putAll(context.getSystemContext());
             // 通过输入模型处理输入参数
-            FlowUtils.handleInArgv(argv.getVariables(), context.getInArgv() == null ? "{}" : context.getInArgv());
+            FlowUtils.handleInArgv(argv.getVariables(), context.getInArgv());
+            // 获取子流程
+            if (StringUtils.isNotEmpty(subFlowIds)) {
+                String[] arr = subFlowIds.split(",");
+                // 拼接in ids
+                List<String> afterArr = new ArrayList<>();
+                for (String s: arr) {
+                    afterArr.add("'" +  s + "'");
+                }
+                String sql = "select in_argv from sys_logic_flow where flow_id in (" + StringUtils.joinToString(afterArr, ",") + ")";
+                List<String> inArgvList = DB.findSingleAttributeList(String.class, sql);
+                for (String string: inArgvList) {
+                    FlowUtils.handleInArgv(argv.getVariables(), string);
+                }
+            }
             // 执行流程
-
             KdbRet<String> ret = DB.kdbApi().executeFlow(argv);
             // 如果失败
             KdbFlowResult result = new KdbFlowResult();

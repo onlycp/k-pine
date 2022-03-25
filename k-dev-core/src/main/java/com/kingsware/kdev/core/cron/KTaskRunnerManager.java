@@ -130,7 +130,7 @@ public class KTaskRunnerManager {
         List<FlowInfo> flowInfos = DB.kdbApi().query(flowInfo);
         if (!flowInfos.isEmpty()) {
             KFlowContext context = KFlowContext.createBaseContext("{}", "{}");
-            KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), new HashMap<>(), context);
+            KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), "", new HashMap<>(), context);
         }
         else {
             throw new CronException("流程不存在", 2);

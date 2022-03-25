@@ -439,7 +439,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         requestMap.put("body", json);
         argvMap.put("request", requestMap);
         // 调用流程
-        KdbFlowResult result = KdbFlowExecutor.getInstance().execute(argv.getFlowId(), argvMap, context);
+        KdbFlowResult result = KdbFlowExecutor.getInstance().execute(argv.getFlowId(), logicFlow == null? "" :logicFlow.getSubFlowIds(),argvMap, context);
         long t2 = System.currentTimeMillis();
         SysFlowDebugRet ret = new SysFlowDebugRet();
         ret.setTakeMs(t2 - t1);

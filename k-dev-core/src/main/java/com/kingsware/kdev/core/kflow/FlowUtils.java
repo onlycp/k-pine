@@ -109,8 +109,9 @@ public class FlowUtils {
      * @param inArgv    输入参数定义
      */
     public static void handleInArgv(Map<String, Object> variables, String inArgv) {
+        String json = inArgv == null ? "{}" : inArgv;
         // 根节点定义
-        JsonNode rootNode = JsonUtil.toTree(inArgv);
+        JsonNode rootNode = JsonUtil.toTree(json);
         // 处理
         handleNodeValue(variables, rootNode, false);
     }
