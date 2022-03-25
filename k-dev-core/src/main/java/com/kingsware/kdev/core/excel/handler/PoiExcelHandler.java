@@ -4,6 +4,8 @@ import ch.qos.logback.core.rolling.helper.FileStoreUtil;
 import com.kingsware.kdev.core.excel.KExcel;
 import com.kingsware.kdev.core.excel.KRegion;
 import com.kingsware.kdev.core.excel.KSheet;
+import com.kingsware.kdev.core.util.ExceptionUtils;
+import com.kingsware.kdev.core.util.RandomUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
@@ -87,13 +89,12 @@ public class PoiExcelHandler implements KExcelHandler{
 
     }
 
-    @Override
-    public List<List<String>> read(int sheetIndex, String filePath) throws Exception {
+    private List<List<String>> readRetry(int sheetIndex, String filePath) throws Exception {
         // 创建工作表
         Workbook workbook = null;
         File file = null;
         try {
-            file = File.createTempFile("excel" +System.currentTimeMillis(), "");
+            file = File.createTempFile("excel" +System.currentTimeMillis() + RandomUtils.randomNumeric(4), "");
             FileCopyUtils.copy(new File(filePath), file);
             workbook = WorkbookFactory.create(file, "", true);
             //设置格式
@@ -157,8 +158,29 @@ public class PoiExcelHandler implements KExcelHandler{
                 }
             }
         }
+    }
 
+    @Override
+    public List<List<String>> read(int sheetIndex, String filePath) throws Exception {
+        int i = 0;
+        while (i < 10) {
+            try {
+                return readRetry(sheetIndex, filePath);
+            }
+            catch (Exception e) {
+                String stackMessage = ExceptionUtils.getStackTrace(e);
+                // 为了应对现场windows服务器，WorkbookFactory.create发生异常的问题
+                if (!stackMessage.contains("WorkbookFactory.create")) {
+                    throw e;
+                }
+                log.info("Excel WorkbookFactory.create()异常，将继续重试, 当前读取次数; {}", i);
+            }
+            finally {
+                i++;
+            }
 
+        }
+        return null;
     }
 
 }
