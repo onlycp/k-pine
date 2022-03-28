@@ -203,7 +203,8 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
      */
     private String getSubFlowIds(String content) {
         // 处理节点
-        FlowDefinition flowDefinition = JsonUtil.toBean(content, FlowDefinition.class);
+        String finalContent = StringUtils.isEmpty(content) ? "{}" : content;
+        FlowDefinition flowDefinition = JsonUtil.toBean(finalContent, FlowDefinition.class);
         if (flowDefinition == null) {
             throw BusinessException.serviceThrow("流程定义不合法，无法读取文件");
         }
@@ -266,6 +267,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         logicFlow.setFlowId(flowId);
         // 获取子流程id
         String subFlowIds = getSubFlowIds(argv.getContent());
+        logicFlow.setSubFlowIds(subFlowIds);
         DB.save(logicFlow);
     }
 

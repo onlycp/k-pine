@@ -85,40 +85,47 @@ public class ApiManager {
      * @return      返回接口信息
      */
     public ApiInfo getApi(String apiMethod, String url) {
-        // 如果url为空
-        List<ApiInfo> myApis = new ArrayList<>();
-        for (ApiInfo api: apis) {
-            if (StringUtils.isNotEmpty(api.getApiUrl())) {
-                myApis.add(api);
-            }
-        }
-        // 先匹配相等的
-        Optional<ApiInfo> optional = myApis.stream().filter(f -> f.getApiMethod().equalsIgnoreCase(apiMethod)).filter(api -> api.getApiUrl().equals(url)).findFirst();
-        if (optional.isPresent()) {
-            return optional.get();
-        }
-        // 匹配正则
-        optional = apis.stream().filter(f -> f.getApiMethod().equalsIgnoreCase(apiMethod)).filter(api -> {
-            // url路径
-            String[] reqArr = url.split("/");
-            String[] restArr = api.getApiUrl().split("/");
-            if (reqArr.length == restArr.length) {
-                for (int i = 0; i < reqArr.length; i++) {
-                    // segment部分跳过
-                    if (restArr[i].startsWith("{") && restArr[i].endsWith("}")) {
-                        continue;
-                    }
-                    if (!reqArr[i].equals(restArr[i])) {
-                        return false;
-                    }
+        try {
+            // 如果url为空
+            List<ApiInfo> myApis = new ArrayList<>();
+            for (ApiInfo api : apis) {
+                if (StringUtils.isNotEmpty(api.getApiUrl()) && StringUtils.isNotEmpty(api.getApiMethod())) {
+                    myApis.add(api);
                 }
-                return true;
             }
-            return false;
+            // 先匹配相等的
+            Optional<ApiInfo> optional = myApis.stream().filter(f -> f.getApiMethod().equalsIgnoreCase(apiMethod)).filter(api -> api.getApiUrl().equals(url)).findFirst();
+            if (optional.isPresent()) {
+                return optional.get();
+            }
+            // 匹配正则
+            optional = apis.stream().filter(f -> f.getApiMethod().equalsIgnoreCase(apiMethod)).filter(api -> {
+                // url路径
+                String[] reqArr = url.split("/");
+                String[] restArr = api.getApiUrl().split("/");
+                if (reqArr.length == restArr.length) {
+                    for (int i = 0; i < reqArr.length; i++) {
+                        // segment部分跳过
+                        if (restArr[i].startsWith("{") && restArr[i].endsWith("}")) {
+                            continue;
+                        }
+                        if (!reqArr[i].equals(restArr[i])) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+                return false;
 
-        }).findFirst();
-        return optional.orElse(null);
+            }).findFirst();
+            return optional.orElse(null);
+        } catch (Exception e) {
+            log.error("error", e);
+            return null;
+
+        }
     }
+
 
 
 }

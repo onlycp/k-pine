@@ -26,8 +26,12 @@ public class UnLockTask {
         List<SysTask> taskList = DB.findList(SysTask.class, sql);
 
         for (SysTask task: taskList) {
+            Integer lockForMost = task.getLockForMost();
+            if (task.getLockForMost() == null) {
+                lockForMost = 60;
+            }
             // 如果达到解锁标准了
-            if ((task.getLockForTime().getTime() + task.getLockForMost()*1000) < System.currentTimeMillis()) {
+            if ((task.getLockForTime().getTime() + lockForMost*1000) < System.currentTimeMillis()) {
                 DB.executeUpdateSql("update sys_task set lock_status=0 where id=?", task.getId());
                 log.info("定时任务:{} 自动解锁", task.getName());
             }
