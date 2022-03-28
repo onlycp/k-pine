@@ -39,6 +39,13 @@ public interface KdbApi {
      */
     List<FlowInfo> query(KdbFlowQueryArgv flowInfo);
 
+    /**
+     * 获取流程
+     * @param flowId    流程id
+     * @return  返回流程
+     */
+    FlowInfo get(String flowId);
+
 
     /**
      * 新增数据源

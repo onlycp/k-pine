@@ -1,6 +1,7 @@
 package com.kingsware.kdev.core.orm.kdb;
 
 import com.kingsware.kdev.core.exception.HttpClientException;
+import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.util.HttpUtil;
 import com.kingsware.kdev.core.util.JsonUtil;
@@ -48,7 +49,19 @@ public abstract class KdbApiAbstract implements  KdbApi {
     @Override
     public void editFlow(EditFlowInfo flowInfo) {
         post(flowInfo, EDIT_FLOW_URL, String.class);
+    }
 
+    @Override
+    public FlowInfo get(String flowId) {
+        // 参数
+        KdbFlowQueryArgv argv = new KdbFlowQueryArgv();
+        argv.setFlowId(flowId);
+        // 查询model
+        KdbApi api = DB.kdbApi();
+        List<FlowInfo> list = api.query(argv);
+
+        // 转换成ret对象
+        return list.get(0);
     }
 
     @Override

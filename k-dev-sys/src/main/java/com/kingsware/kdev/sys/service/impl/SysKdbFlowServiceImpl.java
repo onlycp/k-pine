@@ -47,15 +47,8 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
 
     @Override
     public SysKdbFlowRet get(String id) {
-        // 参数
-        KdbFlowQueryArgv argv = new KdbFlowQueryArgv();
-        argv.setFlowId(id);
-        // 查询model
-        KdbApi api = DB.kdbApi();
-        List<FlowInfo> list = api.query(argv);
-
         // 转换成ret对象
-        FlowInfo kdbFlow = list.get(0);
+        FlowInfo kdbFlow = DB.kdbApi().get(id);
         // 从数据库查询
         String sql = "select t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name from sys_logic_flow t0 left join dev_application t1 on t1.id=t0.application_id where flow_id=?";
         SysKdbFlowRet logicFlow = DB.findOne(SysKdbFlowRet.class, sql, id);
@@ -64,13 +57,8 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
 
     @Override
     public SysFlowDefineRet getDefine(String id) {
-        // 参数
-        KdbFlowQueryArgv argv = new KdbFlowQueryArgv();
-        argv.setFlowId(id);
-        // 查询model
-        KdbApi api = DB.kdbApi();
-        List<FlowInfo> list = api.query(argv);
-        FlowInfo flowInfo = list.get(0);
+
+        FlowInfo flowInfo = DB.kdbApi().get(id);
         // 转为流程定义
         SysFlowDefineRet defineRet = new SysFlowDefineRet();
         defineRet.setId(flowInfo.getFlowId());
@@ -314,14 +302,11 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
 
     @Override
     public void copy(String id) {
-        // 参数
-        KdbFlowQueryArgv argv = new KdbFlowQueryArgv();
-        argv.setFlowId(id);
+
         // 查询model
         KdbApi api = DB.kdbApi();
-        List<FlowInfo> list = api.query(argv);
         // 转换成ret对象
-        FlowInfo kdbFlow = list.get(0);
+        FlowInfo kdbFlow = api.get(id);
         // 拷贝
         SysKdbFlowArgv kdbFlowArgv = new SysKdbFlowArgv();
         // 查找本地库的信息

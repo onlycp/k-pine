@@ -6,6 +6,11 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * Spring上下文
  *
@@ -62,6 +67,11 @@ public class SpringContext implements ApplicationContextAware {
      */
     public static String getProperties(String key, String defaultValue) {
         return applicationContext.getEnvironment().getProperty(key, defaultValue);
+    }
+
+    public static <T> List<T> getBeansOfType(Class<T> tClass){
+        Collection<T> beans = new LinkedList<>(applicationContext.getBeansOfType(tClass).values());
+        return new ArrayList<>(beans);
     }
 
 }

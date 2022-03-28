@@ -34,12 +34,6 @@ public class FlowDefinition {
     /** 当前节点 **/
     @JsonIgnore
     private NodeDefinition currentNode;
-    /** 节点id **/
-    @JsonIgnore
-    private AtomicInteger nodeIdAtomicInteger = new AtomicInteger(0);
-    /** 连线id **/
-    @JsonIgnore
-    private AtomicInteger linkIdAtomicInteger = new AtomicInteger(0);
 
     public FlowDefinition() {
     }
@@ -141,7 +135,7 @@ public class FlowDefinition {
         NodeDefinition node = nodeByName(name);
         if (node == null) {
             node = new NodeDefinition();
-            node.setId(String.format("node-%d", nodeIdAtomicInteger.incrementAndGet()));
+            node.setId(String.format("node-%s", StringUtils.getUUID()));
             node.setName(name);
             node.setAuto(true);
             node.setState(NodeStateEnum.COMPLETED.getValue());
@@ -166,6 +160,39 @@ public class FlowDefinition {
      * @param sql        SQL
      * @return           节点
      */
+    public FlowDefinition toSqlWithId(String nodeId, String name, String sourceName, String sql, String expr) {
+
+        // 创建节点
+        NodeDefinition node = nodeByName(name);
+        if (node == null) {
+            node = new NodeDefinition();
+            node.setId(nodeId);
+            node.setName(name);
+            node.setAuto(true);
+            node.setState(NodeStateEnum.COMPLETED.getValue());
+            node.setDebug(false);
+            node.setType(NodeTypeEnum.TASK.getValue());
+            node.setExecute(ExecuteDefinition.createSqlScript(sourceName, sql));
+            addNode(node);
+        }
+
+        // 创建连接
+        createLink(currentNode, node, expr);
+        // 设置当前节点
+        this.currentNode = node;
+        // 返回
+        return this;
+
+    }
+
+
+
+    /**
+     * 创建SQL节点
+     * @param sourceName 数据源名称
+     * @param sql        SQL
+     * @return           节点
+     */
     public FlowDefinition toSql(String name, String sourceName, String sql) {
         return toSql(name, sourceName, sql, "");
     }
@@ -181,7 +208,7 @@ public class FlowDefinition {
         NodeDefinition node = nodeByName(name);
         if (node == null) {
             node = new NodeDefinition();
-            node.setId(String.format("node-%d", nodeIdAtomicInteger.incrementAndGet()));
+            node.setId(String.format("node-%s", StringUtils.getUUID()));
             node.setName(name);
             node.setAuto(true);
             node.setState(NodeStateEnum.COMPLETED.getValue());
@@ -222,7 +249,7 @@ public class FlowDefinition {
         NodeDefinition node = nodeByName(name);
         if (node == null) {
             node = new NodeDefinition();
-            node.setId(String.format("node-%d", nodeIdAtomicInteger.incrementAndGet()));
+            node.setId(String.format("node-%s", StringUtils.getUUID()));
             node.setName(name);
             node.setAuto(true);
             node.setState(NodeStateEnum.COMPLETED.getValue());
@@ -261,7 +288,7 @@ public class FlowDefinition {
         NodeDefinition node = nodeByName(name);
         if (node == null) {
             node = new NodeDefinition();
-            node.setId(String.format("node-%d", nodeIdAtomicInteger.incrementAndGet()));
+            node.setId(String.format("node-%s", StringUtils.getUUID()));
             node.setName(name);
             node.setType(NodeTypeEnum.DECISION.getValue());
             node.setExecute(new ExecuteDefinition());
@@ -280,7 +307,7 @@ public class FlowDefinition {
         NodeDefinition node = nodeByName(name);
         if (node == null) {
             node = new NodeDefinition();
-            node.setId(String.format("node-%d", nodeIdAtomicInteger.incrementAndGet()));
+            node.setId(String.format("node-%s", StringUtils.getUUID()));
             node.setName(name);
             node.setType(type.getValue());
             node.setExecute(new ExecuteDefinition());
@@ -304,7 +331,7 @@ public class FlowDefinition {
         NodeDefinition node = nodeByName(name);
         if (node == null) {
             node = new NodeDefinition();
-            node.setId(String.format("node-%d", nodeIdAtomicInteger.incrementAndGet()));
+            node.setId(String.format("node-%s", StringUtils.getUUID()));
             node.setName(name);
             node.setType(type.getValue());
             node.setExecute(new ExecuteDefinition());
@@ -340,7 +367,7 @@ public class FlowDefinition {
     private void createLink(NodeDefinition from, NodeDefinition to, String expr) {
         // 创建link
         NodeLink nodeLink = new NodeLink();
-        nodeLink.setId(String.format("link-%d", linkIdAtomicInteger.incrementAndGet()));
+        nodeLink.setId(String.format("link-%s", StringUtils.getUUID()));
         nodeLink.setName(String.format("%s->%s", from.getName(), to.getName()));
         nodeLink.setFrom(from.getId());
         nodeLink.setTo(to.getId());
