@@ -103,6 +103,9 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         }
         // 处理节点
         FlowDefinition flowDefinition = JsonUtil.toBean(flowInfo.getContent(), FlowDefinition.class);
+        if (flowDefinition == null) {
+            return defineRet;
+        }
         for(NodeDefinition nodeDefinition: flowDefinition.getNodeDefinitions()) {
             String executeType = "";
             String dataSource = "";
@@ -206,7 +209,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         String finalContent = StringUtils.isEmpty(content) ? "{}" : content;
         FlowDefinition flowDefinition = JsonUtil.toBean(finalContent, FlowDefinition.class);
         if (flowDefinition == null) {
-            throw BusinessException.serviceThrow("流程定义不合法，无法读取文件");
+            return "";
         }
         Set<String> flowIds = new HashSet<>();
         for (NodeDefinition nodeDefinition: flowDefinition.getNodeDefinitions()) {
