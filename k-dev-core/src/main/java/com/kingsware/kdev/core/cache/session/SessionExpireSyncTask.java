@@ -34,6 +34,7 @@ public class SessionExpireSyncTask implements KTask {
                 DB.executeUpdateSql("update sys_online_user set expire_time=? where id=?", DateUtils.formatDate(new Date(ts.getExpireTime().getTime()), DateUtils.DATE_TIME), ts.getId());
             }
         }
+        //
 
     }
 

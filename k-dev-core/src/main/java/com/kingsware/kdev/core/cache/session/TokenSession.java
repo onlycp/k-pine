@@ -25,4 +25,6 @@ public class TokenSession {
     private Timestamp activeTime;
     /** 是否有变化 **/
     private boolean hasChanged = false;
+    /** ping时间 **/
+    private Timestamp pingTime;
 }

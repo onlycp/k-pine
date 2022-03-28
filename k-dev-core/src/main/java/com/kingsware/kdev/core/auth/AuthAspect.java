@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.exception.UnauthorizedException;
 import com.kingsware.kdev.core.i18n.I18n;
+import com.kingsware.kdev.core.util.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Around;
@@ -73,8 +74,10 @@ public class AuthAspect {
                 throw new UnauthorizedException(I18n.t("auth. unauthorized-e007", "用户已在别处登录"));
             }
         }
+        // 是否要更新过期时间
+        boolean updateExpired = !KClientContext.getContext().getUrl().endsWith("/ping");
         // 更新活动时间
-        SessionManager.getInstance().updateActiveTime(userInfo.getId(), KClientContext.getContext().getToken(), appAuthProperties.getMockSessionExpireMinutes());
+        SessionManager.getInstance().updateActiveTime(userInfo.getId(), KClientContext.getContext().getToken(), appAuthProperties.getMockSessionExpireMinutes(), updateExpired);
         // 将用户信息写到上下文
         KClientContext.getContext().setUserInfo(userInfo);
         return pjd.proceed();

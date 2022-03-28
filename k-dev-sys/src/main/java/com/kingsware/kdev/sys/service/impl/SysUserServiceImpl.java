@@ -375,6 +375,11 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     }
 
     @Override
+    public void ping() {
+        SessionManager.getInstance().getbyToken(KClientContext.getContext().getUserInfo().getId(), KClientContext.getContext().getToken()).setPingTime(new Timestamp(System.currentTimeMillis()));
+    }
+
+    @Override
     public void editProfile(SysUserProfileArgv argv) {
         SysUser model = DB.findById(SysUser.class, argv.getId());
         model.setRealName(argv.getRealName());

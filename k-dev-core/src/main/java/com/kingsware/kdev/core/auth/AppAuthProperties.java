@@ -27,5 +27,7 @@ public class AppAuthProperties {
     private String tokenSecret;
     /** 是否只允许一个会话 **/
     private Boolean loginSessionOne = false;
+    /** ping超时时间 **/
+    private int pingExpireSeconds = 30;
 
 }

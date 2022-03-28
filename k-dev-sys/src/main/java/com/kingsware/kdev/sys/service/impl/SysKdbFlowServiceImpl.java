@@ -63,7 +63,6 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public SysFlowDefineRet getDefine(String id) {
         // 参数
         KdbFlowQueryArgv argv = new KdbFlowQueryArgv();

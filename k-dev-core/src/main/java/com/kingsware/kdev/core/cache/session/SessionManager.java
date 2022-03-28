@@ -118,19 +118,21 @@ public class SessionManager {
       }
     }
 
+
     /**
      * 更新活动时间
      * @param userId        用户id
      * @param loginToken    登录令牌
+     * @param updateExpired  是否要更新过期时间
      */
-    public void updateActiveTime(String userId, String loginToken, int mockSessionExpireTime) {
+    public void updateActiveTime(String userId, String loginToken, int mockSessionExpireTime, boolean updateExpired) {
         if (sessionMapping.containsKey(userId)) {
             Set<TokenSession> onlineUsers = sessionMapping.get(userId);
             for (TokenSession onlineUser: onlineUsers) {
                 if (onlineUser.getLoginToken().equals(loginToken)) {
                     onlineUser.setActiveTime(new Timestamp(System.currentTimeMillis()));
                     onlineUser.setHasChanged(true);
-                    if (mockSessionExpireTime > 0) {
+                    if (mockSessionExpireTime > 0 && updateExpired) {
                         onlineUser.setExpireTime(new Timestamp(onlineUser.getActiveTime().getTime() + (long) mockSessionExpireTime * 1000 * 60));
                     }
                 }
@@ -150,6 +152,18 @@ public class SessionManager {
                     tokenSessions.add(ts);
                 }
             }
+        }
+        return tokenSessions;
+    }
+
+    /**
+     * 获取所有的会话
+     * @return  会话
+     */
+    public Set<TokenSession> sessions() {
+        Set<TokenSession> tokenSessions = new HashSet<>();
+        for (Map.Entry<String, Set<TokenSession>> entry: sessionMapping.entrySet()) {
+            tokenSessions.addAll(entry.getValue());
         }
         return tokenSessions;
     }

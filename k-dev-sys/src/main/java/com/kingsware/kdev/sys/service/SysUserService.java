@@ -74,11 +74,20 @@ public interface SysUserService extends BaseService {
 
     /**
      * 密码转换
-     * @param from
-     * @param to
-     * @param secret
+     * @param from  原加密算法
+     * @param to    目标加密算法
+     * @param secret    密钥
      */
     void encryptChange(String from, String to, String secret);
 
+    /**
+     * 重置密码
+     * @param argv  参数
+     */
     void resetPassword(SysUserResetPasswordArgv argv);
+
+    /**
+     * ping操作
+     */
+    void ping();
 }
