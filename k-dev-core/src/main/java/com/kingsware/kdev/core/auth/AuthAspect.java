@@ -51,23 +51,30 @@ public class AuthAspect {
         Signature signature = pjd.getSignature();
         MethodSignature methodSignature = (MethodSignature)signature;
         Method targetMethod = methodSignature.getMethod();
-        // 如果全局跳过权限
-        if (Boolean.FALSE.equals(appAuthProperties.getEnable())) {
-            return pjd.proceed();
-        }
+
         // 不验证权限
         if(targetMethod.isAnnotationPresent(ApiIgnore.class)){
             return pjd.proceed();
         }
-        // 检查用户是否登录
-        BaseUserInfo userInfo =  TokenUtil.getUserInfoByToken(
-                KClientContext.getContext().getToken(),
-                appAuthProperties.getTokenSecret(),
-                appAuthProperties.getIss(),
-                KClientContext.getContext().getIp(),
-                appAuthProperties.getTokenExpireMinutes(),
-                appAuthProperties.getMockSessionExpireMinutes()
-        );
+        BaseUserInfo userInfo = null;
+        try {
+            // 检查用户是否登录
+            userInfo =  TokenUtil.getUserInfoByToken(
+                    KClientContext.getContext().getToken(),
+                    appAuthProperties.getTokenSecret(),
+                    appAuthProperties.getIss(),
+                    KClientContext.getContext().getIp(),
+                    appAuthProperties.getTokenExpireMinutes(),
+                    appAuthProperties.getMockSessionExpireMinutes()
+            );
+        }
+        catch (UnauthorizedException e) {
+            // 如果全局跳过权限
+            if (Boolean.TRUE.equals(appAuthProperties.getEnable())) {
+                throw e;
+            }
+        }
+
         // 检查是否只有一个会话
         if (appAuthProperties.getLoginSessionOne()) {
             if (!SessionManager.getInstance().checkSession(userInfo.getId(), KClientContext.getContext().getToken())) {
