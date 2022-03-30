@@ -10,7 +10,6 @@ import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.encrypt.EncryptProperties;
 import com.kingsware.kdev.core.encrypt.EncryptWorker;
-import com.kingsware.kdev.core.encrypt.inst.Base64Instance;
 import com.kingsware.kdev.core.enums.ApiSystemEnum;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.UnauthorizedException;
@@ -33,6 +32,8 @@ import com.kingsware.kdev.sys.ret.SysUserLoginRet;
 import com.kingsware.kdev.sys.ret.SysUserProfileRet;
 import com.kingsware.kdev.sys.ret.SysUserRet;
 import com.kingsware.kdev.sys.service.SysUserService;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -51,6 +52,7 @@ import java.util.List;
  * @date 2021/12/23 9:36 上午
  */
 @Service
+@Slf4j
 public class SysUserServiceImpl extends BaseServiceImpl implements SysUserService {
 
     @Resource
@@ -143,6 +145,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         saveUserRoles(model.getId(), argv.getSysRoleIds());
     }
 
+    @SneakyThrows
     @Override
     @SuppressWarnings("unchecked")
     public PageDataRet<SysUserRet> query(SysUserQueryArgv argv) {
@@ -376,7 +379,13 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
 
     @Override
     public void ping() {
-        SessionManager.getInstance().getbyToken(KClientContext.getContext().getUserInfo().getId(), KClientContext.getContext().getToken()).setPingTime(new Timestamp(System.currentTimeMillis()));
+        try {
+            SessionManager.getInstance().getByToken(KClientContext.getContext().getUserInfo().getId(), KClientContext.getContext().getToken()).ping();
+        }
+        catch (Exception e) {
+            log.warn("error", e);
+        }
+
     }
 
     @Override

@@ -110,6 +110,9 @@ public class PoiExcelHandler implements KExcelHandler{
 
                 List<String> contents = new ArrayList<>();
                 Row row = sheet.getRow(rowIndex);
+                if (row == null) {
+                    continue;
+                }
                 if (rowIndex == 0) {
                     colCount = row.getLastCellNum();
                 }
@@ -138,7 +141,17 @@ public class PoiExcelHandler implements KExcelHandler{
                 if (rowIndex == 0) {
                     colCount = contents.size();
                 }
-                allContents.add(contents);
+                boolean isAllEmpty = true;
+                for (String content: contents) {
+                    if (StringUtils.isNotEmpty(content)) {
+                        isAllEmpty = false;
+                        break;
+                    }
+                }
+                if (!isAllEmpty) {
+                    allContents.add(contents);
+                }
+
             }
             return allContents;
         }

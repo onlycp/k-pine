@@ -74,19 +74,22 @@ public class AuthAspect {
                 throw e;
             }
         }
+        if (userInfo != null) {
 
-        // 检查是否只有一个会话
-        if (appAuthProperties.getLoginSessionOne()) {
-            if (!SessionManager.getInstance().checkSession(userInfo.getId(), KClientContext.getContext().getToken())) {
-                throw new UnauthorizedException(I18n.t("auth. unauthorized-e007", "用户已在别处登录"));
+            // 检查是否只有一个会话
+            if (appAuthProperties.getLoginSessionOne()) {
+                if (!SessionManager.getInstance().checkSession(userInfo.getId(), KClientContext.getContext().getToken())) {
+                    throw new UnauthorizedException(I18n.t("auth. unauthorized-e007", "用户已在别处登录"));
+                }
             }
+            // 是否要更新过期时间
+            boolean updateExpired = !KClientContext.getContext().getUrl().endsWith("/ping");
+            // 更新活动时间
+            SessionManager.getInstance().updateActiveTime(userInfo.getId(), KClientContext.getContext().getToken(), appAuthProperties.getMockSessionExpireMinutes(), updateExpired);
+            // 将用户信息写到上下文
+            KClientContext.getContext().setUserInfo(userInfo);
         }
-        // 是否要更新过期时间
-        boolean updateExpired = !KClientContext.getContext().getUrl().endsWith("/ping");
-        // 更新活动时间
-        SessionManager.getInstance().updateActiveTime(userInfo.getId(), KClientContext.getContext().getToken(), appAuthProperties.getMockSessionExpireMinutes(), updateExpired);
-        // 将用户信息写到上下文
-        KClientContext.getContext().setUserInfo(userInfo);
         return pjd.proceed();
+
     }
 }

@@ -27,4 +27,8 @@ public class TokenSession {
     private boolean hasChanged = false;
     /** ping时间 **/
     private Timestamp pingTime;
+
+    public void ping() {
+        this.pingTime = new Timestamp(System.currentTimeMillis());
+    }
 }

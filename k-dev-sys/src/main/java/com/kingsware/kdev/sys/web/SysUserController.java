@@ -1,12 +1,13 @@
 package com.kingsware.kdev.sys.web;
 
 import com.kingsware.kdev.core.auth.ApiIgnore;
+import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
-import com.kingsware.kdev.core.context.ClientContextAspect;
+import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.sys.argv.*;
 import com.kingsware.kdev.sys.ret.SysUserRet;
 import com.kingsware.kdev.sys.service.SysUserService;
@@ -49,8 +50,8 @@ public class SysUserController extends BaseController {
     @ApiOperation(value = "登录信息 " ,notes = "登录信息")
     @GetMapping(value = "info")
     public BaseRet<?> info(HttpServletRequest request) {
-        String ip = ClientContextAspect.getClientIp(request);
-        String token = ClientContextAspect.getTokenString(request);
+        String ip = ServletUtil.getClientIp(request);
+        String token = TokenUtil.getTokenString(request);
         return BaseRet.success(sysUserService.getBaseUserInfo(token, ip));
     }
     /**
@@ -125,8 +126,8 @@ public class SysUserController extends BaseController {
     @ApiOperation(value = "获取用户基本信息 " ,notes = "获取用户基本信息")
     @GetMapping(value = "/get-profile")
     public BaseRet<?> getProfile(HttpServletRequest request) {
-        String ip = ClientContextAspect.getClientIp(request);
-        String token = ClientContextAspect.getTokenString(request);
+        String ip = ServletUtil.getClientIp(request);
+        String token = TokenUtil.getTokenString(request);
         return BaseRet.success(sysUserService.getProfile(token, ip));
     }
 
@@ -148,8 +149,8 @@ public class SysUserController extends BaseController {
     @ApiOperation(value = "修改密码 " ,notes = "修改密码")
     @PostMapping(value = "/change-password")
     public BaseRet<?> changePassword(HttpServletRequest request, @RequestBody SysUserChangePasswordArgv argv) {
-        String ip = ClientContextAspect.getClientIp(request);
-        String token = ClientContextAspect.getTokenString(request);
+        String ip = ServletUtil.getClientIp(request);
+        String token = TokenUtil.getTokenString(request);
         sysUserService.changePassword(argv, token, ip);
         return BaseRet.success();
     }
