@@ -91,4 +91,14 @@ public class ServletUtil {
             }
         }
     }
+
+    /**
+     * 获取访问者IP
+     * @return  ip
+     */
+    public static String getClientIp(HttpServletRequest request) {
+        String ipFromNginx = request.getHeader("X-Real-IP");
+        return StringUtils.isEmpty(ipFromNginx) ? request.getRemoteAddr() : ipFromNginx;
+    }
+
 }

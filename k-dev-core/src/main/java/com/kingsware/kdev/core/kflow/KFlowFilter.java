@@ -1,12 +1,18 @@
 package com.kingsware.kdev.core.kflow;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kingsware.kdev.core.auth.AppAuthProperties;
+import com.kingsware.kdev.core.auth.BaseUserInfo;
+import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.cache.api.ApiManager;
+import com.kingsware.kdev.core.context.ClientInfo;
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.excel.ExcelWorker;
 import com.kingsware.kdev.core.excel.KExcel;
 import com.kingsware.kdev.core.kflow.bean.KFlowUploadFile;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
+import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -45,16 +51,38 @@ public class KFlowFilter implements Filter {
     private ObjectMapper objectMapper;
     @Resource
     private KFlowProperties kFlowProperties;
+    @Resource
+    private AppAuthProperties appAuthProperties;
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+
+        HttpServletRequest request = (HttpServletRequest) servletRequest;
+        HttpServletResponse response = (HttpServletResponse) servletResponse;
+
+        //获取用户信息
+        String ip = ServletUtil.getClientIp(request);
+        String token = TokenUtil.getTokenString(request);
+        // 获取用户信息
+        BaseUserInfo userInfo = TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret());
+        // 组装clientInfo
+        ClientInfo clientInfo = new ClientInfo();
+        clientInfo.setIp(ip);
+        clientInfo.setToken(token);
+        clientInfo.setRequest(request);
+        clientInfo.setResponse(response);
+        clientInfo.setUrl(request.getRequestURI());
+        clientInfo.setUserInfo(userInfo);
+        // 写到线程变量
+        KClientContext.setContext(clientInfo);
+
+
         // 如果不启用流程
         if (!kFlowProperties.isEnable()) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
-        HttpServletRequest request = (HttpServletRequest) servletRequest;
-        HttpServletResponse response = (HttpServletResponse) servletResponse;
+
         // 获取请求路径
         String url = request.getRequestURI();
         // 获取请求方式

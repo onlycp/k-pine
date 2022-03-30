@@ -57,9 +57,7 @@ public class SessionTask implements KTask {
                 SessionManager.getInstance().removeSession(onlineUser.getUserId(), onlineUser.getLoginToken());
                 DB.delete(onlineUser);
                 log.info("用户名：{} 退出，原因是心跳超时", onlineUser.getUserId());
-
             }
-
         }
         // 重置加载
         SessionManager.getInstance().reloadSessions();

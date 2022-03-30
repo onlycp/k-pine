@@ -1,10 +1,11 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
-import com.kingsware.kdev.core.context.ClientContextAspect;
+import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.sys.argv.SysNoticeArgv;
 import com.kingsware.kdev.sys.argv.SysNoticeQueryArgv;
 import com.kingsware.kdev.sys.argv.SysNoticeRelationArgv;
@@ -93,8 +94,8 @@ public class SysNoticeController {
     @ApiOperation(value = "发送消息 " ,notes = "发送消息")
     @PostMapping(value = "/sendNotice")
     public BaseRet<?> sendNotice(HttpServletRequest request, @RequestBody SysNoticeRelationArgv argv) {
-        String ip = ClientContextAspect.getClientIp(request);
-        String token = ClientContextAspect.getTokenString(request);
+        String ip = ServletUtil.getClientIp(request);
+        String token = TokenUtil.getTokenString(request);
         sysNoticeService.sendNotice(argv, token, ip);
         return BaseRet.success();
     }

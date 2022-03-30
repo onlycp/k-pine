@@ -50,7 +50,7 @@ public class SessionManager {
         for (SysOnlineUser onlineUser: onlineUserList) {
             Set<TokenSession> onlineUsers = map.computeIfAbsent(onlineUser.getUserId(), key -> new HashSet<>());
             // 从当前缓存中读取，如果已存在，则直接以缓存中的为准
-            TokenSession ts = getbyToken(onlineUser.getUserId(), onlineUser.getLoginToken());
+            TokenSession ts = getByToken(onlineUser.getUserId(), onlineUser.getLoginToken());
             if (ts == null) {
                 ts = BeanUtils.copyObject(onlineUser, TokenSession.class);
                 ts.setActiveTime(onlineUser.getLoginTime());
@@ -67,7 +67,7 @@ public class SessionManager {
      * @param token     令牌
      * @return
      */
-    public TokenSession getbyToken(String userId, String token) {
+    public TokenSession getByToken(String userId, String token) {
         if (sessionMapping.containsKey(userId)) {
             Set<TokenSession> tokenSessions = sessionMapping.get(userId);
             for (TokenSession ts: tokenSessions) {

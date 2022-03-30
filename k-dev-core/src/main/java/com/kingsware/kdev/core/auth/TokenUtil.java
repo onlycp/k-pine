@@ -4,19 +4,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.cache.session.TokenSession;
-import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.exception.UnauthorizedException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.util.AESUtil;
-import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Date;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 令牌工具类，用于生成令牌及令牌验证
@@ -26,6 +24,12 @@ import java.util.Date;
  * @date 2021/12/20 2:07 下午
  */
 public class TokenUtil {
+
+    /** 令牌请求头**/
+    public static final String AUTH_HEADER = "Authorization";
+    /** 令牌前缀**/
+    public static final String AUTH_PREFIX = "Bearer ";
+
 
     private TokenUtil() {
 
@@ -104,7 +108,7 @@ public class TokenUtil {
         }
         // 否则，走传统的session方案
         else {
-            TokenSession ts = SessionManager.getInstance().getbyToken(authToken.getUserInfo().getId(), token);
+            TokenSession ts = SessionManager.getInstance().getByToken(authToken.getUserInfo().getId(), token);
             if (ts == null) {
                 throw new UnauthorizedException(I18n.t("auth. unauthorized-e007", "登录会话不存在，请重新登录"));
             }
@@ -122,5 +126,33 @@ public class TokenUtil {
 
         // 返回用户信息
         return authToken.getUserInfo();
+    }
+
+
+    public static BaseUserInfo getUserInfoByToken(String token, String dataSecret) {
+        try {
+            // 解密令牌
+            String decryptToken = AESUtil.decrypt(token, dataSecret);
+            AuthToken authToken = new ObjectMapper().readValue(decryptToken, AuthToken.class);
+            return authToken.getUserInfo();
+        }
+        catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * 获取令牌字符串
+     * @return 令牌
+     */
+    public static String getTokenString(HttpServletRequest request) {
+        // 获取对应的请求头
+        String auth = request.getHeader(AUTH_HEADER);
+        // 如果auth为空，则提示用户登录
+        if (StringUtils.isEmpty(auth)) {
+            return "";
+        }
+        // 获取当前令牌
+        return auth.replace(AUTH_PREFIX, "");
     }
 }
