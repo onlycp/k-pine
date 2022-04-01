@@ -149,11 +149,20 @@ public class FlowUtils {
             while (propertyNames.hasNext()) {
                 String pName = propertyNames.next();
                 JsonNode pNode = propertiesNode.get(pName);
+                // 获取值
+                Object varData = null;
+                String pType = pNode.get("type").asText();
+                if ("array".equalsIgnoreCase(pType)) {
+                    varData = new ArrayList<>();
+                }
+                else if ("object".equalsIgnoreCase(pType)) {
+                    varData = new HashMap<>();
+                }
                 // 只有值不存在的时候，才会使用默认值填充
                 if (!mock) {
                     // 获取值
                     if (!map.containsKey(pName)) {
-                        Object entryValue = handleNodeValue(new HashMap<>(), pNode, mock);
+                        Object entryValue = handleNodeValue(varData, pNode, mock);
                         newValueMap.put(pName, entryValue);
                     }
                     // 根据类型进行数据转换
@@ -162,7 +171,6 @@ public class FlowUtils {
                         if (inObject != null && StringUtils.isNotEmpty(inObject.toString())) {
                             String strValue = inObject.toString();
                             JsonNode pTypeNode = pNode.get("type");
-                            String pType = pTypeNode.asText().trim();
                             if ("integer".equalsIgnoreCase(pType)) {
                                 newValueMap.put(pName, Integer.parseInt(strValue));
                             }
@@ -171,15 +179,6 @@ public class FlowUtils {
                     }
                 }
                 else {
-                    // 获取值
-                    Object varData = null;
-                    String pType = pNode.get("type").asText();
-                    if ("array".equalsIgnoreCase(pType)) {
-                        varData = new ArrayList<>();
-                    }
-                    else if ("object".equalsIgnoreCase(pType)) {
-                        varData = new HashMap<>();
-                    }
                     Object entryValue = handleNodeValue(varData, pNode, mock);
                     newValueMap.put(pName, entryValue);
                 }
