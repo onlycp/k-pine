@@ -19,6 +19,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 平台日志
@@ -79,39 +81,43 @@ public class WebLogAspect {
 
         // 保存日志
         try {
-            Class<? extends Object> targetClass = pjd.getTarget().getClass();
-            if (pjd.getTarget().getClass().isAnnotationPresent(Api.class)) {
-                // 获取模块注解
-                Api m = targetClass.getAnnotation(Api.class);
-                // 生成操作日志
-                SysOperateLog operateLog = new SysOperateLog();
-                operateLog.setOperator(KClientContext.getContext().getUserInfo() != null ? KClientContext.getContext().getUserInfo().getUsername() : "");
-                operateLog.setAction(apiOperation.value());
-                operateLog.setModule(m.value());
-                operateLog.setIp(KClientContext.getContext().getIp());
-                operateLog.setTimes((int)(takeTime));
-                operateLog.setUrl(KClientContext.getContext().getUrl());
-                operateLog.setResponseCode(responseCode);
-                operateLog.setResponseMessage(responseMessage);
-                operateLog.setOperateTime(new Timestamp(System.currentTimeMillis()));
-                operateLog.setRequestBody(JsonUtil.toJson(pjd.getArgs()));
-                KmqMessageCenter.getInstance().produce(TOPIC_OPERATE_LOG, JsonUtil.toJson(operateLog) );
+            // 忽略的日志
+            Set<String> ignoreActions = new HashSet<>();
+            ignoreActions.add("PING");
+            if (!ignoreActions.contains(apiOperation.value())) {
+                Class<? extends Object> targetClass = pjd.getTarget().getClass();
+                if (pjd.getTarget().getClass().isAnnotationPresent(Api.class)) {
+                    // 获取模块注解
+                    Api m = targetClass.getAnnotation(Api.class);
+                    // 生成操作日志
+                    SysOperateLog operateLog = new SysOperateLog();
+                    operateLog.setOperator(KClientContext.getContext().getUserInfo() != null ? KClientContext.getContext().getUserInfo().getUsername() : "");
+                    operateLog.setAction(apiOperation.value());
+                    operateLog.setModule(m.value());
+                    operateLog.setIp(KClientContext.getContext().getIp());
+                    operateLog.setTimes((int)(takeTime));
+                    operateLog.setUrl(KClientContext.getContext().getUrl());
+                    operateLog.setResponseCode(responseCode);
+                    operateLog.setResponseMessage(responseMessage);
+                    operateLog.setOperateTime(new Timestamp(System.currentTimeMillis()));
+                    operateLog.setRequestBody(JsonUtil.toJson(pjd.getArgs()));
+                    KmqMessageCenter.getInstance().produce(TOPIC_OPERATE_LOG, JsonUtil.toJson(operateLog) );
 
-                //  如果是登录，则同时生成一个登录日志
-                String operate = apiOperation.value().trim();
-                if ("登录".equals(operate)) {
-                    // 获取表单信息
-                    SysUserLoginArgv loginArgv = (SysUserLoginArgv)pjd.getArgs()[0];
-                    SysLoginLog loginLog = new SysLoginLog();
-                    loginLog.setOperator(loginArgv.getUsername());
-                    loginLog.setIp(KClientContext.getContext().getIp());
-                    loginLog.setResponseCode(responseCode);
-                    loginLog.setTimes((int)takeTime);
-                    loginLog.setResponseMessage(responseMessage);
-                    loginLog.setOperateTime(new Timestamp(System.currentTimeMillis()));
-                    KmqMessageCenter.getInstance().produce(TOPIC_LOGIN_LOG, JsonUtil.toJson(loginLog) );
+                    //  如果是登录，则同时生成一个登录日志
+                    String operate = apiOperation.value().trim();
+                    if ("登录".equals(operate)) {
+                        // 获取表单信息
+                        SysUserLoginArgv loginArgv = (SysUserLoginArgv)pjd.getArgs()[0];
+                        SysLoginLog loginLog = new SysLoginLog();
+                        loginLog.setOperator(loginArgv.getUsername());
+                        loginLog.setIp(KClientContext.getContext().getIp());
+                        loginLog.setResponseCode(responseCode);
+                        loginLog.setTimes((int)takeTime);
+                        loginLog.setResponseMessage(responseMessage);
+                        loginLog.setOperateTime(new Timestamp(System.currentTimeMillis()));
+                        KmqMessageCenter.getInstance().produce(TOPIC_LOGIN_LOG, JsonUtil.toJson(loginLog) );
+                    }
                 }
-
             }
         }
         catch (Exception e) {
