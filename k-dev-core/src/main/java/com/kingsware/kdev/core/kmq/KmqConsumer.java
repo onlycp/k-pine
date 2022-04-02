@@ -1,5 +1,7 @@
 package com.kingsware.kdev.core.kmq;
 
+import java.util.List;
+
 /**
  * 消费者接口
  * 示例:
@@ -20,7 +22,7 @@ public interface KmqConsumer {
      * @param payload       消息
      * @throws Exception    业务消费失败时，将放到失败队列文件日志
      */
-    void onMessage(String payload) throws Exception;
+    void onMessage(List<String> payload) throws Exception;
 
     /**
      * 获取主题
