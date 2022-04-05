@@ -34,5 +34,7 @@ public class SysFile extends BaseManageModel {
     private String fileFrom;
     /** 文件内容 **/
     private String fileContent;
+    /** 所属应用ID **/
+    private String appId;
 
 }

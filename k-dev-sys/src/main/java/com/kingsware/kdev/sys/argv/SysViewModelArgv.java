@@ -25,6 +25,8 @@ public class SysViewModelArgv {
     private String note;
     /** 属性列 **/
     private List<SysViewModelFieldArgv> fields;
+    /** 所属应用ID **/
+    private String appId;
 
 
 }

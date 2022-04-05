@@ -20,4 +20,6 @@ public class SysViewModelRet extends BaseManageRet {
     private String tag;
     /** 描述 **/
     private String note;
+    /** 所属应用ID **/
+    private String appId;
 }

@@ -38,4 +38,6 @@ public class SysApiRet extends BaseManageRet {
     private String apiCode;
     /** 调用方式 **/
     private Integer callType;
+    /** 所属应用ID **/
+    private String appId;
 }

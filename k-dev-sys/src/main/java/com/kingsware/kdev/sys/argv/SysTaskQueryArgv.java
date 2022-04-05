@@ -21,5 +21,7 @@ public class SysTaskQueryArgv extends BasePageArgv {
     private Integer taskType;
     /** 是否启用 **/
     private Integer enable;
+    /** 所属应用ID **/
+    private String appId;
 
 }

@@ -20,5 +20,7 @@ public class SysRoleQueryArgv extends BasePageArgv {
     private String code;
     /** 状态 */
     private Integer status;
+    /** 所属应用ID **/
+    private String appId;
 
 }

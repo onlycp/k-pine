@@ -1,6 +1,7 @@
 package com.kingsware.kdev.sys.ret;
 
 import com.kingsware.kdev.core.bean.BaseManageRet;
+import com.kingsware.kdev.core.orm.annotation.Column;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -62,4 +63,6 @@ public class SysMenuRet extends BaseManageRet {
     private Integer main_mode;
     /** 子节点 **/
     private List<SysMenuRet> children = new ArrayList<>();
+    /** 是否开发者模式 **/
+    private Boolean dev;
 }

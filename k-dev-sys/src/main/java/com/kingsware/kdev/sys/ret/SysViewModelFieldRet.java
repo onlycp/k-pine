@@ -32,4 +32,6 @@ public class SysViewModelFieldRet extends BaseManageRet {
     private Integer hidden;
     /** 排序 **/
     private Integer orderNum;
+    /** 所属应用ID **/
+    private String appId;
 }

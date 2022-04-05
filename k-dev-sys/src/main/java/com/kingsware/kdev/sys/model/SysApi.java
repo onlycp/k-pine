@@ -40,5 +40,7 @@ public class SysApi extends BaseManageModel {
     private String apiFlowId;
     /** 接口编码 **/
     private String apiCode;
+    /** 所属应用ID **/
+    private String appId;
 
 }

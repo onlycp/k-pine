@@ -18,5 +18,7 @@ public class SysViewModelQueryArgv extends BasePageArgv {
     private String name;
     /** 标签 **/
     private String tag;
+    /** 所属应用ID **/
+    private String appId;
 
 }

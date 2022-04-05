@@ -43,4 +43,6 @@ public class SysOperateLogRet extends BaseSimpleRet {
     private String responseMessage;
     /** 创建时间 **/
     private String whenCreated;
+    /** 所属应用ID **/
+    private String appId;
 }

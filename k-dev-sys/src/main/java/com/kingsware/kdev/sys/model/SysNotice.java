@@ -25,4 +25,6 @@ public class SysNotice extends BaseManageModel {
     private Integer type;
     /** 启用状态：0：待启用，1：已启用 */
     private Integer status;
+    /** 所属应用ID **/
+    private String appId;
 }

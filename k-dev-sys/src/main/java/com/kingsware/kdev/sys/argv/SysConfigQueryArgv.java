@@ -20,4 +20,6 @@ public class SysConfigQueryArgv extends BasePageArgv {
     private String code;
     /** 是否系统内置 */
     private Integer isSys;
+    /** 所属应用ID **/
+    private String appId;
 }

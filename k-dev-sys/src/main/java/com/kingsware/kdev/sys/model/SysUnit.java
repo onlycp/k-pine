@@ -34,5 +34,7 @@ public class SysUnit extends BaseManageModel {
     private String note;
     /** 排序 **/
     private Integer orderNum;
+    /** 所属应用ID **/
+    private String appId;
 
 }

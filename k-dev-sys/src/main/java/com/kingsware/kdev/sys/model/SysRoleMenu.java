@@ -31,4 +31,6 @@ public class SysRoleMenu extends BaseModel {
     /** 创建时间 **/
     @Column(auto = AutoEnum.WHEN, updatable = false)
     private Timestamp whenCreated;
+    /** 所属应用ID **/
+    private String appId;
 }

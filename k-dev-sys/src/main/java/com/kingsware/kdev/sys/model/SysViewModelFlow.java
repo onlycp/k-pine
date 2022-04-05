@@ -24,6 +24,8 @@ public class SysViewModelFlow extends BaseManageModel {
      * 流程id
      **/
     private String flowId;
+    /** 所属应用ID **/
+    private String appId;
 
 }
 

@@ -15,5 +15,7 @@ import lombok.EqualsAndHashCode;
 public class SysKdbDataSourceQueryArgv extends BasePageArgv {
     /** 流程名称 **/
     private String name = "";
+    /** 所属应用ID **/
+    private String appId;
 
 }

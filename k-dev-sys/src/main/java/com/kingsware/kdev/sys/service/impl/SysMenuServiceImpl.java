@@ -1,10 +1,14 @@
 package com.kingsware.kdev.sys.service.impl;
 
+import com.kingsware.kdev.core.auth.BaseUserInfo;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.bean.TreeDataRet;
+import com.kingsware.kdev.core.cache.access.AccessManager;
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.i18n.I18n;
+import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
@@ -21,6 +25,7 @@ import com.kingsware.kdev.sys.ret.SysMenuRet;
 import com.kingsware.kdev.sys.service.SysMenuService;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,6 +38,9 @@ import java.util.stream.Collectors;
  */
 @Service
 public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuService {
+
+    @Resource
+    private AppModeProperties appModeProperties;
 
     @Override
     public SysMenuRet get(String id) {
@@ -159,6 +167,7 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
         if (argv.getStatus() != null) {
             wrapper.addCondition("status", Op.EQ, argv.getStatus());
         }
+
         // 查询所有相关的部门
         List<SysMenu> menus = DB.findList(SysMenu.class, wrapper.getSql(), wrapper.getParams().toArray());
         // 然后通过in查询相关的部门(包括上级关系)
@@ -213,6 +222,12 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
         }
         if (!isSuperAdmin && ids != null) {
             wrapper.in("srm.sys_role_id", ids);
+        }
+        if (appModeProperties.getDev()) {
+            wrapper.addCondition("sm.app_id is null", "");
+            if (!isSuperAdmin) {
+                wrapper.addCondition("sm.is_dev", Op.EQ, 1);
+            }
         }
         wrapper.sortBy(" order by order_num asc ");
 

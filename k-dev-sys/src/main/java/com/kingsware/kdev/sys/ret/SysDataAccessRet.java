@@ -21,4 +21,6 @@ public class SysDataAccessRet extends BaseManageRet {
     private Integer status;
     /** 备注 **/
     private String note;
+    /** 所属应用ID **/
+    private String appId;
 }

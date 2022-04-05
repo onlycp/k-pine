@@ -21,4 +21,6 @@ public class SysKdbDataSourceArgv {
     private String username;
     /** 密码 **/
     private String password;
+    /** 所属应用ID **/
+    private String appId;
 }

@@ -29,5 +29,7 @@ public class SysDataResourceArgv {
     private Integer status;
     /** 额外sql **/
     private String extraSql;
+    /** 所属应用ID **/
+    private String appId;
 
 }

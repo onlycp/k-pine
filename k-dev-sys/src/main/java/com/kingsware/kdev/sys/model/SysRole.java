@@ -25,5 +25,7 @@ public class SysRole extends BaseManageModel {
     private Integer status;
     /** 备注 */
     private String note;
+    /** 所属应用ID **/
+    private String appId;
 
 }

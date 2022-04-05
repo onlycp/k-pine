@@ -25,4 +25,6 @@ public class SysNoticeRet extends BaseManageRet {
     private Integer deleted;
     /** 发送数量*/
     private String sends;
+    /** 所属应用ID **/
+    private String appId;
 }

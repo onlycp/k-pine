@@ -33,5 +33,7 @@ public class SysTaskArgv {
     private Integer enable;
     /** 描述 **/
     private String note;
+    /** 所属应用ID **/
+    private String appId;
 
 }

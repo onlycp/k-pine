@@ -1,6 +1,7 @@
 package com.kingsware.kdev.sys.argv;
 
 import com.kingsware.kdev.core.bean.BasePageArgv;
+import com.kingsware.kdev.core.orm.annotation.Column;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -32,5 +33,7 @@ public class SysMenuQueryArgv extends BasePageArgv {
     private Integer topNavMode;
     /** 内容区显示样式：0 自动撑开，1 居中 **/
     private Integer mainMode;
+    /** 是否开发者模式 **/
+    private Boolean dev;
 
 }

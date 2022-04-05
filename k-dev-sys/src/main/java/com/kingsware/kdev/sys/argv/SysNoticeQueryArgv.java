@@ -19,4 +19,6 @@ public class SysNoticeQueryArgv extends BasePageArgv {
     private String content;
     /** 通知类型，1：系统维护通知，2：公告 */
     private Integer type;
+    /** 所属应用ID **/
+    private String appId;
 }

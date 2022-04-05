@@ -24,5 +24,7 @@ public class SysDictArgv extends BaseArgv {
     private String code;
     /** 备注 */
     private String note;
+    /** 所属应用ID **/
+    private String appId;
 
 }

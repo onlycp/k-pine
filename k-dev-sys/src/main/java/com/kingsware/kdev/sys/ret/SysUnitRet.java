@@ -38,4 +38,6 @@ public class SysUnitRet extends BaseManageRet {
     private Integer orderNum;
     /** 子节点 **/
     private List<SysUnitRet> children = new ArrayList<>();
+    /** 所属应用ID **/
+    private String appId;
 }

@@ -58,5 +58,8 @@ public class SysMenu extends BaseManageModel {
     private Integer topNavMode;
     /** 内容区显示样式：0 自动撑开，1 居中 **/
     private Integer mainMode;
+    /** 是否开发者模式 **/
+    @Column(name = "is_dev")
+    private Boolean dev;
 
 }

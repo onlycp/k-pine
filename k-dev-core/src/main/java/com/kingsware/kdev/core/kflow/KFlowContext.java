@@ -1,6 +1,10 @@
 package com.kingsware.kdev.core.kflow;
 
+import com.kingsware.kdev.core.auth.BaseUserInfo;
+import com.kingsware.kdev.core.cache.access.AccessManager;
 import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.Data;
@@ -39,10 +43,27 @@ public class KFlowContext {
         sysMap.put("realName",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getRealName() : "");
         sysMap.put("roleIds",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getRoleIds() : "");
         sysMap.put("roleCodes",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getRoleCodes() : "");
+        sysMap.put("isAdmin",  isAdmin());
         context.getSystemContext().put("sys", sysMap);
+        context.getSystemContext().put("devMode", isDevMode());
         // 设置输入参数
         context.inArgv = StringUtils.isEmpty(inArgv) ? "{}" : inArgv;
         context.outArgv = StringUtils.isEmpty(outArgv) ? "{}" : outArgv;
         return context;
+    }
+
+    private static boolean isDevMode() {
+        AppModeProperties appModeProperties = SpringContext.getBean("appModeProperties");
+        return appModeProperties.getDev();
+    }
+
+    private static boolean isAdmin() {
+        // 获取用户信息
+        BaseUserInfo userInfo = KClientContext.getContext().getUserInfo();
+        // 如果不是web登录或者不登录
+        if (userInfo == null) {
+            return false;
+        }
+        return AccessManager.getInstance().isSupperAdmin(userInfo.getRoleIds());
     }
 }

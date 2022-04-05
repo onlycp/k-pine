@@ -16,4 +16,6 @@ import lombok.EqualsAndHashCode;
 public class SysRoleMenuArgv extends MultiIdArgv {
     /** 角色ID */
     private String sysRoleId;
+    /** 所属应用ID **/
+    private String appId;
 }

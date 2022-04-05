@@ -23,5 +23,7 @@ public class SysFileQueryArgv extends BasePageArgv {
     private Integer saveType;
     /** 上传时间 */
     private String uploadTimes;
+    /** 所属应用ID **/
+    private String appId;
 
 }

@@ -22,5 +22,7 @@ public class SysUserQueryArgv extends BasePageArgv {
     private String mobile;
     /** 状态 */
     private Integer status;
+    /** 所属应用ID **/
+    private String appId;
 
 }

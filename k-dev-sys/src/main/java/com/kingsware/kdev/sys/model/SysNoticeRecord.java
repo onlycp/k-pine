@@ -45,4 +45,6 @@ public class SysNoticeRecord extends BaseModel {
     private String title;
     /** 通知内容 */
     private String content;
+    /** 所属应用ID **/
+    private String appId;
 }

@@ -15,4 +15,6 @@ import lombok.EqualsAndHashCode;
 public class DevTopologicalQueryArgv extends BasePageArgv {
     /** 页面名 */
     private String name;
+    /** 所属应用ID **/
+    private String appId;
 }

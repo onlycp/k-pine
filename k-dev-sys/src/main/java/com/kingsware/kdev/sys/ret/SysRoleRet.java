@@ -22,4 +22,6 @@ public class SysRoleRet extends BaseManageRet {
     private String note;
     /** 状态 **/
     private Integer status;
+    /** 所属应用ID **/
+    private String appId;
 }

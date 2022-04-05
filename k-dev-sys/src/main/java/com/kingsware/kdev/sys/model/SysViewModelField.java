@@ -35,4 +35,6 @@ public class SysViewModelField extends BaseManageModel {
     private Integer hidden;
     /** 排序 **/
     private Integer orderNum;
+    /** 所属应用ID **/
+    private String appId;
 }

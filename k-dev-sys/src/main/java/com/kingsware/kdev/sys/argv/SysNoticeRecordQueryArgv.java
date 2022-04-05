@@ -25,4 +25,6 @@ public class SysNoticeRecordQueryArgv extends BasePageArgv {
     private String title;
     /** 通知内容 */
     private String content;
+    /** 所属应用ID **/
+    private String appId;
 }

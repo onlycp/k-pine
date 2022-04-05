@@ -34,4 +34,6 @@ public class SysOnlineUserRet extends BaseSimpleRet {
     private Timestamp expireTime;
     /** 创建时间 **/
     private Timestamp whenCreated;
+    /** 所属应用ID **/
+    private String appId;
 }

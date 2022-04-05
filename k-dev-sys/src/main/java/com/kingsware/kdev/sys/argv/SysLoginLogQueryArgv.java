@@ -17,4 +17,6 @@ public class SysLoginLogQueryArgv extends BasePageArgv {
     private String operateTimes;
     /** 操作人员 **/
     private String operator;
+    /** 所属应用ID **/
+    private String appId;
 }

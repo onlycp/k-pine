@@ -44,4 +44,6 @@ public class SysFileRet extends BaseManageRet {
     private String filePath;
     /** 文件来源 **/
     private String fileFrom;
+    /** 所属应用ID **/
+    private String appId;
 }
