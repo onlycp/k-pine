@@ -6,6 +6,9 @@ import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.sys.model.SysLoginLog;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 操作日志消费类
  *
@@ -15,16 +18,20 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class LoginLogConsumer implements KmqConsumer {
+
     @Override
-    public void onMessage(String payload) throws Exception {
-        SysLoginLog sysLoginLog = JsonUtil.toBean(payload, SysLoginLog.class);
-        DB.save(sysLoginLog);
-
-
+    public void onMessage(List<String> payloads) throws Exception {
+        List<SysLoginLog>  sysLoginLogs = new ArrayList<>();
+        for (String payload: payloads) {
+            SysLoginLog sysLoginLog = JsonUtil.toBean(payload, SysLoginLog.class);
+            sysLoginLogs.add(sysLoginLog);
+        }
+        DB.saveAll(sysLoginLogs);
     }
 
     @Override
     public String topic() {
         return WebLogAspect.TOPIC_LOGIN_LOG;
     }
+
 }

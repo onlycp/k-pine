@@ -6,6 +6,9 @@ import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.sys.model.SysOperateLog;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 操作日志消费类
  *
@@ -16,9 +19,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class OperateLogConsumer implements KmqConsumer {
     @Override
-    public void onMessage(String payload) throws Exception {
-        SysOperateLog sysOperateLog = JsonUtil.toBean(payload, SysOperateLog.class);
-        DB.save(sysOperateLog);
+    public void onMessage(List<String> payloads) throws Exception {
+        List<SysOperateLog> sysOperateLogs = new ArrayList<>();
+        for (String payload: payloads) {
+            SysOperateLog sysOperateLog = JsonUtil.toBean(payload, SysOperateLog.class);
+            sysOperateLogs.add(sysOperateLog);
+        }
+        DB.saveAll(sysOperateLogs);
 
 
     }

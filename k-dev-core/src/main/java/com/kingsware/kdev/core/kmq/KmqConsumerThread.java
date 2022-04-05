@@ -4,6 +4,8 @@ import com.kingsware.kdev.core.util.ThreadUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -41,9 +43,11 @@ public class KmqConsumerThread implements Runnable {
         while (true) {
             try {
                 String payload = queue.take();
+                List<String> payloads = new ArrayList<>();
+                queue.drainTo(payloads, 50);
                 for (KmqConsumer consumer: consumers) {
                     try {
-                        consumer.onMessage(payload);
+                        consumer.onMessage(payloads);
                     }
                     catch (Exception e) {
                         logger.warn("消费者: {} 消费失败，消息内容:{}, 异常信息:{}", consumer.topic(), payload, e.getMessage());
@@ -57,7 +61,7 @@ public class KmqConsumerThread implements Runnable {
                 Thread.currentThread().interrupt();
             }
             finally {
-                ThreadUtils.sleep(10);
+                ThreadUtils.sleep(5000);
             }
         }
     }
