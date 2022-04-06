@@ -15,4 +15,4 @@ ENV KFAAS_HOST=${KFAAS_HOST}
 # 文件存储基础路径
 ENV FILE_BASE_PATH=${FILE_BASE_PATH}
 # 设置启动
-ENTRYPOINT java ${JAVA_OPTS} -jar /app.jar --spring.profiles.active=${ACTIVE} --server.port=${SERVER_PORT} --database.sources.db.serve=${KFAAS_HOST} --file.base-path=${FILE_BASE_PATH}
+ENTRYPOINT java ${JAVA_OPTS} -jar /app.jar --spring.profiles.active=${ACTIVE} --server.port=${SERVER_PORT} --database.sources.db.server=${KFAAS_HOST} --file.base-path=${FILE_BASE_PATH}
