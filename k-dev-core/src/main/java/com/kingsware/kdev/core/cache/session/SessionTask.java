@@ -45,6 +45,10 @@ public class SessionTask implements KTask {
             if (session.getPingTime() == null) {
                 continue;
             }
+            // 心跳已失活的不算进去
+            if (!session.isActive()) {
+                continue;
+            }
             // 计算超时秒
             int seconds = (int)Math.abs(session.getPingTime().getTime() - System.currentTimeMillis())/1000;
             if (seconds > appAuthProperties.getPingExpireSeconds()) {
@@ -54,9 +58,7 @@ public class SessionTask implements KTask {
         for (TokenSession session: pingExpiredSessions) {
             SysOnlineUser onlineUser = DB.findById(SysOnlineUser.class, session.getId());
             if (onlineUser != null) {
-                SessionManager.getInstance().removeSession(onlineUser.getUserId(), onlineUser.getLoginToken());
-                DB.delete(onlineUser);
-                log.info("用户名：{} 退出，原因是心跳超时", onlineUser.getUserId());
+                SessionManager.getInstance().inActiveSession(onlineUser.getUserId(), onlineUser.getLoginToken());
             }
         }
         // 重置加载

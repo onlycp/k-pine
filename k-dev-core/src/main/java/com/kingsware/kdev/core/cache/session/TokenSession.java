@@ -1,6 +1,7 @@
 package com.kingsware.kdev.core.cache.session;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Timestamp;
 
@@ -12,6 +13,7 @@ import java.sql.Timestamp;
  * @date 2022/3/7 11:19 上午
  */
 @Data
+@Slf4j
 public class TokenSession {
     /** id **/
     private String id;
@@ -27,8 +29,14 @@ public class TokenSession {
     private boolean hasChanged = false;
     /** ping时间 **/
     private Timestamp pingTime;
+    /** 是否活动的 **/
+    private boolean isActive = true;
 
     public void ping() {
         this.pingTime = new Timestamp(System.currentTimeMillis());
+        if (!this.isActive) {
+            log.info("会话:{} 由失活重新转为激活状态", this.loginToken);
+        }
+        this.isActive = true;
     }
 }
