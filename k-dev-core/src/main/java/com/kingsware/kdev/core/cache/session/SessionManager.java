@@ -3,6 +3,7 @@ package com.kingsware.kdev.core.cache.session;
 import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.BeanUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -13,6 +14,7 @@ import java.util.*;
  * @version 1.0.0
  * @date 2022/1/6 9:25 上午
  */
+@Slf4j
 public class SessionManager {
     /** 实例 **/
     private static SessionManager instance;
@@ -116,6 +118,40 @@ public class SessionManager {
               }
           }
       }
+    }
+
+    /**
+     * 失活会话
+     * @param userId    用户id
+     * @param loginToken    登录令牌
+     */
+    public void inActiveSession(String userId, String loginToken) {
+        if (sessionMapping.containsKey(userId)) {
+            Set<TokenSession> onlineUsers = sessionMapping.get(userId);
+            for (TokenSession onlineUser: onlineUsers) {
+                if (onlineUser.getLoginToken().equals(loginToken)) {
+                    if (onlineUser.isActive()) {
+                        log.info("用户名：{} 失活，原因是心跳超时", userId);
+                    }
+                    onlineUser.setActive(false);
+                    return;
+                }
+            }
+        }
+    }
+
+    /**
+     * 用户的活动会话数
+     * @param userId    用户id
+     * @return          激活数
+     */
+    public long activeCount(String userId) {
+        Set<TokenSession> tokenSessions = sessionMapping.get(userId);
+        if (tokenSessions == null) {
+            return 0L;
+        }
+        return tokenSessions.stream().filter(TokenSession::isActive).count();
+
     }
 
 

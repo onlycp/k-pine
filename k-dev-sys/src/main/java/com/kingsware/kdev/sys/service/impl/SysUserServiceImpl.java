@@ -305,8 +305,12 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         if (!appAuthProperties.getLoginSessionOne()) {
             return 0L;
         }
-        String sql = "select count(1) from sys_online_user t0 left join sys_user t1 on t0.user_id = t1.id where t1.username = ?";
-        return DB.findCount(sql, username);
+        String userId = DB.findSingleAttribute(String.class, "select id from sys_user where username=?", username);
+        if (StringUtils.isEmpty(userId)) {
+            return 0L;
+        }
+        return SessionManager.getInstance().activeCount(userId);
+
     }
 
     @Override

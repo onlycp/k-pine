@@ -189,7 +189,6 @@ public class SysUserController extends BaseController {
      *  获取用户基本信息
      * @return 提示
      */
-    @ApiOperation(value = "PING " ,notes = "PING")
     @GetMapping(value = "/ping")
     public BaseRet<?> ping() {
         sysUserService.ping();
