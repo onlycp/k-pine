@@ -54,6 +54,7 @@
                     </execution>
                 </executions>
                 <configuration>
+<!--                    export DOCKER_HOST=tcp://10.11.2.215:2375 -->
 <!--                    <dockerHost>http://10.11.2.215:2375</dockerHost>-->
                     <contextDirectory>${project.basedir}</contextDirectory>
                     <!-- harbor 仓库用户名及密码-->
