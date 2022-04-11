@@ -12,6 +12,7 @@ import com.kingsware.kdev.core.excel.ExcelWorker;
 import com.kingsware.kdev.core.excel.KExcel;
 import com.kingsware.kdev.core.kflow.bean.KFlowUploadFile;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
+import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
 import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -113,6 +114,10 @@ public class KFlowFilter implements Filter {
             }
             else if (result.getType().equals(KFlowConstant.RESULT_EXCEL)) {
                 ExcelWorker.getInstance().writeToWeb((KExcel) result.getData());
+            }
+            else if (result.getType().equals(KFlowConstant.RESULT_FILE)) {
+                KdbRetFile kdbRetFile = (KdbRetFile) result.getData();
+                ServletUtil.responseFile(kdbRetFile.getFileName(), kdbRetFile.getData());
             }
         }
     }

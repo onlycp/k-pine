@@ -26,6 +26,8 @@ public class KFlowConstant {
     public final static String MESSAGE_FLAG = "message|";
     /** 导出excel **/
     public final static String EXCEL_FLAG = "excel|";
+    /** 导出文件 **/
+    public final static String FILE_FLAG = "file|";
 
     /** 结果类型 json **/
     public final static String RESULT_JSON = "json";

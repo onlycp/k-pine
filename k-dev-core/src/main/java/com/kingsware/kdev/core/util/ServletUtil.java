@@ -10,6 +10,7 @@ import org.yaml.snakeyaml.util.UriEncoder;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.util.Base64;
 import java.util.Objects;
 
 /**
@@ -91,6 +92,32 @@ public class ServletUtil {
             }
         }
     }
+
+    /**
+     * 响应文件
+     * @param fileName 文件名称
+     * @param data 文件内容
+     */
+    public static void responseFile(String fileName, byte[] data) {
+        try {
+            HttpServletResponse response = ServletUtil.response();
+            response.reset();
+            response.setContentType("application/octet-stream");
+            response.setCharacterEncoding("utf-8");
+            response.setHeader("Content-Disposition", "attachment;filename=" + UriEncoder.encode(fileName));
+            try {
+                response.setContentLength(data.length);
+                response.getOutputStream().write(data);
+                response.getOutputStream().flush();
+            } catch (IOException e) {
+                throw BusinessException.serviceThrow("文件写入失败");
+            }
+        }
+        catch (Exception e) {
+            log.info("文件写入失败，错误原因:{}", e.getMessage());
+        }
+    }
+
 
     /**
      * 获取访问者IP
