@@ -79,6 +79,9 @@ public class SysNoticeServiceImpl extends BaseServiceImpl implements SysNoticeSe
         if (argv.getType()!=null) {
             wrapper.addCondition("type", Op.EQ, argv.getType());
         }
+        if (StringUtils.isNotEmpty(argv.getAppId())) {
+            wrapper.appendSql(" and (app_id = ? or app_id is null)", argv.getAppId());
+        }
         wrapper.sortBy(" order by when_created desc ");
         return (PageDataRet<SysNoticeRet>) query(wrapper.getSql(), wrapper.getParams(), argv,SysNoticeRet.class);
     }

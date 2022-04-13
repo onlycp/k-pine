@@ -55,6 +55,9 @@ public class DevTopologicalServiceImpl extends BaseServiceImpl implements DevTop
         if (StringUtils.isNotEmpty(argv.getName())) {
             wrapper.addCondition("name", Op.LIKE, "%" + argv.getName() + "%");
         }
+        if (StringUtils.isNotEmpty(argv.getAppId())) {
+            wrapper.appendSql(" and (app_id = ? or app_id is null)", argv.getAppId());
+        }
         wrapper.sortBy("when_created desc");
         return (PageDataRet<DevTopologicalRet>) query(wrapper.getSql(), wrapper.getParams(), argv, DevTopological.class, DevTopologicalRet.class);
     }

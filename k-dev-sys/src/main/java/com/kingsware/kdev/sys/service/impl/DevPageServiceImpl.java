@@ -74,7 +74,7 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
         // 拼装sql
         SqlWrapper wrapper = new SqlWrapper("select * from dev_page where 1=1 and deleted=0 ");
         if (StringUtils.isNotEmpty(argv.getAppId())) {
-            wrapper.addCondition("app_id", Op.EQ, argv.getAppId());
+            wrapper.appendSql(" and (app_id = ? or app_id is null)", argv.getAppId());
         }
         if (StringUtils.isNotEmpty(argv.getName())) {
             wrapper.addCondition("name", Op.LIKE, "%" + argv.getName() + "%");

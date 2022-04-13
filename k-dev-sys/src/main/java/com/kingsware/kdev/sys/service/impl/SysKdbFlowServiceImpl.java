@@ -333,6 +333,9 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         List<FlowInfo> list = api.query(info);
         // 从数据库里查询所有数据
         String sql = "select t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name from sys_logic_flow t0 left join dev_application t1 on t1.id=t0.application_id";
+        if (StringUtils.isNotEmpty(argv.getApplicationId())) {
+            sql += " where (t0.application_id = '" + argv.getApplicationId() + "' or t0.application_id is null)";
+        }
         List<SysKdbFlowRet> logicFlows  = DB.findList(SysKdbFlowRet.class, sql );
         Map<String, SysKdbFlowRet> dbMap = new HashMap<>();
         logicFlows.forEach(it -> dbMap.put(it.getId(), it));

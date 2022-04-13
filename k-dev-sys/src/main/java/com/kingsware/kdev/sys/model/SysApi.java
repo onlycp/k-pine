@@ -1,6 +1,7 @@
 package com.kingsware.kdev.sys.model;
 
 import com.kingsware.kdev.core.bean.BaseManageModel;
+import com.kingsware.kdev.core.orm.annotation.Column;
 import com.kingsware.kdev.core.orm.annotation.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

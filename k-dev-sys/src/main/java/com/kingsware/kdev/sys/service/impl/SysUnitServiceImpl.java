@@ -127,6 +127,9 @@ public class SysUnitServiceImpl extends BaseServiceImpl implements SysUnitServic
         if (argv.getStatus() != null) {
             wrapper.addCondition("status", Op.EQ, argv.getStatus());
         }
+        if (StringUtils.isNotEmpty(argv.getAppId())) {
+            wrapper.appendSql(" and (app_id = ? or app_id is null)", argv.getAppId());
+        }
         // 查询所有相关的部门
         List<SysUnit> units = DB.findList(SysUnit.class, wrapper.getSql(), wrapper.getParams().toArray());
         // 然后通过in查询相关的部门(包括上级关系)

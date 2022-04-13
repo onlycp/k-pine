@@ -170,6 +170,9 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         if (argv.getStatus() != null) {
             wrapper.addCondition("u.status", Op.EQ, argv.getStatus());
         }
+        if (StringUtils.isNotEmpty(argv.getAppId())) {
+            wrapper.appendSql(" and (u.app_id = ? or u.app_id is null)", argv.getAppId());
+        }
         wrapper.groupBy("u.id");
         wrapper.sortBy("order by u.when_created desc");
         return (PageDataRet<SysUserRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysUserRet.class);

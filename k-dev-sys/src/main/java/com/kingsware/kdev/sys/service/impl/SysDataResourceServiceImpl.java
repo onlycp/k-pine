@@ -83,6 +83,9 @@ public class SysDataResourceServiceImpl extends BaseServiceImpl implements SysDa
         if (argv.getStatus() != null) {
             wrapper.addCondition("status", Op.EQ, argv.getStatus());
         }
+        if (StringUtils.isNotEmpty(argv.getAppId())) {
+            wrapper.appendSql(" and (app_id = ? or app_id is null)", argv.getAppId());
+        }
         return (PageDataRet<SysDataResourceRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysDataResource.class, SysDataResourceRet.class);
     }
 
