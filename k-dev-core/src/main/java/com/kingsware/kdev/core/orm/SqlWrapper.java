@@ -235,7 +235,7 @@ public class SqlWrapper {
      * @param objects   参数
      */
     public SqlWrapper appendSql(String sql, Object... objects) {
-        sqlBuffer.append(sql);
+        sqlBuffer.append(" " + sql + " ");
         params.addAll(Arrays.asList(objects));
         return this;
     }

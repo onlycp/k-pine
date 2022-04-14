@@ -52,12 +52,12 @@ public class KFlowContext {
         return context;
     }
 
-    private static boolean isDevMode() {
+    public static boolean isDevMode() {
         AppModeProperties appModeProperties = SpringContext.getBean("appModeProperties");
         return appModeProperties.getDev();
     }
 
-    private static boolean isAdmin() {
+    public static boolean isAdmin() {
         // 获取用户信息
         BaseUserInfo userInfo = KClientContext.getContext().getUserInfo();
         // 如果不是web登录或者不登录
