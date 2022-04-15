@@ -101,7 +101,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         }
         // 如果不是超级管理员
         if (!AccessManager.getInstance().isSupperAdmin(userInfo.getRoleIds())) {
-            wrapper.appendSql(" and da.id in (select dta.app_id from dev_team_member dtm inner join dev_team_app dta on dta.team_id = dtm.team_id where dtm.user_id = ?) ", userInfo.getId());
+            wrapper.appendSql(" and da.id in (select dta.app_id from dev_team_member dtm inner join dev_team_app dta on dta.team_id = dtm.team_id where dtm.user_id = ? and dta.team_id = ?) ", userInfo.getId(), argv.getTeamId());
         }
 
         wrapper.sortBy("da.when_created desc");

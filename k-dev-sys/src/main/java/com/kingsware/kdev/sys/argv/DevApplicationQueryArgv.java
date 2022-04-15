@@ -31,4 +31,7 @@ public class DevApplicationQueryArgv extends BasePageArgv {
 
     /** 应用类型 */
     private String appType;
+
+    /** 当前团队ID */
+    private String teamId;
 }
