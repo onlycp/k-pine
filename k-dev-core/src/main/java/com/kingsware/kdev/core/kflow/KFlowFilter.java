@@ -90,6 +90,9 @@ public class KFlowFilter implements Filter {
         String method = request.getMethod().toLowerCase();
         // 获取上下文路径
         String contextPath = request.getContextPath();
+        if (url.startsWith("/api"))  {
+            contextPath = "/api";
+        }
         // 获取配置的接口信息
         String path = url.replace(contextPath, "");
         ApiInfo api = ApiManager.getInstance().getApi(method, path);

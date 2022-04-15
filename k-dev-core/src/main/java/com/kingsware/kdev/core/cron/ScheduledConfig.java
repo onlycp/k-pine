@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -48,10 +49,7 @@ public class ScheduledConfig implements SchedulingConfigurer {
         List<SysTask> tasks = TaskListManager.getInstance().getAllTask();
         for (SysTask sysTask: tasks) {
             // 执行任务
-            scheduledTaskRegistrar.addTriggerTask(() -> {
-                KTaskRunnerManager.getInstance().runTask(sysTask);
-
-            }, triggerContext -> {
+            scheduledTaskRegistrar.addTriggerTask(() -> KTaskRunnerManager.getInstance().runTask(sysTask), (TriggerContext triggerContext) -> {
                 SysTask myTask = TaskListManager.getInstance().getTask(sysTask.getId());
                 return new CronTrigger(myTask.getCron()).nextExecutionTime(triggerContext);
             });
