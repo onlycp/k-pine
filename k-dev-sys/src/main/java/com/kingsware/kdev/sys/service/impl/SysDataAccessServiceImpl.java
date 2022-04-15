@@ -79,6 +79,9 @@ public class SysDataAccessServiceImpl extends BaseServiceImpl implements SysData
         if (argv.getStatus() != null) {
             wrapper.addCondition("status", Op.EQ, argv.getStatus());
         }
+        if (StringUtils.isNotEmpty(argv.getAppId())) {
+            wrapper.appendSql(" and (app_id = ? or app_id is null)", argv.getAppId());
+        }
         return (PageDataRet<SysDataAccessRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysDataAccess.class, SysDataAccessRet.class);
     }
 

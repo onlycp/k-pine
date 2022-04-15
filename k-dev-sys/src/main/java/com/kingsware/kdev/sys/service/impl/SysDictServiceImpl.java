@@ -87,6 +87,9 @@ public class SysDictServiceImpl extends BaseServiceImpl implements SysDictServic
         // 拼装sql
         SqlWrapper wrapper = new SqlWrapper(" select * from sys_dict where 1=1 ");
         // 拼装查询sql
+        if (StringUtils.isNotEmpty(argv.getId())) {
+            wrapper.addCondition("id", Op.EQ, argv.getId());
+        }
         if (StringUtils.isNotEmpty(argv.getName())) {
             wrapper.addCondition("name", Op.LIKE, "%" + argv.getName() + "%");
         }
@@ -94,7 +97,7 @@ public class SysDictServiceImpl extends BaseServiceImpl implements SysDictServic
             wrapper.addCondition("code", Op.LIKE, "%" + argv.getCode() + "%");
         }
         if (StringUtils.isNotEmpty(argv.getAppId())) {
-            wrapper.addCondition("app_id", Op.EQ, argv.getAppId());
+            wrapper.appendSql(" and (app_id = ? or app_id is null)", argv.getAppId());
         }
         wrapper.sortBy(" order by when_created desc ");
         // 返回结果

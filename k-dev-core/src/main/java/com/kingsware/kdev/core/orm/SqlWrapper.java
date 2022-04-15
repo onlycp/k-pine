@@ -229,7 +229,16 @@ public class SqlWrapper {
         return selectWrapper(tClass, "t", "*");
     }
 
-
+    /**
+     * 增加自定定查询条件，使用？做为参数
+     * @param sql 语句
+     * @param objects   参数
+     */
+    public SqlWrapper appendSql(String sql, Object... objects) {
+        sqlBuffer.append(" " + sql + " ");
+        params.addAll(Arrays.asList(objects));
+        return this;
+    }
 
 
 

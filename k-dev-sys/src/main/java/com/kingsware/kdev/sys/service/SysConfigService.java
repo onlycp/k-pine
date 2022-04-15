@@ -7,6 +7,8 @@ import com.kingsware.kdev.sys.argv.SysConfigArgv;
 import com.kingsware.kdev.sys.argv.SysConfigQueryArgv;
 import com.kingsware.kdev.sys.ret.SysConfigRet;
 
+import java.util.List;
+
 
 /**
  * 系统配置接口
@@ -48,4 +50,6 @@ public interface SysConfigService extends BaseService {
      * @param argv  查询
      */
     void delete(MultiIdArgv argv);
+
+    List<SysConfigRet> getSysConfig();
 }

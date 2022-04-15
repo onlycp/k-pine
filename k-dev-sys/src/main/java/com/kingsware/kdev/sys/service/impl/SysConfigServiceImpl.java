@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.i18n.I18n;
+import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
@@ -16,6 +17,9 @@ import com.kingsware.kdev.sys.model.SysConfig;
 import com.kingsware.kdev.sys.ret.SysConfigRet;
 import com.kingsware.kdev.sys.service.SysConfigService;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -64,9 +68,9 @@ public class SysConfigServiceImpl extends BaseServiceImpl implements SysConfigSe
         // 唯一性校验
         DBChecker<SysConfig> checker =DBChecker.build(model, SysConfig.class);
         // 参数名称唯一
-        checker.uni("name", I18n.t("SysConfig.name.unique", "参数名称必须唯一"));
+        checker.uni(new String[]{"code", "appId"}, I18n.t("SysConfig.name.unique", "参数名称必须唯一"));
         // 参数键名唯一
-        checker.uni("code", I18n.t("SysConfig.code.unique", "参数键名必须唯一"));
+        checker.uni(new String[]{"code", "appId"}, I18n.t("SysConfig.code.unique", "参数键名必须唯一"));
         // 执行校验
         checker.checkUnique();
     }
@@ -86,6 +90,9 @@ public class SysConfigServiceImpl extends BaseServiceImpl implements SysConfigSe
         if (argv.getIsSys()!=null) {
             wrapper.addCondition("is_sys", Op.EQ, argv.getIsSys());
         }
+        if (StringUtils.isNotEmpty(argv.getAppId())) {
+            wrapper.appendSql(" and (app_id = ? or app_id is null)", argv.getAppId());
+        }
         wrapper.sortBy("when_created desc");
         return (PageDataRet<SysConfigRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysConfig.class, SysConfigRet.class);
     }
@@ -96,4 +103,20 @@ public class SysConfigServiceImpl extends BaseServiceImpl implements SysConfigSe
             DB.delete(SysConfig.class, id);
         }
     }
+
+    @Override
+    public List<SysConfigRet> getSysConfig() {
+        List<Object> codeList = new ArrayList<>();
+        codeList.add("application.name");
+        codeList.add("application.logo");
+        codeList.add("application.version");
+        // 拼装sql
+        SqlWrapper wrapper = new SqlWrapper("select * from sys_config where 1=1 ");
+        wrapper.in("code", codeList);
+        if (KFlowContext.isDevMode()) {
+            wrapper.appendSql(" and app_id is null");
+        }
+        return DB.findList(SysConfigRet.class, wrapper.getSql(), wrapper.getParams().toArray());
+    }
+
 }

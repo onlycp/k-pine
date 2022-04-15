@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -14,6 +15,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * 系统配置控制器
@@ -83,6 +85,17 @@ public class SysConfigController extends BaseController {
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         sysConfigService.delete(argv);
         return BaseRet.success();
+    }
+
+    /**
+     * 获取当前系统配置
+     * @return 获取当前系统配置
+     */
+    @ApiOperation(value = "获取当前系统配置 " ,notes = "获取当前系统配置")
+    @GetMapping("/get-sys-config")
+    @ApiIgnore
+    public BaseRet<List<SysConfigRet>> getSysConfig() {
+        return BaseRet.success(sysConfigService.getSysConfig());
     }
 
 }

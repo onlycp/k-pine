@@ -76,6 +76,9 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         if (StringUtils.isNotEmpty(argv.getUploadTimes())) {
             wrapper.between("when_created", argv.getUploadTimes().split(",")[0], argv.getUploadTimes().split(",")[1]);
         }
+        if (StringUtils.isNotEmpty(argv.getAppId())) {
+            wrapper.appendSql(" and (app_id = ? or app_id is null)", argv.getAppId());
+        }
         // 排序
         wrapper.sortBy("when_created desc");
         return (PageDataRet<SysFileRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysFile.class, SysFileRet.class);
