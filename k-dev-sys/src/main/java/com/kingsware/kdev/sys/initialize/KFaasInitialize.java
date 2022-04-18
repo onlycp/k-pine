@@ -92,4 +92,9 @@ public class KFaasInitialize implements SystemInitialize {
 
 
     }
+
+    @Override
+    public int sort() {
+        return 0;
+    }
 }

@@ -12,4 +12,6 @@ public interface SystemInitialize {
      * 系统初始化处理
      */
     void execute();
+
+    int sort();
 }

@@ -81,4 +81,9 @@ public class KAppInitialize implements SystemInitialize {
 
         }
     }
+
+    @Override
+    public int sort() {
+        return 2;
+    }
 }

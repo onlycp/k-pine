@@ -11,10 +11,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 数据库配置类
@@ -50,7 +47,28 @@ public class DBInitialize {
      */
     public void initSystem() {
         List<SystemInitialize> systemInitializes = SpringContext.getBeansOfType(SystemInitialize.class);
+        // 按顺序初始化
+        sortSystemInitializes(systemInitializes);
         systemInitializes.forEach(SystemInitialize::execute);
+    }
 
+    private void sortSystemInitializes(List<SystemInitialize> systemInitializes) {
+        if (systemInitializes == null) {
+            return ;
+        }
+        SystemInitialize tmp = null;
+        for (int i = 0; i < systemInitializes.size() - 1; i ++) {
+            SystemInitialize initA = systemInitializes.get(i);
+            for (int j = i + 1; j < systemInitializes.size(); j ++) {
+                SystemInitialize initB = systemInitializes.get(j);
+                if (initB.sort() < initA.sort()) {
+                    tmp = initA;
+                    initA = initB;
+                    initB = tmp;
+                    systemInitializes.set(j, initB);
+                    systemInitializes.set(i, initA);
+                }
+            }
+        }
     }
 }
