@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.io.FileNotFoundException;
 import java.util.*;
 
 /**
@@ -49,7 +50,13 @@ public class DBInitialize {
         List<SystemInitialize> systemInitializes = SpringContext.getBeansOfType(SystemInitialize.class);
         // 按顺序初始化
         sortSystemInitializes(systemInitializes);
-        systemInitializes.forEach(SystemInitialize::execute);
+        try {
+            for (SystemInitialize systemInitialize : systemInitializes) {
+                systemInitialize.execute();
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     private void sortSystemInitializes(List<SystemInitialize> systemInitializes) {

@@ -1,5 +1,7 @@
 package com.kingsware.kdev.core.base;
 
+import java.io.FileNotFoundException;
+
 /**
  * 系统初始化类
  *
@@ -11,7 +13,7 @@ public interface SystemInitialize {
     /**
      * 系统初始化处理
      */
-    void execute();
+    void execute() throws FileNotFoundException;
 
     int sort();
 }
