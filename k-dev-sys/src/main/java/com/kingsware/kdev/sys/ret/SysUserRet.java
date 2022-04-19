@@ -44,4 +44,5 @@ public class SysUserRet extends BaseManageRet {
     private String note;
     /** 所属应用ID **/
     private String appId;
+
 }

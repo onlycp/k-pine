@@ -34,12 +34,12 @@ public class SysSqlInitialize implements SystemInitialize {
 
     @Override
     public void execute() {
-        List<ExecutionFile> fileList = getFileList(getMaxExecuteVersion());
-        log.info("初始化数据... starting");
-        fileList.forEach(file -> {
-            executeSqlFile(file);
-        });
-        log.info("初始化数据... end");
+//        List<ExecutionFile> fileList = getFileList(getMaxExecuteVersion());
+//        log.info("初始化数据... starting");
+//        fileList.forEach(file -> {
+//            executeSqlFile(file);
+//        });
+//        log.info("初始化数据... end");
     }
 
     private int getMaxExecuteVersion() {
