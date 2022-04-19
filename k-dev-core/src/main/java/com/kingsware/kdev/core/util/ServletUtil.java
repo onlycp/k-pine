@@ -39,6 +39,7 @@ public class ServletUtil {
      * @return http响应
      */
     public static HttpServletResponse response() {
+        ServletRequestAttributes response = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes());
         return ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getResponse();
     }
 

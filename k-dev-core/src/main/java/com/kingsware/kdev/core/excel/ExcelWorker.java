@@ -75,6 +75,25 @@ public class ExcelWorker {
             this.excelHandler.write(excel, response.getOutputStream());
         }
         catch (Exception e) {
+            e.printStackTrace();
+            log.info("excel导出失败，错误原因:{}", e.getMessage());
+        }
+    }
+
+    /**
+     * 输出到web，即直接下载
+     * @param excel excel数据
+     */
+    public void writeToWeb(HttpServletResponse response,KExcel excel) {
+        try {
+            response.reset();
+            response.setContentType("application/octet-stream");
+            response.setCharacterEncoding("utf-8");
+            response.setHeader("Content-Disposition", "attachment;filename=" + UriEncoder.encode(excel.getFileNme()));
+            this.excelHandler.write(excel, response.getOutputStream());
+        }
+        catch (Exception e) {
+            e.printStackTrace();
             log.info("excel导出失败，错误原因:{}", e.getMessage());
         }
     }

@@ -4,17 +4,14 @@ import com.kingsware.kdev.core.base.SystemInitialize;
 import com.kingsware.kdev.core.kflow.define.FlowDefinition;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.*;
-import com.kingsware.kdev.core.util.FileUtils;
-import com.kingsware.kdev.core.util.JsonUtil;
-import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.core.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.util.HashMap;
+import java.net.Socket;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -31,9 +28,31 @@ public class KFaasInitialize implements SystemInitialize {
     @Value("${database.initDatasourcePath:.}")
     private String initDatasourcePath;
 
+    /** faas目录  **/
+    @Value("${database.faas-folder:}")
+    private String faasFolder;
+
+    /** faas命令  **/
+    @Value("${database.faas-start-cmd:}")
+    private String faasStartCmd;
+
+
+    /** faas命令  **/
+    @Value("${database.faas-stop-cmd:}")
+    private String faasStopCmd;
+
+
+    /** faas命令  **/
+    @Value("${database.faas-port:18001}")
+    private int faasPort;
+
+    @Value("${database.faas-port:127.0.0.1}")
+    private String faasIp;
+
     @Override
     public void execute() {
-
+        // 启动faas
+        startFaas();
         // 1. 初始化数据源
         // 读取文件
         String dbConfigFilePath = initDatasourcePath + "/db.json";
@@ -91,6 +110,37 @@ public class KFaasInitialize implements SystemInitialize {
 
 
 
+    }
+
+    /**
+     * 启动faas
+     */
+    private void startFaas() {
+        if (StringUtils.isEmpty(faasStartCmd)) {
+            return;
+        }
+        // 如果当前已启动，先关闭端口
+        if (portOpened(faasIp, faasPort)) {
+            log.info("faas已启动");
+            return;
+
+        }
+        log.info("正在启动faas");
+        new Thread(() -> ShellUtils.execAsync(faasFolder, faasStartCmd)).start();
+        while (!portOpened(faasIp, faasPort)) {
+            ThreadUtils.sleep(1000);
+            log.info("正在检测faas状态，请耐心等等...");
+        }
+        log.info("完成启动faas");
+    }
+
+    private boolean portOpened(String ip, int port) {
+        try (Socket ignored = new Socket(ip , port)) {
+            return true;
+        }
+        catch (Exception e) {
+            return false;
+        }
     }
 
     @Override

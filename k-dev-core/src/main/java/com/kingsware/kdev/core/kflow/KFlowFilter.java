@@ -106,7 +106,7 @@ public class KFlowFilter implements Filter {
             KFlowContext context = KFlowContext.createBaseContext(StringUtils.isNotEmpty(api.getInArgv()) ? api.getInArgv() : "{}", StringUtils.isNotEmpty(api.getOutArgv()) ? api.getOutArgv() : "{}");
             // 处理请求变量
             Map<String, Object> argvMap = getRequestParams(api, path, request);
-//            // 加入Req
+            // 加入Req
             // 处理类
             context.setHandleClass(api.getApiResultHandler());
             // 调用流程
@@ -116,7 +116,7 @@ public class KFlowFilter implements Filter {
                 responseJson(response, FlowUtils.toJsonResult(result.getData()));
             }
             else if (result.getType().equals(KFlowConstant.RESULT_EXCEL)) {
-                ExcelWorker.getInstance().writeToWeb((KExcel) result.getData());
+                ExcelWorker.getInstance().writeToWeb(response, (KExcel) result.getData());
             }
             else if (result.getType().equals(KFlowConstant.RESULT_FILE)) {
                 KdbRetFile kdbRetFile = (KdbRetFile) result.getData();
