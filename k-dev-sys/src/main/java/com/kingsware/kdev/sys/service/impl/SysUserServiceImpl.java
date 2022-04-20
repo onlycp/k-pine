@@ -31,6 +31,7 @@ import com.kingsware.kdev.sys.model.SysUserRole;
 import com.kingsware.kdev.sys.ret.SysUserLoginRet;
 import com.kingsware.kdev.sys.ret.SysUserProfileRet;
 import com.kingsware.kdev.sys.ret.SysUserRet;
+import com.kingsware.kdev.sys.ret.SysUserRoleName;
 import com.kingsware.kdev.sys.service.SysUserService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +44,7 @@ import java.util.*;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 用户业务实现类
@@ -150,12 +152,10 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     @SuppressWarnings("unchecked")
     public PageDataRet<SysUserRet> query(SysUserQueryArgv argv) {
         // 拼装sql
-        SqlWrapper wrapper = new SqlWrapper("select u.*, group_concat(sr.name) as sys_role_names, un.name as sys_unit_name, " +
+        SqlWrapper wrapper = new SqlWrapper("select u.*, un.name as sys_unit_name, " +
                 "un.path as sys_unit_path " +
                 "from sys_user u " +
                 "left join sys_unit un on un.id=u.sys_unit_id " +
-                "left join sys_user_role sur on sur.sys_user_id = u.id " +
-                "left join sys_role sr on sr.id = sur.sys_role_id " +
                 "where 1=1 ");
         // 拼装查询sql
         if (StringUtils.isNotEmpty(argv.getUsername())) {
@@ -173,9 +173,26 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         if (StringUtils.isNotEmpty(argv.getAppId())) {
             wrapper.appendSql(" and (u.app_id = ? or u.app_id is null)", argv.getAppId());
         }
-        wrapper.groupBy("u.id");
         wrapper.sortBy("order by u.when_created desc");
-        return (PageDataRet<SysUserRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysUserRet.class);
+        // 用户信息
+        PageDataRet<SysUserRet> pageDataRet = (PageDataRet<SysUserRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysUserRet.class);
+        // 查询角色信息
+        // 先获取用户id
+        List<Object> userIds = pageDataRet.getList().stream().map(SysUserRet::getId).collect(Collectors.toList());
+        if (!userIds.isEmpty()) {
+            SqlWrapper roleWrapper = new SqlWrapper("select sys_user_id, sr.name from sys_user_role sur inner join sys_role sr on sr.id=sur.sys_role_id where 1=1 ");
+            roleWrapper.in("sur.sys_user_id", userIds);
+            // 将角色名称查询出来
+            List<SysUserRoleName> sysUserRoleNames = DB.findList(SysUserRoleName.class, roleWrapper.getSql(), roleWrapper.getParams().toArray(new Object[0]));
+            // 根据用户信息来合并
+            for (SysUserRet userRet: pageDataRet.getList()) {
+                // 查找用户的角色名称
+                List<String> myRoleNames = sysUserRoleNames.stream().filter(it -> it.getSysUserId().equalsIgnoreCase(userRet.getId())).map(SysUserRoleName::getName).collect(Collectors.toList());
+                userRet.setSysRoleNames(StringUtils.joinToString(myRoleNames, ","));
+            }
+        }
+        return pageDataRet;
+
     }
 
     @Override

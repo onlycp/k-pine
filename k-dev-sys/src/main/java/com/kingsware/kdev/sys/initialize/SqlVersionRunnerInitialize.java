@@ -19,7 +19,7 @@ public class SqlVersionRunnerInitialize implements SystemInitialize {
 
     @Override
     public void execute() {
-        DB.executeUpdateSql(DEV_SQL_RUN_TABLE);
+        // DB.executeUpdateSql(DEV_SQL_RUN_TABLE);
     }
 
     @Override
