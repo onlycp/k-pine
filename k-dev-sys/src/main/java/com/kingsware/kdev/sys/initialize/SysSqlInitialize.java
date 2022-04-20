@@ -52,10 +52,16 @@ public class SysSqlInitialize implements SystemInitialize {
     }
 
     private List<ExecutionFile> getFileList(int maxVersion) {
-        List<File> resultList = new ArrayList<>();
+        List<ExecutionFile> resultList = new ArrayList<>();
         String dbConfigFilePath = initDatasourcePath + "/initSql";
         File fileList = new File(dbConfigFilePath);
+        if (fileList == null) {
+            return resultList;
+        }
         File[] allFile = fileList.listFiles();
+        if (allFile == null || allFile.length == 0) {
+            return resultList;
+        }
         return Arrays.stream(allFile).map(file -> {
             ExecutionFile executionFile = new ExecutionFile();
             String filename = file.getName();
@@ -96,7 +102,7 @@ public class SysSqlInitialize implements SystemInitialize {
                     sqlSumary.append(sql);
                     DB.executeUpdateSql(sql);
                     long eachSqlEnd = System.currentTimeMillis();
-                    log.info(String.format("执行SQL: %s，用时：%sms", sql, (eachSqlEnd - eachSqlStart)));
+                    log.info(String.format("SQL版本：%s，执行SQL: %s，用时：%sms", file.getVersion(), sql, (eachSqlEnd - eachSqlStart)));
                 }
             });
             success = true;

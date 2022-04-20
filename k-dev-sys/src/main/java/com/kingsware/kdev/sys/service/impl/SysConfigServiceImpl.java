@@ -19,7 +19,9 @@ import com.kingsware.kdev.sys.service.SysConfigService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -105,7 +107,7 @@ public class SysConfigServiceImpl extends BaseServiceImpl implements SysConfigSe
     }
 
     @Override
-    public List<SysConfigRet> getSysConfig() {
+    public Map<String, Object> getSysConfig() {
         List<Object> codeList = new ArrayList<>();
         codeList.add("application.name");
         codeList.add("application.logo");
@@ -116,7 +118,14 @@ public class SysConfigServiceImpl extends BaseServiceImpl implements SysConfigSe
         if (KFlowContext.isDevMode()) {
             wrapper.appendSql(" and app_id is null");
         }
-        return DB.findList(SysConfigRet.class, wrapper.getSql(), wrapper.getParams().toArray());
+        Map<String, Object> resultMap = new HashMap<>();
+        List<SysConfigRet> configList = DB.findList(SysConfigRet.class, wrapper.getSql(), wrapper.getParams().toArray());
+        if (configList != null) {
+            for (SysConfigRet sysConfigRet : configList) {
+                resultMap.put(sysConfigRet.getCode().replace("application.", ""), sysConfigRet.getValue());
+            }
+        }
+        return resultMap;
     }
 
 }

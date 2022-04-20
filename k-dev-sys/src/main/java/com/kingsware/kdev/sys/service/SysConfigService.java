@@ -7,7 +7,7 @@ import com.kingsware.kdev.sys.argv.SysConfigArgv;
 import com.kingsware.kdev.sys.argv.SysConfigQueryArgv;
 import com.kingsware.kdev.sys.ret.SysConfigRet;
 
-import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -51,5 +51,5 @@ public interface SysConfigService extends BaseService {
      */
     void delete(MultiIdArgv argv);
 
-    List<SysConfigRet> getSysConfig();
+    Map<String, Object> getSysConfig();
 }

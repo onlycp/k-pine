@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 系统配置控制器
@@ -94,7 +95,7 @@ public class SysConfigController extends BaseController {
     @ApiOperation(value = "获取当前系统配置 " ,notes = "获取当前系统配置")
     @GetMapping("/get-sys-config")
     @ApiIgnore
-    public BaseRet<List<SysConfigRet>> getSysConfig() {
+    public BaseRet<Map<String, Object>> getSysConfig() {
         return BaseRet.success(sysConfigService.getSysConfig());
     }
 
