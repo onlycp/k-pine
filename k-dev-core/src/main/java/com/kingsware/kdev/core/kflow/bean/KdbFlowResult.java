@@ -15,4 +15,6 @@ public class KdbFlowResult {
     private String type;
     /** 处理之后的结束 **/
     private Object data;
+    /** 日志信息 **/
+    private String log;
 }

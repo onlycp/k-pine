@@ -435,7 +435,8 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         long t2 = System.currentTimeMillis();
         SysFlowDebugRet ret = new SysFlowDebugRet();
         ret.setTakeMs(t2 - t1);
-        ret.setResponseBody(JsonUtil.toJson(result));
+        ret.setResponseBody(JsonUtil.toJson(result.getData()));
+        ret.setLog(result.getLog());
         return ret;
     }
 

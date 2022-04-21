@@ -17,6 +17,8 @@ public class BaseRet<T> implements Serializable {
     private String message;
     /** 数据 **/
     private T data;
+    /** 日志 **/
+    private String log;
 
     public BaseRet() {
     }

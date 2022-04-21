@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.orm.kdb;
 
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.HttpClientException;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
@@ -27,7 +28,7 @@ public abstract class KdbApiAbstract implements  KdbApi {
     public static final String EDIT_FLOW_URL = "/api/flow/edit";
     public static final String DELETE_FLOW_URL = "/api/flow/delete";
     public static final String QUERY_FLOW_URL = "/api/flow/search";
-    public static final String EXCUTE_FLOW_URL = "/api/execute";
+    public static final String EXCUTE_FLOW_URL = "/api/execute4debug";
     /** 数据源相关接口 **/
     public static final String ADD_DS_URL = "/api/dataSource/add";
     public static final String EDIT_DS_URL = "/api/dataSource/edit";
@@ -105,7 +106,8 @@ public abstract class KdbApiAbstract implements  KdbApi {
     @Override
     public KdbRet<String> executeFlow(KdbArgv argv) {
         // 加入当前环境变量
-        return post(argv, EXCUTE_FLOW_URL, String.class);
+        String executeFlowUrl = SpringContext.getProperties("database.sources.db.executeSqlApi", "/api/execute");
+        return post(argv, executeFlowUrl, String.class);
     }
 
     @Override

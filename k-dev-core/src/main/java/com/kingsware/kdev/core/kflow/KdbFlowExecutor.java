@@ -91,6 +91,7 @@ public class KdbFlowExecutor {
             KdbRet<String> ret = DB.kdbApi().executeFlow(argv);
             // 如果失败
             KdbFlowResult result = new KdbFlowResult();
+
             if (ret.getErrorCode() != 0) {
                 result.setType(KFlowConstant.RESULT_JSON);
                 result.setData(new ErrorResult(ret.getMessage() == null ? "流程处理失败": ret.getMessage()));
@@ -103,12 +104,14 @@ public class KdbFlowExecutor {
                 result.setType(KFlowConstant.RESULT_JSON);
                 result.setData(null);
             }
+            result.setLog(ret.getKlog());
             return result;
         }
         catch (OrmDbException ormDbException) {
             KdbFlowResult result = new KdbFlowResult();
             result.setType(KFlowConstant.RESULT_JSON);
             result.setData(new ErrorResult(ormDbException.getMessage() == null ? "流程处理失败": ormDbException.getMessage()));
+            result.setLog(ormDbException.getKlog());
             return result;
         }
 

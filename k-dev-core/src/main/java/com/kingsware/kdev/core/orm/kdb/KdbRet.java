@@ -17,4 +17,6 @@ public class KdbRet<T> {
     private String message;
     /** 响应体 **/
     private T responseBody;
+    /** log **/
+    private String klog;
 }

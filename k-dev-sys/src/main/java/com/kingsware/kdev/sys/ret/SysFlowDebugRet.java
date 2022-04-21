@@ -17,4 +17,6 @@ public class SysFlowDebugRet {
     private int code;
     /** 响应内容 **/
     private String responseBody;
+    /** 日志 **/
+    private String log;
 }

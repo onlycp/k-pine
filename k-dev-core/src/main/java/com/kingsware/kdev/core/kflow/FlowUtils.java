@@ -8,6 +8,7 @@ import com.kingsware.kdev.core.cache.config.ConfigManager;
 import com.kingsware.kdev.core.cache.config.SysConfigInfo;
 import com.kingsware.kdev.core.cache.dict.DictManager;
 import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.kflow.bean.ComplexValue;
 import com.kingsware.kdev.core.kflow.bean.ErrorResult;
 import com.kingsware.kdev.core.kflow.bean.KFlowMessage;
@@ -171,9 +172,15 @@ public class FlowUtils {
                         if (inObject != null && StringUtils.isNotEmpty(inObject.toString())) {
                             String strValue = inObject.toString();
                             JsonNode pTypeNode = pNode.get("type");
-                            if ("integer".equalsIgnoreCase(pType)) {
-                                newValueMap.put(pName, Integer.parseInt(strValue));
+                            try {
+                                if ("integer".equalsIgnoreCase(pType)) {
+                                    newValueMap.put(pName, Integer.parseInt(strValue));
+                                }
                             }
+                            catch (Exception e) {
+                                throw new BusinessException("输入参数不合法，定义的类型为:" + pType +", 传入值为:" + strValue);
+                            }
+
                         }
 
                     }
