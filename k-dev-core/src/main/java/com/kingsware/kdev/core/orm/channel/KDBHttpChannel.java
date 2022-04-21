@@ -94,7 +94,6 @@ public class KDBHttpChannel implements DbChannel{
             return 0L;
         }
         return Long.parseLong(executeResponse);
-
     }
 
     public <T> List<T> queryForList(String sql, Class<T> tClass, List<Object> objects) {
