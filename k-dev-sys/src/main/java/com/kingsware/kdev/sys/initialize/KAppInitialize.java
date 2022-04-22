@@ -33,7 +33,7 @@ public class KAppInitialize implements SystemInitialize {
     @Override
     public void execute() {
         String regex = "\\S+pine";
-        executeExportFlowSql();
+//        executeExportFlowSql();
         // 扫描指定目录的psi文件
         File[] files = new File(initPsiPath).listFiles((dir, name) -> Pattern.compile(regex).matcher(name).matches());
         if (files == null) {
