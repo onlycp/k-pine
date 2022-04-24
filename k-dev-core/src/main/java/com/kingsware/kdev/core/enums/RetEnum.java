@@ -21,7 +21,7 @@ public enum RetEnum {
 
 
     /** 响应码 **/
-    private int code;
+    private final int code;
 
     /**
      * 默认构造函数

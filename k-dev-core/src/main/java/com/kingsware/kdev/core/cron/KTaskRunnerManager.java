@@ -49,7 +49,7 @@ public class KTaskRunnerManager {
         }
 
         // 设置锁，通过返回的数量才判断是否被锁
-        long cnt = DB.executeUpdateSql("update sys_task set lock_status=1, lock_for_time=now() where id=? and lock_status=0", sysTask.getId());
+        long cnt = DB.executeUpdateSql("update sys_task set lock_status=1, lock_for_time=? where id=? and lock_status=0",DateUtils.getNow(), sysTask.getId());
         // 如果影响行数为0，说明当前是锁定状态
         if (cnt == 0) {
             log.info("任务:{} 处于锁定状态", sysTask.getName());
@@ -161,6 +161,8 @@ public class KTaskRunnerManager {
                     sysTask.setClassName(tClass.getName());
                     sysTask.setLockForLeast(1);
                     sysTask.setLockForMost(30);
+                    sysTask.setLastExecuteStatus(0);
+                    sysTask.setLastExecuteTake(0L);
                     // 保存
                     DB.save(sysTask);
                     log.info("发现任务，任务名称:{}, cron:{}, Class: {}", sysTask.getName(), sysTask.getCron(), sysTask.getClassName());

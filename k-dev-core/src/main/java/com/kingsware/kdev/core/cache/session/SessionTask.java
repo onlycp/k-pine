@@ -7,6 +7,7 @@ import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public class SessionTask implements KTask {
     public void execute() {
         AppAuthProperties appAuthProperties = SpringContext.getBean(AppAuthProperties.class);
         // 移除过期的会话
-        DB.executeUpdateSql("delete from sys_online_user where expire_time < now()");
+        DB.executeUpdateSql("delete from sys_online_user where expire_time < ?", DateUtils.getNow());
         // 移除心跳超时的会话
         Set<TokenSession> sessions = SessionManager.getInstance().sessions();
         // 心跳过期的方案

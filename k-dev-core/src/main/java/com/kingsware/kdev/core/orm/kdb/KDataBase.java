@@ -124,7 +124,7 @@ public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
         String selectCountSql = SqlGenerator.getListSql2CountSql(sql);
         Long count = channel.queryForCount(selectCountSql, Arrays.asList(params));
         // 查询数据
-        String dataQuerySql = sql + " limit ?,?";
+        String dataQuerySql = sql + " limit ? offset ?";
         // 计算limit
         int from = (page - 1) * pageSize;
         List<Object> objects = new ArrayList<>(Arrays.asList(params));
