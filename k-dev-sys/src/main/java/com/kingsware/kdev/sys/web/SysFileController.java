@@ -12,6 +12,7 @@ import com.kingsware.kdev.sys.service.SysFileService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -77,7 +78,7 @@ public class SysFileController extends BaseController {
      * @return             文件信息列表
      */
     @ApiOperation(value = "文件上传 " ,notes = "文件上传")
-    @PostMapping("/upload/{fileFrom}/{saveType}")
+    @PostMapping(value = "/upload/{fileFrom}/{saveType}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public BaseRet<List<SysFileRet>> upload(@RequestParam("files") MultipartFile[] files, @PathVariable String fileFrom, @PathVariable Integer saveType) {
         return BaseRet.success(sysFileService.upload(files, fileFrom, saveType));
