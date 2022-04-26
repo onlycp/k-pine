@@ -76,14 +76,11 @@ public class KFlowFilter implements Filter {
         clientInfo.setUserInfo(userInfo);
         // 写到线程变量
         KClientContext.setContext(clientInfo);
-
-
         // 如果不启用流程
         if (!kFlowProperties.isEnable()) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
-
         // 获取请求路径
         String url = request.getRequestURI();
         // 获取请求方式
@@ -99,173 +96,33 @@ public class KFlowFilter implements Filter {
         // 如果找不到对应的接口配置
         if (api == null || api.getCallType() == 1) {
             filterChain.doFilter(servletRequest, servletResponse);
+            return;
         }
-        // 流程方式
-        else {
-            // 获取视图模型
-            KFlowContext context = KFlowContext.createBaseContext(StringUtils.isNotEmpty(api.getInArgv()) ? api.getInArgv() : "{}", StringUtils.isNotEmpty(api.getOutArgv()) ? api.getOutArgv() : "{}");
-            // 处理请求变量
-            Map<String, Object> argvMap = getRequestParams(api, path, request);
-            // 加入Req
-            // 处理类
-            context.setHandleClass(api.getApiResultHandler());
-            // 调用流程
-            KdbFlowResult result = KdbFlowExecutor.getInstance().execute(api.getApiFlowId(), api.getSubFlowIds(), argvMap, context);
-            // 转为api格式
-            if (result.getType().equals(KFlowConstant.RESULT_JSON)) {
-                responseJson(response, FlowUtils.toJsonResult(result.getData()));
-            }
-            else if (result.getType().equals(KFlowConstant.RESULT_EXCEL)) {
+        // 获取视图模型
+        KFlowContext context = KFlowContext.createBaseContext(StringUtils.isNotEmpty(api.getInArgv()) ? api.getInArgv() : "{}", StringUtils.isNotEmpty(api.getOutArgv()) ? api.getOutArgv() : "{}");
+        // 处理请求变量
+        Map<String, Object> argvMap = ServletUtil.getRequestParams(api, path, request);
+        // 加入Req
+        // 处理类
+        context.setHandleClass(api.getApiResultHandler());
+        // 调用流程
+        KdbFlowResult result = KdbFlowExecutor.getInstance().execute(api.getApiFlowId(), api.getSubFlowIds(), argvMap, context);
+        // 转为api格式
+        switch (result.getType()) {
+            case KFlowConstant.RESULT_JSON:
+                ServletUtil.responseJson(response, FlowUtils.toJsonResult(result.getData()));
+                break;
+            case KFlowConstant.RESULT_EXCEL:
                 ExcelWorker.getInstance().writeToWeb(response, (KExcel) result.getData());
-            }
-            else if (result.getType().equals(KFlowConstant.RESULT_FILE)) {
+                break;
+            case KFlowConstant.RESULT_FILE:
                 KdbRetFile kdbRetFile = (KdbRetFile) result.getData();
                 ServletUtil.responseFile(response, kdbRetFile.getFileName(), kdbRetFile.getData());
-            }
+                break;
         }
     }
 
-    /**
-     * 获取请求参数
-     * @param api       api信息
-     * @param path      路径
-     * @return          请求参数
-     */
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> getRequestParams(ApiInfo api, String path, HttpServletRequest request) {
+    private void initContext(ServletRequest servletRequest, ServletResponse servletResponse) {
 
-        Map<String, Object> params = new HashMap<>();
-        // 获取query和form-data
-        Enumeration<String> names = request.getParameterNames();
-        while (names.hasMoreElements()) {
-            String name = names.nextElement();
-            String value = request.getParameter(name);
-            params.put(name, value);
-        }
-        // 获取path变量
-        Map<String, Object> pathVariables = getPathVariables(path, api.getApiUrl());
-        params.putAll(pathVariables);
-        // 判断是文件还是raw提交
-        String contentType = request.getContentType();
-
-        // 获取文件
-        if (StringUtils.isNotEmpty(contentType) && contentType.toLowerCase().contains("multipart/form-data")) {
-            MultipartResolver resolver = new StandardServletMultipartResolver();
-            MultipartHttpServletRequest multipartHttpServletRequest = resolver.resolveMultipart(request);
-            // 获取所有文件
-            Map<String, MultipartFile> fileMap = multipartHttpServletRequest.getFileMap();
-            for (Map.Entry<String, MultipartFile> multipartFileEntry: fileMap.entrySet()) {
-                KFlowUploadFile uploadFile = new KFlowUploadFile();
-                Base64.getEncoder().encodeToString("1".getBytes());
-                // 原始文件名
-                uploadFile.setOriginFileName(multipartFileEntry.getValue().getOriginalFilename());
-                // 文件大小
-                uploadFile.setFileSize(multipartFileEntry.getValue().getSize());
-                // 名称
-                uploadFile.setName(multipartFileEntry.getValue().getName());
-                // content type
-                uploadFile.setContentType(multipartFileEntry.getValue().getContentType());
-                // 文件内容
-                try {
-                    uploadFile.setFileContent(Base64Utils.encodeToString(multipartFileEntry.getValue().getBytes()));
-                }
-                catch (IOException e) {
-                    log.error("文件转换成功，原始文件名:{}，名称:{}，{}", uploadFile.getOriginFileName(), uploadFile.getName(), e );
-                }
-                // 将文件加入到流程变量中
-                params.put(multipartFileEntry.getKey(), uploadFile);
-            }
-        }
-        else {
-            // 获取body
-            String body = getBody(request);
-            if (StringUtils.isNotEmpty(body)) {
-                try {
-                    Map<String, Object> argv = objectMapper.readValue(body, Map.class);
-                    params.putAll(argv);
-                }
-                catch (Exception e) {
-                    log.error("error", e);
-                }
-            }
-            // 将body加到变量中
-            Map<String, Object> requestMap = new HashMap<>();
-            requestMap.put("body", body);
-            params.put("request", requestMap);
-        }
-
-        // 返回
-        return params;
-    }
-
-    /**
-     * 获取Body
-     * @param request   Http请求
-     * @return  返回body
-     */
-    private String getBody(HttpServletRequest request) {
-        BufferedReader br = null;
-        StringBuilder sb = new StringBuilder("");
-        try {
-            br = request.getReader();
-            String str;
-            while ((str = br.readLine()) != null) {
-                sb.append(str);
-            }
-            br.close();
-        }
-        catch (IOException e) {
-            log.error("error", e);
-        }
-        finally {
-            if (null != br) {
-                try {
-                    br.close();
-                }
-                catch (IOException e) {
-                    log.error("error", e);
-                }
-            }
-        }
-        return sb.toString();
-    }
-
-    /**
-     * 输出json
-     * @param object    对象
-     */
-    private void responseJson(HttpServletResponse response, Object object) {
-        response.setCharacterEncoding("UTF-8");
-        response.setContentType("application/json; charset=utf-8");
-        try (PrintWriter out = response.getWriter()) {
-            out.append(objectMapper.writeValueAsString(object));
-        } catch (IOException e) {
-            log.error("error", e);
-        }
-    }
-
-    /**
-     *
-     * @param path          路径
-     * @param patternUrl    匹配路径
-     * @return              返回路径变量
-     */
-    private Map<String, Object> getPathVariables(String path, String patternUrl) {
-        Map<String, Object> variables = new HashMap<>();
-        // 匹配路径
-        String[] pUrls = patternUrl.split("/");
-        // 前端传过来的路径
-        String[] uiUrls = path.split("/");
-        // 取最小长度
-        int minLength = Math.min(pUrls.length, uiUrls.length);;
-        for (int i = 0; i< minLength; i++) {
-            String pVar = pUrls[i].trim();
-            String uVar = uiUrls[i].trim();
-            if (pVar.startsWith("{") && pVar.endsWith("}")) {
-                String realName = pVar.substring(1, pVar.length()-1);
-                variables.put(realName, uVar);
-            }
-        }
-        return variables;
     }
 }
