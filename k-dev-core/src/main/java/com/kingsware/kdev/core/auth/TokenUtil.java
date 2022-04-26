@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.cache.session.TokenSession;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.UnauthorizedException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.model.SysOnlineUser;
@@ -48,11 +49,26 @@ public class TokenUtil {
      */
     public static String createToken(String dataSecret, String iss, String ip, BaseUserInfo userInfo) {
         // 实例一个令牌对象
+        return createToken(dataSecret, iss, ip, "", userInfo);
+    }
+
+
+    /**
+     * 生成令牌
+     * @param dataSecret    数据密钥(AES)
+     * @param iss           发行机构
+     * @param userInfo      用户信息
+     * @param ip            客户端ip
+     * @return              生成后的令牌
+     */
+    public static String createToken(String dataSecret, String iss, String ip, String sessionId,  BaseUserInfo userInfo) {
+        // 实例一个令牌对象
         AuthToken authToken = new AuthToken();
         authToken.setIp(ip);
         authToken.setIss(iss);
         authToken.setWhenCreated(System.currentTimeMillis());
         authToken.setUserInfo(userInfo);
+        authToken.setKSessionId(sessionId);
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             String token = objectMapper.writeValueAsString(authToken);
@@ -135,6 +151,23 @@ public class TokenUtil {
             String decryptToken = AESUtil.decrypt(token, dataSecret);
             AuthToken authToken = new ObjectMapper().readValue(decryptToken, AuthToken.class);
             return authToken.getUserInfo();
+        }
+        catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * 获取令牌信息
+     * @param token 令牌
+     * @return  令牌信息
+     */
+    public static AuthToken getAuthToken(String token) {
+        try {
+            AppAuthProperties appAuthProperties = SpringContext.getBean(AppAuthProperties.class);
+            // 解密令牌
+            String decryptToken = AESUtil.decrypt(token, appAuthProperties.getTokenSecret());
+            return new ObjectMapper().readValue(decryptToken, AuthToken.class);
         }
         catch (Exception e) {
             return null;

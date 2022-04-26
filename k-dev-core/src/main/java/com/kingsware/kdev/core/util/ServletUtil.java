@@ -7,6 +7,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.yaml.snakeyaml.util.UriEncoder;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -39,7 +40,6 @@ public class ServletUtil {
      * @return http响应
      */
     public static HttpServletResponse response() {
-        ServletRequestAttributes response = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes());
         return ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getResponse();
     }
 
@@ -49,7 +49,7 @@ public class ServletUtil {
      */
     public static void responseFile(File localFile, String fileName) {
 
-        HttpServletResponse response =  KClientContext.getContext().getResponse();
+        HttpServletResponse response = KClientContext.getContext().getResponse();
         response.reset();
         response.setContentType("application/octet-stream");
         response.setCharacterEncoding("utf-8");
@@ -118,6 +118,24 @@ public class ServletUtil {
         }
     }
 
+
+    /**
+     * 获取cookie值
+     * @param name              名称
+     * @param defaultValue      默认值
+     * @return         cookie值
+     */
+    public static String getCookie(String name, String defaultValue) {
+        // 获取http请求
+        HttpServletRequest request = KClientContext.getContext().getRequest();
+        Cookie[] cookies = request.getCookies();
+        for (Cookie cookie: cookies) {
+            if (cookie.getName().equalsIgnoreCase(name)) {
+                return cookie.getValue();
+            }
+        }
+        return defaultValue;
+    }
 
     /**
      * 获取访问者IP

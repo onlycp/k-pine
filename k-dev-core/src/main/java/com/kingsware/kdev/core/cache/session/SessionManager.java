@@ -1,5 +1,7 @@
 package com.kingsware.kdev.core.cache.session;
 
+import com.kingsware.kdev.core.auth.AuthToken;
+import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.BeanUtils;
@@ -145,12 +147,19 @@ public class SessionManager {
      * @param userId    用户id
      * @return          激活数
      */
-    public long activeCount(String userId) {
+    public long activeCount(String userId, String sessionId) {
         Set<TokenSession> tokenSessions = sessionMapping.get(userId);
         if (tokenSessions == null) {
             return 0L;
         }
-        return tokenSessions.stream().filter(TokenSession::isActive).count();
+        // 同一个会话的不算
+        return tokenSessions.stream().filter(TokenSession::isActive).filter(it -> {
+            AuthToken authToken = TokenUtil.getAuthToken(it.getLoginToken());
+            if (authToken == null) {
+                return false;
+            }
+            return !sessionId.equals(authToken.getKSessionId());
+        }).count();
 
     }
 

@@ -22,6 +22,7 @@ import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.AESUtil;
 import com.kingsware.kdev.core.util.BeanUtils;
+import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.*;
 import com.kingsware.kdev.sys.model.SysUnit;
@@ -44,6 +45,7 @@ import java.util.*;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -239,8 +241,9 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             throw new UnauthorizedException("你当前没有权限访问系统功能，请联系业务部门授权后，再访问系统 。");
         }
         userInfo.setAccessIds(StringUtils.joinToString(accessIds, ","));
-
-        String token = TokenUtil.createToken(appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), KClientContext.getContext().getIp(), userInfo);
+        // 获取会话id
+        String kSessionId = ServletUtil.getCookie("k_session_id", "");
+        String token = TokenUtil.createToken(appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), KClientContext.getContext().getIp(), kSessionId,  userInfo);
         SysUserLoginRet ret = new SysUserLoginRet();
         ret.setToken(token);
         // 保存登录会话
@@ -264,10 +267,9 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         DB.save(onlineUser);
         // 保存到缓存
         SessionManager.getInstance().addSession(onlineUser);
-
-
         return ret;
     }
+
 
     @Override
     public void changePassword(SysUserChangePasswordArgv argv, String token, String ip) {
@@ -329,7 +331,9 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         if (StringUtils.isEmpty(userId)) {
             return 0L;
         }
-        return SessionManager.getInstance().activeCount(userId);
+        // 获取会话id
+        String kSessionId = ServletUtil.getCookie("k_session_id", "");
+        return SessionManager.getInstance().activeCount(userId, kSessionId);
 
     }
 
