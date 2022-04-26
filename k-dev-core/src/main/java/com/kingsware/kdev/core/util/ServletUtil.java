@@ -126,14 +126,20 @@ public class ServletUtil {
      * @return         cookie值
      */
     public static String getCookie(String name, String defaultValue) {
-        // 获取http请求
-        HttpServletRequest request = KClientContext.getContext().getRequest();
-        Cookie[] cookies = request.getCookies();
-        for (Cookie cookie: cookies) {
-            if (cookie.getName().equalsIgnoreCase(name)) {
-                return cookie.getValue();
+        try {
+            // 获取http请求
+            HttpServletRequest request = KClientContext.getContext().getRequest();
+            Cookie[] cookies = request.getCookies();
+            for (Cookie cookie: cookies) {
+                if (cookie.getName().equalsIgnoreCase(name)) {
+                    return cookie.getValue();
+                }
             }
         }
+        catch (Exception ignored) {
+
+        }
+
         return defaultValue;
     }
 
