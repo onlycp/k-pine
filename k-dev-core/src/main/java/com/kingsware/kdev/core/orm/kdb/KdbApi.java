@@ -104,7 +104,7 @@ public interface KdbApi {
      * @param argv  参数
      * @return 查询结果
      */
-    List<FunctionInfo> queryFunction(FunctionQueryArgv argv);
+    List<Functions> queryFunction(FunctionQueryArgv argv);
 
 
 

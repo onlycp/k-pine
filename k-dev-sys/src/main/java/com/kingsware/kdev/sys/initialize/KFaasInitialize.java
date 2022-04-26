@@ -108,8 +108,6 @@ public class KFaasInitialize implements SystemInitialize {
             DB.kdbApi().editFlow(editFlowInfo);
         }
 
-
-
     }
 
     /**

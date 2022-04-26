@@ -120,7 +120,7 @@ public class KFlowFilter implements Filter {
             }
             else if (result.getType().equals(KFlowConstant.RESULT_FILE)) {
                 KdbRetFile kdbRetFile = (KdbRetFile) result.getData();
-                ServletUtil.responseFile(kdbRetFile.getFileName(), kdbRetFile.getData());
+                ServletUtil.responseFile(response, kdbRetFile.getFileName(), kdbRetFile.getData());
             }
         }
     }

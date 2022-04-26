@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.orm.kdb;
 
+import com.kingsware.kdev.core.orm.annotation.Table;
 import lombok.Data;
 
 /**
@@ -10,6 +11,7 @@ import lombok.Data;
  * @date 2022/1/5 4:20 下午
  */
 @Data
+@Table("flow")
 public class FlowInfo {
 
     /** 流程id **/

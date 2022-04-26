@@ -62,6 +62,9 @@ public abstract class KdbApiAbstract implements  KdbApi {
         List<FlowInfo> list = api.query(argv);
 
         // 转换成ret对象
+        if (list == null ||list.isEmpty()) {
+            return null;
+        }
         return list.get(0);
     }
 
@@ -128,10 +131,10 @@ public abstract class KdbApiAbstract implements  KdbApi {
     }
 
     @Override
-    public List<FunctionInfo> queryFunction(FunctionQueryArgv argv) {
+    public List<Functions> queryFunction(FunctionQueryArgv argv) {
         KdbRet<List> list =  post(argv, QUERY_FUN_URL, List.class);
         String json = JsonUtil.toJson(list.getResponseBody());
-        return JsonUtil.toListBean(json, FunctionInfo.class);
+        return JsonUtil.toListBean(json, Functions.class);
     }
 
     /**

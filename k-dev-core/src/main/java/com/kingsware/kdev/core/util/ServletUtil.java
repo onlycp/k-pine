@@ -99,9 +99,8 @@ public class ServletUtil {
      * @param fileName 文件名称
      * @param data 文件内容
      */
-    public static void responseFile(String fileName, byte[] data) {
+    public static void responseFile(HttpServletResponse response, String fileName, byte[] data) {
         try {
-            HttpServletResponse response = ServletUtil.response();
             response.reset();
             response.setContentType("application/octet-stream");
             response.setCharacterEncoding("utf-8");

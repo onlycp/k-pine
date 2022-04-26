@@ -47,4 +47,10 @@ public interface DevApplicationService extends BaseService {
      */
     void delete(MultiIdArgv argv);
 
+    /**
+     * 导入应用
+     * @param json json
+     */
+    void importApp(String json);
+
 }

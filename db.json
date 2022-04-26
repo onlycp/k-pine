@@ -1,9 +1,17 @@
 [
-  {
-    "sourceName":"k_pine_test",
-    "driverClass":"org.postgresql.Driver",
-    "jdbcUrl":"jdbc:postgresql://192.168.2.94:5432/k-pine-test",
-    "userName":"postgres",
-    "password":"P@ssw0rd567"
-  }
+//  {
+//    "sourceName":"MySql",
+//    "driverClass":"org.postgresql.Driver",
+//    "jdbcUrl":"jdbc:postgresql://192.168.2.94:5432/k-pine-test",
+//    "userName":"postgres",
+//    "password":"P@ssw0rd567"
+//  },
+//  {
+//    "sourceName":"postgres_fto",
+//    "driverClass":"org.postgresql.Driver",
+//    "jdbcUrl":"jdbc:postgresql://192.168.2.94:5432/fto",
+//    "userName":"postgres",
+//    "password":"P@ssw0rd567"
+//  }
 ]
+

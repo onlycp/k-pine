@@ -185,6 +185,22 @@ public interface DataBase {
      */
     <T> long updateAll(List<T> list);
 
+    /**
+     * 新增或保存
+     * @param entity    实体
+     * @return          影响行数
+     * @param <T>       泛型
+     */
+    <T> long saveOrUpdate(T entity, Class<T> tClass);
+
+    /**
+     * 批量保存或新增
+     * @param entities  实体
+     * @return          影响行数
+     * @param <T>       泛型
+     */
+    <T> long batchSaveOrUpdate(List<T> entities, Class<T> tClass);
+
 
     /**
      * 执行SQL
@@ -207,6 +223,9 @@ public interface DataBase {
      * @return  表定义
      */
     List<ColumnDefine> columns(String tableName);
+
+
+
 
 
 }

@@ -5,7 +5,10 @@ import com.kingsware.kdev.core.orm.*;
 import com.kingsware.kdev.core.orm.channel.DbChannel;
 import com.kingsware.kdev.core.orm.channel.KDBHttpChannel;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
+import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.orm.expression.Expression;
+import com.kingsware.kdev.core.util.BeanUtils;
+import com.kingsware.kdev.core.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -188,6 +191,46 @@ public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
             result += update(t);
         }
         return result;
+    }
+
+    @Override
+    public <T> long saveOrUpdate(T entity, Class<T> tClass) {
+        return batchSaveOrUpdate(Collections.singletonList(entity), tClass);
+    }
+
+    @Override
+    public <T> long batchSaveOrUpdate(List<T> entities, Class<T> tClass) {
+        // 处理一下。看哪些是新增，哪些是编辑的
+        int totalCount = 0;
+        // 1. id为空，认为是新增
+        List<T> addList = new ArrayList<>();
+        List<T> updateList = new ArrayList<>();
+        for (T entity: entities) {
+            Object id = BeanUtils.getFieldValue("id", entity);
+            if (id == null || StringUtils.isEmpty(id.toString())) {
+                addList.add(entity);
+            }
+            else {
+                // 判断表里是否已存在
+                long count = this.findCount(tClass, Expr.builder().add("id", "=", id).build());
+                if (count == 0) {
+                    addList.add(entity);
+                }
+                else {
+                    updateList.add(entity);
+                }
+
+            }
+        }
+        // 批量新增
+        if (!addList.isEmpty()) {
+            totalCount += this.saveAll(addList);
+        }
+        if (!updateList.isEmpty()) {
+            totalCount += this.updateAll(updateList);
+        }
+
+        return totalCount;
     }
 
     @Override

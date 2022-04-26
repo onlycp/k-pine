@@ -193,6 +193,26 @@ public class DB {
     }
 
 
+    /**
+     * 新增或保存
+     * @param entity    实体
+     * @return          影响行数
+     * @param <T>       泛型
+     */
+    public static <T> long saveOrUpdate(T entity, Class<T> tClass) {
+        return getDefault().saveOrUpdate(entity, tClass);
+    }
+
+    /**
+     * 批量保存或新增
+     * @param entities  实体
+     * @return          影响行数
+     * @param <T>       泛型
+     */
+    public static <T> long batchSaveOrUpdate(List<T> entities, Class<T> tClass) {
+        return getDefault().batchSaveOrUpdate(entities, tClass);
+    }
+
 
     /**
      *  更新实体

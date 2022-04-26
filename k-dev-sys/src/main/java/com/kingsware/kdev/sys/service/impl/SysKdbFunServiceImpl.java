@@ -9,13 +9,10 @@ import com.kingsware.kdev.core.util.PageUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysKdbFunArgv;
 import com.kingsware.kdev.sys.argv.SysKdbFunQueryArgv;
-import com.kingsware.kdev.sys.manager.FileManager;
-import com.kingsware.kdev.sys.model.SysFile;
 import com.kingsware.kdev.sys.ret.SysKdbFunRet;
 import com.kingsware.kdev.sys.service.SysKdbFunService;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -37,12 +34,12 @@ public class SysKdbFunServiceImpl extends BaseServiceImpl implements SysKdbFunSe
         FunctionQueryArgv argv = new FunctionQueryArgv();
         argv.setId(id);
         // 查询
-        List<FunctionInfo> list = DB.kdbApi().queryFunction(argv);
+        List<Functions> list = DB.kdbApi().queryFunction(argv);
         // 转换成ret对象
         return toRet(list.get(0));
     }
 
-    private SysKdbFunRet toRet(FunctionInfo info) {
+    private SysKdbFunRet toRet(Functions info) {
         SysKdbFunRet ret = new SysKdbFunRet();
         ret.setId(info.getId());
         ret.setName(info.getName());
@@ -108,10 +105,10 @@ public class SysKdbFunServiceImpl extends BaseServiceImpl implements SysKdbFunSe
         info.setName(argv.getName());
         info.setType(argv.getType());
         // 查询所有数据
-        List<FunctionInfo> list = DB.kdbApi().queryFunction(info);
+        List<Functions> list = DB.kdbApi().queryFunction(info);
         // 转为ret类
         List<SysKdbFunRet> retList = new ArrayList<>();
-        for (FunctionInfo infoL: list) {
+        for (Functions infoL: list) {
             retList.add(toRet(infoL));
         }
         // 排序

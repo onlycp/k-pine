@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.orm.kdb;
 
+import com.kingsware.kdev.core.orm.annotation.Table;
 import lombok.Data;
 
 /**
@@ -9,7 +10,8 @@ import lombok.Data;
  * @date 2022/2/10 6:12 下午
  */
 @Data
-public class FunctionInfo {
+@Table("functions")
+public class Functions {
     /** id **/
     private String id;
     /** name **/

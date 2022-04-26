@@ -138,6 +138,9 @@ public class SqlGenerator {
             Timestamp timestamp = (Timestamp) value;
             params.add(DateUtils.formatDate(new Date(timestamp.getTime()), DateUtils.DATE_TIME));
         }
+        else if (value instanceof Boolean) {
+            params.add(Boolean.TRUE.equals(value) ? 1: 0);
+        }
         else {
             params.add(value);
         }
