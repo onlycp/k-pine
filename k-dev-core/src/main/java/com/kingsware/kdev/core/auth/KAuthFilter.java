@@ -106,8 +106,15 @@ public class KAuthFilter implements Filter {
                 ignore = StringUtils.isNotEmpty(api.getApiCode()) && apiCode.startsWith(openApi);
             }
             else {
-                apiCode = apiDefine.getApiCode();
-                ignore = apiDefine.isIgnore();
+                if (apiDefine != null) {
+                    apiCode = apiDefine.getApiCode();
+                    ignore = apiDefine.isIgnore();
+                }
+                else {
+                    apiCode = "";
+                    ignore = false;
+                }
+
             }
             // 检验权限
             checkPermission(request, response, ignore, apiCode);
