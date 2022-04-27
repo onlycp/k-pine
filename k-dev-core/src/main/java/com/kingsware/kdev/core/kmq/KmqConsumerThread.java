@@ -20,11 +20,11 @@ public class KmqConsumerThread implements Runnable {
     /** 日志打印 **/
     private final Logger logger  = LoggerFactory.getLogger(KmqConsumerThread.class);
     /** 主题 **/
-    private String topic;
+    private final String topic;
     /** 队列 **/
-    private LinkedBlockingQueue<String> queue;
+    private final LinkedBlockingQueue<String> queue;
     /** 所有消费者 **/
-    private Set<KmqConsumer> consumers;
+    private final Set<KmqConsumer> consumers;
 
     /**
      * 构造函数
@@ -42,25 +42,24 @@ public class KmqConsumerThread implements Runnable {
         // 循环处理消息
         while (true) {
             try {
-                String payload = queue.take();
+//                String payload = queue.take();
                 List<String> payloads = new ArrayList<>();
                 queue.drainTo(payloads, 50);
-                for (KmqConsumer consumer: consumers) {
-                    try {
-                        consumer.onMessage(payloads);
-                    }
-                    catch (Exception e) {
-                        logger.warn("消费者: {} 消费失败，消息内容:{}, 异常信息:{}", consumer.topic(), payload, e.getMessage());
+                if (!payloads.isEmpty()) {
+                    for (KmqConsumer consumer: consumers) {
+                        try {
+                            consumer.onMessage(payloads);
+                        }
+                        catch (Exception e) {
+                            e.printStackTrace();
+                            logger.warn("消费者: {} 消费失败，消息内容:{}, 异常信息:{}", consumer.topic(), payloads, e.getMessage());
 //                        queue.add(payload);
+                        }
                     }
                 }
 
 
-            } catch (InterruptedException e) {
-                logger.warn("kmq消费异常，topic:{}, e:{}", this.topic, e);
-                Thread.currentThread().interrupt();
-            }
-            finally {
+            } finally {
                 ThreadUtils.sleep(5000);
             }
         }

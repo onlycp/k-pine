@@ -96,6 +96,7 @@ public class FileManager {
             }
             else if (saveType == 1) {
                 // 相对路径
+
                 String relativePath = File.separator + fileFrom + File.separator;
                 // 磁盘存储路径
                 // 获取基本路径

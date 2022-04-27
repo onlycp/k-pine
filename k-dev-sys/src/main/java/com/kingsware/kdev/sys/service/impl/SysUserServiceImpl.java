@@ -6,6 +6,8 @@ import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.cache.access.AccessManager;
+import com.kingsware.kdev.core.cache.permssion.PermissionManager;
 import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.encrypt.EncryptProperties;
@@ -252,6 +254,9 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             DB.executeUpdateSql("delete from sys_online_user where user_id = ?", model.getId());
             SessionManager.getInstance().removeByUserId(model.getId());
         }
+        // 获取用户的角色权限
+
+        // 创建在线用户
         SysOnlineUser onlineUser = new SysOnlineUser();
         onlineUser.setUserId(model.getId());
         onlineUser.setLoginIp(KClientContext.getContext().getIp());
@@ -267,6 +272,8 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         DB.save(onlineUser);
         // 保存到缓存
         SessionManager.getInstance().addSession(onlineUser);
+        // 加载权限
+        PermissionManager.getInstance().refreshPermissions(userInfo.getRoleIds());
         return ret;
     }
 
@@ -457,6 +464,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         roleMap.put("roleCodes", roleCodes.toString());
         return roleMap;
     }
+
 
     private List<SysRole> getRolesByUserId(String userId) {
         // 拼装sql

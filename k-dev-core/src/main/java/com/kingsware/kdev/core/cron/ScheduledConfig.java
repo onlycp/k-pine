@@ -51,6 +51,7 @@ public class ScheduledConfig implements SchedulingConfigurer {
             // 执行任务
             scheduledTaskRegistrar.addTriggerTask(() -> KTaskRunnerManager.getInstance().runTask(sysTask), (TriggerContext triggerContext) -> {
                 SysTask myTask = TaskListManager.getInstance().getTask(sysTask.getId());
+//                log.info("设置下次执行时间, 任务: {}", myTask.getName());
                 return new CronTrigger(myTask.getCron()).nextExecutionTime(triggerContext);
             });
         }
