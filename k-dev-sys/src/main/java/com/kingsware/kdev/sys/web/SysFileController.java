@@ -85,6 +85,24 @@ public class SysFileController extends BaseController {
     }
 
     /**
+     * 文件上传，使
+     * @param files         文件列表
+     * @param fileFrom      来源
+     * @param saveType     存储方式
+     * @return             文件信息列表
+     */
+    @ApiOperation(value = "文件上传 " ,notes = "文件上传")
+    @PostMapping(value = "/uploadFile", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public BaseRet<List<SysFileRet>> uploadFile(@RequestParam("files") MultipartFile[] files, String fileFrom, Integer saveType) {
+//        fileFrom格式要求：aaa/bbb 前后无斜扛
+        if (saveType == null) {
+            saveType = 1;
+        }
+        return BaseRet.success(sysFileService.upload(files, fileFrom, saveType));
+    }
+
+    /**
      * 文件下载
      * @param id         文件id
      */
