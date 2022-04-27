@@ -2,6 +2,7 @@ package com.kingsware.kdev.core.cache.dict;
 
 import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.core.orm.DB;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
@@ -12,6 +13,7 @@ import java.util.List;
  * @version 1.0.0
  * @date 2022/1/6 9:41 上午
  */
+@Slf4j
 public class DictTask implements KTask {
 
     public DictTask() {
@@ -23,6 +25,7 @@ public class DictTask implements KTask {
      */
     @Override
     public void execute() {
+        log.info("定时刷新字典");
         // 查找所有字典
         List<DictItemInfo> dictItemList = DB.findList(DictItemInfo.class, "select * from sys_dict_item");
         for (DictItemInfo dictItem: dictItemList) {

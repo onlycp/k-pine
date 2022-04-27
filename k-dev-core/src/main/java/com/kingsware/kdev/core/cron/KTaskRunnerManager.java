@@ -110,6 +110,7 @@ public class KTaskRunnerManager {
      */
     private void runJavaTask(SysTask sysTask) throws Exception {
         try {
+            // todo 会导致执行两次
             KTask kTask = (KTask) Class.forName(sysTask.getClassName()).newInstance();
             kTask.execute();
         } catch (ClassNotFoundException e) {

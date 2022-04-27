@@ -3,7 +3,9 @@ package com.kingsware.kdev.core.orm;
 import com.kingsware.kdev.core.bean.BaseManageModel;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.orm.expression.Expr;
+import com.kingsware.kdev.core.orm.expression.Expression;
 import com.kingsware.kdev.core.util.BeanUtils;
+import com.kingsware.kdev.core.util.StringUtils;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -60,9 +62,14 @@ public class DBChecker<T> {
             for (String field: uni.getKey()) {
                 // 获取值
                 Object value = BeanUtils.getFieldValue(field, model);
-                // 添加查询表达式
-                expr.add(field, "=", value);
-
+                if (value != null && StringUtils.isNotEmpty(value.toString())) {
+                    // 添加查询表达式
+                    expr.add(field, "=", value);
+                }
+            }
+            List<Expression> expressionList = expr.build();
+            if (expressionList.isEmpty()) {
+                continue;
             }
             // 查询
             List<T> list = DB.findList(tClass, expr.build());
