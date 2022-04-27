@@ -103,7 +103,7 @@ public class KAuthFilter implements Filter {
                 callType = 2;
                 apiCode = api.getApiCode();
                 // 是否允许跳过权限
-                ignore = StringUtils.isNotEmpty(api.getApiUrl()) && apiCode.startsWith(openApi);
+                ignore = StringUtils.isNotEmpty(api.getApiCode()) && apiCode.startsWith(openApi);
             }
             else {
                 apiCode = apiDefine.getApiCode();
