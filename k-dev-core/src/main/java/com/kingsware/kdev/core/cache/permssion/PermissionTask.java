@@ -2,6 +2,7 @@ package com.kingsware.kdev.core.cache.permssion;
 
 import com.kingsware.kdev.core.cache.dict.DictItemInfo;
 import com.kingsware.kdev.core.cache.dict.DictManager;
+import com.kingsware.kdev.core.cron.KRunner;
 import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.core.orm.DB;
 
@@ -14,10 +15,9 @@ import java.util.List;
  * @version 1.0.0
  * @date 2022/1/6 9:41 上午
  */
-public class PermissionTask implements KTask {
+public class PermissionTask implements KTask, KRunner {
 
     public PermissionTask() {
-        this.execute();
     }
 
     /**
@@ -36,5 +36,10 @@ public class PermissionTask implements KTask {
     @Override
     public String name() {
         return "PermissionTask";
+    }
+
+    @Override
+    public void runNow() {
+        this.execute();
     }
 }

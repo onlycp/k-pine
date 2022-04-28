@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.cache.dict;
 
+import com.kingsware.kdev.core.cron.KRunner;
 import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.core.orm.DB;
 import lombok.extern.slf4j.Slf4j;
@@ -14,10 +15,9 @@ import java.util.List;
  * @date 2022/1/6 9:41 上午
  */
 @Slf4j
-public class DictTask implements KTask {
+public class DictTask implements KTask, KRunner {
 
     public DictTask() {
-        this.execute();
     }
 
     /**
@@ -40,5 +40,10 @@ public class DictTask implements KTask {
     @Override
     public String name() {
         return "DictTask";
+    }
+
+    @Override
+    public void runNow() {
+        this.execute();
     }
 }

@@ -1,6 +1,8 @@
 package com.kingsware.kdev.core.kflow;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.kingsware.kdev.core.bean.BaseRet;
@@ -12,6 +14,7 @@ import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.kflow.bean.ComplexValue;
 import com.kingsware.kdev.core.kflow.bean.ErrorResult;
 import com.kingsware.kdev.core.kflow.bean.KFlowMessage;
+import com.kingsware.kdev.core.kflow.function.Functions;
 import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.NumberUtils;
@@ -211,44 +214,71 @@ public class FlowUtils {
             retValue = objects;
         }
         else {
+            // 获取扩展类型
+            JsonNode externTypeNode = jsonNode.get("externType");
             // 如果此有值
             JsonNode externNode = jsonNode.get("extern");
             if (externNode != null) {
-                JsonNode defaultNode = externNode.get("default");
-                if (defaultNode != null) {
-                    // 获取默认值
-                    String defaultValue = defaultNode.asText().trim();
-                    if (defaultValue.startsWith("${") && defaultValue.endsWith("}")) {
-                        String key = defaultValue.replace("${", "").replaceAll("}", "").trim();
-                        String configDefaultValue = null;
-                        if (key.contains("|")) {
-                            configDefaultValue = key.split("\\|")[1].trim();
-                        }
-                        SysConfigInfo configInfo = ConfigManager.getInstance().getItem(key);
-                        String itemValue = null;
-                        // 从系统配置中读取
-                        if (configInfo != null) {
-                            itemValue = configInfo.getValue();
-                        }
-                        // 从环境变量里读取
-                        else {
-                            itemValue = SpringContext.getProperties(key, configDefaultValue);
-                        }
-                        if ("integer".equalsIgnoreCase(type)) {
-                            retValue = Integer.parseInt(itemValue);
-                        }
-                        else if ("number".equalsIgnoreCase(type)) {
-                            retValue = Float.parseFloat(itemValue);
-                        }
-                        else {
-                            retValue = itemValue;
-                        }
+                // 扩展类型
+                String externType = externTypeNode.asText().trim();
+                // 如果扩展类型为空, 只此只处理默认值
+                if (StringUtils.isEmpty(externType)) {
+                    JsonNode defaultNode = externNode.get("default");
+                    if (defaultNode != null) {
+                        // 获取默认值
+                        String defaultValue = defaultNode.asText().trim();
+                        if (defaultValue.startsWith("${") && defaultValue.endsWith("}")) {
+                            String key = defaultValue.replace("${", "").replaceAll("}", "").trim();
+                            String configDefaultValue = null;
+                            if (key.contains("|")) {
+                                configDefaultValue = key.split("\\|")[1].trim();
+                            }
+                            SysConfigInfo configInfo = ConfigManager.getInstance().getItem(key);
+                            String itemValue = null;
+                            // 从系统配置中读取
+                            if (configInfo != null) {
+                                itemValue = configInfo.getValue();
+                            }
+                            // 从环境变量里读取
+                            else {
+                                itemValue = SpringContext.getProperties(key, configDefaultValue);
+                            }
+                            if ("integer".equalsIgnoreCase(type)) {
+                                retValue = Integer.parseInt(itemValue);
+                            }
+                            else if ("number".equalsIgnoreCase(type)) {
+                                retValue = Float.parseFloat(itemValue);
+                            }
+                            else {
+                                retValue = itemValue;
+                            }
 
-                    }
-                    else {
-                        retValue = defaultValue;
+                        }
+                        else {
+                            retValue = defaultValue;
+                        }
                     }
                 }
+                else if ("function".equals(externType)) {
+                    // 函数名
+                    String methodName = externNode.get("method").asText().trim();
+                    // 参数
+                    List<Object> params = new ArrayList<>();
+                    if(externNode.has("params")) {
+                        ArrayNode paramsNode = (ArrayNode)externNode.get("params");
+                        String body = paramsNode.toString();
+                        try {
+                            params = new ObjectMapper().readValue(body, List.class);
+                        }
+                        catch (JsonProcessingException e) {
+                            throw new BusinessException("函数参数解析异常，函数名:" + methodName +", 参数:" + body);
+                        }
+                    }
+                    retValue = Functions.call(methodName, params);
+                    log.info("函数调用，函数名:{}, 返回值:{}", methodName, retValue);
+
+                }
+
             }
         }
 

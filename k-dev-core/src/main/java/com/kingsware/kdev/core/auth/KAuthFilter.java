@@ -28,6 +28,7 @@ import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import jdk.nashorn.internal.ir.annotations.Ignore;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -69,6 +70,7 @@ public class KAuthFilter implements Filter {
     private String openApi = ":open";
 
 
+    @ApiIgnore
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
 

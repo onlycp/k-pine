@@ -104,6 +104,7 @@ public class PermissionManager {
      * 刷新权限
      */
     public void refreshAll() {
+        log.info("刷新权限");
         Set<String> keys = permissionMap.keySet();
         for (String key: keys) {
             refreshPermissions(key);

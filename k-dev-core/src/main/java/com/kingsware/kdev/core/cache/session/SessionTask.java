@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.auth.AppAuthProperties;
 import com.kingsware.kdev.core.cache.dict.DictItemInfo;
 import com.kingsware.kdev.core.cache.dict.DictManager;
 import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.cron.KRunner;
 import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.core.orm.DB;
@@ -22,11 +23,9 @@ import java.util.Set;
  * @date 2022/1/6 9:41 上午
  */
 @Slf4j
-public class SessionTask implements KTask {
+public class SessionTask implements KTask, KRunner {
 
     public SessionTask() {
-        // 启动时加载
-        this.execute();
     }
 
     /**
@@ -74,5 +73,10 @@ public class SessionTask implements KTask {
     @Override
     public String name() {
         return "SessionTask";
+    }
+
+    @Override
+    public void runNow() {
+        this.execute();
     }
 }
