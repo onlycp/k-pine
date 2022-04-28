@@ -1,6 +1,7 @@
 package com.kingsware.kdev.core.util;
 
 import com.kingsware.kdev.core.exception.HttpClientException;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -15,6 +16,7 @@ import java.util.Map;
  * @version 1.0.0
  * @date 2021/12/24 8:42 上午
  */
+@Slf4j
 public class HttpUtil {
 
     /**
@@ -85,6 +87,60 @@ public class HttpUtil {
             throw new HttpClientException(e.getLocalizedMessage(), -1, apiUrl, body);
         }
     }
+
+    /**
+     * @param fileName 要上传的文件，列：e:/upload/SSD4k对齐分区.zip
+     * @param apiUrl    接口地路
+     */
+    public static String postFile(String apiUrl, String fileName, String formName,  InputStream inputStream) {
+        OutputStream out = null;
+        try {
+            //要上传的文件
+            URL url = new URL(apiUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setChunkedStreamingMode(1024 * 1024);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("connection", "Keep-Alive");
+            conn.setRequestProperty("Charsert", "UTF-8");
+            conn.setConnectTimeout(50000);
+            conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=-----------------------------264141203718551;file="+ fileName);
+            conn.setRequestProperty("fileName", fileName);
+            conn.setRequestProperty("strSiteID", "strSiteID");
+            conn.setRequestProperty("strColumnID", "strColumnID");
+            conn.setRequestProperty("strDespatcher", "strDespatcher");
+            conn.setRequestProperty("strMechanism", "strMechanism");
+            conn.setRequestProperty("strOther1", "strOther1");
+            out = new DataOutputStream(conn.getOutputStream());
+            DataInputStream in = new DataInputStream(inputStream);
+            int bytes = 0;
+            byte[] bufferOut = new byte[2048];
+            while ((bytes = in.read(bufferOut)) != -1) {
+                out.write(bufferOut, 0, bytes);
+            }
+
+            out.flush();
+            out.close();
+
+            // 获取body
+            String responseBody = getBody(conn.getInputStream());
+            // 获取响应结果
+            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                // 如果是ok，直接返回body
+                return responseBody;
+            }
+            else {
+                throw new HttpClientException(responseBody, conn.getResponseCode(), apiUrl, "");
+            }
+        } catch (Exception e) {
+            log.error("error", e);
+            throw new HttpClientException(e.getLocalizedMessage(), -1, apiUrl, "");
+        }
+    }
+
+
+
 
     /**
      * 获取响应body的内容

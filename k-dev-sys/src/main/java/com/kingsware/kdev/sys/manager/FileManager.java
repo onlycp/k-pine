@@ -1,9 +1,13 @@
 package com.kingsware.kdev.sys.manager;
 
 import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.orm.kdb.KdbRet;
 import com.kingsware.kdev.core.util.FileUtils;
+import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.sys.bean.FaasUploadRet;
 import com.kingsware.kdev.sys.model.SysFile;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -66,6 +70,7 @@ public class FileManager {
      * @param saveType  保存类型
      * @return
      */
+    @SuppressWarnings("all")
     public SysFile register(InputStream inputStream, String fileName, int fileSize,  String fileFrom, Integer saveType) {
         try {
             SysFile sysFile = new SysFile();
@@ -106,19 +111,30 @@ public class FileManager {
                 boolean status = path.mkdirs();
                 // 拷贝文件
                 File saveFile = new File(path.getAbsolutePath() + File.separator + realName);
-                FileCopyUtils.copy(inputStream, new FileOutputStream(saveFile));
-                sysFile.setFileMd5(DigestUtils.md5Hex(new FileInputStream(saveFile)));
+                FileCopyUtils.copy(inputStream, Files.newOutputStream(saveFile.toPath()));
+                sysFile.setFileMd5(DigestUtils.md5Hex(Files.newInputStream(saveFile.toPath())));
 
                 // 文件表只存储相对路径
                 sysFile.setFilePath(relativePath + realName);
+            }
+            // faas 存储
+            else if (saveType == 2) {
+                KdbRet<String> kdbRet =  DB.kdbApi().uploadFile(inputStream, fileName);
+                if (!"成功".equals(kdbRet.getMessage())) {
+                    throw BusinessException.serviceThrow("文件存储失败,错误信息:" + kdbRet.getMessage());
+                }
+                FaasUploadRet faasUploadRet = JsonUtil.toBean(kdbRet.getResponseBody(), FaasUploadRet.class);
+                sysFile.setFilePath(faasUploadRet.getFileName());
+                // 文件md5码
+                sysFile.setFileMd5(FileUtils.getMD5(inputStream));
+
             }
             DB.save(sysFile);
             // 返回id
             return sysFile;
         }
         catch (IOException e) {
-            log.error("源文件路径不存在, IO异常:{}", e.getMessage());
+            throw BusinessException.serviceThrow("源文件路径不存在, IO异常:" + e.getMessage());
         }
-        return null;
     }
 }

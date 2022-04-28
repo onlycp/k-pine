@@ -1,7 +1,6 @@
 package com.kingsware.kdev.core.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.ApiDefine;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
@@ -22,28 +21,18 @@ import com.kingsware.kdev.core.kflow.*;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
-import com.kingsware.kdev.core.util.ClassUtils;
 import com.kingsware.kdev.core.util.ExceptionUtils;
 import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.core.util.StringUtils;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**
