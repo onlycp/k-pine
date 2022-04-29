@@ -8,7 +8,10 @@ import com.kingsware.kdev.core.util.HttpUtil;
 import com.kingsware.kdev.core.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.File;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -43,7 +46,7 @@ public abstract class KdbApiAbstract implements  KdbApi {
     /** 上传文件 **/
     public static final String UPLOAD_URL = "/upload";
     /** 下载文件 **/
-    public static final String DOWN_URL = "/upload";
+    public static final String DOWN_URL = "/download";
 
 
     @Override
@@ -184,7 +187,7 @@ public abstract class KdbApiAbstract implements  KdbApi {
         try {
             String url = getServer() + UPLOAD_URL;
             // 发起请求上传文件
-            String responseBody = HttpUtil.postFile(url, fileName, "file", inputStream);
+            String responseBody = HttpUtil.uploadFile(url, fileName, "file", inputStream);
             KdbRet<String> ret = JsonUtil.toBean(responseBody, KdbRet.class, String.class);
             if (ret == null) {
                 throw new OrmDbException("kdb响应数据不合法，响应内容:" + responseBody);
@@ -195,6 +198,12 @@ public abstract class KdbApiAbstract implements  KdbApi {
             log.error("接口调用，响应码:{}, 响应信息：{}，接口:{}, 参数:{}", e.getCode(), e.getMessage(), e.getUrl(), e.getParams());
             throw new OrmDbException(e.getMessage());
         }
+    }
+
+    @Override
+    public File downloadFile(String path) {
+        String url = getServer() + DOWN_URL + "/" + URLEncoder.encode(path);
+        return HttpUtil.downloadFile(url, path);
     }
 
     /** 设置接口地址 **/

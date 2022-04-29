@@ -78,6 +78,7 @@ public class ServletUtil {
                 response.getOutputStream().write(buff, 0, i);
                 response.getOutputStream().flush();
             }
+            response.getOutputStream().flush();
             response.getOutputStream().close();
 
         }

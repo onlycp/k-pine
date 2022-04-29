@@ -130,7 +130,7 @@ public class KAuthFilter implements Filter {
             ServletUtil.responseJson(response, BaseRet.fail(message, RetEnum.FORBIDDEN.getCode()));
         }
         catch (Exception e) {
-            e.printStackTrace();
+            log.error("error", e);
             ServletUtil.responseJson(response, BaseRet.failMessage(ExceptionUtils.getStackTrace(e)));
         }
 

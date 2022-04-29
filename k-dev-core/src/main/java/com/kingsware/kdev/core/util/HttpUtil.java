@@ -1,6 +1,8 @@
 package com.kingsware.kdev.core.util;
 
+import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.HttpClientException;
+import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -8,6 +10,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Http工具类
@@ -89,43 +92,37 @@ public class HttpUtil {
     }
 
     /**
-     * @param fileName 要上传的文件，列：e:/upload/SSD4k对齐分区.zip
+     * 上传文件
+     * @param fileName 文件名
      * @param apiUrl    接口地路
      */
-    public static String postFile(String apiUrl, String fileName, String formName,  InputStream inputStream) {
-        OutputStream out = null;
-        try {
-            //要上传的文件
-            URL url = new URL(apiUrl);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setDoOutput(true);
-            conn.setDoInput(true);
-            conn.setChunkedStreamingMode(1024 * 1024);
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("connection", "Keep-Alive");
-            conn.setRequestProperty("Charsert", "UTF-8");
-            conn.setConnectTimeout(50000);
-            conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=-----------------------------264141203718551;file="+ fileName);
-            conn.setRequestProperty("fileName", fileName);
-            conn.setRequestProperty("strSiteID", "strSiteID");
-            conn.setRequestProperty("strColumnID", "strColumnID");
-            conn.setRequestProperty("strDespatcher", "strDespatcher");
-            conn.setRequestProperty("strMechanism", "strMechanism");
-            conn.setRequestProperty("strOther1", "strOther1");
-            out = new DataOutputStream(conn.getOutputStream());
-            DataInputStream in = new DataInputStream(inputStream);
-            int bytes = 0;
-            byte[] bufferOut = new byte[2048];
-            while ((bytes = in.read(bufferOut)) != -1) {
-                out.write(bufferOut, 0, bytes);
-            }
+    public static String uploadFile(String apiUrl, String fileName, String formName, InputStream inputStream) {
 
+
+        try {
+            String Boundary = UUID.randomUUID().toString(); // 文件边界
+            // 1.开启Http连接
+            HttpURLConnection conn = (HttpURLConnection) new URL(apiUrl).openConnection();
+            conn.setConnectTimeout(60*1000);
+            conn.setDoOutput(true); // 允许输出
+            // 2.Http请求行/头
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Charset", "utf-8");
+            conn.setRequestProperty("Content-Type", "multipart/form-data; boundary="+Boundary);
+            // 3.Http请求体
+            DataOutputStream out = new DataOutputStream(conn.getOutputStream());
+            out.writeUTF("--"+Boundary+"\r\n"
+                    +"Content-Disposition: form-data; name=\""+ formName+"\"; filename=\""+ fileName + "\"\r\n"
+                    +"Content-Type: application/octet-stream; charset=utf-8"+"\r\n\r\n");
+            byte[] b = new byte[1024];
+            int l = 0;
+            while((l = inputStream.read(b)) != -1) out.write(b,0,l); // 写入文件
+            out.writeUTF("\r\n--"+Boundary+"--\r\n");
             out.flush();
             out.close();
-
-            // 获取body
+            inputStream.close();
+            // 4.Http响应
             String responseBody = getBody(conn.getInputStream());
-            // 获取响应结果
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 // 如果是ok，直接返回body
                 return responseBody;
@@ -133,16 +130,54 @@ public class HttpUtil {
             else {
                 throw new HttpClientException(responseBody, conn.getResponseCode(), apiUrl, "");
             }
+        }
+        catch (Exception e) {
+            throw BusinessException.serviceThrow("Faas文件上传失败");
+        }
+
+    }
+
+    /**
+     * 下载文件
+     * @param downloadUrl       下载地址
+     * @param fileName      输出流
+     */
+    public static File downloadFile(String downloadUrl, String fileName) {
+
+        HttpURLConnection connection = null;
+        try {
+            URL url = new URL(downloadUrl);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestProperty("connection", "Keep-Alive");
+            connection.setRequestProperty("Charset", "UTF-8");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(60000);
+            connection.setDoInput(true);
+            @Cleanup InputStream is = connection.getInputStream();
+            File tempFile = FileUtils.createTempFile(fileName);
+            assert tempFile != null;
+            @Cleanup FileOutputStream outputStream = new FileOutputStream(tempFile);
+            byte[] buf = new byte[2 * 1024];
+            int len;
+            while ((len = is.read(buf)) != -1) {
+                outputStream.write(buf, 0, len);
+            }
+            outputStream.flush();
+            outputStream.close();
+            return tempFile;
         } catch (Exception e) {
             log.error("error", e);
-            throw new HttpClientException(e.getLocalizedMessage(), -1, apiUrl, "");
+            throw BusinessException.serviceThrow("文件下载失败，异常信息:" + e.getMessage());
+
+        } finally {
+            if (connection != null)
+                connection.disconnect();
         }
+
     }
 
 
-
-
-    /**
+        /**
      * 获取响应body的内容
      * @param inputStream   输入流
      * @return  body

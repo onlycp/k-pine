@@ -50,6 +50,9 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
     @Value("${file.base-path:.}")
     private String basePath;
 
+    @Value("${app.file-local-to-faas:false}")
+    private boolean fileLocalToFaas;
+
     @Override
     public SysFileRet get(String id) {
         // 查询model
@@ -95,6 +98,10 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
     @Override
     public List<SysFileRet> upload(MultipartFile[] files, String fileFrom, Integer saveType) {
         List<SysFileRet> retList = new ArrayList<>();
+        // 如果是自动转为faas的，那么新上传的文件也改为faas
+        if (fileLocalToFaas && saveType == 1) {
+            saveType = 2;
+        }
         // 遍历处理文件
         for (MultipartFile file: files) {
             SysFile sysFile = FileManager.getInstance().register(file.getInputStream(), file.getOriginalFilename(), (int)file.getSize(), fileFrom, saveType);
@@ -111,11 +118,13 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
     @Override
     public void download(String id) {
 
+
         SysFile file = DB.findById(SysFile.class, id);
+
+        HttpServletResponse response =  KClientContext.getContext().getResponse();
         if (file == null) {
             throw BusinessException.serviceThrow("文件已被删除！");
         }
-        HttpServletResponse response =  KClientContext.getContext().getResponse();
         response.reset();
         response.setContentType("application/octet-stream");
         response.setCharacterEncoding("utf-8");
@@ -135,6 +144,17 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             File localFile = new File(absFilePath);
             ServletUtil.responseFile(localFile, file.getFileName());
         }
+        else if (file.getSaveType() == 2) {
+            File tempFile = DB.kdbApi().downloadFile(file.getFilePath());
+            ServletUtil.responseFile(tempFile, file.getFileName());
+            try {
+                Files.deleteIfExists(tempFile.toPath());
+            } catch (IOException e) {
+                log.error("error", e);
+                throw new RuntimeException(e);
+            }
+        }
+
     }
 
     @Override
