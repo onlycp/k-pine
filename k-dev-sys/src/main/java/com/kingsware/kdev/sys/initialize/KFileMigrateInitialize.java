@@ -59,7 +59,7 @@ public class KFileMigrateInitialize implements SystemInitialize {
                     sysFile.setSaveType(2);
                     FaasUploadRet faasUploadRet = JsonUtil.toBean(kdbRet.getResponseBody(), FaasUploadRet.class);
                     sysFile.setFilePath(faasUploadRet.getFileName());
-                    DB.save(sysFile);
+                    DB.update(sysFile);
                     log.info("本地存储迁移到FAAS完成，文件序号:{}, 文件名：{}, 文件路径:{}", index++, sysFile.getFileName(), absFilePath);
                 }
 

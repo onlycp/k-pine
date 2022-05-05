@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.util;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -240,6 +241,35 @@ public class StringUtils {
         String str = uuid.toString();
         // 去掉"-"符号
         return str.substring(0, 8) + str.substring(9, 13) + str.substring(14, 18) + str.substring(19, 23) + str.substring(24);
+    }
+
+    /**
+     * 是否uuid
+     * @param uuid  uuid
+     * @return  返回是否
+     */
+    public static boolean isUuid(final String uuid) {
+        String split ="-";
+        String str = uuid;
+        if (uuid.indexOf(split) > 0) {
+            List<String> arr = new ArrayList<>();
+            for (int i=0; i < str.length(); i++) {
+                arr.add(str.charAt(i) + "");
+            }
+            arr.add(8, split);
+            arr.add(14, split);
+            arr.add(24, split);
+            str = StringUtils.joinToString(arr, "-");
+        }
+
+        try {
+            UUID.fromString(str);
+            return true;
+        }
+        catch (Exception e) {
+            return false;
+        }
+
     }
 
 

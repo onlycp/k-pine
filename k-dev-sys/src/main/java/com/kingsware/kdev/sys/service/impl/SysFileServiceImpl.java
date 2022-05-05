@@ -123,8 +123,14 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
 
         HttpServletResponse response =  KClientContext.getContext().getResponse();
         if (file == null) {
-            throw BusinessException.serviceThrow("文件已被删除！");
+            if (StringUtils.isUuid(id)) {
+                throw BusinessException.serviceThrow("文件已被删除！");
+            }
+            else {
+                downloadFromFaas(id, id);
+            }
         }
+
         response.reset();
         response.setContentType("application/octet-stream");
         response.setCharacterEncoding("utf-8");
@@ -145,16 +151,24 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             ServletUtil.responseFile(localFile, file.getFileName());
         }
         else if (file.getSaveType() == 2) {
-            File tempFile = DB.kdbApi().downloadFile(file.getFilePath());
-            ServletUtil.responseFile(tempFile, file.getFileName());
-            try {
-                Files.deleteIfExists(tempFile.toPath());
-            } catch (IOException e) {
-                log.error("error", e);
-                throw new RuntimeException(e);
-            }
+           downloadFromFaas(file.getFilePath(), file.getFileName());
         }
+    }
 
+    /**
+     * 从Faas下载文件
+     * @param filePath  文件路径
+     * @param fileName  文件名称
+     */
+    private void downloadFromFaas(String filePath, String fileName) {
+        File tempFile = DB.kdbApi().downloadFile(filePath);
+        ServletUtil.responseFile(tempFile, fileName);
+        try {
+            Files.deleteIfExists(tempFile.toPath());
+        } catch (IOException e) {
+            log.error("error", e);
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
