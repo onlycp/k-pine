@@ -77,12 +77,19 @@ public class PoiExcelHandler implements KExcelHandler{
                 // 自适应列宽
                 short columnNum = sheet.getRow(0).getLastCellNum();
                 for (short i=0; i< columnNum; i++) {
-                    sheet.autoSizeColumn(i);
+                    try {
+                        sheet.autoSizeColumn(i);
+                    }
+                    catch (Exception ignored) {
+
+                    }
+
                 }
             }
             workbook.write(out);
         }
         catch (Exception e) {
+            log.error("error", e);
             log.info("excel文件写失败，错误原因:{}", e.getMessage());
         }
 
