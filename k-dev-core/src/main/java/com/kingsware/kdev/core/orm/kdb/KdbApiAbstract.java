@@ -8,6 +8,10 @@ import com.kingsware.kdev.core.util.HttpUtil;
 import com.kingsware.kdev.core.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +43,10 @@ public abstract class KdbApiAbstract implements  KdbApi {
     public static final String ADD_FUN_URL = "/api/function/add";
     public static final String EDIT_FUN_URL = "/api/function/edit";
     public static final String DELETE_FUN_URL = "/api/function/delete";
+    /** 上传文件 **/
+    public static final String UPLOAD_URL = "/upload";
+    /** 下载文件 **/
+    public static final String DOWN_URL = "/download";
 
 
     @Override
@@ -131,6 +139,7 @@ public abstract class KdbApiAbstract implements  KdbApi {
     }
 
     @Override
+    @SuppressWarnings("all")
     public List<Functions> queryFunction(FunctionQueryArgv argv) {
         KdbRet<List> list =  post(argv, QUERY_FUN_URL, List.class);
         String json = JsonUtil.toJson(list.getResponseBody());
@@ -142,6 +151,7 @@ public abstract class KdbApiAbstract implements  KdbApi {
      * @param params    参数
      * @return      body
      */
+    @SuppressWarnings("all")
     private <T> KdbRet<T> post(Object params, String api, Class<T> tClass)  {
         try {
             // 转为json
@@ -152,7 +162,7 @@ public abstract class KdbApiAbstract implements  KdbApi {
 
             long t1 = System.currentTimeMillis();
             // 杀敌一万，满身是血
-            String  responseBody = HttpUtil.postBody(url, requestBody, Collections.emptyMap());
+            String responseBody = HttpUtil.postBody(url, requestBody, Collections.emptyMap());
             // 洗洗，换身好衣服
             KdbRet<T> ret = JsonUtil.toBean(responseBody, KdbRet.class, tClass);
             // 看看死了没
@@ -160,8 +170,27 @@ public abstract class KdbApiAbstract implements  KdbApi {
             if (ret == null) {
                 throw new OrmDbException("kdb响应数据不合法，响应内容:" + responseBody);
             }
-            else if (ret.getErrorCode() != 0) {
-                throw new OrmDbException("kdb响应数据不合法，响应内容:" + ret.getMessage());
+//            else if (ret.getErrorCode() != 0) {
+//                throw new OrmDbException("kdb响应数据不合法，响应内容:" + ret.getMessage());
+//            }
+            return ret;
+        }
+        catch (HttpClientException e) {
+            log.error("接口调用，响应码:{}, 响应信息：{}，接口:{}, 参数:{}", e.getCode(), e.getMessage(), e.getUrl(), e.getParams());
+            throw new OrmDbException(e.getMessage());
+        }
+    }
+
+    @Override
+    @SuppressWarnings("all")
+    public KdbRet<String> uploadFile(InputStream inputStream, String fileName ) {
+        try {
+            String url = getServer() + UPLOAD_URL;
+            // 发起请求上传文件
+            String responseBody = HttpUtil.uploadFile(url, fileName, "file", inputStream);
+            KdbRet<String> ret = JsonUtil.toBean(responseBody, KdbRet.class, String.class);
+            if (ret == null) {
+                throw new OrmDbException("kdb响应数据不合法，响应内容:" + responseBody);
             }
             return ret;
         }
@@ -169,6 +198,12 @@ public abstract class KdbApiAbstract implements  KdbApi {
             log.error("接口调用，响应码:{}, 响应信息：{}，接口:{}, 参数:{}", e.getCode(), e.getMessage(), e.getUrl(), e.getParams());
             throw new OrmDbException(e.getMessage());
         }
+    }
+
+    @Override
+    public File downloadFile(String path) {
+        String url = getServer() + DOWN_URL + "/" + URLEncoder.encode(path);
+        return HttpUtil.downloadFile(url, path);
     }
 
     /** 设置接口地址 **/

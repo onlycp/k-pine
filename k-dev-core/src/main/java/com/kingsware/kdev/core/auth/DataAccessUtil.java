@@ -28,6 +28,7 @@ public class DataAccessUtil {
      * 生成权限查询sql
      * @param table     表名
      * @param alias     简写
+     * @param sqlLink   sql拼接方式， in或exists
      * @return          权限sql
      */
     public static String getDataAccessSql(String table, String alias, SqlLink sqlLink ) {

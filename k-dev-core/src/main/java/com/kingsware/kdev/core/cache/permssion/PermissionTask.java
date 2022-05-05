@@ -1,9 +1,10 @@
-package com.kingsware.kdev.core.cache.dict;
+package com.kingsware.kdev.core.cache.permssion;
 
+import com.kingsware.kdev.core.cache.dict.DictItemInfo;
+import com.kingsware.kdev.core.cache.dict.DictManager;
 import com.kingsware.kdev.core.cron.KRunner;
 import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.core.orm.DB;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
@@ -14,22 +15,17 @@ import java.util.List;
  * @version 1.0.0
  * @date 2022/1/6 9:41 上午
  */
-@Slf4j
-public class DictTask implements KTask, KRunner {
+public class PermissionTask implements KTask, KRunner {
 
-    public DictTask() {
+    public PermissionTask() {
     }
 
     /**
-     * 定时拉取字典项
+     * 定时刷新权限
      */
     @Override
     public void execute() {
-        // 查找所有字典
-        List<DictItemInfo> dictItemList = DB.findList(DictItemInfo.class, "select * from sys_dict_item");
-        for (DictItemInfo dictItem: dictItemList) {
-            DictManager.getInstance().addDict(dictItem.getCode(), dictItem.getName(), dictItem.getValue());
-        }
+        PermissionManager.getInstance().refreshAll();
     }
 
     @Override
@@ -39,7 +35,7 @@ public class DictTask implements KTask, KRunner {
 
     @Override
     public String name() {
-        return "DictTask";
+        return "PermissionTask";
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.cron;
 
+import com.kingsware.kdev.core.cache.task.TaskListManager;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.model.SysTask;
@@ -9,6 +10,9 @@ import com.kingsware.kdev.core.orm.kdb.KdbFlowQueryArgv;
 import com.kingsware.kdev.core.util.ClassUtils;
 import com.kingsware.kdev.core.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.TriggerContext;
+import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+import org.springframework.scheduling.support.CronTrigger;
 
 import java.sql.Timestamp;
 import java.util.HashMap;
@@ -25,6 +29,12 @@ import java.util.List;
 public class KTaskRunnerManager {
     private static KTaskRunnerManager instance;
 
+    /** 任务调度器 **/
+    private ScheduledTaskRegistrar scheduledTaskRegistrar;
+
+    //存储任务执行的包装类
+    private HashMap<String, ScheduledFutureHolder> scheduleMap = new HashMap<>();
+
     public static KTaskRunnerManager getInstance() {
         if (instance == null) {
             instance = new KTaskRunnerManager();
@@ -35,6 +45,14 @@ public class KTaskRunnerManager {
     private KTaskRunnerManager() {
     }
 
+
+    /**
+     * 保存任务调试器
+     * @param scheduledTaskRegistrar    任务调度器
+     */
+    public void setScheduledTaskRegistrar(final ScheduledTaskRegistrar scheduledTaskRegistrar) {
+        this.scheduledTaskRegistrar = scheduledTaskRegistrar;
+    }
     /**
      * 运行任务
      * @param sysTask   任务便利店
@@ -63,6 +81,21 @@ public class KTaskRunnerManager {
         executeTask(myTask);
 
     }
+
+    /**
+     * 注册任务
+     * @param sysTask   任务
+     */
+    public void register(SysTask sysTask) {
+        // 启动任务
+        scheduledTaskRegistrar.addTriggerTask(() -> KTaskRunnerManager.getInstance().runTask(sysTask), (TriggerContext triggerContext) -> {
+            SysTask myTask = TaskListManager.getInstance().getTask(sysTask.getId());
+//                log.info("设置下次执行时间, 任务: {}", myTask.getName());
+            MyCronTrigger myCronTrigger = new MyCronTrigger(myTask.getCron(), sysTask.getName());
+            return myCronTrigger.nextExecutionTime(triggerContext);
+        });
+    }
+
 
     /**
      * 运行任务
@@ -110,6 +143,7 @@ public class KTaskRunnerManager {
      */
     private void runJavaTask(SysTask sysTask) throws Exception {
         try {
+            // todo 会导致执行两次
             KTask kTask = (KTask) Class.forName(sysTask.getClassName()).newInstance();
             kTask.execute();
         } catch (ClassNotFoundException e) {
@@ -166,6 +200,10 @@ public class KTaskRunnerManager {
                     // 保存
                     DB.save(sysTask);
                     log.info("发现任务，任务名称:{}, cron:{}, Class: {}", sysTask.getName(), sysTask.getCron(), sysTask.getClassName());
+                }
+                if (task instanceof KRunner) {
+                    ((KRunner)task).runNow();
+                    log.info("定时任务启动时即运行:{}", task.name());
                 }
             } catch (Exception e) {
                 log.error("定时类扫描初始化失败:{}" , e.getMessage());

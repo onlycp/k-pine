@@ -1,5 +1,8 @@
 package com.kingsware.kdev.core.orm.kdb;
 
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -105,6 +108,20 @@ public interface KdbApi {
      * @return 查询结果
      */
     List<Functions> queryFunction(FunctionQueryArgv argv);
+
+    /**
+     * http上传文件
+     * @param inputStream   流
+     * @return          返回上传信息
+     */
+    KdbRet<String> uploadFile(InputStream inputStream, String fileName);
+
+
+    /**
+     * 下载文件，直接流操作
+     * @param path  文件路径
+     */
+    File downloadFile(String path);
 
 
 

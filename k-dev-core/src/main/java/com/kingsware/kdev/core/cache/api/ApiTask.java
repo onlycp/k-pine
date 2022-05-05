@@ -1,6 +1,7 @@
 package com.kingsware.kdev.core.cache.api;
 
 import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.cron.KRunner;
 import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.core.kflow.KFlowProperties;
 import com.kingsware.kdev.core.orm.DB;
@@ -16,10 +17,10 @@ import java.util.List;
  * @date 2022/1/6 9:41 上午
  */
 @Slf4j
-public class ApiTask implements KTask {
+public class ApiTask implements KTask, KRunner {
 
     public ApiTask() {
-        this.execute();
+
     }
 
     /**
@@ -50,5 +51,10 @@ public class ApiTask implements KTask {
     @Override
     public String name() {
         return "ApiTask";
+    }
+
+    @Override
+    public void runNow() {
+        this.execute();
     }
 }

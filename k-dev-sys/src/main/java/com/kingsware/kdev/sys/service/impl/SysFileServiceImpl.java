@@ -50,6 +50,9 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
     @Value("${file.base-path:.}")
     private String basePath;
 
+    @Value("${app.file-local-to-faas:false}")
+    private boolean fileLocalToFaas;
+
     @Override
     public SysFileRet get(String id) {
         // 查询model
@@ -95,6 +98,10 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
     @Override
     public List<SysFileRet> upload(MultipartFile[] files, String fileFrom, Integer saveType) {
         List<SysFileRet> retList = new ArrayList<>();
+        // 如果是自动转为faas的，那么新上传的文件也改为faas
+        if (fileLocalToFaas && saveType == 1) {
+            saveType = 2;
+        }
         // 遍历处理文件
         for (MultipartFile file: files) {
             SysFile sysFile = FileManager.getInstance().register(file.getInputStream(), file.getOriginalFilename(), (int)file.getSize(), fileFrom, saveType);
@@ -111,11 +118,19 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
     @Override
     public void download(String id) {
 
+
         SysFile file = DB.findById(SysFile.class, id);
-        if (file == null) {
-            throw BusinessException.serviceThrow("文件已被删除！");
-        }
+
         HttpServletResponse response =  KClientContext.getContext().getResponse();
+        if (file == null) {
+            if (StringUtils.isUuid(id)) {
+                throw BusinessException.serviceThrow("文件已被删除！");
+            }
+            else {
+                downloadFromFaas(id, id);
+            }
+        }
+
         response.reset();
         response.setContentType("application/octet-stream");
         response.setCharacterEncoding("utf-8");
@@ -134,6 +149,25 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             String absFilePath = basePath + file.getFilePath();
             File localFile = new File(absFilePath);
             ServletUtil.responseFile(localFile, file.getFileName());
+        }
+        else if (file.getSaveType() == 2) {
+           downloadFromFaas(file.getFilePath(), file.getFileName());
+        }
+    }
+
+    /**
+     * 从Faas下载文件
+     * @param filePath  文件路径
+     * @param fileName  文件名称
+     */
+    private void downloadFromFaas(String filePath, String fileName) {
+        File tempFile = DB.kdbApi().downloadFile(filePath);
+        ServletUtil.responseFile(tempFile, fileName);
+        try {
+            Files.deleteIfExists(tempFile.toPath());
+        } catch (IOException e) {
+            log.error("error", e);
+            throw new RuntimeException(e);
         }
     }
 

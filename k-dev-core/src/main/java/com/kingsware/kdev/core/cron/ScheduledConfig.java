@@ -46,13 +46,11 @@ public class ScheduledConfig implements SchedulingConfigurer {
         KTaskRunnerManager.getInstance().scanJavaClassTask(scanPackage);
         // 从数据库里加载所有定时任务
         TaskListManager.getInstance().loadAllTask();
+        // 注册调度器
+        KTaskRunnerManager.getInstance().setScheduledTaskRegistrar(scheduledTaskRegistrar);
         List<SysTask> tasks = TaskListManager.getInstance().getAllTask();
         for (SysTask sysTask: tasks) {
-            // 执行任务
-            scheduledTaskRegistrar.addTriggerTask(() -> KTaskRunnerManager.getInstance().runTask(sysTask), (TriggerContext triggerContext) -> {
-                SysTask myTask = TaskListManager.getInstance().getTask(sysTask.getId());
-                return new CronTrigger(myTask.getCron()).nextExecutionTime(triggerContext);
-            });
+          KTaskRunnerManager.getInstance().register(sysTask);
         }
     }
 

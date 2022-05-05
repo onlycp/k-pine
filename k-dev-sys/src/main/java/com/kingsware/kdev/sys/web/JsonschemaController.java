@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.constants.Version;
 import com.kingsware.kdev.core.jsonschema.BaseSchemaDefine;
@@ -23,7 +24,7 @@ import javax.annotation.Resource;
 @Api(value = "JSON SCHEMA", tags = {"JSONSCHEMA"})
 @RestController
 @RequestMapping("/"+ Version.V1 + "/sys-json-schemas")
-public class JsonschemaController {
+public class JsonschemaController extends BaseController {
 
     @Resource
     private JsonSchemaService jsonSchemaService;

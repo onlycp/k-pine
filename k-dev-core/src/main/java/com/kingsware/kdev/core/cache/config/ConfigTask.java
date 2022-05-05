@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.cache.config;
 
+import com.kingsware.kdev.core.cron.KRunner;
 import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.core.orm.DB;
 
@@ -12,10 +13,10 @@ import java.util.List;
  * @version 1.0.0
  * @date 2022/1/6 9:41 上午
  */
-public class ConfigTask implements KTask {
+public class ConfigTask implements KTask, KRunner {
 
     public ConfigTask() {
-        this.execute();
+
     }
 
     /**
@@ -38,5 +39,10 @@ public class ConfigTask implements KTask {
     @Override
     public String name() {
         return "ConfigTask";
+    }
+
+    @Override
+    public void runNow() {
+        this.execute();
     }
 }
