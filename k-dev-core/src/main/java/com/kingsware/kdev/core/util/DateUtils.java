@@ -74,6 +74,32 @@ public class DateUtils {
     }
 
     /**
+     * 是否同一天
+     * @param date1  目标日期
+     * @param date2  要比较的日期
+     * @return  是否before
+     */
+    public static boolean isBefore(Date date1, Date date2) {
+        long dayMils = 1000*60*60*24;
+        long day1 = date1.getTime()/dayMils;
+        long day2 = date2.getTime()/dayMils;
+        return day2 < day1;
+    }
+
+    /**
+     * 获取相隔天数
+     * @param date1  目标日期
+     * @param date2  要比较的日期
+     * @return  返回相差天数
+     */
+    public static int betweenDays(Date date1, Date date2) {
+        long dayMils = 1000*60*60*24;
+        long day1 = date1.getTime()/dayMils;
+        long day2 = date2.getTime()/dayMils;
+        return (int)(day2-day1);
+    }
+
+    /**
      * 在不知道日期格式的情况下转日期
      * @param dateString
      * @return

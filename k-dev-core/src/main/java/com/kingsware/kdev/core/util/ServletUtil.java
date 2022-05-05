@@ -207,7 +207,7 @@ public class ServletUtil {
             Map<String, MultipartFile> fileMap = multipartHttpServletRequest.getFileMap();
             for (Map.Entry<String, MultipartFile> multipartFileEntry: fileMap.entrySet()) {
                 KFlowUploadFile uploadFile = new KFlowUploadFile();
-                Base64.getEncoder().encodeToString("1".getBytes());
+                // Base64.getEncoder().encodeToString("1".getBytes());
                 // 原始文件名
                 uploadFile.setOriginFileName(multipartFileEntry.getValue().getOriginalFilename());
                 // 文件大小

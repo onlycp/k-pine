@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 import java.nio.file.Files;
 import java.security.MessageDigest;
+import java.util.stream.Stream;
 
 /**
  * 文件处理工具类
@@ -99,6 +100,7 @@ public class FileUtils {
         }
         return sbf.toString();
     }
+
 
     /**
      * 创建临时文件

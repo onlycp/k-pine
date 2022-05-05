@@ -72,6 +72,10 @@ public class KAuthFilter implements Filter {
         // 获取上下文路径
         String contextPath = request.getContextPath();
 
+        if (!url.startsWith("/api") &&  StringUtils.isEmpty(contextPath)) {
+            filterChain.doFilter(servletRequest, servletResponse);
+            return;
+        }
         if (url.startsWith("/api"))  {
             contextPath = "/api";
         }

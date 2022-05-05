@@ -154,6 +154,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             List<Map<String, Object>> list = (List<Map<String, Object>>) pineMap.get("menus");
             for (Map<String, Object> map: list) {
                 transMapBooleanToInt( map,"isDev", "status");
+                transMapIntToBoolean(map, "isHidden");
             }
         }
         if (pineMap.containsKey("kdbFlows")) {
@@ -181,6 +182,14 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             devPine = objectMapper.readValue(JsonUtil.toJson(pineMap), DevPine.class);
         } catch (JsonProcessingException e) {
             throw BusinessException.serviceThrow("应用包数据解析异常");
+        }
+        // 处理menu
+        if (devPine.getMenus() != null) {
+            devPine.getMenus().stream().forEach(it -> {
+                if (it.getHidden() == null) {
+                    it.setHidden(false);
+                }
+            });
         }
         // 处理应用信息
         long appCount = DB.saveOrUpdate(devPine.getInfo(), DevApplication.class);
@@ -241,10 +250,32 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
 
     private void transMapBooleanToInt(Map<String, Object> map, String...keys) {
         for (String key: keys) {
-            if (map.get(key) != null) {
+            if (map.containsKey(key)) {
                 if (map.get(key) instanceof Boolean) {
                     map.put(key, map.get(key).equals(true) ? 1: 0);
                 }
+                else {
+                    map.put(key, 0);
+                }
+            }
+        }
+
+    }
+
+
+    private void transMapIntToBoolean(Map<String, Object> map, String...keys) {
+        for (String key: keys) {
+            if (map.containsKey(key)) {
+                Object value = map.get(key);
+                if (value == null) {
+                    map.put(key, null);
+                }
+                else {
+                    map.put(key, "1".equals(map.get(key).toString().trim()));
+                }
+            }
+            else {
+                map.put(key, false);
             }
         }
 

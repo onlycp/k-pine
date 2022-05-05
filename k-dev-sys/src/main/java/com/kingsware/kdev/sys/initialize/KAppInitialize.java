@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
@@ -55,8 +57,12 @@ public class KAppInitialize implements SystemInitialize {
             try {
                 log.info("开始安装应用: {}", file.getName());
                 long t1 = System.currentTimeMillis();
-                byte[] bytes = Files.readAllBytes(file.toPath());
-                devApplicationService.importApp(new String(bytes));
+                List<String> lines  = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
+                StringBuffer stringBuffer = new StringBuffer();
+                for (String line: lines) {
+                    stringBuffer.append(line);
+                }
+                devApplicationService.importApp(stringBuffer.toString());
                 // 如果导入成功，
                 long t2 = System.currentTimeMillis();
                 log.info("应用安装成功，应用包名称:{}, 用时:{} ms", file.getName(),  (t2 -t1));

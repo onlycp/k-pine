@@ -44,8 +44,7 @@ public class JsonUtil {
         try {
             return objectMapper.readValue(jsonString, tClass);
         } catch (JsonProcessingException e) {
-            logger.warn("字符串转为对象失败, 源串:{}", jsonString);
-            return null;
+            throw  new RuntimeException(String.format("字符串转为对象失败, 源串:%s", jsonString));
         }
     }
 
@@ -155,6 +154,7 @@ public class JsonUtil {
         try {
             return objectMapper.readValue(json, Map.class);
         } catch (JsonProcessingException e) {
+            logger.error("error", e);
             logger.warn("字符串转map失败, 源串:{}", json);
         }
         return null;
