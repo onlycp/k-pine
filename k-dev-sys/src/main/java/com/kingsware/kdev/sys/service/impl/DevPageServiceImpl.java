@@ -53,8 +53,8 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
     public void edit(DevPageArgv argv) {
         DevPage model = DB.findById(DevPage.class, argv.getId());
         // 唯一校验
-        checkUnique(model);
         BeanUtils.copyProperties(argv, model);
+        checkUnique(model);
         // 保存
         DB.update(model);
     }

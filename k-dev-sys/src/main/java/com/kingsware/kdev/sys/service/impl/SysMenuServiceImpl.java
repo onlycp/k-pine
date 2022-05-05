@@ -223,12 +223,12 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
         if (!isSuperAdmin && ids != null) {
             wrapper.in("srm.sys_role_id", ids);
         }
-        if (appModeProperties.getDev()) {
-            wrapper.addCondition("sm.app_id is null", "");
-            if (!isSuperAdmin) {
-                wrapper.addCondition("sm.is_dev", Op.EQ, 1);
-            }
-        }
+//        if (appModeProperties.getDev()) {
+//            wrapper.addCondition("sm.app_id is null", "");
+//            if (!isSuperAdmin) {
+//                wrapper.addCondition("sm.is_dev", Op.EQ, 1);
+//            }
+//        }
         wrapper.sortBy(" order by order_num asc ");
 
         List<SysMenu> list = DB.findList(SysMenu.class, wrapper.getSql(), wrapper.getParams().toArray());
