@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -45,7 +46,7 @@ public class SysSqlInitialize implements SystemInitialize {
     private int getMaxExecuteVersion() {
         int max = 0;
         try {
-            DevSqlRunRet ret = DB.findOne(DevSqlRunRet.class, "select max(version) as max from dev_sql_run");
+            DevSqlRunRet ret = DB.findOne(DevSqlRunRet.class, "select max(version) as max from dev_sql_run where success=1 ");
             if (ret != null && ret.getMax() != null && ret.getMax() > max) {
                 max = (int) ret.getMax();
             }
@@ -129,10 +130,11 @@ public class SysSqlInitialize implements SystemInitialize {
      */
     private List<String> parseSqlList(File file) {
 
-        try (InputStreamReader isr = new InputStreamReader(Files.newInputStream(file.toPath())); BufferedReader br = new BufferedReader(isr)){
+        try {
+            List<String> readList = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
             List<String> sqlList = new ArrayList<>();
-            StringBuilder sql = new StringBuilder();
-            br.lines().forEach(line -> {
+            StringBuffer sql = new StringBuffer();
+            readList.forEach(line -> {
                 // 去掉空格
                 String cleanLine = line.trim();
                 // 如果不是空才处理
