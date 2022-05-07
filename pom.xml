@@ -25,7 +25,7 @@
 		<maven.compiler.target>8</maven.compiler.target>
 		<poi.version>5.2.0</poi.version>
 		<jxl.version>2.6.12</jxl.version>
-		<kdev.version>1.0.0.20220505-02</kdev.version>
+		<kdev.version>1.0.0.20220506-01</kdev.version>
 	</properties>
 	<dependencies>
 		<dependency>
