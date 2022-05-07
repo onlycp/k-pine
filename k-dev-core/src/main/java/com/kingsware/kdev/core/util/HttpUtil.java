@@ -9,6 +9,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -21,6 +22,15 @@ import java.util.UUID;
  */
 @Slf4j
 public class HttpUtil {
+
+
+    private static final int TIME_OUT = 8 * 1000;                          //超时时间
+    private static final String CHARSET = "utf-8";                         //编码格式
+    private static final String PREFIX = "--";                            //前缀
+    private static final String BOUNDARY = UUID.randomUUID().toString();  //边界标识 随机生成
+    private static final String CONTENT_TYPE = "multipart/form-data";     //内容类型
+    private static final String LINE_END = "\r\n";                        //换行
+
 
     /**
      * 私有构造
@@ -91,6 +101,7 @@ public class HttpUtil {
         }
     }
 
+
     /**
      * 上传文件
      * @param fileName 文件名
@@ -99,37 +110,49 @@ public class HttpUtil {
     public static String uploadFile(String apiUrl, String fileName, String formName, InputStream inputStream, String path) {
 
 
+        HttpURLConnection conn = null;
         try {
-            String Boundary = UUID.randomUUID().toString(); // 文件边界
-            // 1.开启Http连接
-            HttpURLConnection conn = (HttpURLConnection) new URL(apiUrl).openConnection();
-            conn.setConnectTimeout(60*1000);
-            conn.setDoOutput(true); // 允许输出
-            // 2.Http请求行/头
+            URL url = new URL(apiUrl);
+            conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
-            conn.setRequestProperty("Charset", "utf-8");
-            conn.setRequestProperty("Content-Type", "multipart/form-data; boundary="+Boundary);
-            // 3.Http请求体
-            DataOutputStream out = new DataOutputStream(conn.getOutputStream());
-            if (StringUtils.isEmpty(path)) {
-                out.writeUTF("--"+Boundary+"\r\n"
-                        +"Content-Disposition: form-data; name=\""+ formName+"\"; filename=\""+ fileName + "\"\r\n"
-                        +"Content-Type: application/octet-stream; charset=utf-8"+"\r\n\r\n");
-            }
-            else {
-                out.writeUTF("--"+Boundary+"\r\n"
-                        +"Content-Disposition: form-data; path=\""+ path+"\"; name=\""+ formName+"\"; filename=\""+ fileName + "\"\r\n"
-                        +"Content-Type: application/octet-stream; charset=utf-8"+"\r\n\r\n");
-            }
+            conn.setReadTimeout(TIME_OUT);
+            conn.setConnectTimeout(TIME_OUT);
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setUseCaches(false);//Post 请求不能使用缓存
+            //设置请求头参数
+            conn.setRequestProperty("Connection", "Keep-Alive");
+            conn.setRequestProperty("Charset", "UTF-8");
+            conn.setRequestProperty("Content-Type", CONTENT_TYPE+";boundary=" + BOUNDARY);
+            //上传参数
+            DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
+            //getStrParams()为一个
+            Map<String, String> strParams = new HashMap<>();
+            strParams.put("path", path);
+            dos.writeBytes( getStrParams(strParams).toString() );
+            dos.flush();
 
-            byte[] b = new byte[1024];
-            int l = 0;
-            while((l = inputStream.read(b)) != -1) out.write(b,0,l); // 写入文件
-            out.writeUTF("\r\n--"+Boundary+"--\r\n");
-            out.flush();
-            out.close();
+            //文件上传
+            String stringBuilder = PREFIX + BOUNDARY + LINE_END +
+                    "Content-Disposition: form-data; name=\"" + formName + "\"; filename=\""
+                    + fileName + "\"" + LINE_END +
+                    "Content-Type: application/octet-stream" + LINE_END + //此处的ContentType不同于 请求头 中Content-Type
+                    "Content-Transfer-Encoding: 8bit" + LINE_END +
+                    LINE_END;// 参数头设置完以后需要两个换行，然后才是参数内容
+            dos.writeBytes(stringBuilder);
+            dos.flush();
+            byte[] buffer = new byte[1024];
+            int len = 0;
+            while ((len = inputStream.read(buffer)) != -1){
+                dos.write(buffer,0,len);
+            }
             inputStream.close();
-            // 4.Http响应
+            dos.writeBytes(LINE_END);
+            //请求结束标志
+            dos.writeBytes(PREFIX + BOUNDARY + PREFIX + LINE_END);
+            dos.flush();
+            dos.close();
+            //读取服务器返回信息
             String responseBody = getBody(conn.getInputStream());
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 // 如果是ok，直接返回body
@@ -138,18 +161,44 @@ public class HttpUtil {
             else {
                 throw new HttpClientException(responseBody, conn.getResponseCode(), apiUrl, "");
             }
-        }
-        catch (Exception e) {
-            throw BusinessException.serviceThrow("Faas文件上传失败");
-        }
 
+        } catch (Exception e) {
+            throw BusinessException.serviceThrow("Faas文件上传失败");
+        }finally {
+            if (conn!=null){
+                conn.disconnect();
+            }
+        }
     }
 
+
     /**
-     * 下载文件
-     * @param downloadUrl       下载地址
-     * @param fileName      输出流
-     */
+     * 对post参数进行编码处理
+     * */
+    private static StringBuilder getStrParams(Map<String,String> strParams) {
+        StringBuilder strSb = new StringBuilder();
+        for (Map.Entry<String, String> entry : strParams.entrySet()) {
+            strSb.append(PREFIX)
+                    .append(BOUNDARY)
+                    .append(LINE_END)
+                    .append("Content-Disposition: form-data; name=\"" + entry.getKey() + "\"" + LINE_END)
+                    .append("Content-Type: text/plain; charset=" + CHARSET + LINE_END)
+                    .append("Content-Transfer-Encoding: 8bit" + LINE_END)
+                    .append(LINE_END)// 参数头设置完以后需要两个换行，然后才是参数内容
+                    .append(entry.getValue())
+                    .append(LINE_END);
+        }
+        return strSb;
+    }
+
+
+
+
+        /**
+         * 下载文件
+         * @param downloadUrl       下载地址
+         * @param fileName      输出流
+         */
     public static File downloadFile(String downloadUrl, String fileName) {
 
         HttpURLConnection connection = null;
