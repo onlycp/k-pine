@@ -192,6 +192,7 @@ public class SysUserController extends BaseController {
      * @return 提示
      */
     @GetMapping(value = "/ping")
+    @ApiIgnore
     public BaseRet<?> ping() {
         sysUserService.ping();
         return BaseRet.success();

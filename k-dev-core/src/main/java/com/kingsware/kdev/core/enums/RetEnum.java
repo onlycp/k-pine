@@ -17,7 +17,10 @@ public enum RetEnum {
     // 系统异常
     EXCEPTION(500),
     // 业务异常
-    SERVICE_FAIL(600);
+    SERVICE_FAIL(600),
+    /** license异常 **/
+    LICENSE_FAIL(700);
+
 
 
     /** 响应码 **/

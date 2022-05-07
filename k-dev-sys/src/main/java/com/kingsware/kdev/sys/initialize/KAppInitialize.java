@@ -58,7 +58,7 @@ public class KAppInitialize implements SystemInitialize {
                 log.info("开始安装应用: {}", file.getName());
                 long t1 = System.currentTimeMillis();
                 List<String> lines  = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
-                StringBuffer stringBuffer = new StringBuffer();
+                StringBuilder stringBuffer = new StringBuilder();
                 for (String line: lines) {
                     stringBuffer.append(line);
                 }

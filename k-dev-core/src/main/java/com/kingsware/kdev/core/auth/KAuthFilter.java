@@ -6,6 +6,7 @@ import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.cache.api.ApiManager;
 import com.kingsware.kdev.core.cache.controller.ControllerManager;
+import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.cache.permssion.PermissionManager;
 import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.context.ClientInfo;
@@ -15,16 +16,19 @@ import com.kingsware.kdev.core.excel.ExcelWorker;
 import com.kingsware.kdev.core.excel.KExcel;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.ForbiddenException;
+import com.kingsware.kdev.core.exception.LicenseException;
 import com.kingsware.kdev.core.exception.UnauthorizedException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.*;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
+import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.util.ExceptionUtils;
 import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -55,9 +59,10 @@ public class KAuthFilter implements Filter {
     private AppAuthProperties appAuthProperties;
     @Resource
     private ControllerManager controllerManager;
+    @Resource
+    private AppModeProperties appModeProperties;
     /** 开放api接口 **/
-    private String openApi = ":open";
-
+    private final String openApi = ":open";
 
     @ApiIgnore
     @Override
@@ -71,7 +76,7 @@ public class KAuthFilter implements Filter {
         String method = request.getMethod().toLowerCase();
         // 获取上下文路径
         String contextPath = request.getContextPath();
-
+        // 如果是静态文件
         if (!url.startsWith("/api") &&  StringUtils.isEmpty(contextPath)) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
@@ -109,15 +114,16 @@ public class KAuthFilter implements Filter {
                     apiCode = "";
                     ignore = false;
                 }
-
             }
             // 检验权限
             checkPermission(request, response, ignore, apiCode);
+            // 校验license
+            checkLicense();
+            // 根据不同的调用类型，进行调用相关处理
             if (callType == 1) {
                 filterChain.doFilter(servletRequest, servletResponse);
             }
             else {
-                // 调用流程
                 callByFlow(request, response, api, path);
             }
         }
@@ -127,6 +133,9 @@ public class KAuthFilter implements Filter {
         catch (UnauthorizedException e) {
             log.error("用户未登录，接口路径:{}, 请求方法:{}", url, method);
             ServletUtil.responseJson(response, BaseRet.fail(e.getMessage(), RetEnum.UNAUTHORIZED.getCode()));
+        }
+        catch (LicenseException e) {
+            ServletUtil.responseJson(response, BaseRet.fail(e.getMessage(), RetEnum.LICENSE_FAIL.getCode()));
         }
         catch (ForbiddenException e) {
             log.error("接口无权限，接口路径:{}, 请求方法:{}", url, method);
@@ -138,11 +147,24 @@ public class KAuthFilter implements Filter {
             ServletUtil.responseJson(response, BaseRet.failMessage(ExceptionUtils.getStackTrace(e)));
         }
 
-
-
-
-
     }
+
+    private void checkLicense() {
+        if (LicenseManager.getInstance().getStatus() == -1) {
+            throw new LicenseException(I18n.t("license.error.-1", "非法授权"));
+        }
+        else if (LicenseManager.getInstance().getStatus() == 0) {
+            throw new LicenseException(I18n.t("license.error.0", "许可证非授权"));
+        }
+        else if (LicenseManager.getInstance().getStatus() == 1) {
+            throw new LicenseException(I18n.t("license.error.1", "许可证未生效"));
+        }
+        else if (LicenseManager.getInstance().getStatus() == 3) {
+            throw new LicenseException(I18n.t("license.error.3", "许可证已过期"));
+        }
+    }
+
+
 
     private void  callByFlow(HttpServletRequest request, HttpServletResponse response, ApiInfo api, String path) {
         // 获取视图模型
