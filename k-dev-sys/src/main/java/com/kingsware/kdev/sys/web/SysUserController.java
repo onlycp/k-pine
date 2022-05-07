@@ -72,7 +72,6 @@ public class SysUserController extends BaseController {
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
-    @ApiCode("user_query")
     public BaseRet<PageDataRet<SysUserRet>> page(SysUserQueryArgv argv) {
         return BaseRet.success(sysUserService.query(argv));
     }
