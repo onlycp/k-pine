@@ -6,12 +6,14 @@ import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.util.HttpUtil;
 import com.kingsware.kdev.core.util.JsonUtil;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -183,11 +185,11 @@ public abstract class KdbApiAbstract implements  KdbApi {
 
     @Override
     @SuppressWarnings("all")
-    public KdbRet<String> uploadFile(InputStream inputStream, String fileName ) {
+    public KdbRet<String> uploadFile(InputStream inputStream, String fileName, String path) {
         try {
             String url = getServer() + UPLOAD_URL;
             // 发起请求上传文件
-            String responseBody = HttpUtil.uploadFile(url, fileName, "file", inputStream);
+            String responseBody = HttpUtil.uploadFile(url, fileName, "file", inputStream, path);
             KdbRet<String> ret = JsonUtil.toBean(responseBody, KdbRet.class, String.class);
             if (ret == null) {
                 throw new OrmDbException("kdb响应数据不合法，响应内容:" + responseBody);
@@ -201,8 +203,9 @@ public abstract class KdbApiAbstract implements  KdbApi {
     }
 
     @Override
-    public File downloadFile(String path) {
-        String url = getServer() + DOWN_URL + "/" + URLEncoder.encode(path);
+    @SneakyThrows
+    public File downloadFile(String path, String fileName) {
+        String url = getServer() + DOWN_URL + "/" + URLEncoder.encode(fileName, "utf-8") +"?path=" + URLEncoder.encode(path, "utf-8");
         return HttpUtil.downloadFile(url, path);
     }
 

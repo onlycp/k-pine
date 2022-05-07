@@ -43,31 +43,35 @@ public class KFileMigrateInitialize implements SystemInitialize {
         if (!fileLocalToFaas) {
             return;
         }
-        // 查找所有存储类型为1的文件
-        List<SysFile> sysFileList = DB.findList(SysFile.class, "select * from sys_file where save_type=1");
-        log.info("开始从本地存储迁移到FAAS，文件数: {}", sysFileList.size());
-        int index = 0;
-        for (SysFile sysFile: sysFileList) {
-            String absFilePath = basePath + sysFile.getFilePath();
-            File localFile = new File(absFilePath);
-            if (!localFile.exists()) {
-                continue;
-            }
-            try(FileInputStream inputStream = new FileInputStream(absFilePath)) {
-                KdbRet<String> kdbRet = DB.kdbApi().uploadFile(inputStream, sysFile.getFileName());
-                if ("成功".equals(kdbRet.getMessage())) {
-                    sysFile.setSaveType(2);
-                    FaasUploadRet faasUploadRet = JsonUtil.toBean(kdbRet.getResponseBody(), FaasUploadRet.class);
-                    sysFile.setFilePath(faasUploadRet.getFileName());
-                    DB.update(sysFile);
-                    log.info("本地存储迁移到FAAS完成，文件序号:{}, 文件名：{}, 文件路径:{}", index++, sysFile.getFileName(), absFilePath);
-                }
-
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-        }
+//        // 查找所有存储类型为1的文件
+//        List<SysFile> sysFileList = DB.findList(SysFile.class, "select * from sys_file where save_type=1");
+//        log.info("开始从本地存储迁移到FAAS，文件数: {}", sysFileList.size());
+//        int index = 0;
+//        for (SysFile sysFile: sysFileList) {
+//            String absFilePath = basePath + sysFile.getFilePath();
+//            File localFile = new File(absFilePath);
+//            if (!localFile.exists()) {
+//                continue;
+//            }
+//            try(FileInputStream inputStream = new FileInputStream(absFilePath)) {
+//                // 相对路径
+//                String relativePath = File.separator + fileFrom + File.separator;
+//                // 磁盘存储路径
+//                String filePath = basePath +  relativePath;
+//                KdbRet<String> kdbRet = DB.kdbApi().uploadFile(inputStream, sysFile.getFileName()，);
+//                if ("成功".equals(kdbRet.getMessage())) {
+//                    sysFile.setSaveType(2);
+//                    FaasUploadRet faasUploadRet = JsonUtil.toBean(kdbRet.getResponseBody(), FaasUploadRet.class);
+//                    sysFile.setFilePath(faasUploadRet.getFileName());
+//                    DB.update(sysFile);
+//                    log.info("本地存储迁移到FAAS完成，文件序号:{}, 文件名：{}, 文件路径:{}", index++, sysFile.getFileName(), absFilePath);
+//                }
+//
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//
+//        }
 
 //
     }

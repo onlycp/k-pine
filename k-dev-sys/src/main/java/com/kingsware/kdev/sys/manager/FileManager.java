@@ -54,8 +54,9 @@ public class FileManager {
                 log.error("File为目录，无法注册到文件管理");
                 return null;
             }
+            String basePath = SpringContext.getProperties("file.base-path", ".");
             FileInputStream inputStream = new FileInputStream(file);
-            return register(inputStream, file.getName(), (int)file.length(), fileFrom, saveType);
+            return register(inputStream, file.getName(), (int)file.length(), fileFrom, saveType, basePath);
         } catch (FileNotFoundException e) {
             log.error("文件不存在，文件路径:{}", file.getAbsolutePath());
             return null;
@@ -71,8 +72,9 @@ public class FileManager {
      * @return
      */
     @SuppressWarnings("all")
-    public SysFile register(InputStream inputStream, String fileName, int fileSize,  String fileFrom, Integer saveType) {
+    public SysFile register(InputStream inputStream, String fileName, int fileSize,  String fileFrom, Integer saveType, String basePath) {
         try {
+            fileFrom = fileFrom.replaceAll("/", File.separator);
             SysFile sysFile = new SysFile();
             // 真实文件名
             String realName =  fileName;
@@ -104,8 +106,6 @@ public class FileManager {
 
                 String relativePath = File.separator + fileFrom + File.separator;
                 // 磁盘存储路径
-                // 获取基本路径
-                String basePath = SpringContext.getProperties("file.base-path", ".");
                 String filePath = basePath +  relativePath;
                 File path = new File(filePath);
                 boolean status = path.mkdirs();
@@ -119,12 +119,16 @@ public class FileManager {
             }
             // faas 存储
             else if (saveType == 2) {
-                KdbRet<String> kdbRet =  DB.kdbApi().uploadFile(inputStream, fileName);
+                // 相对路径
+                String relativePath = File.separator + fileFrom + File.separator;
+                // 磁盘存储路径
+                String filePath = basePath +  relativePath;
+                KdbRet<String> kdbRet =  DB.kdbApi().uploadFile(inputStream, fileName, filePath);
                 if (!"成功".equals(kdbRet.getMessage())) {
                     throw BusinessException.serviceThrow("文件存储失败,错误信息:" + kdbRet.getMessage());
                 }
                 FaasUploadRet faasUploadRet = JsonUtil.toBean(kdbRet.getResponseBody(), FaasUploadRet.class);
-                sysFile.setFilePath(faasUploadRet.getFileName());
+                sysFile.setFilePath(fileFrom + File.separator + faasUploadRet.getFileName());
                 // 文件md5码
                 sysFile.setFileMd5(FileUtils.getMD5(inputStream));
 
