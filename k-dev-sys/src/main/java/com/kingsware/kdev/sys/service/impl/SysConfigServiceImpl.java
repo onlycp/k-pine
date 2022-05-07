@@ -114,7 +114,7 @@ public class SysConfigServiceImpl extends BaseServiceImpl implements SysConfigSe
         codeList.add("application.version");
         // 拼装sql
         SqlWrapper wrapper = new SqlWrapper("select * from sys_config where 1=1 ");
-        wrapper.in("code", codeList);
+//        wrapper.in("code", codeList);
         if (KFlowContext.isDevMode()) {
             wrapper.appendSql(" and app_id is null");
         }
