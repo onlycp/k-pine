@@ -128,7 +128,7 @@ public class HttpUtil {
             DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
             //getStrParams()为一个
             Map<String, String> strParams = new HashMap<>();
-            strParams.put("path", path);
+            strParams.put("path", new String(path.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1));
             dos.writeBytes( getStrParams(strParams).toString() );
             dos.flush();
 
