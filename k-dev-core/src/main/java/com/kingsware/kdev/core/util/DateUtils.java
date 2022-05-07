@@ -80,10 +80,7 @@ public class DateUtils {
      * @return  是否before
      */
     public static boolean isBefore(Date date1, Date date2) {
-        long dayMils = 1000*60*60*24;
-        long day1 = date1.getTime()/dayMils;
-        long day2 = date2.getTime()/dayMils;
-        return day2 < day1;
+        return date2.before(date1);
     }
 
     /**

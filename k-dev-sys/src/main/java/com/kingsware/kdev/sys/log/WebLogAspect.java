@@ -100,7 +100,13 @@ public class WebLogAspect {
                     operateLog.setResponseCode(responseCode);
                     operateLog.setResponseMessage(responseMessage);
                     operateLog.setOperateTime(new Timestamp(System.currentTimeMillis()));
-                    operateLog.setRequestBody(JsonUtil.toJson(pjd.getArgs()));
+                    try {
+                        operateLog.setRequestBody(JsonUtil.toJson(pjd.getArgs()));
+                    }
+                    catch (Exception ignored) {
+
+                    }
+
                     KmqMessageCenter.getInstance().produce(TOPIC_OPERATE_LOG, JsonUtil.toJson(operateLog) );
 
                     //  如果是登录，则同时生成一个登录日志
