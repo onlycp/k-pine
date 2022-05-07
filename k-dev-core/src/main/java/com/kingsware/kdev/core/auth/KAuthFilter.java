@@ -176,7 +176,7 @@ public class KAuthFilter implements Filter {
         // 转为api格式
         switch (result.getType()) {
             case KFlowConstant.RESULT_JSON:
-                ServletUtil.responseJson(response, FlowUtils.toJsonResult(result.getData()));
+                ServletUtil.responseJson(response, FlowUtils.toJsonResult(result.getData(), result.getLog()));
                 break;
             case KFlowConstant.RESULT_EXCEL:
                 ExcelWorker.getInstance().writeToWeb(response, (KExcel) result.getData());

@@ -4,8 +4,10 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.MessageDigest;
+import java.util.List;
 import java.util.stream.Stream;
 
 /**
@@ -99,6 +101,23 @@ public class FileUtils {
             }
         }
         return sbf.toString();
+    }
+
+
+    public static String readFile(File file) {
+        try {
+            List<String> lines  = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
+            StringBuilder stringBuffer = new StringBuilder();
+            for (String line: lines) {
+                stringBuffer.append(line);
+            }
+            return stringBuffer.toString();
+        }
+        catch (Exception e) {
+            log.error("error", e);
+        }
+        return "";
+
     }
 
 

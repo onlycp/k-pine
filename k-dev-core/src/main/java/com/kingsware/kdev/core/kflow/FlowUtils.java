@@ -400,7 +400,7 @@ public class FlowUtils {
      * @param result 源名称
      * @return
      */
-    public static BaseRet<?> toJsonResult(Object result) {
+    public static BaseRet<?> toJsonResult(Object result, String log) {
         // 返回前端
         BaseRet<?> ret = new BaseRet<>();
         if (result instanceof MessageResult) {
@@ -412,6 +412,7 @@ public class FlowUtils {
         else {
             ret = BaseRet.success(result);
         }
+        ret.setLog(log);
         return ret;
     }
 

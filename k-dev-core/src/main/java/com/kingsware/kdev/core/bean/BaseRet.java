@@ -53,6 +53,13 @@ public class BaseRet<T> implements Serializable {
         this.data = data;
     }
 
+    public String getLog() {
+        return log;
+    }
+
+    public void setLog(String log) {
+        this.log = log;
+    }
 
     /**
      * 成功返回

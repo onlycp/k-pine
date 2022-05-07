@@ -214,17 +214,24 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             if (flowInfo.getFlowId().equalsIgnoreCase("base_flow")) {
                 continue;
             }
+//            DB.byName("kingDB").executeUpdateSql("delete from flow where flowid=?", flowInfo.getFlowId());
+
             KdbFlowQueryArgv kdbFlowQueryArgv = new KdbFlowQueryArgv();
             kdbFlowQueryArgv.setFlowId(flowInfo.getFlowId());
             List<FlowInfo> functionInfoList = DB.kdbApi().query(kdbFlowQueryArgv);
+
             // 如果没有，则新增
             if (functionInfoList.isEmpty() ) {
                 String sql = "insert into flow (flowid,name,content,description) values (?,?,?,?)";
                 DB.byName("kingDB").executeUpdateSql(sql, flowInfo.getFlowId(), flowInfo.getName(), flowInfo.getContent(), flowInfo.getDescription());
             }
             else {
-                String sql = "update flow set name=?, content=?,  description=? where flowid=?";
-                DB.byName("kingDB").executeUpdateSql(sql, flowInfo.getName(), flowInfo.getContent(), flowInfo.getDescription(), flowInfo.getFlowId());
+                EditFlowInfo editFlowInfo = new EditFlowInfo();
+                editFlowInfo.setFlowId(flowInfo.getFlowId());
+                editFlowInfo.setContent(flowInfo.getContent());
+                editFlowInfo.setName(flowInfo.getName());
+                editFlowInfo.setDescription(flowInfo.getDescription());
+                DB.kdbApi().editFlow(editFlowInfo);
             }
         }
         // faas逻辑
@@ -239,8 +246,13 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 DB.byName("kingDB").executeUpdateSql(sql, functions.getId(), functions.getName(), functions.getType(), functions.getDesc(), functions.getScript());
             }
             else {
-                String sql = "update functions set name=?, type=?, desc=?, script=? where id=?";
-                DB.byName("kingDB").executeUpdateSql(sql, functions.getName(), functions.getType(), functions.getDesc(), functions.getScript(), functions.getId());
+                EditFunctionInfo editFunctionInfo = new EditFunctionInfo();
+                editFunctionInfo.setId(functions.getId());
+                editFunctionInfo.setName(functions.getName());
+                editFunctionInfo.setDesc(functions.getDesc());
+                editFunctionInfo.setScript(functions.getScript());
+                editFunctionInfo.setType(functions.getType());
+                DB.kdbApi().editFun(editFunctionInfo);
             }
         }
         log.info("导入应用数:{}, 页面数:{}, 接口数:{}, 字典分类数:{}, 字典项数:{}, 任务调度数:{}, 系统配置数:{}， 菜单数:{}, pine逻辑:{}, faas逻辑:{}, 函数数:{}"

@@ -74,13 +74,14 @@ public class LicenseManager {
         if (!licenseFile.exists()) {
             return;
         }
-        String text = FileUtils.readFileText(licenseFile).trim();
+        String text = FileUtils.readFile(licenseFile).trim();
         // license无效
         if (StringUtils.isEmpty(text)) {
             return;
         }
         try {
             String originText = RSAUtils.publicKeyDecrypt(licensePubKey, text);
+//            log.info("license:" + originText);
             String[] arr = originText.split("\\|");
             this.license = new License();
             this.license.setCustomer(arr[0]);
@@ -160,9 +161,8 @@ public class LicenseManager {
         Date validDate = DateUtils.toDate(lic.getValidDate(), "yyyy-MM-dd");
         // 失效日期
         Date inValidDate = DateUtils.toDate(lic.getInvalidDate(), "yyyy-MM-dd");
-        // 比如mac
-        // license未生效
-        if (validateMac(lic.getMac())) {
+//        log.info("license: {}", lic);
+        if (!validateMac(lic.getMac())) {
             return -1;
         }
         else if (now.before(validDate)) {

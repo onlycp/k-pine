@@ -98,7 +98,7 @@ public class RSAUtils {
         cipher.init(Cipher.DECRYPT_MODE, publicKey);
         byte[] result = cipher.doFinal(Base64.getDecoder().decode(cipherText));
 
-        return new String(result);
+        return new String(result, StandardCharsets.UTF_8);
     }
 
     /**
