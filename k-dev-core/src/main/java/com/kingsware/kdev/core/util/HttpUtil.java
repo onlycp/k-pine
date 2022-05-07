@@ -96,7 +96,7 @@ public class HttpUtil {
      * @param fileName 文件名
      * @param apiUrl    接口地路
      */
-    public static String uploadFile(String apiUrl, String fileName, String formName, InputStream inputStream) {
+    public static String uploadFile(String apiUrl, String fileName, String formName, InputStream inputStream, String path) {
 
 
         try {
@@ -111,9 +111,17 @@ public class HttpUtil {
             conn.setRequestProperty("Content-Type", "multipart/form-data; boundary="+Boundary);
             // 3.Http请求体
             DataOutputStream out = new DataOutputStream(conn.getOutputStream());
-            out.writeUTF("--"+Boundary+"\r\n"
-                    +"Content-Disposition: form-data; name=\""+ formName+"\"; filename=\""+ fileName + "\"\r\n"
-                    +"Content-Type: application/octet-stream; charset=utf-8"+"\r\n\r\n");
+            if (StringUtils.isEmpty(path)) {
+                out.writeUTF("--"+Boundary+"\r\n"
+                        +"Content-Disposition: form-data; name=\""+ formName+"\"; filename=\""+ fileName + "\"\r\n"
+                        +"Content-Type: application/octet-stream; charset=utf-8"+"\r\n\r\n");
+            }
+            else {
+                out.writeUTF("--"+Boundary+"\r\n"
+                        +"Content-Disposition: form-data; path=\""+ path+"\"; name=\""+ formName+"\"; filename=\""+ fileName + "\"\r\n"
+                        +"Content-Type: application/octet-stream; charset=utf-8"+"\r\n\r\n");
+            }
+
             byte[] b = new byte[1024];
             int l = 0;
             while((l = inputStream.read(b)) != -1) out.write(b,0,l); // 写入文件

@@ -114,14 +114,14 @@ public interface KdbApi {
      * @param inputStream   流
      * @return          返回上传信息
      */
-    KdbRet<String> uploadFile(InputStream inputStream, String fileName);
+    KdbRet<String> uploadFile(InputStream inputStream, String fileName, String path);
 
 
     /**
      * 下载文件，直接流操作
      * @param path  文件路径
      */
-    File downloadFile(String path);
+    File downloadFile(String path, String fileName);
 
 
 

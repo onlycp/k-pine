@@ -104,7 +104,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         }
         // 遍历处理文件
         for (MultipartFile file: files) {
-            SysFile sysFile = FileManager.getInstance().register(file.getInputStream(), file.getOriginalFilename(), (int)file.getSize(), fileFrom, saveType);
+            SysFile sysFile = FileManager.getInstance().register(file.getInputStream(), file.getOriginalFilename(), (int)file.getSize(), fileFrom, saveType, basePath);
             if (sysFile == null) {
                 throw BusinessException.serviceThrow("文件保存失败");
             }
@@ -117,17 +117,23 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
 
     @Override
     public void download(String id) {
-
-
+        // 进行url编码
+        id = UriEncoder.decode(id);
         SysFile file = DB.findById(SysFile.class, id);
-
         HttpServletResponse response =  KClientContext.getContext().getResponse();
         if (file == null) {
             if (StringUtils.isUuid(id)) {
                 throw BusinessException.serviceThrow("文件已被删除！");
             }
             else {
-                downloadFromFaas(id, id);
+                String relativePath = "";
+                String fileName =  id;
+                if (id.contains("/")) {
+                    int index = id.lastIndexOf("/");
+                    relativePath = id.substring(0, index);
+                    fileName = id.substring(index + 1);
+                }
+                downloadFromFaas(relativePath, fileName);
             }
         }
 
@@ -151,17 +157,23 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             ServletUtil.responseFile(localFile, file.getFileName());
         }
         else if (file.getSaveType() == 2) {
-           downloadFromFaas(file.getFilePath(), file.getFileName());
+            String relativePath = "";
+            if (file.getFilePath().contains("/")) {
+                int index = id.lastIndexOf("/");
+                relativePath = id.substring(0, index);
+            }
+           downloadFromFaas(relativePath, file.getFileName());
         }
     }
 
     /**
      * 从Faas下载文件
-     * @param filePath  文件路径
+     * @param relativePath  文件路径
      * @param fileName  文件名称
      */
-    private void downloadFromFaas(String filePath, String fileName) {
-        File tempFile = DB.kdbApi().downloadFile(filePath);
+    private void downloadFromFaas(String relativePath, String fileName) {
+        String path = basePath + File.separator + relativePath;
+        File tempFile = DB.kdbApi().downloadFile(path,fileName);
         ServletUtil.responseFile(tempFile, fileName);
         try {
             Files.deleteIfExists(tempFile.toPath());
