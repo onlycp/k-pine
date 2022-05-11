@@ -3,6 +3,7 @@ package com.kingsware.kdev.sys.service.impl;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.cron.DynamicTask;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
@@ -17,6 +18,8 @@ import com.kingsware.kdev.sys.ret.SysTaskRet;
 import com.kingsware.kdev.sys.service.SysTaskService;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+
 /**
  * 任务调度
  *
@@ -26,6 +29,9 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class SysTaskServiceImpl extends BaseServiceImpl implements SysTaskService {
+
+//    @Resource
+//    private DynamicTask dynamicTask;
 
     @Override
     public SysTaskRet get(String id) {
@@ -42,6 +48,8 @@ public class SysTaskServiceImpl extends BaseServiceImpl implements SysTaskServic
         checkUnique(model);
         // 保存
         DB.save(model);
+        // 注册任务
+//        dynamicTask.startTask(model);
     }
 
     @Override
@@ -58,6 +66,8 @@ public class SysTaskServiceImpl extends BaseServiceImpl implements SysTaskServic
         checkUnique(model);
         // 保存
         DB.update(model);
+        // 更新动态任务
+//        dynamicTask.updateTask(model);
     }
 
     private void checkUnique(SysTask model) {

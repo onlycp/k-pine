@@ -18,6 +18,4 @@ public class ScheduledFutureHolder {
     private ScheduledFuture<?> scheduledFuture;
     /**  任务 **/
     private SysTask sysTask;
-    /** 当前表达式 **/
-    private String cron;
 }

@@ -1,12 +1,12 @@
 package com.kingsware.kdev.core.auth;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kingsware.kdev.core.bean.ApiDefine;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.cache.api.ApiManager;
 import com.kingsware.kdev.core.cache.controller.ControllerManager;
 import com.kingsware.kdev.core.cache.license.LicenseManager;
+import com.kingsware.kdev.core.cache.open.OpenApiManager;
 import com.kingsware.kdev.core.cache.permssion.PermissionManager;
 import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.context.ClientInfo;
@@ -22,13 +22,11 @@ import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.*;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
-import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.util.ExceptionUtils;
 import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -37,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -50,19 +49,17 @@ import java.util.Map;
 @Slf4j
 public class KAuthFilter implements Filter {
 
-
-    @Resource
-    private ObjectMapper objectMapper;
     @Resource
     private KFlowProperties kFlowProperties;
     @Resource
     private AppAuthProperties appAuthProperties;
     @Resource
     private ControllerManager controllerManager;
-    @Resource
-    private AppModeProperties appModeProperties;
-    /** 开放api接口 **/
-    private final String openApi = ":open";
+    /** 忽略的接口 **/
+    private static final String ignoreApi = ":open";
+    /** 开放接口 **/
+    private static final String openApiFlag = ":open:";
+
 
     @ApiIgnore
     @Override
@@ -95,15 +92,15 @@ public class KAuthFilter implements Filter {
             initContext(request, response);
             // 如果是openapi，表示是ignore
             boolean ignore = false;
-
             // 调用方式
             int callType = 1;
+
             // 流程调用方式
             if (api != null && api.getCallType() == 2 && kFlowProperties.isEnable()) {
                 callType = 2;
                 apiCode = api.getApiCode();
                 // 是否允许跳过权限
-                ignore = StringUtils.isNotEmpty(api.getApiCode()) && apiCode.startsWith(openApi);
+                ignore = StringUtils.isNotEmpty(api.getApiCode()) && apiCode.startsWith(ignoreApi);
             }
             else {
                 if (apiDefine != null) {
@@ -112,20 +109,26 @@ public class KAuthFilter implements Filter {
                 }
                 else {
                     apiCode = "";
-                    ignore = false;
                 }
             }
-            // 检验权限
-            checkPermission(request, response, ignore, apiCode);
+            // 判断是否开放接口
+            boolean isOpenApi = StringUtils.isNotEmpty(apiCode) && apiCode.startsWith(openApiFlag) && api != null;
+            Map<String, Object> argvMap = new HashMap<>();
+            // 只有在是流程调用时才获取参数，否则会破坏RequestBody
+            if (callType == 2) {
+                argvMap = ServletUtil.getRequestParams(api, path, request);
+            }
+            if (isOpenApi) {
+                // 处理请求变量
+                checkOpenApi(api, argvMap);
+            }
+            else {
+                checkPermission(request, response, ignore, apiCode);
+            }
             // 校验license
             checkLicense();
             // 根据不同的调用类型，进行调用相关处理
-            if (callType == 1) {
-                filterChain.doFilter(servletRequest, servletResponse);
-            }
-            else {
-                callByFlow(request, response, api, path);
-            }
+            if (callType == 1) filterChain.doFilter(servletRequest, servletResponse); else callByFlow(request, response, api, path, argvMap);
         }
         catch (BusinessException | OrmDbException e) {
             ServletUtil.responseJson(response, BaseRet.failMessage(e.getMessage()));
@@ -166,11 +169,9 @@ public class KAuthFilter implements Filter {
 
 
 
-    private void  callByFlow(HttpServletRequest request, HttpServletResponse response, ApiInfo api, String path) {
+    private void  callByFlow(HttpServletRequest request, HttpServletResponse response, ApiInfo api, String path, Map<String, Object> argvMap) {
         // 获取视图模型
         KFlowContext context = KFlowContext.createBaseContext(StringUtils.isNotEmpty(api.getInArgv()) ? api.getInArgv() : "{}", StringUtils.isNotEmpty(api.getOutArgv()) ? api.getOutArgv() : "{}");
-        // 处理请求变量
-        Map<String, Object> argvMap = ServletUtil.getRequestParams(api, path, request);
         // 调用流程
         KdbFlowResult result = KdbFlowExecutor.getInstance().execute(api.getApiFlowId(), api.getSubFlowIds(), argvMap, context);
         // 转为api格式
@@ -244,6 +245,25 @@ public class KAuthFilter implements Filter {
             // 更新活动时间
             SessionManager.getInstance().updateActiveTime(userInfo.getId(), KClientContext.getContext().getToken(), appAuthProperties.getMockSessionExpireMinutes(), updateExpired);
 
+        }
+
+    }
+
+    /**
+     * 校验开放api权限
+     * @param apiInfo   接口信息
+     */
+    public void checkOpenApi(ApiInfo apiInfo, Map<String, Object> params) {
+        // 获取接入商id
+        String accessId = params.getOrDefault("accessId", "").toString();
+        if (StringUtils.isEmpty(accessId)) {
+            throw BusinessException.serviceThrow("接入商ID为空！");
+        }
+        if (!OpenApiManager.getInstance().hasAccess(accessId)) {
+            throw BusinessException.serviceThrow("接入商不存在！");
+        }
+        if (!OpenApiManager.getInstance().hasOpenApi(accessId, apiInfo.getApiCode())) {
+            throw BusinessException.serviceThrow("接口未授权");
         }
 
     }
