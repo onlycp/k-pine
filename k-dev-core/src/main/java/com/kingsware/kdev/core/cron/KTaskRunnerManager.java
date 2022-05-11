@@ -9,6 +9,7 @@ import com.kingsware.kdev.core.orm.kdb.FlowInfo;
 import com.kingsware.kdev.core.orm.kdb.KdbFlowQueryArgv;
 import com.kingsware.kdev.core.util.ClassUtils;
 import com.kingsware.kdev.core.util.DateUtils;
+import com.kingsware.kdev.core.util.ExceptionUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
@@ -59,7 +60,8 @@ public class KTaskRunnerManager {
      */
     public void runTask(SysTask sysTask) {
 
-//        log.info("task:{}", sysTask);
+//        log.info("task:{}", sysTask.getName());
+
         // 如果不是分布式任务，直接运行
         if (sysTask.getDistributed() == 0) {
             executeTask(sysTask);
@@ -126,7 +128,7 @@ public class KTaskRunnerManager {
         catch (Exception e) {
             log.error("定时任务执行失败, 任务名: {}， 错误信息:{}", myTask.getName(), e.getMessage());
             executeStatus = 0;
-            errorMessage = e.getMessage();
+            errorMessage = ExceptionUtils.getStackTrace(e);
         }
         finally {
             long t2 = System.currentTimeMillis();
