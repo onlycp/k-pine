@@ -124,6 +124,7 @@ public class HttpUtil {
             conn.setRequestProperty("Connection", "Keep-Alive");
             conn.setRequestProperty("Charset", "UTF-8");
             conn.setRequestProperty("Content-Type", CONTENT_TYPE+";boundary=" + BOUNDARY);
+            log.info("文件上传, 文件名:{}, 路径:{}", fileName, path);
             //上传参数
             DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
             //getStrParams()为一个
@@ -135,7 +136,7 @@ public class HttpUtil {
             //文件上传
             String stringBuilder = PREFIX + BOUNDARY + LINE_END +
                     "Content-Disposition: form-data; name=\"" + formName + "\"; filename=\""
-                    + fileName + "\"" + LINE_END +
+                    +  new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1) + "\"" + LINE_END +
                     "Content-Type: application/octet-stream" + LINE_END + //此处的ContentType不同于 请求头 中Content-Type
                     "Content-Transfer-Encoding: 8bit" + LINE_END +
                     LINE_END;// 参数头设置完以后需要两个换行，然后才是参数内容
@@ -163,6 +164,7 @@ public class HttpUtil {
             }
 
         } catch (Exception e) {
+            log.error("error", e);
             throw BusinessException.serviceThrow("Faas文件上传失败");
         }finally {
             if (conn!=null){

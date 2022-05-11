@@ -80,6 +80,7 @@ public class SysFileController extends BaseController {
     @ApiOperation(value = "文件上传 " ,notes = "文件上传")
     @PostMapping(value = "/upload/{fileFrom}/{saveType}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @ApiIgnore
     public BaseRet<List<SysFileRet>> upload(@RequestParam("files") MultipartFile[] files, @PathVariable String fileFrom, @PathVariable Integer saveType) {
         return BaseRet.success(sysFileService.upload(files, fileFrom, saveType));
     }
@@ -94,6 +95,7 @@ public class SysFileController extends BaseController {
     @ApiOperation(value = "文件上传 " ,notes = "文件上传")
     @PostMapping(value = "/uploadFile", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @ApiIgnore
     public BaseRet<List<SysFileRet>> uploadFile(@RequestParam("files") MultipartFile[] files, String fileFrom, Integer saveType) {
 //        fileFrom格式要求：aaa/bbb 前后无斜扛
         if (saveType == null) {

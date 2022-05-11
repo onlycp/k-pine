@@ -88,7 +88,7 @@ public class KAuthFilter implements Filter {
         try {
 
             // 获取配置的接口信息
-            String path = url.replace(contextPath, "");
+            String path = url.replaceFirst(contextPath, "");
             ApiInfo api = ApiManager.getInstance().getApi(method, path);
             ApiDefine apiDefine = getApiDefine(request, response);
             // 初始化青松上下文

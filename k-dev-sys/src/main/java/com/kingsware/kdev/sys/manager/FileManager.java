@@ -18,6 +18,7 @@ import org.springframework.util.StreamUtils;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.Base64;
+import java.util.regex.Matcher;
 
 /**
  * 文件管理类
@@ -74,7 +75,7 @@ public class FileManager {
     @SuppressWarnings("all")
     public SysFile register(InputStream inputStream, String fileName, int fileSize,  String fileFrom, Integer saveType, String basePath) {
         try {
-            fileFrom = fileFrom.replaceAll("/", File.separator);
+            fileFrom = fileFrom.replaceAll("/", Matcher.quoteReplacement(File.separator));
             SysFile sysFile = new SysFile();
             // 真实文件名
             String realName =  fileName;
