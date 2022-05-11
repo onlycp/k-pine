@@ -1,7 +1,7 @@
 package com.kingsware.kdev.core.excel;
 
 import com.kingsware.kdev.core.context.SpringContext;
-import com.kingsware.kdev.core.excel.handler.JxlExcelHandler;
+//import com.kingsware.kdev.core.excel.handler.JxlExcelHandler;
 import com.kingsware.kdev.core.excel.handler.KExcelHandler;
 import com.kingsware.kdev.core.excel.handler.PoiExcelHandler;
 import com.kingsware.kdev.core.util.BeanUtils;
@@ -50,10 +50,11 @@ public class ExcelWorker {
                 INSTANCE = new ExcelWorker();
                 INSTANCE.properties = SpringContext.getBean(ExcelProperties.class);
                 // 创建具体实例
-                if ("jxl".equalsIgnoreCase(INSTANCE.properties.getParser())) {
-                    INSTANCE.excelHandler = new JxlExcelHandler();
-                }
-                else if ("poi".equalsIgnoreCase(INSTANCE.properties.getParser())) {
+//                if ("jxl".equalsIgnoreCase(INSTANCE.properties.getParser())) {
+//                    INSTANCE.excelHandler = new JxlExcelHandler();
+//                }
+//                else
+                if ("poi".equalsIgnoreCase(INSTANCE.properties.getParser())) {
                     INSTANCE.excelHandler = new PoiExcelHandler();
                 }
             }
