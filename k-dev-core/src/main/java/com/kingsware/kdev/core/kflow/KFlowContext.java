@@ -58,6 +58,9 @@ public class KFlowContext {
     }
 
     public static boolean isAdmin() {
+        if (KClientContext.getContext() == null) {
+            return false;
+        }
         // 获取用户信息
         BaseUserInfo userInfo = KClientContext.getContext().getUserInfo();
         // 如果不是web登录或者不登录
