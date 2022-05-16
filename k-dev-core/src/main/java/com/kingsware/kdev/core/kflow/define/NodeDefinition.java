@@ -36,4 +36,6 @@ public class NodeDefinition {
     /** 子流程id **/
     @JsonProperty("flowID")
     private String flowId;
+    /** 其他属性 **/
+    private Map<String, Object> extra = new HashMap<>();
 }

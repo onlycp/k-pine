@@ -96,16 +96,36 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             String executeType = "";
             String dataSource = "";
             String content = "";
+            String beforeContent = "";
             String afterContent = "";
+            String zIndex = "";
+            String subFlowName = "";
+            String position = "";
             if (nodeDefinition.getExecute() != null && nodeDefinition.getExecute().getScript() != null) {
                 executeType = nodeDefinition.getExecute().getScript().getType();
                 dataSource = nodeDefinition.getExecute().getScript().getSourceName();
                 content = nodeDefinition.getExecute().getScript().getContent();
             }
+            if (nodeDefinition.getListener() != null && nodeDefinition.getListener().getBefore() != null && nodeDefinition.getListener().getBefore().getScript() != null) {
+                beforeContent = nodeDefinition.getListener().getBefore().getScript().getContent();
+            }
             if (nodeDefinition.getListener() != null && nodeDefinition.getListener().getAfter() != null && nodeDefinition.getListener().getAfter().getScript() != null) {
                 afterContent = nodeDefinition.getListener().getAfter().getScript().getContent();
             }
-            defineRet.addNode(nodeDefinition.getId(), nodeDefinition.getName(), nodeDefinition.getType(), executeType, dataSource, content, afterContent, nodeDefinition.getFlowId() );
+
+            if (nodeDefinition.getExtra() != null) {
+                zIndex = (String) nodeDefinition.getExtra().get("zIndex");
+                position = (String) nodeDefinition.getExtra().get("position");
+                subFlowName = (String) nodeDefinition.getExtra().get("subFlowName");
+            }
+            if (nodeDefinition.getFlowId() != null && StringUtils.isEmpty(subFlowName)) {
+                FlowInfo subFlowInfo = DB.kdbApi().get(nodeDefinition.getFlowId());
+                if (subFlowInfo != null) {
+                    subFlowName = subFlowInfo.getName();
+                }
+            }
+            defineRet.addNode(nodeDefinition.getId(), nodeDefinition.getName(), nodeDefinition.getType(), executeType,
+                    dataSource, zIndex, position, beforeContent, content, afterContent, nodeDefinition.getFlowId(), subFlowName );
         }
         // 处理连线
         for (NodeLink link: flowDefinition.getNodeLinks()) {
@@ -133,9 +153,20 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             nodeDefinition.setType(node.getType());
             nodeDefinition.setName(node.getLabel());
             nodeDefinition.setId(node.getId());
+            // 其他属性
+            Map<String, Object> extra = new HashMap<>();
+            extra.put("zIndex", node.getZIndex());
+            extra.put("position", node.getPosition());
+
             // 如果是子流程
             if (node.getType().equalsIgnoreCase(NodeTypeEnum.SUB.getValue())) {
                 nodeDefinition.setFlowId(node.getFlowId());
+                String subFlowName = "";
+                FlowInfo subFlowInfo = DB.kdbApi().get(nodeDefinition.getFlowId());
+                if (subFlowInfo != null) {
+                    subFlowName = subFlowInfo.getName();
+                }
+                extra.put("subFlowName", subFlowName);
             }
             // 判断执行类型
             if (StringUtils.isNotEmpty(node.getExecuteType())  && StringUtils.isNotEmpty(node.getContent())) {
@@ -147,10 +178,17 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
                     nodeDefinition.setExecute(ExecuteDefinition.createJsScript(node.getContent()));
                 }
             }
+            // 判断前置脚本
+            if (StringUtils.isNotEmpty(node.getBeforeContent())) {
+                nodeDefinition.setListener(FlowNodeLister.createWithBefore(node.getBeforeContent()));
+            }
             // 判断后置脚本
             if (StringUtils.isNotEmpty(node.getAfterContent())) {
                 nodeDefinition.setListener(FlowNodeLister.createWithAfter(node.getAfterContent()));
             }
+
+            // 加入其他属性
+            nodeDefinition.setExtra(extra);
             flowDefinition.getNodeDefinitions().add(nodeDefinition);
         }
         // 处理连线

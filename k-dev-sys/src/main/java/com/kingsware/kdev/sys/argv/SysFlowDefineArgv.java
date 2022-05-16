@@ -29,10 +29,18 @@ public class SysFlowDefineArgv extends BasePageArgv {
         private String type;
         /** 子流程流程id **/
         private String flowId;
+        /** 子流程名 **/
+        private String subFlowName;
         /** 执行类型 **/
         private String executeType;
         /** 数据源名称 **/
         private String sourceName;
+        /** 层高 **/
+        private String zIndex;
+        /** 坐标 **/
+        private String position;
+        /** 前置脚本 **/
+        private String beforeContent;
         /** 脚本内容 **/
         private String content;
         /** 执行内容 **/
