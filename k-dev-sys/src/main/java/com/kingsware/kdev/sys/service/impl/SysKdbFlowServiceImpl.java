@@ -1,7 +1,6 @@
 package com.kingsware.kdev.sys.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -24,7 +23,7 @@ import com.kingsware.kdev.sys.argv.SysFlowDebugArgv;
 import com.kingsware.kdev.sys.argv.SysFlowDefineArgv;
 import com.kingsware.kdev.sys.argv.SysKdbFlowArgv;
 import com.kingsware.kdev.sys.argv.SysKdbFlowQueryArgv;
-import com.kingsware.kdev.sys.model.SysLogicFlow;
+import com.kingsware.kdev.core.model.SysLogicFlow;
 import com.kingsware.kdev.sys.ret.SysFlowDebugRet;
 import com.kingsware.kdev.sys.ret.SysFlowDefineRet;
 import com.kingsware.kdev.sys.ret.SysKdbFlowRet;
