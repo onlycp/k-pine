@@ -27,4 +27,15 @@ public class FlowNodeLister {
         return lister;
     }
 
+    /**
+     * 创建监听器
+     * @param javascript   脚本
+     * @return  返回监听器
+     */
+    public static FlowNodeLister createWithBefore(String javascript) {
+        FlowNodeLister lister = new FlowNodeLister();
+        lister.setBefore(ExecuteDefinition.createJsScript(javascript));
+        return lister;
+    }
+
 }
