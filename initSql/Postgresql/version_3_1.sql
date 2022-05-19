@@ -1,0 +1,47 @@
+CREATE TABLE `open_account` (
+    `id` varchar(36) COLLATE utf8mb4_bin NOT NULL COMMENT '主键',
+    `access_name` varchar(128) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '接入者名称',
+    `access_id` varchar(32) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '接入者ID',
+    `auth_type` int(4) DEFAULT NULL COMMENT '授权类型\n1：简单模式，即access_id为access_token, 此时token是固定的',
+    `sign_key` varchar(50) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '签名密钥',
+    `validate_sign` int(4) DEFAULT '0' COMMENT '是否验签',
+    `valid_date` varchar(20) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '生效日期',
+    `invalid_date` varchar(20) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '失效日期',
+    `status` int(4) DEFAULT '1' COMMENT '是否启用\n',
+    `auth_params` text COLLATE utf8mb4_bin COMMENT '参数配置',
+    `who_created` varchar(32) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建人',
+    `when_created` varchar(20) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建时间',
+    `who_modified` varchar(32) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '修改人',
+    `when_modified` varchar(20) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '修改时间',
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `open_account_api` (
+    `id` varchar(32) COLLATE utf8mb4_bin NOT NULL COMMENT 'id',
+    `account_id` varbinary(32) DEFAULT NULL COMMENT '账号id',
+    `api_id` varchar(32) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '接口id',
+    `when_created` varchar(20) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建时间',
+    `who_created` varchar(32) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建人',
+    PRIMARY KEY (`id`)
+);
+CREATE TABLE `dev_power_link` (
+    `id` varchar(32) COLLATE utf8mb4_bin NOT NULL COMMENT '主键',
+    `tree_id` varchar(32) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '能力树id',
+    `power_id` varchar(36) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '能力id',
+    `power_type` int(4) DEFAULT NULL COMMENT '能力类型 1: 流程 2:函数',
+    `who_created` varchar(32) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建人',
+    `when_created` varchar(20) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建时间',
+    PRIMARY KEY (`id`)
+);
+CREATE TABLE `dev_power_tree` (
+    `id` varchar(32) COLLATE utf8mb4_bin NOT NULL COMMENT '主键',
+    `name` varchar(128) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '名称',
+    `parent_id` varchar(32) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '父级id',
+    `note` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '说明',
+    `who_created` varchar(32) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建人',
+    `when_created` varchar(20) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建时间',
+    `who_modified` varchar(32) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '修改人',
+    `when_modified` varchar(20) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '修改时间',
+    `path` text COLLATE utf8mb4_bin COMMENT '树路径',
+    PRIMARY KEY (`id`)
+);
