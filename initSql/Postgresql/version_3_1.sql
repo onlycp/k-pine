@@ -1,4 +1,4 @@
-CREATE TABLE `open_account` (
+CREATE TABLE IF NOT EXISTS `open_account` (
     `id` varchar(36) COLLATE utf8mb4_bin NOT NULL COMMENT '主键',
     `access_name` varchar(128) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '接入者名称',
     `access_id` varchar(32) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '接入者ID',
@@ -16,7 +16,7 @@ CREATE TABLE `open_account` (
     PRIMARY KEY (`id`)
 );
 
-CREATE TABLE `open_account_api` (
+CREATE TABLE IF NOT EXISTS `open_account_api` (
     `id` varchar(32) COLLATE utf8mb4_bin NOT NULL COMMENT 'id',
     `account_id` varbinary(32) DEFAULT NULL COMMENT '账号id',
     `api_id` varchar(32) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '接口id',
@@ -24,7 +24,7 @@ CREATE TABLE `open_account_api` (
     `who_created` varchar(32) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建人',
     PRIMARY KEY (`id`)
 );
-CREATE TABLE `dev_power_link` (
+CREATE TABLE IF NOT EXISTS `dev_power_link` (
     `id` varchar(32) COLLATE utf8mb4_bin NOT NULL COMMENT '主键',
     `tree_id` varchar(32) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '能力树id',
     `power_id` varchar(36) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '能力id',
@@ -33,7 +33,7 @@ CREATE TABLE `dev_power_link` (
     `when_created` varchar(20) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建时间',
     PRIMARY KEY (`id`)
 );
-CREATE TABLE `dev_power_tree` (
+CREATE TABLE IF NOT EXISTS `dev_power_tree` (
     `id` varchar(32) COLLATE utf8mb4_bin NOT NULL COMMENT '主键',
     `name` varchar(128) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '名称',
     `parent_id` varchar(32) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '父级id',
