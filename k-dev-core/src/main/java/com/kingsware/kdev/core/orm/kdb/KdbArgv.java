@@ -22,6 +22,8 @@ import java.util.Map;
 public class KdbArgv {
     /** 流程id **/
     private String flowID;
+    /** 实例id **/
+    private String instID;
     /** 节点可变参数 **/
     private Map<String, StepArgv> script = new LinkedHashMap<>();
     /** 上下文变量 **/

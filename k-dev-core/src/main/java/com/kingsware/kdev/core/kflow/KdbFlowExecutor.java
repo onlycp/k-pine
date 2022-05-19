@@ -1,5 +1,7 @@
 package com.kingsware.kdev.core.kflow;
 
+import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.jsonschema.JsonschemaMock;
 import com.kingsware.kdev.core.kflow.bean.ErrorResult;
 import com.kingsware.kdev.core.kflow.bean.KFlowMessage;
@@ -16,6 +18,7 @@ import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.MapUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 
 import java.util.*;
 
@@ -58,6 +61,13 @@ public class KdbFlowExecutor {
             KdbArgv argv = new KdbArgv();
             // 设置流程id
             argv.setFlowID(flowId);
+            String saas =  SpringContext.getProperties("app.is-saas", "false");
+            if ("true".equals(saas)) {
+                if (KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null && StringUtils.isNotEmpty(KClientContext.getContext().getUserInfo().getSysUnitId())) {
+                    argv.setInstID(KClientContext.getContext().getUserInfo().getSysUnitId());
+                }
+
+            }
             // 设备流程参数
             if (params.containsKey("page") && params.containsKey("pageSize")) {
                 int page = Integer.parseInt(params.getOrDefault("page", "1").toString());

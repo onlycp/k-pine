@@ -1,6 +1,7 @@
 package com.kingsware.kdev.core.cache.license;
 
 import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.util.*;
 import lombok.extern.slf4j.Slf4j;
@@ -56,43 +57,69 @@ public class LicenseManager {
      * @return 返回license
      */
     public License getLicense() {
-        if (this.license == null) {
-            this.loadLicense();
+
+        try {
+            this.license = this.loadLicense();
+        }
+        catch (Exception e) {
+            this.license = null;
         }
         return this.license;
+
     }
 
-    public void loadLicense() {
+    public License loadLicense() {
         // license目录
         String licenseDir = SpringContext.getProperties("license.dir", ".");
-        // license公钥
-        String licensePubKey = SpringContext.getProperties("license.pub-key", "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDNMCUzO6yJeyOdXoknkheWRtzXxiICR1o1fNm67a09m1nhhTkFc3Hj6rVrDkkKISXCJlm3N2wa1dJTg3WBNx/+IZx/VXDFYPMLXdrW65ZLJfUj+tE+SVMS9HbSkOu2teDQnStyqcWo5+GSx0ctkH56k8oWhZNlt/XasvCdyK05IQIDAQAB");
         // 读取文件
         String licenseFilePath = licenseDir + "/pine.license";
         File licenseFile = new File(licenseFilePath);
         // 如果license文件不存在
         if (!licenseFile.exists()) {
-            return;
+            return null;
         }
         String text = FileUtils.readFile(licenseFile).trim();
         // license无效
         if (StringUtils.isEmpty(text)) {
-            return;
+            return null;
         }
         try {
+            return parseLicense(text);
+        }
+        catch (Exception e) {
+            log.warn("license无法解析:{}", text);
+        }
+        return null;
+
+
+    }
+
+    /**
+     * 解析license
+     * @param text  文本
+     * @return
+     */
+    public License parseLicense(String text) {
+        try {
+            // license公钥
+            String licensePubKey = SpringContext.getProperties("license.pub-key", "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDNMCUzO6yJeyOdXoknkheWRtzXxiICR1o1fNm67a09m1nhhTkFc3Hj6rVrDkkKISXCJlm3N2wa1dJTg3WBNx/+IZx/VXDFYPMLXdrW65ZLJfUj+tE+SVMS9HbSkOu2teDQnStyqcWo5+GSx0ctkH56k8oWhZNlt/XasvCdyK05IQIDAQAB");
             String originText = RSAUtils.publicKeyDecrypt(licensePubKey, text);
 //            log.info("license:" + originText);
             String[] arr = originText.split("\\|");
-            this.license = new License();
-            this.license.setCustomer(arr[0]);
-            this.license.setMac(arr[1]);
-            this.license.setAppCode(arr[2]);
-            this.license.setValidDate(arr[3]);
-            this.license.setInvalidDate(arr[4]);
+            License myLicense = new License();
+            myLicense = new License();
+            myLicense.setCustomer(arr[0]);
+            myLicense.setMac(arr[1]);
+            myLicense.setAppCode(arr[2]);
+            myLicense.setValidDate(arr[3]);
+            myLicense.setInvalidDate(arr[4]);
+            return myLicense;
         } catch (Exception e) {
-            log.warn("license无法解析：{}", text);
+            throw BusinessException.serviceThrow("license无效");
         }
     }
+
+
 
     /**
      * 获取所有的mac地址
@@ -137,20 +164,50 @@ public class LicenseManager {
         return false;
     }
 
+
     /**
-     * 获取license状态
-     *
-     * @return 获取状态
+     * 获取mac地址
+     * @return
      */
-    public int getStatus() {
+    public String getMac() {
+        try {
+            java.util.Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces();
+            StringBuilder sb = new StringBuilder();
+            while (en.hasMoreElements()) {
+                NetworkInterface networkInterface = en.nextElement();
+                List<InterfaceAddress> addresses = networkInterface.getInterfaceAddresses();
+                for (InterfaceAddress address : addresses) {
+                    InetAddress ip = address.getAddress();
+                    NetworkInterface network = NetworkInterface.getByInetAddress(ip);
+                    if (network == null) {
+                        continue;
+                    }
+                    byte[] mac = network.getHardwareAddress();
+
+                    if (mac == null) {
+                        continue;
+                    }
+                    sb.delete(0, sb.length());
+                    for (int i = 0; i < mac.length; i++) {
+                        sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+                    }
+                    return sb.toString().trim();
+
+                }
+            }
+
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
+    public int getStatus(License lic) {
 
         AppModeProperties appModeProperties = SpringContext.getBean(AppModeProperties.class);
         // 如果是开发模式
         if (appModeProperties.getDev().equals(Boolean.TRUE)) {
             return -2;
         }
-        // 获取license
-        License lic = getLicense();
         // license不存在或无效
         if (lic == null) {
             return 0;
@@ -175,6 +232,15 @@ public class LicenseManager {
         else {
             return 2;
         }
+    }
 
+    /**
+     * 获取license状态
+     *
+     * @return 获取状态
+     */
+    public int getStatus() {
+        getLicense();
+        return this.getStatus(this.license);
     }
 }

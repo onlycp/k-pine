@@ -20,5 +20,7 @@ public class LicenseRet {
     private String invalidDate;
     /** 状态 0: license不存在或无效 1:未生效 2: 已生效 3: 已失效 **/
     private Integer status = 0;
+    /** mac **/
+    private String mac;
 
 }

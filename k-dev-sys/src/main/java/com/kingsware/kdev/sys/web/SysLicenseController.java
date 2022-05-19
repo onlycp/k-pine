@@ -47,4 +47,11 @@ public class SysLicenseController extends BaseController {
         return BaseRet.success(licenseService.getLicense());
     }
 
+
+    @PostMapping("/active")
+    @ApiIgnore
+    public BaseRet<LicenseRet> active(@RequestBody SysLicenseActive licenseActive) {
+        return BaseRet.success(licenseService.active(licenseActive), "授权成功");
+    }
+
 }

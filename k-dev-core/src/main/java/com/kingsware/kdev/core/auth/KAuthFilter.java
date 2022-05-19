@@ -126,7 +126,10 @@ public class KAuthFilter implements Filter {
                 checkPermission(request, response, ignore, apiCode);
             }
             // 校验license
-            checkLicense();
+            if (!ignore) {
+                checkLicense();
+            }
+
             // 根据不同的调用类型，进行调用相关处理
             if (callType == 1) filterChain.doFilter(servletRequest, servletResponse); else callByFlow(request, response, api, path, argvMap);
         }
@@ -153,16 +156,17 @@ public class KAuthFilter implements Filter {
     }
 
     private void checkLicense() {
-        if (LicenseManager.getInstance().getStatus() == -1) {
+        int status = LicenseManager.getInstance().getStatus();
+        if ( status == -1) {
             throw new LicenseException(I18n.t("license.error.-1", "非法授权"));
         }
-        else if (LicenseManager.getInstance().getStatus() == 0) {
+        else if (status == 0) {
             throw new LicenseException(I18n.t("license.error.0", "许可证非授权"));
         }
-        else if (LicenseManager.getInstance().getStatus() == 1) {
+        else if (status == 1) {
             throw new LicenseException(I18n.t("license.error.1", "许可证未生效"));
         }
-        else if (LicenseManager.getInstance().getStatus() == 3) {
+        else if (status == 3) {
             throw new LicenseException(I18n.t("license.error.3", "许可证已过期"));
         }
     }

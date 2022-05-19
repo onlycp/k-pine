@@ -36,5 +36,6 @@ public class BaseUserInfo {
     private String roleNames;
     /** 权限体系 **/
     private ApiSystemEnum apiSystem;
-
+    /** 归属单位id **/
+    private String sysUnitId;
 }
