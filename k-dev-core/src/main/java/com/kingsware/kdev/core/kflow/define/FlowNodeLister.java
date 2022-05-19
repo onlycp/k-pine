@@ -38,4 +38,18 @@ public class FlowNodeLister {
         return lister;
     }
 
+    /**
+     * 创建监听器
+     * @param before   脚本
+     * @param after   脚本
+     * @return  返回监听器
+     */
+    public static FlowNodeLister createWithBeforeAndAfter(String before, String after) {
+        FlowNodeLister lister = new FlowNodeLister();
+        lister.setBefore(ExecuteDefinition.createJsScript(before));
+        lister.setAfter(ExecuteDefinition.createJsScript(after));
+        return lister;
+    }
+
+
 }

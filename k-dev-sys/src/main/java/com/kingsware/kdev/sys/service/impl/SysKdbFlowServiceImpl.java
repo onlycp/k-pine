@@ -178,13 +178,13 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
                     nodeDefinition.setExecute(ExecuteDefinition.createJsScript(node.getContent()));
                 }
             }
-            // 判断前置脚本
-            if (StringUtils.isNotEmpty(node.getBeforeContent())) {
+            // 创建前置、后置脚本监听器
+            if (StringUtils.isNotEmpty(node.getBeforeContent()) && StringUtils.isNotEmpty(node.getAfterContent())) {
+                nodeDefinition.setListener(FlowNodeLister.createWithBeforeAndAfter(node.getBeforeContent(), node.getAfterContent()));
+            } else if (StringUtils.isNotEmpty(node.getBeforeContent())) {   // 有前置
                 nodeDefinition.setListener(FlowNodeLister.createWithBefore(node.getBeforeContent()));
-            }
-            // 判断后置脚本
-            if (StringUtils.isNotEmpty(node.getAfterContent())) {
-                nodeDefinition.setListener(FlowNodeLister.createWithAfter(node.getAfterContent()));
+            } else if (StringUtils.isNotEmpty(node.getAfterContent())) {    // 有后置
+                nodeDefinition.setListener(FlowNodeLister.createWithBefore(node.getBeforeContent()));
             }
 
             // 加入其他属性

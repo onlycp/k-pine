@@ -69,12 +69,12 @@ public class KFaasInitialize implements SystemInitialize {
                         Optional<DataSourceInfo> optional = dataSourceInfos.stream().filter(it -> it.getSourceName().equals(fileSource.getSourceName())).findFirst();
                         // 如果已存储，则修改
                         if (optional.isPresent()) {
-                            DB.kdbApi().editDataSource(fileSource);
                             log.info("数据源初始化修改: {}" , fileSource);
+                            DB.kdbApi().editDataSource(fileSource);
                         }
                         else {
-                            DB.kdbApi().addDataSource(fileSource);
                             log.info("数据源初始化新增: {}" , fileSource);
+                            DB.kdbApi().addDataSource(fileSource);
                         }
                     }
 
