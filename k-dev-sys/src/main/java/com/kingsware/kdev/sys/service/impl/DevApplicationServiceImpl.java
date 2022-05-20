@@ -156,6 +156,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             for (Map<String, Object> map: list) {
                 transMapBooleanToInt( map,"isDev", "status");
                 transMapIntToBoolean(map, "isHidden");
+                map.put("hidden", map.get("isHidden"));
             }
         }
         if (pineMap.containsKey("kdbFlows")) {

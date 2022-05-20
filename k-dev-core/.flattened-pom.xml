@@ -5,11 +5,11 @@
   <parent>
     <groupId>com.kingsware.dev</groupId>
     <artifactId>k-dev-parent</artifactId>
-    <version>1.0.0.20220519-01</version>
+    <version>1.0.0.20220520-01</version>
   </parent>
   <groupId>com.kingsware.dev</groupId>
   <artifactId>k-dev-core</artifactId>
-  <version>1.0.0.20220519-01</version>
+  <version>1.0.0.20220520-01</version>
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
@@ -17,7 +17,7 @@
     </license>
   </licenses>
   <properties>
-    <maven.compiler.source>8</maven.compiler.source>
     <maven.compiler.target>8</maven.compiler.target>
+    <maven.compiler.source>8</maven.compiler.source>
   </properties>
 </project>
