@@ -33,6 +33,10 @@ public class SysKdbFlowRet extends BaseSimpleRet {
     private String inArgv;
     /** 输出参数 **/
     private String outArgv;
+    /** 关联接口URL **/
+    private String apiUrl;
+    /** 关联接口请求方式 **/
+    private String apiMethod;
     /** 创建时间 **/
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
     private Timestamp whenCreated;

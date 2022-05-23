@@ -69,7 +69,7 @@ public class KdbFlowExecutor {
 
             }
             // 设备流程参数
-            if (params.containsKey("page") && params.containsKey("pageSize")) {
+            if (params.containsKey("page") && (params.containsKey("pageSize") || params.containsKey("perPage"))) {
                 int page = Integer.parseInt(params.getOrDefault("page", "1").toString());
                 int pageSize = Integer.parseInt(params.getOrDefault("pageSize", params.getOrDefault("perPage", "10")).toString());
                 params.put("start", (page-1)*pageSize + "") ;

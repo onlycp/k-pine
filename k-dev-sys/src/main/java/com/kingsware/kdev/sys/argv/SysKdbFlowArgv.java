@@ -28,4 +28,11 @@ public class SysKdbFlowArgv {
     private String applicationId;
     /** 描述 **/
     private String description;
+    /** 默认数据源 **/
+    private String defaultSourceName;
+    /** 关联接口URL **/
+    private String apiUrl;
+    /** 关联接口请求方式 **/
+    private String apiMethod;
+
 }

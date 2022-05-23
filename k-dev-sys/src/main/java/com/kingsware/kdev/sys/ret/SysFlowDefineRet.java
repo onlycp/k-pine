@@ -54,8 +54,12 @@ public class SysFlowDefineRet extends BaseSimpleRet {
         private String label;
         /** 起始节点 **/
         private String source;
+        /** 起始连接点 **/
+        private String sourcePort;
         /** 到达节点 **/
         private String target;
+        /** 到达连接点 **/
+        private String targetPort;
         /** 表达式 **/
         private String expr;
     }
@@ -76,6 +80,8 @@ public class SysFlowDefineRet extends BaseSimpleRet {
     private String outArgv;
     /** 输入参数示例 **/
     private String inExample;
+    /** 默认数据源 **/
+    private String defaultSourceName;
     /** 节点列表 **/
     private List<Node> nodes = new ArrayList<>();
     /** 连续 **/

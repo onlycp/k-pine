@@ -55,8 +55,12 @@ public class SysFlowDefineArgv extends BasePageArgv {
         private String label;
         /** 起始节点 **/
         private String source;
+        /** 起始连接点 **/
+        private String sourcePort;
         /** 到达节点 **/
         private String target;
+        /** 到达连接点 **/
+        private String targetPort;
         /** 表达式 **/
         private String expr;
     }
@@ -75,6 +79,8 @@ public class SysFlowDefineArgv extends BasePageArgv {
     private String inArgv;
     /** 输出参数 **/
     private String outArgv;
+    /** 默认数据源 **/
+    private String defaultSourceName;
     /** 节点列表 **/
     private List<Node> nodes = new ArrayList<>();
     /** 连续 **/

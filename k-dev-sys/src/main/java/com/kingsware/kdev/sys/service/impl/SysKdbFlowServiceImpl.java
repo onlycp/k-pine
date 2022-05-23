@@ -19,17 +19,16 @@ import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.MapUtil;
 import com.kingsware.kdev.core.util.PageUtil;
 import com.kingsware.kdev.core.util.StringUtils;
-import com.kingsware.kdev.sys.argv.SysFlowDebugArgv;
-import com.kingsware.kdev.sys.argv.SysFlowDefineArgv;
-import com.kingsware.kdev.sys.argv.SysKdbFlowArgv;
-import com.kingsware.kdev.sys.argv.SysKdbFlowQueryArgv;
+import com.kingsware.kdev.sys.argv.*;
 import com.kingsware.kdev.core.model.SysLogicFlow;
 import com.kingsware.kdev.sys.ret.SysFlowDebugRet;
 import com.kingsware.kdev.sys.ret.SysFlowDefineRet;
 import com.kingsware.kdev.sys.ret.SysKdbFlowRet;
+import com.kingsware.kdev.sys.service.SysApiService;
 import com.kingsware.kdev.sys.service.SysKdbFlowService;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -43,6 +42,8 @@ import java.util.stream.Collectors;
  */
 @Service
 public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlowService {
+    @Resource
+    private SysApiService sysApiService;
 
     @Override
     public SysKdbFlowRet get(String id) {
@@ -70,6 +71,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             defineRet.setOutArgv(logicFlow.getOutArgv());
             defineRet.setApplicationId(logicFlow.getApplicationId());
             defineRet.setTags(logicFlow.getTags());
+            defineRet.setDefaultSourceName(logicFlow.getDefaultSourceName());
             // 定义mock的merge map
             List<Map<String, Object>> mockMapList = new ArrayList<>();
             Map<String, Object> mockMap = JsonschemaMock.getInstance().mockMap(logicFlow.getInArgv());
@@ -184,7 +186,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             } else if (StringUtils.isNotEmpty(node.getBeforeContent())) {   // 有前置
                 nodeDefinition.setListener(FlowNodeLister.createWithBefore(node.getBeforeContent()));
             } else if (StringUtils.isNotEmpty(node.getAfterContent())) {    // 有后置
-                nodeDefinition.setListener(FlowNodeLister.createWithBefore(node.getBeforeContent()));
+                nodeDefinition.setListener(FlowNodeLister.createWithAfter(node.getAfterContent()));
             }
 
             // 加入其他属性
@@ -219,6 +221,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         sysKdbFlowArgv.setTags(argv.getTags());
         sysKdbFlowArgv.setApplicationId(argv.getApplicationId());
         sysKdbFlowArgv.setContent(flowDefinition.toJson());
+        sysKdbFlowArgv.setDefaultSourceName(argv.getDefaultSourceName());
         this.edit(sysKdbFlowArgv);
 
     }
@@ -265,6 +268,8 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             flowRet.setTags(logicFlow.getTags());
             flowRet.setApplicationName(logicFlow.getApplicationName());
             flowRet.setApplicationId(logicFlow.getApplicationId());
+            flowRet.setApiUrl(logicFlow.getApiUrl());
+            flowRet.setApiMethod(logicFlow.getApiMethod());
         }
         return flowRet;
     }
@@ -296,7 +301,20 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         String subFlowIds = getSubFlowIds(argv.getContent());
         logicFlow.setSubFlowIds(subFlowIds);
         DB.save(logicFlow);
-    }
+
+        if (StringUtils.isNotEmpty(argv.getApiUrl()) && StringUtils.isNotEmpty(argv.getApiMethod())) {
+            SysApiArgv apiArgv = new SysApiArgv();
+            apiArgv.setApiUrl(argv.getApiUrl());
+            apiArgv.setApiMethod(argv.getApiMethod());
+            apiArgv.setAppId(argv.getApplicationId());
+            apiArgv.setApiName(argv.getName());
+            apiArgv.setApiFlowId(logicFlow.getFlowId());
+            apiArgv.setCallType(2);
+            apiArgv.setApiNote(argv.getDescription());
+            apiArgv.setApiTags(argv.getTags());
+            sysApiService.add(apiArgv);
+        }
+     }
 
     @Override
     public void edit(SysKdbFlowArgv argv) {
@@ -369,7 +387,10 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         KdbApi api = (KdbApi)(DB.getDefault());
         List<FlowInfo> list = api.query(info);
         // 从数据库里查询所有数据
-        String sql = "select t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name from sys_logic_flow t0 left join dev_application t1 on t1.id=t0.application_id";
+        String sql = "select t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name, sa.api_url, sa.api_method " +
+                " from sys_logic_flow t0 " +
+                " left join sys_api sa on sa.api_flow_id = t0.flow_id " +
+                " left join dev_application t1 on t1.id=t0.application_id";
         if (StringUtils.isNotEmpty(argv.getApplicationId())) {
             sql += " where (t0.application_id = '" + argv.getApplicationId() + "' or t0.application_id is null)";
         }
