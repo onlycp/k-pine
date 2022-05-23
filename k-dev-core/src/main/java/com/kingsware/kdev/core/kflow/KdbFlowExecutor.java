@@ -56,9 +56,13 @@ public class KdbFlowExecutor {
      */
     public KdbFlowResult execute(String flowId, String subFlowIds, Map<String, Object> params, KFlowContext context) {
 
+        long t1 = System.currentTimeMillis();
+        String statusMessage = "失败";
+        KdbFlowResult result = new KdbFlowResult();
+        // 流程参数
+        KdbArgv argv = new KdbArgv();
         try {
-            // 流程参数
-            KdbArgv argv = new KdbArgv();
+
             // 设置流程id
             argv.setFlowID(flowId);
             String saas =  SpringContext.getProperties("app.is-saas", "false");
@@ -99,8 +103,6 @@ public class KdbFlowExecutor {
             }
             // 执行流程
             KdbRet<String> ret = DB.kdbApi().executeFlow(argv);
-            // 如果失败
-            KdbFlowResult result = new KdbFlowResult();
 
             if (ret.getErrorCode() != 0) {
                 result.setType(KFlowConstant.RESULT_JSON);
@@ -118,11 +120,35 @@ public class KdbFlowExecutor {
             return result;
         }
         catch (OrmDbException ormDbException) {
-            KdbFlowResult result = new KdbFlowResult();
+
             result.setType(KFlowConstant.RESULT_JSON);
             result.setData(new ErrorResult(ormDbException.getMessage() == null ? "流程处理失败": ormDbException.getMessage()));
             result.setLog(ormDbException.getKlog());
             return result;
+        }
+        finally {
+            // todo 临时应对万达poc处理， 后面要删除掉
+            if (argv.getVariables().containsKey("withLogTableId")) {
+                try {
+                    long t2 = System.currentTimeMillis();
+                    Map<String, Object> logMap = new HashMap<>();
+                    logMap.put("pocTableId", argv.getVariables().get("withLogTableId"));
+                    logMap.put("taskTime", DateUtils.formatDate(new Date(t1), DateUtils.DATE_TIME));
+                    logMap.put("taskStatus", result.getData() instanceof ErrorResult ? "失败": "成功");
+                    logMap.put("taskUseTime", t2-t1);
+                    KdbArgv logArgv =JsonUtil.toBean(JsonUtil.toJson(argv), KdbArgv.class);
+                    logArgv.setFlowID("f4c29a689b9b4e7e9a49e5967b68d67d");
+                    logArgv.getVariables().putAll(logMap);
+                    DB.kdbApi().executeFlow(logArgv);
+                }
+                catch (Exception e) {
+                    // 什么都不用管
+                }
+
+            }
+
+
+
         }
 
     }

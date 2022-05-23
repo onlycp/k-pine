@@ -73,16 +73,17 @@ public class KAuthFilter implements Filter {
         String method = request.getMethod().toLowerCase();
         // 获取上下文路径
         String contextPath = request.getContextPath();
-        // 如果是静态文件
-        if (!url.startsWith("/api") &&  StringUtils.isEmpty(contextPath)) {
-            filterChain.doFilter(servletRequest, servletResponse);
-            return;
-        }
-        if (url.startsWith("/api"))  {
-            contextPath = "/api";
-        }
         String apiCode = "";
         try {
+            // 如果是静态文件
+            if (!url.startsWith("/api") &&  StringUtils.isEmpty(contextPath)) {
+                filterChain.doFilter(servletRequest, servletResponse);
+                return;
+            }
+            if (url.startsWith("/api"))  {
+                contextPath = "/api";
+            }
+
 
             // 获取配置的接口信息
             String path = url.replaceFirst(contextPath, "");

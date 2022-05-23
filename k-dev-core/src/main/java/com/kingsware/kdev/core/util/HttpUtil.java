@@ -62,8 +62,8 @@ public class HttpUtil {
             // 禁用缓存
             connection.setUseCaches(false);
             // 设置超时时间
-            connection.setConnectTimeout(3000);
-            connection.setReadTimeout(30000);
+            connection.setConnectTimeout(10000);
+            connection.setReadTimeout(1000*60*10);
             // 自动执行自定向
             connection.setInstanceFollowRedirects(true);
             // 连接复用
