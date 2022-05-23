@@ -109,8 +109,8 @@ public class LicenseManager {
             License myLicense = new License();
             myLicense = new License();
             myLicense.setCustomer(arr[0]);
-            myLicense.setMac(arr[1]);
-            myLicense.setAppCode(arr[2]);
+            myLicense.setMac(arr[1].trim());
+            myLicense.setAppCode(arr[2].trim());
             myLicense.setValidDate(arr[3]);
             myLicense.setInvalidDate(arr[4]);
             return myLicense;

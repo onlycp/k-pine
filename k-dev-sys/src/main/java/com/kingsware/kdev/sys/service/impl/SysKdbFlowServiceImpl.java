@@ -184,7 +184,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             } else if (StringUtils.isNotEmpty(node.getBeforeContent())) {   // 有前置
                 nodeDefinition.setListener(FlowNodeLister.createWithBefore(node.getBeforeContent()));
             } else if (StringUtils.isNotEmpty(node.getAfterContent())) {    // 有后置
-                nodeDefinition.setListener(FlowNodeLister.createWithBefore(node.getBeforeContent()));
+                nodeDefinition.setListener(FlowNodeLister.createWithAfter(node.getAfterContent()));
             }
 
             // 加入其他属性
