@@ -75,6 +75,9 @@ public class KAuthFilter implements Filter {
         String contextPath = request.getContextPath();
         String apiCode = "";
         try {
+            if (url.contains("//")) {
+                url = url.replaceAll("//", "/");
+            }
             // 如果是静态文件
             if (!url.startsWith("/api") &&  StringUtils.isEmpty(contextPath)) {
                 filterChain.doFilter(servletRequest, servletResponse);
