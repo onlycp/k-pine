@@ -10,7 +10,6 @@ import com.kingsware.kdev.sys.service.SysOperateLogService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
-
 import javax.annotation.Resource;
 
 /**
@@ -56,6 +55,15 @@ public class SysOperateLogController extends BaseController {
     @GetMapping("/export")
     public void download(SysOperateLogQueryArgv argv) {
         sysOperateLogService.export(argv);
+    }
+
+    /**
+     *  模块列表
+     */
+    @ApiOperation(value = "模块列表 " ,notes = "模块列表")
+    @GetMapping("/module-list")
+    public BaseRet<PageDataRet<SysOperateLogRet>> moduleList(SysOperateLogQueryArgv argv) {
+        return BaseRet.success(sysOperateLogService.moduleList(argv));
     }
 
 }

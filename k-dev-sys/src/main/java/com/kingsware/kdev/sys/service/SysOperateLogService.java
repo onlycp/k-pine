@@ -5,6 +5,8 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.sys.argv.SysOperateLogQueryArgv;
 import com.kingsware.kdev.sys.ret.SysOperateLogRet;
 
+import java.util.List;
+
 /**
  * 角色业务类
  *
@@ -29,4 +31,6 @@ public interface SysOperateLogService extends BaseService {
      PageDataRet<SysOperateLogRet> query(SysOperateLogQueryArgv argv);
 
     void export(SysOperateLogQueryArgv argv);
+
+    PageDataRet<SysOperateLogRet> moduleList(SysOperateLogQueryArgv argv);
 }
