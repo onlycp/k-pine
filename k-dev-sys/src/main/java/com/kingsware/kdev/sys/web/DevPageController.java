@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -57,6 +58,7 @@ public class DevPageController extends BaseController {
      */
     @ApiOperation(value = "根据路径查询页面 " ,notes = "根据路径查询页面")
     @GetMapping("/getByPath")
+    @ApiIgnore
     public BaseRet<DevPageRet> getByPath(String path) {
         return BaseRet.success(devPageService.getByPath(path));
     }
