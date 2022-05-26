@@ -79,7 +79,9 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
         // 唯一性校验
         DBChecker<SysApi> checker =DBChecker.build(model, SysApi.class);
         // 名称唯一
-        checker.uni("apiCode", I18n.t("SysApi.apiCode.unique", "接口编码必须唯一"));
+        if (StringUtils.isNotEmpty(model.getApiCode()) && !model.getApiCode().trim().equals(":open")) {
+            checker.uni("apiCode", I18n.t("SysApi.apiCode.unique", "接口编码必须唯一"));
+        }
         // 执行校验
         checker.checkUnique();
     }
