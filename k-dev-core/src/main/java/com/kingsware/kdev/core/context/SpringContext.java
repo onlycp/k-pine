@@ -1,5 +1,7 @@
 package com.kingsware.kdev.core.context;
 
+import com.kingsware.kdev.core.cache.config.ConfigManager;
+import com.kingsware.kdev.core.cache.config.SysConfigInfo;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -66,7 +68,15 @@ public class SpringContext implements ApplicationContextAware {
      * @return              返回配置项，如果不存在，返回默认值
      */
     public static String getProperties(String key, String defaultValue) {
-        return applicationContext.getEnvironment().getProperty(key, defaultValue);
+        // 如果系统配置里，优先读取系统配置的
+        SysConfigInfo configInfo = ConfigManager.getInstance().getItem(key);
+        if (configInfo != null ) {
+            return configInfo.getValue();
+        }
+        else {
+            return applicationContext.getEnvironment().getProperty(key, defaultValue);
+        }
+
     }
 
     public static <T> List<T> getBeansOfType(Class<T> tClass){
