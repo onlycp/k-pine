@@ -6,6 +6,7 @@ import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.sys.argv.SysFileQueryArgv;
 import com.kingsware.kdev.sys.ret.SysFileRet;
 import com.kingsware.kdev.sys.service.SysFileService;
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.net.URLEncoder;
 import java.util.List;
 
 /**
@@ -113,6 +116,22 @@ public class SysFileController extends BaseController {
     @ApiIgnore
     public void download(@PathVariable String id) {
         sysFileService.download(id);
+    }
+
+
+    /**
+     * 文件下载
+     */
+    @ApiOperation(value = "文件下载 " ,notes = "文件下载")
+    @GetMapping("/download/**")
+    @ApiIgnore
+    public void downloadWithPath(HttpServletRequest httpServletRequest) {
+        // 获取后面多层目录
+        String uri = httpServletRequest.getRequestURI();
+        String prefix = "/"+ Version.V1 + "/sys-files" + "/download/";
+        String relativePath = uri.replaceFirst(prefix,"");
+
+        sysFileService.download(URLEncoder.encode(relativePath));
     }
 
     /**
