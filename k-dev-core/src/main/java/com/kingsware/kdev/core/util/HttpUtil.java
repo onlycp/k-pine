@@ -226,7 +226,7 @@ public class HttpUtil {
             return tempFile;
         } catch (Exception e) {
             log.error("error", e);
-            throw BusinessException.serviceThrow("文件下载失败，异常信息:" + e.getMessage());
+            throw BusinessException.serviceThrow("文件下载失败");
 
         } finally {
             if (connection != null)

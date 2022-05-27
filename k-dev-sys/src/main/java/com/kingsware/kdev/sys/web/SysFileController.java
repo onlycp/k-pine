@@ -131,7 +131,7 @@ public class SysFileController extends BaseController {
         String prefix = "/"+ Version.V1 + "/sys-files" + "/download/";
         String relativePath = uri.replaceFirst(prefix,"");
 
-        sysFileService.download(URLEncoder.encode(relativePath));
+        sysFileService.download(relativePath);
     }
 
     /**
