@@ -43,7 +43,7 @@ public class KFaasInitialize implements SystemInitialize {
 
 
     /** faas命令  **/
-    @Value("${database.faas-port:18001}")
+    @Value("${database.faas-port:10081}")
     private int faasPort;
 
     @Value("${database.faas-port:127.0.0.1}")
