@@ -99,8 +99,12 @@ public class KAuthFilter implements Filter {
             // 调用方式
             int callType = 1;
 
+            if (api == null) {
+                filterChain.doFilter(servletRequest, servletResponse);
+                return;
+            }
             // 流程调用方式
-            if (api != null && api.getCallType() == 2 && kFlowProperties.isEnable()) {
+            else if (api.getCallType() == 2 && kFlowProperties.isEnable()) {
                 callType = 2;
                 apiCode = api.getApiCode();
                 // 是否允许跳过权限
