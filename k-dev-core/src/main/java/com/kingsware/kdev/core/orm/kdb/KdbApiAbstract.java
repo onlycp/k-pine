@@ -11,9 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -117,9 +115,9 @@ public abstract class KdbApiAbstract implements  KdbApi {
     }
 
     @Override
-    public KdbRet<String> executeFlow(KdbArgv argv) {
+    public KdbRet<String> executeFlow(KdbArgv argv, boolean debug) {
         // 加入当前环境变量
-        String executeFlowUrl = SpringContext.getProperties("database.sources.db.executeSqlApi", "/api/execute");
+        String executeFlowUrl = debug ? "/api/execute4debug" : "/api/execute";
         return post(argv, executeFlowUrl, String.class);
     }
 

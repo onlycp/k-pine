@@ -159,7 +159,7 @@ public class KDBHttpChannel implements DbChannel{
             // 转为json
             String requestBody = JsonUtil.toJson(kdbArgv);
             // 拼接请求
-            String url = kdbConnectConfig.getServer() +  kdbConnectConfig.getExecuteSqlApi();
+            String url = kdbConnectConfig.getServer() +  "/api/execute";
             long t1 = System.currentTimeMillis();
             // 发起请求
             String  responseBody = HttpUtil.postBody(url, requestBody, Collections.emptyMap());

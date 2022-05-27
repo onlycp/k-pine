@@ -182,7 +182,7 @@ public class KAuthFilter implements Filter {
         // 获取视图模型
         KFlowContext context = KFlowContext.createBaseContext(StringUtils.isNotEmpty(api.getInArgv()) ? api.getInArgv() : "{}", StringUtils.isNotEmpty(api.getOutArgv()) ? api.getOutArgv() : "{}");
         // 调用流程
-        KdbFlowResult result = KdbFlowExecutor.getInstance().execute(api.getApiFlowId(), api.getSubFlowIds(), argvMap, context);
+        KdbFlowResult result = KdbFlowExecutor.getInstance().execute(api.getApiFlowId(), api.getSubFlowIds(), argvMap, context, false);
         // 转为api格式
         switch (result.getType()) {
             case KFlowConstant.RESULT_JSON:

@@ -2,7 +2,6 @@ package com.kingsware.kdev.core.orm.kdb;
 
 import java.io.File;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -79,10 +78,12 @@ public interface KdbApi {
 
     /**
      * 执行流程
-     * @param argv        参数
-     * @return              流程执行结果
+     *
+     * @param argv  参数
+     * @param debug
+     * @return 流程执行结果
      */
-    KdbRet<String>  executeFlow(KdbArgv argv);
+    KdbRet<String>  executeFlow(KdbArgv argv, boolean debug);
 
     /**
      * 新增函数

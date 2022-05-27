@@ -217,7 +217,7 @@ public class DynamicTask implements CommandLineRunner {
                 }
             }
             KFlowContext context = KFlowContext.createBaseContext(inArgv, outArgv);
-            KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), "", new HashMap<>(), context);
+            KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), "", new HashMap<>(), context, false);
         }
         else {
             throw new CronException("流程不存在", 2);

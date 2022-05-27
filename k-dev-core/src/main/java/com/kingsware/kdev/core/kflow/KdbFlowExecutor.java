@@ -2,23 +2,18 @@ package com.kingsware.kdev.core.kflow;
 
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
-import com.kingsware.kdev.core.jsonschema.JsonschemaMock;
 import com.kingsware.kdev.core.kflow.bean.ErrorResult;
 import com.kingsware.kdev.core.kflow.bean.KFlowMessage;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.kflow.handler.KResultHandlers;
 import com.kingsware.kdev.core.orm.DB;
-import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
-import com.kingsware.kdev.core.orm.kdb.FlowInfo;
 import com.kingsware.kdev.core.orm.kdb.KdbArgv;
 import com.kingsware.kdev.core.orm.kdb.KdbRet;
 import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
-import com.kingsware.kdev.core.util.MapUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
 import java.util.*;
 
@@ -54,7 +49,7 @@ public class KdbFlowExecutor {
      * @param context      上下文信息
      * @return             执行结果
      */
-    public KdbFlowResult execute(String flowId, String subFlowIds, Map<String, Object> params, KFlowContext context) {
+    public KdbFlowResult execute(String flowId, String subFlowIds, Map<String, Object> params, KFlowContext context, boolean debug) {
 
         long t1 = System.currentTimeMillis();
         String statusMessage = "失败";
@@ -102,7 +97,7 @@ public class KdbFlowExecutor {
                 }
             }
             // 执行流程
-            KdbRet<String> ret = DB.kdbApi().executeFlow(argv);
+            KdbRet<String> ret = DB.kdbApi().executeFlow(argv, debug);
 
             if (ret.getErrorCode() != 0) {
                 result.setType(KFlowConstant.RESULT_JSON);
@@ -139,7 +134,7 @@ public class KdbFlowExecutor {
                     KdbArgv logArgv =JsonUtil.toBean(JsonUtil.toJson(argv), KdbArgv.class);
                     logArgv.setFlowID("f4c29a689b9b4e7e9a49e5967b68d67d");
                     logArgv.getVariables().putAll(logMap);
-                    DB.kdbApi().executeFlow(logArgv);
+                    DB.kdbApi().executeFlow(logArgv, debug);
                 }
                 catch (Exception e) {
                     // 什么都不用管
