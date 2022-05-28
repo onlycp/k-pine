@@ -84,7 +84,7 @@ public class MessageWebSocket {
     @OnMessage
     public void onMessage(String message, Session session) {
 
-        logger.info("接收websocket消息: {}", message);
+//        logger.info("接收websocket消息: {}", message);
         WmMessage wmMessage = JsonUtil.toBean(message, WmMessage.class);
         if (wmMessage == null) {
             logger.info("websocket不合法，无法解析: {}", message);

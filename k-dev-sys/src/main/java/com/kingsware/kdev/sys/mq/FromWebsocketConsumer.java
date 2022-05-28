@@ -38,7 +38,7 @@ public class FromWebsocketConsumer implements KmqConsumer {
                     wmMessageArgv.setMessage(JsonUtil.toJson(replyMessage));
                     wmMessageArgv.setToken(wm2MqMessage.getToken());
                     KmqMessageCenter.getInstance().produce(WebsocketConstants.MQ_TO_WEBSOCKET, JsonUtil.toJson(wmMessageArgv));
-                    log.info("ping响应：{}", wm2MqMessage.getToken() );
+//                    log.info("ping响应：{}", wm2MqMessage.getToken() );
                 }
 
             }
