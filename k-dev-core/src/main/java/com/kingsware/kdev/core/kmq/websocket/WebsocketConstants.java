@@ -12,9 +12,7 @@ public class WebsocketConstants {
     private WebsocketConstants() {}
 
     /** 系统主题 **/
-    public static final String TOPIC_SYSTEM = "system";
-    /** 心跳类型 **/
-    public static final String TYPE_PING = "ping";
+    public static final String T_PING = "ping";
     /** 转向内部mq的topic名称 **/
     public static final String MQ_FROM_WEBSOCKET= "from_websocket";
     /** 转向内部mq的topic名称 **/

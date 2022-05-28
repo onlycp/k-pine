@@ -1,10 +1,14 @@
 package com.kingsware.kdev.core.kmq.websocket;
 
+import com.kingsware.kdev.core.auth.AuthToken;
+import com.kingsware.kdev.core.auth.TokenUtil;
+import com.kingsware.kdev.core.kmq.KmqMessageCenter;
 import com.kingsware.kdev.core.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
@@ -14,6 +18,8 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.kingsware.kdev.core.kmq.websocket.WebsocketConstants.MQ_FROM_WEBSOCKET;
+
 /**
  * websocket端点
  *
@@ -21,8 +27,8 @@ import java.util.Set;
  * @version 1.0.0
  * @date 2021/12/23 3:48 下午
  */
-@ConditionalOnProperty(prefix = "app.websocket", name = {"enable"}, havingValue = "true")
-@ServerEndpoint(value = "/websocket")
+//@ConditionalOnProperty(prefix = "app.websocket", name = {"enable"}, havingValue = "true")
+@ServerEndpoint(value = "/api/v1/websocket")
 @Component
 public class MessageWebSocket {
     /** 日志打印 **/
@@ -36,6 +42,7 @@ public class MessageWebSocket {
     @OnOpen
     public void onOpen(Session session) {
         logger.info("WebSocket连接成功, sessionId:{}", session.getId());
+        sendMessage(session, JsonUtil.toJson(new WmMessage("welcome", "Hello world!")));
     }
 
     /**
@@ -43,12 +50,7 @@ public class MessageWebSocket {
      */
     @OnClose
     public void  onClose(Session session) {
-        // 查找session
-        Optional<SessionToken> optional = sessionTokenSet.stream().filter(it -> it.getSession().getId().equalsIgnoreCase(session.getId())).findFirst();
-        if (optional.isPresent()) {
-            sessionTokenSet.remove(optional.get());
-            logger.info("用户:【userId={}, token={}】退出，当前在线人数为:{} ", optional.get().getUserId(), optional.get().getToken(), sessionTokenSet.size());
-        }
+        removeSession(session);
     }
     /**
      * 发生错误时调用
@@ -56,7 +58,22 @@ public class MessageWebSocket {
      */
     @OnError
     public void onError(Session session, Throwable error) {
+        // 发生错误时
         logger.error("error", error);
+        removeSession(session);
+    }
+
+    /**
+     * 移除会话
+     * @param session  会话
+     */
+    private void removeSession(Session session) {
+        // 查找session
+        Optional<SessionToken> optional = sessionTokenSet.stream().filter(it -> it.getSession().getId().equalsIgnoreCase(session.getId())).findFirst();
+        if (optional.isPresent()) {
+            sessionTokenSet.remove(optional.get());
+            logger.info("用户:【userId={}, token={}】退出，当前在线人数为:{} ", optional.get().getUserId(), optional.get().getToken(), sessionTokenSet.size());
+        }
     }
 
     /**
@@ -73,16 +90,30 @@ public class MessageWebSocket {
             logger.info("websocket不合法，无法解析: {}", message);
             return;
         }
-        // 如果是系统主题，里面主要有心跳
-        if ("system".equalsIgnoreCase(wmMessage.getTopic())) {
-            // 心跳
-            if ("ping".equalsIgnoreCase(wmMessage.getType())) {
-                WmMessage replyMessage = new WmMessage(WebsocketConstants.TOPIC_SYSTEM, WebsocketConstants.TYPE_PING, "pong", 0);
-                sendMessage(session, JsonUtil.toJson(replyMessage));
+        if ("whoami".equalsIgnoreCase(wmMessage.getTopic())) {
+            // 将会话信息保存起来
+            String token = wmMessage.getBody();
+            AuthToken authToken = TokenUtil.getAuthToken(token);
+            if (authToken == null) {
+                return;
             }
-            else if ("token".equalsIgnoreCase(wmMessage.getType())) {
+            SessionToken sessionToken = new SessionToken();
+            sessionToken.setToken(token);
+            sessionToken.setUserId(authToken.getUserInfo().getId());
+            sessionToken.setSession(session);
+            sessionTokenSet.add(sessionToken);
 
+        }
+        else {
+            // 获取令牌
+            Optional<SessionToken> sessionToken = sessionTokenSet.stream().filter(it -> it.getSession().getId().equals(session.getId())).findFirst();
+            if (sessionToken.isPresent()) {
+                Wm2MqMessage wm2MqMessage = new Wm2MqMessage();
+                wm2MqMessage.setToken(sessionToken.get().getToken());
+                wm2MqMessage.setWmMessage(wmMessage);
+                KmqMessageCenter.getInstance().produce(MQ_FROM_WEBSOCKET, JsonUtil.toJson(wm2MqMessage));
             }
+
         }
     }
 
@@ -94,8 +125,28 @@ public class MessageWebSocket {
     public void sendMessage(Session session, String message) {
         try {
             session.getBasicRemote().sendText(message);
-        } catch (IOException e) {
-            logger.info("websocket不合法，无法解析: {}", message);
+//            logger.info("发送消息:" + JsonUtil.toJson(message));
         }
+        catch (Exception e) {
+            logger.error("消息发送失败: {}", message);
+        }
+    }
+
+    /**
+     * 发送消息
+     * @param token 令牌
+     * @param message   消息
+     */
+    public void sendMessageByToken(String token, String message) {
+        sessionTokenSet.stream().filter(it -> it.getToken().equals(token)).forEach(it -> sendMessage(it.getSession(), message));
+    }
+
+    /**
+     * 发送消息
+     * @param userId    用户id
+     * @param message   消息
+     */
+    public void sendMessageByUserId(String userId, String message) {
+        sessionTokenSet.stream().filter(it -> it.getUserId().equals(userId)).forEach(it -> sendMessage(it.getSession(), message));
     }
 }

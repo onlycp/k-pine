@@ -60,7 +60,7 @@ public class KmqConsumerThread implements Runnable {
 
 
             } finally {
-                ThreadUtils.sleep(5000);
+                ThreadUtils.sleep(50);
             }
         }
     }

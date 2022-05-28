@@ -1,6 +1,7 @@
 package com.kingsware.kdev.core.kmq.websocket;
 
 import javax.websocket.Session;
+import java.util.Objects;
 
 /**
  * Websocket的session实体
@@ -39,5 +40,18 @@ public class SessionToken {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SessionToken that = (SessionToken) o;
+        return userId.equals(that.userId) && token.equals(that.token);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId, token);
     }
 }
