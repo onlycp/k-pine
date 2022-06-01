@@ -6,12 +6,11 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.env.PropertySource;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.StandardServletEnvironment;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Spring上下文
@@ -76,6 +75,40 @@ public class SpringContext implements ApplicationContextAware {
         else {
             return applicationContext.getEnvironment().getProperty(key, defaultValue);
         }
+
+    }
+
+
+    /**
+     * 获取所有的配置项
+     * @return
+     */
+    @SuppressWarnings("all")
+    public static Map<String, String> getProperties() {
+
+        //  加载环境变量
+        StandardServletEnvironment environment = (StandardServletEnvironment) applicationContext.getEnvironment();
+        Iterator<PropertySource<?>> iterator = environment.getPropertySources().iterator();
+        Map<String, String> properties = new HashMap<>();
+        while (iterator.hasNext()) {
+            PropertySource<?> propertySource = iterator.next();
+            String name = propertySource.getName();
+            // 去掉系统配置和环境变量
+            if (name.equals(StandardServletEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME) || name.equals(StandardServletEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME)) {
+                continue;
+            }
+            Object o = propertySource.getSource();
+            if (o instanceof Map) {
+                for(Map.Entry<String, Object> entry: ((Map<String, Object>)o).entrySet()) {
+                    String key = entry.getKey();
+                    properties.put(key, environment.getProperty(key));
+                }
+            }
+        }
+        // 加载系统配置
+        Map<String, String> configMap = ConfigManager.getInstance().getAllTextConfig();
+        properties.putAll(configMap);
+        return properties;
 
     }
 

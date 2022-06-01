@@ -155,7 +155,7 @@ public class DynamicTask implements CommandLineRunner {
                 executeStatus = 0;
                 errorMessage = e.getMessage();
                 // 将任务设为禁用，否则影响行情
-                enable = 0;
+                // enable = 0;
             }
         }
         catch (Exception e) {
