@@ -6,6 +6,7 @@ import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.cache.api.ApiManager;
 import com.kingsware.kdev.core.cache.controller.ControllerManager;
 import com.kingsware.kdev.core.cache.license.LicenseManager;
+import com.kingsware.kdev.core.cache.open.OpenAccountInfo;
 import com.kingsware.kdev.core.cache.open.OpenApiManager;
 import com.kingsware.kdev.core.cache.permssion.PermissionManager;
 import com.kingsware.kdev.core.cache.session.SessionManager;
@@ -23,9 +24,7 @@ import com.kingsware.kdev.core.kflow.*;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
-import com.kingsware.kdev.core.util.ExceptionUtils;
-import com.kingsware.kdev.core.util.ServletUtil;
-import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.core.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -35,8 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
 
@@ -59,6 +57,8 @@ public class KAuthFilter implements Filter {
     private static final String ignoreApi = ":open";
     /** 开放接口 **/
     private static final String openApiFlag = ":open:";
+    /** 签名噪音 **/
+    private final Set<String> signNonces = new TreeSet<String>();
 
 
     @ApiIgnore
@@ -74,6 +74,17 @@ public class KAuthFilter implements Filter {
         // 获取上下文路径
         String contextPath = request.getContextPath();
         String apiCode = "";
+        // 接口信息
+        ApiInfo api = null;
+        // 是否开放接口
+        boolean isOpenApi = false;
+        // 错误信息
+        String errorMessage = "";
+        // 请求参数
+        Map<String, Object> argvMap = new HashMap<>();
+        // 请求时间
+        String now = DateUtils.getNow();
+        long t1 = System.currentTimeMillis();
         try {
             if (url.contains("//")) {
                 url = url.replaceAll("//", "/");
@@ -90,7 +101,7 @@ public class KAuthFilter implements Filter {
 
             // 获取配置的接口信息
             String path = url.replaceFirst(contextPath, "");
-            ApiInfo api = ApiManager.getInstance().getApi(method, path);
+            api = ApiManager.getInstance().getApi(method, path);
             ApiDefine apiDefine = getApiDefine(request, response);
             // 初始化青松上下文
             initContext(request, response);
@@ -117,8 +128,8 @@ public class KAuthFilter implements Filter {
                 }
             }
             // 判断是否开放接口
-            boolean isOpenApi = StringUtils.isNotEmpty(apiCode) && apiCode.startsWith(openApiFlag) && api != null;
-            Map<String, Object> argvMap = new HashMap<>();
+            isOpenApi = StringUtils.isNotEmpty(apiCode) && apiCode.startsWith(openApiFlag) && api != null;
+
             // 只有在是流程调用时才获取参数，否则会破坏RequestBody
             if (callType == 2) {
                 argvMap = ServletUtil.getRequestParams(api, path, request);
@@ -139,23 +150,47 @@ public class KAuthFilter implements Filter {
             if (callType == 1) filterChain.doFilter(servletRequest, servletResponse); else callByFlow(request, response, api, path, argvMap);
         }
         catch (BusinessException | OrmDbException e) {
+            errorMessage = e.getMessage();
             ServletUtil.responseJson(response, BaseRet.failMessage(e.getMessage()));
         }
         catch (UnauthorizedException e) {
+            errorMessage = e.getMessage();
             log.error("用户未登录，接口路径:{}, 请求方法:{}", url, method);
             ServletUtil.responseJson(response, BaseRet.fail(e.getMessage(), RetEnum.UNAUTHORIZED.getCode()));
         }
         catch (LicenseException e) {
+            errorMessage = e.getMessage();
             ServletUtil.responseJson(response, BaseRet.fail(e.getMessage(), RetEnum.LICENSE_FAIL.getCode()));
         }
         catch (ForbiddenException e) {
+            errorMessage = e.getMessage();
             log.error("接口无权限，接口路径:{}, 请求方法:{}", url, method);
             String message = MessageFormat.format("很抱歉，您没有此接口的访问权限! 接口地址： {0}, 接口编码:{1}", url, apiCode);
             ServletUtil.responseJson(response, BaseRet.fail(message, RetEnum.FORBIDDEN.getCode()));
         }
         catch (Exception e) {
+            errorMessage = e.getMessage();
             log.error("error", e);
             ServletUtil.responseJson(response, BaseRet.failMessage(ExceptionUtils.getStackTrace(e)));
+        }
+        finally {
+            if (isOpenApi) {
+                String accessId = argvMap.getOrDefault("accessId", "").toString();
+                Map<String, Object> recordMap = new HashMap<>();
+                recordMap.put("id", StringUtils.getUUID());
+                recordMap.put("apiName", api.getApiName());
+                recordMap.put("accessId", accessId);
+                recordMap.put("requestParams", JsonUtil.toJson(argvMap));
+                recordMap.put("requestTime", now);
+                recordMap.put("useTime", System.currentTimeMillis() - t1);
+                recordMap.put("success", StringUtils.isNotEmpty(errorMessage) ? 0: 1);
+                recordMap.put("errorMessage", errorMessage);
+                recordMap.put("requestIp", ServletUtil.getClientIp(request));
+                KFlowContext ic = KFlowContext.createBaseContext("{}", "{}");
+                KdbFlowResult flowResult = KdbFlowExecutor.getInstance().execute("72caaa23e3744781b8e5d7565a6e23f7", "", recordMap, ic, false);
+                System.currentTimeMillis();
+
+            }
         }
 
     }
@@ -274,7 +309,77 @@ public class KAuthFilter implements Filter {
         if (!OpenApiManager.getInstance().hasOpenApi(accessId, apiInfo.getApiCode())) {
             throw BusinessException.serviceThrow("接口未授权");
         }
+        // 验签，如果需要验签，传输参数必须包括 timestamp(精确到毫秒)、sign(签名值 )、signNonce(签名噪音)
+        // 签名算法
+        // 假设参数有 a=1, b=2, c=3, timestamp=1654084663000 签名密钥:  signSecret = BSfNWCZrrSRphRhX
+        // 第一步： 参数升序
+        // 第二步： 参数拼接起来， 即 var str = "a=1&b=2&c=3&timestamp=1654084663000"
+        // 第三步： 拼接签名密钥, 用@字符拼接起来  即  var str2 =  str1 + "@" +signSecret ,即a=1&b=2&c=3@BSfNWCZrrSRphRhX
+        // 第四步， 使用md5进行计算签值 var sign = md5(str2)， 即 5802F5AC1AD0C5948CFE981481F0ADA7
+        // 第五步， 在参数里加入 sign=5802F5AC1AD0C5948CFE981481F0ADA7
 
+
+        OpenAccountInfo openAccountInfo = OpenApiManager.getInstance().getAccount(accessId);
+        // 如果需要验签
+        if (openAccountInfo.getValidateSign() == 1) {
+            // 获取时间
+            if (!params.containsKey("timestamp")) {
+                throw BusinessException.serviceThrow("缺少时间戳参数: timestamp");
+            }
+            if (!params.containsKey("sign")) {
+                throw BusinessException.serviceThrow("缺少签名值: sign");
+            }
+            if (!params.containsKey("signNonce")) {
+                throw BusinessException.serviceThrow("缺少签名噪音: signNonce");
+            }
+            long timestamp = Long.parseLong(params.get("timestamp").toString());
+            // 校验时间，超过5分钟的认为无效
+            if (Math.abs(timestamp - System.currentTimeMillis()) > 1000*60*5)  {
+                throw BusinessException.serviceThrow("请求时间已过期");
+            }
+            // 签名噪音
+            String signNonce = params.get("signNonce").toString();
+            if (signNonces.contains(signNonce)) {
+                throw BusinessException.serviceThrow("签名噪音不能重复使用");
+            }
+            addSignNonce(signNonce);
+
+            String sign = params.get("sign").toString();
+
+            // 排序map
+            TreeMap<String, String>  sortedMap = new TreeMap<>();
+            params.forEach((k, v) -> {
+                if (!k.equals("request") && !k.equals("sign")) {
+                    sortedMap.put(k, v.toString());
+                }
+            });
+            // 拼接拼接字符
+            List<String> queryStrings = new ArrayList<>();
+            sortedMap.forEach((k, v) -> queryStrings.add(String.format("%s=%s", k,v)));
+            String str1 = StringUtils.joinToString(queryStrings, "&");
+            // 加上签名密钥
+            String str2 = str1 + "@" + openAccountInfo.getSignKey();
+            // 计算签名值
+            String calcSign = MD5Utils.md5(str2);
+            // 对比签名
+            if (!calcSign.equalsIgnoreCase(sign)) {
+                throw BusinessException.serviceThrow("签名值不正确，传输的签名值:" + sign +", 计算值:" + calcSign);
+            }
+
+        }
+
+    }
+
+    /**
+     * 添加签名噪音
+     * @param nonce  噪音
+     */
+    private void addSignNonce(String nonce) {
+        // 只存最新5000个, 达到5000时就清0
+        if (signNonces.size()>=5000) {
+            signNonces.clear();
+        }
+        signNonces.add(nonce);
     }
 
     /**

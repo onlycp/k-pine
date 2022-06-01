@@ -56,5 +56,14 @@ public class OpenApiManager {
         return false;
     }
 
+    /**
+     * 获取开放账号
+     * @param accessId  接入商id
+     * @return
+     */
+    public OpenAccountInfo getAccount(String accessId) {
+        return accessor.get(accessId);
+    }
+
 
 }
