@@ -36,17 +36,15 @@ public class KFaasInitialize implements SystemInitialize {
     @Value("${database.faas-start-cmd:}")
     private String faasStartCmd;
 
-
     /** faas命令  **/
     @Value("${database.faas-stop-cmd:}")
     private String faasStopCmd;
-
 
     /** faas命令  **/
     @Value("${database.faas-port:10081}")
     private int faasPort;
 
-    @Value("${database.faas-port:127.0.0.1}")
+    @Value("${database.faas-ip:127.0.0.1}")
     private String faasIp;
 
     @Override
