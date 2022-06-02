@@ -5,11 +5,11 @@
   <parent>
     <groupId>com.kingsware.dev</groupId>
     <artifactId>k-dev-parent</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
   </parent>
   <groupId>com.kingsware.dev</groupId>
   <artifactId>k-dev-core</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
@@ -20,4 +20,10 @@
     <maven.compiler.target>8</maven.compiler.target>
     <maven.compiler.source>8</maven.compiler.source>
   </properties>
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-websocket</artifactId>
+    </dependency>
+  </dependencies>
 </project>
