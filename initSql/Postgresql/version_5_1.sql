@@ -9,4 +9,4 @@ CREATE TABLE IF NOT EXISTS `open_api_log` (
                                 `success` tinyint DEFAULT NULL COMMENT '是否成功',
                                 `error_message` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '错误信息',
                                 PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+);
