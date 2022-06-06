@@ -26,6 +26,7 @@ import com.kingsware.kdev.sys.ret.SysFlowDefineRet;
 import com.kingsware.kdev.sys.ret.SysKdbFlowRet;
 import com.kingsware.kdev.sys.service.SysApiService;
 import com.kingsware.kdev.sys.service.SysKdbFlowService;
+import com.kingsware.kdev.sys.service.SysLogicHistoryService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -44,6 +45,9 @@ import java.util.stream.Collectors;
 public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlowService {
     @Resource
     private SysApiService sysApiService;
+
+    @Resource
+    private SysLogicHistoryService sysLogicHistoryService;
 
     @Override
     public SysKdbFlowRet get(String id) {
@@ -224,6 +228,12 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         sysKdbFlowArgv.setDefaultSourceName(argv.getDefaultSourceName());
         this.edit(sysKdbFlowArgv);
 
+        // 保存历史记录
+        SysLogicHistoryArgv flowHistory = new SysLogicHistoryArgv();
+        flowHistory.setFlowId(argv.getId());
+        flowHistory.setFlowJson(sysKdbFlowArgv.getContent());
+        sysLogicHistoryService.add(flowHistory);
+
     }
 
     /**
@@ -297,6 +307,13 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         logicFlow.setOutArgv(argv.getOutArgv());
         logicFlow.setTags(argv.getTags());
         logicFlow.setFlowId(flowId);
+
+        // 保存历史记录
+        SysLogicHistoryArgv flowHistory = new SysLogicHistoryArgv();
+        flowHistory.setFlowId(flowId);
+        flowHistory.setFlowJson(info.getContent());
+        sysLogicHistoryService.add(flowHistory);
+
         // 获取子流程id
         String subFlowIds = getSubFlowIds(argv.getContent());
         logicFlow.setSubFlowIds(subFlowIds);
@@ -353,6 +370,12 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             logicFlow.setSubFlowIds(subFlowIds);
             DB.update(logicFlow);
         }
+
+        // 保存历史记录
+        SysLogicHistoryArgv flowHistory = new SysLogicHistoryArgv();
+        flowHistory.setFlowId(argv.getId());
+        flowHistory.setFlowJson(info.getContent());
+        sysLogicHistoryService.add(flowHistory);
     }
 
     @Override

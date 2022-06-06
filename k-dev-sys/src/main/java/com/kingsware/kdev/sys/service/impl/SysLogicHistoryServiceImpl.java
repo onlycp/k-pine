@@ -1,0 +1,68 @@
+package com.kingsware.kdev.sys.service.impl;
+
+import com.kingsware.kdev.core.base.BaseServiceImpl;
+import com.kingsware.kdev.core.bean.MultiIdArgv;
+import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.orm.SqlWrapper;
+import com.kingsware.kdev.core.orm.expression.Op;
+import com.kingsware.kdev.core.util.BeanUtils;
+import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.sys.argv.SysLogicHistoryArgv;
+import com.kingsware.kdev.sys.argv.SysLogicHistoryQueryArgv;
+import com.kingsware.kdev.sys.model.SysLogicHistory;
+import com.kingsware.kdev.sys.ret.SysLogicHistoryRet;
+import com.kingsware.kdev.sys.service.SysLogicHistoryService;
+import org.springframework.stereotype.Service;
+
+/**
+ * 业务实现类
+ * @author AndyZheng
+ * @version 1.0.0
+ * @date 2022-02-13 10:20
+ */
+@Service
+public class SysLogicHistoryServiceImpl extends BaseServiceImpl implements SysLogicHistoryService {
+
+    @Override
+    public SysLogicHistoryRet get(String id) {
+        // 查询model
+        SysLogicHistory model = DB.findById(SysLogicHistory.class, id);
+        // 转换成ret对象
+        return (SysLogicHistoryRet) model2Ret(model, SysLogicHistoryRet.class);
+    }
+
+    @Override
+    public void add(SysLogicHistoryArgv argv) {
+        SysLogicHistory model = BeanUtils.copyObject(argv, SysLogicHistory.class);
+        // 保存
+        DB.save(model);
+    }
+
+    @Override
+    public void edit(SysLogicHistoryArgv argv) {
+        SysLogicHistory model = DB.findById(SysLogicHistory.class, argv.getId());
+        BeanUtils.copyProperties(argv, model);
+        // 保存
+        DB.update(model);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public PageDataRet<SysLogicHistoryRet> query(SysLogicHistoryQueryArgv argv) {
+        // 拼装sql
+        SqlWrapper wrapper = new SqlWrapper("select dph.*, su.real_name as created_user_name, su.avatar as created_user_avatar from sys_logic_history dph left join sys_user su on su.id = dph.who_created where 1=1   ");
+        if (StringUtils.isNotEmpty(argv.getFlowId())) {
+            wrapper.addCondition("dph.page_id", Op.EQ, argv.getFlowId());
+        }
+        wrapper.sortBy("dph.when_created desc");
+        return (PageDataRet<SysLogicHistoryRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysLogicHistoryRet.class);
+    }
+
+    @Override
+    public void delete(MultiIdArgv argv) {
+        for (String id: argv.getIds()) {
+            DB.delete(SysLogicHistory.class, id);
+        }
+    }
+}
