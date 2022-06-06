@@ -168,6 +168,18 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         }
     }
 
+    private String getContentType(String fileType, String fileName) {
+        String contentType = "application/octet-stream";
+        String fileExt = FileUtils.getFileExt(fileName);
+        if (fileExt != null) {
+            contentType = ContentTypeMap.getContentType("." + fileExt);
+        }
+        if ("video".equals(fileName)) {
+
+        }
+        return contentType;
+    }
+
     /**
      * 从Faas下载文件
      * @param relativePath  文件路径
