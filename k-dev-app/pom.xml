@@ -31,13 +31,51 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+<!--                    <includes>-->
+<!--                        <include>-->
+<!--                            <groupId>${groupId}</groupId>-->
+<!--                            <artifactId>${artifactId}</artifactId>-->
+<!--                        </include>-->
+<!--                    </includes>-->
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                    <executable>true</executable>
+                    <layout>ZIP</layout>
+                    <mainClass>
+                        com.kingsware.kdev.App
+                    </mainClass>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--拷贝依赖到jar外面的lib目录-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>                <!--指定的依赖路径-->
+                            <outputDirectory>
+                                ${project.build.directory}/lib
+                            </outputDirectory>
+                        </configuration>
+
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>com.spotify</groupId>
@@ -46,16 +84,9 @@
                 <executions>
                     <execution>
                         <id>default</id>
-<!--                        <goals>-->
-<!--                            &lt;!&ndash;如果package时不想用docker打包,就注释掉这个goal&ndash;&gt;-->
-<!--                            <goal>build</goal>-->
-<!--                            <goal>push</goal>-->
-<!--                        </goals>-->
                     </execution>
                 </executions>
                 <configuration>
-<!--                    export DOCKER_HOST=tcp://10.11.2.215:2375 -->
-<!--                    <dockerHost>http://10.11.2.215:2375</dockerHost>-->
                     <contextDirectory>${project.basedir}</contextDirectory>
                     <!-- harbor 仓库用户名及密码-->
                     <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
@@ -67,38 +98,7 @@
 
                 </configuration>
             </plugin>
-<!--            <plugin>-->
-<!--                <groupId>com.spotify</groupId>-->
-<!--                <artifactId>docker-maven-plugin</artifactId>-->
-<!--                <version>1.2.0</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>build-image</id>-->
-<!--                        <phase>package</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>build</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--                <configuration>-->
 
-
-<!--                    <imageName>k-pine/${project.artifactId}</imageName>-->
-<!--                    <imageTags>-->
-<!--                        <imageTag>1.0.0.20220309-01</imageTag>-->
-<!--                    </imageTags>-->
-<!--                    <forceTags>true</forceTags>-->
-<!--                    <dockerDirectory>${project.basedir}</dockerDirectory>-->
-<!--                    <resources>-->
-<!--                        <resource>-->
-<!--                            <targetPath>/</targetPath>-->
-<!--                            <directory>${project.build.directory}</directory>-->
-<!--                            <include>${project.build.finalName}.jar</include>-->
-<!--                        </resource>-->
-<!--                    </resources>-->
-
-<!--                </configuration>-->
-<!--            </plugin>-->
         </plugins>
     </build>
 </project>
