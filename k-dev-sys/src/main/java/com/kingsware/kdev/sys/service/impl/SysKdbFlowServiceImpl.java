@@ -83,7 +83,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
                 String[] arr = logicFlow.getSubFlowIds().split(",");
                 SqlWrapper sqlWrapper = SqlWrapper.selectWrapper(SysLogicFlow.class, "t", "t.in_argv, t.out_argv").in("t.flow_id", Arrays.asList(arr));
                 List<SysLogicFlow> subLoginFlows = DB.findList(SysLogicFlow.class, sqlWrapper.getSql(), sqlWrapper.getParams().toArray(new Object[0]));
-                for (SysLogicFlow sysLogicFlow: subLoginFlows) {
+                for (SysLogicFlow sysLogicFlow : subLoginFlows) {
                     Map<String, Object> subMockMap = JsonschemaMock.getInstance().mockMap(sysLogicFlow.getInArgv());
                     mockMapList.add(subMockMap);
                 }
@@ -96,7 +96,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         if (flowDefinition == null) {
             return defineRet;
         }
-        for(NodeDefinition nodeDefinition: flowDefinition.getNodeDefinitions()) {
+        for (NodeDefinition nodeDefinition : flowDefinition.getNodeDefinitions()) {
             String executeType = "";
             String dataSource = "";
             String content = "";
@@ -129,12 +129,12 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
                 }
             }
             defineRet.addNode(nodeDefinition.getId(), nodeDefinition.getName(), nodeDefinition.getType(), executeType,
-                    dataSource, zIndex, position, beforeContent, content, afterContent, nodeDefinition.getFlowId(), subFlowName );
+                    dataSource, zIndex, position, beforeContent, content, afterContent, nodeDefinition.getFlowId(), subFlowName);
         }
         // 处理连线
-        for (NodeLink link: flowDefinition.getNodeLinks()) {
+        for (NodeLink link : flowDefinition.getNodeLinks()) {
             String expr = "";
-            if (link.getConditions() != null && link.getConditions().getDecision() != null ) {
+            if (link.getConditions() != null && link.getConditions().getDecision() != null) {
                 expr = link.getConditions().getDecision().getExpr();
             }
             defineRet.addLink(link.getId(), link.getName(), link.getFrom(), link.getTo(), expr);
@@ -150,7 +150,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         // 设置流程名称
         flowDefinition.setName(argv.getName());
         // 处理节点
-        for (SysFlowDefineArgv.Node node: argv.getNodes()) {
+        for (SysFlowDefineArgv.Node node : argv.getNodes()) {
             NodeDefinition nodeDefinition = new NodeDefinition();
             nodeDefinition.setAuto(true);
             nodeDefinition.setDebug(false);
@@ -172,33 +172,37 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
                 }
                 extra.put("subFlowName", subFlowName);
             }
-            // 判断执行类型
-            if (StringUtils.isNotEmpty(node.getExecuteType())  && StringUtils.isNotEmpty(node.getContent())) {
-                // 根据不同的执行类型，生成不同的执行内容
-                if (ScriptTypeEnum.SQL.getValue().equals(node.getExecuteType())) {
-                    nodeDefinition.setExecute(ExecuteDefinition.createSqlScript(node.getSourceName(), node.getContent()));
+            // 只有任务节点是任务时，才会这些脚本信息
+            if (node.getType().equalsIgnoreCase(NodeTypeEnum.TASK.getValue())) {
+                // 判断执行类型
+                if (StringUtils.isNotEmpty(node.getExecuteType()) && StringUtils.isNotEmpty(node.getContent())) {
+                    // 根据不同的执行类型，生成不同的执行内容
+                    if (ScriptTypeEnum.SQL.getValue().equals(node.getExecuteType())) {
+                        nodeDefinition.setExecute(ExecuteDefinition.createSqlScript(node.getSourceName(), node.getContent()));
+                    } else if (ScriptTypeEnum.JS.getValue().equals(node.getExecuteType())) {
+                        nodeDefinition.setExecute(ExecuteDefinition.createJsScript(node.getContent()));
+                    }
                 }
-                else if (ScriptTypeEnum.JS.getValue().equals(node.getExecuteType())) {
-                    nodeDefinition.setExecute(ExecuteDefinition.createJsScript(node.getContent()));
+
+                // 创建前置、后置脚本监听器
+                if (StringUtils.isNotEmpty(node.getBeforeContent()) && StringUtils.isNotEmpty(node.getAfterContent())) {
+                    nodeDefinition.setListener(FlowNodeLister.createWithBeforeAndAfter(node.getBeforeContent(), node.getAfterContent()));
+                } else if (StringUtils.isNotEmpty(node.getBeforeContent())) {   // 有前置
+                    nodeDefinition.setListener(FlowNodeLister.createWithBefore(node.getBeforeContent()));
+                } else if (StringUtils.isNotEmpty(node.getAfterContent())) {    // 有后置
+                    nodeDefinition.setListener(FlowNodeLister.createWithAfter(node.getAfterContent()));
                 }
             }
-            // 创建前置、后置脚本监听器
-            if (StringUtils.isNotEmpty(node.getBeforeContent()) && StringUtils.isNotEmpty(node.getAfterContent())) {
-                nodeDefinition.setListener(FlowNodeLister.createWithBeforeAndAfter(node.getBeforeContent(), node.getAfterContent()));
-            } else if (StringUtils.isNotEmpty(node.getBeforeContent())) {   // 有前置
-                nodeDefinition.setListener(FlowNodeLister.createWithBefore(node.getBeforeContent()));
-            } else if (StringUtils.isNotEmpty(node.getAfterContent())) {    // 有后置
-                nodeDefinition.setListener(FlowNodeLister.createWithAfter(node.getAfterContent()));
-            }
+
 
             // 加入其他属性
             nodeDefinition.setExtra(extra);
             flowDefinition.getNodeDefinitions().add(nodeDefinition);
         }
         // 处理连线
-        for (SysFlowDefineArgv.Link link: argv.getLinks()) {
+        for (SysFlowDefineArgv.Link link : argv.getLinks()) {
             // 先校验
-            if(StringUtils.isEmpty(link.getSource()) || StringUtils.isEmpty(link.getTarget())) {
+            if (StringUtils.isEmpty(link.getSource()) || StringUtils.isEmpty(link.getTarget())) {
                 throw BusinessException.serviceThrow(String.format("连线:%s的开始和结束节点均不能为空！", link.getLabel()));
             }
             if (link.getTarget().equals(link.getSource())) {
@@ -229,7 +233,8 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
 
     /**
      * 根据json获取所有子流程id
-     * @param content   流程定义
+     *
+     * @param content 流程定义
      * @return
      */
     private String getSubFlowIds(String content) {
@@ -240,7 +245,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             return "";
         }
         Set<String> flowIds = new HashSet<>();
-        for (NodeDefinition nodeDefinition: flowDefinition.getNodeDefinitions()) {
+        for (NodeDefinition nodeDefinition : flowDefinition.getNodeDefinitions()) {
             if (nodeDefinition.getType().equalsIgnoreCase(NodeTypeEnum.SUB.getValue()) && StringUtils.isNotEmpty(nodeDefinition.getFlowId())) {
                 flowIds.add(nodeDefinition.getFlowId());
             }
@@ -254,10 +259,9 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         flowRet.setContent(info.getContent());
         flowRet.setName(info.getName());
         flowRet.setDescription(info.getDescription());
-        if (info.getCreateTime() !=null ) {
+        if (info.getCreateTime() != null) {
             flowRet.setWhenCreated(new Timestamp(info.getCreateTime()));
-        }
-        else {
+        } else {
             flowRet.setWhenCreated(new Timestamp(0));
         }
         if (info.getUpdateTime() != null) {
@@ -287,7 +291,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             info.setContent(definition.toJson());
         }
         // 保存到kdb
-        KdbApi api = (KdbApi)(DB.getDefault());
+        KdbApi api = (KdbApi) (DB.getDefault());
         String flowId = api.addFlow(info);
         // 将平台信息保存
         SysLogicFlow logicFlow = new SysLogicFlow();
@@ -322,7 +326,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             apiArgv.setApiTags(argv.getTags());
             sysApiService.add(apiArgv);
         }
-     }
+    }
 
     @Override
     public void edit(SysKdbFlowArgv argv) {
@@ -334,7 +338,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         // 获取子流程id
         String subFlowIds = getSubFlowIds(argv.getContent());
         // 保存到kdb
-        KdbApi api = (KdbApi)(DB.getDefault());
+        KdbApi api = (KdbApi) (DB.getDefault());
         api.editFlow(info);
         // 保存到数据库
         SysLogicFlow logicFlow = DB.findOne(SysLogicFlow.class, Expr.builder().add("flowId", "=", argv.getId()).build());
@@ -349,8 +353,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             logicFlow.setFlowId(argv.getId());
             logicFlow.setSubFlowIds(subFlowIds);
             DB.save(logicFlow);
-        }
-        else {
+        } else {
             logicFlow.setName(argv.getName());
             logicFlow.setApplicationId(argv.getApplicationId());
             logicFlow.setNote(argv.getDescription());
@@ -398,7 +401,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
     public PageDataRet<SysKdbFlowRet> query(SysKdbFlowQueryArgv argv) {
         KdbFlowQueryArgv info = new KdbFlowQueryArgv();
         // 查询所有数据
-        KdbApi api = (KdbApi)(DB.getDefault());
+        KdbApi api = (KdbApi) (DB.getDefault());
         List<FlowInfo> list = api.query(info);
         // 从数据库里查询所有数据
         String sql = "select t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name, sa.api_url, sa.api_method " +
@@ -408,12 +411,12 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         if (StringUtils.isNotEmpty(argv.getApplicationId())) {
             sql += " where (t0.application_id = '" + argv.getApplicationId() + "' or t0.application_id is null)";
         }
-        List<SysKdbFlowRet> logicFlows  = DB.findList(SysKdbFlowRet.class, sql );
+        List<SysKdbFlowRet> logicFlows = DB.findList(SysKdbFlowRet.class, sql);
         Map<String, SysKdbFlowRet> dbMap = new HashMap<>();
         logicFlows.forEach(it -> dbMap.put(it.getId(), it));
         // 转为ret类
         List<SysKdbFlowRet> retList = new ArrayList<>();
-        for (FlowInfo infoL: list) {
+        for (FlowInfo infoL : list) {
             retList.add(toRet(infoL, dbMap.get(infoL.getFlowId())));
         }
         // 查询过滤
@@ -423,7 +426,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             }
             return true;
         }).filter(it -> {
-            if (StringUtils.isNotEmpty(argv.getApplicationId()) ) {
+            if (StringUtils.isNotEmpty(argv.getApplicationId())) {
                 return it.getApplicationId() != null && it.getApplicationId().equalsIgnoreCase(argv.getApplicationId());
             }
             return true;
@@ -442,8 +445,8 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
 
     @Override
     public void delete(MultiIdArgv argv) {
-        KdbApi api = (KdbApi)(DB.getDefault());
-        for (String id: argv.getIds()) {
+        KdbApi api = (KdbApi) (DB.getDefault());
+        for (String id : argv.getIds()) {
             api.deleteFlow(id);
             SysLogicFlow logicFlow = DB.findOne(SysLogicFlow.class, Expr.builder().add("flowId", "=", id).build());
             if (logicFlow != null) {
@@ -470,8 +473,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         argv.setDescription("这个人很懒，什么都没有留下");
         if (list.isEmpty()) {
             add(argv);
-        }
-        else {
+        } else {
             argv.setId(list.get(0).getFlowId());
             edit(argv);
         }
@@ -503,7 +505,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         requestMap.put("body", json);
         argvMap.put("request", requestMap);
         // 调用流程
-        KdbFlowResult result = KdbFlowExecutor.getInstance().execute(argv.getFlowId(), logicFlow == null? "" :logicFlow.getSubFlowIds(),argvMap, context, true);
+        KdbFlowResult result = KdbFlowExecutor.getInstance().execute(argv.getFlowId(), logicFlow == null ? "" : logicFlow.getSubFlowIds(), argvMap, context, true);
         long t2 = System.currentTimeMillis();
         SysFlowDebugRet ret = new SysFlowDebugRet();
         ret.setTakeMs(t2 - t1);
