@@ -8,6 +8,7 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
 import com.kingsware.kdev.sys.argv.DevPageHistoryArgv;
 import com.kingsware.kdev.sys.argv.DevPageHistoryQueryArgv;
+import com.kingsware.kdev.sys.argv.SysLogicHistoryArgv;
 import com.kingsware.kdev.sys.ret.DevPageHistoryRet;
 import com.kingsware.kdev.sys.service.DevPageHistoryService;
 import io.swagger.annotations.Api;
@@ -84,6 +85,18 @@ public class DevPageHistoryController extends BaseController {
     @PostMapping(value = "/delete")
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         DevPageHistoryService.delete(argv);
+        return BaseRet.success();
+    }
+
+
+    /**
+     *  回滚
+     * @return 提示
+     */
+    @ApiOperation(value = "回滚 " ,notes = "回滚")
+    @PostMapping("/rollback")
+    public BaseRet<?> rollback(@RequestBody DevPageHistoryArgv argv) {
+        DevPageHistoryService.rollback(argv);
         return BaseRet.success();
     }
 

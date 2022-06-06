@@ -34,6 +34,8 @@ public interface SysLogicHistoryService extends BaseService {
      */
     void edit(SysLogicHistoryArgv argv);
 
+    void rollback(SysLogicHistoryArgv argv);
+
     /**
      * 编辑
      * @param argv 编辑

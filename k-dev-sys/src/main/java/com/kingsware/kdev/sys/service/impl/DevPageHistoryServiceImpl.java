@@ -10,6 +10,7 @@ import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.DevPageHistoryArgv;
 import com.kingsware.kdev.sys.argv.DevPageHistoryQueryArgv;
+import com.kingsware.kdev.sys.model.DevPage;
 import com.kingsware.kdev.sys.model.DevPageHistory;
 import com.kingsware.kdev.sys.ret.DevPageHistoryRet;
 import com.kingsware.kdev.sys.service.DevPageHistoryService;
@@ -45,6 +46,16 @@ public class DevPageHistoryServiceImpl extends BaseServiceImpl implements DevPag
         BeanUtils.copyProperties(argv, model);
         // 保存
         DB.update(model);
+    }
+
+    @Override
+    public void rollback(DevPageHistoryArgv argv) {
+        DevPage model = DB.findById(DevPage.class, argv.getPageId());
+        if (model != null) {
+            model.setPageJson(argv.getPageJson());
+            // 保存
+            DB.update(model);
+        }
     }
 
     @Override

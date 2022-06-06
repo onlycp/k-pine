@@ -34,6 +34,8 @@ public interface DevPageHistoryService extends BaseService {
      */
     void edit(DevPageHistoryArgv argv);
 
+    void rollback(DevPageHistoryArgv argv);
+
     /**
      * 编辑
      * @param argv 编辑

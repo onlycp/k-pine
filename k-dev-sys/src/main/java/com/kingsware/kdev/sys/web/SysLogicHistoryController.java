@@ -87,4 +87,16 @@ public class SysLogicHistoryController extends BaseController {
         return BaseRet.success();
     }
 
+
+    /**
+     *  回滚
+     * @return 提示
+     */
+    @ApiOperation(value = "回滚 " ,notes = "回滚")
+    @PostMapping("/rollback")
+    public BaseRet<?> rollback(@RequestBody SysLogicHistoryArgv argv) {
+        sysLogicHistoryService.rollback(argv);
+        return BaseRet.success();
+    }
+
 }

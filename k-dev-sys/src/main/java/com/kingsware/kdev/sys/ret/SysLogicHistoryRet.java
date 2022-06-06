@@ -35,4 +35,10 @@ public class SysLogicHistoryRet extends BaseSimpleRet {
     /** 创建时间 **/
     private Timestamp whenCreated;
 
+    /** 创建人员 **/
+    private String createdUserName;
+
+    /** 创建人员 **/
+    private String createdUserAvatar;
+
 }

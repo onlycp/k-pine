@@ -8,12 +8,17 @@ import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.sys.argv.SysKdbFlowArgv;
 import com.kingsware.kdev.sys.argv.SysLogicHistoryArgv;
 import com.kingsware.kdev.sys.argv.SysLogicHistoryQueryArgv;
 import com.kingsware.kdev.sys.model.SysLogicHistory;
+import com.kingsware.kdev.sys.ret.SysKdbFlowRet;
 import com.kingsware.kdev.sys.ret.SysLogicHistoryRet;
+import com.kingsware.kdev.sys.service.SysKdbFlowService;
 import com.kingsware.kdev.sys.service.SysLogicHistoryService;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 
 /**
  * 业务实现类
@@ -23,6 +28,9 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class SysLogicHistoryServiceImpl extends BaseServiceImpl implements SysLogicHistoryService {
+
+    @Resource
+    private SysKdbFlowService sysKdbFlowService;
 
     @Override
     public SysLogicHistoryRet get(String id) {
@@ -48,12 +56,25 @@ public class SysLogicHistoryServiceImpl extends BaseServiceImpl implements SysLo
     }
 
     @Override
+    public void rollback(SysLogicHistoryArgv argv) {
+        SysKdbFlowRet ret = sysKdbFlowService.get(argv.getFlowId());
+
+        if (ret != null) {
+            SysKdbFlowArgv flowArgv = new SysKdbFlowArgv();
+            BeanUtils.copyProperties(ret, flowArgv);
+            flowArgv.setContent(argv.getFlowJson());
+            // 保存
+            sysKdbFlowService.edit(flowArgv);
+        }
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public PageDataRet<SysLogicHistoryRet> query(SysLogicHistoryQueryArgv argv) {
         // 拼装sql
         SqlWrapper wrapper = new SqlWrapper("select dph.*, su.real_name as created_user_name, su.avatar as created_user_avatar from sys_logic_history dph left join sys_user su on su.id = dph.who_created where 1=1   ");
         if (StringUtils.isNotEmpty(argv.getFlowId())) {
-            wrapper.addCondition("dph.page_id", Op.EQ, argv.getFlowId());
+            wrapper.addCondition("dph.flow_id", Op.EQ, argv.getFlowId());
         }
         wrapper.sortBy("dph.when_created desc");
         return (PageDataRet<SysLogicHistoryRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysLogicHistoryRet.class);
