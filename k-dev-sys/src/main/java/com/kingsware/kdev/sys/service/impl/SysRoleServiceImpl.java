@@ -19,9 +19,7 @@ import com.kingsware.kdev.sys.ret.SysRoleRet;
 import com.kingsware.kdev.sys.service.SysRoleService;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 角色业务实现类
@@ -114,8 +112,24 @@ public class SysRoleServiceImpl extends BaseServiceImpl implements SysRoleServic
     }
 
     private void saveRoleMenus(String roleId, Set<String> menuIds) {
+        // 查询所有对应的菜单id
+        SqlWrapper wrapper = new SqlWrapper("select path from sys_menu where 1=1 ");
+        wrapper.in("id", Arrays.asList(menuIds.toArray()));
+        List<String> allMenuIds = DB.findSingleAttributeList(String.class, wrapper.getSql(), wrapper.getParams().toArray(new Object[0]));
+        // 转为set
+        Set<String> menuIdSet = new HashSet<>();
+        for (String str: allMenuIds) {
+            String[] arr = str.split("/");
+            for (String id: arr) {
+                String pureId = id.trim();
+                if (StringUtils.isNotEmpty(pureId)) {
+                    menuIdSet.add(pureId);
+                }
+            }
+        }
+        menuIdSet.addAll(menuIds);
         List<SysRoleMenu> models = new ArrayList<>();
-        for (String menuId: menuIds) {
+        for (String menuId: menuIdSet) {
             SysRoleMenu roleMenu = new SysRoleMenu();
             roleMenu.setSysMenuId(menuId);
             roleMenu.setSysRoleId(roleId);
