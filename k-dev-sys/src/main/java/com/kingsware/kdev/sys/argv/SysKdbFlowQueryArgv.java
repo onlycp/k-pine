@@ -23,5 +23,7 @@ public class SysKdbFlowQueryArgv extends BasePageArgv {
     private String applicationId;
     /** 标签 **/
     private String tags;
+    /** 接口路径 **/
+    private String apiUrl = "";
 
 }

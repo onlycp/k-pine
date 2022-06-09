@@ -407,9 +407,13 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         String sql = "select t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name, sa.api_url, sa.api_method " +
                 " from sys_logic_flow t0 " +
                 " left join sys_api sa on sa.api_flow_id = t0.flow_id " +
-                " left join dev_application t1 on t1.id=t0.application_id";
+                " left join dev_application t1 on t1.id=t0.application_id" +
+                " where 1=1";
         if (StringUtils.isNotEmpty(argv.getApplicationId())) {
-            sql += " where (t0.application_id = '" + argv.getApplicationId() + "' or t0.application_id is null)";
+            sql += " and (t0.application_id = '" + argv.getApplicationId() + "' or t0.application_id is null)";
+        }
+        if (StringUtils.isNotEmpty(argv.getApiUrl())) {
+            sql += " and sa.api_url like '%" + argv.getApiUrl() + "%' ";
         }
         List<SysKdbFlowRet> logicFlows = DB.findList(SysKdbFlowRet.class, sql);
         Map<String, SysKdbFlowRet> dbMap = new HashMap<>();
