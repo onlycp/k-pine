@@ -22,6 +22,8 @@ public class ClientInfo {
     private String ip;
     /** 请求url **/
     private String url;
+    /** 语言 **/
+    private String lang;
     /** 当前登录用户信息 **/
     private BaseUserInfo userInfo;
     // http请求

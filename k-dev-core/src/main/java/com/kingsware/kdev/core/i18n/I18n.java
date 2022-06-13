@@ -1,6 +1,14 @@
 package com.kingsware.kdev.core.i18n;
 
+import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.util.StringUtils;
+import org.springframework.context.i18n.LocaleContextHolder;
+
+import javax.servlet.http.HttpServletRequest;
 import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * 国际化工具类
@@ -27,4 +35,38 @@ public class I18n {
     public static String t(String key, String defaultMessage, Object... params) {
         return MessageFormat.format(defaultMessage, params);
     }
+
+
+    /**
+     * 获取语言
+     * @return  返回语言
+     */
+    public static String lang() {
+
+        HttpServletRequest request = KClientContext.getContext().getRequest();
+        // 判断请求参数里有无
+        String queryLang = request.getParameter("lang");
+        if (StringUtils.isNotEmpty(request.getParameter("lang")) ) {
+            return queryLang.replaceAll("-", "_");
+        }
+
+        List<Locale> LOCALES = Arrays.asList(new Locale("zh-cn"), new Locale("zh-hk"), new Locale("en-us"), new Locale("en"), new Locale("zh"));
+        Locale locale = Locale.getDefault();
+        if (StringUtils.isNotEmpty(request.getHeader("Accept-Language"))) {
+            List<Locale.LanguageRange> list = Locale.LanguageRange.parse(request.getHeader("Accept-Language"));
+            locale = Locale.lookup(list, LOCALES);
+        }
+        if (locale == null) {
+            return "zh_CN";
+        }
+        String lang = locale.getLanguage() + "_" + locale.getCountry();
+        if (lang.equalsIgnoreCase("zh_")) {
+            lang = "zh_CN";
+        }
+        else if (lang.equalsIgnoreCase("en_")) {
+            lang = "en_US";
+        }
+        return lang;
+    }
+
 }

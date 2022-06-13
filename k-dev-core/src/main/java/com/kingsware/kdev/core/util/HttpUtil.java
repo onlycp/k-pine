@@ -215,6 +215,7 @@ public class HttpUtil {
             @Cleanup InputStream is = connection.getInputStream();
             File tempFile = FileUtils.createTempFile(fileName);
             assert tempFile != null;
+
             @Cleanup FileOutputStream outputStream = new FileOutputStream(tempFile);
             byte[] buf = new byte[2 * 1024];
             int len;

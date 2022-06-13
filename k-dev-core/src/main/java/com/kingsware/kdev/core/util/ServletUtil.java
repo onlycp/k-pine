@@ -5,6 +5,7 @@ import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.bean.KFlowUploadFile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Base64Utils;
@@ -242,6 +243,7 @@ public class ServletUtil {
             // 将body加到变量中
             Map<String, Object> requestMap = new HashMap<>();
             requestMap.put("body", body);
+            requestMap.put("lang", I18n.lang());
             params.put("request", requestMap);
         }
 
