@@ -13,6 +13,8 @@ import java.io.Serializable;
 public class BaseRet<T> implements Serializable {
     /** 业务响应码 **/
     private int code;
+    /** 业务响应状态：0为成功，其他为失败 **/
+    private int status;
     /** 提示信息 **/
     private String message;
     /** 数据 **/
@@ -27,6 +29,7 @@ public class BaseRet<T> implements Serializable {
         this.code = code;
         this.message = message;
         this.data = data;
+        this.status = code == 200 ? 0 : code;
     }
 
     public int getCode() {
