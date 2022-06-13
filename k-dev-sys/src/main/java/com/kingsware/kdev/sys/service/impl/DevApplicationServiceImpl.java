@@ -96,7 +96,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             wrapper.addCondition("da.enable_status", Op.EQ, argv.getEnableStatus());
         }
         if (argv.getDevStatus() != null) {
-            wrapper.addCondition("da.devStatus", Op.EQ, argv.getDevStatus());
+            wrapper.addCondition("da.dev_status", Op.EQ, argv.getDevStatus());
         }
         if (argv.getVersion() != null) {
             wrapper.addCondition("da.version", Op.EQ, argv.getVersion());
