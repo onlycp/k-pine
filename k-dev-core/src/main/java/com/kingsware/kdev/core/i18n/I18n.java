@@ -50,6 +50,12 @@ public class I18n {
             return queryLang.replaceAll("-", "_");
         }
 
+        // 从请求头获取
+        String i18n = request.getHeader("lang");
+        if (StringUtils.isNotEmpty(i18n)) {
+            return i18n;
+        }
+
         List<Locale> LOCALES = Arrays.asList(new Locale("zh-cn"), new Locale("zh-hk"), new Locale("en-us"), new Locale("en"), new Locale("zh"));
         Locale locale = Locale.getDefault();
         if (StringUtils.isNotEmpty(request.getHeader("Accept-Language"))) {
