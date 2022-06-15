@@ -414,6 +414,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         }
         if (StringUtils.isNotEmpty(argv.getApiUrl())) {
             sql += " and sa.api_url like '%" + argv.getApiUrl() + "%' ";
+            sql += " and sa.api_url is not null ";
         }
         List<SysKdbFlowRet> logicFlows = DB.findList(SysKdbFlowRet.class, sql);
         Map<String, SysKdbFlowRet> dbMap = new HashMap<>();
@@ -437,6 +438,11 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         }).filter(it -> {
             if (StringUtils.isNotEmpty(argv.getTags())) {
                 return it.getTags() != null && it.getTags().contains(argv.getTags());
+            }
+            return true;
+        }).filter(it -> {
+            if (StringUtils.isNotEmpty(argv.getApiUrl())) {
+                return it.getApiUrl() != null && it.getApiUrl().contains(argv.getApiUrl());
             }
             return true;
         }).collect(Collectors.toList());
