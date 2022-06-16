@@ -3,6 +3,10 @@ package com.kingsware.kdev.core.kflow.handler;
 import com.kingsware.kdev.core.kflow.KFlowConstant;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
+import com.kingsware.kdev.core.util.NumberUtils;
+import com.kingsware.kdev.core.util.StringUtils;
+
+import java.math.BigDecimal;
 
 /**
  * 对象处理类
@@ -18,7 +22,12 @@ public class KNumberResultHandler implements KFlowResultHandler {
         KdbFlowResult result = new KdbFlowResult();
         result.setType(KFlowConstant.RESULT_JSON);
         // 解析数据
-        result.setData(Long.parseLong(responseBody));
+        if (NumberUtils.isInteger(responseBody)) {
+            result.setData(Long.parseLong(responseBody));
+        }
+        else {
+            result.setData(Double.parseDouble(responseBody));
+        }
         // 返回数据
         return result;
     }

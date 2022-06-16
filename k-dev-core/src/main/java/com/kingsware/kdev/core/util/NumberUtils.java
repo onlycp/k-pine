@@ -1,5 +1,7 @@
 package com.kingsware.kdev.core.util;
 
+import java.util.regex.Pattern;
+
 /**
  * 数字工具
  *
@@ -48,4 +50,33 @@ public class NumberUtils {
         }
         return true;
     }
+
+
+    /**
+     * 判断是否整数
+     * @param str   字符串
+     * @return
+     */
+    public static boolean isInteger(String str) {
+
+        if (null == str || "".equals(str)) {
+            return false;
+        }
+        Pattern pattern = Pattern.compile("^[-+]?\\d*$");
+        return pattern.matcher(str).matches();
+    }
+
+    /**
+     * 判断是否浮点数
+     * @param str 字符串
+     * @return
+     */
+    public static boolean isDouble(String str) {
+        if (null == str || "".equals(str)) {
+            return false;
+        }
+        Pattern pattern = Pattern.compile("^[-+]?[.\\d]*$");
+        return pattern.matcher(str).matches();
+    }
+
 }
