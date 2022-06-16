@@ -4,11 +4,8 @@ import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.FileEntry;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.constants.ContentTypeMap;
 import com.kingsware.kdev.core.context.KClientContext;
-import com.kingsware.kdev.core.excel.ExcelWorker;
-import com.kingsware.kdev.core.excel.RegionDefine;
-import com.kingsware.kdev.core.excel.format.RegionDictReverseFormat;
-import com.kingsware.kdev.core.excel.format.RegionModelIdFormat;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
@@ -16,23 +13,25 @@ import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.sys.argv.SysFileQueryArgv;
 import com.kingsware.kdev.sys.manager.FileManager;
+import com.kingsware.kdev.sys.manager.NonStaticResourceHttpRequestHandler;
 import com.kingsware.kdev.sys.model.SysFile;
 import com.kingsware.kdev.sys.ret.SysFileRet;
 import com.kingsware.kdev.sys.service.SysFileService;
-import lombok.Cleanup;
-import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileCopyUtils;
-import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.yaml.snakeyaml.util.UriEncoder;
 
+import javax.annotation.Resource;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -52,6 +51,12 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
 
     @Value("${app.file-local-to-faas:false}")
     private boolean fileLocalToFaas;
+
+    private final NonStaticResourceHttpRequestHandler nonStaticResourceHttpRequestHandler;
+
+    public SysFileServiceImpl(NonStaticResourceHttpRequestHandler nonStaticResourceHttpRequestHandler) {
+        this.nonStaticResourceHttpRequestHandler = nonStaticResourceHttpRequestHandler;
+    }
 
     @Override
     public SysFileRet get(String id) {
@@ -116,69 +121,114 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
 
 
     @Override
-    public void download(String id) {
-        // 进行url编码
-        id = UriEncoder.decode(id);
-        SysFile file = DB.findById(SysFile.class, id);
-        HttpServletResponse response =  KClientContext.getContext().getResponse();
-        if (file == null) {
-            if (StringUtils.isUuid(id)) {
-                throw BusinessException.serviceThrow("文件已被删除！");
-            }
-            else {
-                String relativePath = "";
-                String fileName =  id;
-                if (id.contains("/")) {
-                    int index = id.lastIndexOf("/");
-                    relativePath = id.substring(0, index);
-                    fileName = id.substring(index + 1);
-                }
-                downloadFromFaas(relativePath, fileName, fileName);
-            }
-        }
-
-        response.reset();
-        response.setContentType("application/octet-stream");
-        response.setCharacterEncoding("utf-8");
-        response.setHeader("Content-Disposition", "attachment;filename=" + UriEncoder.encode(file.getFileName()));
-        if (file.getSaveType() == 0) {
-            try {
-                byte[] content = Base64.getDecoder().decode(file.getFileContent());
-                response.setContentLength(content.length);
-                response.getOutputStream().write(content);
-                response.getOutputStream().flush();
-            } catch (IOException e) {
-                throw BusinessException.serviceThrow("文件读取失败");
-            }
-        }
-        else if (file.getSaveType() == 1) {
-            String absFilePath = basePath + file.getFilePath();
-            File localFile = new File(absFilePath);
-            ServletUtil.responseFile(localFile, file.getFileName());
-        }
-        else if (file.getSaveType() == 2) {
-            String relativePath = "";
-            String faasFileName = file.getFilePath();
-            if (file.getFilePath().contains("/")) {
-                int index = file.getFilePath().lastIndexOf("/");
-                relativePath = file.getFilePath().substring(0, index);
-                faasFileName = file.getFilePath().substring(index + 1);
-            }
-           downloadFromFaas(relativePath, faasFileName,  file.getFileName());
-        }
+    public void download(String id) throws ServletException, IOException {
+        downloadByPath(id);
     }
 
-//    private String getContentType(String fileType, String fileName) {
-//        String contentType = "application/octet-stream";
-//        String fileExt = FileUtils.getFileExt(fileName);
-//        if (fileExt != null) {
-//            contentType = ContentTypeMap.getContentType("." + fileExt);
-//        }
-//        if ("video".equals(fileName)) {
-//
-//        }
-//        return contentType;
-//    }
+    /**
+     * 下载单个文件
+     * @param path
+     * @throws ServletException
+     * @throws IOException
+     */
+    private void downloadByPath(String path) throws ServletException, IOException {
+        // 进行url编码
+        path = UriEncoder.decode(path);
+        SysFile file = DB.findById(SysFile.class, path);
+        HttpServletResponse response =  KClientContext.getContext().getResponse();
+        HttpServletRequest request =  KClientContext.getContext().getRequest();
+        String fileRealPath = null;
+        String fileName = "";
+        String contentType = "application/octet-stream";
+        if (file == null) {
+            // 如果是ID格式，不是路径格式，则文件已不存在
+            if (StringUtils.isUuid(path)) {
+                throw BusinessException.serviceThrow("文件已被删除！");
+            }
+            // 通过ID找不到文件，按路径处理，共有2处方式，1种是本地文件，2种是FAAS文件
+            // 在本地找是否存在文件
+            File localFile = getLocalFile(path);
+            if (localFile != null && localFile.exists()) {
+                fileRealPath = localFile.getAbsolutePath();
+                fileName = localFile.getName();
+            } else {
+                // 在FAAS找是否存在文件
+                File faasFile = getFaasFile(path);
+                if (faasFile != null && faasFile.exists()) {
+                    fileRealPath = faasFile.getAbsolutePath();
+                    fileName = faasFile.getName();
+                }
+            }
+        } else {
+            fileName = file.getFileName();
+            // 通过ID找得到文件，按数据库里的存储类型读文件
+            if (file.getSaveType() == 0) {
+                try {
+                    byte[] content = Base64.getDecoder().decode(file.getFileContent());
+                    response.setContentLength(content.length);
+                    response.getOutputStream().write(content);
+                    response.getOutputStream().flush();
+                } catch (IOException e) {
+                    throw BusinessException.serviceThrow("文件读取失败");
+                }
+            } else if (file.getSaveType() == 1) {
+                File localFile = getLocalFile(file.getFilePath());
+                if (localFile != null && localFile.exists()) {
+                    fileRealPath = localFile.getAbsolutePath();
+                }
+            } else if (file.getSaveType() == 2) {
+                // 在FAAS找是否存在文件
+                File faasFile = getFaasFile(file.getFilePath());
+                if (faasFile != null && faasFile.exists()) {
+                    fileRealPath = faasFile.getAbsolutePath();
+                }
+            }
+        }
+        if (fileRealPath == null) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
+            return ;
+        }
+//        response.reset();
+        contentType = Files.probeContentType(Paths.get(fileRealPath));
+        response.setContentType(contentType);
+        response.setCharacterEncoding("utf-8");
+        response.setHeader("Content-Disposition", "attachment;filename=" + UriEncoder.encode(fileName));
+
+        request.setAttribute(NonStaticResourceHttpRequestHandler.ATTR_FILE, fileRealPath);
+        nonStaticResourceHttpRequestHandler.handleRequest(request, response);
+    }
+
+    private File getLocalFile(String path) {
+        String absFilePath = basePath + path;
+        return new File(absFilePath);
+    }
+
+    private File getFaasFile(String path) {
+        String relativePath = "";
+        String fileName =  path;
+        if (path.contains("/")) {
+            int index = path.lastIndexOf("/");
+            relativePath = path.substring(0, index);
+            fileName = path.substring(index + 1);
+        }
+        String fileExt = FileUtils.getFileExt(fileName);
+        String downloadPath = basePath + File.separator + relativePath;
+        File tempFile = DB.kdbApi().downloadFile(downloadPath, fileName, "", fileExt);
+        if (tempFile != null && tempFile.exists()) {
+            tempFile.deleteOnExit();
+        }
+        return tempFile;
+    }
+
+    private String getContentType(String fileName) {
+        String contentType = "application/octet-stream";
+        String fileExt = FileUtils.getFileExt(fileName);
+        if (fileExt != null) {
+            contentType = ContentTypeMap.getContentType("." + fileExt);
+        }
+        return contentType;
+    }
 
     /**
      * 从Faas下载文件
@@ -273,13 +323,21 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             FileUtils.writeToFile(tempFile, content);
             return new FileEntry(tempFile, sysFile.getFileName());
         }
-        else {
+        else if (sysFile.getSaveType() == 1) {
             String absFilePath = basePath + sysFile.getFilePath();
             File localFile = new File(absFilePath);
             if (!localFile.exists()) {
                 throw BusinessException.serviceThrow("文件不存在，可能被移动或删除！");
             }
             return new FileEntry(localFile, sysFile.getFileName());
+        } else if (sysFile.getSaveType() == 2) {
+            // 在FAAS找是否存在文件
+            File faasFile = getFaasFile(sysFile.getFilePath());
+            if (!faasFile.exists()) {
+                throw BusinessException.serviceThrow("文件不存在，可能被移动或删除！");
+            }
+            return new FileEntry(faasFile, sysFile.getFileName());
         }
+        throw BusinessException.serviceThrow("文件不存在，可能被移动或删除！");
     }
 }

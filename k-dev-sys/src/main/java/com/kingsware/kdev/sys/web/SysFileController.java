@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.List;
 
@@ -114,7 +116,7 @@ public class SysFileController extends BaseController {
     @ApiOperation(value = "文件下载 " ,notes = "文件下载")
     @GetMapping("/download/{id}")
     @ApiIgnore
-    public void download(@PathVariable String id) {
+    public void download(@PathVariable String id) throws ServletException, IOException {
         sysFileService.download(id);
     }
 
@@ -125,7 +127,7 @@ public class SysFileController extends BaseController {
     @ApiOperation(value = "文件下载 " ,notes = "文件下载")
     @GetMapping("/download/**")
     @ApiIgnore
-    public void downloadWithPath(HttpServletRequest httpServletRequest) {
+    public void downloadWithPath(HttpServletRequest httpServletRequest) throws ServletException, IOException {
         // 获取后面多层目录
         String uri = httpServletRequest.getRequestURI();
         String prefix = "/"+ Version.V1 + "/sys-files" + "/download/";

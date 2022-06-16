@@ -7,6 +7,8 @@ import com.kingsware.kdev.sys.argv.SysFileQueryArgv;
 import com.kingsware.kdev.sys.ret.SysFileRet;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletException;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -51,7 +53,7 @@ public interface SysFileService extends BaseService {
      * 下载文件
      * @param id    文件id
      */
-    void download(String id);
+    void download(String id) throws ServletException, IOException;
 
     /**
      * 下载zip

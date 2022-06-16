@@ -1,5 +1,7 @@
 package com.kingsware.kdev.core.orm.kdb;
 
+import lombok.SneakyThrows;
+
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
@@ -125,5 +127,6 @@ public interface KdbApi {
     File downloadFile(String path, String fileName);
 
 
-
+    @SneakyThrows
+    File downloadFile(String path, String fileName, String prefix, String subfix);
 }

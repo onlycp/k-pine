@@ -194,14 +194,16 @@ public class HttpUtil {
     }
 
 
-
+    public static File downloadFile(String downloadUrl, String fileName) {
+        return downloadFile(downloadUrl, fileName, "", "");
+    }
 
         /**
          * 下载文件
          * @param downloadUrl       下载地址
          * @param fileName      输出流
          */
-    public static File downloadFile(String downloadUrl, String fileName) {
+    public static File downloadFile(String downloadUrl, String fileName, String prefix, String suffix) {
 
         HttpURLConnection connection = null;
         try {
@@ -213,7 +215,7 @@ public class HttpUtil {
             connection.setReadTimeout(60000);
             connection.setDoInput(true);
             @Cleanup InputStream is = connection.getInputStream();
-            File tempFile = FileUtils.createTempFile(fileName);
+            File tempFile = FileUtils.createTempFile(prefix, suffix, fileName);
             assert tempFile != null;
 
             @Cleanup FileOutputStream outputStream = new FileOutputStream(tempFile);

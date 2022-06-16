@@ -130,6 +130,18 @@ public class FileUtils {
         // 获取文件名和后续名
         String prefix = "";
         String suffix = "";
+        return createTempFile(prefix, suffix, fileName);
+    }
+
+
+
+    /**
+     * 创建临时文件
+     * @param fileName  临时文件名
+     * @return  返回临时文件
+     */
+    public static File createTempFile(String prefix, String suffix, String fileName) {
+        // 获取文件名和后续名
         int lastDotIndex = fileName.lastIndexOf(".");
         if (lastDotIndex < 0) {
             prefix = fileName;
