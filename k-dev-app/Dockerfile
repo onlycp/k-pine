@@ -2,6 +2,7 @@ FROM registry.cn-hangzhou.aliyuncs.com/mt23/jre8-alpine-shanghai:1.0.0
 MAINTAINER The team of self-killer
 VOLUME /tmp
 ADD target/*jar app.jar
+ADD pine.license pine.license
 # 开放端口
 EXPOSE 8080
 # jvm 配置
