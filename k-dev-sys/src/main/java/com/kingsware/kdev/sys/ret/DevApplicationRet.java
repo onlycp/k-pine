@@ -48,4 +48,7 @@ public class DevApplicationRet extends BaseManageRet {
     /** 默认路径 */
     private String defaultPath;
 
+    /** 应用发布类型 */
+    private Integer appPublicType;
+
 }

@@ -48,4 +48,7 @@ public class DevApplication extends BaseManageModel {
     /** 默认路径 */
     private String defaultPath;
 
+    /** 应用发布类型 */
+    private Integer appPublicType;
+
 }
