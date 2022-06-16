@@ -205,9 +205,9 @@ public class LicenseManager {
 
         AppModeProperties appModeProperties = SpringContext.getBean(AppModeProperties.class);
         // 如果是开发模式
-        if (appModeProperties.getDev().equals(Boolean.TRUE)) {
-            return -2;
-        }
+//        if (appModeProperties.getDev().equals(Boolean.TRUE)) {
+//            return -2;
+//        }
         // license不存在或无效
         if (lic == null) {
             return 0;
