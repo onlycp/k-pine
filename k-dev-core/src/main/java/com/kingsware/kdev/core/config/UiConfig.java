@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
+import java.io.File;
+
 /**
  *
  * @author chen peng
@@ -19,7 +21,11 @@ public class UiConfig extends WebMvcConfigurationSupport {
 
     @Override
     protected void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/**").addResourceLocations("file:" +  ui);
-        super.addResourceHandlers(registry);
+        // 判断只有目录真实存在的时候才生效
+        if (new File(ui).exists()) {
+            registry.addResourceHandler("/**").addResourceLocations("file:" +  ui);
+            super.addResourceHandlers(registry);
+        }
+
     }
 }
