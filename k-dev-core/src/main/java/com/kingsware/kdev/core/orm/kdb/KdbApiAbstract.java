@@ -211,7 +211,7 @@ public abstract class KdbApiAbstract implements  KdbApi {
     @SneakyThrows
     public File downloadFile(String path, String fileName, String prefix, String subfix) {
         String url = getServer() + DOWN_URL + "/" + URLEncoder.encode(fileName, "utf-8") +"?path=" + URLEncoder.encode(path, "utf-8");
-        return HttpUtil.downloadFile(url, path);
+        return HttpUtil.downloadFile(url, path, prefix, subfix);
     }
 
     /** 设置接口地址 **/

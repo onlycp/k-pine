@@ -212,7 +212,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             relativePath = path.substring(0, index);
             fileName = path.substring(index + 1);
         }
-        String fileExt = FileUtils.getFileExt(fileName);
+        String fileExt = "." + FileUtils.getFileExt(fileName);
         String downloadPath = basePath + File.separator + relativePath;
         File tempFile = DB.kdbApi().downloadFile(downloadPath, fileName, "", fileExt);
         if (tempFile != null && tempFile.exists()) {
