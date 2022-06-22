@@ -31,10 +31,13 @@ public class UnLockTask {
                 lockForMost = 60;
             }
             // 如果达到解锁标准了
-            if ((task.getLockForTime().getTime() + lockForMost*1000) < System.currentTimeMillis()) {
-                DB.executeUpdateSql("update sys_task set lock_status=0 where id=?", task.getId());
-                log.info("定时任务:{} 自动解锁", task.getName());
+            if (task.getLockForTime() != null) {
+                if ((task.getLockForTime().getTime() + lockForMost*1000) < System.currentTimeMillis()) {
+                    DB.executeUpdateSql("update sys_task set lock_status=0 where id=?", task.getId());
+                    log.info("定时任务:{} 自动解锁", task.getName());
+                }
             }
+
         }
     }
 }
