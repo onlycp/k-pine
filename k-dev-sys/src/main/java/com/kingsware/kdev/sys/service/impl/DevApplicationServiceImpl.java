@@ -202,6 +202,12 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         // 字典分类
         long dictCount = DB.batchSaveOrUpdate(devPine.getDict(), SysDict.class);
         // 字典项
+        // 先删除已有字典项
+        if (devPine.getDictItems() != null &&  !devPine.getDictItems().isEmpty()) {
+            for (SysDictItem item: devPine.getDictItems()) {
+                DB.delete(item);
+            }
+        }
         long dictItemCount = DB.batchSaveOrUpdate(devPine.getDictItems(), SysDictItem.class);
         // 任务调度
         long taskCount = DB.batchSaveOrUpdate(devPine.getTasks(), SysTask.class);

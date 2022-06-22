@@ -92,12 +92,18 @@ public abstract class KdbApiAbstract implements  KdbApi {
 
     @Override
     public void addDataSource(DataSourceInfo dataSourceInfo) {
-        post(dataSourceInfo, ADD_DS_URL, String.class);
+        KdbRet<String> ret = post(dataSourceInfo, ADD_DS_URL, String.class);
+        if (ret.getErrorCode() != 0) {
+            throw new OrmDbException(ret.getResponseBody());
+        }
     }
 
     @Override
     public void editDataSource(DataSourceInfo dataSourceInfo) {
-        post(dataSourceInfo, EDIT_DS_URL, String.class);
+        KdbRet<String> ret = post(dataSourceInfo, EDIT_DS_URL, String.class);
+        if (ret.getErrorCode() != 0) {
+            throw new OrmDbException(ret.getResponseBody());
+        }
     }
 
     @Override

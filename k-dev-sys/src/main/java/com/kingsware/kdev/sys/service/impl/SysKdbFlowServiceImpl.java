@@ -96,6 +96,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         if (flowDefinition == null) {
             return defineRet;
         }
+        Set<String> nodeIds = new HashSet<>();
         for (NodeDefinition nodeDefinition : flowDefinition.getNodeDefinitions()) {
             String executeType = "";
             String dataSource = "";
@@ -130,6 +131,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             }
             defineRet.addNode(nodeDefinition.getId(), nodeDefinition.getName(), nodeDefinition.getType(), executeType,
                     dataSource, zIndex, position, beforeContent, content, afterContent, nodeDefinition.getFlowId(), subFlowName);
+            nodeIds.add(nodeDefinition.getId());
         }
         // 处理连线
         for (NodeLink link : flowDefinition.getNodeLinks()) {
@@ -137,7 +139,11 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             if (link.getConditions() != null && link.getConditions().getDecision() != null) {
                 expr = link.getConditions().getDecision().getExpr();
             }
-            defineRet.addLink(link.getId(), link.getName(), link.getFrom(), link.getTo(), expr);
+            // 判断一下from和to是否存在，如果有一个不存在，那么就丢弃它
+            if (nodeIds.contains(link.getFrom()) && nodeIds.contains(link.getTo())) {
+                defineRet.addLink(link.getId(), link.getName(), link.getFrom(), link.getTo(), expr);
+            }
+
         }
 
         return defineRet;
