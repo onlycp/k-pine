@@ -37,7 +37,7 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
 
     @Override
     public DevPageRet getByPath(String path) {
-        return DB.findOne(DevPageRet.class, " select * from dev_page where path = ? and deleted=0 ", path);
+        return DB.findOne(DevPageRet.class, " select * from dev_page where (path = ? or id = ?) and deleted=0 ", path, path);
     }
 
     @Override
