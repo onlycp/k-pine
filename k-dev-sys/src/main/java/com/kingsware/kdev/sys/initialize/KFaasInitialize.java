@@ -1,8 +1,12 @@
 package com.kingsware.kdev.sys.initialize;
 
 import com.kingsware.kdev.core.base.SystemInitialize;
+import com.kingsware.kdev.core.bean.JdbcUrl;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.kflow.define.FlowDefinition;
 import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.orm.DBConnectConfig;
+import com.kingsware.kdev.core.orm.DbContext;
 import com.kingsware.kdev.core.orm.kdb.*;
 import com.kingsware.kdev.core.util.*;
 import lombok.extern.slf4j.Slf4j;
@@ -63,7 +67,9 @@ public class KFaasInitialize implements SystemInitialize {
                     // 获取所有的数据源
                     List<DataSourceInfo> dataSourceInfos = DB.kdbApi().queryDataSource(new DataSourceQueryArgv());
                     for (DataSourceInfo fileSource: dataSourceFromFile) {
-                        // 查看是否已存在
+                        // 创建数据库
+                        createInitDb(fileSource);
+//                        // 查看是否已存在
                         Optional<DataSourceInfo> optional = dataSourceInfos.stream().filter(it -> it.getSourceName().equals(fileSource.getSourceName())).findFirst();
                         // 如果已存储，则修改
                         if (optional.isPresent()) {
@@ -79,8 +85,11 @@ public class KFaasInitialize implements SystemInitialize {
                 }
             }
         }
+        // 重新初始化baseFlow
+        initBaseFlow();
+    }
 
-
+    private void initBaseFlow() {
         // 2. 修改基础流程
         FlowInfo flowInfo = DB.kdbApi().get("base_flow");
         // 转为流程定义
@@ -105,6 +114,85 @@ public class KFaasInitialize implements SystemInitialize {
             editFlowInfo.setDescription(flowInfo.getDescription());
             DB.kdbApi().editFlow(editFlowInfo);
         }
+    }
+
+    /**
+     * 创建的数据库初始化
+     * @param dataSourceInfo   数据源信息
+     */
+    private void createInitDb(final DataSourceInfo dataSourceInfo) {
+        // 解析url
+        JdbcUrl jdbcUrl = JdbcUrlUtils.parseUrl(dataSourceInfo.getJdbcUrl());
+        DataSourceInfo initDs = BeanUtils.copyObject(dataSourceInfo, DataSourceInfo.class);
+        String dbName = jdbcUrl.getDbName();
+        String sourceName = dataSourceInfo.getSourceName() + "PineInit";
+        // 先移除
+        try {
+            // 创建数据源
+            DB.kdbApi().deleteDataSource(sourceName);
+        }
+        catch (Exception ignored) {}
+        try {
+            if ("mysql".equalsIgnoreCase(jdbcUrl.getDbType())) {
+                jdbcUrl.setDbName("mysql");
+                initDs.setJdbcUrl(jdbcUrl.build());
+                initDs.setSourceName(sourceName);
+                // 创建数据源
+                DB.kdbApi().addDataSource(initDs);
+                // 创建本地sql
+                KDBConnectConfig config = new KDBConnectConfig();
+                config.setChannel("kdbHttp");
+                config.setDatabaseType("kdb");
+                config.setInnerType(jdbcUrl.getDbType());
+                config.setDbName(sourceName);
+                config.setDataSource(sourceName);
+                config.setServer(SpringContext.getProperties("database.sources.db.server", ""));
+                config.setExecuteSqlApi(SpringContext.getProperties("database.sources.db.executeSqlApi", ""));
+                DbContext.getInstance().createDataBase(sourceName, config);
+                // 需要先初始化数据源
+                initBaseFlow();
+                // 创建数据库
+                String createSchemaSql = String.format("CREATE DATABASE IF NOT EXISTS `%s` DEFAULT CHARSET utf8 COLLATE utf8_general_ci;",  dbName);
+                DB.byName(initDs.getSourceName()).executeUpdateSql(createSchemaSql);
+            }
+            else if ("postgresql".equalsIgnoreCase(jdbcUrl.getDbType())) {
+                jdbcUrl.setDbName("postgres");
+                initDs.setJdbcUrl(jdbcUrl.build());
+                initDs.setSourceName(sourceName);
+                // 创建数据源
+                DB.kdbApi().addDataSource(initDs);
+                // 创建本地sql
+                KDBConnectConfig config = new KDBConnectConfig();
+                config.setChannel("kdbHttp");
+                config.setDatabaseType("kdb");
+                config.setInnerType(jdbcUrl.getDbType());
+                config.setDbName(sourceName);
+                config.setDataSource(sourceName);
+                config.setServer(SpringContext.getProperties("database.sources.db.server", ""));
+                config.setExecuteSqlApi(SpringContext.getProperties("database.sources.db.executeSqlApi", ""));
+                DbContext.getInstance().createDataBase(sourceName, config);
+                // 需要先初始化数据源
+                initBaseFlow();
+                // 创建数据库
+                // 先判断数据库是否存在在
+                long count = DB.byName(initDs.getSourceName()).findCount(String.format("select 1 from pg_database where datname = '%s'", dbName));
+                if (count == 0) {
+                    String createSchemaSql = String.format("CREATE DATABASE \"%s\";",  dbName);
+                    DB.byName(initDs.getSourceName()).executeUpdateSql(createSchemaSql);
+                }
+
+
+            }
+        }
+        finally {
+            try {
+                DbContext.getInstance().removeDataBase(sourceName);
+                DB.kdbApi().deleteDataSource(sourceName);
+            }
+            catch (Exception ignored) {}
+
+        }
+
 
     }
 
