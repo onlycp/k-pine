@@ -57,7 +57,8 @@ public class KFaasInitialize implements SystemInitialize {
         startFaas();
         // 1. 初始化数据源
         // 读取文件
-        String dbConfigFilePath = initDatasourcePath + "/db.json";
+        // 在windows环境中，代码版运行./xx会找不到文件，需要改成.\xx，所以
+        String dbConfigFilePath = initDatasourcePath + File.separator + "db.json";
         File dbConfigFile = new File(dbConfigFilePath);
         if (dbConfigFile.exists()) {
             String text = FileUtils.readFileText(dbConfigFile);

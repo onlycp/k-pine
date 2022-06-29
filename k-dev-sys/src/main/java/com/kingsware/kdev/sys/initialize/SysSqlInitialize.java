@@ -59,7 +59,8 @@ public class SysSqlInitialize implements SystemInitialize {
 
     private List<ExecutionFile> getFileList(int maxVersion) {
         List<ExecutionFile> resultList = new ArrayList<>();
-        String dbConfigFilePath = initDatasourcePath + "/initSql" + "/" + initDbType;
+        // 在windows环境中，代码版运行./xx会找不到文件，需要改成.\xx
+        String dbConfigFilePath = initDatasourcePath + File.separator + "initSql" + File.separator + initDbType;
         File fileList = new File(dbConfigFilePath);
         File[] allFile = fileList.listFiles();
         if (allFile == null || allFile.length == 0) {
