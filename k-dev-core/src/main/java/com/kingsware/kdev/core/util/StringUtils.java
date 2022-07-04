@@ -272,6 +272,19 @@ public class StringUtils {
 
     }
 
+    /**
+     * 清理字符串
+     * @param sql   sql
+     * @return
+     */
+    public static String clean(String sql) {
+        // 正则匹配{空格/换行/回车/制表符/换页符}
+        final String regx = "\\s+|\t|\r|\n";
+        Pattern patt = Pattern.compile(regx);
+        Matcher m = patt.matcher(sql);
+        return m.replaceAll(" ");
+    }
+
 
 
 }

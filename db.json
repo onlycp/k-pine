@@ -1,17 +1,11 @@
-[
+//[
 //  {
 //    "sourceName":"MySql",
-//    "driverClass":"org.postgresql.Driver",
-//    "jdbcUrl":"jdbc:postgresql://192.168.2.94:5432/k-pine-test",
-//    "userName":"postgres",
-//    "password":"P@ssw0rd567"
-//  },
-//  {
-//    "sourceName":"postgres_fto",
-//    "driverClass":"org.postgresql.Driver",
-//    "jdbcUrl":"jdbc:postgresql://192.168.2.94:5432/fto",
-//    "userName":"postgres",
-//    "password":"P@ssw0rd567"
+//    "driverClass":"com.microsoft.sqlserver.jdbc.SQLServerDriver",
+//    "jdbcUrl":"jdbc:sqlserver://10.11.2.115:1433;DatabaseName=k-pine-server;encrypt=false",
+//    "userName":"sa",
+//    "password":"fg@991212"
 //  }
-]
+//
+//]
 

@@ -28,6 +28,9 @@ public class JdbcUrlUtils {
         // 获取服务器ip和端口
         str = str.substring(tagDbTypeIndex + 3);
         int serverIndex = str.indexOf("/");
+        if (serverIndex == -1) {
+            serverIndex = str.indexOf(";");
+        }
         String server = str.substring(0, serverIndex);
         // 获取数据库名
         str = str.substring(serverIndex + 1);

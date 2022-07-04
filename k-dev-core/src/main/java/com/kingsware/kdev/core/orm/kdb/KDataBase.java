@@ -1,6 +1,7 @@
 package com.kingsware.kdev.core.orm.kdb;
 
 import com.kingsware.kdev.core.bean.BaseModel;
+import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.orm.*;
 import com.kingsware.kdev.core.orm.channel.DbChannel;
 import com.kingsware.kdev.core.orm.channel.KDBHttpChannel;
@@ -8,6 +9,7 @@ import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.orm.expression.Expression;
 import com.kingsware.kdev.core.util.BeanUtils;
+import com.kingsware.kdev.core.util.CollectUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 
 import java.util.ArrayList;
@@ -72,7 +74,7 @@ public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
 
     @Override
     public <T> T findOne(Class<T> tClass, List<Expression> expressionList) {
-        SqlWrapper sqlWrapper = SqlGenerator.findSql(tClass, expressionList);
+        SqlWrapper sqlWrapper = SqlGenerator.findSql(tClass, expressionList, this.getConfig().getInnerType());
         List<T> list = this.findList(tClass, sqlWrapper.getSql(), sqlWrapper.getParams().toArray());
         if (list.isEmpty()) {
             return null;
@@ -101,7 +103,7 @@ public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
 
     @Override
     public <T> long findCount(Class<T> tClass, List<Expression> expressionList) {
-        SqlWrapper sqlWrapper = SqlGenerator.findSql(tClass, expressionList);
+        SqlWrapper sqlWrapper = SqlGenerator.findSql(tClass, expressionList, this.getConfig().getInnerType());
         return this.findCount(SqlGenerator.getListSql2CountSql(sqlWrapper.getSql()),  sqlWrapper.getParams().toArray());
     }
 
@@ -112,7 +114,7 @@ public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
 
     @Override
     public <T> List<T> findList(Class<T> tClass, List<Expression> expressionList) {
-        SqlWrapper sqlWrapper = SqlGenerator.findSql(tClass, expressionList);
+        SqlWrapper sqlWrapper = SqlGenerator.findSql(tClass, expressionList, this.getConfig().getInnerType());
         return this.findList(tClass, sqlWrapper.getSql(), sqlWrapper.getParams().toArray());
     }
 
@@ -127,14 +129,31 @@ public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
         String selectCountSql = SqlGenerator.getListSql2CountSql(sql);
         Long count = channel.queryForCount(selectCountSql, Arrays.asList(params));
         // 查询数据
-        String dataQuerySql = sql + " limit ? offset ?";
+        String limitSql = " limit ? offset ?";
+        List<Object> objects = new ArrayList<>(Arrays.asList(params));
         // 计算limit
         int from = (page - 1) * pageSize;
-        List<Object> objects = new ArrayList<>(Arrays.asList(params));
-        // 加入pageSize
-        objects.add(pageSize);
-        // 加入from
-        objects.add(from);
+        if (this.getConfig().getInnerType().equalsIgnoreCase("SQLServer")) {
+            if (sql.toLowerCase().contains("order by"))  {
+                limitSql = " offset ? rows fetch next ? rows only";
+            }
+            else {
+                throw BusinessException.serviceThrow("SqlServer分页查询必须包括order by语句！ SQL:" + sql);
+            }
+
+            // 加入from
+            objects.add(from);
+            // 加入pageSize
+            objects.add(pageSize);
+        }
+        else {
+            // 加入pageSize
+            objects.add(pageSize);
+            // 加入from
+            objects.add(from);
+        }
+        String dataQuerySql = sql + limitSql;
+
         // 查询数据
         List<T> data =  channel.queryForList(dataQuerySql, tClass,  objects);
         // 计算总页数
@@ -166,20 +185,36 @@ public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
 
     @Override
     public <T> long save(T entity) {
-        SqlWrapper sqlWrapper = SqlGenerator.insertSql((BaseModel) entity, DataBaseTypeEnum.KDB);
+        SqlWrapper sqlWrapper = SqlGenerator.insertSql((BaseModel) entity, this.getConfig().getInnerType());
         return channel.executeSql(sqlWrapper.getSql(),  sqlWrapper.getParams());
 
     }
 
     @Override
     public <T> long saveAll(List<T> list) {
-        SqlWrapper sqlWrapper = SqlGenerator.insertListSql(list , DataBaseTypeEnum.KDB);
-        return channel.executeSql(sqlWrapper.getSql(), sqlWrapper.getParams());
+        int batchNum =  getBatchAddUpdateCount() == 0 ? list.size(): getBatchAddUpdateCount();
+        List<List<T>> listList = CollectUtils.splitList(list, batchNum);
+        for (List<T> subList: listList) {
+            SqlWrapper sqlWrapper = SqlGenerator.insertListSql(subList , this.getConfig().getInnerType());
+            channel.executeSql(sqlWrapper.getSql(), sqlWrapper.getParams());
+        }
+        return list.size();
+    }
+
+    /**
+     * 获取批处理数量
+     * @return 数据批数据数量
+     */
+    private int getBatchAddUpdateCount() {
+        if (this.getConfig().getInnerType().equalsIgnoreCase("sqlserver")) {
+            return 50;
+        }
+        return 0;
     }
 
     @Override
     public <T> long update(T entity) {
-        SqlWrapper sqlWrapper = SqlGenerator.updateSql(entity , DataBaseTypeEnum.KDB);
+        SqlWrapper sqlWrapper = SqlGenerator.updateSql(entity , this.getConfig().getInnerType());
         return channel.executeSql(sqlWrapper.getSql(), sqlWrapper.getParams());
     }
 

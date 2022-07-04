@@ -51,7 +51,7 @@ public class PermissionManager {
             return;
         }
 
-        String sql = "select DISTINCT(mn.path) from sys_role_menu rm \n" +
+        String sql = "select mn.path from sys_role_menu rm \n" +
                 "left join sys_menu mn on mn.id = rm.sys_menu_id\n" +
                 "where rm.sys_role_id in  (";
         List<String> sortedList = sortRoleIds(roleIds);

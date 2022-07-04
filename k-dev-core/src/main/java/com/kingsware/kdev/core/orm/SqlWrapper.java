@@ -98,6 +98,24 @@ public class SqlWrapper {
     }
 
     /**
+     * In 查询
+     * @param sql 列表
+     * @param inSet      id的集合
+     */
+    public SqlWrapper appendInSql(String sql, Collection<Object> inSet) {
+        StringBuilder tmp = new StringBuilder();
+        for (Object obj: inSet) {
+            tmp.append( "?,");
+            params.add(obj);
+        }
+        // 移除最后一个"."
+        String tempSql = tmp.substring(0, tmp.length()-1);
+        String replacedSql = sql.replace("${in}", tempSql);
+        sqlBuffer.append(" and ").append(replacedSql).append(" ");
+        return this;
+    }
+
+    /**
      * 区间查询
      * @param columnName    属性名
      * @param lowValue      低值

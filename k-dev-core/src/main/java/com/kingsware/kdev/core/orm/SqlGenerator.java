@@ -19,6 +19,8 @@ import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * SQL生成器
@@ -28,6 +30,7 @@ import java.util.*;
  * @date 2021/12/21 5:40 下午
  */
 public class SqlGenerator {
+
 
     /** 日志打印 **/
     private static final Logger logger  = LoggerFactory.getLogger(SqlGenerator.class);
@@ -42,7 +45,7 @@ public class SqlGenerator {
      * @param <T>   泛型
      * @return      批量插入的sql
      */
-    public static <T> SqlWrapper insertListSql(List<T> models, DataBaseTypeEnum dataBaseTypeEnum) {
+    public static <T> SqlWrapper insertListSql(List<T> models, String dataBaseTypeEnum) {
         // 获取第一个对象的class
         Class<?> tClass = models.get(0).getClass();
         // 获取表名
@@ -116,7 +119,7 @@ public class SqlGenerator {
         }
         // 拼装sql
         builder.append(" ( ");
-        builder.append(StringUtils.joinToString(insertColumns, ","));
+        builder.append(StringUtils.joinToString(SqlKeywords.wrapperColumn(insertColumns, dataBaseTypeEnum), ","));
         builder.append(" ) ");
         builder.append(" values ");
         builder.append(StringUtils.joinToString(insertValues, ","));
@@ -152,7 +155,7 @@ public class SqlGenerator {
      * @param dataBaseTypeEnum  数据库类型
      * @return              生成后的语句
      */
-    public static <T> SqlWrapper insertSql(T model, DataBaseTypeEnum dataBaseTypeEnum) {
+    public static <T> SqlWrapper insertSql(T model, String dataBaseTypeEnum) {
         List<T> models = new ArrayList<>();
         models.add(model);
         return insertListSql(models, dataBaseTypeEnum);
@@ -164,7 +167,7 @@ public class SqlGenerator {
      * @param dataBaseTypeEnum  数据库类型
      * @return  sql结构
      */
-    public static <T> SqlWrapper updateSql(T model, DataBaseTypeEnum dataBaseTypeEnum) {
+    public static <T> SqlWrapper updateSql(T model, String dataBaseTypeEnum) {
         Class<?> tClass = model.getClass();
         // 获取表名
         String tableName = ModelUtil.getTableName(tClass);
@@ -187,7 +190,7 @@ public class SqlGenerator {
             // 如果不存在Column，则默认可增可改
             String columnName = StringUtils.humpToLine(field.getName());
             if (!field.isAnnotationPresent(Column.class)) {
-                updateList.add(String.format("%s=?", columnName));
+                updateList.add(String.format("%s=?", SqlKeywords.wrapperColumn(columnName, dataBaseTypeEnum)));
                 addParams(field, model, params);
             }
             else {
@@ -204,7 +207,7 @@ public class SqlGenerator {
                 }
 
                 // 增加列
-                updateList.add(String.format("%s=?", columnName));
+                updateList.add(String.format("%s=?", SqlKeywords.wrapperColumn(columnName, dataBaseTypeEnum)));
                 // 自动设置值
                 autoWrite(column, field, model);
                 // 增加参数
@@ -280,7 +283,7 @@ public class SqlGenerator {
      * @param <T>               泛型
      * @return                  sql
      */
-    public static <T> SqlWrapper findSql(Class<T> tClass, List<Expression> expressionList ) {
+    public static <T> SqlWrapper findSql(Class<T> tClass, List<Expression> expressionList, String dataBaseTypeEnum ) {
         SqlWrapper sqlWrapper = new SqlWrapper();
         // 获取表名
         String tableName = ModelUtil.getTableName(tClass);
@@ -290,7 +293,7 @@ public class SqlGenerator {
         // 逻辑删除
         LogicDelete logicDelete = LogicDeleteTables.getInstance().getTable(tableName);
         if (logicDelete != null) {
-            builder.append(String.format("where %s=%d ", logicDelete.column(), logicDelete.defValue()));
+            builder.append(String.format("where %s=%d ", SqlKeywords.wrapperColumn(logicDelete.column(), dataBaseTypeEnum), logicDelete.defValue()));
         }
         else {
             builder.append("where 1=1 ");
@@ -330,8 +333,27 @@ public class SqlGenerator {
      * @return      查询个数的sql
      */
     public static String getListSql2CountSql(String sql) {
+
+        String cleanSql = StringUtils.clean(sql);
         // 简单处理，后续优化
-        return String.format("select count(1) from (%s) tmp_cnt", sql);
+        String lowerCaseSql = cleanSql.toLowerCase();
+        String select  = "select ";
+        String from = " from";
+        int selectIndex = lowerCaseSql.indexOf(select);
+        int fromIndex = lowerCaseSql.indexOf(from);
+        // 取头取尾
+        String head = cleanSql.substring(0, selectIndex + select.length());
+        String tail = cleanSql.substring(fromIndex);
+        // 去掉order by
+        int orderByIndex = tail.lastIndexOf("order by");
+        if (orderByIndex > -1) {
+            String orderBy = tail.substring(orderByIndex);
+            if (!orderBy.contains("(") && !orderBy.contains(")")) {
+                tail = tail.substring(0, orderByIndex);
+            }
+        }
+        // 返回查询sql
+        return head + "count(1)"  + tail;
     }
 
     public static SqlWrapper deleteSql(BaseModel model) {

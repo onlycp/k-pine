@@ -68,7 +68,9 @@ public class SysNoticeServiceImpl extends BaseServiceImpl implements SysNoticeSe
     @SuppressWarnings("unchecked")
     public PageDataRet<SysNoticeRet> query(SysNoticeQueryArgv argv) {
         // 拼装sql
-        SqlWrapper wrapper = new SqlWrapper("select sn.*,(select count(notice_id) from sys_notice_record where notice_id = sn.id) as sends from sys_notice sn where 1=1 and sn.deleted = 0");
+        SqlWrapper wrapper = new SqlWrapper("select sn.*, rec.sends from sys_notice sn left join (" +
+                "select notice_id, count(1) as sends from sys_notice_record group by notice_id" +
+                ") rec on rec.notice_id=sn.id where 1=1 and sn.deleted = 0");
         // 拼装查询sql
         if (StringUtils.isNotEmpty(argv.getTitle())) {
             wrapper.addCondition("title", Op.LIKE, "%" +argv.getTitle() +"%");
