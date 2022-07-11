@@ -10,7 +10,7 @@
   </parent>
   <groupId>com.kingsware.dev</groupId>
   <artifactId>k-dev-parent</artifactId>
-  <version>1.0.3-20220627-beta3</version>
+  <version>2.0.0</version>
   <packaging>pom</packaging>
   <name>k-dev-cli-api</name>
   <description>金智维青松平台</description>
@@ -41,7 +41,7 @@
     <jxl.version>2.6.12</jxl.version>
     <java.version>1.8</java.version>
     <maven.compiler.source>8</maven.compiler.source>
-    <kdev.version>1.0.3-20220627-beta3</kdev.version>
+    <kdev.version>2.0.0</kdev.version>
     <maven.compiler.target>8</maven.compiler.target>
     <poi.version>5.2.0</poi.version>
   </properties>
