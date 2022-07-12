@@ -376,6 +376,11 @@ public class FlowUtils {
             message.setHandlerName("excel");
             message.setData(text);
         }
+        else if (responseBody.startsWith(KFlowConstant.KEXCEL_FLAG)) {
+            String text = responseBody.substring(KFlowConstant.KEXCEL_FLAG.length());
+            message.setHandlerName("kexcel");
+            message.setData(text);
+        }
         else if (responseBody.startsWith(KFlowConstant.FILE_FLAG)) {
             String text = responseBody.substring(KFlowConstant.FILE_FLAG.length());
             message.setHandlerName("file");

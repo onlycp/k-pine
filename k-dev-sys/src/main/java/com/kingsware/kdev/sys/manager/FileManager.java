@@ -111,7 +111,7 @@ public class FileManager {
                 File path = new File(filePath);
                 boolean status = path.mkdirs();
                 // 拷贝文件
-                File saveFile = new File(path.getAbsolutePath() + File.separator + realName);
+                File saveFile = new File(path.getAbsolutePath() + "/" + realName);
                 FileCopyUtils.copy(inputStream, Files.newOutputStream(saveFile.toPath()));
                 sysFile.setFileMd5(DigestUtils.md5Hex(Files.newInputStream(saveFile.toPath())));
 
@@ -121,7 +121,7 @@ public class FileManager {
             // faas 存储
             else if (saveType == 2) {
                 // 相对路径
-                String relativePath = File.separator + fileFrom + File.separator;
+                String relativePath = "/"+ fileFrom + "/";
                 // 磁盘存储路径
                 String filePath = basePath +  relativePath;
                 KdbRet<String> kdbRet =  DB.kdbApi().uploadFile(inputStream, fileName, filePath);
@@ -129,7 +129,7 @@ public class FileManager {
                     throw BusinessException.serviceThrow("文件存储失败,错误信息:" + kdbRet.getMessage());
                 }
                 FaasUploadRet faasUploadRet = JsonUtil.toBean(kdbRet.getResponseBody(), FaasUploadRet.class);
-                sysFile.setFilePath(fileFrom + File.separator + faasUploadRet.getFileName());
+                sysFile.setFilePath(fileFrom + "/" + faasUploadRet.getFileName());
                 // 文件md5码
                 sysFile.setFileMd5(FileUtils.getMD5(inputStream));
 
