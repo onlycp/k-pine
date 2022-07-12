@@ -106,9 +106,7 @@ public class WebLogAspect {
                     catch (Exception ignored) {
 
                     }
-
                     KmqMessageCenter.getInstance().produce(TOPIC_OPERATE_LOG, JsonUtil.toJson(operateLog) );
-
                     //  如果是登录，则同时生成一个登录日志
                     String operate = apiOperation.value().trim();
                     if ("登录".equals(operate)) {
