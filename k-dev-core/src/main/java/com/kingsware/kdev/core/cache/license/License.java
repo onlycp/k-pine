@@ -29,4 +29,6 @@ public class License {
     private String whenCreated;
     /** 应用编码 **/
     private String appCode;
+    /** 应用端口 **/
+    private String appPort;
 }

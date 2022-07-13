@@ -107,12 +107,14 @@ public class LicenseManager {
 //            log.info("license:" + originText);
             String[] arr = originText.split("\\|");
             License myLicense = new License();
-            myLicense = new License();
             myLicense.setCustomer(arr[0]);
             myLicense.setMac(arr[1].trim());
             myLicense.setAppCode(arr[2].trim());
             myLicense.setValidDate(arr[3]);
             myLicense.setInvalidDate(arr[4]);
+            if (arr.length == 7) {
+                myLicense.setAppPort(arr[6]);
+            }
             return myLicense;
         } catch (Exception e) {
             throw BusinessException.serviceThrow("license无效");
@@ -218,9 +220,14 @@ public class LicenseManager {
         Date validDate = DateUtils.toDate(lic.getValidDate(), "yyyy-MM-dd");
         // 失效日期
         Date inValidDate = DateUtils.toDate(lic.getInvalidDate(), "yyyy-MM-dd");
+        //  获取端口
+        String port = SpringContext.getProperties("server.port", "0");
 //        log.info("license: {}", lic);
-        if (!validateMac(lic.getMac())) {
+        if (!validateMac(lic.getMac()) ) {
             return -1;
+        }
+        else if (StringUtils.isNotEmpty(lic.getAppPort()) && !lic.getAppPort().equals(port))  {
+            return  -1;
         }
         else if (now.before(validDate)) {
             return 1;
