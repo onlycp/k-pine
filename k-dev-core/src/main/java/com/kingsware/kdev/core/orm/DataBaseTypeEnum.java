@@ -14,6 +14,8 @@ public enum DataBaseTypeEnum {
     POSTGRESQL("postgresql"),
     // kdb
     SQLSERVER("sqlserver"),
+    // H2
+    H2("h2"),
     // mysql
     MYSQL("mysql");
 

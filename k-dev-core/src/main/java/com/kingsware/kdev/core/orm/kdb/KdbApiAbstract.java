@@ -94,7 +94,7 @@ public abstract class KdbApiAbstract implements  KdbApi {
     public void addDataSource(DataSourceInfo dataSourceInfo) {
         KdbRet<String> ret = post(dataSourceInfo, ADD_DS_URL, String.class);
         if (ret.getErrorCode() != 0) {
-            throw new OrmDbException(ret.getResponseBody());
+            throw new OrmDbException(ret.getMessage());
         }
     }
 
@@ -102,7 +102,7 @@ public abstract class KdbApiAbstract implements  KdbApi {
     public void editDataSource(DataSourceInfo dataSourceInfo) {
         KdbRet<String> ret = post(dataSourceInfo, EDIT_DS_URL, String.class);
         if (ret.getErrorCode() != 0) {
-            throw new OrmDbException(ret.getResponseBody());
+            throw new OrmDbException(ret.getMessage());
         }
     }
 

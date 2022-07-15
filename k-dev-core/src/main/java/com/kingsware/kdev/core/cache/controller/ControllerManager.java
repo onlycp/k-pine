@@ -203,7 +203,7 @@ public class ControllerManager {
                     continue;
                 }
                 apiDefineList.add(apiDefine);
-                log.info("控制器接口定义： {}", apiDefine);
+//                log.info("控制器接口定义： {}", apiDefine);
             }
         }
     }

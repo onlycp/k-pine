@@ -13,10 +13,15 @@ public class SqlKeywords {
      */
     private static final Map<String, Set<String>> keywords = new HashMap<>();
     static {
+        /** sql server **/
         Set<String> sqlServerKeywords = new HashSet<>();
         sqlServerKeywords.add("distributed");
         sqlServerKeywords.add("file");
         keywords.put("SQLServer", sqlServerKeywords);
+        /** h2 **/
+        Set<String> h2ServerKeywords = new HashSet<>();
+        h2ServerKeywords.add("value");
+        keywords.put("H2", h2ServerKeywords);
     }
 
 
@@ -48,6 +53,9 @@ public class SqlKeywords {
             return "[" +  columnName + "]";
         }
         else if (dataBaseTypeEnum.equalsIgnoreCase("Mysql")) {
+            return "`"+ columnName + "`";
+        }
+        else if (dataBaseTypeEnum.equalsIgnoreCase("H2")) {
             return "`"+ columnName + "`";
         }
         return columnName;

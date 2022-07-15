@@ -109,8 +109,9 @@ public class SysSqlInitialize implements SystemInitialize {
             }
             success = true;
         } catch (Exception e) {
-            e.printStackTrace();
             success = false;
+            throw e;
+
         } finally {
             long end = System.currentTimeMillis();
             DevSqlRun model = new DevSqlRun();
