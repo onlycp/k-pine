@@ -21,11 +21,11 @@ CREATE TABLE IF NOT EXISTS`dev_api` (  `id` varchar(32)  NOT NULL DEFAULT '' ,  
 -- ----------------------------
 -- Table structure for dev_application
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS`dev_application` (  `id` varchar(36)  NOT NULL ,  `name` varchar(100)  DEFAULT NULL ,  `short_name` varchar(30)  NOT NULL ,  `description` varchar(255)  DEFAULT NULL ,  `enable_status` tinyint(1) DEFAULT NULL ,  `dev_status` tinyint(1) DEFAULT NULL,  `version` varchar(50)  DEFAULT NULL,  `who_in_charge` varchar(255)  DEFAULT NULL,  `system_logo` varchar(255)  DEFAULT NULL ,  `app_type` varchar(100)  DEFAULT NULL ,  `default_path` varchar(255)  DEFAULT NULL ,  `deleted` tinyint(1) NOT NULL DEFAULT '0' ,  `when_created` timestamp NULL DEFAULT NULL ,  `who_created` varchar(36)  DEFAULT NULL ,  `when_modified` timestamp NULL DEFAULT NULL ,  `who_modified` varchar(36)  DEFAULT NULL ,  `faas_port` int(11) DEFAULT NULL ,  `pine_port` int(11) DEFAULT NULL ,  `data_source` varchar(1000)  DEFAULT NULL ,  PRIMARY KEY (`id`) );
+CREATE TABLE IF NOT EXISTS`dev_application` (  `id` varchar(36)  NOT NULL ,  `name` varchar(100)  DEFAULT NULL ,  `short_name` varchar(30)  NOT NULL ,  `description` varchar(255)  DEFAULT NULL ,  `enable_status` tinyint(1) DEFAULT NULL ,  `dev_status` tinyint(1) DEFAULT NULL,  `version` varchar(50)  DEFAULT NULL,  `who_in_charge` varchar(255)  DEFAULT NULL,  `system_logo` varchar(255)  DEFAULT NULL ,  `app_type` varchar(100)  DEFAULT NULL ,  `default_path` varchar(255)  DEFAULT NULL ,  `deleted` tinyint(1) NOT NULL DEFAULT '0' ,  `when_created` varchar(20) NULL DEFAULT NULL ,  `who_created` varchar(36)  DEFAULT NULL ,  `when_modified` varchar(20) NULL DEFAULT NULL ,  `who_modified` varchar(36)  DEFAULT NULL ,  `faas_port` int(11) DEFAULT NULL ,  `pine_port` int(11) DEFAULT NULL ,  `data_source` varchar(1000)  DEFAULT NULL ,  PRIMARY KEY (`id`) );
 -- ----------------------------
 -- Table structure for dev_application_version_history
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS`dev_application_version_history` (  `id` varchar(36)  NOT NULL ,  `when_created` timestamp NULL DEFAULT NULL ,  `who_created` varchar(36)  DEFAULT NULL ,  `app_id` varchar(36)  DEFAULT NULL ,  `version` varchar(50)  DEFAULT NULL,  PRIMARY KEY (`id`) );
+CREATE TABLE IF NOT EXISTS`dev_application_version_history` (  `id` varchar(36)  NOT NULL ,  `when_created` varchar(20) NULL DEFAULT NULL ,  `who_created` varchar(36)  DEFAULT NULL ,  `app_id` varchar(36)  DEFAULT NULL ,  `version` varchar(50)  DEFAULT NULL,  PRIMARY KEY (`id`) );
 -- ----------------------------
 -- Table structure for dev_document
 -- ----------------------------
@@ -33,15 +33,15 @@ CREATE TABLE IF NOT EXISTS`dev_document` (  `id` varchar(255)  NOT NULL ,  `name
 -- ----------------------------
 -- Table structure for dev_page
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS`dev_page` (  `id` varchar(36)  NOT NULL ,  `when_created` timestamp NULL DEFAULT NULL ,  `when_modified` timestamp NULL DEFAULT NULL ,  `who_created` varchar(36)  DEFAULT NULL ,  `who_modified` varchar(36)  DEFAULT NULL ,  `deleted` tinyint(4) DEFAULT '0' ,  `app_id` varchar(36)  DEFAULT NULL ,  `name` varchar(255)  DEFAULT NULL ,  `description` varchar(255)  DEFAULT NULL ,  `path` varchar(255)  DEFAULT NULL ,  `app_type` varchar(100)  DEFAULT NULL ,  `login_required` tinyint(1) DEFAULT NULL ,  `enable_status` tinyint(1) DEFAULT NULL ,  `dev_status` tinyint(1) DEFAULT NULL,  `page_json` longtext,  PRIMARY KEY (`id`) );
+CREATE TABLE IF NOT EXISTS`dev_page` (  `id` varchar(36)  NOT NULL ,  `when_created` varchar(20) NULL DEFAULT NULL ,  `when_modified` varchar(20) NULL DEFAULT NULL ,  `who_created` varchar(36)  DEFAULT NULL ,  `who_modified` varchar(36)  DEFAULT NULL ,  `deleted` tinyint(4) DEFAULT '0' ,  `app_id` varchar(36)  DEFAULT NULL ,  `name` varchar(255)  DEFAULT NULL ,  `description` varchar(255)  DEFAULT NULL ,  `path` varchar(255)  DEFAULT NULL ,  `app_type` varchar(100)  DEFAULT NULL ,  `login_required` tinyint(1) DEFAULT NULL ,  `enable_status` tinyint(1) DEFAULT NULL ,  `dev_status` tinyint(1) DEFAULT NULL,  `page_json` longtext,  PRIMARY KEY (`id`) );
 -- ----------------------------
 -- Table structure for dev_page_history
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS`dev_page_history` (  `id` varchar(36)  NOT NULL ,  `page_id` varchar(36)  DEFAULT NULL ,  `page_json` longtext ,  `when_created` timestamp NULL DEFAULT NULL ,  `who_created` varchar(36)  DEFAULT NULL ,  PRIMARY KEY (`id`) ) ;
+CREATE TABLE IF NOT EXISTS`dev_page_history` (  `id` varchar(36)  NOT NULL ,  `page_id` varchar(36)  DEFAULT NULL ,  `page_json` longtext ,  `when_created` varchar(20) NULL DEFAULT NULL ,  `who_created` varchar(36)  DEFAULT NULL ,  PRIMARY KEY (`id`) ) ;
 -- ----------------------------
 -- Table structure for dev_sql_run
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS`dev_sql_run` (  `id` varchar(36)  NOT NULL ,  `version` int(11) NOT NULL ,  `md5` varchar(100)  DEFAULT NULL ,  `when_created` timestamp NULL DEFAULT NULL ,  `execution_time` int(11) DEFAULT NULL ,  `success` tinyint(4) NOT NULL ,  PRIMARY KEY (`id`)) ;
+CREATE TABLE IF NOT EXISTS`dev_sql_run` (  `id` varchar(36)  NOT NULL ,  `version` int(11) NOT NULL ,  `md5` varchar(100)  DEFAULT NULL ,  `when_created` varchar(20) NULL DEFAULT NULL ,  `execution_time` int(11) DEFAULT NULL ,  `success` tinyint(4) NOT NULL ,  PRIMARY KEY (`id`)) ;
 -- ----------------------------
 -- Table structure for dev_sql_script
 -- ----------------------------
@@ -49,31 +49,31 @@ CREATE TABLE IF NOT EXISTS`dev_sql_script` (  `sql` longtext  NOT NULL ,  `descr
 -- ----------------------------
 -- Table structure for dev_team
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS`dev_team` (  `id` varchar(36)  NOT NULL ,  `name` varchar(100)  NOT NULL ,  `owner` varchar(36)  NOT NULL ,  `description` varchar(255)  DEFAULT NULL ,  `deleted` tinyint(1) NOT NULL DEFAULT '0' ,  `when_created` timestamp NULL DEFAULT NULL ,  `who_created` varchar(36)  DEFAULT NULL ,  `when_modified` timestamp NULL DEFAULT NULL ,  `who_modified` varchar(36)  DEFAULT NULL ,  PRIMARY KEY (`id`)) ;
+CREATE TABLE IF NOT EXISTS`dev_team` (  `id` varchar(36)  NOT NULL ,  `name` varchar(100)  NOT NULL ,  `owner` varchar(36)  NOT NULL ,  `description` varchar(255)  DEFAULT NULL ,  `deleted` tinyint(1) NOT NULL DEFAULT '0' ,  `when_created` varchar(20) NULL DEFAULT NULL ,  `who_created` varchar(36)  DEFAULT NULL ,  `when_modified` varchar(20) NULL DEFAULT NULL ,  `who_modified` varchar(36)  DEFAULT NULL ,  PRIMARY KEY (`id`)) ;
 -- ----------------------------
 -- Table structure for dev_team_app
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS`dev_team_app` (  `id` varchar(36)  NOT NULL ,  `team_id` varchar(36)  DEFAULT NULL ,  `app_id` varchar(36)  DEFAULT NULL ,  `team_type` tinyint(1) NOT NULL ,  `when_created` timestamp NULL DEFAULT NULL ,  `who_created` varchar(36)  DEFAULT NULL ,  PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+CREATE TABLE IF NOT EXISTS`dev_team_app` (  `id` varchar(36)  NOT NULL ,  `team_id` varchar(36)  DEFAULT NULL ,  `app_id` varchar(36)  DEFAULT NULL ,  `team_type` tinyint(1) NOT NULL ,  `when_created` varchar(20) NULL DEFAULT NULL ,  `who_created` varchar(36)  DEFAULT NULL ,  PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 -- ----------------------------
 -- Table structure for dev_team_member
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS`dev_team_member` (  `id` varchar(36)  NOT NULL ,  `team_id` varchar(36)  NOT NULL ,  `user_id` varchar(36)  NOT NULL ,  `when_join` timestamp NULL DEFAULT NULL ,  `who_invite` varchar(36)  DEFAULT NULL ,  `team_role_id` varchar(36)  DEFAULT NULL ,  `is_owner` tinyint(1) DEFAULT NULL ,  `app_id` varchar(255)  DEFAULT NULL ,  PRIMARY KEY (`id`));
+CREATE TABLE IF NOT EXISTS`dev_team_member` (  `id` varchar(36)  NOT NULL ,  `team_id` varchar(36)  NOT NULL ,  `user_id` varchar(36)  NOT NULL ,  `when_join` varchar(20) NULL DEFAULT NULL ,  `who_invite` varchar(36)  DEFAULT NULL ,  `team_role_id` varchar(36)  DEFAULT NULL ,  `is_owner` tinyint(1) DEFAULT NULL ,  `app_id` varchar(255)  DEFAULT NULL ,  PRIMARY KEY (`id`));
 -- ----------------------------
 -- Table structure for dev_topological
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS`dev_topological` (  `id` varchar(36)  NOT NULL ,  `when_created` timestamp NULL DEFAULT NULL ,  `when_modified` timestamp NULL DEFAULT NULL ,  `who_created` varchar(36)  DEFAULT NULL ,  `who_modified` varchar(36)  DEFAULT NULL ,  `deleted` tinyint(4) DEFAULT '0' ,  `app_id` varchar(36)  DEFAULT NULL ,  `name` varchar(255)  DEFAULT NULL ,  `description` varchar(255)  DEFAULT NULL,  `page_json` longtext  ,  `enable_status` tinyint(1) DEFAULT NULL ) ;
+CREATE TABLE IF NOT EXISTS`dev_topological` (  `id` varchar(36)  NOT NULL ,  `when_created` varchar(20) NULL DEFAULT NULL ,  `when_modified` varchar(20) NULL DEFAULT NULL ,  `who_created` varchar(36)  DEFAULT NULL ,  `who_modified` varchar(36)  DEFAULT NULL ,  `deleted` tinyint(4) DEFAULT '0' ,  `app_id` varchar(36)  DEFAULT NULL ,  `name` varchar(255)  DEFAULT NULL ,  `description` varchar(255)  DEFAULT NULL,  `page_json` longtext  ,  `enable_status` tinyint(1) DEFAULT NULL ) ;
 -- ----------------------------
 -- Table structure for dev_view_model
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS`dev_view_model` (  `id` varchar(36)  NOT NULL ,  `name` varchar(50)  DEFAULT NULL ,  `note` text  ,  `who_created` varchar(32)  DEFAULT NULL ,  `when_created` timestamp NULL DEFAULT NULL ,  `who_modified` varchar(32)  DEFAULT NULL ,  `when_modified` timestamp NULL DEFAULT NULL ,  `deleted` int(11) DEFAULT '0' ,  `tag` varchar(100)  DEFAULT NULL,  `app_id` varchar(36)  DEFAULT NULL ,  PRIMARY KEY (`id`) ) ;
+CREATE TABLE IF NOT EXISTS`dev_view_model` (  `id` varchar(36)  NOT NULL ,  `name` varchar(50)  DEFAULT NULL ,  `note` text  ,  `who_created` varchar(32)  DEFAULT NULL ,  `when_created` varchar(20) NULL DEFAULT NULL ,  `who_modified` varchar(32)  DEFAULT NULL ,  `when_modified` varchar(20) NULL DEFAULT NULL ,  `deleted` int(11) DEFAULT '0' ,  `tag` varchar(100)  DEFAULT NULL,  `app_id` varchar(36)  DEFAULT NULL ,  PRIMARY KEY (`id`) ) ;
 -- ----------------------------
 -- Table structure for dev_view_model_field
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS`dev_view_model_field` (  `id` varchar(32)  NOT NULL ,  `view_model_id` varchar(32)  DEFAULT NULL ,  `field` varchar(50)  DEFAULT NULL ,  `label` varchar(50)  DEFAULT NULL ,  `type` varchar(20)  DEFAULT NULL ,  `format_type` varchar(20)  DEFAULT NULL,  `format_pattern` varchar(50)  DEFAULT NULL ,  `default_text` varchar(50)  DEFAULT NULL,  `who_created` varchar(32)  DEFAULT NULL ,  `when_created` timestamp NULL DEFAULT NULL ,  `who_modified` varchar(32)  DEFAULT NULL ,  `when_modified` timestamp NULL DEFAULT NULL ,  `hidden` int(11) DEFAULT '0' ,  `order_num` int(11) DEFAULT '0' ,  `app_id` varchar(36)  DEFAULT NULL ,  PRIMARY KEY (`id`)) ;
+CREATE TABLE IF NOT EXISTS`dev_view_model_field` (  `id` varchar(32)  NOT NULL ,  `view_model_id` varchar(32)  DEFAULT NULL ,  `field` varchar(50)  DEFAULT NULL ,  `label` varchar(50)  DEFAULT NULL ,  `type` varchar(20)  DEFAULT NULL ,  `format_type` varchar(20)  DEFAULT NULL,  `format_pattern` varchar(50)  DEFAULT NULL ,  `default_text` varchar(50)  DEFAULT NULL,  `who_created` varchar(32)  DEFAULT NULL ,  `when_created` varchar(20) NULL DEFAULT NULL ,  `who_modified` varchar(32)  DEFAULT NULL ,  `when_modified` varchar(20) NULL DEFAULT NULL ,  `hidden` int(11) DEFAULT '0' ,  `order_num` int(11) DEFAULT '0' ,  `app_id` varchar(36)  DEFAULT NULL ,  PRIMARY KEY (`id`)) ;
 -- ----------------------------
 -- Table structure for dev_view_model_flow
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS`dev_view_model_flow` (  `id` varchar(32)  NOT NULL,  `flow_id` varchar(36)  DEFAULT NULL,  `view_model_id` varchar(32)  DEFAULT NULL ,  `who_created` varchar(32)  DEFAULT NULL ,  `when_created` timestamp NULL DEFAULT NULL ,  `who_modified` varchar(32)  DEFAULT NULL ,  `when_modified` timestamp NULL DEFAULT NULL ,  `app_id` varchar(36)  DEFAULT NULL ,  PRIMARY KEY (`id`) ) ;
+CREATE TABLE IF NOT EXISTS`dev_view_model_flow` (  `id` varchar(32)  NOT NULL,  `flow_id` varchar(36)  DEFAULT NULL,  `view_model_id` varchar(32)  DEFAULT NULL ,  `who_created` varchar(32)  DEFAULT NULL ,  `when_created` varchar(20) NULL DEFAULT NULL ,  `who_modified` varchar(32)  DEFAULT NULL ,  `when_modified` varchar(20) NULL DEFAULT NULL ,  `app_id` varchar(36)  DEFAULT NULL ,  PRIMARY KEY (`id`) ) ;
 -- ----------------------------
 -- Table structure for sys_api
 -- ----------------------------
@@ -115,7 +115,7 @@ CREATE TABLE IF NOT EXISTS`sys_file` (  `id` varchar(32)  NOT NULL ,  `file_name
 -- ----------------------------
 -- Table structure for sys_logic_flow
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS`sys_logic_flow` (  `id` varchar(36)  NOT NULL ,  `name` varchar(255)  DEFAULT NULL ,  `flow_id` varchar(36)  DEFAULT NULL ,  `application_id` varchar(32)  DEFAULT NULL ,  `tags` varchar(255)  DEFAULT NULL ,  `in_argv` text  ,  `out_argv` text ,  `sub_flow_ids` text,    `note` varchar(255)  DEFAULT NULL,  `who_created` varchar(32)  DEFAULT NULL ,  `when_created` timestamp NULL DEFAULT NULL ,  `who_modified` varchar(32)  DEFAULT NULL ,  `when_modified` timestamp NULL DEFAULT NULL ,  `app_id` varchar(36)  DEFAULT NULL ,  PRIMARY KEY (`id`) ) ;
+CREATE TABLE IF NOT EXISTS`sys_logic_flow` (  `id` varchar(36)  NOT NULL ,  `name` varchar(255)  DEFAULT NULL ,  `flow_id` varchar(36)  DEFAULT NULL ,  `application_id` varchar(32)  DEFAULT NULL ,  `tags` varchar(255)  DEFAULT NULL ,  `in_argv` text  ,  `out_argv` text ,  `sub_flow_ids` text,    `note` varchar(255)  DEFAULT NULL,  `who_created` varchar(32)  DEFAULT NULL ,  `when_created` varchar(20) NULL DEFAULT NULL ,  `who_modified` varchar(32)  DEFAULT NULL ,  `when_modified` varchar(20) NULL DEFAULT NULL ,  `app_id` varchar(36)  DEFAULT NULL ,  PRIMARY KEY (`id`) ) ;
 -- ----------------------------
 -- Table structure for sys_login_log
 -- ----------------------------
@@ -127,15 +127,15 @@ CREATE TABLE IF NOT EXISTS`sys_menu` (  `id` varchar(32)  NOT NULL ,  `name` var
 -- ----------------------------
 -- Table structure for sys_notice
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS`sys_notice` (  `id` varchar(36)  NOT NULL ,  `title` varchar(255)  DEFAULT NULL ,  `content` text ,  `type` tinyint(2) DEFAULT NULL ,  `status` tinyint(2) NOT NULL DEFAULT '1' ,  `who_created` varchar(36)  DEFAULT NULL ,  `when_created` timestamp NULL DEFAULT NULL ,  `who_modified` varchar(36)  DEFAULT NULL ,  `when_modified` timestamp NULL DEFAULT NULL ,  `deleted` tinyint(1) DEFAULT NULL ,`app_id` varchar(36)  DEFAULT NULL ,  PRIMARY KEY (`id`) );
+CREATE TABLE IF NOT EXISTS`sys_notice` (  `id` varchar(36)  NOT NULL ,  `title` varchar(255)  DEFAULT NULL ,  `content` text ,  `type` tinyint(2) DEFAULT NULL ,  `status` tinyint(2) NOT NULL DEFAULT '1' ,  `who_created` varchar(36)  DEFAULT NULL ,  `when_created` varchar(20) NULL DEFAULT NULL ,  `who_modified` varchar(36)  DEFAULT NULL ,  `when_modified` varchar(20) NULL DEFAULT NULL ,  `deleted` tinyint(1) DEFAULT NULL ,`app_id` varchar(36)  DEFAULT NULL ,  PRIMARY KEY (`id`) );
 -- ----------------------------
 -- Table structure for sys_notice_record
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS`sys_notice_record` (  `id` varchar(36)  NOT NULL ,  `from_who` varchar(36)  DEFAULT NULL ,  `to_who` varchar(36)  NOT NULL ,  `notice_id` varchar(36)  DEFAULT NULL ,  `is_read` tinyint(2) NOT NULL DEFAULT '0' ,  `read_time` timestamp NULL DEFAULT NULL ,  `notice_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ,  `title` varchar(255)  DEFAULT NULL ,  `content` text ,  `to_who_name` varchar(255)  DEFAULT NULL ,  `from_who_name` varchar(255)  DEFAULT NULL ,  `app_id` varchar(36)  DEFAULT NULL ,  PRIMARY KEY (`id`) );
+CREATE TABLE IF NOT EXISTS`sys_notice_record` (  `id` varchar(36)  NOT NULL ,  `from_who` varchar(36)  DEFAULT NULL ,  `to_who` varchar(36)  NOT NULL ,  `notice_id` varchar(36)  DEFAULT NULL ,  `is_read` tinyint(2) NOT NULL DEFAULT '0' ,  `read_time` varchar(20) NULL DEFAULT NULL ,  `notice_time` varchar(20) NOT NULL DEFAULT null ,  `title` varchar(255)  DEFAULT NULL ,  `content` text ,  `to_who_name` varchar(255)  DEFAULT NULL ,  `from_who_name` varchar(255)  DEFAULT NULL ,  `app_id` varchar(36)  DEFAULT NULL ,  PRIMARY KEY (`id`) );
 -- ----------------------------
 -- Table structure for sys_online_user
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS`sys_online_user` (  `id` varchar(32)  NOT NULL ,  `user_id` varchar(32)  DEFAULT NULL ,  `login_time` timestamp NULL DEFAULT NULL ,  `login_ip` varchar(20)  DEFAULT NULL,  `login_token` varchar(1024)  DEFAULT NULL ,  `expire_time` timestamp NULL DEFAULT NULL ,  `when_created` timestamp NULL DEFAULT NULL ,  `app_id` varchar(36)  DEFAULT NULL ,  PRIMARY KEY (`id`) ) ;
+CREATE TABLE IF NOT EXISTS`sys_online_user` (  `id` varchar(32)  NOT NULL ,  `user_id` varchar(32)  DEFAULT NULL ,  `login_time` varchar(20) NULL DEFAULT NULL ,  `login_ip` varchar(20)  DEFAULT NULL,  `login_token` varchar(1024)  DEFAULT NULL ,  `expire_time` varchar(20) NULL DEFAULT NULL ,  `when_created` varchar(20) NULL DEFAULT NULL ,  `app_id` varchar(36)  DEFAULT NULL ,  PRIMARY KEY (`id`) ) ;
 -- ----------------------------
 -- Table structure for sys_operate_log
 -- ----------------------------
@@ -147,19 +147,19 @@ CREATE TABLE IF NOT EXISTS`sys_role_menu` (  `id` varchar(32)  NOT NULL ,  `sys_
 -- ----------------------------
 -- Table structure for sys_task
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS`sys_task` (  `id` varchar(32)  NOT NULL ,  `name` varchar(100)  DEFAULT NULL  ,  `cron` varchar(50)  DEFAULT NULL ,  `distributed` tinyint(4) DEFAULT NULL ,  `application_id` varchar(32)  DEFAULT NULL ,  `task_type` tinyint(4) DEFAULT '1' ,  `task_resource_id` varchar(36)  DEFAULT NULL ,  `class_name` varchar(255)  DEFAULT NULL ,  `enable` tinyint(4) DEFAULT '1' ,  `last_execute_status` tinyint(4) DEFAULT NULL ,  `last_execute_msg` text ,  `last_execute_time` timestamp NULL DEFAULT NULL,  `last_execute_take` int(11) DEFAULT NULL ,  `lock_status` tinyint(4) DEFAULT '0' ,  `lock_for_most` int(8) DEFAULT '30',  `lock_for_least` int(8) DEFAULT '1' ,  `lock_for_time` timestamp NULL DEFAULT NULL ,  `note` text ,  `who_created` varchar(32)  DEFAULT NULL ,  `when_created` timestamp NULL DEFAULT NULL ,  `who_modified` varchar(32)  DEFAULT NULL ,  `when_modified` timestamp NULL DEFAULT NULL ,  `app_id` varchar(36)  DEFAULT NULL ,  PRIMARY KEY (`id`) ) ;
+CREATE TABLE IF NOT EXISTS`sys_task` (  `id` varchar(32)  NOT NULL ,  `name` varchar(100)  DEFAULT NULL  ,  `cron` varchar(50)  DEFAULT NULL ,  `distributed` tinyint(4) DEFAULT NULL ,  `application_id` varchar(32)  DEFAULT NULL ,  `task_type` tinyint(4) DEFAULT '1' ,  `task_resource_id` varchar(36)  DEFAULT NULL ,  `class_name` varchar(255)  DEFAULT NULL ,  `enable` tinyint(4) DEFAULT '1' ,  `last_execute_status` tinyint(4) DEFAULT NULL ,  `last_execute_msg` text ,  `last_execute_time` varchar(20) NULL DEFAULT NULL,  `last_execute_take` int(11) DEFAULT NULL ,  `lock_status` tinyint(4) DEFAULT '0' ,  `lock_for_most` int(8) DEFAULT '30',  `lock_for_least` int(8) DEFAULT '1' ,  `lock_for_time` varchar(20) NULL DEFAULT NULL ,  `note` text ,  `who_created` varchar(32)  DEFAULT NULL ,  `when_created` varchar(20) NULL DEFAULT NULL ,  `who_modified` varchar(32)  DEFAULT NULL ,  `when_modified` varchar(20) NULL DEFAULT NULL ,  `app_id` varchar(36)  DEFAULT NULL ,  PRIMARY KEY (`id`) ) ;
 -- ----------------------------
 -- Table structure for sys_view_model
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS`sys_view_model` (  `id` varchar(36)  NOT NULL ,  `name` varchar(50)  DEFAULT NULL ,  `note` text  ,  `who_created` varchar(32)  DEFAULT NULL ,  `when_created` timestamp NULL DEFAULT NULL ,  `who_modified` varchar(32)  DEFAULT NULL ,  `when_modified` timestamp NULL DEFAULT NULL ,  `deleted` int(11) DEFAULT '0' ,  `tag` varchar(100)  DEFAULT NULL ,  PRIMARY KEY (`id`)) ;
+CREATE TABLE IF NOT EXISTS`sys_view_model` (  `id` varchar(36)  NOT NULL ,  `name` varchar(50)  DEFAULT NULL ,  `note` text  ,  `who_created` varchar(32)  DEFAULT NULL ,  `when_created` varchar(20) NULL DEFAULT NULL ,  `who_modified` varchar(32)  DEFAULT NULL ,  `when_modified` varchar(20) NULL DEFAULT NULL ,  `deleted` int(11) DEFAULT '0' ,  `tag` varchar(100)  DEFAULT NULL ,  PRIMARY KEY (`id`)) ;
 -- ----------------------------
 -- Table structure for sys_view_model_field
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS`sys_view_model_field` (  `id` varchar(32)  NOT NULL ,  `view_model_id` varchar(32)  DEFAULT NULL ,  `field` varchar(50)  DEFAULT NULL ,  `label` varchar(50)  DEFAULT NULL ,  `type` varchar(20)  DEFAULT NULL ,  `format_type` varchar(20)  DEFAULT NULL ,  `format_pattern` varchar(50)  DEFAULT NULL ,  `default_text` varchar(50)  DEFAULT NULL ,  `who_created` varchar(32)  DEFAULT NULL ,  `when_created` timestamp NULL DEFAULT NULL ,  `who_modified` varchar(32)  DEFAULT NULL ,  `when_modified` timestamp NULL DEFAULT NULL ,  `hidden` int(11) DEFAULT '0' ,  `order_num` int(11) DEFAULT '0' );
+CREATE TABLE IF NOT EXISTS`sys_view_model_field` (  `id` varchar(32)  NOT NULL ,  `view_model_id` varchar(32)  DEFAULT NULL ,  `field` varchar(50)  DEFAULT NULL ,  `label` varchar(50)  DEFAULT NULL ,  `type` varchar(20)  DEFAULT NULL ,  `format_type` varchar(20)  DEFAULT NULL ,  `format_pattern` varchar(50)  DEFAULT NULL ,  `default_text` varchar(50)  DEFAULT NULL ,  `who_created` varchar(32)  DEFAULT NULL ,  `when_created` varchar(20) NULL DEFAULT NULL ,  `who_modified` varchar(32)  DEFAULT NULL ,  `when_modified` varchar(20) NULL DEFAULT NULL ,  `hidden` int(11) DEFAULT '0' ,  `order_num` int(11) DEFAULT '0' );
 -- ----------------------------
 -- Table structure for sys_view_model_flow
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS`sys_view_model_flow` (  `id` varchar(32)  NOT NULL,  `flow_id` varchar(36)  DEFAULT NULL,  `view_model_id` varchar(32)  DEFAULT NULL ,  `who_created` varchar(32)  DEFAULT NULL ,  `when_created` timestamp NULL DEFAULT NULL ,  `who_modified` varchar(32)  DEFAULT NULL ,  `when_modified` timestamp NULL DEFAULT NULL ,  PRIMARY KEY (`id`)) ;
+CREATE TABLE IF NOT EXISTS`sys_view_model_flow` (  `id` varchar(32)  NOT NULL,  `flow_id` varchar(36)  DEFAULT NULL,  `view_model_id` varchar(32)  DEFAULT NULL ,  `who_created` varchar(32)  DEFAULT NULL ,  `when_created` varchar(20) NULL DEFAULT NULL ,  `who_modified` varchar(32)  DEFAULT NULL ,  `when_modified` varchar(20) NULL DEFAULT NULL ,  PRIMARY KEY (`id`)) ;
 delete from sys_user;
 delete from sys_role;
 delete from sys_user_role;

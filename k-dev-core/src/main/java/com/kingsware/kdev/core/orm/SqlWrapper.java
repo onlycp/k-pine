@@ -123,8 +123,10 @@ public class SqlWrapper {
      */
     public SqlWrapper between(String columnName, Object lowValue, Object highValue) {
         sqlBuffer.append(" and ( ");
-        sqlBuffer.append(columnName);
-        sqlBuffer.append(" between ? and ? ) ");
+        sqlBuffer.append(columnName).append(">=? ");
+        sqlBuffer.append("and ");
+        sqlBuffer.append(columnName).append("<=? ");
+        sqlBuffer.append(") ");
         params.add(lowValue);
         params.add(highValue);
         return this;

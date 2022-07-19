@@ -156,7 +156,15 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                 File faasFile = getFaasFile(path);
                 if (faasFile != null && faasFile.exists()) {
                     fileRealPath = faasFile.getAbsolutePath();
-                    fileName = faasFile.getName();
+                    int index = path.lastIndexOf("/");
+                    if(index == -1) {
+                        fileName = path;
+                    }
+                    else {
+                        fileName = path.substring(index + 1);
+                    }
+
+
                 }
             }
         } else {
