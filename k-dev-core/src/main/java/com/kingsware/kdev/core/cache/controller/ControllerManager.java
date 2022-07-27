@@ -133,9 +133,19 @@ public class ControllerManager {
                 if (method.isAnnotationPresent(RequestMapping.class)) {
                     // 方法
                     RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
-                    for (RequestMethod requestMethod: requestMapping.method()) {
-                        apiDefine.getMethod().add(requestMethod.name().toLowerCase());
+                    if (requestMapping.method().length > 0) {
+                        for (RequestMethod requestMethod: requestMapping.method()) {
+                            apiDefine.getMethod().add(requestMethod.name().toLowerCase());
+                        }
                     }
+                    else {
+                        apiDefine.getMethod().add(RequestMethod.GET.name().toLowerCase());
+                        apiDefine.getMethod().add(RequestMethod.POST.name().toLowerCase());
+                        apiDefine.getMethod().add(RequestMethod.PUT.name().toLowerCase());
+                        apiDefine.getMethod().add(RequestMethod.PATCH.name().toLowerCase());
+                        apiDefine.getMethod().add(RequestMethod.DELETE.name().toLowerCase());
+                    }
+
                     // url
                     if (requestMapping.value().length > 0) {
                         actionUrl = requestMapping.value()[0];
