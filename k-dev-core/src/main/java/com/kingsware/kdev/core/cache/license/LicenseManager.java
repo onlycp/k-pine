@@ -193,6 +193,23 @@ public class LicenseManager {
                     for (int i = 0; i < mac.length; i++) {
                         sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
                     }
+                    String macName = network.getName();;
+                    String displayName = network.getDisplayName();
+                    // 忽略的网卡地址
+                    Set<String> strings = new HashSet<>();
+                    strings.add("awdl");
+                    strings.add("lo");
+                    strings.add("docker");
+                    boolean isIngore = false;
+                    for (String s: strings) {
+                        if (macName.startsWith(s) || displayName.startsWith(s)) {
+                            isIngore = true;
+                            break;
+                        }
+                    }
+                    if (isIngore) {
+                        continue;
+                    }
                     return sb.toString().trim();
 
                 }
