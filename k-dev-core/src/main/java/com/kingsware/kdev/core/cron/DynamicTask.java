@@ -120,7 +120,7 @@ public class DynamicTask implements CommandLineRunner {
         long cnt = DB.executeUpdateSql("update sys_task set lock_status=1, lock_for_time=? where id=? and lock_status=0", DateUtils.getNow(), sysTask.getId());
         // 如果影响行数为0，说明当前是锁定状态
         if (cnt == 0) {
-            log.info("任务:{} 处于锁定状态", sysTask.getName());
+//            log.info("任务:{} 处于锁定状态", sysTask.getName());
             return;
         }
 

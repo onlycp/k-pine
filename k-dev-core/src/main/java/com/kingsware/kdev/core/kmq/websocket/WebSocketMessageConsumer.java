@@ -29,6 +29,9 @@ public class WebSocketMessageConsumer implements KmqConsumer {
             else if (StringUtils.isNotEmpty(wmMessageArgv.getUserId())) {
                 messageWebSocket.sendMessageByUserId(wmMessageArgv.getUserId(), wmMessageArgv.getMessage());
             }
+            else {
+                messageWebSocket.broadMessage(wmMessageArgv.getMessage());
+            }
         }
 
     }

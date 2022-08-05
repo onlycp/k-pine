@@ -5,6 +5,7 @@ import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.kflow.tcp.TcpClientContext;
 import com.kingsware.kdev.core.kmq.KmqConsumer;
 import com.kingsware.kdev.core.kmq.KmqMessageCenter;
 import com.kingsware.kdev.core.kmq.websocket.*;
@@ -42,7 +43,9 @@ public class FromWebsocketConsumer implements KmqConsumer {
                 }
 
             }
-
+            else if ("faasDebug".equals(wm2MqMessage.getWmMessage().getTopic())) {
+                TcpClientContext.getInstance().write(JsonUtil.toJson(wm2MqMessage.getWmMessage()));
+            }
         }
 
     }

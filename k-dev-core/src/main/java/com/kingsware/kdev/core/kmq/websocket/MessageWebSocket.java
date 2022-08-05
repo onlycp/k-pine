@@ -133,6 +133,13 @@ public class MessageWebSocket {
     }
 
     /**
+     * 广播消息
+     */
+    public void broadMessage(String message) {
+        sessionTokenSet.forEach(it -> sendMessage(it.getSession(), message));
+    }
+
+    /**
      * 发送消息
      * @param token 令牌
      * @param message   消息
