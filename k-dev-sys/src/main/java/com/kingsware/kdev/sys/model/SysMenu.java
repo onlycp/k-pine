@@ -61,5 +61,9 @@ public class SysMenu extends BaseManageModel {
     /** 是否开发者模式 **/
     @Column(name = "is_dev")
     private Boolean dev;
+    /** 所属应用页面ID **/
+    private String pageId;
+    /** 完整路径 **/
+    private String fullPath;
 
 }
