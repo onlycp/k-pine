@@ -139,9 +139,12 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             if (link.getConditions() != null && link.getConditions().getDecision() != null) {
                 expr = link.getConditions().getDecision().getExpr();
             }
+            if (StringUtils.isEmpty(link.getCatchException())) {
+                link.setCatchException("false");
+            }
             // 判断一下from和to是否存在，如果有一个不存在，那么就丢弃它
             if (nodeIds.contains(link.getFrom()) && nodeIds.contains(link.getTo())) {
-                defineRet.addLink(link.getId(), link.getName(), link.getFrom(), link.getTo(), expr);
+                defineRet.addLink(link.getId(), link.getName(), link.getFrom(), link.getTo(), expr, link.getCatchException());
             }
 
         }
@@ -219,6 +222,10 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             nodeLink.setName(link.getLabel());
             nodeLink.setFrom(link.getSource());
             nodeLink.setTo(link.getTarget());
+            nodeLink.setCatchException(link.getCatchException());
+            if (StringUtils.isEmpty(link.getCatchException())) {
+                nodeLink.setCatchException("false");
+            }
             if (StringUtils.isNotEmpty(link.getExpr())) {
                 nodeLink.setConditions(ConditionDefinition.createDecisionCondition(link.getExpr()));
             }

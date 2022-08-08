@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.argv;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kingsware.kdev.core.bean.BasePageArgv;
 import com.kingsware.kdev.core.bean.BaseSimpleRet;
 import lombok.Data;
@@ -63,6 +64,8 @@ public class SysFlowDefineArgv extends BasePageArgv {
         private String targetPort;
         /** 表达式 **/
         private String expr;
+        /** 异常处理标识 **/
+        private String catchException;
     }
 
     /** 流程id **/
