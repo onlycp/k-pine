@@ -153,7 +153,7 @@ public class SysDictItemServiceImpl extends BaseServiceImpl implements SysDictIt
     private Map<String, String> getDetailKeyMapByDictId(List<SysDictItemRet> sysDictItemList, String dictId) {
         Map<String, String> map = new HashMap<>();
         for (SysDictItemRet detail : sysDictItemList) {
-            if (detail.getSysDictId().equals(dictId)) {
+            if (detail.getSysDictId().equals(dictId) && StringUtils.isNotEmpty(detail.getValue())) {
                 map.put(detail.getValue(), detail.getValue());
             }
         }
@@ -163,7 +163,7 @@ public class SysDictItemServiceImpl extends BaseServiceImpl implements SysDictIt
     private Map<String, String> getDetailValueMapByDictId(List<SysDictItemRet> sysDictItemList, String dictId) {
         Map<String, String> map = new HashMap<>();
         for (SysDictItemRet detail : sysDictItemList) {
-            if (detail.getSysDictId().equals(dictId)) {
+            if (detail.getSysDictId().equals(dictId) && StringUtils.isNotEmpty(detail.getValue())) {
                 map.put(detail.getValue(), detail.getName());
             }
         }
@@ -173,7 +173,7 @@ public class SysDictItemServiceImpl extends BaseServiceImpl implements SysDictIt
     private Map<String, String> getDetailNameMapByDictId(List<SysDictItemRet> sysDictItemList, String dictId) {
         Map<String, String> map = new HashMap<>();
         for (SysDictItemRet detail : sysDictItemList) {
-            if (detail.getSysDictId().equals(dictId)) {
+            if (detail.getSysDictId().equals(dictId) && StringUtils.isNotEmpty(detail.getName())) {
                 map.put(detail.getName(), detail.getValue());
             }
         }
@@ -184,7 +184,9 @@ public class SysDictItemServiceImpl extends BaseServiceImpl implements SysDictIt
         Map<String, Map<String, String>> resultMap = new HashMap<>();
         for (SysDictRet dict : dictList) {
             Map<String, String> keyMap = getDetailKeyMapByDictId(sysDictItemList, dict.getId());
-            resultMap.put(dict.getCode(), keyMap);
+            if (StringUtils.isNotEmpty(dict.getCode())) {
+                resultMap.put(dict.getCode(), keyMap);
+            }
         }
         return resultMap;
     }
@@ -193,7 +195,9 @@ public class SysDictItemServiceImpl extends BaseServiceImpl implements SysDictIt
         Map<String, Map<String, String>> resultMap = new HashMap<>();
         for (SysDictRet dict : dictList) {
             Map<String, String> valueMap = getDetailValueMapByDictId(sysDictItemList, dict.getId());
-            resultMap.put(dict.getCode(), valueMap);
+            if (StringUtils.isNotEmpty(dict.getCode())) {
+                resultMap.put(dict.getCode(), valueMap);
+            }
         }
         return resultMap;
     }
@@ -202,7 +206,9 @@ public class SysDictItemServiceImpl extends BaseServiceImpl implements SysDictIt
         Map<String, List<Map<String, String>>> map = new HashMap<>();
         for (SysDictRet dict : dictList) {
             List<Map<String, String>> detailList = getDetailByDictId(sysDictItemList, dict.getId());
-            map.put(dict.getCode(), detailList);
+            if (StringUtils.isNotEmpty(dict.getCode())) {
+                map.put(dict.getCode(), detailList);
+            }
         }
         return map;
     }
