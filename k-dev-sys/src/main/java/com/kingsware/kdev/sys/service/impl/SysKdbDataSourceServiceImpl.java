@@ -7,7 +7,10 @@ import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.DataSourceInfo;
 import com.kingsware.kdev.core.orm.kdb.DataSourceQueryArgv;
 import com.kingsware.kdev.core.orm.kdb.KdbApi;
+import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.PageUtil;
+import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.sys.argv.DataBaseInstanceArgv;
 import com.kingsware.kdev.sys.argv.SysKdbDataSourceArgv;
 import com.kingsware.kdev.sys.argv.SysKdbDataSourceQueryArgv;
 import com.kingsware.kdev.sys.ret.SysKdbDataSourceRet;
@@ -28,6 +31,9 @@ import java.util.List;
 @Service
 public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysKdbDataSourceService {
 
+    /** 分隔符 **/
+    private final String SPLIT_TAG = "\\\0a01";
+
     @Override
     public SysKdbDataSourceRet get(String id) {
         // 参数
@@ -47,6 +53,19 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
         ret.setJdbcUrl(info.getJdbcUrl());
         ret.setUsername(info.getUserName());
         ret.setPassword(info.getPassword());
+        // 处理instance
+        List<DataBaseInstanceArgv> instances = new ArrayList<>();
+        String[] urls = info.getJdbcUrl().split(SPLIT_TAG);
+        String[] usernames = info.getUserName().split(SPLIT_TAG);
+        String[] passwords = info.getPassword().split(SPLIT_TAG);
+        for (int i=0; i<urls.length; i++) {
+            DataBaseInstanceArgv instance = new DataBaseInstanceArgv();
+            instance.setJdbcUrl(urls[i]);
+            instance.setUserName((usernames.length-1 < i)? "":  usernames[i]);
+            instance.setPassword((passwords.length-1 < i)? "":  passwords[i]);
+            instances.add(instance);
+        }
+        ret.setInstances(instances);
         return ret;
     }
 
@@ -56,11 +75,28 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
         DataSourceInfo info = new DataSourceInfo();
         info.setSourceName(argv.getId());
         info.setDriverClass(argv.getDriverClass());
-        info.setJdbcUrl(argv.getJdbcUrl());
-        info.setUserName(argv.getUsername());
-        info.setPassword(argv.getPassword());
+        instanceToField(info, argv);
         KdbApi api = (KdbApi)(DB.getDefault());
         api.addDataSource(info);
+    }
+
+    /**
+     * 将实例的json展开为属性列表
+     * @param info
+     * @param argv
+     */
+    private void instanceToField(DataSourceInfo info, SysKdbDataSourceArgv argv) {
+        if (argv.getInstances() != null && !argv.getInstances().isEmpty()) {
+            List<DataBaseInstanceArgv> instances = argv.getInstances();
+            info.setJdbcUrl(StringUtils.joinFieldToString(instances, DataSourceInfo.Fields.jdbcUrl, SPLIT_TAG));
+            info.setUserName(StringUtils.joinFieldToString(instances, DataSourceInfo.Fields.userName, SPLIT_TAG));
+            info.setPassword(StringUtils.joinFieldToString(instances, DataSourceInfo.Fields.password, SPLIT_TAG));
+        }
+        else {
+            info.setJdbcUrl(argv.getJdbcUrl());
+            info.setUserName(argv.getUsername());
+            info.setPassword(argv.getPassword());
+        }
     }
 
     @Override
@@ -68,9 +104,7 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
         DataSourceInfo info = new DataSourceInfo();
         info.setSourceName(argv.getId());
         info.setDriverClass(argv.getDriverClass());
-        info.setJdbcUrl(argv.getJdbcUrl());
-        info.setUserName(argv.getUsername());
-        info.setPassword(argv.getPassword());
+        instanceToField(info, argv);
         KdbApi api = (KdbApi)(DB.getDefault());
         api.editDataSource(info);
     }

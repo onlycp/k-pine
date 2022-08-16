@@ -2,6 +2,7 @@ package com.kingsware.kdev.core.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -101,6 +102,22 @@ public class StringUtils {
         // 返回
         return joinToString(subList, separator);
     }
+
+    /**
+     * 获取集合的属性并join
+     * @param list
+     * @param fieldName
+     * @param separator
+     * @return
+     */
+    public static String joinFieldToString(List<?> list, String fieldName,  String separator) {
+        List<Object> afterList = new ArrayList<>();
+        for (Object obj: list) {
+            afterList.add(Optional.ofNullable(BeanUtils.getFieldValue(fieldName, obj)).orElse(""));
+        }
+        return joinToString(afterList, separator);
+    }
+
 
     /**
      *  将列表转为字符串

@@ -1,8 +1,11 @@
 package com.kingsware.kdev.sys.ret;
 
 import com.kingsware.kdev.core.bean.BaseSimpleRet;
+import com.kingsware.kdev.sys.argv.DataBaseInstanceArgv;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.List;
 
 /**
  * 新增流程实体
@@ -26,4 +29,6 @@ public class SysKdbDataSourceRet extends BaseSimpleRet {
     private String password;
     /** 所属应用ID **/
     private String appId;
+    /** 实例json **/
+    private List<DataBaseInstanceArgv> instances;
 }

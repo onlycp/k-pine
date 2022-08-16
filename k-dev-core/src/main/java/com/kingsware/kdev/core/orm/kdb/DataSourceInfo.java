@@ -1,6 +1,7 @@
 package com.kingsware.kdev.core.orm.kdb;
 
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 /**
  * 数据源信息.
@@ -10,6 +11,7 @@ import lombok.Data;
  * @date 2022/1/14 1:59 下午
  */
 @Data
+@FieldNameConstants
 public class DataSourceInfo {
     /** 数据源名称 **/
     private String sourceName;
