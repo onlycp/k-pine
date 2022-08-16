@@ -194,13 +194,16 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
                 }
 
                 // 创建前置、后置脚本监听器
-                if (StringUtils.isNotEmpty(node.getBeforeContent()) && StringUtils.isNotEmpty(node.getAfterContent())) {
-                    nodeDefinition.setListener(FlowNodeLister.createWithBeforeAndAfter(node.getBeforeContent(), node.getAfterContent()));
-                } else if (StringUtils.isNotEmpty(node.getBeforeContent())) {   // 有前置
-                    nodeDefinition.setListener(FlowNodeLister.createWithBefore(node.getBeforeContent()));
-                } else if (StringUtils.isNotEmpty(node.getAfterContent())) {    // 有后置
-                    nodeDefinition.setListener(FlowNodeLister.createWithAfter(node.getAfterContent()));
+                if (ScriptTypeEnum.SQL.getValue().equals(node.getExecuteType())) {
+                    if (StringUtils.isNotEmpty(node.getBeforeContent()) && StringUtils.isNotEmpty(node.getAfterContent())) {
+                        nodeDefinition.setListener(FlowNodeLister.createWithBeforeAndAfter(node.getBeforeContent(), node.getAfterContent()));
+                    } else if (StringUtils.isNotEmpty(node.getBeforeContent())) {   // 有前置
+                        nodeDefinition.setListener(FlowNodeLister.createWithBefore(node.getBeforeContent()));
+                    } else if (StringUtils.isNotEmpty(node.getAfterContent())) {    // 有后置
+                        nodeDefinition.setListener(FlowNodeLister.createWithAfter(node.getAfterContent()));
+                    }
                 }
+
             }
 
 

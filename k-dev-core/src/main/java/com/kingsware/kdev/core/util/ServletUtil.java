@@ -244,6 +244,10 @@ public class ServletUtil {
             Map<String, Object> requestMap = new HashMap<>();
             requestMap.put("body", body);
             requestMap.put("lang", I18n.lang());
+            requestMap.put("ip", ServletUtil.getClientIp(request));
+            requestMap.put("method", request.getMethod());
+            requestMap.put("path", path);
+            requestMap.put("apiName", api.getApiName());
             params.put("request", requestMap);
         }
 
