@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.kflow.define;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 /**
@@ -19,6 +20,9 @@ public class NodeLink {
     private String from;
     /** to **/
     private String to;
+    /** 异常处理标识 **/
+    @JsonProperty("catch_exception")
+    private String catchException;
     /** 变量 **/
     private ExecuteDefinition variables;
     /** 条件 **/

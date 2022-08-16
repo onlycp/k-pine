@@ -62,6 +62,8 @@ public class SysFlowDefineRet extends BaseSimpleRet {
         private String targetPort;
         /** 表达式 **/
         private String expr;
+        /** 异常处理标识 **/
+        private String catchException;
     }
 
     /** 流程id **/
@@ -115,13 +117,14 @@ public class SysFlowDefineRet extends BaseSimpleRet {
      * @param to        到达节点
      * @param expr      表达式
      */
-    public void addLink(String id, String label, String from, String to, String expr) {
+    public void addLink(String id, String label, String from, String to, String expr, String catchException) {
         Link link = new Link();
         link.setId(id);
         link.setLabel(label);
         link.setSource(from);
         link.setTarget(to);
         link.setExpr(expr);
+        link.setCatchException(catchException);
         this.links.add(link);
     }
 }
