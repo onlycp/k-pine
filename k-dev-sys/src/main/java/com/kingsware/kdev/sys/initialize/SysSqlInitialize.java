@@ -1,6 +1,7 @@
 package com.kingsware.kdev.sys.initialize;
 
 import com.kingsware.kdev.core.base.SystemInitialize;
+import com.kingsware.kdev.core.kflow.FlowUtils;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.MD5Utils;
 import com.kingsware.kdev.core.util.StringUtils;
@@ -52,9 +53,11 @@ public class SysSqlInitialize implements SystemInitialize {
             }
         }
         catch (Exception ignored) {
+            max = 0;
+        } finally {
+            return max;
         }
 
-        return max;
     }
 
     private List<ExecutionFile> getFileList(int maxVersion) {
@@ -143,14 +146,14 @@ public class SysSqlInitialize implements SystemInitialize {
                 if (isSql(cleanLine)) {
                     sql.append(cleanLine).append("\n");
                     if (cleanLine.endsWith(";")) {
-                        sqlList.add(sql.toString());
+                        sqlList.add(FlowUtils.buildCDATASql(sql.toString()));
                         // 清空sql
                         sql.setLength(0);
                     }
                 }
             });
             if (sql.length() > 0) {
-                sqlList.add(sql.toString());
+                sqlList.add(FlowUtils.buildCDATASql(sql.toString()));
             }
             return sqlList;
 
