@@ -1,6 +1,7 @@
 package com.kingsware.kdev.core.orm.kdb;
 
 import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.HttpClientException;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
@@ -57,7 +58,10 @@ public abstract class KdbApiAbstract implements  KdbApi {
 
     @Override
     public void editFlow(EditFlowInfo flowInfo) {
-        post(flowInfo, EDIT_FLOW_URL, String.class);
+        KdbRet ret = post(flowInfo, EDIT_FLOW_URL, String.class);
+        if (ret.getErrorCode() != 0) {
+            throw BusinessException.serviceThrow("保存失败,错误信息:" + ret.getMessage());
+        }
     }
 
     @Override
@@ -80,7 +84,11 @@ public abstract class KdbApiAbstract implements  KdbApi {
     public void deleteFlow(String flowId) {
         Map<String, Object> params = new HashMap<>(1);
         params.put("flowId", flowId);
-        post(params, DELETE_FLOW_URL, String.class);
+        KdbRet ret = post(params, DELETE_FLOW_URL, String.class);
+        if (ret.getErrorCode() != 0) {
+            throw new OrmDbException(ret.getMessage());
+        }
+
     }
 
     @Override
@@ -110,7 +118,11 @@ public abstract class KdbApiAbstract implements  KdbApi {
     public void deleteDataSource(String sourceName) {
         Map<String, Object> params = new HashMap<>(1);
         params.put("sourceName", sourceName);
-        post(params, DELETE_DS_URL, String.class);
+        KdbRet ret = post(params, DELETE_DS_URL, String.class);
+        if (ret.getErrorCode() != 0) {
+            throw new OrmDbException(ret.getMessage());
+        }
+
     }
 
     @Override
@@ -129,19 +141,28 @@ public abstract class KdbApiAbstract implements  KdbApi {
 
     @Override
     public void addFun(AddFunctionInfo argv) {
-        post(argv, ADD_FUN_URL, String.class);
+        KdbRet ret = post(argv, ADD_FUN_URL, String.class);
+        if (ret.getErrorCode() != 0) {
+            throw new OrmDbException(ret.getMessage());
+        }
     }
 
     @Override
     public void editFun(EditFunctionInfo argv) {
-        post(argv, EDIT_FUN_URL, String.class);
+        KdbRet ret = post(argv, EDIT_FUN_URL, String.class);
+        if (ret.getErrorCode() != 0) {
+            throw new OrmDbException(ret.getMessage());
+        }
     }
 
     @Override
     public void deleteFun(String funId) {
         Map<String, Object> params = new HashMap<>(1);
         params.put("id", funId);
-        post(params, DELETE_FUN_URL, String.class);
+        KdbRet ret = post(params, DELETE_FUN_URL, String.class);
+        if (ret.getErrorCode() != 0) {
+            throw new OrmDbException(ret.getMessage());
+        }
     }
 
     @Override
