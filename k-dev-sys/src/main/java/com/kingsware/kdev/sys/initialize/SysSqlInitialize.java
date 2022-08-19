@@ -146,14 +146,14 @@ public class SysSqlInitialize implements SystemInitialize {
                 if (isSql(cleanLine)) {
                     sql.append(cleanLine).append("\n");
                     if (cleanLine.endsWith(";")) {
-                        sqlList.add(FlowUtils.buildCDATASql(sql.toString()));
+                        sqlList.add(sql.toString());
                         // 清空sql
                         sql.setLength(0);
                     }
                 }
             });
             if (sql.length() > 0) {
-                sqlList.add(FlowUtils.buildCDATASql(sql.toString()));
+                sqlList.add(sql.toString());
             }
             return sqlList;
 
