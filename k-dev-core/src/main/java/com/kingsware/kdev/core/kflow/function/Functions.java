@@ -2,7 +2,9 @@ package com.kingsware.kdev.core.kflow.function;
 
 import com.kingsware.kdev.core.auth.DataAccessUtil;
 import com.kingsware.kdev.core.auth.SqlLink;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 
 import java.lang.reflect.InvocationTargetException;
@@ -32,6 +34,14 @@ public class Functions {
         else {
             return "";
         }
+    }
+
+    /**
+     * 获取所有的系统配置
+     * @return
+     */
+    public static String props() {
+        return JsonUtil.toJson(SpringContext.getProperties());
     }
 
     /**
