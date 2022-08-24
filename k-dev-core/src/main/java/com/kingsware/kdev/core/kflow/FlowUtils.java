@@ -278,7 +278,6 @@ public class FlowUtils {
                         }
                     }
                     retValue = Functions.call(methodName, params);
-                    log.info("函数调用，函数名:{}, 返回值:{}", methodName, retValue);
 
                 }
 
