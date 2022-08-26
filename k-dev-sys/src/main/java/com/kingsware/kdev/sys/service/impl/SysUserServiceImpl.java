@@ -7,15 +7,19 @@ import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.cache.access.AccessManager;
+import com.kingsware.kdev.core.cache.config.ConfigManager;
+import com.kingsware.kdev.core.cache.config.SysConfigInfo;
 import com.kingsware.kdev.core.cache.permssion.PermissionManager;
 import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.encrypt.EncryptProperties;
 import com.kingsware.kdev.core.encrypt.EncryptWorker;
 import com.kingsware.kdev.core.enums.ApiSystemEnum;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.UnauthorizedException;
 import com.kingsware.kdev.core.i18n.I18n;
+import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
@@ -48,6 +52,8 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -421,6 +427,36 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             log.warn("error", e);
         }
 
+    }
+
+    /**
+     * 用户密码校验（及非开发模式的自定义校验）
+     * @param password
+     * @param appId
+     * @return
+     */
+    @Override
+    public Map<String, Object> passwordValidate(String password, String appId) {
+        final String passwordValidateKey = "application.user.passwordValidate";
+        final String passwordValidateMessageKey = "application.user.passwordValidateMessage";
+        SysConfigInfo passwordValidate = ConfigManager.getInstance().getItem(passwordValidateKey);
+        SysConfigInfo passwordValidateMessage = ConfigManager.getInstance().getItem(passwordValidateMessageKey);
+        String validate = "^(?![a-zA-Z]+$)(?![A-Z0-9]+$)(?![A-Z\\W_-]+$)(?![a-z0-9]+$)(?![a-z\\W_-]+$)(?![0-9\\W_-]+$)[a-zA-Z0-9\\W_-]";
+        String validateMessage = "必须包含大写字母，小写字母，数字，特殊符号'_-'中任意3项";
+        AppModeProperties appModeProperties = SpringContext.getBean("appModeProperties");
+
+        // 仅非开发模式可用自定义密码校验
+        if (!appModeProperties.getDev() && passwordValidate != null) {
+            validate = passwordValidate.getValue();
+        }
+        if (!appModeProperties.getDev() && passwordValidateMessage != null) {
+            validateMessage = passwordValidateMessage.getValue();
+        }
+        Map<String, Object> resultMap = new HashMap<>();
+        Pattern p = Pattern.compile(validate);
+        resultMap.put("success", p.matcher(password).find());
+        resultMap.put("message", validateMessage);
+        return resultMap;
     }
 
     @Override
