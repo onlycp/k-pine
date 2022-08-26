@@ -212,7 +212,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         return new File(absFilePath);
     }
 
-    private File getFaasFile(String path) {
+    public File getFaasFile(String path) {
         String relativePath = "";
         String fileName =  path;
         if (path.contains("/")) {

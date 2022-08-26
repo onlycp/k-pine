@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kingsware.kdev.core.auth.BaseUserInfo;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
+import com.kingsware.kdev.core.bean.BaseRet;
+import com.kingsware.kdev.core.bean.LogStack;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.cache.access.AccessManager;
@@ -18,19 +20,20 @@ import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.orm.kdb.*;
-import com.kingsware.kdev.core.util.BeanUtils;
-import com.kingsware.kdev.core.util.DateUtils;
-import com.kingsware.kdev.core.util.JsonUtil;
-import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.core.util.*;
+import com.kingsware.kdev.sys.argv.DevAppInstallArgv;
 import com.kingsware.kdev.sys.argv.DevApplicationArgv;
 import com.kingsware.kdev.sys.argv.DevApplicationQueryArgv;
 import com.kingsware.kdev.sys.argv.DevPine;
 import com.kingsware.kdev.sys.model.*;
 import com.kingsware.kdev.sys.ret.DevApplicationRet;
 import com.kingsware.kdev.sys.service.DevApplicationService;
+import com.kingsware.kdev.sys.service.SysFileService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -43,6 +46,9 @@ import java.util.*;
 @Service
 @Slf4j
 public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApplicationService {
+
+    @Resource
+    private SysFileService sysFileService;
 
     @Override
     public DevApplicationRet get(String id) {
@@ -133,7 +139,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
 
     @Override
     @SuppressWarnings("all")
-    public void importApp(String json) {
+    public String importApp(String json) {
 
         Map<String, Object> pineMap = JsonUtil.toMap(json);
         // 处理特殊的字段
@@ -263,9 +269,69 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 DB.kdbApi().editFun(editFunctionInfo);
             }
         }
-        log.info("导入应用数:{}, 页面数:{}, 接口数:{}, 字典分类数:{}, 字典项数:{}, 任务调度数:{}, 系统配置数:{}， 菜单数:{}, pine逻辑:{}, faas逻辑:{}, 函数数:{}"
-                , appCount, pageCount, apiCount, dictCount, dictItemCount, taskCount, configCount, menuCount, pineFlowCount, devPine.getKdbFlows().size(), devPine.getFunctions().size());
+        String result = String.format("导入应用数:%d, 页面数:%d, 接口数:%d, 字典分类数:%d, 字典项数:%d, 任务调度数:%d, 系统配置数:%d， 菜单数:%d, pine逻辑:%d, faas逻辑:%d, 函数数:%d"
+                , appCount, pageCount, apiCount, dictCount, dictItemCount, taskCount
+                , configCount, menuCount, pineFlowCount, devPine.getKdbFlows().size()
+                , devPine.getFunctions().size());
+        log.info(result);
+        return result;
 
+    }
+
+    /**
+     * 安装应用
+     *
+     * @param argv
+     */
+    @Override
+    public Map<String, Object> install(DevAppInstallArgv argv) {
+        LogStack logStack = new LogStack();
+        try {
+            DevApplication application = DB.findById(DevApplication.class, argv.getAppId());
+            logStack.addMessage("启动...");
+            // 在线升级
+            if (argv.getMode() == 1 ) {
+                // 获取通道信息
+                DevOtaChannel channel = DB.findById(DevOtaChannel.class, argv.getChannelId());
+                // 通道类型
+                // 最新代码
+                if (argv.getChannel() == 2) {
+                    String apiUrl = channel.getChannelUrl() + "/api/v1/pine/app/update-to-date";
+                    Map<String, Object> body = new HashMap<>();
+                    body.put("accessId", channel.getAuthToken());
+                    body.put("timestamp", System.currentTimeMillis());
+                    body.put("signNonce", StringUtils.getUUID());
+                    body.put("appId", argv.getAppId());
+                    // 获取签名值
+                    String sign = SignUtil.getSign(body, channel.getSignSecret());
+                    body.put("sign", sign);
+                    logStack.addMessage("准备请求远程数据, URL：" + apiUrl);
+                    String responseBody = HttpUtil.postBody(apiUrl, JsonUtil.toJson(body), new HashMap<>());
+                    logStack.addMessage("完成请求远程数据，准备安装应用." );
+                    String result = importApp(responseBody);
+                    logStack.addMessage("应用安装完成：" + result);
+
+                }
+            }
+            // 本地升级,支持多个文件
+            else {
+                // 先将文件下载下来
+                String[] ids = argv.getLocalFileIds().split(",");
+                for (String fileId: ids) {
+                    SysFile sysFile = DB.findById(SysFile.class, fileId);
+                    File file = sysFileService.getFaasFile(sysFile.getFilePath());
+                    String json = FileUtils.readFile(file);
+                    logStack.addMessage("开始安装应用:" + sysFile.getFileOriginalName());
+                    String result = importApp(json);
+                    logStack.addMessage("应用安装完成：" + result);
+                }
+            }
+        }
+        catch (Exception e) {
+            logStack.addMessage(ExceptionUtils.getStackTrace(e));
+        }
+
+        return logStack.formatMessages();
     }
 
     private void transMapBooleanToInt(Map<String, Object> map, String...keys) {

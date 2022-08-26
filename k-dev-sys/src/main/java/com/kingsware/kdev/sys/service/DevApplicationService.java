@@ -3,9 +3,12 @@ package com.kingsware.kdev.sys.service;
 import com.kingsware.kdev.core.base.BaseService;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.sys.argv.DevAppInstallArgv;
 import com.kingsware.kdev.sys.argv.DevApplicationArgv;
 import com.kingsware.kdev.sys.argv.DevApplicationQueryArgv;
 import com.kingsware.kdev.sys.ret.DevApplicationRet;
+
+import java.util.Map;
 
 /**
  * 接口业务类
@@ -51,6 +54,11 @@ public interface DevApplicationService extends BaseService {
      * 导入应用
      * @param json json
      */
-    void importApp(String json);
+    String importApp(String json);
 
+    /**
+     * 安装应用
+     * @param argv
+     */
+    Map<String, Object> install(DevAppInstallArgv argv);
 }

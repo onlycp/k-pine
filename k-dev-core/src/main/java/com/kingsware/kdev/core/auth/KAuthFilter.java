@@ -347,20 +347,14 @@ public class KAuthFilter implements Filter {
             String sign = params.get("sign").toString();
 
             // 排序map
-            TreeMap<String, String>  sortedMap = new TreeMap<>();
+            Map<String, Object> toSignMap = new HashMap<>();
             params.forEach((k, v) -> {
                 if (!k.equals("request") && !k.equals("sign")) {
-                    sortedMap.put(k, v.toString());
+                    toSignMap.put(k, v.toString());
                 }
             });
-            // 拼接拼接字符
-            List<String> queryStrings = new ArrayList<>();
-            sortedMap.forEach((k, v) -> queryStrings.add(String.format("%s=%s", k,v)));
-            String str1 = StringUtils.joinToString(queryStrings, "&");
-            // 加上签名密钥
-            String str2 = str1 + "@" + openAccountInfo.getSignKey();
             // 计算签名值
-            String calcSign = MD5Utils.md5(str2);
+            String calcSign = SignUtil.getSign(toSignMap, openAccountInfo.getSignKey());
             // 对比签名
             if (!calcSign.equalsIgnoreCase(sign)) {
                 throw BusinessException.serviceThrow("签名值不正确，传输的签名值:" + sign +", 计算值:" + calcSign);

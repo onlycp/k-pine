@@ -8,6 +8,7 @@ import com.kingsware.kdev.sys.ret.SysFileRet;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletException;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -61,4 +62,11 @@ public interface SysFileService extends BaseService {
      * @param ids   id列表，用逗号分隔
      */
     void downloadZip(String ids);
+
+    /**
+     * 从faas里下载文件
+     * @param path
+     * @return
+     */
+    File getFaasFile(String path);
 }
