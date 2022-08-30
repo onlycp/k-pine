@@ -10,6 +10,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.io.File;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
@@ -166,13 +167,10 @@ public class LicenseManager {
         return false;
     }
 
-
-    /**
-     * 获取mac地址
-     * @return
-     */
-    public String getMac() {
+    public List<MacAddress> getMacs() {
+        List<MacAddress> macAddresses = new ArrayList<>();
         try {
+
             java.util.Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces();
             StringBuilder sb = new StringBuilder();
             while (en.hasMoreElements()) {
@@ -210,14 +208,55 @@ public class LicenseManager {
                     if (isIngore) {
                         continue;
                     }
-                    return sb.toString().trim();
+                    // 去掉虚拟网卡以及不活动网卡
+                    if (network.isVirtual() || !network.isUp()) {
+                        continue;
+                    }
+                    String ipAddress = "";
+                    if (ip instanceof Inet4Address && !ip.isLoopbackAddress() && !ip.isLoopbackAddress()) {
+                        ipAddress = ip.getHostAddress();
+                    }
+                    if (StringUtils.isEmpty(ipAddress)) {
+                        continue;
+                    }
+                    MacAddress macAddress = new MacAddress();
+                    macAddress.setName(macName);
+                    macAddress.setMac(sb.toString().trim());
+                    macAddress.setIp(ipAddress);
+                    macAddresses.add(macAddress);
 
                 }
             }
 
         } catch (Exception ignored) {
         }
-        return null;
+        for (MacAddress macAddress: macAddresses) {
+            log.info("网卡信息，网卡名称：{}， Mac地址:{}, IP:{}", macAddress.getName(), macAddress.getMac(), macAddress.getIp());
+        }
+        return macAddresses;
+    }
+
+
+    /**
+     * 获取mac地址
+     * @return
+     */
+    public String getMac() {
+        List<MacAddress> macAddresses = getMacs();
+        // 排序，避免每次查到的不一致
+        macAddresses.sort(Comparator.comparing(MacAddress::getMac));
+        // 优先取 192开头的
+        Optional<MacAddress> optional = macAddresses.stream().filter(it -> it.getIp().startsWith("192.")).findFirst();
+        if (optional.isPresent()) {
+            return optional.get().getMac();
+        }
+        // 然后取10开头的
+        Optional<MacAddress> optional10 = macAddresses.stream().filter(it -> it.getIp().startsWith("10.")).findFirst();
+        if (optional10.isPresent()) {
+            return optional10.get().getMac();
+        }
+
+        return macAddresses.get(0).getMac();
     }
 
     public int getStatus(License lic) {
