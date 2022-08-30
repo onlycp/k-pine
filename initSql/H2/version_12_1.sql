@@ -12,5 +12,4 @@ create table IF NOT EXISTS  dev_ota_channel
     when_modified varchar(20)   null,
     who_modified  varchar(36)   null,
     PRIMARY KEY (`id`)
-)
-    comment 'OTA通道 ';
+);
