@@ -197,4 +197,14 @@ public class SysUserController extends BaseController {
         return BaseRet.success();
     }
 
+    /**
+     *  获取用户基本信息
+     * @return 提示
+     */
+    @PostMapping(value = "/passwordValidate")
+    @ApiIgnore
+    public BaseRet<?> passwordValidate(String password, String appId) {
+        return BaseRet.success(sysUserService.passwordValidate(password, appId));
+    }
+
 }

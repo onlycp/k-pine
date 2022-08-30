@@ -9,6 +9,8 @@ import com.kingsware.kdev.sys.ret.SysUserLoginRet;
 import com.kingsware.kdev.sys.ret.SysUserProfileRet;
 import com.kingsware.kdev.sys.ret.SysUserRet;
 
+import java.util.Map;
+
 /**
  * 用户业务类
  *
@@ -90,4 +92,6 @@ public interface SysUserService extends BaseService {
      * ping操作
      */
     void ping();
+
+    Map<String, Object> passwordValidate(String password, String appId);
 }
