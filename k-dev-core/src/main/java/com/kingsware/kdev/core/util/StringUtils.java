@@ -268,24 +268,30 @@ public class StringUtils {
     public static boolean isUuid(final String uuid) {
         String split ="-";
         String str = uuid;
-        if (uuid.indexOf(split) > 0) {
-            List<String> arr = new ArrayList<>();
-            for (int i=0; i < str.length(); i++) {
-                arr.add(str.charAt(i) + "");
-            }
-            arr.add(8, split);
-            arr.add(14, split);
-            arr.add(24, split);
-            str = StringUtils.joinToString(arr, "-");
-        }
-
         try {
-            UUID.fromString(str);
-            return true;
+            if (uuid.indexOf(split) > 0) {
+                List<String> arr = new ArrayList<>();
+                for (int i=0; i < str.length(); i++) {
+                    arr.add(str.charAt(i) + "");
+                }
+                arr.add(8, split);
+                arr.add(14, split);
+                arr.add(24, split);
+                str = StringUtils.joinToString(arr, "-");
+            }
+
+            try {
+                UUID.fromString(str);
+                return true;
+            }
+            catch (Exception e) {
+                return false;
+            }
         }
         catch (Exception e) {
             return false;
         }
+
 
     }
 
