@@ -1,11 +1,11 @@
 package com.kingsware.kdev.core.cron;
 
-import com.kingsware.kdev.core.cache.task.TaskListManager;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.model.SysLogicFlow;
 import com.kingsware.kdev.core.model.SysTask;
 import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.kdb.FlowInfo;
 import com.kingsware.kdev.core.orm.kdb.KdbFlowQueryArgv;
 import com.kingsware.kdev.core.util.ClassUtils;
@@ -26,7 +26,10 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledFuture;
+import java.util.stream.Collectors;
 
 /**
  * 动态定时任务
@@ -115,7 +118,6 @@ public class DynamicTask implements CommandLineRunner {
             executeTask(sysTask);
             return;
         }
-
         // 设置锁，通过返回的数量才判断是否被锁
         long cnt = DB.executeUpdateSql("update sys_task set lock_status=1, lock_for_time=? where id=? and lock_status=0", DateUtils.getNow(), sysTask.getId());
         // 如果影响行数为0，说明当前是锁定状态
@@ -139,7 +141,6 @@ public class DynamicTask implements CommandLineRunner {
     private void executeTask(SysTask myTask)  {
         long t1 = System.currentTimeMillis();
         int executeStatus = 1;
-        int enable = 1;
         String errorMessage = "";
         try {
             // 如果是java类
@@ -154,8 +155,6 @@ public class DynamicTask implements CommandLineRunner {
             if (e.getErrorCode() == 1 || e.getErrorCode() == 2 ) {
                 executeStatus = 0;
                 errorMessage = e.getMessage();
-                // 将任务设为禁用，否则影响行情
-                // enable = 0;
             }
         }
         catch (Exception e) {
@@ -165,17 +164,8 @@ public class DynamicTask implements CommandLineRunner {
         }
         finally {
             long t2 = System.currentTimeMillis();
-            if (enable == 0 ) {
-                String sql = "update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ?,  last_execute_time=?, lock_status=0, enable=? where id=?";
-                DB.executeUpdateSql(sql, executeStatus, (t2 - t1),  errorMessage, DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME), enable, myTask.getId());
-            }
-            else {
-                String sql = "update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ?,  last_execute_time=?, lock_status=0 where id=?";
-                DB.executeUpdateSql(sql, executeStatus, (t2 - t1),  errorMessage, DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME), myTask.getId());
-            }
-
-
-            //log.debug("定时任务执行, 任务名: {}", sysTask.getName());
+            String sql = "update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ?,  last_execute_time=?, lock_status=0 where id=?";
+            DB.executeUpdateSql(sql, executeStatus, (t2 - t1),  errorMessage, DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME), myTask.getId());
         }
 
     }
@@ -285,12 +275,32 @@ public class DynamicTask implements CommandLineRunner {
                  for (String tid: deleteTaskIds) {
                      stopTask(scheduledFutureMap.get(tid).getSysTask());
                  }
+                 // 解锁任务
+                 unlockTask(tasks);
              }
              catch (Exception e) {
                  log.error("定时任务注册失败, {}", e.getMessage());
              }
 
-        }, new CronTrigger("0/10 * * * * ?"));
+        }, new CronTrigger("0/30 * * * * ?"));
 
+    }
+
+    private void unlockTask(final List<SysTask> tasks) {
+        // 解锁任务
+        List<SysTask> lockedTasks = tasks.stream().filter(it -> it.getLockStatus() != null && it.getLockStatus() == 1).collect(Collectors.toList());
+        for (SysTask task: lockedTasks) {
+            Integer lockForMost = task.getLockForMost();
+            if (task.getLockForMost() == null) {
+                lockForMost = 60;
+            }
+            // 如果达到解锁标准了
+            if (task.getLockForTime() != null) {
+                if ((task.getLockForTime().getTime() + lockForMost*1000) < System.currentTimeMillis()) {
+                    DB.executeUpdateSql("update sys_task set lock_status=0 where id=?", task.getId());
+                    log.info("定时任务:{} 自动解锁", task.getName());
+                }
+            }
+        }
     }
 }

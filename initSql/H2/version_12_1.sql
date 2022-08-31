@@ -13,3 +13,4 @@ create table IF NOT EXISTS  dev_ota_channel
     who_modified  varchar(36)   null,
     PRIMARY KEY (`id`)
 );
+

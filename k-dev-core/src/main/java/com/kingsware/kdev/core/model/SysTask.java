@@ -49,4 +49,7 @@ public class SysTask extends BaseManageModel {
     private Timestamp lockForTime;
     /** 描述 **/
     private String note;
+    /** 锁定状态 **/
+    private Integer lockStatus;
+
 }
