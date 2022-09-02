@@ -6,6 +6,7 @@ import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -18,6 +19,7 @@ import java.util.List;
  * @version 1.0.0
  * @date 2022/4/27 3:41 PM
  */
+@Slf4j
 public class Functions {
 
     /**
@@ -41,6 +43,7 @@ public class Functions {
      * @return
      */
     public static String props() {
+        log.info("全部配置:{}",JsonUtil.toJson(SpringContext.getProperties()));
         return JsonUtil.toJson(SpringContext.getProperties());
     }
 
@@ -51,6 +54,7 @@ public class Functions {
      * @return              调用结果
      */
     public static Object call(String methodName, List<Object> params) {
+        log.info("Function: {}, {},", methodName, params);
         // 获取所有方法
         Method[] methods = Functions.class.getDeclaredMethods();
         // 方法

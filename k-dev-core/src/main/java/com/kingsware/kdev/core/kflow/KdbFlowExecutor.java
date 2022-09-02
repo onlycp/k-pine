@@ -73,6 +73,7 @@ public class KdbFlowExecutor {
                 int pageSize = Integer.parseInt(params.getOrDefault("pageSize", params.getOrDefault("perPage", "10")).toString());
                 params.put("start", (page-1)*pageSize + "") ;
                 params.put("limit", pageSize + "");
+                params.put("end", page*pageSize);
             }
             if (params.containsKey("pageQuery")) {
                 params.put("pageQuery", params.getOrDefault("pageQuery", false).toString());

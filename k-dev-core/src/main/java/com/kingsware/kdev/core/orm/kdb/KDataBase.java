@@ -127,7 +127,7 @@ public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
     public <T> PagedList<T> findPagedList(Class<T> tClass, int page, int pageSize, String sql, Object... params) {
         // 先查询总数
         String selectCountSql = SqlGenerator.getListSql2CountSql(sql);
-        Long count = channel.queryForCount(selectCountSql, Arrays.asList(params));
+        long count = channel.queryForCount(selectCountSql, Arrays.asList(params));
         // 查询数据
         String limitSql = " limit ? offset ?";
         List<Object> objects = new ArrayList<>(Arrays.asList(params));
@@ -145,6 +145,13 @@ public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
             objects.add(from);
             // 加入pageSize
             objects.add(pageSize);
+        }
+        else if (this.getConfig().getInnerType().equalsIgnoreCase("Oracle")) {
+            sql = "select * from (" + sql + ") table_alias ";
+            limitSql = " where ROWNUM <= ? AND ROWNUM > ?";
+            objects.add(from + pageSize);
+            objects.add(from);
+
         }
         else {
             // 加入pageSize
@@ -166,7 +173,7 @@ public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
         pagedList.setList(data);
         pagedList.setPageCount(pageCount);
         pagedList.setPageIndex(page);
-        pagedList.setTotalCount((count.intValue()));
+        pagedList.setTotalCount(((int) count));
         pagedList.setPageSize(pageSize);
         return pagedList;
     }
@@ -209,6 +216,11 @@ public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
         if (this.getConfig().getInnerType().equalsIgnoreCase("sqlserver")) {
             return 50;
         }
+        // 由于在处理clob字段时，select xx from dual 在批量插入时，需要保存类型一致，因此只能一条条插入
+        else if (this.getConfig().getInnerType().equalsIgnoreCase("oracle")) {
+            return 1;
+        }
+
         return 0;
     }
 

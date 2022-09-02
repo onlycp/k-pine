@@ -238,6 +238,7 @@ public class FlowUtils {
                             }
                             SysConfigInfo configInfo = ConfigManager.getInstance().getItem(itemKey);
                             String itemValue = null;
+
                             // 从系统配置中读取
                             if (configInfo != null) {
                                 itemValue = configInfo.getValue();
@@ -255,6 +256,7 @@ public class FlowUtils {
                             else {
                                 retValue = itemValue;
                             }
+                            log.info("系统配置:{}, {}", key, retValue);
 
                         }
                         else {

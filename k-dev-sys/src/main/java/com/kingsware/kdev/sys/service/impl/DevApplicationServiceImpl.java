@@ -199,14 +199,24 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 }
             });
         }
+        int subSize = 3500;
+//        devPine.getPages().stream().filter(it->it.getPageJson().length()>subSize).forEach(it -> {
+//            log.info("页面名称:{}, 长度:{}", it.getName(), it.getPageJson().length());
+//            it.setPageJson(it.getPageJson().substring(0, subSize));
+//        });
+        log.info("开始导入数据");
         // 处理应用信息
         long appCount = DB.saveOrUpdate(devPine.getInfo(), DevApplication.class);
+        log.info("完成导入应用信息：{}", appCount);
         // 处理页面
         long pageCount = DB.batchSaveOrUpdate(devPine.getPages(), DevPage.class);
+        log.info("完成导入页面信息：{}", pageCount);
         // 接口
         long apiCount = DB.batchSaveOrUpdate(devPine.getApis(), SysApi.class);
+        log.info("完成导入接口信息：{}", apiCount);
         // 字典分类
         long dictCount = DB.batchSaveOrUpdate(devPine.getDict(), SysDict.class);
+        log.info("完成导入字典信息：{}", dictCount);
         // 字典项
         // 先删除已有字典项
         if (devPine.getDictItems() != null &&  !devPine.getDictItems().isEmpty()) {
@@ -215,14 +225,19 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             }
         }
         long dictItemCount = DB.batchSaveOrUpdate(devPine.getDictItems(), SysDictItem.class);
+        log.info("完成导入字典项信息：{}", dictItemCount);
         // 任务调度
         long taskCount = DB.batchSaveOrUpdate(devPine.getTasks(), SysTask.class);
+        log.info("完成导入任务调度信息：{}", taskCount);
         // 系度配置
         long configCount = DB.batchSaveOrUpdate(devPine.getConfigs(), SysConfig.class);
+        log.info("完成导入系度配置：{}", configCount);
         // 菜单
         long menuCount = DB.batchSaveOrUpdate(devPine.getMenus(), SysMenu.class);
+        log.info("完成导入菜单：{}", menuCount);
         // pine逻辑
         long pineFlowCount = DB.batchSaveOrUpdate(devPine.getLogicFlows(), SysLogicFlow.class);
+        log.info("完成导入pine逻辑：{}", pineFlowCount);
         // faas逻辑
         for (FlowInfo flowInfo: devPine.getKdbFlows()) {
             if (flowInfo.getFlowId().equalsIgnoreCase("base_flow")) {
@@ -302,6 +317,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                     body.put("timestamp", System.currentTimeMillis());
                     body.put("signNonce", StringUtils.getUUID());
                     body.put("appId", argv.getAppId());
+                    body.put("downloadSys", argv.getWithSysData());
                     // 获取签名值
                     String sign = SignUtil.getSign(body, channel.getSignSecret());
                     body.put("sign", sign);

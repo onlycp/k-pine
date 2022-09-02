@@ -2,16 +2,14 @@ package com.kingsware.kdev.core.cron;
 
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
+import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.model.SysLogicFlow;
 import com.kingsware.kdev.core.model.SysTask;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.kdb.FlowInfo;
 import com.kingsware.kdev.core.orm.kdb.KdbFlowQueryArgv;
-import com.kingsware.kdev.core.util.ClassUtils;
-import com.kingsware.kdev.core.util.DateUtils;
-import com.kingsware.kdev.core.util.ExceptionUtils;
-import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.core.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -207,7 +205,8 @@ public class DynamicTask implements CommandLineRunner {
                 }
             }
             KFlowContext context = KFlowContext.createBaseContext(inArgv, outArgv);
-            KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), "", new HashMap<>(), context, false);
+            KdbFlowResult kdbFlowResult = KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), "", new HashMap<>(), context, false);
+            log.info("流程任务：{}, 结果:{}", sysTask.getName(), JsonUtil.toJson(kdbFlowResult));
         }
         else {
             throw new CronException("流程不存在", 2);

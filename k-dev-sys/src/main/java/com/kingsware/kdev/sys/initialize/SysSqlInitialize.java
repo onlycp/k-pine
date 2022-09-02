@@ -105,6 +105,10 @@ public class SysSqlInitialize implements SystemInitialize {
             List<String> sqlList = parseSqlList(file.getFile());
             for (String sql: sqlList) {
                 long eachSqlStart = System.currentTimeMillis();
+                sql = sql.trim();
+                if (sql.endsWith(";")) {
+                    sql = sql.substring(0, sql.length()-1);
+                }
                 sqlSumary.append(sql);
                 DB.executeUpdateSql(sql);
                 long eachSqlEnd = System.currentTimeMillis();

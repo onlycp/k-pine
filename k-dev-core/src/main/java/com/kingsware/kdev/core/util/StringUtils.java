@@ -305,7 +305,29 @@ public class StringUtils {
         final String regx = "\\s+|\t|\r|\n";
         Pattern patt = Pattern.compile(regx);
         Matcher m = patt.matcher(sql);
-        return m.replaceAll(" ");
+        return m.replaceAll(" ").trim();
+    }
+
+    /**
+     * 分隔字符串
+     * @param str
+     * @param size
+     * @return
+     */
+    public static List<String> subStringToArray(String str, int size) {
+        int index = 0;
+        int len = str.length();
+        List<String> retList = new ArrayList<>();
+        do {
+            int startIndex = index;
+            int endIndex = index + size;
+            if ((index + size) >= len) {
+                endIndex = len;
+            }
+            retList.add(str.substring(startIndex, endIndex));
+            index = endIndex;
+        }while (index<len);
+        return retList;
     }
 
 

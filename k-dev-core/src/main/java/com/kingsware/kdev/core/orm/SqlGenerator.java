@@ -95,7 +95,6 @@ public class SqlGenerator {
         for (T model: models) {
             List<String> itemValues = new ArrayList<>();
             for (Field2Column field2Column: insertableFields) {
-                itemValues.add("?");
                 Column column = field2Column.getColumn();
                 Field field = field2Column.getField();
                 // 自动赋值
@@ -107,22 +106,36 @@ public class SqlGenerator {
                     }
 
                 }
-                addParams(field2Column.getField(), model, params);
+                itemValues.add(addParams(field2Column.getField(), model, params, dataBaseTypeEnum));
 
             }
             if (logicDelete != null) {
                 params.add(logicDelete.defValue());
                 itemValues.add("?");
             }
-            String subValues = String.format("( %s )", StringUtils.joinToString(itemValues, ","));
-            insertValues.add(subValues);
+            if (dataBaseTypeEnum.equalsIgnoreCase("oracle")) {
+                String subValues = String.format("(select %s from dual)", StringUtils.joinToString(itemValues, ","));
+                insertValues.add(subValues);
+            }
+            else {
+                String subValues = String.format("( %s )", StringUtils.joinToString(itemValues, ","));
+                insertValues.add(subValues);
+            }
+
         }
         // 拼装sql
         builder.append(" ( ");
         builder.append(StringUtils.joinToString(SqlKeywords.wrapperColumn(insertColumns, dataBaseTypeEnum), ","));
         builder.append(" ) ");
-        builder.append(" values ");
-        builder.append(StringUtils.joinToString(insertValues, ","));
+        if (dataBaseTypeEnum.equalsIgnoreCase("Oracle")) {
+            builder.append(StringUtils.joinToString(insertValues, " union all "));
+        }
+        else {
+            builder.append(" values ");
+            builder.append(StringUtils.joinToString(insertValues, ","));
+        }
+
+
         // 返回结果
         SqlWrapper sqlWrapper = new SqlWrapper(builder.toString());
         sqlWrapper.setParams(params);
@@ -135,8 +148,14 @@ public class SqlGenerator {
      * @param model     模型
      * @param params    参数
      */
-    private static void addParams(Field field, Object model, List<Object> params) {
+    private static String addParams(Field field, Object model, List<Object> params, String dbType) {
         Object value = BeanUtils.getFieldValue(field, model);
+        String variable = "?";
+        if (value == null) {
+            params.add(null);
+            return variable;
+        }
+
         if (value instanceof Timestamp) {
             Timestamp timestamp = (Timestamp) value;
             params.add(DateUtils.formatDate(new Date(timestamp.getTime()), DateUtils.DATE_TIME));
@@ -144,10 +163,29 @@ public class SqlGenerator {
         else if (value instanceof Boolean) {
             params.add(Boolean.TRUE.equals(value) ? 1: 0);
         }
+        else if (value instanceof String ) {
+            if (((String) value).length() >=2000 && "oracle".equalsIgnoreCase(dbType)) {
+                List<String> items = StringUtils.subStringToArray((String) value, 2000);
+                List<String> tmps = new ArrayList<>();
+                for (String str: items) {
+                    tmps.add("to_clob(?)");
+                    params.add(str);
+                }
+                variable = StringUtils.joinToString(tmps, "||");
+            }
+            else {
+                params.add(value);
+            }
+
+
+        }
         else {
             params.add(value);
         }
+        return variable;
     }
+
+
 
     /**
      * 生成insertSQL
@@ -190,8 +228,7 @@ public class SqlGenerator {
             // 如果不存在Column，则默认可增可改
             String columnName = StringUtils.humpToLine(field.getName());
             if (!field.isAnnotationPresent(Column.class)) {
-                updateList.add(String.format("%s=?", SqlKeywords.wrapperColumn(columnName, dataBaseTypeEnum)));
-                addParams(field, model, params);
+                updateList.add(String.format("%s=%s", SqlKeywords.wrapperColumn(columnName, dataBaseTypeEnum), addParams(field, model, params, dataBaseTypeEnum)));
             }
             else {
                 Column column = field.getAnnotation(Column.class);
@@ -205,13 +242,10 @@ public class SqlGenerator {
                 if (!column.updatable()) {
                     continue;
                 }
-
-                // 增加列
-                updateList.add(String.format("%s=?", SqlKeywords.wrapperColumn(columnName, dataBaseTypeEnum)));
                 // 自动设置值
                 autoWrite(column, field, model);
-                // 增加参数
-                addParams(field, model, params);
+                // 增加列
+                updateList.add(String.format("%s=%s", SqlKeywords.wrapperColumn(columnName, dataBaseTypeEnum), addParams(field, model, params, dataBaseTypeEnum)));
             }
         }
         // 追加id
@@ -238,7 +272,7 @@ public class SqlGenerator {
                 BeanUtils.setField(field, model, KClientContext.getContext().getUserInfo().getId());
             }
             else {
-                BeanUtils.setField(field, model, "");
+                BeanUtils.setField(field, model, " ");
             }
         }
         else if (column.auto() == AutoEnum.WHEN) {

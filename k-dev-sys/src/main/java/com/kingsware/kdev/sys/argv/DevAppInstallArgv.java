@@ -9,5 +9,6 @@ public class DevAppInstallArgv {
     private Integer mode;
     private Integer channel;
     private String version;
+    private Integer withSysData;
     private String localFileIds;
 }
