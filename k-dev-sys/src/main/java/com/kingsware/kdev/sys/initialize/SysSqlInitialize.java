@@ -110,7 +110,11 @@ public class SysSqlInitialize implements SystemInitialize {
                     sql = sql.substring(0, sql.length()-1);
                 }
                 sqlSumary.append(sql);
-                DB.executeUpdateSql(sql);
+//                String tmpSql = sql.toLowerCase().trim();
+//                if (tmpSql.startsWith("insert") || tmpSql.startsWith("update")) {
+//                    sql = FlowUtils.buildCDATASql(sql);
+//                }
+                DB.executeUpdateSql(FlowUtils.buildCDATASql(sql));
                 long eachSqlEnd = System.currentTimeMillis();
                 log.info(String.format("SQL版本：%s，执行SQL: %s，用时：%sms", file.getVersion(), sql, (eachSqlEnd - eachSqlStart)));
             }
