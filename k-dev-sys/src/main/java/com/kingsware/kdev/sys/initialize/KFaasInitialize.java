@@ -176,7 +176,7 @@ public class KFaasInitialize implements SystemInitialize {
                 initBaseFlow();
                 // 创建数据库
                 // 先判断数据库是否存在在
-                long count = DB.byName(initDs.getSourceName()).findCount(String.format("select 1 from pg_database where datname = '%s'", dbName));
+                long count = DB.byName(initDs.getSourceName()).findCount(String.format("select count(1) from pg_database where datname = '%s'", dbName));
                 if (count == 0) {
                     String createSchemaSql = String.format("CREATE DATABASE \"%s\";",  dbName);
                     DB.byName(initDs.getSourceName()).executeUpdateSql(createSchemaSql);

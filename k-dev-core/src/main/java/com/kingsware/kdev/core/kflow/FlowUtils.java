@@ -425,5 +425,12 @@ public class FlowUtils {
         return ret;
     }
 
-
+    /**
+     * 转换成FAAS不识别#{}, ${}的SQL
+     * @param sql
+     * @return
+     */
+    public static String buildCDATASql(String sql) {
+        return "<![CDATA[ " + sql + " ]]>";
+    }
 }
