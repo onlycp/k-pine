@@ -88,8 +88,8 @@ public class SysDictItemServiceImpl extends BaseServiceImpl implements SysDictIt
     public PageDataRet<SysDictItemRet> query(SysDictItemQueryArgv argv) {
         // 拼装sql
         StringBuilder builder = new StringBuilder();
-        builder.append(" select sdi.*, sd.name as sys_dict_name from sys_dict_item as sdi ");
-        builder.append(" left join sys_dict as sd on sdi.sys_dict_id = sd.id ");
+        builder.append(" select sdi.*, sd.name as sys_dict_name from sys_dict_item  sdi ");
+        builder.append(" left join sys_dict sd on sdi.sys_dict_id = sd.id ");
         builder.append(" where 1=1 ");
         SqlWrapper wrapper = new SqlWrapper(builder.toString());
         // 拼装查询sql
