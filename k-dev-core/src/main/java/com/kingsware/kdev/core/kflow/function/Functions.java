@@ -43,7 +43,7 @@ public class Functions {
      * @return
      */
     public static String props() {
-        log.info("全部配置:{}",JsonUtil.toJson(SpringContext.getProperties()));
+//        log.info("全部配置:{}",JsonUtil.toJson(SpringContext.getProperties()));
         return JsonUtil.toJson(SpringContext.getProperties());
     }
 

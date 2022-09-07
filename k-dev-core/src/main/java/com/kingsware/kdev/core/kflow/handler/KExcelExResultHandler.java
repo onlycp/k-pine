@@ -2,6 +2,7 @@ package com.kingsware.kdev.core.kflow.handler;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.kingsware.kdev.core.excel.KExcel;
+import com.kingsware.kdev.core.excel.KRegionStyle;
 import com.kingsware.kdev.core.excel.KSheet;
 import com.kingsware.kdev.core.kflow.FlowUtils;
 import com.kingsware.kdev.core.kflow.KFlowConstant;
@@ -47,15 +48,20 @@ public class KExcelExResultHandler implements KFlowResultHandler {
             for (Map<String, Object> regionMap: regions) {
                 int x1 = Integer.parseInt(regionMap.get("x1").toString());
                 int y1 = Integer.parseInt(regionMap.get("y1").toString());
+                KRegionStyle style = null;
+                if (regionMap.containsKey("style")) {
+                    style = JsonUtil.mapToBean((Map<String, Object>)regionMap.get("style"), KRegionStyle.class);
+                }
                 Object value = regionMap.get("value");
                 if (regionMap.containsKey("x2") && regionMap.containsKey("y2")) {
                     int x2 = Integer.parseInt(regionMap.get("x2").toString());
                     int y2 = Integer.parseInt(regionMap.get("y2").toString());
-                    kSheet.addRegion(x1, y1, x2, y2, value);
+                    kSheet.addRegion(x1, y1, x2, y2, value, style);
                 }
                 else {
-                    kSheet.addCellRegion(x1, y1, value);
+                    kSheet.addCellRegion(x1, y1, value, style);
                 }
+
             }
         }
         result.setData(kExcel);

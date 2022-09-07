@@ -1,9 +1,10 @@
 package com.kingsware.kdev.core.excel.handler;
 
-import ch.qos.logback.core.rolling.helper.FileStoreUtil;
 import com.kingsware.kdev.core.excel.KExcel;
 import com.kingsware.kdev.core.excel.KRegion;
+import com.kingsware.kdev.core.excel.KRegionStyle;
 import com.kingsware.kdev.core.excel.KSheet;
+import com.kingsware.kdev.core.util.ColorUtil;
 import com.kingsware.kdev.core.util.ExceptionUtils;
 import com.kingsware.kdev.core.util.RandomUtils;
 import com.kingsware.kdev.core.util.StringUtils;
@@ -11,19 +12,23 @@ import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.hssf.usermodel.HSSFPalette;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.util.FileCopyUtils;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.apache.poi.ss.usermodel.FillPatternType.SOLID_FOREGROUND;
 
 /**
  * Poi处理类
@@ -48,6 +53,7 @@ public class PoiExcelHandler implements KExcelHandler{
             for (KSheet ks: excel.getSheetList()) {
                 // 生成一个表格
                 Sheet sheet = workbook.createSheet(ks.getName());
+                sheet.setDefaultColumnWidth(200*255);
                 // 设置字体
                 CellStyle cellStyle = workbook.createCellStyle();
                 Font font = workbook.createFont();
@@ -67,7 +73,7 @@ public class PoiExcelHandler implements KExcelHandler{
                     Cell cell = row.createCell(region.getStartCell().getColumnIndex());
                     cell.setCellValue(region.getValue() == null ? "" : region.getValue().toString());
                     // 设置格式
-                    cell.setCellStyle(cellStyle);
+                    cell.setCellStyle(createCellStyle(workbook,region.getStyle()));
                     // 合并单元格
                     if (!region.isSingleCell()) {
                         sheet.addMergedRegion(new CellRangeAddress(region.getStartCell().getRowIndex(), region.getEndCell().getRowIndex()
@@ -76,9 +82,17 @@ public class PoiExcelHandler implements KExcelHandler{
                 }
                 // 自适应列宽
                 try {
-                    short columnNum = sheet.getRow(0).getLastCellNum();
-                    for (short i=0; i< columnNum; i++) {
+
+                    int rowNums = sheet.getLastRowNum();
+                    int maxColNum = 0;
+                    for (int i=0; i< rowNums; i++) {
+                        if (maxColNum < sheet.getRow(i).getLastCellNum()) {
+                            maxColNum = sheet.getRow(i).getLastCellNum();
+                        }
+                    }
+                    for (short i=0; i< maxColNum; i++) {
                         try {
+//                            sheet.setColumnWidth((short) 0, (short) 250);
                             sheet.autoSizeColumn(i);
                         }
                         catch (Exception ignored) {}
@@ -93,6 +107,86 @@ public class PoiExcelHandler implements KExcelHandler{
             log.info("excel文件写失败，错误原因:{}", e.getMessage());
         }
 
+
+    }
+
+    /**
+     * 创建样式
+     * @param workbook  工作表
+     * @param style     样式
+     * @return          cell样式
+     */
+    private CellStyle createCellStyle(Workbook workbook, KRegionStyle style) {
+        XSSFCellStyle cellStyle = ((XSSFWorkbook) workbook).createCellStyle();
+        if (style == null) {
+            return cellStyle;
+        }
+        try {
+            // 背景色
+            if (StringUtils.isNotEmpty(style.getBgColor())) {
+                java.awt.Color color = ColorUtil.toColorFromString(style.getBgColor());
+                XSSFColor xssfColor = new XSSFColor();
+                xssfColor.setRGB(new byte[]{(byte) color.getRed(), (byte) color.getGreen(), (byte) color.getBlue()});
+                cellStyle.setFillForegroundColor(xssfColor);
+                cellStyle.setFillPattern(SOLID_FOREGROUND);
+
+
+            }
+            Font font = workbook.createFont();
+            try {
+                font.setFontName("宋体");
+            }
+            catch (Exception ignored) {
+
+            }
+            cellStyle.setFont(font);
+            // 字体颜色
+            if (StringUtils.isNotEmpty(style.getFontColor())) {
+                HSSFPalette palette = ((HSSFWorkbook)workbook).getCustomPalette();
+                java.awt.Color color = ColorUtil.toColorFromString(style.getBgColor());
+                palette.setColorAtIndex(HSSFColor.HSSFColorPredefined.AQUA.getIndex(), (byte) color.getRed(), (byte) color.getGreen(), (byte) color.getBlue());
+                font.setColor(HSSFColor.HSSFColorPredefined.AQUA.getIndex());
+            }
+            // 字体名称
+            if (StringUtils.isNotEmpty(style.getFontName())) {
+                font.setFontName(style.getFontName());
+            }
+            // 字体大小
+            if (style.getFontSize() != null) {
+                font.setFontHeightInPoints(style.getFontSize().shortValue());
+            }
+            if (style.isBold()) {
+                font.setBold(true);
+            }
+            if (style.getH() != null) {
+                if (style.getH() == 0) {
+                    cellStyle.setAlignment(HorizontalAlignment.LEFT);
+                }
+                else if (style.getH() == 1) {
+                    cellStyle.setAlignment(HorizontalAlignment.CENTER);
+                }
+                else if (style.getH() == 2) {
+                    cellStyle.setAlignment(HorizontalAlignment.RIGHT);
+                }
+
+            }
+            if (style.getV() != null) {
+                if (style.getV() == 0) {
+                    cellStyle.setVerticalAlignment(VerticalAlignment.TOP);
+                }
+                else if (style.getV() == 1) {
+                    cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+                }
+                else if (style.getV() == 2) {
+                    cellStyle.setVerticalAlignment(VerticalAlignment.BOTTOM);
+                }
+
+            }
+        }
+        catch (Exception ignored) {
+            log.warn("样式设置警告:" + ignored.getMessage());
+        }
+        return cellStyle;
 
     }
 

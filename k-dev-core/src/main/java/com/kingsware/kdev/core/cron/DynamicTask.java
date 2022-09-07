@@ -206,7 +206,7 @@ public class DynamicTask implements CommandLineRunner {
             }
             KFlowContext context = KFlowContext.createBaseContext(inArgv, outArgv);
             KdbFlowResult kdbFlowResult = KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), "", new HashMap<>(), context, false);
-            log.info("流程任务：{}, 结果:{}", sysTask.getName(), JsonUtil.toJson(kdbFlowResult));
+//            log.info("流程任务：{}, 结果:{}", sysTask.getName(), JsonUtil.toJson(kdbFlowResult));
         }
         else {
             throw new CronException("流程不存在", 2);

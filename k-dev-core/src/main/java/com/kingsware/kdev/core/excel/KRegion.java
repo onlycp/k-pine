@@ -17,6 +17,8 @@ public class KRegion {
     private KCell endCell;
     /** 值 **/
     private Object value;
+    /** 样式 **/
+    private KRegionStyle style;
 
     /**
      * 是否单个单元格

@@ -30,7 +30,18 @@ public class KSheet {
      * @return              返回当前区域
      */
     public KRegion addCellRegion(int rowIndex, int columnIndex, Object value) {
-        return addRegion(rowIndex, columnIndex, rowIndex, columnIndex, value);
+        return addRegion(rowIndex, columnIndex, rowIndex, columnIndex, value, null);
+    }
+
+    /**
+     *  增加单元格区域
+     * @param rowIndex      行号
+     * @param columnIndex   列号
+     * @param value         值
+     * @return              返回当前区域
+     */
+    public KRegion addCellRegion(int rowIndex, int columnIndex, Object value, KRegionStyle style) {
+        return addRegion(rowIndex, columnIndex, rowIndex, columnIndex, value, style);
     }
 
     /**
@@ -56,6 +67,19 @@ public class KSheet {
      * @return              返回当前区域
      */
     public KRegion addRegion(int rowIndex1, int columnIndex1, int rowIndex2, int columnIndex2,  Object value) {
+        return addRegion(rowIndex1, columnIndex1, rowIndex2, columnIndex2, value, null);
+    }
+
+    /**
+     *  增加区域
+     * @param rowIndex1      行号1
+     * @param columnIndex1   列号1
+     * @param rowIndex2      行号2
+     * @param columnIndex2   列号2
+     * @param value         值
+     * @return              返回当前区域
+     */
+    public KRegion addRegion(int rowIndex1, int columnIndex1, int rowIndex2, int columnIndex2,  Object value, KRegionStyle style) {
         // 创建区域
         KRegion region = new KRegion();
         // 创建单元格，并设置行和列
@@ -72,9 +96,12 @@ public class KSheet {
         region.setEndCell(cell2);
         // 设置值
         region.setValue(value);
+        // 设置样式
+        region.setStyle(style);
         regions.add(region);
         // 返回当前区域
         return region;
     }
+
 
 }
