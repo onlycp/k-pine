@@ -4,10 +4,7 @@ import com.kingsware.kdev.core.excel.KExcel;
 import com.kingsware.kdev.core.excel.KRegion;
 import com.kingsware.kdev.core.excel.KRegionStyle;
 import com.kingsware.kdev.core.excel.KSheet;
-import com.kingsware.kdev.core.util.ColorUtil;
-import com.kingsware.kdev.core.util.ExceptionUtils;
-import com.kingsware.kdev.core.util.RandomUtils;
-import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.core.util.*;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
@@ -26,8 +23,7 @@ import java.io.File;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static org.apache.poi.ss.usermodel.FillPatternType.SOLID_FOREGROUND;
 
@@ -40,6 +36,9 @@ import static org.apache.poi.ss.usermodel.FillPatternType.SOLID_FOREGROUND;
  */
 @Slf4j
 public class PoiExcelHandler implements KExcelHandler{
+    /** 样式缓存 **/
+    private final Map<String, XSSFCellStyle> xssfCellStyleMap = new HashMap<>();
+
     @Override
     public void write(KExcel excel, OutputStream out) {
 
@@ -63,6 +62,7 @@ public class PoiExcelHandler implements KExcelHandler{
                 font.setFontHeightInPoints((short) 11);
                 font.setFontName("微软雅黑");
                 cellStyle.setFont(font);
+                CellStyle lastCellStyle = cellStyle;
                 // 写入单元格数据
                 for (KRegion region: ks.getRegions()) {
 
@@ -70,7 +70,9 @@ public class PoiExcelHandler implements KExcelHandler{
                     if (row == null) {
                         row = sheet.createRow(region.getStartCell().getRowIndex());
                     }
-                    CellStyle itemCellStyle = createCellStyle(workbook,region.getStyle());
+
+                    assert lastCellStyle instanceof XSSFCellStyle;
+                    lastCellStyle = createCellStyle(workbook,region.getStyle(),(XSSFCellStyle) lastCellStyle);
                     // 创建单元格
                     Cell cell = row.createCell(region.getStartCell().getColumnIndex());
                     if (region.getValue() != null) {
@@ -83,10 +85,10 @@ public class PoiExcelHandler implements KExcelHandler{
                             // 此处设置数据格式
                             DataFormat df = workbook.createDataFormat();
                             if (region.getValue() instanceof Integer) {
-                                itemCellStyle.setDataFormat(df.getFormat("0_ "));//数据格式只显示整数
+                                lastCellStyle.setDataFormat(df.getFormat("0_ "));//数据格式只显示整数
                                 cell.setCellValue(new BigDecimal(region.getValue().toString()).intValue());
                             }else{
-                                itemCellStyle.setDataFormat(df.getFormat("0.00_ "));//保留两位小数点
+                                lastCellStyle.setDataFormat(df.getFormat("0.00_ "));//保留两位小数点
                                 cell.setCellValue(new BigDecimal(region.getValue().toString()).doubleValue());
                             }
 
@@ -97,7 +99,7 @@ public class PoiExcelHandler implements KExcelHandler{
                     }
 
                     // 设置格式
-                    cell.setCellStyle(itemCellStyle);
+                    cell.setCellStyle(lastCellStyle);
                     // 合并单元格
                     if (!region.isSingleCell()) {
                         sheet.addMergedRegion(new CellRangeAddress(region.getStartCell().getRowIndex(), region.getEndCell().getRowIndex()
@@ -140,11 +142,15 @@ public class PoiExcelHandler implements KExcelHandler{
      * @param style     样式
      * @return          cell样式
      */
-    private CellStyle createCellStyle(Workbook workbook, KRegionStyle style) {
-        XSSFCellStyle cellStyle = ((XSSFWorkbook) workbook).createCellStyle();
+    private CellStyle createCellStyle(Workbook workbook, KRegionStyle style, XSSFCellStyle lastCellStyle ) {
         if (style == null) {
-            return cellStyle;
+            return lastCellStyle;
         }
+        String key = MD5Utils.md5(Objects.requireNonNull(JsonUtil.toJson(style.toString())));
+        if (xssfCellStyleMap.containsKey(key)) {
+            return xssfCellStyleMap.get(key);
+        }
+        XSSFCellStyle cellStyle = ((XSSFWorkbook) workbook).createCellStyle();
         try {
             // 背景色
             if (StringUtils.isNotEmpty(style.getBgColor())) {
@@ -210,6 +216,8 @@ public class PoiExcelHandler implements KExcelHandler{
         catch (Exception ignored) {
             log.warn("样式设置警告:" + ignored.getMessage());
         }
+        // 缓存样式, 避免创建更多cellStyle导致报错
+        xssfCellStyleMap.put(key, cellStyle);
         return cellStyle;
 
     }
