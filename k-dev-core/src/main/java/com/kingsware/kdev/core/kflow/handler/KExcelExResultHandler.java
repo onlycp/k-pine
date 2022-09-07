@@ -49,17 +49,21 @@ public class KExcelExResultHandler implements KFlowResultHandler {
                 int x1 = Integer.parseInt(regionMap.get("x1").toString());
                 int y1 = Integer.parseInt(regionMap.get("y1").toString());
                 KRegionStyle style = null;
+                String type = null;
                 if (regionMap.containsKey("style")) {
                     style = JsonUtil.mapToBean((Map<String, Object>)regionMap.get("style"), KRegionStyle.class);
+                }
+                if (regionMap.containsKey("type")) {
+                    type = regionMap.get("type").toString();
                 }
                 Object value = regionMap.get("value");
                 if (regionMap.containsKey("x2") && regionMap.containsKey("y2")) {
                     int x2 = Integer.parseInt(regionMap.get("x2").toString());
                     int y2 = Integer.parseInt(regionMap.get("y2").toString());
-                    kSheet.addRegion(x1, y1, x2, y2, value, style);
+                    kSheet.addRegion(x1, y1, x2, y2, value, style).setType(type);
                 }
                 else {
-                    kSheet.addCellRegion(x1, y1, value, style);
+                    kSheet.addCellRegion(x1, y1, value, style).setType(type);
                 }
 
             }

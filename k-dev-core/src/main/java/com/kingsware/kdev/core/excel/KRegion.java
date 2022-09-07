@@ -17,6 +17,8 @@ public class KRegion {
     private KCell endCell;
     /** 值 **/
     private Object value;
+    /** 数据类型 number: 数字, formula：公式 , string: 字符串, image: 图片, 默认是根据值的类型来自动识别  **/
+    private String type;
     /** 样式 **/
     private KRegionStyle style;
 

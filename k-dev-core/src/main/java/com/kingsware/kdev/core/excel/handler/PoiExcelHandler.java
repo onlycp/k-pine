@@ -24,6 +24,7 @@ import org.springframework.util.FileCopyUtils;
 
 import java.io.File;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,11 +70,34 @@ public class PoiExcelHandler implements KExcelHandler{
                     if (row == null) {
                         row = sheet.createRow(region.getStartCell().getRowIndex());
                     }
+                    CellStyle itemCellStyle = createCellStyle(workbook,region.getStyle());
                     // 创建单元格
                     Cell cell = row.createCell(region.getStartCell().getColumnIndex());
-                    cell.setCellValue(region.getValue() == null ? "" : region.getValue().toString());
+                    if (region.getValue() != null) {
+
+                        if ("formula".equalsIgnoreCase(region.getType())) {
+                            cell.setCellFormula(region.getValue().toString());
+                        }
+
+                        else if ("number".equalsIgnoreCase(region.getType()) || region.getValue() instanceof Number) {
+                            // 此处设置数据格式
+                            DataFormat df = workbook.createDataFormat();
+                            if (region.getValue() instanceof Integer) {
+                                itemCellStyle.setDataFormat(df.getFormat("0_ "));//数据格式只显示整数
+                                cell.setCellValue(new BigDecimal(region.getValue().toString()).intValue());
+                            }else{
+                                itemCellStyle.setDataFormat(df.getFormat("0.00_ "));//保留两位小数点
+                                cell.setCellValue(new BigDecimal(region.getValue().toString()).doubleValue());
+                            }
+
+                        }
+                        else {
+                            cell.setCellValue(region.getValue().toString());
+                        }
+                    }
+
                     // 设置格式
-                    cell.setCellStyle(createCellStyle(workbook,region.getStyle()));
+                    cell.setCellStyle(itemCellStyle);
                     // 合并单元格
                     if (!region.isSingleCell()) {
                         sheet.addMergedRegion(new CellRangeAddress(region.getStartCell().getRowIndex(), region.getEndCell().getRowIndex()
