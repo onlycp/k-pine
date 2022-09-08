@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.excel.handler;
 
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.excel.KExcel;
 import com.kingsware.kdev.core.excel.KRegion;
 import com.kingsware.kdev.core.excel.KRegionStyle;
@@ -7,6 +8,7 @@ import com.kingsware.kdev.core.excel.KSheet;
 import com.kingsware.kdev.core.util.*;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFPalette;
@@ -14,14 +16,19 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFColor;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.streaming.SXSSFDrawing;
+import org.apache.poi.xssf.usermodel.*;
 import org.springframework.util.FileCopyUtils;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.util.*;
 
@@ -38,31 +45,33 @@ import static org.apache.poi.ss.usermodel.FillPatternType.SOLID_FOREGROUND;
 public class PoiExcelHandler implements KExcelHandler{
     /** 样式缓存 **/
     private final Map<String, XSSFCellStyle> xssfCellStyleMap = new HashMap<>();
+    /**
+     * 画图的顶级管理器
+     */
+    private XSSFDrawing drawingPatriarch;
 
     @Override
     public void write(KExcel excel, OutputStream out) {
 
         // 创建workbook
         try {
-            @Cleanup Workbook workbook = null;
-            if (excel.getFileNme().endsWith(".xls")) {
-                workbook = new HSSFWorkbook();
-            } else {
-                workbook = new XSSFWorkbook();
-            }
+            xssfCellStyleMap.clear();
+            @Cleanup XSSFWorkbook workbook = new XSSFWorkbook();
+
             for (KSheet ks: excel.getSheetList()) {
                 // 生成一个表格
                 Sheet sheet = workbook.createSheet(ks.getName());
                 sheet.setDefaultColumnWidth(200*255);
+                this.drawingPatriarch = (XSSFDrawing) sheet.createDrawingPatriarch();
                 // 设置字体
-                CellStyle cellStyle = workbook.createCellStyle();
+                XSSFCellStyle cellStyle = workbook.createCellStyle();
                 Font font = workbook.createFont();
                 font.setCharSet(HSSFFont.DEFAULT_CHARSET);
                 //更改默认字体大小
                 font.setFontHeightInPoints((short) 11);
                 font.setFontName("微软雅黑");
                 cellStyle.setFont(font);
-                CellStyle lastCellStyle = cellStyle;
+                XSSFCellStyle lastCellStyle = cellStyle;
                 // 写入单元格数据
                 for (KRegion region: ks.getRegions()) {
 
@@ -71,7 +80,6 @@ public class PoiExcelHandler implements KExcelHandler{
                         row = sheet.createRow(region.getStartCell().getRowIndex());
                     }
 
-                    assert lastCellStyle instanceof XSSFCellStyle;
                     lastCellStyle = createCellStyle(workbook,region.getStyle(),(XSSFCellStyle) lastCellStyle);
                     // 创建单元格
                     Cell cell = row.createCell(region.getStartCell().getColumnIndex());
@@ -79,6 +87,34 @@ public class PoiExcelHandler implements KExcelHandler{
 
                         if ("formula".equalsIgnoreCase(region.getType())) {
                             cell.setCellFormula(region.getValue().toString());
+                        }
+                        else if ("image".equals(region.getType())) {
+                            try {
+                                URL url = new URL("http://127.0.0.1:" + SpringContext.getProperties("server.port", "8080") +"/api/v1/sys-files/download/" + region.getValue());
+                                BufferedImage bufferImg = null;
+                                bufferImg = ImageIO.read(url);
+                                @Cleanup ByteArrayOutputStream byteArrayOut = new ByteArrayOutputStream();
+                                ImageIO.write(bufferImg, "jpg", byteArrayOut);
+                                XSSFClientAnchor anchor = new XSSFClientAnchor(
+                                        0,
+                                        0,
+                                        255,
+                                        255,
+                                        region.getStartCell().getColumnIndex(),
+                                        region.getStartCell().getRowIndex(),
+                                        region.getEndCell().getColumnIndex()+1,
+                                        region.getEndCell().getRowIndex()+1
+                                );
+                                XSSFPicture picture = drawingPatriarch.createPicture(anchor, workbook.addPicture(byteArrayOut.toByteArray(), XSSFWorkbook.PICTURE_TYPE_JPEG));
+                                cell.getRow().setHeight((short) (255*10));
+
+
+
+                            }
+                            catch (Exception e) {
+                                log.warn("error", e);
+                            }
+
                         }
 
                         else if ("number".equalsIgnoreCase(region.getType()) || region.getValue() instanceof Number) {
@@ -97,9 +133,14 @@ public class PoiExcelHandler implements KExcelHandler{
                             cell.setCellValue(region.getValue().toString());
                         }
                     }
-
                     // 设置格式
-                    cell.setCellStyle(lastCellStyle);
+                    try {
+                        cell.setCellStyle(lastCellStyle);
+                    }
+                    catch (Exception e) {
+                        log.warn("warn", e);
+                    }
+
                     // 合并单元格
                     if (!region.isSingleCell()) {
                         sheet.addMergedRegion(new CellRangeAddress(region.getStartCell().getRowIndex(), region.getEndCell().getRowIndex()
@@ -142,15 +183,21 @@ public class PoiExcelHandler implements KExcelHandler{
      * @param style     样式
      * @return          cell样式
      */
-    private CellStyle createCellStyle(Workbook workbook, KRegionStyle style, XSSFCellStyle lastCellStyle ) {
+    private XSSFCellStyle createCellStyle(XSSFWorkbook workbook, KRegionStyle style, XSSFCellStyle lastCellStyle ) {
         if (style == null) {
-            return lastCellStyle;
+            String key = "empty";
+            if (xssfCellStyleMap.containsKey(key)) {
+                return xssfCellStyleMap.get(key);
+            }
+            XSSFCellStyle cellStyle = workbook.createCellStyle();
+            xssfCellStyleMap.put(key, cellStyle);
+            return cellStyle;
         }
         String key = MD5Utils.md5(Objects.requireNonNull(JsonUtil.toJson(style.toString())));
         if (xssfCellStyleMap.containsKey(key)) {
             return xssfCellStyleMap.get(key);
         }
-        XSSFCellStyle cellStyle = ((XSSFWorkbook) workbook).createCellStyle();
+        XSSFCellStyle cellStyle = workbook.createCellStyle();
         try {
             // 背景色
             if (StringUtils.isNotEmpty(style.getBgColor())) {
@@ -172,9 +219,9 @@ public class PoiExcelHandler implements KExcelHandler{
             cellStyle.setFont(font);
             // 字体颜色
             if (StringUtils.isNotEmpty(style.getFontColor())) {
-                HSSFPalette palette = ((HSSFWorkbook)workbook).getCustomPalette();
-                java.awt.Color color = ColorUtil.toColorFromString(style.getBgColor());
-                palette.setColorAtIndex(HSSFColor.HSSFColorPredefined.AQUA.getIndex(), (byte) color.getRed(), (byte) color.getGreen(), (byte) color.getBlue());
+                java.awt.Color color = ColorUtil.toColorFromString(style.getFontColor());
+                XSSFColor xssfColor = new XSSFColor();
+                xssfColor.setRGB(new byte[]{(byte) color.getRed(), (byte) color.getGreen(), (byte) color.getBlue()});
                 font.setColor(HSSFColor.HSSFColorPredefined.AQUA.getIndex());
             }
             // 字体名称

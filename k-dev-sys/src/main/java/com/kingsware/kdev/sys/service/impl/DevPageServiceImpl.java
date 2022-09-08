@@ -3,6 +3,7 @@ package com.kingsware.kdev.sys.service.impl;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.cache.kcache.KCache;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
@@ -16,6 +17,7 @@ import com.kingsware.kdev.sys.model.DevApplication;
 import com.kingsware.kdev.sys.model.DevPage;
 import com.kingsware.kdev.sys.ret.DevPageRet;
 import com.kingsware.kdev.sys.service.DevPageService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
@@ -25,6 +27,7 @@ import org.springframework.stereotype.Service;
  * @date 2022-02-13 10:20
  */
 @Service
+@Slf4j
 public class DevPageServiceImpl extends BaseServiceImpl implements DevPageService {
 
     @Override
@@ -36,7 +39,9 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
     }
 
     @Override
+    @KCache(onlyForProd = true)
     public DevPageRet getByPath(String path) {
+        log.info("请求页面信息:{}", path );
         return DB.findOne(DevPageRet.class, " select * from dev_page where (path = ? or id = ?) and deleted=0 ", path, path);
     }
 

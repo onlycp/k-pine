@@ -68,6 +68,7 @@ public class SysUnitServiceImpl extends BaseServiceImpl implements SysUnitServic
         model.setEmail(argv.getEmail());
         model.setLeader(argv.getLeader());
         model.setMobile(argv.getMobile());
+        model.setOrderNum(argv.getOrderNum());
         // 处理path， 如果单位有变动时，才需要处理
         boolean parentChanged = !Objects.equals(model.getParentId(), argv.getParentId());
         String hisParentPath = model.getPath().replace("/" + model.getId() +"/", "/");
