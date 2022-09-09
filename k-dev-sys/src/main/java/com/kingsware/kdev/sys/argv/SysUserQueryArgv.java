@@ -25,4 +25,9 @@ public class SysUserQueryArgv extends BasePageArgv {
     /** 所属应用ID **/
     private String appId;
 
+    /** 归属部门 */
+    private String sysUnitId;
+
+
+
 }
