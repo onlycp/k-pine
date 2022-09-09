@@ -54,7 +54,7 @@ public class Functions {
      * @return              调用结果
      */
     public static Object call(String methodName, List<Object> params) {
-        log.info("Function: {}, {},", methodName, params);
+//        log.info("Function: {}, {},", methodName, params);
         // 获取所有方法
         Method[] methods = Functions.class.getDeclaredMethods();
         // 方法

@@ -25,4 +25,8 @@ public class KRegionStyle {
     private Integer h;
     /** 垂直方向 0：上 1：中间 2：下 **/
     private Integer v;
+    /** 宽 **/
+    private String width;
+    /** 自动换行 **/
+    private boolean wordBreak;
 }

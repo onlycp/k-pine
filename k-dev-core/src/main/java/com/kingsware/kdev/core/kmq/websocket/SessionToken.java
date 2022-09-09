@@ -46,12 +46,19 @@ public class SessionToken {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+
         SessionToken that = (SessionToken) o;
-        return userId.equals(that.userId) && token.equals(that.token);
+
+        if (!session.equals(that.session)) return false;
+        if (!userId.equals(that.userId)) return false;
+        return token.equals(that.token);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId, token);
+        int result = session.hashCode();
+        result = 31 * result + userId.hashCode();
+        result = 31 * result + token.hashCode();
+        return result;
     }
 }
