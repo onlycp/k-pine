@@ -8,15 +8,10 @@ import com.kingsware.kdev.core.excel.KSheet;
 import com.kingsware.kdev.core.util.*;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
-import org.apache.poi.hssf.usermodel.HSSFPalette;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.streaming.SXSSFDrawing;
 import org.apache.poi.xssf.usermodel.*;
 import org.springframework.util.FileCopyUtils;
 
@@ -26,9 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.OutputStream;
 import java.math.BigDecimal;
-import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.file.Files;
 import java.util.*;
 
@@ -68,7 +61,7 @@ public class PoiExcelHandler implements KExcelHandler{
                 Font font = workbook.createFont();
                 font.setCharSet(HSSFFont.DEFAULT_CHARSET);
                 //更改默认字体大小
-                font.setFontHeightInPoints((short) 11);
+                font.setFontHeightInPoints((short) 10);
                 font.setFontName("微软雅黑");
                 cellStyle.setFont(font);
                 XSSFCellStyle lastCellStyle = cellStyle;
@@ -94,21 +87,20 @@ public class PoiExcelHandler implements KExcelHandler{
                                 BufferedImage bufferImg = null;
                                 bufferImg = ImageIO.read(url);
                                 @Cleanup ByteArrayOutputStream byteArrayOut = new ByteArrayOutputStream();
-                                ImageIO.write(bufferImg, "jpg", byteArrayOut);
+                                ImageIO.write(bufferImg, "png", byteArrayOut);
                                 XSSFClientAnchor anchor = new XSSFClientAnchor(
-                                        0,
-                                        0,
-                                        255,
-                                        255,
+                                        10000*10,
+                                        10000*10,
+                                        -10000*10,
+                                        -10000*10,
                                         region.getStartCell().getColumnIndex(),
                                         region.getStartCell().getRowIndex(),
                                         region.getEndCell().getColumnIndex()+1,
                                         region.getEndCell().getRowIndex()+1
                                 );
+                                anchor.setAnchorType(ClientAnchor.AnchorType.MOVE_AND_RESIZE);
                                 XSSFPicture picture = drawingPatriarch.createPicture(anchor, workbook.addPicture(byteArrayOut.toByteArray(), XSSFWorkbook.PICTURE_TYPE_JPEG));
-                                cell.getRow().setHeight((short) (255*10));
-
-
+                                picture.setFillColor(0,0,0 );
 
                             }
                             catch (Exception e) {
@@ -136,6 +128,13 @@ public class PoiExcelHandler implements KExcelHandler{
                     // 设置格式
                     try {
                         cell.setCellStyle(lastCellStyle);
+                        if (region.getStyle().getWidth() != null) {
+                            sheet.setColumnWidth(cell.getColumnIndex(), region.getStyle().getWidth() * 256);
+                            if ("image".equals(region.getType())) {
+                                cell.getRow().setHeight((short)(region.getStyle().getWidth() * 100));
+                            }
+                        }
+
                     }
                     catch (Exception e) {
                         log.warn("warn", e);
@@ -147,25 +146,28 @@ public class PoiExcelHandler implements KExcelHandler{
                                 , region.getStartCell().getColumnIndex(), region.getEndCell().getColumnIndex()));
                     }
                 }
-                // 自适应列宽
-                try {
+                if (ks.isAutoColumnSize()) {
+                    // 自适应列宽
+                    try {
 
-                    int rowNums = sheet.getLastRowNum();
-                    int maxColNum = 0;
-                    for (int i=0; i< rowNums; i++) {
-                        if (maxColNum < sheet.getRow(i).getLastCellNum()) {
-                            maxColNum = sheet.getRow(i).getLastCellNum();
+                        int rowNums = sheet.getLastRowNum();
+                        int maxColNum = 0;
+                        for (int i=0; i< rowNums; i++) {
+                            if (maxColNum < sheet.getRow(i).getLastCellNum()) {
+                                maxColNum = sheet.getRow(i).getLastCellNum();
+                            }
                         }
-                    }
-                    for (short i=0; i< maxColNum; i++) {
-                        try {
+                        for (short i=0; i< maxColNum; i++) {
+                            try {
 //                            sheet.setColumnWidth((short) 0, (short) 250);
-                            sheet.autoSizeColumn(i);
+                                sheet.autoSizeColumn(i);
+                            }
+                            catch (Exception ignored) {}
                         }
-                        catch (Exception ignored) {}
                     }
+                    catch (Exception ignored) {}
                 }
-                catch (Exception ignored) {}
+
             }
             workbook.write(out);
         }
@@ -211,7 +213,7 @@ public class PoiExcelHandler implements KExcelHandler{
             }
             Font font = workbook.createFont();
             try {
-                font.setFontName("宋体");
+                font.setFontName("等线");
             }
             catch (Exception ignored) {
 
@@ -257,8 +259,12 @@ public class PoiExcelHandler implements KExcelHandler{
                 else if (style.getV() == 2) {
                     cellStyle.setVerticalAlignment(VerticalAlignment.BOTTOM);
                 }
-
             }
+            // 换行处理
+            if (style.isWrapText()) {
+                cellStyle.setWrapText(style.isWrapText());
+            }
+
         }
         catch (Exception ignored) {
             log.warn("样式设置警告:" + ignored.getMessage());

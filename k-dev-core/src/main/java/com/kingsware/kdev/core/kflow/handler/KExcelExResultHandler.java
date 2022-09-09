@@ -42,6 +42,9 @@ public class KExcelExResultHandler implements KFlowResultHandler {
         for(Map<String, Object> sheetMap: sheets) {
             String sheetName = sheetMap.get("name").toString();
             KSheet kSheet = kExcel.createSheet(sheetName);
+            if (sheetMap.containsKey("autoColumnSize")) {
+                kSheet.setAutoColumnSize((Boolean)sheetMap.get("autoColumnSize"));
+            }
             Integer sheetIndex = Integer.parseInt(sheetMap.get("index").toString());
             List<Map<String, Object>> regions = (List<Map<String, Object>>)sheetMap.get("regions");
             // 遍历regions

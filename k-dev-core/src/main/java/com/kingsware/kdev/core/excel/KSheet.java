@@ -18,6 +18,8 @@ public class KSheet {
     private int index;
     /** 名称 **/
     private String name;
+    /** 是否自动调整行宽度 **/
+    private boolean autoColumnSize;
 
     /** 区域清表 **/
     private List<KRegion> regions = new ArrayList<>();
