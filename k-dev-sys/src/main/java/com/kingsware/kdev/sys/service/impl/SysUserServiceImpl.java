@@ -158,44 +158,44 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     /**
      * 工具方法：通过部门id查询出该部门及其下级部门的所有部门id
      *
-     * @param argv 查询
+     * @param sysUnitId 部门id
      */
     @SuppressWarnings("unchecked")
-    private List<Object> getAllUnitIdByUnitId(SysUserQueryArgv argv) {
+    private List<Object> getAllUnitIdByUnitId(String sysUnitId) {
         //1.最终结果id的集合
         List<Object> ids = new ArrayList<>();
         //2.一次性查询出所有部门
-        SqlWrapper wrapper = new SqlWrapper("select * from sys_unit where 1=1");
-        PageDataRet<SysUnitRet> pageDataRet = (PageDataRet<SysUnitRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysUnitRet.class);
-        List<SysUnitRet> allUnit = pageDataRet.getList();
-        //3.如果前端点击的是顶级部门,部门id为null的也应该被查出来,直接返回所有
-        List<String> rootId = allUnit.stream().filter(s -> s.getParentId() == null).map(SysUnitRet::getId).collect(Collectors.toList());
-        if (rootId.contains(argv.getSysUnitId())) {
-            //返回null用于作为不筛选条件
+        List<SysUnit> allUnit = DB.findList(SysUnit.class, "select * from sys_unit");
+        //3.如果前端点击的是顶级部门,部门id为null的也应该被查出来
+        boolean isRoot = allUnit.stream().anyMatch(s -> s.getId().equals(sysUnitId) && s.getParentId() == null);
+        if (isRoot){
+            //直接返回null用于作为不筛选条件
             return null;
+        }else {
+            //4.否则根据部门id进行筛选(递归)
+            getChildUnitIdById(allUnit, ids, sysUnitId);
+            return ids;
         }
-        //4.否则根据部门id进行筛选(递归)
-        getChildUnitIdById(allUnit, ids, argv.getSysUnitId());
-        return ids;
     }
 
     /**
      * 工具方法：递归过程
+     *
      * @param allUnit 数据库当中的所有部门
-     * @param ids 最终结果ids的集合
-     * @param id 当前部门id
+     * @param ids     最终结果ids的集合
+     * @param id      当前部门id
      */
-    private void getChildUnitIdById(List<SysUnitRet> allUnit, List<Object> ids, String id) {
+    private void getChildUnitIdById(List<SysUnit> allUnit, List<Object> ids, String id) {
         //1.添加当前的部门id
         ids.add(id);
         //2.取下级部门id（递归结束条件）
-        List<SysUnitRet> childUnitList = allUnit.stream().filter(s -> s.getParentId() != null && s.getParentId().equals(id)).collect(Collectors.toList());
+        List<SysUnit> childUnitList = allUnit.stream().filter(s -> s.getParentId() != null && s.getParentId().equals(id)).collect(Collectors.toList());
         if (childUnitList.size() == 0) {
             return;
         }
         //3.递归子过程
-        for (SysUnitRet unitRet : childUnitList) {
-            getChildUnitIdById(allUnit, ids, unitRet.getId());
+        for (SysUnit unit : childUnitList) {
+            getChildUnitIdById(allUnit, ids, unit.getId());
         }
     }
 
@@ -227,7 +227,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         }
         if (StringUtils.isNotEmpty(argv.getSysUnitId())) {
             //通过部门id查询出该部门及其下级部门的所有部门id
-            List<Object> unitIds = getAllUnitIdByUnitId(argv);
+            List<Object> unitIds = getAllUnitIdByUnitId(argv.getSysUnitId());
             if (unitIds != null){
                 wrapper.in("sys_unit_id", unitIds);
             }
