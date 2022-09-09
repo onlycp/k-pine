@@ -44,7 +44,10 @@ public class SysFlowDefineRet extends BaseSimpleRet {
         private String content;
         /** 执行内容 **/
         private String afterContent;
+        /** 大小写 **/
+        private String columnLabelCase;
     }
+
 
     @Data
     static class Link {
@@ -92,7 +95,7 @@ public class SysFlowDefineRet extends BaseSimpleRet {
     /** 设置 **/
     public void addNode(String id, String label, String type,  String executeType, String sourceName, String zIndex,
                         String position, String beforeContent, String content, String afterContent,
-                        String flowId, String subFlowName) {
+                        String flowId, String subFlowName, String columnLabelCase) {
         Node node = new Node();
         node.setId(id);
         node.setType(type);
@@ -106,6 +109,7 @@ public class SysFlowDefineRet extends BaseSimpleRet {
         node.setAfterContent(afterContent);
         node.setFlowId(flowId);
         node.setSubFlowName(subFlowName);
+        node.setColumnLabelCase(columnLabelCase);
         this.nodes.add(node);
     }
 

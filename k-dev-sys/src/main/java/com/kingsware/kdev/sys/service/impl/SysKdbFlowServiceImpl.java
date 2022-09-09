@@ -106,10 +106,15 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             String zIndex = "";
             String subFlowName = "";
             String position = "";
+            String columnLabelCase = "normal";
             if (nodeDefinition.getExecute() != null && nodeDefinition.getExecute().getScript() != null) {
                 executeType = nodeDefinition.getExecute().getScript().getType();
                 dataSource = nodeDefinition.getExecute().getScript().getSourceName();
                 content = nodeDefinition.getExecute().getScript().getContent();
+                columnLabelCase = nodeDefinition.getExecute().getScript().getColumnLabelCase();
+                if (StringUtils.isEmpty(columnLabelCase)) {
+                    columnLabelCase = "normal";
+                }
             }
             if (nodeDefinition.getListener() != null && nodeDefinition.getListener().getBefore() != null && nodeDefinition.getListener().getBefore().getScript() != null) {
                 beforeContent = nodeDefinition.getListener().getBefore().getScript().getContent();
@@ -130,7 +135,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
                 }
             }
             defineRet.addNode(nodeDefinition.getId(), nodeDefinition.getName(), nodeDefinition.getType(), executeType,
-                    dataSource, zIndex, position, beforeContent, content, afterContent, nodeDefinition.getFlowId(), subFlowName);
+                    dataSource, zIndex, position, beforeContent, content, afterContent, nodeDefinition.getFlowId(), subFlowName, columnLabelCase);
             nodeIds.add(nodeDefinition.getId());
         }
         // 处理连线
@@ -187,7 +192,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
                 if (StringUtils.isNotEmpty(node.getExecuteType()) && StringUtils.isNotEmpty(node.getContent())) {
                     // 根据不同的执行类型，生成不同的执行内容
                     if (ScriptTypeEnum.SQL.getValue().equals(node.getExecuteType())) {
-                        nodeDefinition.setExecute(ExecuteDefinition.createSqlScript(node.getSourceName(), node.getContent()));
+                        nodeDefinition.setExecute(ExecuteDefinition.createSqlScript(node.getSourceName(), node.getContent(), node.getColumnLabelCase()));
                     } else if (ScriptTypeEnum.JS.getValue().equals(node.getExecuteType())) {
                         nodeDefinition.setExecute(ExecuteDefinition.createJsScript(node.getContent()));
                     }

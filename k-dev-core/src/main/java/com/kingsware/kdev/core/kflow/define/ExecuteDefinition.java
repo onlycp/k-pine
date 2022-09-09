@@ -21,11 +21,12 @@ public class ExecuteDefinition {
      * @param content
      * @return
      */
-    public static ExecuteDefinition createSqlScript(String sourceName, String content) {
+    public static ExecuteDefinition createSqlScript(String sourceName, String content, String columnLabelCase) {
         Script s = new Script();
         s.setSourceName(sourceName);
         s.setContent(content);
         s.setType("sql");
+        s.setColumnLabelCase(columnLabelCase);
         ExecuteDefinition executeDefinition = new ExecuteDefinition();
         executeDefinition.script = s;
         return executeDefinition;

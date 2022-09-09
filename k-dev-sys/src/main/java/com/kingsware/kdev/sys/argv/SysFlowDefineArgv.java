@@ -46,6 +46,8 @@ public class SysFlowDefineArgv extends BasePageArgv {
         private String content;
         /** 执行内容 **/
         private String afterContent;
+        /** 大小写 **/
+        private String columnLabelCase;
     }
 
     @Data

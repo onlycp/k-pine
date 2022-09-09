@@ -21,4 +21,6 @@ public class Script {
     private String type;
     /** 参数 **/
     private List<Object> params = new ArrayList<>();
+    /** 列表返回大小写, upper 大写, lower 小写, normal 正常/为空默认是这个 **/
+    private String columnLabelCase;
 }

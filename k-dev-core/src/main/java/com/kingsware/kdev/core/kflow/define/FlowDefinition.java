@@ -141,7 +141,7 @@ public class FlowDefinition {
             node.setState(NodeStateEnum.COMPLETED.getValue());
             node.setDebug(false);
             node.setType(NodeTypeEnum.TASK.getValue());
-            node.setExecute(ExecuteDefinition.createSqlScript(sourceName, sql));
+            node.setExecute(ExecuteDefinition.createSqlScript(sourceName, sql, ""));
             addNode(node);
         }
 
@@ -172,7 +172,7 @@ public class FlowDefinition {
             node.setState(NodeStateEnum.COMPLETED.getValue());
             node.setDebug(false);
             node.setType(NodeTypeEnum.TASK.getValue());
-            node.setExecute(ExecuteDefinition.createSqlScript(sourceName, sql));
+            node.setExecute(ExecuteDefinition.createSqlScript(sourceName, sql, ""));
             addNode(node);
         }
 
@@ -214,7 +214,7 @@ public class FlowDefinition {
             node.setState(NodeStateEnum.COMPLETED.getValue());
             node.setDebug(false);
             node.setType(NodeTypeEnum.TASK.getValue());
-            node.setExecute(ExecuteDefinition.createSqlScript(sourceName, sql));
+            node.setExecute(ExecuteDefinition.createSqlScript(sourceName, sql, ""));
             node.setListener(FlowNodeLister.createWithAfter(afterJavaScript));
             addNode(node);
         }
