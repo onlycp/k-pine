@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.auth.AppAuthProperties;
 import com.kingsware.kdev.core.auth.BaseUserInfo;
 import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
+import com.kingsware.kdev.core.bean.BaseSimpleRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.cache.access.AccessManager;
@@ -35,10 +36,7 @@ import com.kingsware.kdev.sys.model.SysUnit;
 import com.kingsware.kdev.sys.model.SysRole;
 import com.kingsware.kdev.sys.model.SysUser;
 import com.kingsware.kdev.sys.model.SysUserRole;
-import com.kingsware.kdev.sys.ret.SysUserLoginRet;
-import com.kingsware.kdev.sys.ret.SysUserProfileRet;
-import com.kingsware.kdev.sys.ret.SysUserRet;
-import com.kingsware.kdev.sys.ret.SysUserRoleName;
+import com.kingsware.kdev.sys.ret.*;
 import com.kingsware.kdev.sys.service.SysUserService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -157,6 +155,50 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         saveUserRoles(model.getId(), argv.getSysRoleIds());
     }
 
+    /**
+     * 工具方法：通过部门id查询出该部门及其下级部门的所有部门id
+     *
+     * @param argv 查询
+     */
+    @SuppressWarnings("unchecked")
+    private List<Object> getAllUnitIdByUnitId(SysUserQueryArgv argv) {
+        //1.最终结果id的集合
+        List<Object> ids = new ArrayList<>();
+        //2.一次性查询出所有部门
+        SqlWrapper wrapper = new SqlWrapper("select * from sys_unit where 1=1");
+        PageDataRet<SysUnitRet> pageDataRet = (PageDataRet<SysUnitRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysUnitRet.class);
+        List<SysUnitRet> allUnit = pageDataRet.getList();
+        //3.如果前端点击的是顶级部门,部门id为null的也应该被查出来,直接返回所有
+        List<String> rootId = allUnit.stream().filter(s -> s.getParentId() == null).map(SysUnitRet::getId).collect(Collectors.toList());
+        if (rootId.contains(argv.getSysUnitId())) {
+            //返回null用于作为不筛选条件
+            return null;
+        }
+        //4.否则根据部门id进行筛选(递归)
+        getChildUnitIdById(allUnit, ids, argv.getSysUnitId());
+        return ids;
+    }
+
+    /**
+     * 工具方法：递归过程
+     * @param allUnit 数据库当中的所有部门
+     * @param ids 最终结果ids的集合
+     * @param id 当前部门id
+     */
+    private void getChildUnitIdById(List<SysUnitRet> allUnit, List<Object> ids, String id) {
+        //1.添加当前的部门id
+        ids.add(id);
+        //2.取下级部门id（递归结束条件）
+        List<SysUnitRet> childUnitList = allUnit.stream().filter(s -> s.getParentId() != null && s.getParentId().equals(id)).collect(Collectors.toList());
+        if (childUnitList.size() == 0) {
+            return;
+        }
+        //3.递归子过程
+        for (SysUnitRet unitRet : childUnitList) {
+            getChildUnitIdById(allUnit, ids, unitRet.getId());
+        }
+    }
+
     @SneakyThrows
     @Override
     @SuppressWarnings("unchecked")
@@ -182,6 +224,13 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         }
         if (StringUtils.isNotEmpty(argv.getAppId())) {
             wrapper.appendSql(" and (u.app_id = ? or u.app_id is null)", argv.getAppId());
+        }
+        if (StringUtils.isNotEmpty(argv.getSysUnitId())) {
+            //通过部门id查询出该部门及其下级部门的所有部门id
+            List<Object> unitIds = getAllUnitIdByUnitId(argv);
+            if (unitIds != null){
+                wrapper.in("sys_unit_id", unitIds);
+            }
         }
         wrapper.sortBy("order by u.when_created desc");
         // 用户信息
