@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 /**
  * 演示控制器
@@ -41,7 +42,7 @@ public class SysUserController extends BaseController {
     @ApiIgnore
     @ApiOperation(value = "登录" ,notes = "登录")
     @PostMapping(value = "login")
-    public BaseRet<?> login(@RequestBody SysUserLoginArgv sysUserLoginArgv) {
+    public BaseRet<?> login(@RequestBody Map<String, Object> sysUserLoginArgv) {
         return BaseRet.success(sysUserService.login(sysUserLoginArgv));
     }
     /**

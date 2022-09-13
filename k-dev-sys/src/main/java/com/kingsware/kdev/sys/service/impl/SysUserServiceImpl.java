@@ -20,6 +20,9 @@ import com.kingsware.kdev.core.enums.ApiSystemEnum;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.UnauthorizedException;
 import com.kingsware.kdev.core.i18n.I18n;
+import com.kingsware.kdev.core.kflow.KFlowContext;
+import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
+import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.core.orm.DB;
@@ -204,10 +207,11 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     @SuppressWarnings("unchecked")
     public PageDataRet<SysUserRet> query(SysUserQueryArgv argv) {
         // 拼装sql
-        SqlWrapper wrapper = new SqlWrapper("select u.*, un.name as sys_unit_name, " +
+        SqlWrapper wrapper = new SqlWrapper("select DISTINCT(u.id) as uni_id, u.*, un.name as sys_unit_name, " +
                 "un.path as sys_unit_path " +
                 "from sys_user u " +
                 "left join sys_unit un on un.id=u.sys_unit_id " +
+                "left join sys_user_role sur on sur.sys_user_id=u.id " +
                 "where 1=1 ");
         // 拼装查询sql
         if (StringUtils.isNotEmpty(argv.getUsername())) {
@@ -221,6 +225,9 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         }
         if (argv.getStatus() != null) {
             wrapper.addCondition("u.status", Op.EQ, argv.getStatus());
+        }
+        if (argv.getStatus() != null) {
+            wrapper.addCondition("sur.sys_role_id", Op.EQ, argv.getRoleId());
         }
         if (StringUtils.isNotEmpty(argv.getAppId())) {
             wrapper.appendSql(" and (u.app_id = ? or u.app_id is null)", argv.getAppId());
@@ -262,74 +269,128 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     }
 
     @Override
-    public SysUserLoginRet login(SysUserLoginArgv argv) {
-        // 非空检查
-        if (argv == null
-                || argv.getUsername() == null
-                || argv.getPassword() == null) {
-            throw BusinessException.serviceThrow("请填写完整的登录信息！");
-        }
-        // 拼装sql
-        final Integer ENABLE_STATUS = 1;
-        SqlWrapper wrapper = new SqlWrapper("select * from sys_user where 1=1 ");
-        wrapper.addCondition("username", Op.EQ, argv.getUsername());
-        wrapper.addCondition("status", Op.EQ, ENABLE_STATUS);
-        SysUser model = DB.findOne(SysUser.class, wrapper.getSql(), wrapper.getParams().toArray());
-        if (model == null) {
-            throw BusinessException.serviceThrow("用户名或密码有误！");
-        }
-        // 把参数里的加密密码解密出来
-        argv.setPassword(decodeBase64(argv.getPassword()));
-        if (!EncryptWorker.getInstance().validate(argv.getPassword(), model.getPassword())) {
-            throw BusinessException.serviceThrow("用户名或密码有误！");
-        }
-        BaseUserInfo userInfo = new BaseUserInfo();
-        userInfo = BeanUtils.copyObject(model, BaseUserInfo.class);
-        Map<String, String> roleMap = getRoleIds(getRolesByUserId(model.getId()));
-        userInfo.setRoleIds(roleMap.get("roleIds"));
-        userInfo.setRoleNames(roleMap.get("roleNames"));
-        userInfo.setRoleCodes(roleMap.get("roleCodes"));
-        userInfo.setApiSystem(ApiSystemEnum.ADMIN);
-        // 获取数据权限id
-        String accessSql = "select sys_data_access_id from sys_data_access_user au inner join sys_data_access da on (da.id=au.sys_data_access_id and da.status=1) where au.sys_user_id=?";
-        List<String> accessIds = DB.findSingleAttributeList(String.class, accessSql, model.getId());
-
-        if (userInfo.getRoleIds() == null || userInfo.getRoleIds().isEmpty()) {
-            throw new UnauthorizedException("你当前没有权限访问系统功能，请联系业务部门授权后，再访问系统 。");
-        }
-        userInfo.setAccessIds(StringUtils.joinToString(accessIds, ","));
-        // 获取会话id
-        String kSessionId = ServletUtil.getCookie("k_session_id", "");
-        String token = TokenUtil.createToken(appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), KClientContext.getContext().getIp(), kSessionId,  userInfo);
+    public SysUserLoginRet login(Map<String, Object> argv) {
         SysUserLoginRet ret = new SysUserLoginRet();
-        ret.setToken(token);
-        // 保存登录会话
-        // 如果只允许一个登录会话, 那么先将之前的会话删除
-        if (appAuthProperties.getLoginSessionOne()) {
-            DB.executeUpdateSql("delete from sys_online_user where user_id = ?", model.getId());
-            SessionManager.getInstance().removeByUserId(model.getId());
-        }
-        // 获取用户的角色权限
+        Map<String, Object> beforeFlowResultMap = new HashMap<>();
+        Map<String, Object> afterParams = new HashMap<>();
+        afterParams.put("isLogined", false);
 
-        // 创建在线用户
-        SysOnlineUser onlineUser = new SysOnlineUser();
-        onlineUser.setUserId(model.getId());
-        onlineUser.setLoginIp(KClientContext.getContext().getIp());
-        onlineUser.setLoginTime(new Timestamp(System.currentTimeMillis()));
-        onlineUser.setLoginToken(token);
-        // 区分是jwt还是session
-        if (appAuthProperties.getMockSessionExpireMinutes() <= 0) {
-            onlineUser.setExpireTime(new Timestamp(System.currentTimeMillis() +  ((long) appAuthProperties.getTokenExpireMinutes() * 60 * 1000)));
+        try {
+            // 调用前置登录处理
+            if (!KFlowContext.isDevMode()) {
+                SysConfigInfo beforeFlow = ConfigManager.getInstance().getItem("application.customLoginBeforeFlow");
+                if (beforeFlow != null && StringUtils.isNotEmpty(beforeFlow.getValue())) {
+                    KFlowContext beforeIc = KFlowContext.createBaseContext("{}", "{}");
+                    KdbFlowResult beforeFlowResult = KdbFlowExecutor.getInstance().execute(beforeFlow.getValue(), "", argv, beforeIc, false);
+                    beforeFlowResultMap = (Map<String, Object>) beforeFlowResult.getData();
+                }
+            }
+
+            boolean hasValid = (boolean) beforeFlowResultMap.getOrDefault("hasValid", false);
+            boolean isValid = (boolean) beforeFlowResultMap.getOrDefault("isValid", false);
+            String message = (String) beforeFlowResultMap.getOrDefault("message", "");
+            boolean useUsernamePassword = (boolean) beforeFlowResultMap.getOrDefault("useUsernamePassword", true);
+            String userId = (String) beforeFlowResultMap.getOrDefault("userId", "");
+
+            if (hasValid && !isValid) {
+                throw BusinessException.serviceThrow(message != null ? message : "请填写完整的登录信息！");
+            }
+
+            // 非空检查
+            String username = (String) argv.get("username");
+            String password = (String) argv.get("password");
+            if (useUsernamePassword) {
+                if (argv == null
+                        || username == null
+                        || password == null) {
+                    throw BusinessException.serviceThrow("请填写完整的登录信息！");
+                }
+            }
+
+            // 拼装sql
+            final Integer ENABLE_STATUS = 1;
+            SqlWrapper wrapper = new SqlWrapper("select * from sys_user where 1=1 ");
+            if (useUsernamePassword) {
+                wrapper.addCondition("username", Op.EQ, username);
+            } else {
+                wrapper.addCondition("id", Op.EQ, userId);
+            }
+            wrapper.addCondition("status", Op.EQ, ENABLE_STATUS);
+            SysUser model = DB.findOne(SysUser.class, wrapper.getSql(), wrapper.getParams().toArray());
+            if (model == null) {
+                throw BusinessException.serviceThrow("用户不存在！");
+            }
+            if (useUsernamePassword) {
+                // 把参数里的加密密码解密出来
+                if (!EncryptWorker.getInstance().validate(decodeBase64(password), model.getPassword())) {
+                    throw BusinessException.serviceThrow("用户名或密码有误！");
+                }
+            }
+            BaseUserInfo userInfo = new BaseUserInfo();
+            userInfo = BeanUtils.copyObject(model, BaseUserInfo.class);
+            Map<String, String> roleMap = getRoleIds(getRolesByUserId(model.getId()));
+            userInfo.setRoleIds(roleMap.get("roleIds"));
+            userInfo.setRoleNames(roleMap.get("roleNames"));
+            userInfo.setRoleCodes(roleMap.get("roleCodes"));
+            userInfo.setApiSystem(ApiSystemEnum.ADMIN);
+            // 获取数据权限id
+            String accessSql = "select sys_data_access_id from sys_data_access_user au inner join sys_data_access da on (da.id=au.sys_data_access_id and da.status=1) where au.sys_user_id=?";
+            List<String> accessIds = DB.findSingleAttributeList(String.class, accessSql, model.getId());
+
+            if (userInfo.getRoleIds() == null || userInfo.getRoleIds().isEmpty()) {
+                throw new UnauthorizedException("你当前没有权限访问系统功能，请联系业务部门授权后，再访问系统 。");
+            }
+            userInfo.setAccessIds(StringUtils.joinToString(accessIds, ","));
+            // 获取会话id
+            String kSessionId = ServletUtil.getCookie("k_session_id", "");
+            String token = TokenUtil.createToken(appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), KClientContext.getContext().getIp(), kSessionId,  userInfo);
+            ret.setToken(token);
+            // 保存登录会话
+            // 如果只允许一个登录会话, 那么先将之前的会话删除
+            if (appAuthProperties.getLoginSessionOne()) {
+                DB.executeUpdateSql("delete from sys_online_user where user_id = ?", model.getId());
+                SessionManager.getInstance().removeByUserId(model.getId());
+            }
+            // 获取用户的角色权限
+
+            // 创建在线用户
+            SysOnlineUser onlineUser = new SysOnlineUser();
+            onlineUser.setUserId(model.getId());
+            onlineUser.setLoginIp(KClientContext.getContext().getIp());
+            onlineUser.setLoginTime(new Timestamp(System.currentTimeMillis()));
+            onlineUser.setLoginToken(token);
+            // 区分是jwt还是session
+            if (appAuthProperties.getMockSessionExpireMinutes() <= 0) {
+                onlineUser.setExpireTime(new Timestamp(System.currentTimeMillis() +  ((long) appAuthProperties.getTokenExpireMinutes() * 60 * 1000)));
+            }
+            else {
+                onlineUser.setExpireTime(new Timestamp(System.currentTimeMillis() +  ((long) appAuthProperties.getMockSessionExpireMinutes() * 60 * 1000)));
+            }
+            DB.save(onlineUser);
+            // 保存到缓存
+            SessionManager.getInstance().addSession(onlineUser);
+            // 加载权限
+            PermissionManager.getInstance().refreshPermissions(userInfo.getRoleIds());
+
+            afterParams.put("isLogined", true);
+
+        } finally {
+            // 调用后置登录处理
+
+            if (!KFlowContext.isDevMode()) {
+                SysConfigInfo afterFlow = ConfigManager.getInstance().getItem("application.customLoginBeforeFlow");
+                if (afterFlow != null && StringUtils.isNotEmpty(afterFlow.getValue())) {
+                    KFlowContext afterIc = KFlowContext.createBaseContext("{}", "{}");
+                    afterParams.putAll(beforeFlowResultMap);
+                    afterParams.putAll(argv);
+                    afterParams.put("password", null);
+                    KdbFlowResult afterFlowResult = KdbFlowExecutor.getInstance().execute(afterFlow.getValue(), "", afterParams, afterIc, false);
+                    Object afterFlowResultMap = afterFlowResult.getData();
+                    ret.setOtherParams(afterFlowResultMap);
+                }
+            }
+            return ret;
         }
-        else {
-            onlineUser.setExpireTime(new Timestamp(System.currentTimeMillis() +  ((long) appAuthProperties.getMockSessionExpireMinutes() * 60 * 1000)));
-        }
-        DB.save(onlineUser);
-        // 保存到缓存
-        SessionManager.getInstance().addSession(onlineUser);
-        // 加载权限
-        PermissionManager.getInstance().refreshPermissions(userInfo.getRoleIds());
-        return ret;
     }
 
 

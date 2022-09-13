@@ -4,6 +4,8 @@ import com.kingsware.kdev.core.bean.BaseManageRet;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.Map;
+
 /**
  * 用户返回
  *
@@ -16,4 +18,6 @@ import lombok.EqualsAndHashCode;
 public class SysUserLoginRet  {
     /** 令牌 */
     private String token;
+
+    private Object otherParams;
 }
