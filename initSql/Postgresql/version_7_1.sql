@@ -160,19 +160,19 @@ COMMENT ON COLUMN "sys_i18n"."who_modified" IS '修改人员';
 
 COMMENT ON TABLE "sys_i18n" IS '系统表-国际化配置';
 CREATE TABLE IF NOT EXISTS "sys_logic_template" (
-                                               "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
-                                               "name" varchar(255) COLLATE "pg_catalog"."default",
-                                               "module_id" varchar(36) COLLATE "pg_catalog"."default",
-                                               "description" text COLLATE "pg_catalog"."default",
-                                               "nodes" text COLLATE "pg_catalog"."default",
-                                               "links" text COLLATE "pg_catalog"."default",
-                                               "app_id" varchar(36) COLLATE "pg_catalog"."default",
-                                               "when_created" varchar(50) COLLATE "pg_catalog"."default",
-                                               "who_created" varchar(36) COLLATE "pg_catalog"."default",
-                                               "when_modified" varchar(50) COLLATE "pg_catalog"."default",
-                                               "who_modified" varchar(36) COLLATE "pg_catalog"."default",
-                                               CONSTRAINT "sys_logic_template_pk_sys_i18n" PRIMARY KEY ("id")
-)
+    id varchar(36) NOT NULL,
+    name varchar(255) NULL,
+    module_id varchar(36) NULL,
+    description text NULL,
+    nodes text NULL,
+    links text NULL,
+    app_id varchar(36) NULL,
+    when_created varchar(50) NULL,
+    who_created varchar(36) NULL,
+    when_modified varchar(50) NULL,
+    who_modified varchar(36) NULL,
+    CONSTRAINT sys_logic_template_pk_ PRIMARY KEY (id)
+    )
 ;
 
 
