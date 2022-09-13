@@ -18,6 +18,8 @@ public class BasePageArgv {
     private String orderBy;
     /** 排序方式, asc或desc **/
     private String sort;
+    /** 排序方式, asc或desc **/
+    private String orderDir;
     /** 被选择要导出的ID 或 指定要查的ID集合,逗号分隔 */
     private String ids;
 
@@ -43,6 +45,14 @@ public class BasePageArgv {
 
     public void setOrderBy(String orderBy) {
         this.orderBy = orderBy;
+    }
+
+    public String getOrderDir() {
+        return orderDir;
+    }
+
+    public void setOrderDir(String orderDir) {
+        this.orderDir = orderDir;
     }
 
     public String getSort() {

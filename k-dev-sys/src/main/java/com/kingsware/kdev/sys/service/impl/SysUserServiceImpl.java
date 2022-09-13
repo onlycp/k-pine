@@ -30,10 +30,7 @@ import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.orm.expression.Op;
-import com.kingsware.kdev.core.util.AESUtil;
-import com.kingsware.kdev.core.util.BeanUtils;
-import com.kingsware.kdev.core.util.ServletUtil;
-import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.sys.argv.*;
 import com.kingsware.kdev.sys.model.SysUnit;
 import com.kingsware.kdev.sys.model.SysRole;
@@ -208,7 +205,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     public PageDataRet<SysUserRet> query(SysUserQueryArgv argv) {
         // 拼装sql
         SqlWrapper wrapper = new SqlWrapper("select DISTINCT(u.id) as uni_id, u.*, un.name as sys_unit_name, " +
-                "un.path as sys_unit_path " +
+                "un.path as sys_unit_path  " +
                 "from sys_user u " +
                 "left join sys_unit un on un.id=u.sys_unit_id " +
                 "left join sys_user_role sur on sur.sys_user_id=u.id " +
@@ -239,7 +236,17 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 wrapper.in("sys_unit_id", unitIds);
             }
         }
-        wrapper.sortBy("order by u.when_created desc");
+        String orderString = "order by ";
+        if (StringUtils.isNotEmpty(argv.getOrderBy())) {
+            argv = PageUtil.mergeQueryOrder(argv, SysUserQueryArgv.class);
+            if ("sys_role_names".equalsIgnoreCase(argv.getOrderBy())) {
+                argv.setOrderBy("sur.sys_role_id");
+            }
+            orderString += (argv.getOrderBy() + " " + argv.getSort());
+        } else {
+            orderString += "u.when_created desc";
+        }
+        wrapper.sortBy(orderString);
         // 用户信息
         PageDataRet<SysUserRet> pageDataRet = (PageDataRet<SysUserRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysUserRet.class);
         // 查询角色信息
