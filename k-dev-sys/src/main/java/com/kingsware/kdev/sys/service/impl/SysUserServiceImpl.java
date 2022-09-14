@@ -382,9 +382,14 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                                 "where sys_role_id = ?";
                         List<SysMenu> sysMenuList = DB.findList(SysMenu.class, sql, roleId);
                         //获取当前角色的的菜单权限字符api_codes
-                        Set<String> apiCodes = sysMenuList.stream().map(SysMenu::getApiCodes)
-                                .filter(StringUtils::isNotEmpty).collect(Collectors.toSet());
-                        perms.addAll(apiCodes);
+                        List<String[]> apiCodeList = sysMenuList.stream()
+                                .map(SysMenu::getApiCodes)
+                                .filter(StringUtils::isNotEmpty)
+                                .map(s -> s.split(","))
+                                .collect(Collectors.toList());
+                        for (String[] apiCode : apiCodeList) {
+                            perms.addAll(Arrays.asList(apiCode));
+                        }
                     }
                 }
             }
