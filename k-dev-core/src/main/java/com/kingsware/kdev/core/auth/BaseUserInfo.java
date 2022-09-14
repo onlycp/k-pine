@@ -38,4 +38,6 @@ public class BaseUserInfo {
     private ApiSystemEnum apiSystem;
     /** 归属单位id **/
     private String sysUnitId;
+    /** 归属单位名称 **/
+    private String sysUnitName;
 }

@@ -340,6 +340,14 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             userInfo.setRoleNames(roleMap.get("roleNames"));
             userInfo.setRoleCodes(roleMap.get("roleCodes"));
             userInfo.setApiSystem(ApiSystemEnum.ADMIN);
+            // 获取部门信息
+            if (StringUtils.isNotEmpty(model.getSysUnitId())) {
+                SysUnit sysUnit = DB.findOne(SysUnit.class, Expr.builder().add("id", "=", model.getSysUnitId()).build());
+                if (sysUnit != null) {
+                    userInfo.setSysUnitName(sysUnit.getName());
+                }
+            }
+
             // 获取数据权限id
             String accessSql = "select sys_data_access_id from sys_data_access_user au inner join sys_data_access da on (da.id=au.sys_data_access_id and da.status=1) where au.sys_user_id=?";
             List<String> accessIds = DB.findSingleAttributeList(String.class, accessSql, model.getId());
