@@ -32,10 +32,7 @@ import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.sys.argv.*;
-import com.kingsware.kdev.sys.model.SysUnit;
-import com.kingsware.kdev.sys.model.SysRole;
-import com.kingsware.kdev.sys.model.SysUser;
-import com.kingsware.kdev.sys.model.SysUserRole;
+import com.kingsware.kdev.sys.model.*;
 import com.kingsware.kdev.sys.ret.*;
 import com.kingsware.kdev.sys.service.SysUserService;
 import lombok.SneakyThrows;
@@ -435,7 +432,45 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     public BaseUserInfo getBaseUserInfo(String token, String ip) {
         BaseUserInfo userInfo = TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), ip, appAuthProperties.getTokenExpireMinutes(), appAuthProperties.getMockSessionExpireMinutes());
 //        userInfo.setAvatar("https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif");
+        //获取角色拥有的权限
+        Set<String> permissions = getMenuPermission(userInfo);
+        userInfo.setPermissions(permissions);
         return userInfo;
+    }
+
+    /**
+     * 工具方法：userInfo->拿到角色id列表->根据角色id查询角色拥有的菜单权限字符api_codes
+     */
+    private Set<String> getMenuPermission(BaseUserInfo userInfo) {
+        Set<String> perms = new HashSet<>();
+        //管理员拥有所有权限
+        String[] roleCodes = userInfo.getRoleCodes().split(",");
+        if (roleCodes.length > 0) {
+            boolean isAdmin = Arrays.stream(roleCodes).anyMatch(s -> s.equalsIgnoreCase("admin"));
+            if (isAdmin) {
+                perms.add("*:*:*");
+            } else {
+                //多角色菜单权限遍历
+                String[] roleIds = userInfo.getRoleIds().split(",");
+                if (roleIds.length > 0) {
+                    for (String roleId : roleIds) {
+                        String sql = "SELECT u.* FROM sys_role_menu r left JOIN sys_menu u ON r.sys_menu_id = u.id\n" +
+                                "where sys_role_id = ?";
+                        List<SysMenu> sysMenuList = DB.findList(SysMenu.class, sql, roleId);
+                        //获取当前角色的的菜单权限字符api_codes
+                        List<String[]> apiCodeList = sysMenuList.stream()
+                                .map(SysMenu::getApiCodes)
+                                .filter(StringUtils::isNotEmpty)
+                                .map(s -> s.split(","))
+                                .collect(Collectors.toList());
+                        for (String[] apiCode : apiCodeList) {
+                            perms.addAll(Arrays.asList(apiCode));
+                        }
+                    }
+                }
+            }
+        }
+        return perms;
     }
 
     @Override
