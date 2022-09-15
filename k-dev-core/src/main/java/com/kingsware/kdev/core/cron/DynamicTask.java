@@ -43,6 +43,10 @@ public class DynamicTask implements CommandLineRunner {
 
     @Value("${schedule.scan-package:com.kingsware.kdev}")
     private String scanPackage ;
+    /** 是否将结果回写到数据库 **/
+    @Value("${schedule.result-to-db:true}")
+    private boolean resultToDb ;
+
 
     private final ThreadPoolTaskScheduler threadPoolTaskScheduler;
 
@@ -162,8 +166,14 @@ public class DynamicTask implements CommandLineRunner {
         }
         finally {
             long t2 = System.currentTimeMillis();
-            String sql = "update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ?,  last_execute_time=?, lock_status=0 where id=?";
-            DB.executeUpdateSql(sql, executeStatus, (t2 - t1),  errorMessage, DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME), myTask.getId());
+            if ((!resultToDb) && myTask.getDistributed()==0) {
+                log.info("任务执行完成，名称:{}, 执行结果:{}, 用时:{}, 信息:{}", myTask.getName(), executeStatus==1 ?"成功":"失败", (t2-t1), errorMessage);
+            }
+            else {
+                String sql = "update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ?,  last_execute_time=?, lock_status=0 where id=?";
+                DB.executeUpdateSql(sql, executeStatus, (t2 - t1),  errorMessage, DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME), myTask.getId());
+            }
+
         }
 
     }
