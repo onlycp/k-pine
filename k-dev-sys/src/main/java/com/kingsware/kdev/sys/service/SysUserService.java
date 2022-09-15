@@ -52,7 +52,7 @@ public interface SysUserService extends BaseService {
      */
     void delete(MultiIdArgv argv);
 
-    SysUserLoginRet login(SysUserLoginArgv argv);
+    SysUserLoginRet login(Map<String, Object> argv);
 
     void changePassword(SysUserChangePasswordArgv argv, String token, String ip);
 

@@ -70,4 +70,15 @@ public class PageUtil {
         }
         return pageDataRet;
     }
+
+    public static <T> T mergeQueryOrder(T argv, Class T) {
+        if (argv instanceof BasePageArgv) {
+            // Vue代码版的排序用的是sort参数，AMIS版页面的排序用的是orderDir
+            if (((BasePageArgv) argv).getOrderDir() != null) {
+                ((BasePageArgv) argv).setSort(((BasePageArgv) argv).getOrderDir());
+                ((BasePageArgv) argv).setOrderBy(StringUtils.humpToLine(((BasePageArgv) argv).getOrderBy()));
+            }
+        }
+        return argv;
+    }
 }

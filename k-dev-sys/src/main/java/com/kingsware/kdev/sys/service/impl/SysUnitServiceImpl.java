@@ -18,6 +18,7 @@ import com.kingsware.kdev.sys.argv.SysUnitArgv;
 import com.kingsware.kdev.sys.argv.SysUnitQueryArgv;
 import com.kingsware.kdev.sys.model.SysUnit;
 import com.kingsware.kdev.sys.ret.SysUnitRet;
+import com.kingsware.kdev.sys.ret.SysUserRoleName;
 import com.kingsware.kdev.sys.service.SysUnitService;
 import org.springframework.stereotype.Service;
 
@@ -120,16 +121,19 @@ public class SysUnitServiceImpl extends BaseServiceImpl implements SysUnitServic
     public PageDataRet<SysUnitRet> query(SysUnitQueryArgv argv) {
 
         // 拼装sql
-        SqlWrapper wrapper = new SqlWrapper("select * from sys_unit where 1=1 ");
+        SqlWrapper wrapper = new SqlWrapper("select sun.id, sun.name, sun.parent_id, sun.path, sun.mobile, sun.email, sun.status, sun.note, sun.order_num, sun.who_created, sun.when_created, sun.who_modified, sun.when_modified, sun.app_id" +
+                ", su.id as leader_id, su.real_name as leader from sys_unit sun left join sys_user su on sun.leader = su.id where 1=1 ");
+
+//        SqlWrapper wrapper = new SqlWrapper("select * from sys_unit where 1=1 ");
         // 拼装查询sql
         if (StringUtils.isNotEmpty(argv.getName())) {
-            wrapper.addCondition("name", Op.LIKE, "%" +argv.getName() +"%");
+            wrapper.addCondition("sun.name", Op.LIKE, "%" +argv.getName() +"%");
         }
         if (argv.getStatus() != null) {
-            wrapper.addCondition("status", Op.EQ, argv.getStatus());
+            wrapper.addCondition("sun.status", Op.EQ, argv.getStatus());
         }
         if (StringUtils.isNotEmpty(argv.getAppId())) {
-            wrapper.appendSql(" and (app_id = ? or app_id is null)", argv.getAppId());
+            wrapper.appendSql(" and (sun.app_id = ? or sun.app_id is null)", argv.getAppId());
         }
         // 查询所有相关的部门
         List<SysUnit> units = DB.findList(SysUnit.class, wrapper.getSql(), wrapper.getParams().toArray());
@@ -140,10 +144,11 @@ public class SysUnitServiceImpl extends BaseServiceImpl implements SysUnitServic
             ids.addAll(Arrays.asList(splits));
         }
         // 重新查询自己想要的
-        SqlWrapper wantWrapper = new SqlWrapper("select * from sys_unit where 1=1 ");
+        SqlWrapper wantWrapper = new SqlWrapper("select sun.id, sun.name, sun.parent_id, sun.path, sun.mobile, sun.email, sun.status, sun.note, sun.order_num, sun.who_created, sun.when_created, sun.who_modified, sun.when_modified, sun.app_id"
+                + " , su.id as leader_id, su.real_name as leader from sys_unit sun left join sys_user su on sun.leader = su.id where 1=1 ");
         // 加一个不可能存在的id进去
         ids.add(StringUtils.getUUID());
-        wantWrapper.in("id", ids);
+        wantWrapper.in("sun.id", ids);
         List<SysUnit> wantList = DB.findList(SysUnit.class, wantWrapper.getSql(), wantWrapper.getParams().toArray());
         // 将结果转为树
         List<SysUnitRet> retList = new ArrayList<>();

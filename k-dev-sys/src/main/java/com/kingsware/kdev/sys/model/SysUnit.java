@@ -24,6 +24,8 @@ public class SysUnit extends BaseManageModel {
     private String path;
     /** 负责人 **/
     private String leader;
+    /** 负责人 **/
+    private String leaderId;
     /** 联系电话 **/
     private String mobile;
     /** 电子邮件 **/

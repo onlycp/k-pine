@@ -4,6 +4,8 @@ import com.kingsware.kdev.core.enums.ApiSystemEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.Set;
+
 /**
  * 登录用户的基本信息
  *
@@ -38,4 +40,8 @@ public class BaseUserInfo {
     private ApiSystemEnum apiSystem;
     /** 归属单位id **/
     private String sysUnitId;
+    /** 归属单位名称 **/
+    private String sysUnitName;
+    /** 角色拥有的菜单权限 **/
+    private Set<String> permissions;
 }
