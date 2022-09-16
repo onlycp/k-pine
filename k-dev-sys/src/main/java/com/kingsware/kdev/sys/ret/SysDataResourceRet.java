@@ -31,4 +31,6 @@ public class SysDataResourceRet extends BaseManageRet {
     private String extraSql;
     /** 所属应用ID **/
     private String appId;
+    /** 关联字段名 **/
+    private String valueField;
 }

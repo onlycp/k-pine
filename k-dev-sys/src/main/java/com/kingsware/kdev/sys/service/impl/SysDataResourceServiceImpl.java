@@ -54,6 +54,7 @@ public class SysDataResourceServiceImpl extends BaseServiceImpl implements SysDa
         model.setIsOnlyLeaf(argv.getIsOnlyLeaf());
         model.setExtraSql(argv.getExtraSql());
         model.setQuerySql(argv.getQuerySql());
+        model.setValueField(argv.getValueField());
         // 校验
         checkUnique(model);
         // 保存

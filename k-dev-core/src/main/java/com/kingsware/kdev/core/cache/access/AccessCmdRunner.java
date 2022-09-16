@@ -24,10 +24,10 @@ public class AccessCmdRunner implements CommandLineRunner {
         String id = DB.findSingleAttribute(String.class, "select id from sys_role where code = ?", "admin");
         AccessManager.getInstance().setSupperAdminRoleId(id);
         // 查询表
-        List<DataResourceInfo> tables = DB.findList(DataResourceInfo.class, "select table_name, extra_sql from sys_data_resource where status = ?", 1);
-        Map<String, String>  map = new HashMap<>();
+        List<DataResourceInfo> tables = DB.findList(DataResourceInfo.class, "select table_name, extra_sql, value_field from sys_data_resource where status = ?", 1);
+        Map<String, DataResourceInfo>  map = new HashMap<>();
         for (DataResourceInfo resource: tables) {
-            map.put(resource.getTableName(), resource.getExtraSql());
+            map.put(resource.getTableName(), resource);
         }
         AccessManager.getInstance().setAccessTables(map);
     }
