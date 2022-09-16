@@ -201,11 +201,11 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     @SuppressWarnings("unchecked")
     public PageDataRet<SysUserRet> query(SysUserQueryArgv argv) {
         // 拼装sql
-        SqlWrapper wrapper = new SqlWrapper("select DISTINCT(u.id) as uni_id, u.*, un.name as sys_unit_name, " +
+        SqlWrapper wrapper = new SqlWrapper("select u.*, un.name as sys_unit_name, " +
                 "un.path as sys_unit_path  " +
                 "from sys_user u " +
                 "left join sys_unit un on un.id=u.sys_unit_id " +
-                "left join sys_user_role sur on sur.sys_user_id=u.id " +
+//                "left join sys_user_role sur on sur.sys_user_id=u.id " +
                 "where 1=1 ");
         // 拼装查询sql
         if (StringUtils.isNotEmpty(argv.getUsername())) {
@@ -220,9 +220,9 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         if (argv.getStatus() != null) {
             wrapper.addCondition("u.status", Op.EQ, argv.getStatus());
         }
-        if (argv.getStatus() != null) {
-            wrapper.addCondition("sur.sys_role_id", Op.EQ, argv.getRoleId());
-        }
+//        if (argv.getRoleId() != null) {
+//            wrapper.addCondition("sur.sys_role_id", Op.EQ, argv.getRoleId());
+//        }
         if (StringUtils.isNotEmpty(argv.getAppId())) {
             wrapper.appendSql(" and (u.app_id = ? or u.app_id is null)", argv.getAppId());
         }
@@ -236,9 +236,6 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         String orderString = "order by ";
         if (StringUtils.isNotEmpty(argv.getOrderBy())) {
             argv = PageUtil.mergeQueryOrder(argv, SysUserQueryArgv.class);
-            if ("sys_role_names".equalsIgnoreCase(argv.getOrderBy())) {
-                argv.setOrderBy("sur.sys_role_id");
-            }
             orderString += (argv.getOrderBy() + " " + argv.getSort());
         } else {
             orderString += "u.when_created desc";
@@ -344,7 +341,6 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                     userInfo.setSysUnitName(sysUnit.getName());
                 }
             }
-
             // 获取数据权限id
             String accessSql = "select sys_data_access_id from sys_data_access_user au inner join sys_data_access da on (da.id=au.sys_data_access_id and da.status=1) where au.sys_user_id=?";
             List<String> accessIds = DB.findSingleAttributeList(String.class, accessSql, model.getId());
