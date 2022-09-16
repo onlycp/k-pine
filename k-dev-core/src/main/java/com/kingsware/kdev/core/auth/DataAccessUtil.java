@@ -1,7 +1,9 @@
 package com.kingsware.kdev.core.auth;
 
 import com.kingsware.kdev.core.cache.access.AccessManager;
+import com.kingsware.kdev.core.cache.access.DataResourceInfo;
 import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.orm.kdb.DataSourceInfo;
 import com.kingsware.kdev.core.util.StringUtils;
 
 import java.text.MessageFormat;
@@ -50,8 +52,10 @@ public class DataAccessUtil {
         }
 
         // 获取附加sql
-        String extraSql = AccessManager.getInstance().getAccessTables().get(table.toLowerCase());
+        DataResourceInfo dataSourceInfo = AccessManager.getInstance().getAccessTables().get(table.toLowerCase());
+        String queryColumn = StringUtils.isEmpty(dataSourceInfo.getValueField()) ? "id" : dataSourceInfo.getValueField();
         // 如果用户的数据id为空， 返回永远不可能成真的条件
+        String extraSql = dataSourceInfo.getExtraSql();
         if (StringUtils.isEmpty(userInfo.getAccessIds()) && StringUtils.isEmpty(extraSql)) {
             return "1 != 1";
         }
@@ -77,11 +81,11 @@ public class DataAccessUtil {
         // 拼接权限sql(由于id是uuid，这里忽略table_name)
         if (sqlLink == SqlLink.EXISTS) {
             return MessageFormat.format("exists (" +
-                    "select ar.data_id from sys_data_access_resource ar where ({0}.id=ar.data_id and ar.access_id in ({1}) ) {2} " +
-                    ")", alias, StringUtils.joinToString(inSet, ","), extraSql == null ? "" : extraSql);
+                    "select ar.data_id from sys_data_access_resource ar where ({0}.{1}=ar.data_id and ar.access_id in ({2}) ) {3} " +
+                    ")", alias, queryColumn, StringUtils.joinToString(inSet, ","), extraSql == null ? "" : extraSql);
         }
         else if (sqlLink == SqlLink.IN) {
-            return MessageFormat.format("{0}.id in (select ar.data_id from sys_data_access_resource ar where (ar.table_name=''{1}'' and  ar.access_id in ({2})) {3})", alias, table, StringUtils.joinToString(inSet, ","), extraSql);
+            return MessageFormat.format("{0}.{1} in (select ar.data_id from sys_data_access_resource ar where (ar.table_name=''{2}'' and  ar.access_id in ({3})) {4})", alias, queryColumn, table, StringUtils.joinToString(inSet, ","), extraSql);
         }
         return null;
     }

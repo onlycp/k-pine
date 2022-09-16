@@ -18,7 +18,7 @@ public class AccessManager {
     /** 超级管理员id **/
     private String supperAdminRoleId;
     /** 权限资源map **/
-    private Map<String, String> accessTables = new HashMap<>();
+    private Map<String, DataResourceInfo> accessTables = new HashMap<>();
 
 
 
@@ -58,11 +58,11 @@ public class AccessManager {
         this.supperAdminRoleId = supperAdminRoleId;
     }
 
-    public void setAccessTables(Map<String, String> accessTables) {
+    public void setAccessTables(Map<String, DataResourceInfo> accessTables) {
         this.accessTables = accessTables;
     }
 
-    public Map<String, String> getAccessTables() {
+    public Map<String, DataResourceInfo> getAccessTables() {
         return accessTables;
     }
 }

@@ -15,5 +15,7 @@ public class DataResourceInfo {
     private String tableName;
     /** 附加sql **/
     private String extraSql;
+    /** 关联字段 **/
+    private String valueField;
 }
 
