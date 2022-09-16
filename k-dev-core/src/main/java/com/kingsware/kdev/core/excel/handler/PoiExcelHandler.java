@@ -72,8 +72,19 @@ public class PoiExcelHandler implements KExcelHandler{
                     if (row == null) {
                         row = sheet.createRow(region.getStartCell().getRowIndex());
                     }
+                    String dataType = region.getType();
+                    if (region.getValue() != null && "number".equalsIgnoreCase(region.getType()) || region.getValue() instanceof Number) {
+                        // 此处设置数据格式
+                        DataFormat df = workbook.createDataFormat();
+                        if (region.getValue() instanceof Integer) {
+                            dataType = "integer";
+                        }else{
+                           dataType = "number";
+                        }
 
-                    lastCellStyle = createCellStyle(workbook,region.getStyle(),(XSSFCellStyle) lastCellStyle);
+                    }
+
+                    lastCellStyle = createCellStyle(workbook,region.getStyle(), dataType);
                     // 创建单元格
                     Cell cell = row.createCell(region.getStartCell().getColumnIndex());
                     if (region.getValue() != null) {
@@ -185,7 +196,7 @@ public class PoiExcelHandler implements KExcelHandler{
      * @param style     样式
      * @return          cell样式
      */
-    private XSSFCellStyle createCellStyle(XSSFWorkbook workbook, KRegionStyle style, XSSFCellStyle lastCellStyle ) {
+    private XSSFCellStyle createCellStyle(XSSFWorkbook workbook, KRegionStyle style, String dataType ) {
         if (style == null) {
             String key = "empty";
             if (xssfCellStyleMap.containsKey(key)) {
@@ -195,7 +206,7 @@ public class PoiExcelHandler implements KExcelHandler{
             xssfCellStyleMap.put(key, cellStyle);
             return cellStyle;
         }
-        String key = MD5Utils.md5(Objects.requireNonNull(JsonUtil.toJson(style.toString())));
+        String key = MD5Utils.md5(Objects.requireNonNull(JsonUtil.toJson(style.toString())) + dataType);
         if (xssfCellStyleMap.containsKey(key)) {
             return xssfCellStyleMap.get(key);
         }
