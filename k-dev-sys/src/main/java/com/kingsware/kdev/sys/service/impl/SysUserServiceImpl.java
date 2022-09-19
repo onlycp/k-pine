@@ -287,11 +287,19 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 }
             }
 
-            boolean hasValid = (boolean) beforeFlowResultMap.getOrDefault("hasValid", false);
-            boolean isValid = (boolean) beforeFlowResultMap.getOrDefault("isValid", false);
-            String message = (String) beforeFlowResultMap.getOrDefault("message", "");
-            boolean useUsernamePassword = (boolean) beforeFlowResultMap.getOrDefault("useUsernamePassword", true);
-            String userId = (String) beforeFlowResultMap.getOrDefault("userId", "");
+
+            boolean hasValid = false;
+            boolean isValid = false;
+            boolean useUsernamePassword = true;
+            String message = null;
+            String userId = null;
+            if (beforeFlowResultMap != null) {
+                hasValid = (boolean) beforeFlowResultMap.getOrDefault("hasValid", false);
+                isValid = (boolean) beforeFlowResultMap.getOrDefault("isValid", false);
+                useUsernamePassword = (boolean) beforeFlowResultMap.getOrDefault("useUsernamePassword", true);
+                message = (String) beforeFlowResultMap.get("message");
+                userId = (String) beforeFlowResultMap.getOrDefault("userId", null);
+            }
 
             if (hasValid && !isValid) {
                 throw BusinessException.serviceThrow(message != null ? message : "请填写完整的登录信息！");
@@ -382,6 +390,9 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
 
             afterParams.put("isLogined", true);
 
+        } catch(Exception e) {
+            log.error("error: ", e);
+            throw e;
         } finally {
             // 调用后置登录处理
 
