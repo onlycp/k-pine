@@ -21,6 +21,8 @@ public class SysOperateLogQueryArgv extends BasePageArgv {
     private String operateTimes;
     /** 操作人员 **/
     private String operator;
+    /* 响应码 用于筛选成功或者失败*/
+    private Integer responseCode;
     /** 所属应用ID **/
     private String appId;
 }

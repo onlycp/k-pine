@@ -55,6 +55,8 @@ public class WebLogAspect {
         int responseCode = -1;
         // 响应信息
         String responseMessage = "";
+        // 完整的响应体
+        String responseBody = "";
         try {
             // 执行方法
             result = pjd.proceed();
@@ -63,6 +65,7 @@ public class WebLogAspect {
                 BaseRet<?> ret = (BaseRet<?>) result;
                 responseCode = ret.getCode();
                 responseMessage = ret.getMessage();
+                responseBody = JsonUtil.toJson(ret);
             }
         }
         catch (Exception e) {
@@ -89,6 +92,9 @@ public class WebLogAspect {
                 if (pjd.getTarget().getClass().isAnnotationPresent(Api.class)) {
                     // 获取模块注解
                     Api m = targetClass.getAnnotation(Api.class);
+                    // 获取方法名称(全路径)
+                    String className = pjd.getTarget().getClass().getName();
+                    String methodName = pjd.getSignature().getName();
                     // 生成操作日志
                     SysOperateLog operateLog = new SysOperateLog();
                     operateLog.setOperator(KClientContext.getContext().getUserInfo() != null ? KClientContext.getContext().getUserInfo().getUsername() : "");
@@ -100,6 +106,9 @@ public class WebLogAspect {
                     operateLog.setResponseCode(responseCode);
                     operateLog.setResponseMessage(responseMessage);
                     operateLog.setOperateTime(new Timestamp(System.currentTimeMillis()));
+                    operateLog.setMethod(className + "." + methodName + "()");
+                    operateLog.setRequestMethod(KClientContext.getContext().getRequest().getMethod());
+                    operateLog.setResponseBody(responseBody);
                     try {
                         operateLog.setRequestBody(JsonUtil.toJson(pjd.getArgs()));
                     }
@@ -115,7 +124,6 @@ public class WebLogAspect {
                         SysLoginLog loginLog = new SysLoginLog();
                         loginLog.setOperator(loginArgv.getUsername());
                         loginLog.setIp(KClientContext.getContext().getIp());
-                        loginLog.setResponseCode(responseCode);
                         loginLog.setTimes((int)takeTime);
                         loginLog.setResponseMessage(responseMessage);
                         loginLog.setOperateTime(new Timestamp(System.currentTimeMillis()));
