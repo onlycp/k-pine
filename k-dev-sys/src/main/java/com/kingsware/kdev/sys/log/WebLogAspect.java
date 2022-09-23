@@ -124,6 +124,7 @@ public class WebLogAspect {
                         SysLoginLog loginLog = new SysLoginLog();
                         loginLog.setOperator(loginArgv.getUsername());
                         loginLog.setIp(KClientContext.getContext().getIp());
+                        loginLog.setResponseCode(responseCode);
                         loginLog.setTimes((int)takeTime);
                         loginLog.setResponseMessage(responseMessage);
                         loginLog.setOperateTime(new Timestamp(System.currentTimeMillis()));

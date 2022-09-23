@@ -106,7 +106,7 @@ public class SysOperateLogServiceImpl extends BaseServiceImpl implements SysOper
         SqlWrapper wrapper = new SqlWrapper("select DISTINCT module from sys_operate_log where 1=1 ");
         // 拼装查询sql
         if (StringUtils.isNotEmpty(argv.getModule())) {
-            wrapper.addCondition("module", Op.LIKE, "%" + argv.getModule() + "%");
+            wrapper.addCondition("module", Op.LIKE, "%" +argv.getModule() +"%");
         }
 
         return (PageDataRet<SysOperateLogRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysOperateLogRet.class);
