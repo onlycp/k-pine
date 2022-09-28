@@ -114,13 +114,24 @@ public class SysSqlInitialize implements SystemInitialize {
 //                if (tmpSql.startsWith("insert") || tmpSql.startsWith("update")) {
 //                    sql = FlowUtils.buildCDATASql(sql);
 //                }
-                DB.executeUpdateSql(FlowUtils.buildCDATASql(sql));
+                try {
+                    DB.executeUpdateSql(FlowUtils.buildCDATASql(sql));
+                } catch (Exception e) {
+                    if (e.getMessage().toLowerCase().contains("duplicate")) {
+                        log.warn("sql执行失败: " + sql + ", error: " + e.getMessage());
+                        continue;
+                    }
+                    log.error("sql执行失败: " + sql + ", error: " + e.getMessage(), e);
+                    throw e;
+                }
                 long eachSqlEnd = System.currentTimeMillis();
                 log.info(String.format("SQL版本：%s，执行SQL: %s，用时：%sms", file.getVersion(), sql, (eachSqlEnd - eachSqlStart)));
             }
             success = true;
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
+            log.error(String.format("SQL版本执行失败：%s", file.getVersion()));
+
             success = false;
 
         } finally {
