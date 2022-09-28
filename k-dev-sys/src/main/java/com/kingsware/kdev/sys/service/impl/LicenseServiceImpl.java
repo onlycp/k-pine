@@ -2,6 +2,7 @@ package com.kingsware.kdev.sys.service.impl;
 
 import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.LicenseException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
@@ -65,11 +66,11 @@ public class LicenseServiceImpl implements LicenseService {
         License license = LicenseManager.getInstance().parseLicense(licenseActive.getLicense());
         int status = LicenseManager.getInstance().getStatus(license);
         if ( status == -1) {
-            throw new LicenseException(I18n.t("license.error.-1", "非法授权"));
+            throw BusinessException.serviceThrow(I18n.t("license.error.-1", "非法授权"));
         }
 
         else if (status == 3) {
-            throw new LicenseException(I18n.t("license.error.3", "许可证已过期"));
+            throw BusinessException.serviceThrow(I18n.t("license.error.3", "许可证已过期"));
         }
         // 保存license
         // license目录
