@@ -241,6 +241,17 @@ public abstract class KdbApiAbstract implements  KdbApi {
         return HttpUtil.downloadFile(url, path, prefix, subfix);
     }
 
+    @Override
+    public KdbDataRet<FlowInfo> queryFlow(KdbFlowQueryArgv flowInfo) {
+        KdbRet<List> list =  post(flowInfo, QUERY_FLOW_URL, List.class);
+        String json = JsonUtil.toJson(list.getResponseBody());
+        List<FlowInfo> flowInfoList = JsonUtil.toListBean(json, FlowInfo.class);
+        KdbDataRet<FlowInfo> flowDataRet = new KdbDataRet<>();
+        flowDataRet.setList(flowInfoList);
+        flowDataRet.setTotal(list.getTotal());
+        return flowDataRet;
+    }
+
     /** 设置接口地址 **/
     abstract String getServer();
 }

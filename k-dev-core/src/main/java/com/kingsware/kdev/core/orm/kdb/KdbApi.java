@@ -129,4 +129,11 @@ public interface KdbApi {
 
     @SneakyThrows
     File downloadFile(String path, String fileName, String prefix, String subfix);
+
+    /**
+     * 流程查询
+     * @param flowInfo
+     * @return
+     */
+    KdbDataRet<FlowInfo> queryFlow(KdbFlowQueryArgv flowInfo);
 }

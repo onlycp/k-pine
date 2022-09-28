@@ -71,6 +71,18 @@ public class PageUtil {
         return pageDataRet;
     }
 
+    public static <T> PageDataRet<T> memoryPage(BasePageArgv argv, List<T> retList, int total) {
+        PageDataRet<T> pageDataRet = new PageDataRet<>();
+        pageDataRet.setList(retList);
+        pageDataRet.setTotal(total);
+        Integer page = argv.getPage();
+        Integer pageSize = argv.getPageSize();
+        pageDataRet.setPage(page);
+        pageDataRet.setPageSize(pageSize);
+        pageDataRet.setPageCount(total/pageSize);
+        return pageDataRet;
+    }
+
     public static <T> T mergeQueryOrder(T argv, Class T) {
         if (argv instanceof BasePageArgv) {
             // Vue代码版的排序用的是sort参数，AMIS版页面的排序用的是orderDir

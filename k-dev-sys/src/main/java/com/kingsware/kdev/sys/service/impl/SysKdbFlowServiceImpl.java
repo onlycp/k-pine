@@ -27,13 +27,10 @@ import com.kingsware.kdev.sys.ret.SysFlowDefineRet;
 import com.kingsware.kdev.sys.ret.SysKdbFlowRet;
 import com.kingsware.kdev.sys.service.SysApiService;
 import com.kingsware.kdev.sys.service.SysKdbFlowService;
-import com.kingsware.kdev.sys.service.SysLogicHistoryService;
 import org.springframework.stereotype.Service;
-
 import javax.annotation.Resource;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 角色业务实现类
@@ -420,58 +417,68 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
     @Override
     @SuppressWarnings("")
     public PageDataRet<SysKdbFlowRet> query(SysKdbFlowQueryArgv argv) {
-        KdbFlowQueryArgv info = new KdbFlowQueryArgv();
-        // 查询所有数据
-        KdbApi api = (KdbApi) (DB.getDefault());
-        List<FlowInfo> list = api.query(info);
-        // 从数据库里查询所有数据
-        String sql = "select t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name, sa.api_url, sa.api_method " +
+        // 根据条件查询appId、tags和apiUrl数据
+        String sql = "select distinct t0.name,t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name, sa.api_url, sa.api_method " +
                 " from sys_logic_flow t0 " +
                 " left join sys_api sa on sa.api_flow_id = t0.flow_id " +
                 " left join dev_application t1 on t1.id=t0.application_id" +
                 " where 1=1";
         if (StringUtils.isNotEmpty(argv.getApplicationId())) {
-            sql += " and (t0.application_id = '" + argv.getApplicationId() + "' or t0.application_id is null)";
+            sql += " and (t0.application_id = '" + argv.getApplicationId() + "')";
         }
         if (StringUtils.isNotEmpty(argv.getApiUrl())) {
             sql += " and sa.api_url like '%" + argv.getApiUrl() + "%' ";
             sql += " and sa.api_url is not null ";
         }
+        if (StringUtils.isNotEmpty(argv.getTags())) {
+            sql += " and t0.tags like '%" + argv.getTags() + "%'";
+        }
+        if (StringUtils.isNotEmpty(argv.getName())) {
+            sql += " and t0.name like '%" + argv.getName() + "%'";
+        }
         List<SysKdbFlowRet> logicFlows = DB.findList(SysKdbFlowRet.class, sql);
+        // 根据flowId批量查询
+        List<String> flowIds = new ArrayList<>();
+        logicFlows.forEach(logicFlow -> flowIds.add(logicFlow.getId()));
+
+        if (flowIds.size() == 0) {
+            flowIds.add("");
+        }
+        KdbFlowQueryArgv info = new KdbFlowQueryArgv();
+
+        // 根据条件分页查询faas流程数据
+        KdbApi api = (KdbApi) (DB.getDefault());
+        if (!flowIds.isEmpty()) {
+            info.setFlowIds(flowIds);
+        }
+        if (argv.isPageQuery()) {
+            info.setPageQuery(true);
+            info.setPage(argv.getPage());
+            info.setOffset(argv.getPageSize());
+        }
+
+        KdbDataRet<FlowInfo> flowDataRet = api.queryFlow(info);
+
         Map<String, SysKdbFlowRet> dbMap = new HashMap<>();
         logicFlows.forEach(it -> dbMap.put(it.getId(), it));
         // 转为ret类
-        List<SysKdbFlowRet> retList = new ArrayList<>();
-        for (FlowInfo infoL : list) {
-            retList.add(toRet(infoL, dbMap.get(infoL.getFlowId())));
+        List<SysKdbFlowRet> filterList = new ArrayList<>();
+        for (FlowInfo infoL : flowDataRet.getList()) {
+            filterList.add(toRet(infoL, dbMap.get(infoL.getFlowId())));
         }
-        // 查询过滤
-        List<SysKdbFlowRet> filterList = retList.stream().filter(it -> {
-            if (StringUtils.isNotEmpty(argv.getName())) {
-                return it.getName().contains(argv.getName());
-            }
-            return true;
-        }).filter(it -> {
-            if (StringUtils.isNotEmpty(argv.getApplicationId())) {
-                return it.getApplicationId() != null && it.getApplicationId().equalsIgnoreCase(argv.getApplicationId());
-            }
-            return true;
-        }).filter(it -> {
-            if (StringUtils.isNotEmpty(argv.getTags())) {
-                return it.getTags() != null && it.getTags().contains(argv.getTags());
-            }
-            return true;
-        }).filter(it -> {
-            if (StringUtils.isNotEmpty(argv.getApiUrl())) {
-                return it.getApiUrl() != null && it.getApiUrl().contains(argv.getApiUrl());
-            }
-            return true;
-        }).collect(Collectors.toList());
         // 排序
         if (!filterList.isEmpty()) {
             filterList.sort(((o1, o2) -> o2.getWhenCreated().compareTo(o1.getWhenCreated())));
         }
-        return PageUtil.memoryPage(argv, filterList, SysKdbFlowRet.class);
+        PageDataRet<SysKdbFlowRet> pageDataRet;
+        if (argv.isPageQuery()) {
+            pageDataRet = PageUtil.memoryPage(argv, filterList, flowDataRet.getTotal());
+        } else {
+            pageDataRet = new PageDataRet<>();
+            pageDataRet.setList(filterList);
+            pageDataRet.setTotal(flowDataRet.getTotal());
+        }
+        return pageDataRet;
     }
 
     @Override

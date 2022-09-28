@@ -19,4 +19,6 @@ public class KdbRet<T> {
     private T responseBody;
     /** log **/
     private String klog;
+    /** 总数 **/
+    private Integer total;
 }
