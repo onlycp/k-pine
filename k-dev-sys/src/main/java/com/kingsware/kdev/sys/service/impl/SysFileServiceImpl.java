@@ -6,6 +6,7 @@ import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.ContentTypeMap;
 import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
@@ -45,12 +46,25 @@ import java.util.*;
 @Slf4j
 public class SysFileServiceImpl extends BaseServiceImpl implements SysFileService {
 
-    /** 基础目录 **/
-    @Value("${file.base-path:.}")
-    private String basePath;
+//    /** 基础目录 **/
+//    @Value("${file.base-path:.}")
+//    private String basePath;
+//
+//    @Value("${app.file-local-to-faas:false}")
+//    private boolean fileLocalToFaas;
 
-    @Value("${app.file-local-to-faas:false}")
-    private boolean fileLocalToFaas;
+    /**
+     * 获取基础目录
+     * @return
+     */
+    private String getBasePath() {
+        return SpringContext.getProperties("file.base-path", ".");
+    }
+
+    private boolean isFileLocalToFaas() {
+        String flag = SpringContext.getProperties("app.file-local-to-faas", "false");
+        return "true".equalsIgnoreCase(flag);
+    }
 
     private final NonStaticResourceHttpRequestHandler nonStaticResourceHttpRequestHandler;
 
@@ -104,12 +118,12 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
     public List<SysFileRet> upload(MultipartFile[] files, String fileFrom, Integer saveType) {
         List<SysFileRet> retList = new ArrayList<>();
         // 如果是自动转为faas的，那么新上传的文件也改为faas
-        if (fileLocalToFaas && saveType == 1) {
+        if (isFileLocalToFaas() && saveType == 1) {
             saveType = 2;
         }
         // 遍历处理文件
         for (MultipartFile file: files) {
-            SysFile sysFile = FileManager.getInstance().register(file.getInputStream(), file.getOriginalFilename(), (int)file.getSize(), fileFrom, saveType, basePath);
+            SysFile sysFile = FileManager.getInstance().register(file.getInputStream(), file.getOriginalFilename(), (int)file.getSize(), fileFrom, saveType, getBasePath());
             if (sysFile == null) {
                 throw BusinessException.serviceThrow("文件保存失败");
             }
@@ -208,7 +222,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
     }
 
     private File getLocalFile(String path) {
-        String absFilePath = basePath + path;
+        String absFilePath = getBasePath() + path;
         return new File(absFilePath);
     }
 
@@ -221,7 +235,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             fileName = path.substring(index + 1);
         }
         String fileExt = "." + FileUtils.getFileExt(fileName);
-        String downloadPath = basePath + "/" + relativePath;
+        String downloadPath = getBasePath() + "/" + relativePath;
         File tempFile = DB.kdbApi().downloadFile(downloadPath, fileName, "", fileExt);
         if (tempFile != null && tempFile.exists()) {
             tempFile.deleteOnExit();
@@ -244,7 +258,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
      * @param faasfileName  文件名称
      */
     private void downloadFromFaas(String relativePath, String faasfileName, String outFileName) {
-        String path = basePath + File.separator + relativePath;
+        String path = getBasePath() + File.separator + relativePath;
         File tempFile = DB.kdbApi().downloadFile(path,faasfileName);
         ServletUtil.responseFile(tempFile, outFileName);
         try {
@@ -332,7 +346,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             return new FileEntry(tempFile, sysFile.getFileName());
         }
         else if (sysFile.getSaveType() == 1) {
-            String absFilePath = basePath + sysFile.getFilePath();
+            String absFilePath = getBasePath() + sysFile.getFilePath();
             File localFile = new File(absFilePath);
             if (!localFile.exists()) {
                 throw BusinessException.serviceThrow("文件不存在，可能被移动或删除！");
