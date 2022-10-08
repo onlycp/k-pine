@@ -66,4 +66,12 @@ public class SysOperateLogController extends BaseController {
         return BaseRet.success(sysOperateLogService.moduleList(argv));
     }
 
+    /**
+     * 动作列表
+     */
+    @ApiOperation(value = "动作列表", notes = "动作列表")
+    @GetMapping("/action-list")
+    public BaseRet<PageDataRet<SysOperateLogRet>> actionList(SysOperateLogQueryArgv argv) {
+        return BaseRet.success(sysOperateLogService.actionList(argv));
+    }
 }

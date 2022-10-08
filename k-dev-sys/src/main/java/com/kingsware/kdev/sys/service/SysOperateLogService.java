@@ -33,4 +33,6 @@ public interface SysOperateLogService extends BaseService {
     void export(SysOperateLogQueryArgv argv);
 
     PageDataRet<SysOperateLogRet> moduleList(SysOperateLogQueryArgv argv);
+
+    PageDataRet<SysOperateLogRet> actionList(SysOperateLogQueryArgv argv);
 }

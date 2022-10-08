@@ -2,6 +2,7 @@ package com.kingsware.kdev.sys.service.impl;
 
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.enums.RetEnum;
 import com.kingsware.kdev.core.excel.ExcelWorker;
 import com.kingsware.kdev.core.excel.KExcel;
 import com.kingsware.kdev.core.excel.RegionDefine;
@@ -58,6 +59,11 @@ public class SysOperateLogServiceImpl extends BaseServiceImpl implements SysOper
         if (StringUtils.isNotEmpty(argv.getOperateTimes())) {
             wrapper.between("operate_time", argv.getOperateTimes().split(",")[0], argv.getOperateTimes().split(",")[1]);
         }
+        if (argv.getResponseCode() != null) {
+            //筛选成功或者失败的日志(200和非200)
+            Op op = argv.getResponseCode() == RetEnum.OK.getCode() ? Op.EQ : Op.NOT_EQ;
+            wrapper.addCondition("response_code", op, RetEnum.OK.getCode());
+        }
         if (argv.getIds() != null) {
             String[] splits = argv.getIds().split(",");
             Set<Object> ids = Arrays.asList(splits).stream().collect(Collectors.toSet());
@@ -84,6 +90,9 @@ public class SysOperateLogServiceImpl extends BaseServiceImpl implements SysOper
         defineList.add(RegionDefine.builder().propName("requestBody").labelName("请求内容体").build());
         defineList.add(RegionDefine.builder().propName("responseCode").labelName("响应码").build());
         defineList.add(RegionDefine.builder().propName("responseMessage").labelName("响应消息").build());
+        defineList.add(RegionDefine.builder().propName("method").labelName("方法名称").build());
+        defineList.add(RegionDefine.builder().propName("requestMethod").labelName("请求方式").build());
+        defineList.add(RegionDefine.builder().propName("responseBody").labelName("响应内容体").build());
         defineList.add(RegionDefine.builder().propName("operator").labelName("用户名").build());
         defineList.add(RegionDefine.builder().propName("operateTime").labelName("操作时间").build());
         // 导出
@@ -103,4 +112,14 @@ public class SysOperateLogServiceImpl extends BaseServiceImpl implements SysOper
         return (PageDataRet<SysOperateLogRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysOperateLogRet.class);
     }
 
+    @Override
+    public PageDataRet<SysOperateLogRet> actionList(SysOperateLogQueryArgv argv) {
+        // 拼装sql
+        SqlWrapper wrapper = new SqlWrapper("select DISTINCT action from sys_operate_log where 1=1 ");
+        // 拼装查询sql
+        if (StringUtils.isNotEmpty(argv.getAction())) {
+            wrapper.addCondition("action", Op.LIKE, "%" + argv.getAction() + "%");
+        }
+        return (PageDataRet<SysOperateLogRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysOperateLogRet.class);
+    }
 }
