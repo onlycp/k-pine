@@ -49,6 +49,6 @@ public class KCacheManager {
      * 清理所有的缓存
      */
     public void clear() {
-
+        this.cache.deleteAll();
     }
 }

@@ -44,8 +44,14 @@ public class SysOperateLog extends BaseModel {
     private String responseMessage;
     /** 创建时间 **/
     @Column(auto = AutoEnum.WHEN, updatable = false)
+
     private String whenCreated;
     /** 所属应用ID **/
     private String appId;
-
+    /*方法名称*/
+    private String method;
+    /*请求方式*/
+    private String requestMethod;
+    /*响应内容体*/
+    private String responseBody;
 }
