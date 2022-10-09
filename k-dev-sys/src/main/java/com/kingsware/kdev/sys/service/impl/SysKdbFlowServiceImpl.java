@@ -418,17 +418,16 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
     @SuppressWarnings("")
     public PageDataRet<SysKdbFlowRet> query(SysKdbFlowQueryArgv argv) {
         // 根据条件查询appId、tags和apiUrl数据
-        String sql = "select distinct t0.name,t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name, sa.api_url, sa.api_method " +
+        String sql = "select distinct t0.name,t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name, sa.api_url, sa.api_method, t0.when_created " +
                 " from sys_logic_flow t0 " +
                 " left join sys_api sa on sa.api_flow_id = t0.flow_id " +
-                " left join dev_application t1 on t1.id=t0.application_id" +
+                " left join dev_application t1 on t1.id=t0.application_id " +
                 " where 1=1";
         if (StringUtils.isNotEmpty(argv.getApplicationId())) {
             sql += " and (t0.application_id = '" + argv.getApplicationId() + "')";
         }
         if (StringUtils.isNotEmpty(argv.getApiUrl())) {
             sql += " and sa.api_url like '%" + argv.getApiUrl() + "%' ";
-            sql += " and sa.api_url is not null ";
         }
         if (StringUtils.isNotEmpty(argv.getTags())) {
             sql += " and t0.tags like '%" + argv.getTags() + "%'";
@@ -436,26 +435,34 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         if (StringUtils.isNotEmpty(argv.getName())) {
             sql += " and t0.name like '%" + argv.getName() + "%'";
         }
+        sql += " ORDER BY t0.when_created DESC";
+
+        int total = 0;
+        // 分页
+        if (argv.isPageQuery()) {
+            // 查询总数
+            String totalSql = "select count(1) from (" + sql + ") AS a";
+            total = (int) DB.findCount(totalSql);
+
+            Integer page = argv.getPage();
+            Integer pageSize = argv.getPageSize();
+            int start = (page - 1) * pageSize;
+            sql += " limit " + start + ", " + pageSize;
+        }
+
         List<SysKdbFlowRet> logicFlows = DB.findList(SysKdbFlowRet.class, sql);
         // 根据flowId批量查询
         List<String> flowIds = new ArrayList<>();
         logicFlows.forEach(logicFlow -> flowIds.add(logicFlow.getId()));
 
-        if (flowIds.size() == 0) {
-            flowIds.add("");
-        }
         KdbFlowQueryArgv info = new KdbFlowQueryArgv();
 
-        // 根据条件分页查询faas流程数据
+        // 查询faas流程数据
         KdbApi api = (KdbApi) (DB.getDefault());
         if (!flowIds.isEmpty()) {
             info.setFlowIds(flowIds);
         }
-        if (argv.isPageQuery()) {
-            info.setPageQuery(true);
-            info.setPage(argv.getPage());
-            info.setOffset(argv.getPageSize());
-        }
+        info.setPageQuery(false);
 
         KdbDataRet<FlowInfo> flowDataRet = api.queryFlow(info);
 
@@ -466,17 +473,13 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         for (FlowInfo infoL : flowDataRet.getList()) {
             filterList.add(toRet(infoL, dbMap.get(infoL.getFlowId())));
         }
-        // 排序
-        if (!filterList.isEmpty()) {
-            filterList.sort(((o1, o2) -> o2.getWhenCreated().compareTo(o1.getWhenCreated())));
-        }
         PageDataRet<SysKdbFlowRet> pageDataRet;
         if (argv.isPageQuery()) {
-            pageDataRet = PageUtil.memoryPage(argv, filterList, flowDataRet.getTotal());
+            pageDataRet = PageUtil.memoryPage(argv, filterList, total);
         } else {
             pageDataRet = new PageDataRet<>();
             pageDataRet.setList(filterList);
-            pageDataRet.setTotal(flowDataRet.getTotal());
+            pageDataRet.setTotal(filterList.size());
         }
         return pageDataRet;
     }
