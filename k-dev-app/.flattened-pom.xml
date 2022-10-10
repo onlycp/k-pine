@@ -17,9 +17,9 @@
     </license>
   </licenses>
   <properties>
-    <docker.registry.name>k-pine</docker.registry.name>
-    <docker.maven.plugin.version>1.4.10</docker.maven.plugin.version>
     <docker.repostory>192.168.6.11</docker.repostory>
+    <docker.maven.plugin.version>1.4.10</docker.maven.plugin.version>
+    <docker.registry.name>k-pine</docker.registry.name>
   </properties>
   <dependencies>
     <dependency>
