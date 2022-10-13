@@ -168,6 +168,9 @@ public class KAuthFilter implements Filter {
             String message = MessageFormat.format("很抱歉，您没有此接口的访问权限! 接口地址： {0}, 接口编码:{1}", url, apiCode);
             ServletUtil.responseJson(response, BaseRet.fail(message, RetEnum.FORBIDDEN.getCode()));
         }
+        catch (ServletException e) {
+            //文件下载的不作处理
+        }
         catch (Exception e) {
             errorMessage = e.getMessage();
             log.error("error", e);
