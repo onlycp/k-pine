@@ -59,7 +59,6 @@ public class MessageWebSocket {
     @OnError
     public void onError(Session session, Throwable error) {
         // 发生错误时
-        logger.error("error", error);
         removeSession(session);
     }
 
@@ -69,7 +68,8 @@ public class MessageWebSocket {
      */
     private void removeSession(Session session) {
         // 查找session
-        Optional<SessionToken> optional = sessionTokenSet.stream().filter(it -> it.getSession().getId().equalsIgnoreCase(session.getId())).findFirst();
+        Set<SessionToken> copiedSet = new HashSet<>(sessionTokenSet);
+        Optional<SessionToken> optional = copiedSet.stream().filter(it -> it.getSession().getId().equalsIgnoreCase(session.getId())).findFirst();
         if (optional.isPresent()) {
             sessionTokenSet.remove(optional.get());
             logger.info("用户:【userId={}, token={}】退出，当前在线人数为:{} ", optional.get().getUserId(), optional.get().getToken(), sessionTokenSet.size());
@@ -106,7 +106,8 @@ public class MessageWebSocket {
         }
         else {
             // 获取令牌
-            Optional<SessionToken> sessionToken = sessionTokenSet.stream().filter(it -> it.getSession().getId().equals(session.getId())).findFirst();
+            Set<SessionToken> copiedSet = new HashSet<>(sessionTokenSet);
+            Optional<SessionToken> sessionToken = copiedSet.stream().filter(it -> it.getSession().getId().equals(session.getId())).findFirst();
             if (sessionToken.isPresent()) {
                 Wm2MqMessage wm2MqMessage = new Wm2MqMessage();
                 wm2MqMessage.setToken(sessionToken.get().getToken());
