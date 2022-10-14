@@ -25,7 +25,7 @@ public class SysUserProfileRet extends BaseManageRet {
     /** 性别 **/
     private Integer sex;
     /** 部门名称 **/
-    private String sysUnitName;
+    private String sysUnitNames;
     /** 岗位 **/
     private String post;
     /** 备注 */

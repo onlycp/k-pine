@@ -30,8 +30,6 @@ public class SysUser extends BaseManageModel {
     private String email;
     /** 性别 **/
     private Integer sex;
-    /** 部门id **/
-    private String sysUnitId;
     /** 岗位 **/
     private String post;
     /** 状态 **/

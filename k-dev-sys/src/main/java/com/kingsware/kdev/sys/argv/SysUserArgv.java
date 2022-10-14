@@ -30,7 +30,7 @@ public class SysUserArgv {
     /** 性别 **/
     private Integer sex;
     /** 部门id **/
-    private String sysUnitId;
+    private String sysUnitIds;
     /** 岗位 **/
     private String post;
     /** 状态 **/

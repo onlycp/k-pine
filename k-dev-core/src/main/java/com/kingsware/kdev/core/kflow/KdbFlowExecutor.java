@@ -10,12 +10,12 @@ import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.orm.kdb.KdbArgv;
 import com.kingsware.kdev.core.orm.kdb.KdbRet;
-import com.kingsware.kdev.core.util.DateUtils;
-import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * KDB流程执行器
@@ -62,8 +62,8 @@ public class KdbFlowExecutor {
             argv.setFlowID(flowId);
             String saas =  SpringContext.getProperties("app.is-saas", "false");
             if ("true".equals(saas)) {
-                if (KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null && StringUtils.isNotEmpty(KClientContext.getContext().getUserInfo().getSysUnitId())) {
-                    argv.setInstID(KClientContext.getContext().getUserInfo().getSysUnitId());
+                if (KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null && StringUtils.isNotEmpty(KClientContext.getContext().getUserInfo().getSysUnitIds())) {
+                    argv.setInstID(KClientContext.getContext().getUserInfo().getSysUnitIds());
                 }
 
             }

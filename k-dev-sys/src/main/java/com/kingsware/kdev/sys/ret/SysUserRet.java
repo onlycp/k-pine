@@ -26,12 +26,12 @@ public class SysUserRet extends BaseManageRet {
     private String email;
     /** 性别 **/
     private Integer sex;
-    /** 部门id **/
-    private String sysUnitId;
-    /** 部门名称 **/
-    private String sysUnitName;
+    /** 部门id(多部门) **/
+    private String sysUnitIds;
+    /** 部门名称(多部门) **/
+    private String sysUnitNames;
     /** 部门路径 **/
-    private String sysUnitPath;
+    private String sysUnitPaths;
     /** 角色ids **/
     private String sysRoleIds;
     /** 角色名 **/

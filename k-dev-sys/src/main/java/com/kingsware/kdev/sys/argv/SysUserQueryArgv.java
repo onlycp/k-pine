@@ -27,6 +27,6 @@ public class SysUserQueryArgv extends BasePageArgv {
     /** 角色 */
     private String roleId;
     /** 归属部门 */
-    private String sysUnitId;
+    private String sysUnitIds;
 
 }
