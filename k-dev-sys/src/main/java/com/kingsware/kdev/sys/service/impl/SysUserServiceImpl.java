@@ -98,7 +98,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         // 唯一性校验
         DBChecker<SysUser> checker = DBChecker.build(model, SysUser.class);
         // 名称唯一
-        checker.uni("username", I18n.t("SysUser.username.unique", "用户名必须唯一"));
+        checker.uni("username", I18n.t("SysUser.username.unique", "用户账户必须唯一"));
         // 执行校验
         checker.checkUnique();
         // 保存
