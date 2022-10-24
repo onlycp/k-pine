@@ -23,7 +23,6 @@ import java.util.*;
 public class KFileResultHandler implements KFlowResultHandler {
 
     @Override
-    @SuppressWarnings("unchecked")
     public KdbFlowResult parser(String responseBody, KFlowContext context) {
 
 
@@ -33,12 +32,12 @@ public class KFileResultHandler implements KFlowResultHandler {
         String fileName = responseBody.substring(0, index);
         String body = responseBody.substring(index+1);
         // 解析数据
-        Map<String, Object> data = JsonUtil.toMap(body);
-        JsonNode jsonNode = JsonUtil.toTree(context.getOutArgv());
-        Object finalBody = FlowUtils.processData(data, context, jsonNode);
+//        Map<String, Object> data = JsonUtil.toMap(body);
+//        JsonNode jsonNode = JsonUtil.toTree(context.getOutArgv());
+//        Object finalBody = FlowUtils.processData(data, context, jsonNode);
         KdbRetFile kdbRetFile = new KdbRetFile();
         kdbRetFile.setFileName(fileName);
-        kdbRetFile.setData(Objects.requireNonNull(JsonUtil.toJson(finalBody)).getBytes(StandardCharsets.UTF_8));
+        kdbRetFile.setData(Objects.requireNonNull(body.getBytes(StandardCharsets.UTF_8)));
         result.setData(kdbRetFile);
         // 返回数据
         return result;
