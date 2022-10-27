@@ -2,13 +2,16 @@ package com.kingsware.kdev.sys.service;
 
 import com.kingsware.kdev.core.auth.BaseUserInfo;
 import com.kingsware.kdev.core.base.BaseService;
+import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.sys.argv.*;
 import com.kingsware.kdev.sys.ret.SysUserLoginRet;
 import com.kingsware.kdev.sys.ret.SysUserProfileRet;
 import com.kingsware.kdev.sys.ret.SysUserRet;
+import com.kingsware.kdev.sys.ret.VerificationCodeRet;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -94,4 +97,8 @@ public interface SysUserService extends BaseService {
     void ping();
 
     Map<String, Object> passwordValidate(String password, String appId);
+
+    BaseRet<VerificationCodeRet> getVerificationCode() throws IOException;
+
+    BaseRet<?> validVerificationCode(String uuid, String code, String encryptCode);
 }

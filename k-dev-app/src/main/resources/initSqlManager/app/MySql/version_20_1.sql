@@ -1,2280 +1,883 @@
-CREATE TABLE IF NOT EXISTS `dev_sql_run`
-(
-    `id` varchar
-(
-    36
-) COLLATE utf8mb4_bin NOT NULL COMMENT '' id '',
-    `version` int
-(
-    11
-) NOT NULL COMMENT '' 关联版本号 '',
-    `md5` varchar
-(
-    100
-) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '' md5 '',
-    `when_created` timestamp NULL DEFAULT NULL COMMENT '' 执行时间 '',
-    `execution_time` int
-(
-    11
-) DEFAULT NULL COMMENT '' 执行时长（毫秒）'',
-    `success` tinyint(4) NOT NULL COMMENT ''是否成功'',
+
+CREATE TABLE IF NOT EXISTS `dev_sql_run` ( `id` varchar(36) COLLATE utf8mb4_bin NOT NULL COMMENT 'id',
+    `version` int(11) NOT NULL COMMENT '关联版本号',
+    `md5` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'md5',
+    `when_created` varchar(20) NULL DEFAULT NULL COMMENT '执行时间',
+    `execution_time` int(11) DEFAULT NULL COMMENT '执行时长（毫秒）',
+    `success` tinyint(4) NOT NULL COMMENT '是否成功',
     PRIMARY KEY (`id`)) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_bin;
 
-CREATE TABLE IF NOT EXISTS `biz_demo_user`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `biz_demo_user`
-    add column `age` int DEFAULT NULL COMMENT '''';
-alter table `biz_demo_user`
-    add column `birthday` varchar(20) DEFAULT NULL COMMENT '''';
-alter table `biz_demo_user`
-    add column `id` varchar(36) DEFAULT NULL COMMENT '''';
-alter table `biz_demo_user`
-    add column `id_card` varchar(20) DEFAULT NULL COMMENT '''';
-alter table `biz_demo_user`
-    add column `name` varchar(100) DEFAULT NULL COMMENT '''';
-alter table `biz_demo_user`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT '''';
-alter table `biz_demo_user`
-    add column `who_created` varchar(36) DEFAULT NULL COMMENT '''';
-CREATE TABLE IF NOT EXISTS `cm_app_role`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `cm_app_role`
-    add column `app_id` varchar(32) DEFAULT NULL COMMENT '''';
-alter table `cm_app_role`
-    add column `customer_id` varchar(32) DEFAULT NULL COMMENT '''';
-alter table `cm_app_role`
-    add column `id` varchar(32) DEFAULT NULL COMMENT '''';
-alter table `cm_app_role`
-    add column `permission` int DEFAULT NULL COMMENT '''';
-alter table `cm_app_role`
-    add column `role_id` varchar(32) DEFAULT NULL COMMENT '''';
-CREATE TABLE IF NOT EXISTS `cm_customer_app_menu`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `cm_customer_app_menu`
-    add column `app_menu_id` varchar(32) DEFAULT NULL COMMENT '''';
-alter table `cm_customer_app_menu`
-    add column `call_count` varchar(10) DEFAULT NULL COMMENT '''';
-alter table `cm_customer_app_menu`
-    add column `count_method` tinyint DEFAULT NULL COMMENT '''';
-alter table `cm_customer_app_menu`
-    add column `customer_id` varchar(32) DEFAULT NULL COMMENT '''';
-alter table `cm_customer_app_menu`
-    add column `end_time` varchar(20) DEFAULT NULL COMMENT '''';
-alter table `cm_customer_app_menu`
-    add column `id` varchar(32) DEFAULT NULL COMMENT '''';
-alter table `cm_customer_app_menu`
-    add column `start_time` varchar(20) DEFAULT NULL COMMENT '''';
-alter table `cm_customer_app_menu`
-    add column `status` tinyint DEFAULT NULL COMMENT '''';
-CREATE TABLE IF NOT EXISTS `cm_customer_db`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `cm_customer_db`
-    add column `customer_id` varchar(32) DEFAULT NULL COMMENT '''';
-alter table `cm_customer_db`
-    add column `data_source_id` varchar(32) DEFAULT NULL COMMENT '''';
-alter table `cm_customer_db`
-    add column `db_name` varchar(255) DEFAULT NULL COMMENT '''';
-alter table `cm_customer_db`
-    add column `id` varchar(32) DEFAULT NULL COMMENT '''';
-alter table `cm_customer_db`
-    add column `ip` varchar(128) DEFAULT NULL COMMENT '''';
-alter table `cm_customer_db`
-    add column `port` varchar(32) DEFAULT NULL COMMENT '''';
-CREATE TABLE IF NOT EXISTS `cm_customer_info`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `cm_customer_info`
-    add column `contacts1` varchar(50) DEFAULT NULL COMMENT ''联系人1'';
-alter table `cm_customer_info`
-    add column `contacts1_email` varchar(255) DEFAULT NULL COMMENT ''联系人1邮箱'';
-alter table `cm_customer_info`
-    add column `contacts1_telephone` varchar(50) DEFAULT NULL COMMENT ''联系人1电话'';
-alter table `cm_customer_info`
-    add column `contacts2` varchar(50) DEFAULT NULL COMMENT ''联系人2'';
-alter table `cm_customer_info`
-    add column `contacts2_email` varchar(255) DEFAULT NULL COMMENT ''联系人2邮箱'';
-alter table `cm_customer_info`
-    add column `contacts2_telephone` varchar(50) DEFAULT NULL COMMENT ''联系人2电话'';
-alter table `cm_customer_info`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''客户ID'';
-alter table `cm_customer_info`
-    add column `name` varchar(50) DEFAULT NULL COMMENT ''客户名称'';
-alter table `cm_customer_info`
-    add column `prefix` varchar(50) DEFAULT NULL COMMENT ''客户用户名前缀'';
-alter table `cm_customer_info`
-    add column `status` tinyint DEFAULT NULL COMMENT ''0删除，1正常，2停用'';
-alter table `cm_customer_info`
-    add column `suffix` varchar(50) DEFAULT NULL COMMENT ''客户用吗后缀'';
-alter table `cm_customer_info`
-    add column `when_created` timestamp COMMENT ''创建时间'';
-alter table `cm_customer_info`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人'';
-CREATE TABLE IF NOT EXISTS `cm_customer_user`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `cm_customer_user`
-    add column `customer_id` varchar(32) DEFAULT NULL COMMENT '''';
-alter table `cm_customer_user`
-    add column `id` varchar(32) DEFAULT NULL COMMENT '''';
-alter table `cm_customer_user`
-    add column `manager` tinyint DEFAULT NULL COMMENT '''';
-alter table `cm_customer_user`
-    add column `user_id` varchar(32) DEFAULT NULL COMMENT '''';
-CREATE TABLE IF NOT EXISTS `dev_api`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `dev_api`
-    add column `api_argv_type` int DEFAULT NULL COMMENT ''参数组装方式'';
-alter table `dev_api`
-    add column `api_code` varchar(50) DEFAULT NULL COMMENT ''接口编码'';
-alter table `dev_api`
-    add column `api_flow_id` varchar(50) DEFAULT NULL COMMENT ''流程ID'';
-alter table `dev_api`
-    add column `api_method` varchar(32) DEFAULT ''get'' COMMENT ''请求方式'';
-alter table `dev_api`
-    add column `api_name` varchar(50) DEFAULT NULL COMMENT ''接口名称'';
-alter table `dev_api`
-    add column `api_note` text DEFAULT NULL COMMENT ''接口描述'';
-alter table `dev_api`
-    add column `api_req_argv` text DEFAULT NULL COMMENT ''请求参数'';
-alter table `dev_api`
-    add column `api_result_handler` varchar(128) DEFAULT NULL COMMENT ''结果处理类'';
-alter table `dev_api`
-    add column `api_rsp_argv` text DEFAULT NULL COMMENT ''响应结果'';
-alter table `dev_api`
-    add column `api_tags` varchar(128) DEFAULT NULL COMMENT ''标签'';
-alter table `dev_api`
-    add column `api_url` varchar(128) DEFAULT NULL COMMENT ''接口路径'';
-alter table `dev_api`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `dev_api`
-    add column `application_id` varchar(32) DEFAULT NULL COMMENT ''归属应用ID'';
-alter table `dev_api`
-    add column `call_type` int DEFAULT NULL COMMENT ''调试方式'';
-alter table `dev_api`
-    add column `id` varchar(32) DEFAULT '''' COMMENT ''主键'';
-alter table `dev_api`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `dev_api`
-    add column `when_modified` varchar(20) DEFAULT NULL COMMENT ''修改时间'';
-alter table `dev_api`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人'';
-alter table `dev_api`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人'';
-CREATE TABLE IF NOT EXISTS `dev_application`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `dev_application`
-    add column `app_public_type` int DEFAULT 0 COMMENT ''应用开启类型： 0：普通应用，1：公共库应用，2：系统库应用'';
-alter table `dev_application`
-    add column `app_type` varchar(100) DEFAULT NULL COMMENT ''应用类型：可多个，逗号分隔，0: PC Web应用，1：移动端Web应用，2： 小程序，3： APP'';
-alter table `dev_application`
-    add column `data_source` varchar(1000) DEFAULT NULL COMMENT ''数据源配置'';
-alter table `dev_application`
-    add column `default_path` varchar(255) DEFAULT NULL COMMENT ''默认路径'';
-alter table `dev_application`
-    add column `deleted` tinyint(1) DEFAULT 0 COMMENT ''是否已删除'';
-alter table `dev_application`
-    add column `description` varchar(255) DEFAULT NULL COMMENT ''应用介绍'';
-alter table `dev_application`
-    add column `dev_status` tinyint(1) DEFAULT NULL COMMENT ''开发状态，0: 新建1: 确认版本2: 有更新'';
-alter table `dev_application`
-    add column `enable_status` tinyint(1) DEFAULT NULL COMMENT ''可用状态'';
-alter table `dev_application`
-    add column `faas_port` int DEFAULT NULL COMMENT ''faas端口号'';
-alter table `dev_application`
-    add column `id` varchar(36) DEFAULT NULL COMMENT ''应用ID'';
-alter table `dev_application`
-    add column `name` varchar(100) DEFAULT NULL COMMENT ''应用名'';
-alter table `dev_application`
-    add column `pine_port` int DEFAULT NULL COMMENT ''青松端口号'';
-alter table `dev_application`
-    add column `short_name` varchar(30) DEFAULT NULL COMMENT ''应用短英文名（用于数据库等前缀命名），- 必须唯一，- 必须为纯英文、小写字母命名- 用于创建业务目录、数据库，'';
-alter table `dev_application`
-    add column `system_logo` varchar(255) DEFAULT NULL COMMENT ''应用图标'';
-alter table `dev_application`
-    add column `version` varchar(50) DEFAULT NULL COMMENT ''当前发布版本'';
-alter table `dev_application`
-    add column `when_created` timestamp DEFAULT NULL COMMENT ''创建时间'';
-alter table `dev_application`
-    add column `when_modified` timestamp DEFAULT NULL COMMENT ''修改时间'';
-alter table `dev_application`
-    add column `who_created` varchar(36) DEFAULT NULL COMMENT ''创建人'';
-alter table `dev_application`
-    add column `who_in_charge` varchar(255) DEFAULT NULL COMMENT ''负责人'';
-alter table `dev_application`
-    add column `who_modified` varchar(36) DEFAULT NULL COMMENT ''修改人'';
-CREATE TABLE IF NOT EXISTS `dev_application_version_history`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `dev_application_version_history`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''应用ID'';
-alter table `dev_application_version_history`
-    add column `export_data` text DEFAULT NULL COMMENT ''导出数据参数'';
-alter table `dev_application_version_history`
-    add column `file_name` varchar(255) DEFAULT NULL COMMENT ''文件名'';
-alter table `dev_application_version_history`
-    add column `id` varchar(36) DEFAULT NULL COMMENT ''主键'';
-alter table `dev_application_version_history`
-    add column `note` varchar(255) DEFAULT NULL COMMENT ''备注'';
-alter table `dev_application_version_history`
-    add column `version` varchar(50) DEFAULT NULL COMMENT ''版本'';
-alter table `dev_application_version_history`
-    add column `when_created` timestamp DEFAULT NULL COMMENT ''创建时间'';
-alter table `dev_application_version_history`
-    add column `who_created` varchar(36) DEFAULT NULL COMMENT ''创建人'';
-CREATE TABLE IF NOT EXISTS `dev_document`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `dev_document`
-    add column `content` mediumtext DEFAULT NULL COMMENT ''正文'';
-alter table `dev_document`
-    add column `deleted` tinyint DEFAULT 0 COMMENT ''逻辑删除 0:正常 1：删除'';
-alter table `dev_document`
-    add column `id` varchar(255) DEFAULT NULL COMMENT ''id'';
-alter table `dev_document`
-    add column `name` varchar(255) DEFAULT NULL COMMENT ''标题'';
-alter table `dev_document`
-    add column `order` int DEFAULT NULL COMMENT ''目录排序'';
-alter table `dev_document`
-    add column `parent_id` varchar(255) DEFAULT NULL COMMENT ''父节点id'';
-alter table `dev_document`
-    add column `path` varchar(255) DEFAULT NULL COMMENT ''文件路径'';
-alter table `dev_document`
-    add column `when_created` date DEFAULT NULL COMMENT ''创建时间'';
-alter table `dev_document`
-    add column `who_created` varchar(255) DEFAULT NULL COMMENT ''创建人'';
-CREATE TABLE IF NOT EXISTS `dev_module`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `dev_module`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `dev_module`
-    add column `has_path` int DEFAULT NULL COMMENT ''是否有路径'';
-alter table `dev_module`
-    add column `id` varchar(36) DEFAULT NULL COMMENT ''ID'';
-alter table `dev_module`
-    add column `is_sys` int DEFAULT NULL COMMENT ''是否系统'';
-alter table `dev_module`
-    add column `name` varchar(100) DEFAULT NULL COMMENT ''名称'';
-alter table `dev_module`
-    add column `parent_id` varchar(36) DEFAULT NULL COMMENT ''父节点'';
-alter table `dev_module`
-    add column `path` varchar(255) DEFAULT NULL COMMENT ''路径'';
-alter table `dev_module`
-    add column `sort` int DEFAULT NULL COMMENT ''排序'';
-alter table `dev_module`
-    add column `when_created` varchar(50) DEFAULT NULL COMMENT ''创建时间'';
-alter table `dev_module`
-    add column `when_modified` varchar(50) DEFAULT NULL COMMENT ''修改时间'';
-alter table `dev_module`
-    add column `who_created` varchar(36) DEFAULT NULL COMMENT ''创建人'';
-alter table `dev_module`
-    add column `who_modified` varchar(36) DEFAULT NULL COMMENT ''修改人'';
-CREATE TABLE IF NOT EXISTS `dev_ota_channel`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `dev_ota_channel`
-    add column `auth_token` varchar(50) DEFAULT NULL COMMENT ''安全令牌'';
-alter table `dev_ota_channel`
-    add column `channel_name` varchar(50) DEFAULT NULL COMMENT ''通道名称'';
-alter table `dev_ota_channel`
-    add column `channel_url` varchar(100) DEFAULT NULL COMMENT ''服务器地址'';
-alter table `dev_ota_channel`
-    add column `id` varchar(36) DEFAULT NULL COMMENT ''ID'';
-alter table `dev_ota_channel`
-    add column `master` int DEFAULT 0 COMMENT ''是否主通道'';
-alter table `dev_ota_channel`
-    add column `note` varchar(255) DEFAULT NULL COMMENT ''备注信息'';
-alter table `dev_ota_channel`
-    add column `sign_secret` varchar(50) DEFAULT NULL COMMENT ''签名密钥'';
-alter table `dev_ota_channel`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `dev_ota_channel`
-    add column `when_modified` varchar(20) DEFAULT NULL COMMENT ''修改时间'';
-alter table `dev_ota_channel`
-    add column `who_created` varchar(36) DEFAULT NULL COMMENT ''创建人'';
-alter table `dev_ota_channel`
-    add column `who_modified` varchar(36) DEFAULT NULL COMMENT ''修改人员'';
-CREATE TABLE IF NOT EXISTS `dev_page`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `dev_page`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''应用ID'';
-alter table `dev_page`
-    add column `app_type` varchar(100) DEFAULT NULL COMMENT ''应用类型：可多个，逗号分隔，0: PC Web应用，1：移动端Web应用，2： 小程序，3： APP'';
-alter table `dev_page`
-    add column `deleted` tinyint DEFAULT 0 COMMENT ''删除标识'';
-alter table `dev_page`
-    add column `description` varchar(255) DEFAULT NULL COMMENT ''页面介绍'';
-alter table `dev_page`
-    add column `dev_status` tinyint(1) DEFAULT NULL COMMENT ''开发状态'';
-alter table `dev_page`
-    add column `enable_status` tinyint(1) DEFAULT NULL COMMENT ''可用状态'';
-alter table `dev_page`
-    add column `id` varchar(36) DEFAULT NULL COMMENT ''主键'';
-alter table `dev_page`
-    add column `login_required` tinyint(1) DEFAULT NULL COMMENT ''是否需要登录才可以访问'';
-alter table `dev_page`
-    add column `name` varchar(255) DEFAULT NULL COMMENT ''页面名称'';
-alter table `dev_page`
-    add column `page_json` longtext DEFAULT NULL COMMENT ''页面数据化JSON'';
-alter table `dev_page`
-    add column `path` varchar(255) DEFAULT NULL COMMENT ''访问路径 '';
-alter table `dev_page`
-    add column `when_created` timestamp DEFAULT NULL COMMENT ''创建时间'';
-alter table `dev_page`
-    add column `when_modified` timestamp DEFAULT NULL COMMENT ''修改时间'';
-alter table `dev_page`
-    add column `who_created` varchar(36) DEFAULT NULL COMMENT ''创建人'';
-alter table `dev_page`
-    add column `who_modified` varchar(36) DEFAULT NULL COMMENT ''修改人'';
-CREATE TABLE IF NOT EXISTS `dev_page_history`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `dev_page_history`
-    add column `id` varchar(36) DEFAULT NULL COMMENT ''ID'';
-alter table `dev_page_history`
-    add column `page_id` varchar(36) DEFAULT NULL COMMENT ''页面ID'';
-alter table `dev_page_history`
-    add column `page_json` longtext DEFAULT NULL COMMENT ''页面JSON'';
-alter table `dev_page_history`
-    add column `version_tag` varchar(50) DEFAULT NULL COMMENT ''版本标签'';
-alter table `dev_page_history`
-    add column `version_tag_time` varchar(30) DEFAULT NULL COMMENT ''版本时间'';
-alter table `dev_page_history`
-    add column `when_created` timestamp DEFAULT NULL COMMENT ''创建时间'';
-alter table `dev_page_history`
-    add column `who_created` varchar(36) DEFAULT NULL COMMENT ''创建人'';
-CREATE TABLE IF NOT EXISTS `dev_pine_plugin`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `dev_pine_plugin`
-    add column `app_id` varchar(32) DEFAULT NULL COMMENT ''归属应用id'';
-alter table `dev_pine_plugin`
-    add column `author` varchar(50) DEFAULT NULL COMMENT ''插件作者'';
-alter table `dev_pine_plugin`
-    add column `enable_status` int DEFAULT 0 COMMENT ''是否启动'';
-alter table `dev_pine_plugin`
-    add column `file_id` varchar(32) DEFAULT NULL COMMENT ''文件id'';
-alter table `dev_pine_plugin`
-    add column `id` varchar(36) DEFAULT NULL COMMENT ''主键'';
-alter table `dev_pine_plugin`
-    add column `note` text DEFAULT NULL COMMENT ''说明'';
-alter table `dev_pine_plugin`
-    add column `plugin_name` varchar(50) DEFAULT NULL COMMENT ''插件名称'';
-alter table `dev_pine_plugin`
-    add column `plugin_version` varchar(10) DEFAULT NULL COMMENT ''插件版本号'';
-alter table `dev_pine_plugin`
-    add column `when_created` varchar(32) DEFAULT NULL COMMENT ''创建时间'';
-alter table `dev_pine_plugin`
-    add column `when_modified` varchar(20) DEFAULT NULL COMMENT ''修改时间'';
-alter table `dev_pine_plugin`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人'';
-alter table `dev_pine_plugin`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人员'';
-CREATE TABLE IF NOT EXISTS `dev_power_link`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `dev_power_link`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''主键'';
-alter table `dev_power_link`
-    add column `power_id` varchar(36) DEFAULT NULL COMMENT ''能力id'';
-alter table `dev_power_link`
-    add column `power_type` int DEFAULT NULL COMMENT ''能力类型 1: 逻辑编排 2:函数 3:kutils 4:逻辑编排模板'';
-alter table `dev_power_link`
-    add column `tree_id` varchar(32) DEFAULT NULL COMMENT ''能力树id'';
-alter table `dev_power_link`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `dev_power_link`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人'';
-CREATE TABLE IF NOT EXISTS `dev_power_tree`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `dev_power_tree`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''主键'';
-alter table `dev_power_tree`
-    add column `name` varchar(128) DEFAULT NULL COMMENT ''名称'';
-alter table `dev_power_tree`
-    add column `note` varchar(255) DEFAULT NULL COMMENT ''说明'';
-alter table `dev_power_tree`
-    add column `parent_id` varchar(32) DEFAULT NULL COMMENT ''父级id'';
-alter table `dev_power_tree`
-    add column `path` text DEFAULT NULL COMMENT ''树路径'';
-alter table `dev_power_tree`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `dev_power_tree`
-    add column `when_modified` varchar(20) DEFAULT NULL COMMENT ''修改时间'';
-alter table `dev_power_tree`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人'';
-alter table `dev_power_tree`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人'';
-CREATE TABLE IF NOT EXISTS `dev_sql_run`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `dev_sql_run`
-    add column `execution_time` int DEFAULT NULL COMMENT ''执行时长（毫秒）'';
-alter table `dev_sql_run`
-    add column `id` varchar(36) DEFAULT NULL COMMENT ''id'';
-alter table `dev_sql_run`
-    add column `md5` varchar(100) DEFAULT NULL COMMENT ''md5'';
-alter table `dev_sql_run`
-    add column `success` tinyint DEFAULT NULL COMMENT ''是否成功'';
-alter table `dev_sql_run`
-    add column `version` int DEFAULT NULL COMMENT ''关联版本号'';
-alter table `dev_sql_run`
-    add column `when_created` timestamp DEFAULT NULL COMMENT ''执行时间'';
-CREATE TABLE IF NOT EXISTS `dev_sql_script`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `dev_sql_script`
-    add column `description` varchar(255) DEFAULT NULL COMMENT ''描述'';
-alter table `dev_sql_script`
-    add column `is_once` tinyint DEFAULT 1 COMMENT ''是否只执行1次'';
-alter table `dev_sql_script`
-    add column `sql` longtext DEFAULT NULL COMMENT ''执行脚本'';
-alter table `dev_sql_script`
-    add column `version` int DEFAULT NULL COMMENT ''版本号'';
-CREATE TABLE IF NOT EXISTS `dev_team`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `dev_team`
-    add column `deleted` tinyint(1) DEFAULT 0 COMMENT ''是否已删除'';
-alter table `dev_team`
-    add column `description` varchar(255) DEFAULT NULL COMMENT ''团队简介'';
-alter table `dev_team`
-    add column `id` varchar(36) DEFAULT NULL COMMENT ''团队ID'';
-alter table `dev_team`
-    add column `name` varchar(100) DEFAULT NULL COMMENT ''团队名称'';
-alter table `dev_team`
-    add column `owner` varchar(36) DEFAULT NULL COMMENT ''团队负责人'';
-alter table `dev_team`
-    add column `when_created` timestamp DEFAULT NULL COMMENT ''创建时间'';
-alter table `dev_team`
-    add column `when_modified` timestamp DEFAULT NULL COMMENT ''修改时间'';
-alter table `dev_team`
-    add column `who_created` varchar(36) DEFAULT NULL COMMENT ''创建人'';
-alter table `dev_team`
-    add column `who_modified` varchar(36) DEFAULT NULL COMMENT ''修改人'';
-CREATE TABLE IF NOT EXISTS `dev_team_app`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `dev_team_app`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''当类型为应用团队时，必须有应用APP_ID'';
-alter table `dev_team_app`
-    add column `id` varchar(36) DEFAULT NULL COMMENT ''主键ID'';
-alter table `dev_team_app`
-    add column `team_id` varchar(36) DEFAULT NULL COMMENT ''团队ID'';
-alter table `dev_team_app`
-    add column `team_type` tinyint(1) DEFAULT NULL COMMENT ''团队类型（1：平台团队，2：应用团队）'';
-alter table `dev_team_app`
-    add column `when_created` timestamp DEFAULT NULL COMMENT ''创建时间'';
-alter table `dev_team_app`
-    add column `who_created` varchar(36) DEFAULT NULL COMMENT ''创建人'';
-CREATE TABLE IF NOT EXISTS `dev_team_member`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `dev_team_member`
-    add column `app_id` varchar(255) DEFAULT NULL COMMENT ''关联应用'';
-alter table `dev_team_member`
-    add column `id` varchar(36) DEFAULT NULL COMMENT ''id'';
-alter table `dev_team_member`
-    add column `is_owner` tinyint(1) DEFAULT NULL COMMENT ''是否为团队负责人'';
-alter table `dev_team_member`
-    add column `team_id` varchar(36) DEFAULT NULL COMMENT ''团队ID'';
-alter table `dev_team_member`
-    add column `team_role_id` varchar(36) DEFAULT NULL COMMENT ''团队角色'';
-alter table `dev_team_member`
-    add column `user_id` varchar(36) DEFAULT NULL COMMENT ''用户ID'';
-alter table `dev_team_member`
-    add column `when_join` timestamp DEFAULT NULL COMMENT ''加入时间'';
-alter table `dev_team_member`
-    add column `who_invite` varchar(36) DEFAULT NULL COMMENT ''邀请人'';
-CREATE TABLE IF NOT EXISTS `dev_topological`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `dev_topological`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''应用ID'';
-alter table `dev_topological`
-    add column `deleted` tinyint DEFAULT 0 COMMENT ''删除标识'';
-alter table `dev_topological`
-    add column `description` varchar(255) DEFAULT NULL COMMENT ''页面介绍'';
-alter table `dev_topological`
-    add column `enable_status` tinyint(1) DEFAULT NULL COMMENT ''可用状态'';
-alter table `dev_topological`
-    add column `id` varchar(36) DEFAULT NULL COMMENT ''主键'';
-alter table `dev_topological`
-    add column `name` varchar(255) DEFAULT NULL COMMENT ''页面名称'';
-alter table `dev_topological`
-    add column `page_json` longtext DEFAULT NULL COMMENT ''页面数据化JSON'';
-alter table `dev_topological`
-    add column `when_created` timestamp DEFAULT NULL COMMENT ''创建时间'';
-alter table `dev_topological`
-    add column `when_modified` timestamp DEFAULT NULL COMMENT ''修改时间'';
-alter table `dev_topological`
-    add column `who_created` varchar(36) DEFAULT NULL COMMENT ''创建人'';
-alter table `dev_topological`
-    add column `who_modified` varchar(36) DEFAULT NULL COMMENT ''修改人'';
-CREATE TABLE IF NOT EXISTS `dev_view_model`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `dev_view_model`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `dev_view_model`
-    add column `deleted` int DEFAULT 0 COMMENT ''逻辑删除'';
-alter table `dev_view_model`
-    add column `id` varchar(36) DEFAULT NULL COMMENT ''主键'';
-alter table `dev_view_model`
-    add column `name` varchar(50) DEFAULT NULL COMMENT ''名称'';
-alter table `dev_view_model`
-    add column `note` text DEFAULT NULL COMMENT ''描述'';
-alter table `dev_view_model`
-    add column `tag` varchar(100) DEFAULT NULL COMMENT ''标签，多个用逗号分隔'';
-alter table `dev_view_model`
-    add column `when_created` timestamp DEFAULT NULL COMMENT ''创建时间'';
-alter table `dev_view_model`
-    add column `when_modified` timestamp DEFAULT NULL COMMENT ''修改时间'';
-alter table `dev_view_model`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人员'';
-alter table `dev_view_model`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人员'';
-CREATE TABLE IF NOT EXISTS `dev_view_model_field`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `dev_view_model_field`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `dev_view_model_field`
-    add column `default_text` varchar(50) DEFAULT NULL COMMENT ''默认显示'';
-alter table `dev_view_model_field`
-    add column `field` varchar(50) DEFAULT NULL COMMENT ''键名'';
-alter table `dev_view_model_field`
-    add column `format_pattern` varchar(50) DEFAULT NULL COMMENT ''格式规则'';
-alter table `dev_view_model_field`
-    add column `format_type` varchar(20) DEFAULT NULL COMMENT ''格式类型'';
-alter table `dev_view_model_field`
-    add column `hidden` int DEFAULT 0 COMMENT ''是否隐藏'';
-alter table `dev_view_model_field`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''主键'';
-alter table `dev_view_model_field`
-    add column `label` varchar(50) DEFAULT NULL COMMENT ''标签'';
-alter table `dev_view_model_field`
-    add column `order_num` int DEFAULT 0 COMMENT ''排序'';
-alter table `dev_view_model_field`
-    add column `type` varchar(20) DEFAULT NULL COMMENT ''数据类型'';
-alter table `dev_view_model_field`
-    add column `view_model_id` varchar(32) DEFAULT NULL COMMENT ''模型ID'';
-alter table `dev_view_model_field`
-    add column `when_created` timestamp DEFAULT NULL COMMENT ''创建时间'';
-alter table `dev_view_model_field`
-    add column `when_modified` timestamp DEFAULT NULL COMMENT ''修改时间'';
-alter table `dev_view_model_field`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人员'';
-alter table `dev_view_model_field`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人员'';
-CREATE TABLE IF NOT EXISTS `dev_view_model_flow`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `dev_view_model_flow`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `dev_view_model_flow`
-    add column `flow_id` varchar(36) DEFAULT NULL COMMENT ''流水ID'';
-alter table `dev_view_model_flow`
-    add column `id` varchar(32) DEFAULT NULL COMMENT '''';
-alter table `dev_view_model_flow`
-    add column `view_model_id` varchar(32) DEFAULT NULL COMMENT ''模型ID'';
-alter table `dev_view_model_flow`
-    add column `when_created` timestamp DEFAULT NULL COMMENT ''创建时间'';
-alter table `dev_view_model_flow`
-    add column `when_modified` timestamp DEFAULT NULL COMMENT ''修改时间'';
-alter table `dev_view_model_flow`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人员'';
-alter table `dev_view_model_flow`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人员'';
-CREATE TABLE IF NOT EXISTS `ext_plugin_interface`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `ext_plugin_interface`
-    add column `content` text DEFAULT NULL COMMENT ''接口使用说明Demo'';
-alter table `ext_plugin_interface`
-    add column `create_time` timestamp DEFAULT CURRENT_TIMESTAMP COMMENT '''';
-alter table `ext_plugin_interface`
-    add column `create_user` varchar(255) DEFAULT NULL COMMENT '''';
-alter table `ext_plugin_interface`
-    add column `deleted` int DEFAULT 0 COMMENT ''1:逻辑删'';
-alter table `ext_plugin_interface`
-    add column `description` varchar(1024) DEFAULT NULL COMMENT ''接口描述'';
-alter table `ext_plugin_interface`
-    add column `id` varchar(255) DEFAULT NULL COMMENT '''';
-alter table `ext_plugin_interface`
-    add column `name` varchar(255) DEFAULT NULL COMMENT ''接口名称'';
-alter table `ext_plugin_interface`
-    add column `plugin_id` varchar(255) DEFAULT NULL COMMENT ''插件id'';
-alter table `ext_plugin_interface`
-    add column `resp_type` varchar(255) DEFAULT '''' COMMENT ''返回值类型'';
-alter table `ext_plugin_interface`
-    add column `update_time` timestamp DEFAULT CURRENT_TIMESTAMP COMMENT '''';
-alter table `ext_plugin_interface`
-    add column `update_user` varchar(255) DEFAULT NULL COMMENT '''';
-CREATE TABLE IF NOT EXISTS `ext_plugin_tree`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `ext_plugin_tree`
-    add column `check_time` timestamp DEFAULT NULL COMMENT ''插件检测时间'';
-alter table `ext_plugin_tree`
-    add column `clazz_name` varchar(255) DEFAULT NULL COMMENT ''调用插件方法名'';
-alter table `ext_plugin_tree`
-    add column `create_time` timestamp DEFAULT CURRENT_TIMESTAMP COMMENT '''';
-alter table `ext_plugin_tree`
-    add column `create_user` varchar(255) DEFAULT NULL COMMENT '''';
-alter table `ext_plugin_tree`
-    add column `description` text DEFAULT NULL COMMENT ''描述'';
-alter table `ext_plugin_tree`
-    add column `ext_name` varchar(255) DEFAULT NULL COMMENT ''插件名称'';
-alter table `ext_plugin_tree`
-    add column `id` varchar(255) DEFAULT NULL COMMENT '''';
-alter table `ext_plugin_tree`
-    add column `jar_name` varchar(255) DEFAULT NULL COMMENT ''jar包名称'';
-alter table `ext_plugin_tree`
-    add column `name` varchar(255) DEFAULT NULL COMMENT ''中文名'';
-alter table `ext_plugin_tree`
-    add column `status` int DEFAULT 0 COMMENT ''服务器是否存在该包，0:不存在;
-1:存在'';
-alter table `ext_plugin_tree`
-    add column `type` int DEFAULT NULL COMMENT ''1:一级节点；2:二级节点'';
-alter table `ext_plugin_tree`
-    add column `update_time` timestamp DEFAULT CURRENT_TIMESTAMP COMMENT '''';
-alter table `ext_plugin_tree`
-    add column `update_user` varchar(255) DEFAULT NULL COMMENT '''';
-CREATE TABLE IF NOT EXISTS `kfaas_lib`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `kfaas_lib`
-    add column `createTime` timestamp DEFAULT CURRENT_TIMESTAMP COMMENT '''';
-alter table `kfaas_lib`
-    add column `createUser` varchar(255) DEFAULT NULL COMMENT '''';
-alter table `kfaas_lib`
-    add column `jarName` varchar(255) DEFAULT NULL COMMENT ''jar包名称'';
-alter table `kfaas_lib`
-    add column `status` int DEFAULT 0 COMMENT ''服务器是否存在该包，0:不存在;
-1:存在'';
-alter table `kfaas_lib`
-    add column `updateTime` timestamp DEFAULT CURRENT_TIMESTAMP COMMENT '''';
-alter table `kfaas_lib`
-    add column `updateUser` varchar(255) DEFAULT NULL COMMENT '''';
-CREATE TABLE IF NOT EXISTS `number_regulation`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `number_regulation`
-    add column `id` varchar(64) DEFAULT NULL COMMENT '''';
-alter table `number_regulation`
-    add column `sort` varchar(255) DEFAULT NULL COMMENT ''排序'';
-alter table `number_regulation`
-    add column `type` varchar(255) DEFAULT NULL COMMENT ''规则类型'';
-alter table `number_regulation`
-    add column `value` varchar(255) DEFAULT NULL COMMENT ''规则值'';
-CREATE TABLE IF NOT EXISTS `number_serial`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `number_serial`
-    add column `create_time` varchar(255) DEFAULT NULL COMMENT ''创建时间'';
-alter table `number_serial`
-    add column `id` varchar(64) DEFAULT NULL COMMENT '''';
-alter table `number_serial`
-    add column `name` varchar(255) DEFAULT NULL COMMENT ''流水号名称'';
-alter table `number_serial`
-    add column `number` varchar(255) DEFAULT NULL COMMENT ''流水号编号'';
-alter table `number_serial`
-    add column `regulationId` varchar(64) DEFAULT NULL COMMENT ''规则ID'';
-alter table `number_serial`
-    add column `remark` varchar(255) DEFAULT NULL COMMENT ''备注'';
-alter table `number_serial`
-    add column `start_value` varchar(255) DEFAULT NULL COMMENT ''开始值'';
-alter table `number_serial`
-    add column `step_value` varchar(255) DEFAULT NULL COMMENT ''步长值'';
-alter table `number_serial`
-    add column `update_time` varchar(255) DEFAULT NULL COMMENT ''更新时间'';
-CREATE TABLE IF NOT EXISTS `open_account`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `open_account`
-    add column `access_id` varchar(32) DEFAULT NULL COMMENT ''接入者ID'';
-alter table `open_account`
-    add column `access_name` varchar(128) DEFAULT NULL COMMENT ''接入者名称'';
-alter table `open_account`
-    add column `auth_params` text DEFAULT NULL COMMENT ''参数配置'';
-alter table `open_account`
-    add column `auth_type` int DEFAULT NULL COMMENT ''授权类型1：简单模式，即access_id为access_token, 此时token是固定的'';
-alter table `open_account`
-    add column `id` varchar(36) DEFAULT NULL COMMENT ''主键'';
-alter table `open_account`
-    add column `invalid_date` varchar(20) DEFAULT NULL COMMENT ''失效日期'';
-alter table `open_account`
-    add column `sign_key` varchar(50) DEFAULT NULL COMMENT ''签名密钥'';
-alter table `open_account`
-    add column `status` int DEFAULT 1 COMMENT ''是否启用'';
-alter table `open_account`
-    add column `valid_date` varchar(20) DEFAULT NULL COMMENT ''生效日期'';
-alter table `open_account`
-    add column `validate_sign` int DEFAULT 0 COMMENT ''是否验签'';
-alter table `open_account`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `open_account`
-    add column `when_modified` varchar(20) DEFAULT NULL COMMENT ''修改时间'';
-alter table `open_account`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人'';
-alter table `open_account`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人'';
-CREATE TABLE IF NOT EXISTS `open_account_api`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `open_account_api`
-    add column `account_id` varchar(32) DEFAULT NULL COMMENT ''账号id'';
-alter table `open_account_api`
-    add column `api_id` varchar(32) DEFAULT NULL COMMENT ''接口id'';
-alter table `open_account_api`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''id'';
-alter table `open_account_api`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `open_account_api`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人'';
-CREATE TABLE IF NOT EXISTS `open_api_log`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `open_api_log`
-    add column `access_id` varchar(100) DEFAULT NULL COMMENT ''接口入商名称'';
-alter table `open_api_log`
-    add column `api_name` varchar(100) DEFAULT NULL COMMENT ''接口名称'';
-alter table `open_api_log`
-    add column `error_message` varchar(255) DEFAULT NULL COMMENT ''错误信息'';
-alter table `open_api_log`
-    add column `id` varchar(36) DEFAULT NULL COMMENT ''主键'';
-alter table `open_api_log`
-    add column `request_ip` varchar(20) DEFAULT NULL COMMENT ''请求IP'';
-alter table `open_api_log`
-    add column `request_params` longtext DEFAULT NULL COMMENT ''请求参数'';
-alter table `open_api_log`
-    add column `request_time` varchar(20) DEFAULT NULL COMMENT ''请求时间'';
-alter table `open_api_log`
-    add column `success` tinyint DEFAULT NULL COMMENT ''是否成功'';
-alter table `open_api_log`
-    add column `use_time` tinyint DEFAULT NULL COMMENT ''响应时间(秒)'';
-CREATE TABLE IF NOT EXISTS `rep_app`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `rep_app`
-    add column `app_name` varchar(50) DEFAULT NULL COMMENT ''报表名称'';
-alter table `rep_app`
-    add column `app_note` varchar(256) DEFAULT NULL COMMENT ''报表描述'';
-alter table `rep_app`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''ID'';
-alter table `rep_app`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `rep_app`
-    add column `when_modified` varchar(20) DEFAULT NULL COMMENT ''修改时间'';
-alter table `rep_app`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人'';
-alter table `rep_app`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''更新人'';
-CREATE TABLE IF NOT EXISTS `rep_dataset`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `rep_dataset`
-    add column `column_def` text DEFAULT NULL COMMENT ''列定义'';
-alter table `rep_dataset`
-    add column `ds_meta` text DEFAULT NULL COMMENT ''配置信息'';
-alter table `rep_dataset`
-    add column `ds_name` varchar(50) DEFAULT NULL COMMENT ''数据集名称'';
-alter table `rep_dataset`
-    add column `ds_note` varchar(255) DEFAULT NULL COMMENT ''描述信息'';
-alter table `rep_dataset`
-    add column `ds_type` int DEFAULT NULL COMMENT ''数据集类型 1：sql 2:json 3:excel'';
-alter table `rep_dataset`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''ID'';
-alter table `rep_dataset`
-    add column `rep_app_id` varchar(32) DEFAULT NULL COMMENT ''报表应用id'';
-alter table `rep_dataset`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `rep_dataset`
-    add column `when_modified` varchar(20) DEFAULT NULL COMMENT ''修改时间'';
-alter table `rep_dataset`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人员'';
-alter table `rep_dataset`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人员'';
-CREATE TABLE IF NOT EXISTS `sys_api`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_api`
-    add column `api_argv_type` int DEFAULT NULL COMMENT ''参数组装方式'';
-alter table `sys_api`
-    add column `api_code` varchar(50) DEFAULT NULL COMMENT ''接口编码'';
-alter table `sys_api`
-    add column `api_flow_id` varchar(50) DEFAULT NULL COMMENT ''流程ID'';
-alter table `sys_api`
-    add column `api_method` varchar(32) DEFAULT ''get'' COMMENT ''请求方式'';
-alter table `sys_api`
-    add column `api_name` varchar(50) DEFAULT NULL COMMENT ''接口名称'';
-alter table `sys_api`
-    add column `api_note` text DEFAULT NULL COMMENT ''接口描述'';
-alter table `sys_api`
-    add column `api_req_argv` text DEFAULT NULL COMMENT ''请求参数'';
-alter table `sys_api`
-    add column `api_result_handler` varchar(128) DEFAULT NULL COMMENT ''结果处理类'';
-alter table `sys_api`
-    add column `api_rsp_argv` text DEFAULT NULL COMMENT ''响应结果'';
-alter table `sys_api`
-    add column `api_tags` varchar(128) DEFAULT NULL COMMENT ''标签'';
-alter table `sys_api`
-    add column `api_url` varchar(128) DEFAULT NULL COMMENT ''接口路径'';
-alter table `sys_api`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `sys_api`
-    add column `call_type` int DEFAULT NULL COMMENT ''调试方式'';
-alter table `sys_api`
-    add column `id` varchar(32) DEFAULT '''' COMMENT ''主键'';
-alter table `sys_api`
-    add column `module_id` varchar(36) DEFAULT NULL COMMENT ''关联模块'';
-alter table `sys_api`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_api`
-    add column `when_modified` varchar(20) DEFAULT NULL COMMENT ''修改时间'';
-alter table `sys_api`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人'';
-alter table `sys_api`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人'';
-CREATE TABLE IF NOT EXISTS `sys_auto_serial`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_auto_serial`
-    add column `auto_num` int DEFAULT NULL COMMENT ''当前编号'';
-alter table `sys_auto_serial`
-    add column `category` varchar(100) DEFAULT NULL COMMENT ''分类'';
-alter table `sys_auto_serial`
-    add column `create_time` timestamp DEFAULT CURRENT_TIMESTAMP COMMENT '''';
-alter table `sys_auto_serial`
-    add column `create_user` varchar(50) DEFAULT NULL COMMENT '''';
-alter table `sys_auto_serial`
-    add column `id` varchar(100) DEFAULT '''' COMMENT '''';
-alter table `sys_auto_serial`
-    add column `key` varchar(50) DEFAULT NULL COMMENT ''计算方式key'';
-alter table `sys_auto_serial`
-    add column `locked` int DEFAULT 0 COMMENT ''是否被锁 1：已锁 0：未锁'';
-alter table `sys_auto_serial`
-    add column `num_length` int DEFAULT NULL COMMENT ''编号长度，不够前面补0'';
-alter table `sys_auto_serial`
-    add column `start_num` int DEFAULT NULL COMMENT ''初始值'';
-alter table `sys_auto_serial`
-    add column `step` int DEFAULT NULL COMMENT ''步长'';
-alter table `sys_auto_serial`
-    add column `tpl` varchar(100) DEFAULT NULL COMMENT ''模板'';
-alter table `sys_auto_serial`
-    add column `type` int DEFAULT NULL COMMENT ''计算方式1: 按日 2：按月 3:按年'';
-alter table `sys_auto_serial`
-    add column `update_time` timestamp DEFAULT CURRENT_TIMESTAMP COMMENT '''';
-alter table `sys_auto_serial`
-    add column `update_user` varchar(50) DEFAULT NULL COMMENT '''';
-CREATE TABLE IF NOT EXISTS `sys_base`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_base`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `sys_base`
-    add column `code` varchar(50) DEFAULT NULL COMMENT ''编码'';
-alter table `sys_base`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''主键'';
-alter table `sys_base`
-    add column `is_test` tinyint DEFAULT NULL COMMENT '''';
-alter table `sys_base`
-    add column `name` varchar(50) DEFAULT NULL COMMENT ''名称'';
-alter table `sys_base`
-    add column `note` text DEFAULT NULL COMMENT ''备注'';
-alter table `sys_base`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_base`
-    add column `when_modified` varchar(20) DEFAULT NULL COMMENT ''修改时间'';
-alter table `sys_base`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人员'';
-alter table `sys_base`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人员'';
-CREATE TABLE IF NOT EXISTS `sys_config`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_config`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `sys_config`
-    add column `code` varchar(255) DEFAULT NULL COMMENT ''参数键名'';
-alter table `sys_config`
-    add column `id` varchar(36) DEFAULT NULL COMMENT ''ID'';
-alter table `sys_config`
-    add column `is_sys` tinyint DEFAULT NULL COMMENT ''是否系统内置'';
-alter table `sys_config`
-    add column `name` varchar(255) DEFAULT NULL COMMENT ''参数名称'';
-alter table `sys_config`
-    add column `note` varchar(255) DEFAULT NULL COMMENT ''备注'';
-alter table `sys_config`
-    add column `value` varchar(255) DEFAULT NULL COMMENT ''参数键值'';
-alter table `sys_config`
-    add column `value_type` tinyint DEFAULT 0 COMMENT '''';
-alter table `sys_config`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_config`
-    add column `when_modified` varchar(20) DEFAULT NULL COMMENT ''修改时间'';
-alter table `sys_config`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人员'';
-alter table `sys_config`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人员'';
-CREATE TABLE IF NOT EXISTS `sys_data_access`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_data_access`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `sys_data_access`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''主键'';
-alter table `sys_data_access`
-    add column `name` varchar(50) DEFAULT NULL COMMENT ''名称'';
-alter table `sys_data_access`
-    add column `note` text DEFAULT NULL COMMENT ''备注'';
-alter table `sys_data_access`
-    add column `status` tinyint DEFAULT NULL COMMENT ''启用状态'';
-alter table `sys_data_access`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_data_access`
-    add column `when_modified` varchar(20) DEFAULT NULL COMMENT ''修改时间'';
-alter table `sys_data_access`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人员'';
-alter table `sys_data_access`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人员'';
-CREATE TABLE IF NOT EXISTS `sys_data_access_resource`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_data_access_resource`
-    add column `access_id` varchar(36) DEFAULT NULL COMMENT ''编码'';
-alter table `sys_data_access_resource`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `sys_data_access_resource`
-    add column `data_id` varchar(36) DEFAULT NULL COMMENT ''名称'';
-alter table `sys_data_access_resource`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''主键'';
-alter table `sys_data_access_resource`
-    add column `table_name` varchar(50) DEFAULT NULL COMMENT ''备注'';
-alter table `sys_data_access_resource`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_data_access_resource`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人员'';
-CREATE TABLE IF NOT EXISTS `sys_data_access_user`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_data_access_user`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `sys_data_access_user`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''主键'';
-alter table `sys_data_access_user`
-    add column `sys_data_access_id` varchar(50) DEFAULT NULL COMMENT ''数据访问组id'';
-alter table `sys_data_access_user`
-    add column `sys_user_id` varchar(32) DEFAULT NULL COMMENT ''用户id'';
-alter table `sys_data_access_user`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_data_access_user`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人员'';
-CREATE TABLE IF NOT EXISTS `sys_data_resource`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_data_resource`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `sys_data_resource`
-    add column `extra_sql` text DEFAULT NULL COMMENT ''权限附加SQL'';
-alter table `sys_data_resource`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''主键'';
-alter table `sys_data_resource`
-    add column `is_only_leaf` tinyint DEFAULT NULL COMMENT ''是否只选树叶'';
-alter table `sys_data_resource`
-    add column `is_tree` tinyint DEFAULT NULL COMMENT ''是否树形结构'';
-alter table `sys_data_resource`
-    add column `label_field` varchar(50) DEFAULT NULL COMMENT ''标签列'';
-alter table `sys_data_resource`
-    add column `name` varchar(50) DEFAULT NULL COMMENT ''名称'';
-alter table `sys_data_resource`
-    add column `query_sql` text DEFAULT NULL COMMENT ''查询SQL'';
-alter table `sys_data_resource`
-    add column `status` tinyint DEFAULT NULL COMMENT ''启用状态'';
-alter table `sys_data_resource`
-    add column `table_name` varchar(50) DEFAULT NULL COMMENT ''表名'';
-alter table `sys_data_resource`
-    add column `value_field` varchar(50) DEFAULT NULL COMMENT ''值列'';
-alter table `sys_data_resource`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_data_resource`
-    add column `when_modified` varchar(20) DEFAULT NULL COMMENT ''修改时间'';
-alter table `sys_data_resource`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人员'';
-alter table `sys_data_resource`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人员'';
-CREATE TABLE IF NOT EXISTS `sys_dict`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_dict`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `sys_dict`
-    add column `code` varchar(50) DEFAULT NULL COMMENT ''编码'';
-alter table `sys_dict`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''主键'';
-alter table `sys_dict`
-    add column `name` varchar(50) DEFAULT NULL COMMENT ''名称'';
-alter table `sys_dict`
-    add column `note` text DEFAULT NULL COMMENT ''备注'';
-alter table `sys_dict`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_dict`
-    add column `when_modified` varchar(20) DEFAULT NULL COMMENT ''修改时间'';
-alter table `sys_dict`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人员'';
-alter table `sys_dict`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人员'';
-CREATE TABLE IF NOT EXISTS `sys_dict_item`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_dict_item`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `sys_dict_item`
-    add column `code` varchar(50) DEFAULT NULL COMMENT ''编码'';
-alter table `sys_dict_item`
-    add column `group_name` varchar(50) DEFAULT NULL COMMENT ''组名'';
-alter table `sys_dict_item`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''主键'';
-alter table `sys_dict_item`
-    add column `name` varchar(50) DEFAULT NULL COMMENT ''名称'';
-alter table `sys_dict_item`
-    add column `note` text DEFAULT NULL COMMENT ''备注'';
-alter table `sys_dict_item`
-    add column `order_num` int DEFAULT NULL COMMENT ''排序'';
-alter table `sys_dict_item`
-    add column `sys_dict_id` varchar(32) DEFAULT NULL COMMENT ''字典id'';
-alter table `sys_dict_item`
-    add column `value` varchar(20) DEFAULT NULL COMMENT ''值'';
-alter table `sys_dict_item`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_dict_item`
-    add column `when_modified` varchar(20) DEFAULT NULL COMMENT ''修改时间'';
-alter table `sys_dict_item`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人员'';
-alter table `sys_dict_item`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人员'';
-CREATE TABLE IF NOT EXISTS `sys_excel`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_excel`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `sys_excel`
-    add column `data_from` int DEFAULT NULL COMMENT ''1. 普通 2. Excel文件 3. 数据源'';
-alter table `sys_excel`
-    add column `data_from_id` varchar(36) DEFAULT NULL COMMENT ''数据来源ID：如果data_from为2，则为fileId；如果为3，则为datasetId'';
-alter table `sys_excel`
-    add column `data_json` longtext DEFAULT NULL COMMENT ''数据配置'';
-alter table `sys_excel`
-    add column `id` varchar(255) DEFAULT NULL COMMENT ''主键'';
-alter table `sys_excel`
-    add column `name` varchar(255) DEFAULT NULL COMMENT ''名称'';
-alter table `sys_excel`
-    add column `when_created` varchar(30) DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_excel`
-    add column `when_modified` varchar(30) DEFAULT NULL COMMENT ''修改时间'';
-alter table `sys_excel`
-    add column `who_created` varchar(36) DEFAULT NULL COMMENT ''创建人'';
-alter table `sys_excel`
-    add column `who_modified` varchar(36) DEFAULT NULL COMMENT ''修改人'';
-CREATE TABLE IF NOT EXISTS `sys_file`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_file`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `sys_file`
-    add column `file_content` longtext DEFAULT NULL COMMENT ''文件内容，只有存数据库时才有值'';
-alter table `sys_file`
-    add column `file_ext` text DEFAULT NULL COMMENT ''文件扩展名'';
-alter table `sys_file`
-    add column `file_from` varchar(50) DEFAULT NULL COMMENT ''文件来源'';
-alter table `sys_file`
-    add column `file_md5` varchar(40) DEFAULT NULL COMMENT ''文件MD5值'';
-alter table `sys_file`
-    add column `file_name` varchar(100) DEFAULT NULL COMMENT ''文件名称'';
-alter table `sys_file`
-    add column `file_original_name` varchar(100) DEFAULT NULL COMMENT ''原始文件名'';
-alter table `sys_file`
-    add column `file_path` varchar(100) DEFAULT NULL COMMENT ''存储路径'';
-alter table `sys_file`
-    add column `file_size` int DEFAULT NULL COMMENT ''文件大小(Byte)'';
-alter table `sys_file`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''主键'';
-alter table `sys_file`
-    add column `save_type` int DEFAULT NULL COMMENT ''存储方式 0：数据库 1：本地磁盘，2：FAAS储存'';
-alter table `sys_file`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_file`
-    add column `when_modified` varchar(20) DEFAULT NULL COMMENT ''修改时间'';
-alter table `sys_file`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人员'';
-alter table `sys_file`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人员'';
-CREATE TABLE IF NOT EXISTS `sys_hint_select`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_hint_select`
-    add column `code` varchar(100) DEFAULT NULL COMMENT ''简称'';
-alter table `sys_hint_select`
-    add column `db_id` varchar(100) DEFAULT NULL COMMENT ''数据源'';
-alter table `sys_hint_select`
-    add column `flow_id` varchar(50) DEFAULT NULL COMMENT ''逻辑编排,优化级最高'';
-alter table `sys_hint_select`
-    add column `id` varchar(50) DEFAULT NULL COMMENT ''主键'';
-alter table `sys_hint_select`
-    add column `remark` text DEFAULT NULL COMMENT ''备注说明'';
-alter table `sys_hint_select`
-    add column `select_fields` text DEFAULT NULL COMMENT ''字段说明'';
-alter table `sys_hint_select`
-    add column `select_sql` text DEFAULT NULL COMMENT ''下拉SQL'';
-alter table `sys_hint_select`
-    add column `type` varchar(50) DEFAULT NULL COMMENT ''类型:0=普通下拉,1=树下拉'';
-CREATE TABLE IF NOT EXISTS `sys_i18n`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_i18n`
-    add column `app_id` varchar(32) DEFAULT NULL COMMENT ''归属应用ID'';
-alter table `sys_i18n`
-    add column `i18n_key` varchar(255) DEFAULT NULL COMMENT ''键名'';
-alter table `sys_i18n`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''主键'';
-alter table `sys_i18n`
-    add column `message` text DEFAULT NULL COMMENT ''国际化配置信息，JSON保存'';
-alter table `sys_i18n`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_i18n`
-    add column `when_modified` varchar(20) DEFAULT NULL COMMENT ''修改时间'';
-alter table `sys_i18n`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人员'';
-alter table `sys_i18n`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人员'';
-CREATE TABLE IF NOT EXISTS `sys_logic_flow`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_logic_flow`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `sys_logic_flow`
-    add column `application_id` varchar(32) DEFAULT NULL COMMENT ''应用ID'';
-alter table `sys_logic_flow`
-    add column `default_source_name` varchar(100) DEFAULT NULL COMMENT ''默认数据源'';
-alter table `sys_logic_flow`
-    add column `flow_id` varchar(36) DEFAULT NULL COMMENT ''流程ID'';
-alter table `sys_logic_flow`
-    add column `id` varchar(36) DEFAULT NULL COMMENT ''ID'';
-alter table `sys_logic_flow`
-    add column `in_argv` text DEFAULT NULL COMMENT ''输入参数'';
-alter table `sys_logic_flow`
-    add column `name` varchar(255) DEFAULT NULL COMMENT ''名称'';
-alter table `sys_logic_flow`
-    add column `note` varchar(255) DEFAULT NULL COMMENT ''备注'';
-alter table `sys_logic_flow`
-    add column `out_argv` text DEFAULT NULL COMMENT ''输出参数'';
-alter table `sys_logic_flow`
-    add column `sub_flow_ids` text DEFAULT NULL COMMENT ''子流程ID列表'';
-alter table `sys_logic_flow`
-    add column `tags` varchar(255) DEFAULT NULL COMMENT ''标签'';
-alter table `sys_logic_flow`
-    add column `when_created` timestamp DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_logic_flow`
-    add column `when_modified` timestamp DEFAULT NULL COMMENT ''修改时间'';
-alter table `sys_logic_flow`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人员'';
-alter table `sys_logic_flow`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人员'';
-CREATE TABLE IF NOT EXISTS `sys_logic_history`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_logic_history`
-    add column `flow_id` varchar(36) DEFAULT NULL COMMENT ''流程ID'';
-alter table `sys_logic_history`
-    add column `flow_json` longtext DEFAULT NULL COMMENT ''流程JSON'';
-alter table `sys_logic_history`
-    add column `id` varchar(36) DEFAULT NULL COMMENT ''ID'';
-alter table `sys_logic_history`
-    add column `version_tag` varchar(50) DEFAULT NULL COMMENT ''版本标签'';
-alter table `sys_logic_history`
-    add column `version_tag_time` varchar(30) DEFAULT NULL COMMENT ''版本时间'';
-alter table `sys_logic_history`
-    add column `when_created` timestamp DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_logic_history`
-    add column `who_created` varchar(36) DEFAULT NULL COMMENT ''创建人'';
-CREATE TABLE IF NOT EXISTS `sys_logic_template`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_logic_template`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `sys_logic_template`
-    add column `description` text DEFAULT NULL COMMENT ''简介'';
-alter table `sys_logic_template`
-    add column `id` varchar(36) DEFAULT NULL COMMENT ''id'';
-alter table `sys_logic_template`
-    add column `links` longtext DEFAULT NULL COMMENT ''连接列表'';
-alter table `sys_logic_template`
-    add column `module_id` varchar(36) DEFAULT NULL COMMENT ''关联模块'';
-alter table `sys_logic_template`
-    add column `name` varchar(255) DEFAULT NULL COMMENT ''名称'';
-alter table `sys_logic_template`
-    add column `nodes` longtext DEFAULT NULL COMMENT ''节点列表'';
-alter table `sys_logic_template`
-    add column `when_created` varchar(50) DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_logic_template`
-    add column `when_modified` varchar(50) DEFAULT NULL COMMENT ''修改时间'';
-alter table `sys_logic_template`
-    add column `who_created` varchar(36) DEFAULT NULL COMMENT ''创建人'';
-alter table `sys_logic_template`
-    add column `who_modified` varchar(36) DEFAULT NULL COMMENT ''修改人'';
-CREATE TABLE IF NOT EXISTS `sys_login_log`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_login_log`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''主键'';
-alter table `sys_login_log`
-    add column `ip` varchar(20) DEFAULT NULL COMMENT ''来访IP'';
-alter table `sys_login_log`
-    add column `operate_time` timestamp DEFAULT NULL COMMENT ''访问时间'';
-alter table `sys_login_log`
-    add column `operator` varchar(32) DEFAULT NULL COMMENT ''访问人员'';
-alter table `sys_login_log`
-    add column `response_code` int DEFAULT NULL COMMENT ''响应码'';
-alter table `sys_login_log`
-    add column `response_message` varchar(100) DEFAULT NULL COMMENT ''响应消息'';
-alter table `sys_login_log`
-    add column `times` int DEFAULT NULL COMMENT ''耗时(ms)'';
-alter table `sys_login_log`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-CREATE TABLE IF NOT EXISTS `sys_menu`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_menu`
-    add column `api_codes` varchar(255) DEFAULT NULL COMMENT ''接口编码，多个用逗号分隔'';
-alter table `sys_menu`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''所属应用ID'';
-alter table `sys_menu`
-    add column `code` varchar(50) DEFAULT NULL COMMENT ''编码'';
-alter table `sys_menu`
-    add column `component_path` varchar(255) DEFAULT NULL COMMENT ''组件路径'';
-alter table `sys_menu`
-    add column `data_type` tinyint DEFAULT NULL COMMENT ''数据类型：0系统，1业务应用, 2开发平台'';
-alter table `sys_menu`
-    add column `full_path` varchar(255) DEFAULT NULL COMMENT ''完整路径（根据层级结构、router_path拼接的完整路径）'';
-alter table `sys_menu`
-    add column `icon` varchar(50) DEFAULT NULL COMMENT ''图标'';
-alter table `sys_menu`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''主键'';
-alter table `sys_menu`
-    add column `is_dev` tinyint(1) DEFAULT 0 COMMENT ''菜单是否为开发者模式菜单'';
-alter table `sys_menu`
-    add column `is_hidden` tinyint DEFAULT 0 COMMENT ''是否隐藏'';
-alter table `sys_menu`
-    add column `keep_alive` tinyint DEFAULT NULL COMMENT ''是否刷新 0: 否 1：是'';
-alter table `sys_menu`
-    add column `main_mode` tinyint DEFAULT NULL COMMENT ''内容区显示样式：0 自动撑开，1 居中'';
-alter table `sys_menu`
-    add column `menu_type` char(1) DEFAULT ''0 '' COMMENT ''菜单类型（M目录 C菜单 F按钮）'';
-alter table `sys_menu`
-    add column `name` varchar(50) DEFAULT NULL COMMENT ''名称'';
-alter table `sys_menu`
-    add column `open_mode` tinyint DEFAULT NULL COMMENT ''打开方式 0:页签 1:新窗口'';
-alter table `sys_menu`
-    add column `order_num` int DEFAULT 0 COMMENT ''排序'';
-alter table `sys_menu`
-    add column `page_id` varchar(36) DEFAULT NULL COMMENT ''关联页面'';
-alter table `sys_menu`
-    add column `page_type` tinyint DEFAULT NULL COMMENT ''页面渲染方式：0 Vue， 1 JSON'';
-alter table `sys_menu`
-    add column `parent_id` varchar(32) DEFAULT NULL COMMENT ''上级菜单ID'';
-alter table `sys_menu`
-    add column `path` text DEFAULT NULL COMMENT ''菜单层级关系，自动生成'';
-alter table `sys_menu`
-    add column `router_path` varchar(255) DEFAULT NULL COMMENT ''路由路径'';
-alter table `sys_menu`
-    add column `sidebar_nav_mode` tinyint DEFAULT NULL COMMENT ''侧边菜单显示模式：0 不显示，1 从一级菜单开始显示，2 从二级菜单开始显示, 3 显示二级以下菜单'';
-alter table `sys_menu`
-    add column `status` tinyint DEFAULT 1 COMMENT ''可用状态'';
-alter table `sys_menu`
-    add column `theme` varchar(50) DEFAULT NULL COMMENT ''layout主题'';
-alter table `sys_menu`
-    add column `top_nav_mode` tinyint DEFAULT NULL COMMENT ''顶部菜单显示模式：0 完全不显示, top_nav_mode1 不显示nav（有header，没有菜单），2 从一级菜单开始显示，3 从二级菜单开始显示'';
-alter table `sys_menu`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_menu`
-    add column `when_modified` varchar(20) DEFAULT NULL COMMENT ''修改时间'';
-alter table `sys_menu`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人员'';
-alter table `sys_menu`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人员'';
-CREATE TABLE IF NOT EXISTS `sys_mq_channel`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_mq_channel`
-    add column `batch_consumer` int DEFAULT NULL COMMENT ''批量消费数'';
-alter table `sys_mq_channel`
-    add column `channel_name` varchar(50) DEFAULT NULL COMMENT ''通道名称'';
-alter table `sys_mq_channel`
-    add column `consumer_group` varchar(50) DEFAULT NULL COMMENT ''消费组名'';
-alter table `sys_mq_channel`
-    add column `consumer_thread` int DEFAULT NULL COMMENT ''消费线程数'';
-alter table `sys_mq_channel`
-    add column `enable` int DEFAULT NULL COMMENT ''是否启用 0-否 1-是'';
-alter table `sys_mq_channel`
-    add column `id` varchar(64) DEFAULT NULL COMMENT ''ID'';
-alter table `sys_mq_channel`
-    add column `message_name` varchar(50) DEFAULT NULL COMMENT ''消息处理逻辑编排'';
-alter table `sys_mq_channel`
-    add column `topic` varchar(50) DEFAULT NULL COMMENT ''主题'';
-alter table `sys_mq_channel`
-    add column `zk_address` varchar(50) DEFAULT NULL COMMENT ''zk地址'';
-CREATE TABLE IF NOT EXISTS `sys_notice`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_notice`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `sys_notice`
-    add column `content` text DEFAULT NULL COMMENT ''通知内容'';
-alter table `sys_notice`
-    add column `deleted` tinyint(1) DEFAULT NULL COMMENT ''逻辑删除，0：未删除，1：已删除'';
-alter table `sys_notice`
-    add column `id` varchar(36) DEFAULT NULL COMMENT ''消息ID'';
-alter table `sys_notice`
-    add column `status` tinyint DEFAULT 1 COMMENT ''启用状态：0：待启用，1：已启用'';
-alter table `sys_notice`
-    add column `title` varchar(255) DEFAULT NULL COMMENT ''通知标题'';
-alter table `sys_notice`
-    add column `type` tinyint DEFAULT NULL COMMENT ''通知类型，1：系统维护通知，2：公告'';
-alter table `sys_notice`
-    add column `when_created` timestamp DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_notice`
-    add column `when_modified` timestamp DEFAULT NULL COMMENT ''更新时间'';
-alter table `sys_notice`
-    add column `who_created` varchar(36) DEFAULT NULL COMMENT ''创建人'';
-alter table `sys_notice`
-    add column `who_modified` varchar(36) DEFAULT NULL COMMENT ''更新人'';
-CREATE TABLE IF NOT EXISTS `sys_notice_record`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_notice_record`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `sys_notice_record`
-    add column `content` text DEFAULT NULL COMMENT ''通知内容'';
-alter table `sys_notice_record`
-    add column `from_who` varchar(36) DEFAULT NULL COMMENT ''发送人'';
-alter table `sys_notice_record`
-    add column `from_who_name` varchar(255) DEFAULT NULL COMMENT ''发送人名称'';
-alter table `sys_notice_record`
-    add column `id` varchar(36) DEFAULT NULL COMMENT ''通知记录ID'';
-alter table `sys_notice_record`
-    add column `is_read` tinyint DEFAULT 0 COMMENT ''是否已读，0：未读，1：已读'';
-alter table `sys_notice_record`
-    add column `notice_id` varchar(36) DEFAULT NULL COMMENT ''关联通知'';
-alter table `sys_notice_record`
-    add column `notice_time` timestamp DEFAULT CURRENT_TIMESTAMP COMMENT ''接收通知时间'';
-alter table `sys_notice_record`
-    add column `read_time` timestamp DEFAULT NULL COMMENT ''阅读通知时间'';
-alter table `sys_notice_record`
-    add column `title` varchar(255) DEFAULT NULL COMMENT ''通知标题'';
-alter table `sys_notice_record`
-    add column `to_who` varchar(36) DEFAULT NULL COMMENT ''接收人'';
-alter table `sys_notice_record`
-    add column `to_who_name` varchar(255) DEFAULT NULL COMMENT ''接收人名称'';
-CREATE TABLE IF NOT EXISTS `sys_online_user`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_online_user`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `sys_online_user`
-    add column `expire_time` timestamp DEFAULT NULL COMMENT ''失效时间'';
-alter table `sys_online_user`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''主键'';
-alter table `sys_online_user`
-    add column `login_ip` varchar(20) DEFAULT NULL COMMENT ''登录ip'';
-alter table `sys_online_user`
-    add column `login_time` timestamp DEFAULT NULL COMMENT ''登录时间'';
-alter table `sys_online_user`
-    add column `login_token` varchar(1024) DEFAULT NULL COMMENT ''令牌'';
-alter table `sys_online_user`
-    add column `user_id` varchar(32) DEFAULT NULL COMMENT ''用户id'';
-alter table `sys_online_user`
-    add column `when_created` timestamp DEFAULT NULL COMMENT ''创建时间'';
-CREATE TABLE IF NOT EXISTS `sys_operate_log`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_operate_log`
-    add column `action` varchar(255) DEFAULT NULL COMMENT ''动作'';
-alter table `sys_operate_log`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `sys_operate_log`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''主键'';
-alter table `sys_operate_log`
-    add column `ip` varchar(20) DEFAULT NULL COMMENT ''来访IP'';
-alter table `sys_operate_log`
-    add column `module` varchar(100) DEFAULT NULL COMMENT ''模块'';
-alter table `sys_operate_log`
-    add column `operate_time` timestamp DEFAULT NULL COMMENT ''访问时间'';
-alter table `sys_operate_log`
-    add column `operator` varchar(32) DEFAULT NULL COMMENT ''访问人员'';
-alter table `sys_operate_log`
-    add column `request_body` longtext DEFAULT NULL COMMENT ''请求内容体'';
-alter table `sys_operate_log`
-    add column `response_code` int DEFAULT NULL COMMENT ''响应码'';
-alter table `sys_operate_log`
-    add column `response_message` varchar(100) DEFAULT NULL COMMENT ''响应消息'';
-alter table `sys_operate_log`
-    add column `times` int DEFAULT NULL COMMENT ''耗时(ms)'';
-alter table `sys_operate_log`
-    add column `url` varchar(255) DEFAULT NULL COMMENT ''路径'';
-alter table `sys_operate_log`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_operate_log`
-    add column `method` varchar(255) comment ''方法名称'';
-alter table `sys_operate_log`
-    add column `request_method` varchar(20) comment ''请求方式'';
-alter table `sys_operate_log`
-    add column `response_body` text comment ''响应内容体'';
-CREATE TABLE IF NOT EXISTS `sys_role`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_role`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `sys_role`
-    add column `code` varchar(50) DEFAULT NULL COMMENT ''编码'';
-alter table `sys_role`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''主键'';
-alter table `sys_role`
-    add column `name` varchar(50) DEFAULT NULL COMMENT ''名称'';
-alter table `sys_role`
-    add column `note` text DEFAULT NULL COMMENT ''备注'';
-alter table `sys_role`
-    add column `status` tinyint DEFAULT NULL COMMENT ''是否有效 0:否 1：是'';
-alter table `sys_role`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_role`
-    add column `when_modified` varchar(20) DEFAULT NULL COMMENT ''修改时间'';
-alter table `sys_role`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人员'';
-alter table `sys_role`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人员'';
-CREATE TABLE IF NOT EXISTS `sys_role_menu`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_role_menu`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `sys_role_menu`
-    add column `id` varchar(36) DEFAULT NULL COMMENT ''主键'';
-alter table `sys_role_menu`
-    add column `sys_menu_id` varchar(36) DEFAULT NULL COMMENT ''名称'';
-alter table `sys_role_menu`
-    add column `sys_role_id` varchar(50) DEFAULT NULL COMMENT ''编码'';
-alter table `sys_role_menu`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_role_menu`
-    add column `who_created` varchar(36) DEFAULT NULL COMMENT ''创建人员'';
-CREATE TABLE IF NOT EXISTS `sys_task`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_task`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `sys_task`
-    add column `application_id` varchar(32) DEFAULT NULL COMMENT ''应用ID'';
-alter table `sys_task`
-    add column `class_name` varchar(255) DEFAULT NULL COMMENT ''类名'';
-alter table `sys_task`
-    add column `cron` varchar(50) DEFAULT NULL COMMENT ''定时表达式'';
-alter table `sys_task`
-    add column `distributed` tinyint DEFAULT NULL COMMENT ''是否分布式'';
-alter table `sys_task`
-    add column `enable` tinyint DEFAULT 1 COMMENT ''启用状态'';
-alter table `sys_task`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''主键'';
-alter table `sys_task`
-    add column `last_execute_msg` text DEFAULT NULL COMMENT ''最后执行错误信息'';
-alter table `sys_task`
-    add column `last_execute_status` tinyint DEFAULT NULL COMMENT ''最后执行状态 1：成功 0：失败'';
-alter table `sys_task`
-    add column `last_execute_take` int DEFAULT NULL COMMENT ''上次执行消耗'';
-alter table `sys_task`
-    add column `last_execute_time` timestamp DEFAULT NULL COMMENT ''上次执行时间'';
-alter table `sys_task`
-    add column `lock_for_least` int DEFAULT 1 COMMENT ''最少锁定时长(秒)'';
-alter table `sys_task`
-    add column `lock_for_most` int DEFAULT 30 COMMENT ''最多锁定时长(秒)'';
-alter table `sys_task`
-    add column `lock_for_time` timestamp DEFAULT NULL COMMENT ''锁定时间'';
-alter table `sys_task`
-    add column `lock_status` tinyint DEFAULT 0 COMMENT ''锁定状态'';
-alter table `sys_task`
-    add column `name` varchar(100) DEFAULT NULL COMMENT ''任务名称'';
-alter table `sys_task`
-    add column `note` text DEFAULT NULL COMMENT ''备注'';
-alter table `sys_task`
-    add column `task_resource_id` varchar(36) DEFAULT NULL COMMENT ''任务资源ID'';
-alter table `sys_task`
-    add column `task_type` tinyint DEFAULT 1 COMMENT ''任务类型'';
-alter table `sys_task`
-    add column `when_created` timestamp DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_task`
-    add column `when_modified` timestamp DEFAULT NULL COMMENT ''修改时间'';
-alter table `sys_task`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人'';
-alter table `sys_task`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人'';
-CREATE TABLE IF NOT EXISTS `sys_unit`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_unit`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `sys_unit`
-    add column `email` varchar(50) DEFAULT NULL COMMENT ''电子邮箱'';
-alter table `sys_unit`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''主键'';
-alter table `sys_unit`
-    add column `leader` varchar(255) DEFAULT NULL COMMENT ''负责人'';
-alter table `sys_unit`
-    add column `mobile` varchar(20) DEFAULT NULL COMMENT ''联系电话'';
-alter table `sys_unit`
-    add column `name` varchar(50) DEFAULT NULL COMMENT ''名称'';
-alter table `sys_unit`
-    add column `note` text DEFAULT NULL COMMENT ''备注'';
-alter table `sys_unit`
-    add column `order_num` int DEFAULT 0 COMMENT ''排序 '';
-alter table `sys_unit`
-    add column `parent_id` varchar(32) DEFAULT NULL COMMENT ''上级单位ID'';
-alter table `sys_unit`
-    add column `path` text DEFAULT NULL COMMENT ''层次关系，自动生成'';
-alter table `sys_unit`
-    add column `status` tinyint DEFAULT 1 COMMENT ''部门状态， 0：停用 1：正常'';
-alter table `sys_unit`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_unit`
-    add column `when_modified` varchar(20) DEFAULT NULL COMMENT ''修改时间'';
-alter table `sys_unit`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人员'';
-alter table `sys_unit`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人员'';
-CREATE TABLE IF NOT EXISTS `sys_user`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_user`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `sys_user`
-    add column `avatar` varchar(255) DEFAULT NULL COMMENT '''';
-alter table `sys_user`
-    add column `deleted` tinyint DEFAULT 0 COMMENT ''逻辑删除 0:正常 1：删除'';
-alter table `sys_user`
-    add column `email` varchar(50) DEFAULT NULL COMMENT ''电子邮箱'';
-alter table `sys_user`
-    add column `id` varchar(36) DEFAULT NULL COMMENT ''主键'';
-alter table `sys_user`
-    add column `mobile` varchar(20) DEFAULT NULL COMMENT ''手机号码'';
-alter table `sys_user`
-    add column `note` text DEFAULT NULL COMMENT ''备注'';
-alter table `sys_user`
-    add column `password` varchar(256) DEFAULT NULL COMMENT ''密码'';
-alter table `sys_user`
-    add column `post` varchar(50) DEFAULT NULL COMMENT ''岗位'';
-alter table `sys_user`
-    add column `real_name` varchar(50) DEFAULT NULL COMMENT ''用户姓名'';
-alter table `sys_user`
-    add column `sex` tinyint DEFAULT NULL COMMENT ''性别 0:男 1:女'';
-alter table `sys_user`
-    add column `status` tinyint DEFAULT 1 COMMENT ''状态 1：正常 0：禁用'';
-alter table `sys_user`
-    add column `sys_unit_id` varchar(32) DEFAULT NULL COMMENT ''归属部门'';
-alter table `sys_user`
-    add column `username` varchar(50) DEFAULT NULL COMMENT ''用户名'';
-alter table `sys_user`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_user`
-    add column `when_modified` varchar(20) DEFAULT NULL COMMENT ''修改时间'';
-alter table `sys_user`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人员'';
-alter table `sys_user`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人员'';
-CREATE TABLE IF NOT EXISTS `sys_user_role`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_user_role`
-    add column `app_id` varchar(36) DEFAULT NULL COMMENT ''关联应用'';
-alter table `sys_user_role`
-    add column `id` varchar(36) DEFAULT NULL COMMENT ''主键'';
-alter table `sys_user_role`
-    add column `sys_role_id` varchar(32) DEFAULT NULL COMMENT ''编码'';
-alter table `sys_user_role`
-    add column `sys_user_id` varchar(32) DEFAULT NULL COMMENT ''名称'';
-alter table `sys_user_role`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_user_role`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人员'';
-CREATE TABLE IF NOT EXISTS `sys_view_model`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_view_model`
-    add column `deleted` int DEFAULT 0 COMMENT ''逻辑删除'';
-alter table `sys_view_model`
-    add column `id` varchar(36) DEFAULT NULL COMMENT ''主键'';
-alter table `sys_view_model`
-    add column `name` varchar(50) DEFAULT NULL COMMENT ''名称'';
-alter table `sys_view_model`
-    add column `note` text DEFAULT NULL COMMENT ''描述'';
-alter table `sys_view_model`
-    add column `tag` varchar(100) DEFAULT NULL COMMENT ''标签，多个用逗号分隔'';
-alter table `sys_view_model`
-    add column `when_created` timestamp DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_view_model`
-    add column `when_modified` timestamp DEFAULT NULL COMMENT ''修改时间'';
-alter table `sys_view_model`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人员'';
-alter table `sys_view_model`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人员'';
-CREATE TABLE IF NOT EXISTS `sys_view_model_field`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_view_model_field`
-    add column `default_text` varchar(50) DEFAULT NULL COMMENT ''默认显示'';
-alter table `sys_view_model_field`
-    add column `field` varchar(50) DEFAULT NULL COMMENT ''键名'';
-alter table `sys_view_model_field`
-    add column `format_pattern` varchar(50) DEFAULT NULL COMMENT ''格式规则'';
-alter table `sys_view_model_field`
-    add column `format_type` varchar(20) DEFAULT NULL COMMENT ''格式类型'';
-alter table `sys_view_model_field`
-    add column `hidden` int DEFAULT 0 COMMENT ''是否隐藏'';
-alter table `sys_view_model_field`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''主键'';
-alter table `sys_view_model_field`
-    add column `label` varchar(50) DEFAULT NULL COMMENT ''标签'';
-alter table `sys_view_model_field`
-    add column `order_num` int DEFAULT 0 COMMENT ''排序'';
-alter table `sys_view_model_field`
-    add column `type` varchar(20) DEFAULT NULL COMMENT ''数据类型'';
-alter table `sys_view_model_field`
-    add column `view_model_id` varchar(32) DEFAULT NULL COMMENT ''模型ID'';
-alter table `sys_view_model_field`
-    add column `when_created` timestamp DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_view_model_field`
-    add column `when_modified` timestamp DEFAULT NULL COMMENT ''修改时间'';
-alter table `sys_view_model_field`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人员'';
-alter table `sys_view_model_field`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人员'';
-CREATE TABLE IF NOT EXISTS `sys_view_model_flow`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `sys_view_model_flow`
-    add column `flow_id` varchar(36) DEFAULT NULL COMMENT ''流水ID'';
-alter table `sys_view_model_flow`
-    add column `id` varchar(32) DEFAULT NULL COMMENT '''';
-alter table `sys_view_model_flow`
-    add column `view_model_id` varchar(32) DEFAULT NULL COMMENT ''模型ID'';
-alter table `sys_view_model_flow`
-    add column `when_created` timestamp DEFAULT NULL COMMENT ''创建时间'';
-alter table `sys_view_model_flow`
-    add column `when_modified` timestamp DEFAULT NULL COMMENT ''修改时间'';
-alter table `sys_view_model_flow`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人员'';
-alter table `sys_view_model_flow`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人员'';
-CREATE TABLE IF NOT EXISTS `wf_demo_leave`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `wf_demo_leave`
-    add column `day` int DEFAULT NULL COMMENT ''请假天数'';
-alter table `wf_demo_leave`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''主键'';
-alter table `wf_demo_leave`
-    add column `proc_inst_id` varchar(32) DEFAULT NULL COMMENT ''实例id'';
-alter table `wf_demo_leave`
-    add column `reason` varchar(255) DEFAULT NULL COMMENT ''请假原因'';
-CREATE TABLE IF NOT EXISTS `wf_ext_category`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `wf_ext_category`
-    add column `category_name` varchar(50) DEFAULT NULL COMMENT ''模块名称'';
-alter table `wf_ext_category`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''主键'';
-alter table `wf_ext_category`
-    add column `order_num` int DEFAULT NULL COMMENT ''排序'';
-alter table `wf_ext_category`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `wf_ext_category`
-    add column `when_modified` varchar(20) DEFAULT NULL COMMENT ''修改时间'';
-alter table `wf_ext_category`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人'';
-alter table `wf_ext_category`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人'';
-CREATE TABLE IF NOT EXISTS `wf_ext_comment`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `wf_ext_comment`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''主键'';
-alter table `wf_ext_comment`
-    add column `message` varchar(255) DEFAULT NULL COMMENT ''意见'';
-alter table `wf_ext_comment`
-    add column `proc_inst_id` varchar(32) DEFAULT NULL COMMENT ''流程实例ID'';
-alter table `wf_ext_comment`
-    add column `task_id` varchar(32) DEFAULT NULL COMMENT ''任务ID'';
-alter table `wf_ext_comment`
-    add column `task_name` varchar(50) DEFAULT NULL COMMENT ''任务名称'';
-alter table `wf_ext_comment`
-    add column `type` varchar(20) DEFAULT ''comment'' COMMENT ''类型'';
-alter table `wf_ext_comment`
-    add column `user_id` varchar(32) DEFAULT NULL COMMENT ''用户ID'';
-alter table `wf_ext_comment`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-CREATE TABLE IF NOT EXISTS `wf_ext_node_attribute`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `wf_ext_node_attribute`
-    add column `actions` varchar(100) DEFAULT NULL COMMENT ''处理动作权限'';
-alter table `wf_ext_node_attribute`
-    add column `exec_mode` varchar(50) DEFAULT NULL COMMENT ''执行方式'';
-alter table `wf_ext_node_attribute`
-    add column `flow_id` varchar(100) DEFAULT NULL COMMENT ''流程ID'';
-alter table `wf_ext_node_attribute`
-    add column `form_attribute` text DEFAULT NULL COMMENT ''表单属性'';
-alter table `wf_ext_node_attribute`
-    add column `id` varchar(100) DEFAULT NULL COMMENT ''主键'';
-alter table `wf_ext_node_attribute`
-    add column `msg_send_rule` varchar(100) DEFAULT NULL COMMENT ''消息发送策略'';
-alter table `wf_ext_node_attribute`
-    add column `next_user` varchar(500) DEFAULT NULL COMMENT ''下一步处理人'';
-alter table `wf_ext_node_attribute`
-    add column `node_id` varchar(100) DEFAULT NULL COMMENT ''节点ID'';
-alter table `wf_ext_node_attribute`
-    add column `node_type` varchar(50) DEFAULT NULL COMMENT ''节点类型'';
-alter table `wf_ext_node_attribute`
-    add column `pass_ok` varchar(50) DEFAULT NULL COMMENT ''审核通过要求'';
-alter table `wf_ext_node_attribute`
-    add column `person` varchar(50) DEFAULT NULL COMMENT ''审核通过要求-任几人'';
-alter table `wf_ext_node_attribute`
-    add column `time_out` varchar(50) DEFAULT NULL COMMENT ''超时时间(分)'';
-alter table `wf_ext_node_attribute`
-    add column `when_created` varchar(50) DEFAULT NULL COMMENT ''创建时间'';
-alter table `wf_ext_node_attribute`
-    add column `when_modified` varchar(50) DEFAULT NULL COMMENT ''更新时间'';
-alter table `wf_ext_node_attribute`
-    add column `who_created` varchar(100) DEFAULT NULL COMMENT ''创建人'';
-alter table `wf_ext_node_attribute`
-    add column `who_modified` varchar(100) DEFAULT NULL COMMENT ''更新人'';
-CREATE TABLE IF NOT EXISTS `wf_ext_procdef`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `wf_ext_procdef`
-    add column `category_id` varchar(32) DEFAULT NULL COMMENT ''分类ID'';
-alter table `wf_ext_procdef`
-    add column `content` longtext DEFAULT NULL COMMENT ''内容'';
-alter table `wf_ext_procdef`
-    add column `deploy_md5` varchar(255) DEFAULT NULL COMMENT ''已发布版本MD5'';
-alter table `wf_ext_procdef`
-    add column `deploy_status` tinyint DEFAULT NULL COMMENT ''部署状态 0:待发布 1:已发布'';
-alter table `wf_ext_procdef`
-    add column `deploy_time` varchar(20) DEFAULT NULL COMMENT ''最新发布时间'';
-alter table `wf_ext_procdef`
-    add column `form_key` varchar(50) DEFAULT NULL COMMENT ''表单key，一般是表名'';
-alter table `wf_ext_procdef`
-    add column `form_page_id` varchar(32) DEFAULT NULL COMMENT ''表单页面ID'';
-alter table `wf_ext_procdef`
-    add column `icon` varchar(50) DEFAULT NULL COMMENT ''图标'';
-alter table `wf_ext_procdef`
-    add column `id` varchar(50) DEFAULT NULL COMMENT ''主键'';
-alter table `wf_ext_procdef`
-    add column `inst_desc` varchar(255) DEFAULT NULL COMMENT ''实例描述'';
-alter table `wf_ext_procdef`
-    add column `order_num` int DEFAULT NULL COMMENT ''排序'';
-alter table `wf_ext_procdef`
-    add column `proc_definition_id` varchar(32) DEFAULT NULL COMMENT ''流程定义ID'';
-alter table `wf_ext_procdef`
-    add column `proc_definition_key` varchar(100) DEFAULT NULL COMMENT ''流程定义KEY'';
-alter table `wf_ext_procdef`
-    add column `proc_name` varchar(100) DEFAULT NULL COMMENT ''流程定义名称'';
-alter table `wf_ext_procdef`
-    add column `proc_version` int DEFAULT NULL COMMENT ''版本号'';
-alter table `wf_ext_procdef`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
-alter table `wf_ext_procdef`
-    add column `when_modified` varchar(20) DEFAULT NULL COMMENT ''修改时间'';
-alter table `wf_ext_procdef`
-    add column `who_created` varchar(32) DEFAULT NULL COMMENT ''创建人'';
-alter table `wf_ext_procdef`
-    add column `who_modified` varchar(32) DEFAULT NULL COMMENT ''修改人'';
-alter table `wf_ext_procdef`
-    add column `work_num` varchar(100) DEFAULT NULL COMMENT ''工单编号'';
-CREATE TABLE IF NOT EXISTS `wf_ext_procinst`
-(
-    `id` varchar
-(
-    36
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY
-(
-    `id`
-) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
-alter table `wf_ext_procinst`
-    add column `bill_code` varchar(50) DEFAULT NULL COMMENT ''工单号'';
-alter table `wf_ext_procinst`
-    add column `bill_title` varchar(100) DEFAULT NULL COMMENT ''工单标题'';
-alter table `wf_ext_procinst`
-    add column `form_data` text DEFAULT NULL COMMENT ''表单数据'';
-alter table `wf_ext_procinst`
-    add column `id` varchar(32) DEFAULT NULL COMMENT ''主键'';
-alter table `wf_ext_procinst`
-    add column `main_inst_id` varchar(50) DEFAULT NULL COMMENT ''主流程实例ID'';
-alter table `wf_ext_procinst`
-    add column `main_task_id` varchar(50) DEFAULT NULL COMMENT ''主流程任务ID'';
-alter table `wf_ext_procinst`
-    add column `proc_inst_id` varchar(32) DEFAULT NULL COMMENT ''流程实例ID'';
-alter table `wf_ext_procinst`
-    add column `starter` varchar(32) DEFAULT NULL COMMENT ''发起人ID'';
-alter table `wf_ext_procinst`
-    add column `when_created` varchar(20) DEFAULT NULL COMMENT ''创建时间'';
+CREATE TABLE IF NOT EXISTS `biz_demo_user`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `biz_demo_user` add column `age` int DEFAULT NULL COMMENT '';
+alter table `biz_demo_user` add column `birthday` varchar(20) DEFAULT NULL COMMENT '';
+alter table `biz_demo_user` add column `id` varchar(36) DEFAULT NULL COMMENT '';
+alter table `biz_demo_user` add column `id_card` varchar(20) DEFAULT NULL COMMENT '';
+alter table `biz_demo_user` add column `name` varchar(100) DEFAULT NULL COMMENT '';
+alter table `biz_demo_user` add column `when_created` varchar(20) DEFAULT NULL COMMENT '';
+alter table `biz_demo_user` add column `who_created` varchar(36) DEFAULT NULL COMMENT '';
+CREATE TABLE IF NOT EXISTS `cm_app_role`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `cm_app_role` add column `app_id` varchar(32) DEFAULT NULL COMMENT '';
+alter table `cm_app_role` add column `customer_id` varchar(32) DEFAULT NULL COMMENT '';
+alter table `cm_app_role` add column `id` varchar(32) DEFAULT NULL COMMENT '';
+alter table `cm_app_role` add column `permission` int DEFAULT NULL COMMENT '';
+alter table `cm_app_role` add column `role_id` varchar(32) DEFAULT NULL COMMENT '';
+CREATE TABLE IF NOT EXISTS `cm_customer_app_menu`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `cm_customer_app_menu` add column `app_menu_id` varchar(32) DEFAULT NULL COMMENT '';
+alter table `cm_customer_app_menu` add column `call_count` varchar(10) DEFAULT NULL COMMENT '';
+alter table `cm_customer_app_menu` add column `count_method` tinyint DEFAULT NULL COMMENT '';
+alter table `cm_customer_app_menu` add column `customer_id` varchar(32) DEFAULT NULL COMMENT '';
+alter table `cm_customer_app_menu` add column `end_time` varchar(20) DEFAULT NULL COMMENT '';
+alter table `cm_customer_app_menu` add column `id` varchar(32) DEFAULT NULL COMMENT '';
+alter table `cm_customer_app_menu` add column `start_time` varchar(20) DEFAULT NULL COMMENT '';
+alter table `cm_customer_app_menu` add column `status` tinyint DEFAULT NULL COMMENT '';
+CREATE TABLE IF NOT EXISTS `cm_customer_db`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `cm_customer_db` add column `customer_id` varchar(32) DEFAULT NULL COMMENT '';
+alter table `cm_customer_db` add column `data_source_id` varchar(32) DEFAULT NULL COMMENT '';
+alter table `cm_customer_db` add column `db_name` varchar(255) DEFAULT NULL COMMENT '';
+alter table `cm_customer_db` add column `id` varchar(32) DEFAULT NULL COMMENT '';
+alter table `cm_customer_db` add column `ip` varchar(128) DEFAULT NULL COMMENT '';
+alter table `cm_customer_db` add column `port` varchar(32) DEFAULT NULL COMMENT '';
+CREATE TABLE IF NOT EXISTS `cm_customer_info`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `cm_customer_info` add column `contacts1` varchar(50) DEFAULT NULL COMMENT '联系人1';
+alter table `cm_customer_info` add column `contacts1_email` varchar(255) DEFAULT NULL COMMENT '联系人1邮箱';
+alter table `cm_customer_info` add column `contacts1_telephone` varchar(50) DEFAULT NULL COMMENT '联系人1电话';
+alter table `cm_customer_info` add column `contacts2` varchar(50) DEFAULT NULL COMMENT '联系人2';
+alter table `cm_customer_info` add column `contacts2_email` varchar(255) DEFAULT NULL COMMENT '联系人2邮箱';
+alter table `cm_customer_info` add column `contacts2_telephone` varchar(50) DEFAULT NULL COMMENT '联系人2电话';
+alter table `cm_customer_info` add column `id` varchar(32) DEFAULT NULL COMMENT '客户ID';
+alter table `cm_customer_info` add column `name` varchar(50) DEFAULT NULL COMMENT '客户名称';
+alter table `cm_customer_info` add column `prefix` varchar(50) DEFAULT NULL COMMENT '客户用户名前缀';
+alter table `cm_customer_info` add column `status` tinyint DEFAULT NULL COMMENT '0删除，1正常，2停用';
+alter table `cm_customer_info` add column `suffix` varchar(50) DEFAULT NULL COMMENT '客户用吗后缀';
+alter table `cm_customer_info` add column `when_created` varchar(20) COMMENT '创建时间';
+alter table `cm_customer_info` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人';
+CREATE TABLE IF NOT EXISTS `cm_customer_user`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `cm_customer_user` add column `customer_id` varchar(32) DEFAULT NULL COMMENT '';
+alter table `cm_customer_user` add column `id` varchar(32) DEFAULT NULL COMMENT '';
+alter table `cm_customer_user` add column `manager` tinyint DEFAULT NULL COMMENT '';
+alter table `cm_customer_user` add column `user_id` varchar(32) DEFAULT NULL COMMENT '';
+CREATE TABLE IF NOT EXISTS `dev_api`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `dev_api` add column `api_argv_type` int DEFAULT NULL COMMENT '参数组装方式';
+alter table `dev_api` add column `api_code` varchar(50) DEFAULT NULL COMMENT '接口编码';
+alter table `dev_api` add column `api_flow_id` varchar(50) DEFAULT NULL COMMENT '流程ID';
+alter table `dev_api` add column `api_method` varchar(32) DEFAULT 'get' COMMENT '请求方式';
+alter table `dev_api` add column `api_name` varchar(50) DEFAULT NULL COMMENT '接口名称';
+alter table `dev_api` add column `api_note` text DEFAULT NULL COMMENT '接口描述';
+alter table `dev_api` add column `api_req_argv` text DEFAULT NULL COMMENT '请求参数';
+alter table `dev_api` add column `api_result_handler` varchar(128) DEFAULT NULL COMMENT '结果处理类';
+alter table `dev_api` add column `api_rsp_argv` text DEFAULT NULL COMMENT '响应结果';
+alter table `dev_api` add column `api_tags` varchar(128) DEFAULT NULL COMMENT '标签';
+alter table `dev_api` add column `api_url` varchar(128) DEFAULT NULL COMMENT '接口路径';
+alter table `dev_api` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `dev_api` add column `application_id` varchar(32) DEFAULT NULL COMMENT '归属应用ID';
+alter table `dev_api` add column `call_type` int DEFAULT NULL COMMENT '调试方式';
+alter table `dev_api` add column `id` varchar(32) DEFAULT '' COMMENT '主键';
+alter table `dev_api` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `dev_api` add column `when_modified` varchar(20) DEFAULT NULL COMMENT '修改时间';
+alter table `dev_api` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人';
+alter table `dev_api` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人';
+CREATE TABLE IF NOT EXISTS `dev_application`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `dev_application` add column `app_public_type` int DEFAULT 0 COMMENT '应用开启类型： 0：普通应用，1：公共库应用，2：系统库应用';
+alter table `dev_application` add column `app_type` varchar(100) DEFAULT NULL COMMENT '应用类型：可多个，逗号分隔，0: PC Web应用，1：移动端Web应用，2： 小程序，3： APP';
+alter table `dev_application` add column `data_source` varchar(1000) DEFAULT NULL COMMENT '数据源配置';
+alter table `dev_application` add column `default_path` varchar(255) DEFAULT NULL COMMENT '默认路径';
+alter table `dev_application` add column `deleted` tinyint(1) DEFAULT 0 COMMENT '是否已删除';
+alter table `dev_application` add column `description` varchar(255) DEFAULT NULL COMMENT '应用介绍';
+alter table `dev_application` add column `dev_status` tinyint(1) DEFAULT NULL COMMENT '开发状态，0: 新建1: 确认版本2: 有更新';
+alter table `dev_application` add column `enable_status` tinyint(1) DEFAULT NULL COMMENT '可用状态';
+alter table `dev_application` add column `faas_port` int DEFAULT NULL COMMENT 'faas端口号';
+alter table `dev_application` add column `id` varchar(36) DEFAULT NULL COMMENT '应用ID';
+alter table `dev_application` add column `name` varchar(100) DEFAULT NULL COMMENT '应用名';
+alter table `dev_application` add column `pine_port` int DEFAULT NULL COMMENT '青松端口号';
+alter table `dev_application` add column `short_name` varchar(30) DEFAULT NULL COMMENT '应用短英文名（用于数据库等前缀命名），- 必须唯一，- 必须为纯英文、小写字母命名- 用于创建业务目录、数据库，';
+alter table `dev_application` add column `system_logo` varchar(255) DEFAULT NULL COMMENT '应用图标';
+alter table `dev_application` add column `version` varchar(50) DEFAULT NULL COMMENT '当前发布版本';
+alter table `dev_application` add column `when_created` varchar(20) COMMENT '创建时间';
+alter table `dev_application` add column `when_modified` varchar(20) COMMENT '修改时间';
+alter table `dev_application` add column `who_created` varchar(36) DEFAULT NULL COMMENT '创建人';
+alter table `dev_application` add column `who_in_charge` varchar(255) DEFAULT NULL COMMENT '负责人';
+alter table `dev_application` add column `who_modified` varchar(36) DEFAULT NULL COMMENT '修改人';
+CREATE TABLE IF NOT EXISTS `dev_application_version_history`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `dev_application_version_history` add column `app_id` varchar(36) DEFAULT NULL COMMENT '应用ID';
+alter table `dev_application_version_history` add column `export_data` text DEFAULT NULL COMMENT '导出数据参数';
+alter table `dev_application_version_history` add column `file_name` varchar(255) DEFAULT NULL COMMENT '文件名';
+alter table `dev_application_version_history` add column `id` varchar(36) DEFAULT NULL COMMENT '主键';
+alter table `dev_application_version_history` add column `note` varchar(255) DEFAULT NULL COMMENT '备注';
+alter table `dev_application_version_history` add column `version` varchar(50) DEFAULT NULL COMMENT '版本';
+alter table `dev_application_version_history` add column `when_created` varchar(20) COMMENT '创建时间';
+alter table `dev_application_version_history` add column `who_created` varchar(36) DEFAULT NULL COMMENT '创建人';
+CREATE TABLE IF NOT EXISTS `dev_document`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `dev_document` add column `content` mediumtext DEFAULT NULL COMMENT '正文';
+alter table `dev_document` add column `deleted` tinyint DEFAULT 0 COMMENT '逻辑删除 0:正常 1：删除';
+alter table `dev_document` add column `id` varchar(255) DEFAULT NULL COMMENT 'id';
+alter table `dev_document` add column `name` varchar(255) DEFAULT NULL COMMENT '标题';
+alter table `dev_document` add column `order` int DEFAULT NULL COMMENT '目录排序';
+alter table `dev_document` add column `parent_id` varchar(255) DEFAULT NULL COMMENT '父节点id';
+alter table `dev_document` add column `path` varchar(255) DEFAULT NULL COMMENT '文件路径';
+alter table `dev_document` add column `when_created` date DEFAULT NULL COMMENT '创建时间';
+alter table `dev_document` add column `who_created` varchar(255) DEFAULT NULL COMMENT '创建人';
+CREATE TABLE IF NOT EXISTS `dev_module`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `dev_module` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `dev_module` add column `has_path` int DEFAULT NULL COMMENT '是否有路径';
+alter table `dev_module` add column `id` varchar(36) DEFAULT NULL COMMENT 'ID';
+alter table `dev_module` add column `is_sys` int DEFAULT NULL COMMENT '是否系统';
+alter table `dev_module` add column `name` varchar(100) DEFAULT NULL COMMENT '名称';
+alter table `dev_module` add column `parent_id` varchar(36) DEFAULT NULL COMMENT '父节点';
+alter table `dev_module` add column `path` varchar(255) DEFAULT NULL COMMENT '路径';
+alter table `dev_module` add column `sort` int DEFAULT NULL COMMENT '排序';
+alter table `dev_module` add column `when_created` varchar(50) DEFAULT NULL COMMENT '创建时间';
+alter table `dev_module` add column `when_modified` varchar(50) DEFAULT NULL COMMENT '修改时间';
+alter table `dev_module` add column `who_created` varchar(36) DEFAULT NULL COMMENT '创建人';
+alter table `dev_module` add column `who_modified` varchar(36) DEFAULT NULL COMMENT '修改人';
+CREATE TABLE IF NOT EXISTS `dev_ota_channel`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `dev_ota_channel` add column `auth_token` varchar(50) DEFAULT NULL COMMENT '安全令牌';
+alter table `dev_ota_channel` add column `channel_name` varchar(50) DEFAULT NULL COMMENT '通道名称';
+alter table `dev_ota_channel` add column `channel_url` varchar(100) DEFAULT NULL COMMENT '服务器地址';
+alter table `dev_ota_channel` add column `id` varchar(36) DEFAULT NULL COMMENT 'ID';
+alter table `dev_ota_channel` add column `master` int DEFAULT 0 COMMENT '是否主通道';
+alter table `dev_ota_channel` add column `note` varchar(255) DEFAULT NULL COMMENT '备注信息';
+alter table `dev_ota_channel` add column `sign_secret` varchar(50) DEFAULT NULL COMMENT '签名密钥';
+alter table `dev_ota_channel` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `dev_ota_channel` add column `when_modified` varchar(20) DEFAULT NULL COMMENT '修改时间';
+alter table `dev_ota_channel` add column `who_created` varchar(36) DEFAULT NULL COMMENT '创建人';
+alter table `dev_ota_channel` add column `who_modified` varchar(36) DEFAULT NULL COMMENT '修改人员';
+CREATE TABLE IF NOT EXISTS `dev_page`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `dev_page` add column `app_id` varchar(36) DEFAULT NULL COMMENT '应用ID';
+alter table `dev_page` add column `app_type` varchar(100) DEFAULT NULL COMMENT '应用类型：可多个，逗号分隔，0: PC Web应用，1：移动端Web应用，2： 小程序，3： APP';
+alter table `dev_page` add column `deleted` tinyint DEFAULT 0 COMMENT '删除标识';
+alter table `dev_page` add column `description` varchar(255) DEFAULT NULL COMMENT '页面介绍';
+alter table `dev_page` add column `dev_status` tinyint(1) DEFAULT NULL COMMENT '开发状态';
+alter table `dev_page` add column `enable_status` tinyint(1) DEFAULT NULL COMMENT '可用状态';
+alter table `dev_page` add column `id` varchar(36) DEFAULT NULL COMMENT '主键';
+alter table `dev_page` add column `login_required` tinyint(1) DEFAULT NULL COMMENT '是否需要登录才可以访问';
+alter table `dev_page` add column `name` varchar(255) DEFAULT NULL COMMENT '页面名称';
+alter table `dev_page` add column `page_json` longtext DEFAULT NULL COMMENT '页面数据化JSON';
+alter table `dev_page` add column `path` varchar(255) DEFAULT NULL COMMENT '访问路径 ';
+alter table `dev_page` add column `when_created` varchar(20) COMMENT '创建时间';
+alter table `dev_page` add column `when_modified` varchar(20) COMMENT '修改时间';
+alter table `dev_page` add column `who_created` varchar(36) DEFAULT NULL COMMENT '创建人';
+alter table `dev_page` add column `who_modified` varchar(36) DEFAULT NULL COMMENT '修改人';
+CREATE TABLE IF NOT EXISTS `dev_page_history`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `dev_page_history` add column `id` varchar(36) DEFAULT NULL COMMENT 'ID';
+alter table `dev_page_history` add column `page_id` varchar(36) DEFAULT NULL COMMENT '页面ID';
+alter table `dev_page_history` add column `page_json` longtext DEFAULT NULL COMMENT '页面JSON';
+alter table `dev_page_history` add column `version_tag` varchar(50) DEFAULT NULL COMMENT '版本标签';
+alter table `dev_page_history` add column `version_tag_time` varchar(30) DEFAULT NULL COMMENT '版本时间';
+alter table `dev_page_history` add column `when_created` varchar(20) COMMENT '创建时间';
+alter table `dev_page_history` add column `who_created` varchar(36) DEFAULT NULL COMMENT '创建人';
+CREATE TABLE IF NOT EXISTS `dev_pine_plugin`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `dev_pine_plugin` add column `app_id` varchar(32) DEFAULT NULL COMMENT '归属应用id';
+alter table `dev_pine_plugin` add column `author` varchar(50) DEFAULT NULL COMMENT '插件作者';
+alter table `dev_pine_plugin` add column `enable_status` int DEFAULT 0 COMMENT '是否启动';
+alter table `dev_pine_plugin` add column `file_id` varchar(32) DEFAULT NULL COMMENT '文件id';
+alter table `dev_pine_plugin` add column `id` varchar(36) DEFAULT NULL COMMENT '主键';
+alter table `dev_pine_plugin` add column `note` text DEFAULT NULL COMMENT '说明';
+alter table `dev_pine_plugin` add column `plugin_name` varchar(50) DEFAULT NULL COMMENT '插件名称';
+alter table `dev_pine_plugin` add column `plugin_version` varchar(10) DEFAULT NULL COMMENT '插件版本号';
+alter table `dev_pine_plugin` add column `when_created` varchar(32) DEFAULT NULL COMMENT '创建时间';
+alter table `dev_pine_plugin` add column `when_modified` varchar(20) DEFAULT NULL COMMENT '修改时间';
+alter table `dev_pine_plugin` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人';
+alter table `dev_pine_plugin` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人员';
+CREATE TABLE IF NOT EXISTS `dev_power_link`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `dev_power_link` add column `id` varchar(32) DEFAULT NULL COMMENT '主键';
+alter table `dev_power_link` add column `power_id` varchar(36) DEFAULT NULL COMMENT '能力id';
+alter table `dev_power_link` add column `power_type` int DEFAULT NULL COMMENT '能力类型 1: 逻辑编排 2:函数 3:kutils 4:逻辑编排模板';
+alter table `dev_power_link` add column `tree_id` varchar(32) DEFAULT NULL COMMENT '能力树id';
+alter table `dev_power_link` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `dev_power_link` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人';
+CREATE TABLE IF NOT EXISTS `dev_power_tree`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `dev_power_tree` add column `id` varchar(32) DEFAULT NULL COMMENT '主键';
+alter table `dev_power_tree` add column `name` varchar(128) DEFAULT NULL COMMENT '名称';
+alter table `dev_power_tree` add column `note` varchar(255) DEFAULT NULL COMMENT '说明';
+alter table `dev_power_tree` add column `parent_id` varchar(32) DEFAULT NULL COMMENT '父级id';
+alter table `dev_power_tree` add column `path` text DEFAULT NULL COMMENT '树路径';
+alter table `dev_power_tree` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `dev_power_tree` add column `when_modified` varchar(20) DEFAULT NULL COMMENT '修改时间';
+alter table `dev_power_tree` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人';
+alter table `dev_power_tree` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人';
+CREATE TABLE IF NOT EXISTS `dev_sql_run`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `dev_sql_run` add column `execution_time` int DEFAULT NULL COMMENT '执行时长（毫秒）';
+alter table `dev_sql_run` add column `id` varchar(36) DEFAULT NULL COMMENT 'id';
+alter table `dev_sql_run` add column `md5` varchar(100) DEFAULT NULL COMMENT 'md5';
+alter table `dev_sql_run` add column `success` tinyint DEFAULT NULL COMMENT '是否成功';
+alter table `dev_sql_run` add column `version` int DEFAULT NULL COMMENT '关联版本号';
+alter table `dev_sql_run` add column `when_created` varchar(20) COMMENT '执行时间';
+CREATE TABLE IF NOT EXISTS `dev_sql_script`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `dev_sql_script` add column `description` varchar(255) DEFAULT NULL COMMENT '描述';
+alter table `dev_sql_script` add column `is_once` tinyint DEFAULT 1 COMMENT '是否只执行1次';
+alter table `dev_sql_script` add column `sql` longtext DEFAULT NULL COMMENT '执行脚本';
+alter table `dev_sql_script` add column `version` int DEFAULT NULL COMMENT '版本号';
+CREATE TABLE IF NOT EXISTS `dev_team`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `dev_team` add column `deleted` tinyint(1) DEFAULT 0 COMMENT '是否已删除';
+alter table `dev_team` add column `description` varchar(255) DEFAULT NULL COMMENT '团队简介';
+alter table `dev_team` add column `id` varchar(36) DEFAULT NULL COMMENT '团队ID';
+alter table `dev_team` add column `name` varchar(100) DEFAULT NULL COMMENT '团队名称';
+alter table `dev_team` add column `owner` varchar(36) DEFAULT NULL COMMENT '团队负责人';
+alter table `dev_team` add column `when_created` varchar(20) COMMENT '创建时间';
+alter table `dev_team` add column `when_modified` varchar(20) COMMENT '修改时间';
+alter table `dev_team` add column `who_created` varchar(36) DEFAULT NULL COMMENT '创建人';
+alter table `dev_team` add column `who_modified` varchar(36) DEFAULT NULL COMMENT '修改人';
+CREATE TABLE IF NOT EXISTS `dev_team_app`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `dev_team_app` add column `app_id` varchar(36) DEFAULT NULL COMMENT '当类型为应用团队时，必须有应用APP_ID';
+alter table `dev_team_app` add column `id` varchar(36) DEFAULT NULL COMMENT '主键ID';
+alter table `dev_team_app` add column `team_id` varchar(36) DEFAULT NULL COMMENT '团队ID';
+alter table `dev_team_app` add column `team_type` tinyint(1) DEFAULT NULL COMMENT '团队类型（1：平台团队，2：应用团队）';
+alter table `dev_team_app` add column `when_created` varchar(20) COMMENT '创建时间';
+alter table `dev_team_app` add column `who_created` varchar(36) DEFAULT NULL COMMENT '创建人';
+CREATE TABLE IF NOT EXISTS `dev_team_member`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `dev_team_member` add column `app_id` varchar(255) DEFAULT NULL COMMENT '关联应用';
+alter table `dev_team_member` add column `id` varchar(36) DEFAULT NULL COMMENT 'id';
+alter table `dev_team_member` add column `is_owner` tinyint(1) DEFAULT NULL COMMENT '是否为团队负责人';
+alter table `dev_team_member` add column `team_id` varchar(36) DEFAULT NULL COMMENT '团队ID';
+alter table `dev_team_member` add column `team_role_id` varchar(36) DEFAULT NULL COMMENT '团队角色';
+alter table `dev_team_member` add column `user_id` varchar(36) DEFAULT NULL COMMENT '用户ID';
+alter table `dev_team_member` add column `when_join` varchar(20) COMMENT '加入时间';
+alter table `dev_team_member` add column `who_invite` varchar(36) DEFAULT NULL COMMENT '邀请人';
+CREATE TABLE IF NOT EXISTS `dev_topological`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `dev_topological` add column `app_id` varchar(36) DEFAULT NULL COMMENT '应用ID';
+alter table `dev_topological` add column `deleted` tinyint DEFAULT 0 COMMENT '删除标识';
+alter table `dev_topological` add column `description` varchar(255) DEFAULT NULL COMMENT '页面介绍';
+alter table `dev_topological` add column `enable_status` tinyint(1) DEFAULT NULL COMMENT '可用状态';
+alter table `dev_topological` add column `id` varchar(36) DEFAULT NULL COMMENT '主键';
+alter table `dev_topological` add column `name` varchar(255) DEFAULT NULL COMMENT '页面名称';
+alter table `dev_topological` add column `page_json` longtext DEFAULT NULL COMMENT '页面数据化JSON';
+alter table `dev_topological` add column `when_created` varchar(20) COMMENT '创建时间';
+alter table `dev_topological` add column `when_modified` varchar(20) COMMENT '修改时间';
+alter table `dev_topological` add column `who_created` varchar(36) DEFAULT NULL COMMENT '创建人';
+alter table `dev_topological` add column `who_modified` varchar(36) DEFAULT NULL COMMENT '修改人';
+CREATE TABLE IF NOT EXISTS `dev_view_model`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `dev_view_model` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `dev_view_model` add column `deleted` int DEFAULT 0 COMMENT '逻辑删除';
+alter table `dev_view_model` add column `id` varchar(36) DEFAULT NULL COMMENT '主键';
+alter table `dev_view_model` add column `name` varchar(50) DEFAULT NULL COMMENT '名称';
+alter table `dev_view_model` add column `note` text DEFAULT NULL COMMENT '描述';
+alter table `dev_view_model` add column `tag` varchar(100) DEFAULT NULL COMMENT '标签，多个用逗号分隔';
+alter table `dev_view_model` add column `when_created` varchar(20) COMMENT '创建时间';
+alter table `dev_view_model` add column `when_modified` varchar(20) COMMENT '修改时间';
+alter table `dev_view_model` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人员';
+alter table `dev_view_model` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人员';
+CREATE TABLE IF NOT EXISTS `dev_view_model_field`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `dev_view_model_field` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `dev_view_model_field` add column `default_text` varchar(50) DEFAULT NULL COMMENT '默认显示';
+alter table `dev_view_model_field` add column `field` varchar(50) DEFAULT NULL COMMENT '键名';
+alter table `dev_view_model_field` add column `format_pattern` varchar(50) DEFAULT NULL COMMENT '格式规则';
+alter table `dev_view_model_field` add column `format_type` varchar(20) DEFAULT NULL COMMENT '格式类型';
+alter table `dev_view_model_field` add column `hidden` int DEFAULT 0 COMMENT '是否隐藏';
+alter table `dev_view_model_field` add column `id` varchar(32) DEFAULT NULL COMMENT '主键';
+alter table `dev_view_model_field` add column `label` varchar(50) DEFAULT NULL COMMENT '标签';
+alter table `dev_view_model_field` add column `order_num` int DEFAULT 0 COMMENT '排序';
+alter table `dev_view_model_field` add column `type` varchar(20) DEFAULT NULL COMMENT '数据类型';
+alter table `dev_view_model_field` add column `view_model_id` varchar(32) DEFAULT NULL COMMENT '模型ID';
+alter table `dev_view_model_field` add column `when_created` varchar(20) COMMENT '创建时间';
+alter table `dev_view_model_field` add column `when_modified` varchar(20) COMMENT '修改时间';
+alter table `dev_view_model_field` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人员';
+alter table `dev_view_model_field` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人员';
+CREATE TABLE IF NOT EXISTS `dev_view_model_flow`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `dev_view_model_flow` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `dev_view_model_flow` add column `flow_id` varchar(36) DEFAULT NULL COMMENT '流水ID';
+alter table `dev_view_model_flow` add column `id` varchar(32) DEFAULT NULL COMMENT '';
+alter table `dev_view_model_flow` add column `view_model_id` varchar(32) DEFAULT NULL COMMENT '模型ID';
+alter table `dev_view_model_flow` add column `when_created` varchar(20) COMMENT '创建时间';
+alter table `dev_view_model_flow` add column `when_modified` varchar(20) COMMENT '修改时间';
+alter table `dev_view_model_flow` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人员';
+alter table `dev_view_model_flow` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人员';
+CREATE TABLE IF NOT EXISTS `ext_plugin_interface`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `ext_plugin_interface` add column `content` text DEFAULT NULL COMMENT '接口使用说明Demo';
+alter table `ext_plugin_interface` add column `create_time` varchar(20) COMMENT '';
+alter table `ext_plugin_interface` add column `create_user` varchar(255) DEFAULT NULL COMMENT '';
+alter table `ext_plugin_interface` add column `deleted` int DEFAULT 0 COMMENT '1:逻辑删';
+alter table `ext_plugin_interface` add column `description` varchar(1024) DEFAULT NULL COMMENT '接口描述';
+alter table `ext_plugin_interface` add column `id` varchar(255) DEFAULT NULL COMMENT '';
+alter table `ext_plugin_interface` add column `name` varchar(255) DEFAULT NULL COMMENT '接口名称';
+alter table `ext_plugin_interface` add column `plugin_id` varchar(255) DEFAULT NULL COMMENT '插件id';
+alter table `ext_plugin_interface` add column `resp_type` varchar(255) DEFAULT '' COMMENT '返回值类型';
+alter table `ext_plugin_interface` add column `update_time` varchar(20) COMMENT '';
+alter table `ext_plugin_interface` add column `update_user` varchar(255) DEFAULT NULL COMMENT '';
+CREATE TABLE IF NOT EXISTS `ext_plugin_tree`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `ext_plugin_tree` add column `check_time` varchar(20) COMMENT '插件检测时间';
+alter table `ext_plugin_tree` add column `clazz_name` varchar(255) DEFAULT NULL COMMENT '调用插件方法名';
+alter table `ext_plugin_tree` add column `create_time` varchar(20) COMMENT '';
+alter table `ext_plugin_tree` add column `create_user` varchar(255) DEFAULT NULL COMMENT '';
+alter table `ext_plugin_tree` add column `description` text DEFAULT NULL COMMENT '描述';
+alter table `ext_plugin_tree` add column `ext_name` varchar(255) DEFAULT NULL COMMENT '插件名称';
+alter table `ext_plugin_tree` add column `id` varchar(255) DEFAULT NULL COMMENT '';
+alter table `ext_plugin_tree` add column `jar_name` varchar(255) DEFAULT NULL COMMENT 'jar包名称';
+alter table `ext_plugin_tree` add column `name` varchar(255) DEFAULT NULL COMMENT '中文名';
+alter table `ext_plugin_tree` add column `status` int DEFAULT 0 COMMENT '服务器是否存在该包，0:不存在;1:存在';
+alter table `ext_plugin_tree` add column `type` int DEFAULT NULL COMMENT '1:一级节点；2:二级节点';
+alter table `ext_plugin_tree` add column `update_time` varchar(20) COMMENT '';
+alter table `ext_plugin_tree` add column `update_user` varchar(255) DEFAULT NULL COMMENT '';
+CREATE TABLE IF NOT EXISTS `kfaas_lib`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `kfaas_lib` add column `create_time` varchar(20) COMMENT '';
+alter table `kfaas_lib` add column `create_user` varchar(255) DEFAULT NULL COMMENT '';
+alter table `kfaas_lib` add column `jar_name` varchar(255) DEFAULT NULL COMMENT 'jar包名称';
+alter table `kfaas_lib` add column `status` int DEFAULT 0 COMMENT '服务器是否存在该包，0:不存在;1:存在';
+alter table `kfaas_lib` add column `update_time` varchar(20) COMMENT '';
+alter table `kfaas_lib` add column `update_user` varchar(255) DEFAULT NULL COMMENT '';
+CREATE TABLE IF NOT EXISTS `number_regulation`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `number_regulation` add column `id` varchar(64) DEFAULT NULL COMMENT '';
+alter table `number_regulation` add column `sort` varchar(255) DEFAULT NULL COMMENT '排序';
+alter table `number_regulation` add column `type` varchar(255) DEFAULT NULL COMMENT '规则类型';
+alter table `number_regulation` add column `value` varchar(255) DEFAULT NULL COMMENT '规则值';
+CREATE TABLE IF NOT EXISTS `number_serial`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `number_serial` add column `create_time` varchar(255) DEFAULT NULL COMMENT '创建时间';
+alter table `number_serial` add column `id` varchar(64) DEFAULT NULL COMMENT '';
+alter table `number_serial` add column `name` varchar(255) DEFAULT NULL COMMENT '流水号名称';
+alter table `number_serial` add column `number` varchar(255) DEFAULT NULL COMMENT '流水号编号';
+alter table `number_serial` add column `regulationId` varchar(64) DEFAULT NULL COMMENT '规则ID';
+alter table `number_serial` add column `remark` varchar(255) DEFAULT NULL COMMENT '备注';
+alter table `number_serial` add column `start_value` varchar(255) DEFAULT NULL COMMENT '开始值';
+alter table `number_serial` add column `step_value` varchar(255) DEFAULT NULL COMMENT '步长值';
+alter table `number_serial` add column `update_time` varchar(255) DEFAULT NULL COMMENT '更新时间';
+CREATE TABLE IF NOT EXISTS `open_account`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `open_account` add column `access_id` varchar(32) DEFAULT NULL COMMENT '接入者ID';
+alter table `open_account` add column `access_name` varchar(128) DEFAULT NULL COMMENT '接入者名称';
+alter table `open_account` add column `auth_params` text DEFAULT NULL COMMENT '参数配置';
+alter table `open_account` add column `auth_type` int DEFAULT NULL COMMENT '授权类型1：简单模式，即access_id为access_token, 此时token是固定的';
+alter table `open_account` add column `id` varchar(36) DEFAULT NULL COMMENT '主键';
+alter table `open_account` add column `invalid_date` varchar(20) DEFAULT NULL COMMENT '失效日期';
+alter table `open_account` add column `sign_key` varchar(50) DEFAULT NULL COMMENT '签名密钥';
+alter table `open_account` add column `status` int DEFAULT 1 COMMENT '是否启用';
+alter table `open_account` add column `valid_date` varchar(20) DEFAULT NULL COMMENT '生效日期';
+alter table `open_account` add column `validate_sign` int DEFAULT 0 COMMENT '是否验签';
+alter table `open_account` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `open_account` add column `when_modified` varchar(20) DEFAULT NULL COMMENT '修改时间';
+alter table `open_account` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人';
+alter table `open_account` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人';
+CREATE TABLE IF NOT EXISTS `open_account_api`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `open_account_api` add column `account_id` varchar(32) DEFAULT NULL COMMENT '账号id';
+alter table `open_account_api` add column `api_id` varchar(32) DEFAULT NULL COMMENT '接口id';
+alter table `open_account_api` add column `id` varchar(32) DEFAULT NULL COMMENT 'id';
+alter table `open_account_api` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `open_account_api` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人';
+CREATE TABLE IF NOT EXISTS `open_api_log`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `open_api_log` add column `access_id` varchar(100) DEFAULT NULL COMMENT '接口入商名称';
+alter table `open_api_log` add column `api_name` varchar(100) DEFAULT NULL COMMENT '接口名称';
+alter table `open_api_log` add column `error_message` varchar(255) DEFAULT NULL COMMENT '错误信息';
+alter table `open_api_log` add column `id` varchar(36) DEFAULT NULL COMMENT '主键';
+alter table `open_api_log` add column `request_ip` varchar(20) DEFAULT NULL COMMENT '请求IP';
+alter table `open_api_log` add column `request_params` longtext DEFAULT NULL COMMENT '请求参数';
+alter table `open_api_log` add column `request_time` varchar(20) DEFAULT NULL COMMENT '请求时间';
+alter table `open_api_log` add column `success` tinyint DEFAULT NULL COMMENT '是否成功';
+alter table `open_api_log` add column `use_time` tinyint DEFAULT NULL COMMENT '响应时间(秒)';
+CREATE TABLE IF NOT EXISTS `rep_app`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `rep_app` add column `app_name` varchar(50) DEFAULT NULL COMMENT '报表名称';
+alter table `rep_app` add column `app_note` varchar(256) DEFAULT NULL COMMENT '报表描述';
+alter table `rep_app` add column `id` varchar(32) DEFAULT NULL COMMENT 'ID';
+alter table `rep_app` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `rep_app` add column `when_modified` varchar(20) DEFAULT NULL COMMENT '修改时间';
+alter table `rep_app` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人';
+alter table `rep_app` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '更新人';
+CREATE TABLE IF NOT EXISTS `rep_dataset`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `rep_dataset` add column `column_def` text DEFAULT NULL COMMENT '列定义';
+alter table `rep_dataset` add column `ds_meta` text DEFAULT NULL COMMENT '配置信息';
+alter table `rep_dataset` add column `ds_name` varchar(50) DEFAULT NULL COMMENT '数据集名称';
+alter table `rep_dataset` add column `ds_note` varchar(255) DEFAULT NULL COMMENT '描述信息';
+alter table `rep_dataset` add column `ds_type` int DEFAULT NULL COMMENT '数据集类型 1：sql 2:json 3:excel';
+alter table `rep_dataset` add column `id` varchar(32) DEFAULT NULL COMMENT 'ID';
+alter table `rep_dataset` add column `rep_app_id` varchar(32) DEFAULT NULL COMMENT '报表应用id';
+alter table `rep_dataset` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `rep_dataset` add column `when_modified` varchar(20) DEFAULT NULL COMMENT '修改时间';
+alter table `rep_dataset` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人员';
+alter table `rep_dataset` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人员';
+CREATE TABLE IF NOT EXISTS `sys_api`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_api` add column `api_argv_type` int DEFAULT NULL COMMENT '参数组装方式';
+alter table `sys_api` add column `api_code` varchar(50) DEFAULT NULL COMMENT '接口编码';
+alter table `sys_api` add column `api_flow_id` varchar(50) DEFAULT NULL COMMENT '流程ID';
+alter table `sys_api` add column `api_method` varchar(32) DEFAULT 'get' COMMENT '请求方式';
+alter table `sys_api` add column `api_name` varchar(50) DEFAULT NULL COMMENT '接口名称';
+alter table `sys_api` add column `api_note` text DEFAULT NULL COMMENT '接口描述';
+alter table `sys_api` add column `api_req_argv` text DEFAULT NULL COMMENT '请求参数';
+alter table `sys_api` add column `api_result_handler` varchar(128) DEFAULT NULL COMMENT '结果处理类';
+alter table `sys_api` add column `api_rsp_argv` text DEFAULT NULL COMMENT '响应结果';
+alter table `sys_api` add column `api_tags` varchar(128) DEFAULT NULL COMMENT '标签';
+alter table `sys_api` add column `api_url` varchar(128) DEFAULT NULL COMMENT '接口路径';
+alter table `sys_api` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `sys_api` add column `call_type` int DEFAULT NULL COMMENT '调试方式';
+alter table `sys_api` add column `id` varchar(32) DEFAULT '' COMMENT '主键';
+alter table `sys_api` add column `module_id` varchar(36) DEFAULT NULL COMMENT '关联模块';
+alter table `sys_api` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `sys_api` add column `when_modified` varchar(20) DEFAULT NULL COMMENT '修改时间';
+alter table `sys_api` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人';
+alter table `sys_api` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人';
+CREATE TABLE IF NOT EXISTS `sys_auto_serial`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_auto_serial` add column `auto_num` int DEFAULT NULL COMMENT '当前编号';
+alter table `sys_auto_serial` add column `category` varchar(100) DEFAULT NULL COMMENT '分类';
+alter table `sys_auto_serial` add column `create_time` varchar(20) COMMENT '';
+alter table `sys_auto_serial` add column `create_user` varchar(50) DEFAULT NULL COMMENT '';
+alter table `sys_auto_serial` add column `id` varchar(100) DEFAULT '' COMMENT '';
+alter table `sys_auto_serial` add column `key` varchar(50) DEFAULT NULL COMMENT '计算方式key';
+alter table `sys_auto_serial` add column `locked` int DEFAULT 0 COMMENT '是否被锁 1：已锁 0：未锁';
+alter table `sys_auto_serial` add column `num_length` int DEFAULT NULL COMMENT '编号长度，不够前面补0';
+alter table `sys_auto_serial` add column `start_num` int DEFAULT NULL COMMENT '初始值';
+alter table `sys_auto_serial` add column `step` int DEFAULT NULL COMMENT '步长';
+alter table `sys_auto_serial` add column `tpl` varchar(100) DEFAULT NULL COMMENT '模板';
+alter table `sys_auto_serial` add column `type` int DEFAULT NULL COMMENT '计算方式1: 按日 2：按月 3:按年';
+alter table `sys_auto_serial` add column `update_time` varchar(20) COMMENT '';
+alter table `sys_auto_serial` add column `update_user` varchar(50) DEFAULT NULL COMMENT '';
+CREATE TABLE IF NOT EXISTS `sys_base`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_base` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `sys_base` add column `code` varchar(50) DEFAULT NULL COMMENT '编码';
+alter table `sys_base` add column `id` varchar(32) DEFAULT NULL COMMENT '主键';
+alter table `sys_base` add column `is_test` tinyint DEFAULT NULL COMMENT '';
+alter table `sys_base` add column `name` varchar(50) DEFAULT NULL COMMENT '名称';
+alter table `sys_base` add column `note` text DEFAULT NULL COMMENT '备注';
+alter table `sys_base` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `sys_base` add column `when_modified` varchar(20) DEFAULT NULL COMMENT '修改时间';
+alter table `sys_base` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人员';
+alter table `sys_base` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人员';
+CREATE TABLE IF NOT EXISTS `sys_config`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_config` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `sys_config` add column `code` varchar(255) DEFAULT NULL COMMENT '参数键名';
+alter table `sys_config` add column `id` varchar(36) DEFAULT NULL COMMENT 'ID';
+alter table `sys_config` add column `is_sys` tinyint DEFAULT NULL COMMENT '是否系统内置';
+alter table `sys_config` add column `name` varchar(255) DEFAULT NULL COMMENT '参数名称';
+alter table `sys_config` add column `note` varchar(255) DEFAULT NULL COMMENT '备注';
+alter table `sys_config` add column `value` varchar(255) DEFAULT NULL COMMENT '参数键值';
+alter table `sys_config` add column `value_type` tinyint DEFAULT 0 COMMENT '';
+alter table `sys_config` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `sys_config` add column `when_modified` varchar(20) DEFAULT NULL COMMENT '修改时间';
+alter table `sys_config` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人员';
+alter table `sys_config` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人员';
+CREATE TABLE IF NOT EXISTS `sys_data_access`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_data_access` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `sys_data_access` add column `id` varchar(32) DEFAULT NULL COMMENT '主键';
+alter table `sys_data_access` add column `name` varchar(50) DEFAULT NULL COMMENT '名称';
+alter table `sys_data_access` add column `note` text DEFAULT NULL COMMENT '备注';
+alter table `sys_data_access` add column `status` tinyint DEFAULT NULL COMMENT '启用状态';
+alter table `sys_data_access` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `sys_data_access` add column `when_modified` varchar(20) DEFAULT NULL COMMENT '修改时间';
+alter table `sys_data_access` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人员';
+alter table `sys_data_access` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人员';
+CREATE TABLE IF NOT EXISTS `sys_data_access_resource`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_data_access_resource` add column `access_id` varchar(36) DEFAULT NULL COMMENT '编码';
+alter table `sys_data_access_resource` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `sys_data_access_resource` add column `data_id` varchar(36) DEFAULT NULL COMMENT '名称';
+alter table `sys_data_access_resource` add column `id` varchar(32) DEFAULT NULL COMMENT '主键';
+alter table `sys_data_access_resource` add column `table_name` varchar(50) DEFAULT NULL COMMENT '备注';
+alter table `sys_data_access_resource` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `sys_data_access_resource` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人员';
+CREATE TABLE IF NOT EXISTS `sys_data_access_user`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_data_access_user` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `sys_data_access_user` add column `id` varchar(32) DEFAULT NULL COMMENT '主键';
+alter table `sys_data_access_user` add column `sys_data_access_id` varchar(50) DEFAULT NULL COMMENT '数据访问组id';
+alter table `sys_data_access_user` add column `sys_user_id` varchar(32) DEFAULT NULL COMMENT '用户id';
+alter table `sys_data_access_user` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `sys_data_access_user` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人员';
+CREATE TABLE IF NOT EXISTS `sys_data_resource`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_data_resource` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `sys_data_resource` add column `extra_sql` text DEFAULT NULL COMMENT '权限附加SQL';
+alter table `sys_data_resource` add column `id` varchar(32) DEFAULT NULL COMMENT '主键';
+alter table `sys_data_resource` add column `is_only_leaf` tinyint DEFAULT NULL COMMENT '是否只选树叶';
+alter table `sys_data_resource` add column `is_tree` tinyint DEFAULT NULL COMMENT '是否树形结构';
+alter table `sys_data_resource` add column `label_field` varchar(50) DEFAULT NULL COMMENT '标签列';
+alter table `sys_data_resource` add column `name` varchar(50) DEFAULT NULL COMMENT '名称';
+alter table `sys_data_resource` add column `query_sql` text DEFAULT NULL COMMENT '查询SQL';
+alter table `sys_data_resource` add column `status` tinyint DEFAULT NULL COMMENT '启用状态';
+alter table `sys_data_resource` add column `table_name` varchar(50) DEFAULT NULL COMMENT '表名';
+alter table `sys_data_resource` add column `value_field` varchar(50) DEFAULT NULL COMMENT '值列';
+alter table `sys_data_resource` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `sys_data_resource` add column `when_modified` varchar(20) DEFAULT NULL COMMENT '修改时间';
+alter table `sys_data_resource` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人员';
+alter table `sys_data_resource` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人员';
+CREATE TABLE IF NOT EXISTS `sys_dict`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_dict` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `sys_dict` add column `code` varchar(50) DEFAULT NULL COMMENT '编码';
+alter table `sys_dict` add column `id` varchar(32) DEFAULT NULL COMMENT '主键';
+alter table `sys_dict` add column `name` varchar(50) DEFAULT NULL COMMENT '名称';
+alter table `sys_dict` add column `note` text DEFAULT NULL COMMENT '备注';
+alter table `sys_dict` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `sys_dict` add column `when_modified` varchar(20) DEFAULT NULL COMMENT '修改时间';
+alter table `sys_dict` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人员';
+alter table `sys_dict` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人员';
+CREATE TABLE IF NOT EXISTS `sys_dict_item`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_dict_item` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `sys_dict_item` add column `code` varchar(50) DEFAULT NULL COMMENT '编码';
+alter table `sys_dict_item` add column `group_name` varchar(50) DEFAULT NULL COMMENT '组名';
+alter table `sys_dict_item` add column `id` varchar(32) DEFAULT NULL COMMENT '主键';
+alter table `sys_dict_item` add column `name` varchar(50) DEFAULT NULL COMMENT '名称';
+alter table `sys_dict_item` add column `note` text DEFAULT NULL COMMENT '备注';
+alter table `sys_dict_item` add column `order_num` int DEFAULT NULL COMMENT '排序';
+alter table `sys_dict_item` add column `sys_dict_id` varchar(32) DEFAULT NULL COMMENT '字典id';
+alter table `sys_dict_item` add column `value` varchar(20) DEFAULT NULL COMMENT '值';
+alter table `sys_dict_item` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `sys_dict_item` add column `when_modified` varchar(20) DEFAULT NULL COMMENT '修改时间';
+alter table `sys_dict_item` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人员';
+alter table `sys_dict_item` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人员';
+CREATE TABLE IF NOT EXISTS `sys_excel`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_excel` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `sys_excel` add column `data_from` int DEFAULT NULL COMMENT '1. 普通 2. Excel文件 3. 数据源';
+alter table `sys_excel` add column `data_from_id` varchar(36) DEFAULT NULL COMMENT '数据来源ID：如果data_from为2，则为fileId；如果为3，则为datasetId';
+alter table `sys_excel` add column `data_json` longtext DEFAULT NULL COMMENT '数据配置';
+alter table `sys_excel` add column `id` varchar(255) DEFAULT NULL COMMENT '主键';
+alter table `sys_excel` add column `name` varchar(255) DEFAULT NULL COMMENT '名称';
+alter table `sys_excel` add column `when_created` varchar(30) DEFAULT NULL COMMENT '创建时间';
+alter table `sys_excel` add column `when_modified` varchar(30) DEFAULT NULL COMMENT '修改时间';
+alter table `sys_excel` add column `who_created` varchar(36) DEFAULT NULL COMMENT '创建人';
+alter table `sys_excel` add column `who_modified` varchar(36) DEFAULT NULL COMMENT '修改人';
+CREATE TABLE IF NOT EXISTS `sys_file`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_file` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `sys_file` add column `file_content` longtext DEFAULT NULL COMMENT '文件内容，只有存数据库时才有值';
+alter table `sys_file` add column `file_ext` text DEFAULT NULL COMMENT '文件扩展名';
+alter table `sys_file` add column `file_from` varchar(50) DEFAULT NULL COMMENT '文件来源';
+alter table `sys_file` add column `file_md5` varchar(40) DEFAULT NULL COMMENT '文件MD5值';
+alter table `sys_file` add column `file_name` varchar(100) DEFAULT NULL COMMENT '文件名称';
+alter table `sys_file` add column `file_original_name` varchar(100) DEFAULT NULL COMMENT '原始文件名';
+alter table `sys_file` add column `file_path` varchar(100) DEFAULT NULL COMMENT '存储路径';
+alter table `sys_file` add column `file_size` int DEFAULT NULL COMMENT '文件大小(Byte)';
+alter table `sys_file` add column `id` varchar(32) DEFAULT NULL COMMENT '主键';
+alter table `sys_file` add column `save_type` int DEFAULT NULL COMMENT '存储方式 0：数据库 1：本地磁盘，2：FAAS储存';
+alter table `sys_file` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `sys_file` add column `when_modified` varchar(20) DEFAULT NULL COMMENT '修改时间';
+alter table `sys_file` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人员';
+alter table `sys_file` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人员';
+CREATE TABLE IF NOT EXISTS `sys_hint_select`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_hint_select` add column `code` varchar(100) DEFAULT NULL COMMENT '简称';
+alter table `sys_hint_select` add column `db_id` varchar(100) DEFAULT NULL COMMENT '数据源';
+alter table `sys_hint_select` add column `flow_id` varchar(50) DEFAULT NULL COMMENT '逻辑编排,优化级最高';
+alter table `sys_hint_select` add column `id` varchar(50) DEFAULT NULL COMMENT '主键';
+alter table `sys_hint_select` add column `remark` text DEFAULT NULL COMMENT '备注说明';
+alter table `sys_hint_select` add column `select_fields` text DEFAULT NULL COMMENT '字段说明';
+alter table `sys_hint_select` add column `select_sql` text DEFAULT NULL COMMENT '下拉SQL';
+alter table `sys_hint_select` add column `type` varchar(50) DEFAULT NULL COMMENT '类型:0=普通下拉,1=树下拉';
+CREATE TABLE IF NOT EXISTS `sys_i18n`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_i18n` add column `app_id` varchar(32) DEFAULT NULL COMMENT '归属应用ID';
+alter table `sys_i18n` add column `i18n_key` varchar(255) DEFAULT NULL COMMENT '键名';
+alter table `sys_i18n` add column `id` varchar(32) DEFAULT NULL COMMENT '主键';
+alter table `sys_i18n` add column `message` text DEFAULT NULL COMMENT '国际化配置信息，JSON保存';
+alter table `sys_i18n` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `sys_i18n` add column `when_modified` varchar(20) DEFAULT NULL COMMENT '修改时间';
+alter table `sys_i18n` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人员';
+alter table `sys_i18n` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人员';
+CREATE TABLE IF NOT EXISTS `sys_logic_flow`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_logic_flow` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `sys_logic_flow` add column `application_id` varchar(32) DEFAULT NULL COMMENT '应用ID';
+alter table `sys_logic_flow` add column `default_source_name` varchar(100) DEFAULT NULL COMMENT '默认数据源';
+alter table `sys_logic_flow` add column `flow_id` varchar(36) DEFAULT NULL COMMENT '流程ID';
+alter table `sys_logic_flow` add column `id` varchar(36) DEFAULT NULL COMMENT 'ID';
+alter table `sys_logic_flow` add column `in_argv` text DEFAULT NULL COMMENT '输入参数';
+alter table `sys_logic_flow` add column `name` varchar(255) DEFAULT NULL COMMENT '名称';
+alter table `sys_logic_flow` add column `note` varchar(255) DEFAULT NULL COMMENT '备注';
+alter table `sys_logic_flow` add column `out_argv` text DEFAULT NULL COMMENT '输出参数';
+alter table `sys_logic_flow` add column `sub_flow_ids` text DEFAULT NULL COMMENT '子流程ID列表';
+alter table `sys_logic_flow` add column `tags` varchar(255) DEFAULT NULL COMMENT '标签';
+alter table `sys_logic_flow` add column `when_created` varchar(20) COMMENT '创建时间';
+alter table `sys_logic_flow` add column `when_modified` varchar(20) COMMENT '修改时间';
+alter table `sys_logic_flow` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人员';
+alter table `sys_logic_flow` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人员';
+CREATE TABLE IF NOT EXISTS `sys_logic_history`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_logic_history` add column `flow_id` varchar(36) DEFAULT NULL COMMENT '流程ID';
+alter table `sys_logic_history` add column `flow_json` longtext DEFAULT NULL COMMENT '流程JSON';
+alter table `sys_logic_history` add column `id` varchar(36) DEFAULT NULL COMMENT 'ID';
+alter table `sys_logic_history` add column `version_tag` varchar(50) DEFAULT NULL COMMENT '版本标签';
+alter table `sys_logic_history` add column `version_tag_time` varchar(30) DEFAULT NULL COMMENT '版本时间';
+alter table `sys_logic_history` add column `when_created` varchar(20) COMMENT '创建时间';
+alter table `sys_logic_history` add column `who_created` varchar(36) DEFAULT NULL COMMENT '创建人';
+CREATE TABLE IF NOT EXISTS `sys_logic_template`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_logic_template` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `sys_logic_template` add column `description` text DEFAULT NULL COMMENT '简介';
+alter table `sys_logic_template` add column `id` varchar(36) DEFAULT NULL COMMENT 'id';
+alter table `sys_logic_template` add column `links` longtext DEFAULT NULL COMMENT '连接列表';
+alter table `sys_logic_template` add column `module_id` varchar(36) DEFAULT NULL COMMENT '关联模块';
+alter table `sys_logic_template` add column `name` varchar(255) DEFAULT NULL COMMENT '名称';
+alter table `sys_logic_template` add column `nodes` longtext DEFAULT NULL COMMENT '节点列表';
+alter table `sys_logic_template` add column `when_created` varchar(50) DEFAULT NULL COMMENT '创建时间';
+alter table `sys_logic_template` add column `when_modified` varchar(50) DEFAULT NULL COMMENT '修改时间';
+alter table `sys_logic_template` add column `who_created` varchar(36) DEFAULT NULL COMMENT '创建人';
+alter table `sys_logic_template` add column `who_modified` varchar(36) DEFAULT NULL COMMENT '修改人';
+CREATE TABLE IF NOT EXISTS `sys_login_log`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_login_log` add column `id` varchar(32) DEFAULT NULL COMMENT '主键';
+alter table `sys_login_log` add column `ip` varchar(20) DEFAULT NULL COMMENT '来访IP';
+alter table `sys_login_log` add column `operate_time` varchar(20) COMMENT '访问时间';
+alter table `sys_login_log` add column `operator` varchar(32) DEFAULT NULL COMMENT '访问人员';
+alter table `sys_login_log` add column `response_code` int DEFAULT NULL COMMENT '响应码';
+alter table `sys_login_log` add column `response_message` varchar(100) DEFAULT NULL COMMENT '响应消息';
+alter table `sys_login_log` add column `times` int DEFAULT NULL COMMENT '耗时(ms)';
+alter table `sys_login_log` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+CREATE TABLE IF NOT EXISTS `sys_menu`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_menu` add column `api_codes` varchar(255) DEFAULT NULL COMMENT '接口编码，多个用逗号分隔';
+alter table `sys_menu` add column `app_id` varchar(36) DEFAULT NULL COMMENT '所属应用ID';
+alter table `sys_menu` add column `code` varchar(50) DEFAULT NULL COMMENT '编码';
+alter table `sys_menu` add column `component_path` varchar(255) DEFAULT NULL COMMENT '组件路径';
+alter table `sys_menu` add column `data_type` tinyint DEFAULT NULL COMMENT '数据类型：0系统，1业务应用, 2开发平台';
+alter table `sys_menu` add column `full_path` varchar(255) DEFAULT NULL COMMENT '完整路径（根据层级结构、router_path拼接的完整路径）';
+alter table `sys_menu` add column `icon` varchar(50) DEFAULT NULL COMMENT '图标';
+alter table `sys_menu` add column `id` varchar(32) DEFAULT NULL COMMENT '主键';
+alter table `sys_menu` add column `is_dev` tinyint(1) DEFAULT 0 COMMENT '菜单是否为开发者模式菜单';
+alter table `sys_menu` add column `is_hidden` tinyint DEFAULT 0 COMMENT '是否隐藏';
+alter table `sys_menu` add column `keep_alive` tinyint DEFAULT NULL COMMENT '是否刷新 0: 否 1：是';
+alter table `sys_menu` add column `main_mode` tinyint DEFAULT NULL COMMENT '内容区显示样式：0 自动撑开，1 居中';
+alter table `sys_menu` add column `menu_type` char(1) DEFAULT '0' COMMENT '菜单类型（M目录 C菜单 F按钮）';
+alter table `sys_menu` add column `name` varchar(50) DEFAULT NULL COMMENT '名称';
+alter table `sys_menu` add column `open_mode` tinyint DEFAULT NULL COMMENT '打开方式 0:页签 1:新窗口';
+alter table `sys_menu` add column `order_num` int DEFAULT 0 COMMENT '排序';
+alter table `sys_menu` add column `page_id` varchar(36) DEFAULT NULL COMMENT '关联页面';
+alter table `sys_menu` add column `page_type` tinyint DEFAULT NULL COMMENT '页面渲染方式：0 Vue， 1 JSON';
+alter table `sys_menu` add column `parent_id` varchar(32) DEFAULT NULL COMMENT '上级菜单ID';
+alter table `sys_menu` add column `path` text DEFAULT NULL COMMENT '菜单层级关系，自动生成';
+alter table `sys_menu` add column `router_path` varchar(255) DEFAULT NULL COMMENT '路由路径';
+alter table `sys_menu` add column `sidebar_nav_mode` tinyint DEFAULT NULL COMMENT '侧边菜单显示模式：0 不显示，1 从一级菜单开始显示，2 从二级菜单开始显示, 3 显示二级以下菜单';
+alter table `sys_menu` add column `status` tinyint DEFAULT 1 COMMENT '可用状态';
+alter table `sys_menu` add column `theme` varchar(50) DEFAULT NULL COMMENT 'layout主题';
+alter table `sys_menu` add column `top_nav_mode` tinyint DEFAULT NULL COMMENT '顶部菜单显示模式：0 完全不显示, top_nav_mode1 不显示nav（有header，没有菜单），2 从一级菜单开始显示，3 从二级菜单开始显示';
+alter table `sys_menu` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `sys_menu` add column `when_modified` varchar(20) DEFAULT NULL COMMENT '修改时间';
+alter table `sys_menu` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人员';
+alter table `sys_menu` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人员';
+CREATE TABLE IF NOT EXISTS `sys_mq_channel`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_mq_channel` add column `batch_consumer` int DEFAULT NULL COMMENT '批量消费数';
+alter table `sys_mq_channel` add column `channel_name` varchar(50) DEFAULT NULL COMMENT '通道名称';
+alter table `sys_mq_channel` add column `consumer_group` varchar(50) DEFAULT NULL COMMENT '消费组名';
+alter table `sys_mq_channel` add column `consumer_thread` int DEFAULT NULL COMMENT '消费线程数';
+alter table `sys_mq_channel` add column `enable` int DEFAULT NULL COMMENT '是否启用 0-否 1-是';
+alter table `sys_mq_channel` add column `id` varchar(64) DEFAULT NULL COMMENT 'ID';
+alter table `sys_mq_channel` add column `message_name` varchar(50) DEFAULT NULL COMMENT '消息处理逻辑编排';
+alter table `sys_mq_channel` add column `topic` varchar(50) DEFAULT NULL COMMENT '主题';
+alter table `sys_mq_channel` add column `zk_address` varchar(50) DEFAULT NULL COMMENT 'zk地址';
+CREATE TABLE IF NOT EXISTS `sys_notice`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_notice` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `sys_notice` add column `content` text DEFAULT NULL COMMENT '通知内容';
+alter table `sys_notice` add column `deleted` tinyint(1) DEFAULT NULL COMMENT '逻辑删除，0：未删除，1：已删除';
+alter table `sys_notice` add column `id` varchar(36) DEFAULT NULL COMMENT '消息ID';
+alter table `sys_notice` add column `status` tinyint DEFAULT 1 COMMENT '启用状态：0：待启用，1：已启用';
+alter table `sys_notice` add column `title` varchar(255) DEFAULT NULL COMMENT '通知标题';
+alter table `sys_notice` add column `type` tinyint DEFAULT NULL COMMENT '通知类型，1：系统维护通知，2：公告';
+alter table `sys_notice` add column `when_created` varchar(20) COMMENT '创建时间';
+alter table `sys_notice` add column `when_modified` varchar(20) COMMENT '更新时间';
+alter table `sys_notice` add column `who_created` varchar(36) DEFAULT NULL COMMENT '创建人';
+alter table `sys_notice` add column `who_modified` varchar(36) DEFAULT NULL COMMENT '更新人';
+CREATE TABLE IF NOT EXISTS `sys_notice_record`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_notice_record` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `sys_notice_record` add column `content` text DEFAULT NULL COMMENT '通知内容';
+alter table `sys_notice_record` add column `from_who` varchar(36) DEFAULT NULL COMMENT '发送人';
+alter table `sys_notice_record` add column `from_who_name` varchar(255) DEFAULT NULL COMMENT '发送人名称';
+alter table `sys_notice_record` add column `id` varchar(36) DEFAULT NULL COMMENT '通知记录ID';
+alter table `sys_notice_record` add column `is_read` tinyint DEFAULT 0 COMMENT '是否已读，0：未读，1：已读';
+alter table `sys_notice_record` add column `notice_id` varchar(36) DEFAULT NULL COMMENT '关联通知';
+alter table `sys_notice_record` add column `notice_time` varchar(20) COMMENT '接收通知时间';
+alter table `sys_notice_record` add column `read_time` varchar(20) COMMENT '阅读通知时间';
+alter table `sys_notice_record` add column `title` varchar(255) DEFAULT NULL COMMENT '通知标题';
+alter table `sys_notice_record` add column `to_who` varchar(36) DEFAULT NULL COMMENT '接收人';
+alter table `sys_notice_record` add column `to_who_name` varchar(255) DEFAULT NULL COMMENT '接收人名称';
+CREATE TABLE IF NOT EXISTS `sys_online_user`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_online_user` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `sys_online_user` add column `expire_time` varchar(20) COMMENT '失效时间';
+alter table `sys_online_user` add column `id` varchar(32) DEFAULT NULL COMMENT '主键';
+alter table `sys_online_user` add column `login_ip` varchar(20) DEFAULT NULL COMMENT '登录ip';
+alter table `sys_online_user` add column `login_time` varchar(20) COMMENT '登录时间';
+alter table `sys_online_user` add column `login_token` varchar(1024) DEFAULT NULL COMMENT '令牌';
+alter table `sys_online_user` add column `user_id` varchar(32) DEFAULT NULL COMMENT '用户id';
+alter table `sys_online_user` add column `when_created` varchar(20) COMMENT '创建时间';
+CREATE TABLE IF NOT EXISTS `sys_operate_log`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_operate_log` add column `action` varchar(255) DEFAULT NULL COMMENT '动作';
+alter table `sys_operate_log` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `sys_operate_log` add column `id` varchar(32) DEFAULT NULL COMMENT '主键';
+alter table `sys_operate_log` add column `ip` varchar(20) DEFAULT NULL COMMENT '来访IP';
+alter table `sys_operate_log` add column `module` varchar(100) DEFAULT NULL COMMENT '模块';
+alter table `sys_operate_log` add column `operate_time` varchar(20) COMMENT '访问时间';
+alter table `sys_operate_log` add column `operator` varchar(32) DEFAULT NULL COMMENT '访问人员';
+alter table `sys_operate_log` add column `request_body` longtext DEFAULT NULL COMMENT '请求内容体';
+alter table `sys_operate_log` add column `response_code` int DEFAULT NULL COMMENT '响应码';
+alter table `sys_operate_log` add column `response_message` varchar(100) DEFAULT NULL COMMENT '响应消息';
+alter table `sys_operate_log` add column `times` int DEFAULT NULL COMMENT '耗时(ms)';
+alter table `sys_operate_log` add column `url` varchar(255) DEFAULT NULL COMMENT '路径';
+alter table `sys_operate_log` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `sys_operate_log` add column `method` varchar(255) comment '方法名称';
+alter table `sys_operate_log` add column `request_method` varchar(20) comment '请求方式';
+alter table `sys_operate_log` add column `response_body` text comment '响应内容体';
+CREATE TABLE IF NOT EXISTS `sys_role`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_role` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `sys_role` add column `code` varchar(50) DEFAULT NULL COMMENT '编码';
+alter table `sys_role` add column `id` varchar(32) DEFAULT NULL COMMENT '主键';
+alter table `sys_role` add column `name` varchar(50) DEFAULT NULL COMMENT '名称';
+alter table `sys_role` add column `note` text DEFAULT NULL COMMENT '备注';
+alter table `sys_role` add column `status` tinyint DEFAULT NULL COMMENT '是否有效 0:否 1：是';
+alter table `sys_role` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `sys_role` add column `when_modified` varchar(20) DEFAULT NULL COMMENT '修改时间';
+alter table `sys_role` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人员';
+alter table `sys_role` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人员';
+CREATE TABLE IF NOT EXISTS `sys_role_menu`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_role_menu` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `sys_role_menu` add column `id` varchar(36) DEFAULT NULL COMMENT '主键';
+alter table `sys_role_menu` add column `sys_menu_id` varchar(36) DEFAULT NULL COMMENT '名称';
+alter table `sys_role_menu` add column `sys_role_id` varchar(50) DEFAULT NULL COMMENT '编码';
+alter table `sys_role_menu` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `sys_role_menu` add column `who_created` varchar(36) DEFAULT NULL COMMENT '创建人员';
+CREATE TABLE IF NOT EXISTS `sys_task`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_task` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `sys_task` add column `application_id` varchar(32) DEFAULT NULL COMMENT '应用ID';
+alter table `sys_task` add column `class_name` varchar(255) DEFAULT NULL COMMENT '类名';
+alter table `sys_task` add column `cron` varchar(50) DEFAULT NULL COMMENT '定时表达式';
+alter table `sys_task` add column `distributed` tinyint DEFAULT NULL COMMENT '是否分布式';
+alter table `sys_task` add column `enable` tinyint DEFAULT 1 COMMENT '启用状态';
+alter table `sys_task` add column `id` varchar(32) DEFAULT NULL COMMENT '主键';
+alter table `sys_task` add column `last_execute_msg` text DEFAULT NULL COMMENT '最后执行错误信息';
+alter table `sys_task` add column `last_execute_status` tinyint DEFAULT NULL COMMENT '最后执行状态 1：成功 0：失败';
+alter table `sys_task` add column `last_execute_take` int DEFAULT NULL COMMENT '上次执行消耗';
+alter table `sys_task` add column `last_execute_time` varchar(20) COMMENT '上次执行时间';
+alter table `sys_task` add column `lock_for_least` int DEFAULT 1 COMMENT '最少锁定时长(秒)';
+alter table `sys_task` add column `lock_for_most` int DEFAULT 30 COMMENT '最多锁定时长(秒)';
+alter table `sys_task` add column `lock_for_time` varchar(20) COMMENT '锁定时间';
+alter table `sys_task` add column `lock_status` tinyint DEFAULT 0 COMMENT '锁定状态';
+alter table `sys_task` add column `name` varchar(100) DEFAULT NULL COMMENT '任务名称';
+alter table `sys_task` add column `note` text DEFAULT NULL COMMENT '备注';
+alter table `sys_task` add column `task_resource_id` varchar(36) DEFAULT NULL COMMENT '任务资源ID';
+alter table `sys_task` add column `task_type` tinyint DEFAULT 1 COMMENT '任务类型';
+alter table `sys_task` add column `when_created` varchar(20) COMMENT '创建时间';
+alter table `sys_task` add column `when_modified` varchar(20) COMMENT '修改时间';
+alter table `sys_task` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人';
+alter table `sys_task` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人';
+CREATE TABLE IF NOT EXISTS `sys_unit`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_unit` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `sys_unit` add column `email` varchar(50) DEFAULT NULL COMMENT '电子邮箱';
+alter table `sys_unit` add column `id` varchar(32) DEFAULT NULL COMMENT '主键';
+alter table `sys_unit` add column `leader` varchar(255) DEFAULT NULL COMMENT '负责人';
+alter table `sys_unit` add column `mobile` varchar(20) DEFAULT NULL COMMENT '联系电话';
+alter table `sys_unit` add column `name` varchar(50) DEFAULT NULL COMMENT '名称';
+alter table `sys_unit` add column `note` text DEFAULT NULL COMMENT '备注';
+alter table `sys_unit` add column `order_num` int DEFAULT 0 COMMENT '排序 ';
+alter table `sys_unit` add column `parent_id` varchar(32) DEFAULT NULL COMMENT '上级单位ID';
+alter table `sys_unit` add column `path` text DEFAULT NULL COMMENT '层次关系，自动生成';
+alter table `sys_unit` add column `status` tinyint DEFAULT 1 COMMENT '部门状态， 0：停用 1：正常';
+alter table `sys_unit` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `sys_unit` add column `when_modified` varchar(20) DEFAULT NULL COMMENT '修改时间';
+alter table `sys_unit` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人员';
+alter table `sys_unit` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人员';
+CREATE TABLE IF NOT EXISTS `sys_user`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_user` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `sys_user` add column `avatar` varchar(255) DEFAULT NULL COMMENT '';
+alter table `sys_user` add column `deleted` tinyint DEFAULT 0 COMMENT '逻辑删除 0:正常 1：删除';
+alter table `sys_user` add column `email` varchar(50) DEFAULT NULL COMMENT '电子邮箱';
+alter table `sys_user` add column `id` varchar(36) DEFAULT NULL COMMENT '主键';
+alter table `sys_user` add column `mobile` varchar(20) DEFAULT NULL COMMENT '手机号码';
+alter table `sys_user` add column `note` text DEFAULT NULL COMMENT '备注';
+alter table `sys_user` add column `password` varchar(256) DEFAULT NULL COMMENT '密码';
+alter table `sys_user` add column `post` varchar(50) DEFAULT NULL COMMENT '岗位';
+alter table `sys_user` add column `real_name` varchar(50) DEFAULT NULL COMMENT '用户姓名';
+alter table `sys_user` add column `sex` tinyint DEFAULT NULL COMMENT '性别 0:男 1:女';
+alter table `sys_user` add column `status` tinyint DEFAULT 1 COMMENT '状态 1：正常 0：禁用';
+alter table `sys_user` add column `sys_unit_id` varchar(32) DEFAULT NULL COMMENT '归属部门';
+alter table `sys_user` add column `username` varchar(50) DEFAULT NULL COMMENT '用户名';
+alter table `sys_user` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `sys_user` add column `when_modified` varchar(20) DEFAULT NULL COMMENT '修改时间';
+alter table `sys_user` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人员';
+alter table `sys_user` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人员';
+CREATE TABLE IF NOT EXISTS `sys_user_role`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_user_role` add column `app_id` varchar(36) DEFAULT NULL COMMENT '关联应用';
+alter table `sys_user_role` add column `id` varchar(36) DEFAULT NULL COMMENT '主键';
+alter table `sys_user_role` add column `sys_role_id` varchar(32) DEFAULT NULL COMMENT '编码';
+alter table `sys_user_role` add column `sys_user_id` varchar(32) DEFAULT NULL COMMENT '名称';
+alter table `sys_user_role` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `sys_user_role` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人员';
+CREATE TABLE IF NOT EXISTS `sys_view_model`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_view_model` add column `deleted` int DEFAULT 0 COMMENT '逻辑删除';
+alter table `sys_view_model` add column `id` varchar(36) DEFAULT NULL COMMENT '主键';
+alter table `sys_view_model` add column `name` varchar(50) DEFAULT NULL COMMENT '名称';
+alter table `sys_view_model` add column `note` text DEFAULT NULL COMMENT '描述';
+alter table `sys_view_model` add column `tag` varchar(100) DEFAULT NULL COMMENT '标签，多个用逗号分隔';
+alter table `sys_view_model` add column `when_created` varchar(20) COMMENT '创建时间';
+alter table `sys_view_model` add column `when_modified` varchar(20) COMMENT '修改时间';
+alter table `sys_view_model` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人员';
+alter table `sys_view_model` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人员';
+CREATE TABLE IF NOT EXISTS `sys_view_model_field`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_view_model_field` add column `default_text` varchar(50) DEFAULT NULL COMMENT '默认显示';
+alter table `sys_view_model_field` add column `field` varchar(50) DEFAULT NULL COMMENT '键名';
+alter table `sys_view_model_field` add column `format_pattern` varchar(50) DEFAULT NULL COMMENT '格式规则';
+alter table `sys_view_model_field` add column `format_type` varchar(20) DEFAULT NULL COMMENT '格式类型';
+alter table `sys_view_model_field` add column `hidden` int DEFAULT 0 COMMENT '是否隐藏';
+alter table `sys_view_model_field` add column `id` varchar(32) DEFAULT NULL COMMENT '主键';
+alter table `sys_view_model_field` add column `label` varchar(50) DEFAULT NULL COMMENT '标签';
+alter table `sys_view_model_field` add column `order_num` int DEFAULT 0 COMMENT '排序';
+alter table `sys_view_model_field` add column `type` varchar(20) DEFAULT NULL COMMENT '数据类型';
+alter table `sys_view_model_field` add column `view_model_id` varchar(32) DEFAULT NULL COMMENT '模型ID';
+alter table `sys_view_model_field` add column `when_created` varchar(20) COMMENT '创建时间';
+alter table `sys_view_model_field` add column `when_modified` varchar(20) COMMENT '修改时间';
+alter table `sys_view_model_field` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人员';
+alter table `sys_view_model_field` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人员';
+CREATE TABLE IF NOT EXISTS `sys_view_model_flow`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `sys_view_model_flow` add column `flow_id` varchar(36) DEFAULT NULL COMMENT '流水ID';
+alter table `sys_view_model_flow` add column `id` varchar(32) DEFAULT NULL COMMENT '';
+alter table `sys_view_model_flow` add column `view_model_id` varchar(32) DEFAULT NULL COMMENT '模型ID';
+alter table `sys_view_model_flow` add column `when_created` varchar(20) COMMENT '创建时间';
+alter table `sys_view_model_flow` add column `when_modified` varchar(20) COMMENT '修改时间';
+alter table `sys_view_model_flow` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人员';
+alter table `sys_view_model_flow` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人员';
+CREATE TABLE IF NOT EXISTS `wf_demo_leave`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `wf_demo_leave` add column `day` int DEFAULT NULL COMMENT '请假天数';
+alter table `wf_demo_leave` add column `id` varchar(32) DEFAULT NULL COMMENT '主键';
+alter table `wf_demo_leave` add column `proc_inst_id` varchar(32) DEFAULT NULL COMMENT '实例id';
+alter table `wf_demo_leave` add column `reason` varchar(255) DEFAULT NULL COMMENT '请假原因';
+CREATE TABLE IF NOT EXISTS `wf_ext_category`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `wf_ext_category` add column `category_name` varchar(50) DEFAULT NULL COMMENT '模块名称';
+alter table `wf_ext_category` add column `id` varchar(32) DEFAULT NULL COMMENT '主键';
+alter table `wf_ext_category` add column `order_num` int DEFAULT NULL COMMENT '排序';
+alter table `wf_ext_category` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `wf_ext_category` add column `when_modified` varchar(20) DEFAULT NULL COMMENT '修改时间';
+alter table `wf_ext_category` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人';
+alter table `wf_ext_category` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人';
+CREATE TABLE IF NOT EXISTS `wf_ext_comment`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `wf_ext_comment` add column `id` varchar(32) DEFAULT NULL COMMENT '主键';
+alter table `wf_ext_comment` add column `message` varchar(255) DEFAULT NULL COMMENT '意见';
+alter table `wf_ext_comment` add column `proc_inst_id` varchar(32) DEFAULT NULL COMMENT '流程实例ID';
+alter table `wf_ext_comment` add column `task_id` varchar(32) DEFAULT NULL COMMENT '任务ID';
+alter table `wf_ext_comment` add column `task_name` varchar(50) DEFAULT NULL COMMENT '任务名称';
+alter table `wf_ext_comment` add column `type` varchar(20) DEFAULT 'comment' COMMENT '类型';
+alter table `wf_ext_comment` add column `user_id` varchar(32) DEFAULT NULL COMMENT '用户ID';
+alter table `wf_ext_comment` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+CREATE TABLE IF NOT EXISTS `wf_ext_node_attribute`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `wf_ext_node_attribute` add column `actions` varchar(100) DEFAULT NULL COMMENT '处理动作权限';
+alter table `wf_ext_node_attribute` add column `exec_mode` varchar(50) DEFAULT NULL COMMENT '执行方式';
+alter table `wf_ext_node_attribute` add column `flow_id` varchar(100) DEFAULT NULL COMMENT '流程ID';
+alter table `wf_ext_node_attribute` add column `form_attribute` text DEFAULT NULL COMMENT '表单属性';
+alter table `wf_ext_node_attribute` add column `id` varchar(100) DEFAULT NULL COMMENT '主键';
+alter table `wf_ext_node_attribute` add column `msg_send_rule` varchar(100) DEFAULT NULL COMMENT '消息发送策略';
+alter table `wf_ext_node_attribute` add column `next_user` varchar(500) DEFAULT NULL COMMENT '下一步处理人';
+alter table `wf_ext_node_attribute` add column `node_id` varchar(100) DEFAULT NULL COMMENT '节点ID';
+alter table `wf_ext_node_attribute` add column `node_type` varchar(50) DEFAULT NULL COMMENT '节点类型';
+alter table `wf_ext_node_attribute` add column `pass_ok` varchar(50) DEFAULT NULL COMMENT '审核通过要求';
+alter table `wf_ext_node_attribute` add column `person` varchar(50) DEFAULT NULL COMMENT '审核通过要求-任几人';
+alter table `wf_ext_node_attribute` add column `time_out` varchar(50) DEFAULT NULL COMMENT '超时时间(分)';
+alter table `wf_ext_node_attribute` add column `when_created` varchar(50) DEFAULT NULL COMMENT '创建时间';
+alter table `wf_ext_node_attribute` add column `when_modified` varchar(50) DEFAULT NULL COMMENT '更新时间';
+alter table `wf_ext_node_attribute` add column `who_created` varchar(100) DEFAULT NULL COMMENT '创建人';
+alter table `wf_ext_node_attribute` add column `who_modified` varchar(100) DEFAULT NULL COMMENT '更新人';
+CREATE TABLE IF NOT EXISTS `wf_ext_procdef`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `wf_ext_procdef` add column `category_id` varchar(32) DEFAULT NULL COMMENT '分类ID';
+alter table `wf_ext_procdef` add column `content` longtext DEFAULT NULL COMMENT '内容';
+alter table `wf_ext_procdef` add column `deploy_md5` varchar(255) DEFAULT NULL COMMENT '已发布版本MD5';
+alter table `wf_ext_procdef` add column `deploy_status` tinyint DEFAULT NULL COMMENT '部署状态 0:待发布 1:已发布';
+alter table `wf_ext_procdef` add column `deploy_time` varchar(20) DEFAULT NULL COMMENT '最新发布时间';
+alter table `wf_ext_procdef` add column `form_key` varchar(50) DEFAULT NULL COMMENT '表单key，一般是表名';
+alter table `wf_ext_procdef` add column `form_page_id` varchar(32) DEFAULT NULL COMMENT '表单页面ID';
+alter table `wf_ext_procdef` add column `icon` varchar(50) DEFAULT NULL COMMENT '图标';
+alter table `wf_ext_procdef` add column `id` varchar(50) DEFAULT NULL COMMENT '主键';
+alter table `wf_ext_procdef` add column `inst_desc` varchar(255) DEFAULT NULL COMMENT '实例描述';
+alter table `wf_ext_procdef` add column `order_num` int DEFAULT NULL COMMENT '排序';
+alter table `wf_ext_procdef` add column `proc_definition_id` varchar(32) DEFAULT NULL COMMENT '流程定义ID';
+alter table `wf_ext_procdef` add column `proc_definition_key` varchar(100) DEFAULT NULL COMMENT '流程定义KEY';
+alter table `wf_ext_procdef` add column `proc_name` varchar(100) DEFAULT NULL COMMENT '流程定义名称';
+alter table `wf_ext_procdef` add column `proc_version` int DEFAULT NULL COMMENT '版本号';
+alter table `wf_ext_procdef` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
+alter table `wf_ext_procdef` add column `when_modified` varchar(20) DEFAULT NULL COMMENT '修改时间';
+alter table `wf_ext_procdef` add column `who_created` varchar(32) DEFAULT NULL COMMENT '创建人';
+alter table `wf_ext_procdef` add column `who_modified` varchar(32) DEFAULT NULL COMMENT '修改人';
+alter table `wf_ext_procdef` add column `work_num` varchar(100) DEFAULT NULL COMMENT '工单编号';
+CREATE TABLE IF NOT EXISTS `wf_ext_procinst`  (`id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, PRIMARY KEY (`id`) USING BTREE) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+alter table `wf_ext_procinst` add column `bill_code` varchar(50) DEFAULT NULL COMMENT '工单号';
+alter table `wf_ext_procinst` add column `bill_title` varchar(100) DEFAULT NULL COMMENT '工单标题';
+alter table `wf_ext_procinst` add column `form_data` text DEFAULT NULL COMMENT '表单数据';
+alter table `wf_ext_procinst` add column `id` varchar(32) DEFAULT NULL COMMENT '主键';
+alter table `wf_ext_procinst` add column `main_inst_id` varchar(50) DEFAULT NULL COMMENT '主流程实例ID';
+alter table `wf_ext_procinst` add column `main_task_id` varchar(50) DEFAULT NULL COMMENT '主流程任务ID';
+alter table `wf_ext_procinst` add column `proc_inst_id` varchar(32) DEFAULT NULL COMMENT '流程实例ID';
+alter table `wf_ext_procinst` add column `starter` varchar(32) DEFAULT NULL COMMENT '发起人ID';
+alter table `wf_ext_procinst` add column `when_created` varchar(20) DEFAULT NULL COMMENT '创建时间';
 
+create table sys_user_unit (
+                               id varchar(36) not null primary key comment '主键',
+                               sys_user_id varchar(36) not null comment '用户ID',
+                               sys_unit_id varchar(36) not null comment '部门ID',
+                               who_created varchar(36) not null comment '创建人员',
+                               when_created varchar(20) not null comment '创建时间',
+                               app_id varchar(36) comment '关联应用'
+);

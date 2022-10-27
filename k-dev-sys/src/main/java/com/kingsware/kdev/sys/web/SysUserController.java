@@ -8,17 +8,31 @@ import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
+import com.kingsware.kdev.core.util.AESUtil;
 import com.kingsware.kdev.core.util.ServletUtil;
+import com.kingsware.kdev.core.util.VerifyCodeUtils;
 import com.kingsware.kdev.sys.argv.*;
 import com.kingsware.kdev.sys.ret.SysUserRet;
+import com.kingsware.kdev.sys.ret.VerificationCodeRet;
 import com.kingsware.kdev.sys.service.SysUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.Base64;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * 演示控制器
@@ -30,6 +44,7 @@ import java.util.Map;
 @Api(value = "用户管理", tags = {"用户管理"})
 @RestController
 @RequestMapping("/"+ Version.V1 + "/sys-users")
+@Slf4j
 public class SysUserController extends BaseController {
 
     @Resource
@@ -42,8 +57,8 @@ public class SysUserController extends BaseController {
     @ApiIgnore
     @ApiOperation(value = "登录" ,notes = "登录")
     @PostMapping(value = "login")
-    public BaseRet<?> login(@RequestBody Map<String, Object> sysUserLoginArgv) {
-        return BaseRet.success(sysUserService.login(sysUserLoginArgv));
+    public BaseRet<?> login(@RequestBody Map<String, Object> argv) {
+        return BaseRet.success(sysUserService.login(argv));
     }
     /**
      *  登录信息
@@ -208,4 +223,15 @@ public class SysUserController extends BaseController {
         return BaseRet.success(sysUserService.passwordValidate(password, appId));
     }
 
+    @RequestMapping("/getVerifyCode")
+    @ApiIgnore
+    public BaseRet<VerificationCodeRet> getVerificationCode() throws IOException {
+        return sysUserService.getVerificationCode();
+    }
+
+    @PostMapping("validVerifyCode")
+    @ApiIgnore
+    public BaseRet<?> validVerificationCode(String uuid, String code, String encryptCode) {
+        return sysUserService.validVerificationCode(uuid, code, encryptCode);
+    }
 }
