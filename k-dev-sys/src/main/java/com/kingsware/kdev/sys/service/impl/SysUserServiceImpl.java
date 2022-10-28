@@ -385,14 +385,17 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             throw BusinessException.serviceThrow(message != null ? message : "验证未通过！");
         }
 
-        String encryptCode = (String) argv.get("encryptCode");
-        String verifyUuid = (String) argv.get("verifyUuid");
-        String code = (String) argv.get("code");
-        boolean codeValid = checkVerifyCode(verifyUuid, code, encryptCode);
-        // 默认校验验证码的是为真
-        if (KClientContext.getContext().isValidateCodeFlag() && !codeValid) {
-            throw BusinessException.serviceThrow("验证码有误！");
+        if (KClientContext.getContext().isValidateCodeFlag()) {
+            String encryptCode = (String) argv.get("encryptCode");
+            String verifyUuid = (String) argv.get("verifyUuid");
+            String code = (String) argv.get("code");
+            boolean codeValid = checkVerifyCode(verifyUuid, code, encryptCode);
+            // 默认校验验证码的是为真
+            if (!codeValid) {
+                throw BusinessException.serviceThrow("验证码有误！");
+            }
         }
+
 
         // 非空检查
         String username = (String) argv.get("username");
