@@ -389,7 +389,8 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         String verifyUuid = (String) argv.get("verifyUuid");
         String code = (String) argv.get("code");
         boolean codeValid = checkVerifyCode(verifyUuid, code, encryptCode);
-        if (!codeValid) {
+        // 默认校验验证码的是为真
+        if (KClientContext.getContext().isValidateCodeFlag() && !codeValid) {
             throw BusinessException.serviceThrow("验证码有误！");
         }
 
