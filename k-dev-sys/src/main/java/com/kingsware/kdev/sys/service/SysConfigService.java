@@ -7,6 +7,7 @@ import com.kingsware.kdev.sys.argv.SysConfigArgv;
 import com.kingsware.kdev.sys.argv.SysConfigQueryArgv;
 import com.kingsware.kdev.sys.ret.SysConfigRet;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 
@@ -51,5 +52,5 @@ public interface SysConfigService extends BaseService {
      */
     void delete(MultiIdArgv argv);
 
-    Map<String, Object> getSysConfig();
+    Map<String, Object> getSysConfig(HttpServletRequest request);
 }

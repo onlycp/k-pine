@@ -1,11 +1,13 @@
 package com.kingsware.kdev.sys.web;
 
 import com.kingsware.kdev.core.auth.ApiIgnore;
+import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
+import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.sys.argv.SysConfigArgv;
 import com.kingsware.kdev.sys.argv.SysConfigQueryArgv;
 import com.kingsware.kdev.sys.ret.SysConfigRet;
@@ -15,6 +17,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -95,8 +98,8 @@ public class SysConfigController extends BaseController {
     @ApiOperation(value = "获取当前系统配置 " ,notes = "获取当前系统配置")
     @GetMapping("/get-sys-config")
     @ApiIgnore
-    public BaseRet<Map<String, Object>> getSysConfig() {
-        return BaseRet.success(sysConfigService.getSysConfig());
+    public BaseRet<Map<String, Object>> getSysConfig(HttpServletRequest request) {
+        return BaseRet.success(sysConfigService.getSysConfig(request));
     }
 
 }

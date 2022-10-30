@@ -1,8 +1,12 @@
 package com.kingsware.kdev.sys.service.impl;
 
+import com.kingsware.kdev.core.auth.AppAuthProperties;
+import com.kingsware.kdev.core.auth.BaseUserInfo;
+import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.orm.DB;
@@ -10,14 +14,18 @@ import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
+import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysConfigArgv;
 import com.kingsware.kdev.sys.argv.SysConfigQueryArgv;
 import com.kingsware.kdev.sys.model.SysConfig;
+import com.kingsware.kdev.sys.model.SysUser;
 import com.kingsware.kdev.sys.ret.SysConfigRet;
 import com.kingsware.kdev.sys.service.SysConfigService;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +42,8 @@ import java.util.Map;
 @Service
 public class SysConfigServiceImpl extends BaseServiceImpl implements SysConfigService {
 
+    @Resource
+    private AppAuthProperties appAuthProperties;
 
     @Override
     public SysConfigRet get(String id) {
@@ -107,7 +117,11 @@ public class SysConfigServiceImpl extends BaseServiceImpl implements SysConfigSe
     }
 
     @Override
-    public Map<String, Object> getSysConfig() {
+    public Map<String, Object> getSysConfig(HttpServletRequest request) {
+        String ip = ServletUtil.getClientIp(request);
+        String token = TokenUtil.getTokenString(request);
+        BaseUserInfo userInfo = TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), ip, appAuthProperties.getTokenExpireMinutes(), appAuthProperties.getMockSessionExpireMinutes());
+
         List<Object> codeList = new ArrayList<>();
         codeList.add("application.name");
         codeList.add("application.logo");
@@ -115,6 +129,9 @@ public class SysConfigServiceImpl extends BaseServiceImpl implements SysConfigSe
         // 拼装sql
         SqlWrapper wrapper = new SqlWrapper("select * from sys_config where 1=1 ");
 //        wrapper.in("code", codeList);
+        if (userInfo.getId() == null) {
+            wrapper.addCondition("code", Op.LIKE, "application.%");
+        }
         if (KFlowContext.isDevMode()) {
             wrapper.appendSql(" and app_id is null");
         }
