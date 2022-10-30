@@ -223,7 +223,7 @@ public class SysUserController extends BaseController {
         return BaseRet.success(sysUserService.passwordValidate(password, appId));
     }
 
-    @RequestMapping("/getVerifyCode")
+    @GetMapping("/getVerifyCode")
     @ApiIgnore
     public BaseRet<VerificationCodeRet> getVerificationCode() throws IOException {
         return sysUserService.getVerificationCode();

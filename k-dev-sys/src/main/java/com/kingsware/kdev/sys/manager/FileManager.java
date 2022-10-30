@@ -82,6 +82,17 @@ public class FileManager {
             // 文件名
             sysFile.setFileName(realName);
             String fileExt =  FileUtils.getFileExt(realName);
+
+            if (!FileUtils.checkFileNaming(fileName)) {
+                throw BusinessException.serviceThrow("文件名命名不符合规范，请重新命名后再上传!");
+            }
+            if (!FileUtils.checkFileFrom(fileFrom)) {
+                throw BusinessException.serviceThrow("文件目录命名不符合规范!");
+            }
+            if (!FileUtils.checkFileExt(fileExt)) {
+                throw BusinessException.serviceThrow(fileExt + "文件后缀名不在上传文件白名单中!");
+            }
+
             if (StringUtils.isNotEmpty(fileExt)) {
                 fileExt = "." + fileExt;
             }

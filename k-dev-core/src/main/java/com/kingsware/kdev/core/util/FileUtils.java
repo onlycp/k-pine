@@ -1,13 +1,21 @@
 package com.kingsware.kdev.core.util;
 
+import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.encrypt.EncryptProperties;
+import com.kingsware.kdev.core.properties.FileProperties;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
@@ -18,11 +26,27 @@ import java.util.stream.Stream;
  * @date 2021/12/31 4:30 下午
  */
 @Slf4j
+@Component
 public class FileUtils {
     /** hex码 **/
     private static final char[] hexCode = "0123456789ABCDEF".toCharArray();
 
-    private FileUtils(){}
+    private FileUtils(){
+    }
+
+//    @Value("${}")
+//    public void setFileExtWriteList(String writeList) {
+//
+//    }
+//    static {
+//        FileProperties fileProperties = SpringContext.getBean(FileProperties.class);
+//        List writeList = new ArrayList<String>();
+//        if (StringUtils.isNotEmpty(fileProperties.getWriteList())) {
+//            String[] arr = fileProperties.getWriteList().trim().split(",");
+//            writeList = Arrays.asList(arr);
+//        }
+//        FileUtils.fileExtWriteList = writeList;
+//    }
 
     /**
      * 获取文件扩展名
@@ -170,4 +194,35 @@ public class FileUtils {
             log.error("文件写入失败，文件名:{}", file.getName());
         }
     }
+
+    /**
+     *
+     * @param fileName
+     * @return
+     */
+    public static boolean checkFileNaming(String fileName) {
+        Pattern pattern = Pattern.compile(".*[/\\\\:*?|]|(\\.\\.).*");
+        return !pattern.matcher(fileName).matches();
+    }
+
+    public static boolean checkFileExt(String extName) {
+        FileProperties fileProperties = SpringContext.getBean(FileProperties.class);
+        List writeList = new ArrayList<String>();
+        if (StringUtils.isNotEmpty(fileProperties.getWriteList())) {
+            String[] arr = fileProperties.getWriteList().trim().split(",");
+            writeList = Arrays.asList(arr);
+        }
+        return writeList.contains(extName);
+    }
+
+    public static boolean checkFileFrom(String fileFrom) {
+        boolean flag = true;
+        flag = !fileFrom.startsWith("/");
+        if (!flag) {
+            return false;
+        }
+        Pattern pattern = Pattern.compile(".*[:*?|]|(\\.\\.).*");
+        return !pattern.matcher(fileFrom).matches();
+    }
+
 }

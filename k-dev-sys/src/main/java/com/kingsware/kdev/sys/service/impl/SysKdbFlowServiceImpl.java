@@ -31,6 +31,7 @@ import com.kingsware.kdev.sys.service.SysLogicHistoryService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.sql.Array;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -424,6 +425,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         // 查询所有数据
         KdbApi api = (KdbApi) (DB.getDefault());
         List<FlowInfo> list = api.query(info);
+        List<Object> params = new ArrayList<>();
         // 从数据库里查询所有数据
         String sql = "select t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name, sa.api_url, sa.api_method " +
                 " from sys_logic_flow t0 " +
@@ -431,13 +433,15 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
                 " left join dev_application t1 on t1.id=t0.application_id" +
                 " where 1=1";
         if (StringUtils.isNotEmpty(argv.getApplicationId())) {
-            sql += " and (t0.application_id = '" + argv.getApplicationId() + "' or t0.application_id is null)";
+            sql += " and (t0.application_id = ? or t0.application_id is null)";
+            params.add(argv.getApplicationId());
         }
         if (StringUtils.isNotEmpty(argv.getApiUrl())) {
-            sql += " and sa.api_url like '%" + argv.getApiUrl() + "%' ";
+            sql += " and sa.api_url like concat('%', ?, '%') ";
             sql += " and sa.api_url is not null ";
+            params.add(argv.getApiUrl());
         }
-        List<SysKdbFlowRet> logicFlows = DB.findList(SysKdbFlowRet.class, sql);
+        List<SysKdbFlowRet> logicFlows = DB.findList(SysKdbFlowRet.class, sql, params.toArray());
         Map<String, SysKdbFlowRet> dbMap = new HashMap<>();
         logicFlows.forEach(it -> dbMap.put(it.getId(), it));
         // 转为ret类

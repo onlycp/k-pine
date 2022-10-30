@@ -822,7 +822,9 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 outputStream.flush();
                 outputStream.close();//关闭流
             }
+            log.info("base64String: ", base64String);
             ret.setEncryptCode(AESUtil.encrypt(randomText, aesSecret));
+            log.info("getEncryptCode: ", ret.getEncryptCode());
             ret.setImageBase64String("data:image/jpeg;base64," + base64String);
             ret.setUuid(UUID.randomUUID().toString());
             return BaseRet.success(ret);
