@@ -385,7 +385,8 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             throw BusinessException.serviceThrow(message != null ? message : "验证未通过！");
         }
 
-        if (KClientContext.getContext().isValidateCodeFlag()) {
+        if (KClientContext.getContext().isValidateCodeFlag()
+                && appAuthProperties.getOpenValidateCode() != null && appAuthProperties.getOpenValidateCode()) {
             String encryptCode = (String) argv.get("encryptCode");
             String verifyUuid = (String) argv.get("verifyUuid");
             String code = (String) argv.get("code");

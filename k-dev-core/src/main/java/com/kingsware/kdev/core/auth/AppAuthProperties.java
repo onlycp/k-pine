@@ -29,5 +29,7 @@ public class AppAuthProperties {
     private Boolean loginSessionOne = false;
     /** ping超时时间 **/
     private int pingExpireSeconds = 30;
+    /** 开启验证码 */
+    private Boolean openValidateCode;
 
 }
