@@ -7,6 +7,7 @@ import com.kingsware.kdev.core.orm.kdb.FlowInfo;
 import com.kingsware.kdev.core.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -22,6 +23,7 @@ import java.util.*;
  * @date 2021/12/21 4:48 下午
  */
 @Component
+@DependsOn("springContext")
 public class DBInitialize {
     /** 日志打印 **/
     private static final Logger logger  = LoggerFactory.getLogger(DBInitialize.class);
