@@ -280,11 +280,13 @@ public class LicenseManager {
         Date inValidDate = DateUtils.toDate(lic.getInvalidDate(), "yyyy-MM-dd");
         //  获取端口
         String port = SpringContext.getProperties("server.port", "0");
-//        log.info("license: {}", lic);
+        log.info("license port: {}, server port:{}", lic.getAppPort(), port);
         if (!validateMac(lic.getMac()) ) {
+            log.info("mac不一致");
             return -1;
         }
         else if (StringUtils.isNotEmpty(lic.getAppPort()) && !lic.getAppPort().equals(port))  {
+            log.info("端口不一致");
             return  -1;
         }
         else if (now.before(validDate)) {
