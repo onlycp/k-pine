@@ -80,6 +80,17 @@ public class SpringContext implements ApplicationContextAware {
 
     }
 
+    /**
+     * 获取配置项
+     * @param key           key
+     * @param defaultValue  默认值
+     * @return              返回配置项，如果不存在，返回默认值
+     */
+    public static String getBootProperties(String key, String defaultValue) {
+        return applicationContext.getEnvironment().getProperty(key, defaultValue);
+
+    }
+
 
     /**
      * 获取所有的配置项

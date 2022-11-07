@@ -279,7 +279,7 @@ public class LicenseManager {
         // 失效日期
         Date inValidDate = DateUtils.toDate(lic.getInvalidDate(), "yyyy-MM-dd");
         //  获取端口
-        String port = SpringContext.getProperties("server.port", "0");
+        String port = SpringContext.getBootProperties("server.port", "0");
         log.info("license port: {}, server port:{}", lic.getAppPort(), port);
         if (!validateMac(lic.getMac()) ) {
             log.info("mac不一致");
