@@ -158,6 +158,7 @@ public class LicenseManager {
                     }
                     log.info("license: {}, server:{}", macAddress, sb);
                     if (macAddress.equalsIgnoreCase(sb.toString().trim())) {
+                        log.info("license: {}, server:{} 校验通过", macAddress, sb);
                         return true;
                     }
                 }
