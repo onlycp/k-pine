@@ -156,6 +156,7 @@ public class LicenseManager {
                     for (int i = 0; i < mac.length; i++) {
                         sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
                     }
+                    log.info("license: {}, server:{}", macAddress, sb);
                     if (macAddress.equalsIgnoreCase(sb.toString().trim())) {
                         return true;
                     }
@@ -303,6 +304,7 @@ public class LicenseManager {
      * @return 获取状态
      */
     public int getStatus() {
+//        return 2;
         getLicense();
         return this.getStatus(this.license);
     }
