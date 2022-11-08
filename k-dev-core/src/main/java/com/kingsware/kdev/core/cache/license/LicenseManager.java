@@ -156,7 +156,9 @@ public class LicenseManager {
                     for (int i = 0; i < mac.length; i++) {
                         sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
                     }
+                    log.info("license: {}, server:{}", macAddress, sb);
                     if (macAddress.equalsIgnoreCase(sb.toString().trim())) {
+                        log.info("license: {}, server:{} 校验通过", macAddress, sb);
                         return true;
                     }
                 }
@@ -277,12 +279,14 @@ public class LicenseManager {
         // 失效日期
         Date inValidDate = DateUtils.toDate(lic.getInvalidDate(), "yyyy-MM-dd");
         //  获取端口
-        String port = SpringContext.getProperties("server.port", "0");
-//        log.info("license: {}", lic);
+        String port = SpringContext.getBootProperties("server.port", "0");
+        log.info("license port: {}, server port:{}", lic.getAppPort(), port);
         if (!validateMac(lic.getMac()) ) {
+            log.info("mac不一致");
             return -1;
         }
         else if (StringUtils.isNotEmpty(lic.getAppPort()) && !lic.getAppPort().equals(port))  {
+            log.info("端口不一致");
             return  -1;
         }
         else if (now.before(validDate)) {
@@ -303,6 +307,7 @@ public class LicenseManager {
      * @return 获取状态
      */
     public int getStatus() {
+//        return 2;
         getLicense();
         return this.getStatus(this.license);
     }

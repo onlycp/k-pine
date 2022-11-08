@@ -52,7 +52,7 @@ public class KmqConsumerThread implements Runnable {
                         }
                         catch (Exception e) {
                             e.printStackTrace();
-                            logger.warn("消费者: {} 消费失败，消息内容:{}, 异常信息:{}", consumer.topic(), payloads, e.getMessage());
+//                            logger.warn("消费者: {} 消费失败，消息内容:{}, 异常信息:{}", consumer.topic(), payloads, e.getMessage());
 //                        queue.add(payload);
                         }
                     }

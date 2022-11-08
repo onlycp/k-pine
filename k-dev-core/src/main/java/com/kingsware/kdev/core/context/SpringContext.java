@@ -6,6 +6,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.PropertySource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.StandardServletEnvironment;
@@ -20,6 +21,7 @@ import java.util.*;
  * @date 2021/12/21 3:48 下午
  */
 @Component
+@Order(-1)
 public class SpringContext implements ApplicationContextAware {
     /** 上下文 **/
     private static ApplicationContext applicationContext;
@@ -75,6 +77,17 @@ public class SpringContext implements ApplicationContextAware {
         else {
             return applicationContext.getEnvironment().getProperty(key, defaultValue);
         }
+
+    }
+
+    /**
+     * 获取配置项
+     * @param key           key
+     * @param defaultValue  默认值
+     * @return              返回配置项，如果不存在，返回默认值
+     */
+    public static String getBootProperties(String key, String defaultValue) {
+        return applicationContext.getEnvironment().getProperty(key, defaultValue);
 
     }
 
