@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.manager;
 
+import com.kingsware.kdev.core.constants.PropertiesConstant;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.orm.DB;
@@ -75,6 +76,7 @@ public class FileManager {
     @SuppressWarnings("all")
     public SysFile register(InputStream inputStream, String fileName, int fileSize,  String fileFrom, Integer saveType, String basePath) {
         try {
+            boolean isCloseReplaceMode = PropertiesConstant.TRUE.equals(SpringContext.getProperties("file.close-replace-mode", PropertiesConstant.FALSE));
             fileFrom = fileFrom.replaceAll("/", Matcher.quoteReplacement(File.separator));
             SysFile sysFile = new SysFile();
             // 真实文件名
@@ -122,12 +124,16 @@ public class FileManager {
                 File path = new File(filePath);
                 boolean status = path.mkdirs();
                 // 拷贝文件
-                File saveFile = new File(path.getAbsolutePath() + "/" + realName);
+                String saveFileName = fileName;
+                if (isCloseReplaceMode) {
+                    saveFileName = realName;
+                }
+                File saveFile = new File(path.getAbsolutePath() + "/" + saveFileName);
                 FileCopyUtils.copy(inputStream, Files.newOutputStream(saveFile.toPath()));
                 sysFile.setFileMd5(DigestUtils.md5Hex(Files.newInputStream(saveFile.toPath())));
 
                 // 文件表只存储相对路径
-                sysFile.setFilePath(relativePath + realName);
+                sysFile.setFilePath(relativePath + saveFileName);
             }
             // faas 存储
             else if (saveType == 2) {
@@ -135,7 +141,11 @@ public class FileManager {
                 String relativePath = "/"+ fileFrom + "/";
                 // 磁盘存储路径
                 String filePath = basePath +  relativePath;
-                KdbRet<String> kdbRet =  DB.kdbApi().uploadFile(inputStream, fileName, filePath);
+                String saveFileName = fileName;
+                if (isCloseReplaceMode) {
+                    saveFileName = realName;
+                }
+                KdbRet<String> kdbRet =  DB.kdbApi().uploadFile(inputStream, saveFileName, filePath);
                 if (!"成功".equals(kdbRet.getMessage())) {
                     throw BusinessException.serviceThrow("文件存储失败,错误信息:" + kdbRet.getMessage());
                 }
