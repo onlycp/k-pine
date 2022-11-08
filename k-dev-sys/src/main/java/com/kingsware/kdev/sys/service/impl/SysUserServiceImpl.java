@@ -11,6 +11,7 @@ import com.kingsware.kdev.core.cache.config.ConfigManager;
 import com.kingsware.kdev.core.cache.config.SysConfigInfo;
 import com.kingsware.kdev.core.cache.permssion.PermissionManager;
 import com.kingsware.kdev.core.cache.session.SessionManager;
+import com.kingsware.kdev.core.constants.PropertiesConstant;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.encrypt.EncryptProperties;
@@ -385,8 +386,8 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             throw BusinessException.serviceThrow(message != null ? message : "验证未通过！");
         }
 
-        String openValidationCode = SpringContext.getProperties("application.openValidateCode", "false");
-        if (KClientContext.getContext().isValidateCodeFlag() && "true".equals(openValidationCode)) {
+        String openValidationCode = SpringContext.getProperties("application.openValidateCode", PropertiesConstant.FALSE);
+        if (KClientContext.getContext().isValidateCodeFlag() && PropertiesConstant.TRUE.equals(openValidationCode)) {
             String encryptCode = (String) argv.get("encryptCode");
             String verifyUuid = (String) argv.get("verifyUuid");
             String code = (String) argv.get("code");
