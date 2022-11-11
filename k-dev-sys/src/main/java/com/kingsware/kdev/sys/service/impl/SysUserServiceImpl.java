@@ -261,6 +261,23 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         if (argv.getStatus() != null) {
             wrapper.addCondition("u.status", Op.EQ, argv.getStatus());
         }
+        // 支持前端根据部门id过滤
+        if (StringUtils.isNotEmpty(argv.getSysUnitIds())) {
+            // 切割
+            String[] split = argv.getSysUnitIds().split(",");
+            // 只想查询出在此部门列表中的用户（部门及所有子部门）
+            Set<Object> unitIds = getAllUnitIdByUnitId(split);
+            // 使用null作为是否开启过滤的判断条件
+            if (unitIds != null) {
+                // 想要的用户id列表
+                SqlWrapper unitWrapper = new SqlWrapper("select suu.sys_user_id from sys_user_unit suu where 1=1 ");
+                unitWrapper.in("suu.sys_unit_id", unitIds);
+                List<SysUserUnit> unitList = DB.findList(SysUserUnit.class, unitWrapper.getSql(), unitWrapper.getParams().toArray(new Object[0]));
+                List<Object> list = unitList.stream().map(SysUserUnit::getSysUserId).collect(Collectors.toList());
+                // 拼接最终sql
+                wrapper.in("u.id",list);
+            }
+        }
 //        if (argv.getRoleId() != null) {
 //            wrapper.addCondition("sur.sys_role_id", Op.EQ, argv.getRoleId());
 //        }
@@ -308,33 +325,6 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 userRet.setSysUnitIds(StringUtils.joinToString(myUnitIds, ","));
                 userRet.setSysUnitNames(StringUtils.joinToString(myUnitNames, ","));
                 userRet.setSysUnitPaths(StringUtils.joinToString(myUnitPaths, ","));
-            }
-        }
-        // 用于支持前端可以根据部门id进行过滤
-        // 先获取用户传递过来的部门ids，查询所有子部门id，形成列表
-        if (StringUtils.isNotEmpty(argv.getSysUnitIds())) {
-            // 切割
-            String[] split = argv.getSysUnitIds().split(",");
-            // 只想查询出在此部门列表中的用户
-            Set<Object> unitIds = getAllUnitIdByUnitId(split);
-            // 使用null作为是否开启过滤的判断条件
-            if (unitIds != null) {
-                // 根据部门id列表筛选需要的用户
-                List<SysUserRet> finalList = pageDataRet.getList().stream().filter(item -> {
-                    List<String> asList = Arrays.asList(item.getSysUnitIds().split(","));
-                    return asList.stream().anyMatch(unitIds::contains);
-                }).collect(Collectors.toList());
-                // 重新计算pageDataRet
-                PageDataRet<SysUserRet> finalPageDataRet = new PageDataRet<>();
-                finalPageDataRet.setList(finalList);
-                finalPageDataRet.setTotal(finalList.size());
-                finalPageDataRet.setPage(pageDataRet.getPage());
-                finalPageDataRet.setPageSize(pageDataRet.getPageSize());
-                // 计算总页数
-                double tempTotalPage = finalPageDataRet.getTotal() / (double) finalPageDataRet.getPageSize();
-                int totalPage = (int) Math.ceil(tempTotalPage);
-                finalPageDataRet.setPageCount(totalPage);
-                return finalPageDataRet;
             }
         }
         return pageDataRet;
