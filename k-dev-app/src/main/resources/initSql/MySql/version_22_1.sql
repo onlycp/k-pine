@@ -1,12 +1,4 @@
-CREATE TABLE sys_user_unit (
-     id varchar(36) NOT NULL COMMENT '主键',
-     sys_user_id varchar(36) NOT NULL COMMENT '用户ID',
-     sys_unit_id varchar(36) NOT NULL COMMENT '部门ID',
-     who_created varchar(36) NOT NULL COMMENT '创建人员',
-     when_created varchar(20) NOT NULL COMMENT '创建时间',
-     app_id varchar(36) DEFAULT NULL COMMENT '关联应用',
-     PRIMARY KEY (id)
-);
+
 
 CREATE TABLE sys_search_config (
     id varchar(36)  NOT NULL,
