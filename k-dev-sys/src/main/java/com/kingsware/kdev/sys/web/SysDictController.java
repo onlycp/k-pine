@@ -38,6 +38,7 @@ public class SysDictController extends BaseController {
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
+    @ApiCode("sysinfo:dict:query")
     public BaseRet<PageDataRet<SysDictRet>> page(SysDictQueryArgv argv) {
         return BaseRet.success(sysDictService.query(argv));
     }
@@ -48,6 +49,7 @@ public class SysDictController extends BaseController {
      */
     @ApiOperation(value = "详情 " ,notes = "详情")
     @GetMapping("/{id}")
+    @ApiCode("sysinfo:dict:query")
     public BaseRet<SysDictRet> get(@PathVariable String id) {
         return BaseRet.success(sysDictService.get(id));
     }

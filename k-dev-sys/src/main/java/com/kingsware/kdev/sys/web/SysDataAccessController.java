@@ -37,6 +37,7 @@ public class SysDataAccessController extends BaseController {
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
+    @ApiCode("sysinfo:dataaccess:query")
     public BaseRet<PageDataRet<SysDataAccessRet>> page(SysDataAccessQueryArgv argv) {
         return BaseRet.success(sysDataAccessService.query(argv));
     }
@@ -47,6 +48,7 @@ public class SysDataAccessController extends BaseController {
      */
     @ApiOperation(value = "详情 " ,notes = "详情")
     @GetMapping("/{id}")
+    @ApiCode("sysinfo:dataaccess:query")
     public BaseRet<SysDataAccessRet> get(@PathVariable String id) {
         return BaseRet.success(sysDataAccessService.get(id));
     }

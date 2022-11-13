@@ -38,6 +38,7 @@ public class SysTaskController extends BaseController {
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
+    @ApiCode("sysinfo:task:query")
     public BaseRet<PageDataRet<SysTaskRet>> page(SysTaskQueryArgv argv) {
         return BaseRet.success(sysTaskService.query(argv));
     }
@@ -48,6 +49,7 @@ public class SysTaskController extends BaseController {
      */
     @ApiOperation(value = "详情 " ,notes = "详情")
     @GetMapping("/{id}")
+    @ApiCode("sysinfo:task:query")
     public BaseRet<SysTaskRet> get(@PathVariable String id) {
         return BaseRet.success(sysTaskService.get(id));
     }

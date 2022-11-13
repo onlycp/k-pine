@@ -40,6 +40,7 @@ public class SysNoticeController {
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
+    @ApiCode("sysinfo:notice:query")
     public BaseRet<PageDataRet<SysNoticeRet>> page(SysNoticeQueryArgv argv) {
         return BaseRet.success(sysNoticeService.query(argv));
     }
@@ -50,6 +51,7 @@ public class SysNoticeController {
      */
     @ApiOperation(value = "详情 " ,notes = "详情")
     @GetMapping("/{id}")
+    @ApiCode("sysinfo:notice:query")
     public BaseRet<SysNoticeRet> get(@PathVariable String id) {
         return BaseRet.success(sysNoticeService.get(id));
     }

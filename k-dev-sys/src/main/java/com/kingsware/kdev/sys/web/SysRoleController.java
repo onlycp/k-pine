@@ -39,6 +39,7 @@ public class SysRoleController extends BaseController {
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
+    @ApiCode("sysinfo:role:query")
     public BaseRet<PageDataRet<SysRoleRet>> page(SysRoleQueryArgv argv) {
         return BaseRet.success(SysRoleService.query(argv));
     }
@@ -49,6 +50,7 @@ public class SysRoleController extends BaseController {
      */
     @ApiOperation(value = "详情 " ,notes = "详情")
     @GetMapping("/{id}")
+    @ApiCode("sysinfo:role:query")
     public BaseRet<SysRoleRet> get(@PathVariable String id) {
         return BaseRet.success(SysRoleService.get(id));
     }

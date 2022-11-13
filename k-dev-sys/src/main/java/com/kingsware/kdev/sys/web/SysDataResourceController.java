@@ -38,6 +38,7 @@ public class SysDataResourceController extends BaseController {
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
+    @ApiCode("sysinfo:dataresources:query")
     public BaseRet<PageDataRet<SysDataResourceRet>> page(SysDataResourceQueryArgv argv) {
         return BaseRet.success(sysDataResourceService.query(argv));
     }
@@ -48,6 +49,7 @@ public class SysDataResourceController extends BaseController {
      */
     @ApiOperation(value = "详情 " ,notes = "详情")
     @GetMapping("/{id}")
+    @ApiCode("sysinfo:dataresources:query")
     public BaseRet<SysDataResourceRet> get(@PathVariable String id) {
         return BaseRet.success(sysDataResourceService.get(id));
     }
