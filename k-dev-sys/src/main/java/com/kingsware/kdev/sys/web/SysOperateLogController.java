@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.ApiCode;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.PageDataRet;
@@ -53,6 +54,7 @@ public class SysOperateLogController extends BaseController {
      */
     @ApiOperation(value = "导出 " ,notes = "导出")
     @GetMapping("/export")
+    @ApiCode("sysinfo:operationlog:export")
     public void download(SysOperateLogQueryArgv argv) {
         sysOperateLogService.export(argv);
     }

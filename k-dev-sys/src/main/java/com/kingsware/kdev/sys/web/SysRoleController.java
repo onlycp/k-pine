@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.ApiCode;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -58,6 +59,7 @@ public class SysRoleController extends BaseController {
      */
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
+    @ApiCode("sysinfo:role:add")
     public BaseRet<?> add(@RequestBody SysRoleArgv argv) {
         SysRoleService.add(argv);
         return BaseRet.success();
@@ -70,6 +72,7 @@ public class SysRoleController extends BaseController {
      */
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
+    @ApiCode("sysinfo:role:edit")
     public BaseRet<?> edit(@RequestBody SysRoleArgv argv) {
         SysRoleService.edit(argv);
         return BaseRet.success();
@@ -81,6 +84,7 @@ public class SysRoleController extends BaseController {
      */
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
+    @ApiCode("sysinfo:role:remove")
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         SysRoleService.delete(argv);
         return BaseRet.success();
@@ -92,6 +96,7 @@ public class SysRoleController extends BaseController {
      */
     @ApiOperation(value = "修改角色权限 " ,notes = "修改角色权限")
     @PostMapping("update-permission")
+    @ApiCode("sysinfo:role:permission")
     public BaseRet<?> updatePermission(@RequestBody SysRoleMenuArgv argv) {
         SysRoleService.updatePermission(argv);
         return BaseRet.success();

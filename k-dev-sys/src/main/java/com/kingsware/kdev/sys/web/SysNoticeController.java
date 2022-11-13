@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.ApiCode;
 import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -59,6 +60,7 @@ public class SysNoticeController {
      */
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
+    @ApiCode("sysinfo:notice:add")
     public BaseRet<?> add(@RequestBody SysNoticeArgv argv) {
         sysNoticeService.add(argv);
         return BaseRet.success();
@@ -71,6 +73,7 @@ public class SysNoticeController {
      */
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
+    @ApiCode("sysinfo:notice:edit")
     public BaseRet<?> edit(@RequestBody SysNoticeArgv argv) {
         sysNoticeService.edit(argv);
         return BaseRet.success();
@@ -82,6 +85,7 @@ public class SysNoticeController {
      */
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
+    @ApiCode("sysinfo:notice:remove")
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         sysNoticeService.delete(argv);
         return BaseRet.success();
@@ -93,6 +97,7 @@ public class SysNoticeController {
      */
     @ApiOperation(value = "发送消息 " ,notes = "发送消息")
     @PostMapping(value = "/sendNotice")
+    @ApiCode("sysinfo:notice:send")
     public BaseRet<?> sendNotice(HttpServletRequest request, @RequestBody SysNoticeRelationArgv argv) {
         String ip = ServletUtil.getClientIp(request);
         String token = TokenUtil.getTokenString(request);

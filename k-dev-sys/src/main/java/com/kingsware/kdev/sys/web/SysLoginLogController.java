@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.ApiCode;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.PageDataRet;
@@ -57,6 +58,7 @@ public class SysLoginLogController extends BaseController {
      */
     @ApiOperation(value = "导出 " ,notes = "导出")
     @GetMapping("/export")
+    @ApiCode("sysinfo:loginlog:export")
     public void download(SysLoginLogQueryArgv argv) {
         sysLoginLogService.export(argv);
     }

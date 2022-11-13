@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.ApiCode;
 import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
@@ -59,6 +60,7 @@ public class SysDictItemController extends BaseController {
      */
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
+    @ApiCode("sysinfo:dictitem:add")
     public BaseRet<?> add(@RequestBody SysDictItemArgv argv) {
         sysDictItemService.add(argv);
         return BaseRet.success();
@@ -71,6 +73,7 @@ public class SysDictItemController extends BaseController {
      */
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
+    @ApiCode("sysinfo:dictitem:edit")
     public BaseRet<?> edit(@RequestBody SysDictItemArgv argv) {
         sysDictItemService.edit(argv);
         return BaseRet.success();
@@ -82,6 +85,7 @@ public class SysDictItemController extends BaseController {
      */
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
+    @ApiCode("sysinfo:dictitem:remove")
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         sysDictItemService.delete(argv);
         return BaseRet.success();

@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.ApiCode;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -57,6 +58,7 @@ public class SysDataResourceController extends BaseController {
      */
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
+    @ApiCode("sysinfo:dataresources:add")
     public BaseRet<?> add(@RequestBody SysDataResourceArgv argv) {
         sysDataResourceService.add(argv);
         return BaseRet.success();
@@ -69,6 +71,7 @@ public class SysDataResourceController extends BaseController {
      */
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
+    @ApiCode("sysinfo:dataresources:edit")
     public BaseRet<?> edit(@RequestBody SysDataResourceArgv argv) {
         sysDataResourceService.edit(argv);
         return BaseRet.success();
@@ -80,6 +83,7 @@ public class SysDataResourceController extends BaseController {
      */
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
+    @ApiCode("sysinfo:dataresources:edit")
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         sysDataResourceService.delete(argv);
         return BaseRet.success();

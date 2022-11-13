@@ -88,6 +88,7 @@ public class SysUserController extends BaseController {
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
+    @ApiCode("user_query")
     public BaseRet<PageDataRet<SysUserRet>> page(SysUserQueryArgv argv) {
         return BaseRet.success(sysUserService.query(argv));
     }
@@ -98,6 +99,7 @@ public class SysUserController extends BaseController {
      */
     @ApiOperation(value = "详情 " ,notes = "详情")
     @GetMapping("/{id}")
+    @ApiCode("user_query")
     public BaseRet<SysUserRet> get(@PathVariable String id) {
         return BaseRet.success(sysUserService.get(id));
     }
@@ -108,6 +110,7 @@ public class SysUserController extends BaseController {
      */
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
+    @ApiCode("sysinfo:user:add")
     public BaseRet<?> add(@RequestBody SysUserArgv argv) {
         sysUserService.add(argv);
         return BaseRet.success();
@@ -120,6 +123,7 @@ public class SysUserController extends BaseController {
      */
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
+    @ApiCode("sysinfo:user:edit")
     public BaseRet<?> edit(@RequestBody SysUserArgv argv) {
         sysUserService.edit(argv);
         return BaseRet.success();
@@ -131,6 +135,7 @@ public class SysUserController extends BaseController {
      */
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
+    @ApiCode("sysinfo:user:remove")
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         sysUserService.delete(argv);
         return BaseRet.success();
