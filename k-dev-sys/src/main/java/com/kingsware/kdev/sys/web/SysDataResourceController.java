@@ -85,7 +85,7 @@ public class SysDataResourceController extends BaseController {
      */
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
-    @ApiCode("sysinfo:dataresources:edit")
+    @ApiCode("sysinfo:dataresources:remove")
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         sysDataResourceService.delete(argv);
         return BaseRet.success();
