@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.ApiCode;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -37,6 +38,7 @@ public class SysDataResourceController extends BaseController {
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
+    @ApiCode("sysinfo:dataresources:query")
     public BaseRet<PageDataRet<SysDataResourceRet>> page(SysDataResourceQueryArgv argv) {
         return BaseRet.success(sysDataResourceService.query(argv));
     }
@@ -47,6 +49,7 @@ public class SysDataResourceController extends BaseController {
      */
     @ApiOperation(value = "详情 " ,notes = "详情")
     @GetMapping("/{id}")
+    @ApiCode("sysinfo:dataresources:query")
     public BaseRet<SysDataResourceRet> get(@PathVariable String id) {
         return BaseRet.success(sysDataResourceService.get(id));
     }
@@ -57,6 +60,7 @@ public class SysDataResourceController extends BaseController {
      */
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
+    @ApiCode("sysinfo:dataresources:add")
     public BaseRet<?> add(@RequestBody SysDataResourceArgv argv) {
         sysDataResourceService.add(argv);
         return BaseRet.success();
@@ -69,6 +73,7 @@ public class SysDataResourceController extends BaseController {
      */
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
+    @ApiCode("sysinfo:dataresources:edit")
     public BaseRet<?> edit(@RequestBody SysDataResourceArgv argv) {
         sysDataResourceService.edit(argv);
         return BaseRet.success();
@@ -80,6 +85,7 @@ public class SysDataResourceController extends BaseController {
      */
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
+    @ApiCode("sysinfo:dataresources:remove")
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         sysDataResourceService.delete(argv);
         return BaseRet.success();

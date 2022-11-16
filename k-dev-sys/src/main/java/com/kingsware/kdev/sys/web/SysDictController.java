@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.ApiCode;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -37,6 +38,7 @@ public class SysDictController extends BaseController {
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
+    @ApiCode("sysinfo:dict:query")
     public BaseRet<PageDataRet<SysDictRet>> page(SysDictQueryArgv argv) {
         return BaseRet.success(sysDictService.query(argv));
     }
@@ -47,6 +49,7 @@ public class SysDictController extends BaseController {
      */
     @ApiOperation(value = "详情 " ,notes = "详情")
     @GetMapping("/{id}")
+    @ApiCode("sysinfo:dict:query")
     public BaseRet<SysDictRet> get(@PathVariable String id) {
         return BaseRet.success(sysDictService.get(id));
     }
@@ -57,6 +60,7 @@ public class SysDictController extends BaseController {
      */
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
+    @ApiCode("sysinfo:dict:add")
     public BaseRet<?> add(@RequestBody SysDictArgv argv) {
         sysDictService.add(argv);
         return BaseRet.success();
@@ -69,6 +73,7 @@ public class SysDictController extends BaseController {
      */
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
+    @ApiCode("sysinfo:dict:edit")
     public BaseRet<?> edit(@RequestBody SysDictArgv argv) {
         sysDictService.edit(argv);
         return BaseRet.success();
@@ -80,6 +85,7 @@ public class SysDictController extends BaseController {
      */
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
+    @ApiCode("sysinfo:dict:remove")
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         sysDictService.delete(argv);
         return BaseRet.success();

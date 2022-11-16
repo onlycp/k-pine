@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.ApiCode;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -37,6 +38,7 @@ public class SysTaskController extends BaseController {
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
+    @ApiCode("sysinfo:task:query")
     public BaseRet<PageDataRet<SysTaskRet>> page(SysTaskQueryArgv argv) {
         return BaseRet.success(sysTaskService.query(argv));
     }
@@ -47,6 +49,7 @@ public class SysTaskController extends BaseController {
      */
     @ApiOperation(value = "详情 " ,notes = "详情")
     @GetMapping("/{id}")
+    @ApiCode("sysinfo:task:query")
     public BaseRet<SysTaskRet> get(@PathVariable String id) {
         return BaseRet.success(sysTaskService.get(id));
     }
@@ -57,6 +60,7 @@ public class SysTaskController extends BaseController {
      */
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
+    @ApiCode("sysinfo:task:add")
     public BaseRet<?> add(@RequestBody SysTaskArgv argv) {
         sysTaskService.add(argv);
         return BaseRet.success();
@@ -69,6 +73,7 @@ public class SysTaskController extends BaseController {
      */
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
+    @ApiCode("sysinfo:task:edit")
     public BaseRet<?> edit(@RequestBody SysTaskArgv argv) {
         sysTaskService.edit(argv);
         return BaseRet.success();
@@ -80,6 +85,7 @@ public class SysTaskController extends BaseController {
      */
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
+    @ApiCode("sysinfo:task:remove")
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         sysTaskService.delete(argv);
         return BaseRet.success();

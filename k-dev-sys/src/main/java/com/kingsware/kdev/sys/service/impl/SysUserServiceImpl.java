@@ -275,7 +275,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 List<SysUserUnit> unitList = DB.findList(SysUserUnit.class, unitWrapper.getSql(), unitWrapper.getParams().toArray(new Object[0]));
                 List<Object> list = unitList.stream().map(SysUserUnit::getSysUserId).collect(Collectors.toList());
                 // 拼接最终sql
-                wrapper.in("u.id",list);
+                wrapper.in("u.id", list.size() > 0 ? list : Collections.singletonList(""));
             }
         }
 //        if (argv.getRoleId() != null) {

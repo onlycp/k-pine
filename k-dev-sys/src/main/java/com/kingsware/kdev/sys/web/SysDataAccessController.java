@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.ApiCode;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.*;
 import com.kingsware.kdev.core.constants.Version;
@@ -36,6 +37,7 @@ public class SysDataAccessController extends BaseController {
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
+    @ApiCode("sysinfo:dataaccess:query")
     public BaseRet<PageDataRet<SysDataAccessRet>> page(SysDataAccessQueryArgv argv) {
         return BaseRet.success(sysDataAccessService.query(argv));
     }
@@ -46,6 +48,7 @@ public class SysDataAccessController extends BaseController {
      */
     @ApiOperation(value = "详情 " ,notes = "详情")
     @GetMapping("/{id}")
+    @ApiCode("sysinfo:dataaccess:query")
     public BaseRet<SysDataAccessRet> get(@PathVariable String id) {
         return BaseRet.success(sysDataAccessService.get(id));
     }
@@ -56,6 +59,7 @@ public class SysDataAccessController extends BaseController {
      */
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
+    @ApiCode("sysinfo:dataaccess:add")
     public BaseRet<?> add(@RequestBody SysDataAccessArgv argv) {
         sysDataAccessService.add(argv);
         return BaseRet.success();
@@ -68,6 +72,7 @@ public class SysDataAccessController extends BaseController {
      */
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
+    @ApiCode("sysinfo:dataaccess:edit")
     public BaseRet<?> edit(@RequestBody SysDataAccessArgv argv) {
         sysDataAccessService.edit(argv);
         return BaseRet.success();
@@ -79,6 +84,7 @@ public class SysDataAccessController extends BaseController {
      */
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
+    @ApiCode("sysinfo:dataaccess:remove")
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         sysDataAccessService.delete(argv);
         return BaseRet.success();
@@ -90,6 +96,7 @@ public class SysDataAccessController extends BaseController {
      */
     @ApiOperation(value = "保存用户关联" ,notes = "保存用户关联")
     @PostMapping("/saveDataAccessUser")
+    @ApiCode("sysinfo:dataaccess:user")
     public BaseRet<?> saveDataAccessUser(@RequestBody BaseRelationArgv argv) {
         sysDataAccessService.saveDataAccessUser(argv);
         return BaseRet.success();
@@ -121,6 +128,7 @@ public class SysDataAccessController extends BaseController {
      */
     @ApiOperation(value = "保存数据关联" ,notes = "保存数据关联")
     @PostMapping("/saveDataAccessResource/{resourceId}")
+    @ApiCode("sysinfo:dataaccess:data")
     public BaseRet<?> saveDataAccessResource(@RequestBody BaseRelationArgv argv,  @PathVariable String resourceId) {
         sysDataAccessService.saveDataAccessResource(resourceId, argv);
         return BaseRet.success();

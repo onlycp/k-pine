@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.ApiCode;
 import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.base.BaseController;
@@ -63,6 +64,7 @@ public class SysConfigController extends BaseController {
      */
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
+    @ApiCode("sysinfo:config:add")
     public BaseRet<?> add(@RequestBody SysConfigArgv argv) {
         sysConfigService.add(argv);
         return BaseRet.success();
@@ -75,6 +77,7 @@ public class SysConfigController extends BaseController {
      */
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
+    @ApiCode("sysinfo:config:edit")
     public BaseRet<?> edit(@RequestBody SysConfigArgv argv) {
         sysConfigService.edit(argv);
         return BaseRet.success();
@@ -86,6 +89,7 @@ public class SysConfigController extends BaseController {
      */
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
+    @ApiCode("sysinfo:config:remove")
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         sysConfigService.delete(argv);
         return BaseRet.success();
