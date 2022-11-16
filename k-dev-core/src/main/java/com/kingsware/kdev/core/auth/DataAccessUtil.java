@@ -65,6 +65,8 @@ public class DataAccessUtil {
             Map<String, String> contextMap = new HashMap<>();
             contextMap.put("userId", "'" + userInfo.getId() + "'");
             contextMap.put("username", "'" + userInfo.getUsername() + "'");
+            contextMap.put("roleCodes", "'" + userInfo.getRoleCodes() + "'");
+            contextMap.put("roleNames", "'" + userInfo.getRoleNames() + "'");
             contextMap.put("alias", alias);
             for (Map.Entry<String, String> entry: contextMap.entrySet()) {
                 extraSql = extraSql.replaceAll("\\$\\{"+entry.getKey() +"}", entry.getValue());
@@ -80,9 +82,10 @@ public class DataAccessUtil {
         }
         // 拼接权限sql(由于id是uuid，这里忽略table_name)
         if (sqlLink == SqlLink.EXISTS) {
-            return MessageFormat.format("exists (" +
-                    "select ar.data_id from sys_data_access_resource ar where ({0}.{1}=ar.data_id and ar.access_id in ({2}) ) {3} " +
-                    ")", alias, queryColumn, StringUtils.joinToString(inSet, ","), extraSql == null ? "" : extraSql);
+            String s =  MessageFormat.format("exists (" +
+                    "select ar.data_id from sys_data_access_resource ar where ({0}.{1}=ar.data_id and ar.access_id in ({2}) ) " +
+                    ") {3} ", alias, queryColumn, StringUtils.joinToString(inSet, ","), extraSql == null ? "" : extraSql);
+            return s;
         }
         else if (sqlLink == SqlLink.IN) {
             return MessageFormat.format("{0}.{1} in (select ar.data_id from sys_data_access_resource ar where (ar.table_name=''{2}'' and  ar.access_id in ({3})) {4})", alias, queryColumn, table, StringUtils.joinToString(inSet, ","), extraSql);
