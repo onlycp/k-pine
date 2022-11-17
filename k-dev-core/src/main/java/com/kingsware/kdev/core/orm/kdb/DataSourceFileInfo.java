@@ -15,7 +15,7 @@ import java.util.Map;
  */
 @Data
 @FieldNameConstants
-public class DataSourceInfo {
+public class DataSourceFileInfo {
     /** 数据源名称 **/
     private String sourceName;
     /** 驱动类 **/
@@ -27,5 +27,5 @@ public class DataSourceInfo {
     /** 密码 **/
     private String password;
     /** 其他配置参数 **/
-    private String json;
+    private Map<String, Object> json = new HashMap<>();
 }

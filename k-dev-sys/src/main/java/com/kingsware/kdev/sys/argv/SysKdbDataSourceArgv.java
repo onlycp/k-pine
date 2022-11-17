@@ -1,6 +1,5 @@
 package com.kingsware.kdev.sys.argv;
 
-import com.kingsware.kdev.core.orm.kdb.DataSourceInfo;
 import lombok.Data;
 
 import java.util.List;
@@ -28,4 +27,6 @@ public class SysKdbDataSourceArgv {
     private List<DataBaseInstanceArgv> instances;
     /** 所属应用ID **/
     private String appId;
+    /** 其他配置参数 **/
+    private String json;
 }

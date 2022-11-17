@@ -1,9 +1,14 @@
 //[
 //  {
-//    "sourceName":"MySql",
+//    "sourceName":"MySqlCP001",
 //    "driverClass":"com.mysql.jdbc.Driver",
 //    "jdbcUrl":"jdbc:mysql://192.168.2.34:3306/andy-pine?serverTimezone=GMT%2B8&verifyServerCertificate=false&useSSL=false&characterEncoding=UTF-8",
 //    "userName":"root",
-//    "password":"123456"
+//    "password":"123456",
+//    "json": {
+//      "poolParam":{
+//        "connectionTimeout":10000
+//      }
+//    }
 //  }
 //]

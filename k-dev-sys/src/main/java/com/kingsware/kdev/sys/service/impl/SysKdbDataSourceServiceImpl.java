@@ -53,6 +53,13 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
         ret.setJdbcUrl(info.getJdbcUrl());
         ret.setUsername(info.getUserName());
         ret.setPassword(info.getPassword());
+        if (info.getJson() == null) {
+            ret.setJson("{}");
+        }
+        else {
+            ret.setJson(info.getJson());
+        }
+
         // 处理instance
         List<DataBaseInstanceArgv> instances = new ArrayList<>();
         String[] urls = info.getJdbcUrl().split(SPLIT_TAG);
@@ -76,6 +83,12 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
         info.setSourceName(argv.getId());
         info.setDriverClass(argv.getDriverClass());
         instanceToField(info, argv);
+        if (StringUtils.isNotEmpty(argv.getJson())) {
+            info.setJson(argv.getJson());
+        }
+        else {
+            info.setJson("{}");
+        }
         KdbApi api = (KdbApi)(DB.getDefault());
         api.addDataSource(info);
     }
@@ -106,6 +119,12 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
         info.setDriverClass(argv.getDriverClass());
         instanceToField(info, argv);
         KdbApi api = (KdbApi)(DB.getDefault());
+        if (StringUtils.isNotEmpty(argv.getJson())) {
+            info.setJson(argv.getJson());
+        }
+        else {
+            info.setJson("{}");
+        }
         api.editDataSource(info);
     }
 

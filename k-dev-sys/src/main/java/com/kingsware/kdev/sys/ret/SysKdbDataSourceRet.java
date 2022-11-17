@@ -31,4 +31,6 @@ public class SysKdbDataSourceRet extends BaseSimpleRet {
     private String appId;
     /** 实例json **/
     private List<DataBaseInstanceArgv> instances;
+    /** 连接池参数 **/
+    private String json;
 }

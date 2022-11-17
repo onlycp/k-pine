@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -63,11 +64,23 @@ public class KFaasInitialize implements SystemInitialize {
         if (dbConfigFile.exists()) {
             String text = FileUtils.readFileText(dbConfigFile);
             if (StringUtils.isNotEmpty(text)) {
-                List<DataSourceInfo> dataSourceFromFile = JsonUtil.toListBean(text, DataSourceInfo.class);
+                List<DataSourceFileInfo> dataSourceFromFile = JsonUtil.toListBean(text, DataSourceFileInfo.class);
                 if (dataSourceFromFile != null) {
+                    // 转为标准结构
+                    List<DataSourceInfo> targetSources = new ArrayList<>();
+                    dataSourceFromFile.forEach(it -> {
+                        DataSourceInfo ds = new DataSourceInfo();
+                        ds.setUserName(it.getUserName());
+                        ds.setPassword(it.getPassword());
+                        ds.setJdbcUrl(it.getJdbcUrl());
+                        ds.setDriverClass(it.getDriverClass());
+                        ds.setSourceName(it.getSourceName());
+                        ds.setJson(JsonUtil.toJson(it.getJson()));
+                        targetSources.add(ds);
+                    });
                     // 获取所有的数据源
                     List<DataSourceInfo> dataSourceInfos = DB.kdbApi().queryDataSource(new DataSourceQueryArgv());
-                    for (DataSourceInfo fileSource: dataSourceFromFile) {
+                    for (DataSourceInfo fileSource: targetSources) {
                         // 创建数据库
                         createInitDb(fileSource);
 //                        // 查看是否已存在
