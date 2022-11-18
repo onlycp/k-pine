@@ -154,7 +154,6 @@ public class JsonUtil {
         try {
             return objectMapper.readValue(json, Map.class);
         } catch (JsonProcessingException e) {
-            logger.error("error", e);
             logger.warn("字符串转map失败, 源串:{}", json);
         }
         return null;

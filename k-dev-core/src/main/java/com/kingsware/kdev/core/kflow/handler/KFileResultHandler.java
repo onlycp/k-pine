@@ -31,16 +31,21 @@ public class KFileResultHandler implements KFlowResultHandler {
         int index = responseBody.indexOf("|");
         String fileName = responseBody.substring(0, index);
         String body = responseBody.substring(index+1);
-        // 解析数据
-        try {
-            Map<String, Object> data = JsonUtil.toMap(body);
-            JsonNode jsonNode = JsonUtil.toTree(context.getOutArgv());
-            Object finalBody = FlowUtils.processData(data, context, jsonNode);
-            body =  JsonUtil.toJson(finalBody);
+        String retBody = body;
+        Map<String, Object> data = JsonUtil.toMap(body);
+        if (data == null) {
+            body = retBody;
         }
-        catch (Exception e) {
+        else  {
+            try {
+                JsonNode jsonNode = JsonUtil.toTree(context.getOutArgv());
+                Object finalBody = FlowUtils.processData(data, context, jsonNode);
+                body =  JsonUtil.toJson(finalBody);
+            }
+            catch (Exception e) {
+                body = retBody;
+            }
         }
-
         KdbRetFile kdbRetFile = new KdbRetFile();
         kdbRetFile.setFileName(fileName);
         kdbRetFile.setData(Objects.requireNonNull(body.getBytes(StandardCharsets.UTF_8)));
