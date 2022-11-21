@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -120,7 +121,14 @@ public class WebLogAspect {
                     String operate = apiOperation.value().trim();
                     if ("登录".equals(operate)) {
                         // 获取表单信息
-                        SysUserLoginArgv loginArgv = (SysUserLoginArgv)pjd.getArgs()[0];
+                        SysUserLoginArgv loginArgv = null;
+                        if (pjd.getArgs()[0] instanceof SysUserLoginArgv) {
+                            loginArgv = (SysUserLoginArgv)pjd.getArgs()[0];
+                        } else {
+                            loginArgv = new SysUserLoginArgv();
+                            Map map = (Map)pjd.getArgs()[0];
+                            loginArgv.setPassword(String.valueOf(map.get("username")));
+                        }
                         SysLoginLog loginLog = new SysLoginLog();
                         loginLog.setOperator(loginArgv.getUsername());
                         loginLog.setIp(KClientContext.getContext().getIp());
