@@ -22,6 +22,11 @@ public class SqlKeywords {
         Set<String> h2ServerKeywords = new HashSet<>();
         h2ServerKeywords.add("value");
         keywords.put("H2", h2ServerKeywords);
+        /** GBase **/
+        Set<String> gbaseServerKeywords = new HashSet<>();
+        gbaseServerKeywords.add("distributed");
+        keywords.put("GBase", gbaseServerKeywords);
+
     }
 
 
@@ -56,6 +61,9 @@ public class SqlKeywords {
             return "`"+ columnName + "`";
         }
         else if (dataBaseTypeEnum.equalsIgnoreCase("H2")) {
+            return "`"+ columnName + "`";
+        }
+        else if (dataBaseTypeEnum.equalsIgnoreCase("GBase")) {
             return "`"+ columnName + "`";
         }
         return columnName;
