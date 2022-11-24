@@ -2,6 +2,7 @@ package com.kingsware.kdev.core.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
+import com.kingsware.kdev.core.config.MyHttpServletRequestWrapper;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
@@ -15,12 +16,16 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
+import org.springframework.web.util.ContentCachingRequestWrapper;
+import org.springframework.web.util.ContentCachingResponseWrapper;
+import org.springframework.web.util.WebUtils;
 import org.yaml.snakeyaml.util.UriEncoder;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -182,7 +187,7 @@ public class ServletUtil {
      * @return          请求参数
      */
     @SuppressWarnings("unchecked")
-    public static Map<String, Object> getRequestParams(ApiInfo api, String path, HttpServletRequest request) {
+    public static Map<String, Object> getRequestParams(ApiInfo api, String path, HttpServletRequest request, String requestBody) {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -195,8 +200,10 @@ public class ServletUtil {
             params.put(name, value);
         }
         // 获取path变量
-        Map<String, Object> pathVariables = getPathVariables(path, api.getApiUrl());
-        params.putAll(pathVariables);
+        if (api != null) {
+            Map<String, Object> pathVariables = getPathVariables(path, api.getApiUrl());
+            params.putAll(pathVariables);
+        }
         // 判断是文件还是raw提交
         String contentType = request.getContentType();
 
@@ -230,7 +237,7 @@ public class ServletUtil {
         }
         else {
             // 获取body
-            String body = getBody(request);
+            String body = requestBody;
             if (StringUtils.isNotEmpty(body)) {
                 try {
                     Map<String, Object> argv = objectMapper.readValue(body, Map.class);
@@ -247,7 +254,7 @@ public class ServletUtil {
             requestMap.put("ip", ServletUtil.getClientIp(request));
             requestMap.put("method", request.getMethod());
             requestMap.put("path", path);
-            requestMap.put("apiName", api.getApiName());
+            requestMap.put("apiName", api != null ? api.getApiName() : "");
             params.put("request", requestMap);
         }
 
@@ -327,5 +334,54 @@ public class ServletUtil {
             log.error("error", e);
         }
     }
+
+    /**
+     * 打印返回参数
+     *
+     * @param response 响应
+     */
+    public static String getResponseBody(ContentCachingResponseWrapper response) {
+        ContentCachingResponseWrapper wrapper = WebUtils.getNativeResponse(response,
+                ContentCachingResponseWrapper.class);
+        if (wrapper != null) {
+            byte[] buf = wrapper.getContentAsByteArray();
+            if (buf.length > 0) {
+                String payload;
+                try {
+                    payload = new String(buf, 0, buf.length, wrapper.getCharacterEncoding());
+                } catch (UnsupportedEncodingException e) {
+                    payload = "[unknown]";
+                }
+                return payload;
+            }
+        }
+        return "{}";
+    }
+
+
+
+    /**
+     * 打印请求参数
+     *
+     * @param request 请求
+     */
+    public static String getRequestBody(ContentCachingRequestWrapper request) {
+        ContentCachingRequestWrapper wrapper = WebUtils.getNativeRequest(request, ContentCachingRequestWrapper.class);
+        if (wrapper != null) {
+            byte[] buf = wrapper.getContentAsByteArray();
+            if (buf.length > 0) {
+                String payload;
+                try {
+                    payload = new String(buf, 0, buf.length, wrapper.getCharacterEncoding());
+                } catch (UnsupportedEncodingException e) {
+                    payload = "[unknown]";
+                }
+                return payload.replaceAll("\\n", "");
+            }
+        }
+        return "{}";
+    }
+
+
 
 }

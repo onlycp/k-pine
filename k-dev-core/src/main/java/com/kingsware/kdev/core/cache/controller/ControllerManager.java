@@ -128,6 +128,7 @@ public class ControllerManager {
                     apiName = method.getAnnotation(ApiOperation.class).value();
                 }
                 apiDefine.setName(apiName);
+                apiDefine.setCallMethod(clazz.getName() +"." +method.getName());
                 String actionUrl = "";
                 // 请求方法
                 if (method.isAnnotationPresent(RequestMapping.class)) {

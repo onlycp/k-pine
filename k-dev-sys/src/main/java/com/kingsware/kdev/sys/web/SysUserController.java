@@ -188,7 +188,7 @@ public class SysUserController extends BaseController {
         return BaseRet.success();
     }
 
-//    @ApiOperation(value = "登录会话数量 " ,notes = "登录会话数量")
+    @ApiOperation(value = "登录会话数量 " ,notes = "登录会话数量")
     @GetMapping("/session-count/{username}")
     @ApiIgnore
     public BaseRet<Long> getOnlineSessionCount(@PathVariable String username) {

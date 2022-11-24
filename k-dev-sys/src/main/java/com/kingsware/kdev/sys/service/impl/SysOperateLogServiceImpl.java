@@ -11,7 +11,7 @@ import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysOperateLogQueryArgv;
-import com.kingsware.kdev.sys.model.SysOperateLog;
+import com.kingsware.kdev.core.model.SysOperateLog;
 import com.kingsware.kdev.sys.ret.SysOperateLogRet;
 import com.kingsware.kdev.sys.service.SysOperateLogService;
 import org.springframework.stereotype.Service;
