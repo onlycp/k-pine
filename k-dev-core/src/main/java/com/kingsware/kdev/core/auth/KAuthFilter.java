@@ -83,11 +83,14 @@ public class KAuthFilter implements Filter {
         String requestBody = "{}";
         if (servletRequest != null) {
             wrapperRequest = new MyHttpServletRequestWrapper((HttpServletRequest) request);
-            wrapperRequest.getInputStream();
-            requestBody = new String(wrapperRequest.getRequestBody(), StandardCharsets.UTF_8);
+            String contentType = request.getContentType();
+            if (contentType == null || !contentType.toLowerCase().contains("multipart/form-data")) {
+                wrapperRequest.getInputStream();
+                requestBody = new String(wrapperRequest.getRequestBody(), StandardCharsets.UTF_8);
+            }
+
         }
         ContentCachingResponseWrapper wrapperResponse = new ContentCachingResponseWrapper(response);
-
         // 获取请求路径
         String url = request.getRequestURI();
         // 获取请求方式
@@ -122,7 +125,6 @@ public class KAuthFilter implements Filter {
             if (url.startsWith("/api"))  {
                 contextPath = "/api";
             }
-
             // 获取配置的接口信息
             String path = url.replaceFirst(contextPath, "");
             api = ApiManager.getInstance().getApi(method, path);
@@ -146,15 +148,12 @@ public class KAuthFilter implements Filter {
                     ignore = apiDefine.isIgnore();
                 }
                 else {
-
                     filterChain.doFilter(wrapperRequest, wrapperResponse);
                     return;
                 }
             }
             // 判断是否开放接口
             isOpenApi = StringUtils.isNotEmpty(apiCode) && apiCode.startsWith(openApiFlag) && api != null;
-
-
             if (isOpenApi) {
                 // 处理请求变量
                 this.checkOpenApi(api, argvMap);

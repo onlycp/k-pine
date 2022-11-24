@@ -190,7 +190,6 @@ public class ServletUtil {
     public static Map<String, Object> getRequestParams(ApiInfo api, String path, HttpServletRequest request, String requestBody) {
 
         ObjectMapper objectMapper = new ObjectMapper();
-
         Map<String, Object> params = new HashMap<>();
         // 获取query和form-data
         Enumeration<String> names = request.getParameterNames();
@@ -206,7 +205,6 @@ public class ServletUtil {
         }
         // 判断是文件还是raw提交
         String contentType = request.getContentType();
-
         // 获取文件
         if (StringUtils.isNotEmpty(contentType) && contentType.toLowerCase().contains("multipart/form-data")) {
             MultipartResolver resolver = new StandardServletMultipartResolver();
@@ -229,7 +227,7 @@ public class ServletUtil {
                     uploadFile.setFileContent(Base64Utils.encodeToString(multipartFileEntry.getValue().getBytes()));
                 }
                 catch (IOException e) {
-                    log.error("文件转换成功，原始文件名:{}，名称:{}，{}", uploadFile.getOriginFileName(), uploadFile.getName(), e );
+                    log.error("文件转换失败，原始文件名:{}，名称:{}，{}", uploadFile.getOriginFileName(), uploadFile.getName(), e );
                 }
                 // 将文件加入到流程变量中
                 params.put(multipartFileEntry.getKey(), uploadFile);
