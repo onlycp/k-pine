@@ -6,7 +6,9 @@ import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.bean.TreeDataRet;
 import com.kingsware.kdev.core.cache.access.AccessManager;
+import com.kingsware.kdev.core.constants.PropertiesConstant;
 import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.orm.DB;
@@ -82,6 +84,10 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
         model.setKeepAlive(argv.getKeepAlive());
         model.setOrderNum(argv.getOrderNum());
         model.setStatus(argv.getStatus());
+        model.setDataType(argv.getDataType());
+        model.setMainMode(argv.getMainMode());
+        model.setSidebarNavMode(argv.getSidebarNavMode());
+        model.setTopNavMode(argv.getTopNavMode());
         // 处理path， 如果单位有变动时，才需要处理
         boolean parentChanged = !Objects.equals(model.getParentId(), argv.getParentId());
         String hisParentPath = model.getPath().replace("/" + model.getId() +"/", "/");
@@ -197,7 +203,7 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
     }
 
     @Override
-    public List<TreeDataRet<Object>> treeOptions(String excludeId, String roleIds) {
+    public List<TreeDataRet<Object>> treeOptions(String excludeId, String roleIds, boolean isMobile) {
         // 查找所有
         String[] splits = null;
         if (roleIds != null) {
@@ -219,6 +225,9 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
         SqlWrapper wrapper = new SqlWrapper(sql.toString());
         if (excludeId != null) {
             wrapper.addCondition("sm.path", Op.NOT_LIKE, "%/"+ excludeId + "/%");
+        }
+        if (isMobile) {
+            wrapper.addCondition("sm.data_type", Op.EQ, 3);
         }
         if (!isSuperAdmin && ids != null) {
             wrapper.appendInSql("sm.id in (select sys_menu_id from sys_role_menu where sys_role_id in (${in})) ", ids);

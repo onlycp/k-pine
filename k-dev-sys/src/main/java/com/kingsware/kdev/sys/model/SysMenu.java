@@ -46,7 +46,7 @@ public class SysMenu extends BaseManageModel {
     private Boolean status;
     /** 所属应用ID **/
     private String appId;
-    /** 数据类型：0系统，1业务应用, 2开发平台 **/
+    /** 数据类型：0系统，1业务应用, 2开发平台, 3移动端 **/
     private Integer dataType;
     /** layout主题 **/
     private String theme;
