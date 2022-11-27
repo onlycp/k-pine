@@ -3,7 +3,7 @@ package com.kingsware.kdev.sys.log;
 import com.kingsware.kdev.core.kmq.KmqConsumer;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.JsonUtil;
-import com.kingsware.kdev.sys.model.SysLoginLog;
+import com.kingsware.kdev.core.model.SysLoginLog;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ public class LoginLogConsumer implements KmqConsumer {
 
     @Override
     public String topic() {
-        return WebLogAspect.TOPIC_LOGIN_LOG;
+        return "t_login_log";
     }
 
 }

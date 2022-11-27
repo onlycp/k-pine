@@ -10,7 +10,7 @@ import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysLoginLogQueryArgv;
-import com.kingsware.kdev.sys.model.SysLoginLog;
+import com.kingsware.kdev.core.model.SysLoginLog;
 import com.kingsware.kdev.sys.ret.SysLoginLogRet;
 import com.kingsware.kdev.sys.service.SysLoginLogService;
 import org.springframework.stereotype.Service;

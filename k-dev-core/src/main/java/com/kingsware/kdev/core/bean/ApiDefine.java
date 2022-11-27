@@ -30,4 +30,6 @@ public class ApiDefine {
     private String className;
     /** 接口代码 **/
     private String apiCode;
+    /** 调用方法 **/
+    private String callMethod;
 }

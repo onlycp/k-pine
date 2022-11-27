@@ -64,7 +64,7 @@ public class SysUserController extends BaseController {
      *  登录信息
      * @return 提示
      */
-    @ApiOperation(value = "登录信息 " ,notes = "登录信息")
+    @ApiOperation(value = "个人信息 " ,notes = "个人信息")
     @GetMapping(value = "info")
     public BaseRet<?> info(HttpServletRequest request) {
         String ip = ServletUtil.getClientIp(request);
