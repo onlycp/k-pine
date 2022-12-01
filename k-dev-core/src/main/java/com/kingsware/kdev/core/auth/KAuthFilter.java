@@ -73,11 +73,19 @@ public class KAuthFilter implements Filter {
     private String logIgnoreTags;
 
 
+
+
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
 
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
+        // 获取请求路径
+        String url = request.getRequestURI();
+//        if (1 ==1) {
+//            filterChain.doFilter(request, response);
+//            return;
+//        }
 
         MyHttpServletRequestWrapper wrapperRequest = null;
         String requestBody = "{}";
@@ -91,8 +99,7 @@ public class KAuthFilter implements Filter {
 
         }
         ContentCachingResponseWrapper wrapperResponse = new ContentCachingResponseWrapper(response);
-        // 获取请求路径
-        String url = request.getRequestURI();
+
         // 获取请求方式
         String method = request.getMethod().toLowerCase();
         // 获取上下文路径
@@ -119,7 +126,7 @@ public class KAuthFilter implements Filter {
             }
             // 如果是静态文件
             if (!url.startsWith("/api") &&  StringUtils.isEmpty(contextPath)) {
-                filterChain.doFilter(wrapperRequest, wrapperResponse);
+                filterChain.doFilter(wrapperRequest, response);
                 return;
             }
             if (url.startsWith("/api"))  {
