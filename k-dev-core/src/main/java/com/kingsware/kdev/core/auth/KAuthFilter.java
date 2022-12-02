@@ -155,7 +155,7 @@ public class KAuthFilter implements Filter {
                     ignore = apiDefine.isIgnore();
                 }
                 else {
-                    filterChain.doFilter(wrapperRequest, wrapperResponse);
+                    filterChain.doFilter(wrapperRequest, response);
                     return;
                 }
             }
