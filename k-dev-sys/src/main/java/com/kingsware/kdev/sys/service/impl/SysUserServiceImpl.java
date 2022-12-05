@@ -281,6 +281,13 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
 //        if (argv.getRoleId() != null) {
 //            wrapper.addCondition("sur.sys_role_id", Op.EQ, argv.getRoleId());
 //        }
+        if (argv.getRoleId() != null) {
+            SqlWrapper roleWrapper = new SqlWrapper("select sys_user_id from sys_user_role where 1=1 ");
+            roleWrapper.in("sys_role_id", Collections.singletonList(argv.getRoleId()));
+            List<SysUserRole> roleList = DB.findList(SysUserRole.class, roleWrapper.getSql(), roleWrapper.getParams().toArray(new Object[0]));
+            List<Object> list = roleList.stream().map(SysUserRole::getSysUserId).collect(Collectors.toList());
+            wrapper.in("u.id", list.size() > 0 ? list : Collections.singletonList(""));
+        }
         if (StringUtils.isNotEmpty(argv.getAppId())) {
             wrapper.appendSql(" and (u.app_id = ? or u.app_id is null)", argv.getAppId());
         }
