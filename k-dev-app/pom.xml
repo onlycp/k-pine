@@ -12,6 +12,7 @@
     <properties>
         <docker.repostory>192.168.6.11</docker.repostory>
         <docker.registry.name>k-pine</docker.registry.name>
+        <maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
         <docker.maven.plugin.version>1.4.10</docker.maven.plugin.version>
     </properties>
     <dependencies>
@@ -26,6 +27,7 @@
     </dependencies>
 
     <build>
+        <finalName>kpine_${project.version}_${maven.build.timestamp}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
