@@ -29,4 +29,6 @@ public class KRegionStyle {
     private Integer width;
     /** 自动换行 **/
     private boolean wrapText;
+    /** 小数点位 **/
+    private Integer scale;
 }

@@ -90,6 +90,8 @@ public class PoiExcelHandler implements KExcelHandler{
                     if (region.getValue() != null) {
 
                         if ("formula".equalsIgnoreCase(region.getType())) {
+                            DataFormat df = workbook.createDataFormat();
+                            lastCellStyle.setDataFormat(df.getFormat("0.00_ "));//保留两位小数点
                             cell.setCellFormula(region.getValue().toString());
                         }
                         else if ("image".equals(region.getType())) {
@@ -138,7 +140,16 @@ public class PoiExcelHandler implements KExcelHandler{
                     }
                     // 设置格式
                     try {
+                        if (region.getStyle().getScale() != null && region.getStyle().getScale() >0) {
+                            DataFormat df = workbook.createDataFormat();
+                            StringBuilder sb = new StringBuilder();
+                            for (int i=0; i<region.getStyle().getScale(); i++) {
+                                sb.append("0");
+                            }
+                            lastCellStyle.setDataFormat(df.getFormat(String.format("0.%s_ ", sb)));
+                        }
                         cell.setCellStyle(lastCellStyle);
+
                         if (region.getStyle().getWidth() != null) {
                             sheet.setColumnWidth(cell.getColumnIndex(), region.getStyle().getWidth() * 256);
                             if ("image".equals(region.getType())) {
