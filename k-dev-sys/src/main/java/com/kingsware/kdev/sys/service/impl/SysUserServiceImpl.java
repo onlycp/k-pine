@@ -9,6 +9,7 @@ import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.cache.config.ConfigManager;
 import com.kingsware.kdev.core.cache.config.SysConfigInfo;
+import com.kingsware.kdev.core.cache.core.SysCacheService;
 import com.kingsware.kdev.core.cache.permssion.PermissionManager;
 import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.constants.PropertiesConstant;
@@ -24,6 +25,7 @@ import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.mode.AppModeProperties;
+import com.kingsware.kdev.core.model.SysCache;
 import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
@@ -69,6 +71,11 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
 
     @Value("${encrypt.aes.secret}")
     private String aesSecret;
+
+    @Resource
+    private SysCacheService sysCacheService;
+
+    private final String VALIDATION_CODE_CACHE_KEY = "VerificationCode:";
 
     @Override
     public SysUserRet get(String id) {
@@ -826,6 +833,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             log.info("getEncryptCode: ", ret.getEncryptCode());
             ret.setImageBase64String("data:image/jpeg;base64," + base64String);
             ret.setUuid(UUID.randomUUID().toString());
+            sysCacheService.setCache(VALIDATION_CODE_CACHE_KEY + ret.getUuid(), randomText);
             return BaseRet.success(ret);
         } catch (IOException e) {
             if (outputStream != null) {
@@ -843,8 +851,13 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     }
 
     private boolean checkVerifyCode(String uuid, String code, String encryptCode) {
-        String decodedCode = AESUtil.decrypt(encryptCode, aesSecret);
-        boolean valid = decodedCode.equalsIgnoreCase(code);
+//        String decodedCode = AESUtil.decrypt(encryptCode, aesSecret);
+//        boolean valid = decodedCode.equalsIgnoreCase(code);
+        String cacheCode = VALIDATION_CODE_CACHE_KEY + uuid;
+        SysCache sysCache = sysCacheService.getCache(cacheCode);
+        boolean valid = sysCache != null && StringUtils.isNotEmpty(code)
+                    && code.equalsIgnoreCase(sysCache.getValue());
+        sysCacheService.removeCache(cacheCode);
         return valid;
     }
 }

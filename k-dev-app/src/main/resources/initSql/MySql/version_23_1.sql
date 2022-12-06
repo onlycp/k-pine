@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS rep_template;
+
 CREATE TABLE rep_template(
                              id VARCHAR(36) NOT NULL   COMMENT '主键' ,
                              name VARCHAR(255) NOT NULL   COMMENT '模板名称' ,

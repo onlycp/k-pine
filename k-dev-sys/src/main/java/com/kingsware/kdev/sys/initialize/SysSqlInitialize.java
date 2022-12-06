@@ -62,7 +62,11 @@ public class SysSqlInitialize implements SystemInitialize {
 
     private List<ExecutionFile> getFileList(int maxVersion) {
         List<ExecutionFile> resultList = new ArrayList<>();
+        List<File> allFileList = new ArrayList<>();
         // 在windows环境中，代码版运行./xx会找不到文件，需要改成.\xx
+//        if (".".equals(initDatasourcePath)) {
+//            initDatasourcePath = SysSqlInitialize.class.getResource("/").getPath();
+//        }
         String dbConfigFilePath = initDatasourcePath + File.separator + "initSql" + File.separator + initDbType;
         File fileList = new File(dbConfigFilePath);
         File[] allFile = fileList.listFiles();
@@ -117,7 +121,8 @@ public class SysSqlInitialize implements SystemInitialize {
                 try {
                     DB.executeUpdateSql(FlowUtils.buildCDATASql(sql));
                 } catch (Exception e) {
-                    if (e.getMessage().toLowerCase().contains("duplicate")) {
+                    if (e.getMessage().toLowerCase().contains("duplicate")
+                        || e.getMessage().toLowerCase().contains("already exists")) {
                         log.warn("sql执行失败: " + sql + ", error: " + e.getMessage());
                         continue;
                     }

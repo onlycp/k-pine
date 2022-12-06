@@ -12,5 +12,5 @@ public interface KRunner {
     /**
      *  马上运行
      */
-    void runNow();
+    void runNow() throws Exception;
 }
