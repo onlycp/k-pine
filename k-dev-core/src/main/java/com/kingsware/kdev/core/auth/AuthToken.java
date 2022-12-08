@@ -14,8 +14,6 @@ public class AuthToken {
 
     /** 创建时间 **/
     private long whenCreated;
-    /** 发行机构 **/
-    private String iss;
     /** 客户端ip, 用来校验用户的id **/
     private String ip;
     /** 会话id **/
