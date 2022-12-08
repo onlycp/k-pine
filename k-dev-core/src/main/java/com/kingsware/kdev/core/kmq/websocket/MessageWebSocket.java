@@ -41,7 +41,7 @@ public class MessageWebSocket {
      * 连接建立成功调用的方法 */
     @OnOpen
     public void onOpen(Session session) {
-        logger.info("WebSocket连接成功, sessionId:{}", session.getId());
+        //logger.info("WebSocket连接成功, sessionId:{}", session.getId());
         sendMessage(session, JsonUtil.toJson(new WmMessage("welcome", "Hello world!")));
     }
 
@@ -72,7 +72,7 @@ public class MessageWebSocket {
         Optional<SessionToken> optional = copiedSet.stream().filter(it -> it.getSession().getId().equalsIgnoreCase(session.getId())).findFirst();
         if (optional.isPresent()) {
             sessionTokenSet.remove(optional.get());
-            logger.info("用户:【userId={}, token={}】退出，当前在线人数为:{} ", optional.get().getUserId(), optional.get().getToken(), sessionTokenSet.size());
+            // logger.info("用户:【userId={}, token={}】退出，当前在线人数为:{} ", optional.get().getUserId(), optional.get().getToken(), sessionTokenSet.size());
         }
     }
 

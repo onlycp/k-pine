@@ -188,7 +188,7 @@ public class KAuthFilter implements Filter {
         catch (UnauthorizedException e) {
             errorMessage = e.getMessage();
             responseCode = RetEnum.UNAUTHORIZED.getCode();
-            log.error("用户未登录，接口路径:{}, 请求方法:{}", url, method);
+            log.error("用户未登录，接口路径:{}, 请求方法:{}， 异常信息:{}", url, method, e.getMessage());
             ServletUtil.responseJson(response, BaseRet.fail(e.getMessage(), RetEnum.UNAUTHORIZED.getCode()));
         }
         catch (LicenseException e) {
