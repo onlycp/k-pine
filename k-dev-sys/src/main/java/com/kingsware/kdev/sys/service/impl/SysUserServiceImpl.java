@@ -69,7 +69,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     @Resource
     private EncryptProperties encryptProperties;
 
-    @Value("${encrypt.aes.secret}")
+    @Value("${encrypt.aes.secret:PsLZlcuUJBUB8yPo}")
     private String aesSecret;
 
     @Resource
