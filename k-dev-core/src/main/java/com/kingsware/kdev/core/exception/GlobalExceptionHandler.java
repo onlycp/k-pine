@@ -1,6 +1,7 @@
 package com.kingsware.kdev.core.exception;
 
 import com.kingsware.kdev.core.bean.BaseRet;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.enums.RetEnum;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -29,7 +30,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = OrmDbException.class)
     @ResponseBody
     public BaseRet<?> ormExceptionHandler(HttpServletRequest request, OrmDbException e) {
-        return BaseRet.failMessage(e.getMessage());
+        String devMode = SpringContext.getProperties("app.mode.dev", "true");
+        if ("true".equals(devMode)) {
+            return BaseRet.failMessage(e.getMessage(), e.getKlog(), e.getExceptionTrace());
+        }
+        else {
+            return BaseRet.failMessage(e.getMessage());
+        }
+
     }
 
     /**

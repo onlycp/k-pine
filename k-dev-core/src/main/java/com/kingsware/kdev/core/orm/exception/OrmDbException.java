@@ -10,6 +10,8 @@ package com.kingsware.kdev.core.orm.exception;
 public class OrmDbException extends RuntimeException {
 
     private String klog;
+
+    private String exceptionTrace;
     /**
      * 默认构造函数
      * @param message    提示消息
@@ -18,12 +20,18 @@ public class OrmDbException extends RuntimeException {
         super(message);
     }
 
-    public OrmDbException(String message, String klog) {
+    public OrmDbException(String message, String klog, String exceptionTrace) {
         super(message);
         this.klog = klog;
+        this.exceptionTrace = exceptionTrace;
     }
 
     public String getKlog() {
         return klog;
     }
+
+    public String getExceptionTrace() {
+        return exceptionTrace;
+    }
+
 }

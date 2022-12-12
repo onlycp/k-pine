@@ -103,7 +103,6 @@ public class TokenUtil {
         }
         AuthToken authToken;
         try {
-            logger.info("token: {}", token);
             authToken = new ObjectMapper().readValue(decryptToken, AuthToken.class);
         } catch (JsonProcessingException e) {
             // 如果令牌无法转为实体

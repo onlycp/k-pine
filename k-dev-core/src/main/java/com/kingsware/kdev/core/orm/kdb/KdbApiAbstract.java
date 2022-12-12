@@ -86,7 +86,7 @@ public abstract class KdbApiAbstract implements  KdbApi {
         params.put("flowId", flowId);
         KdbRet ret = post(params, DELETE_FLOW_URL, String.class);
         if (ret.getErrorCode() != 0) {
-            throw new OrmDbException(ret.getMessage());
+            throw new OrmDbException(ret.getMessage(), ret.getKlog(), ret.getStackTrace());
         }
 
     }
@@ -102,7 +102,7 @@ public abstract class KdbApiAbstract implements  KdbApi {
     public void addDataSource(DataSourceInfo dataSourceInfo) {
         KdbRet<String> ret = post(dataSourceInfo, ADD_DS_URL, String.class);
         if (ret.getErrorCode() != 0) {
-            throw new OrmDbException(ret.getMessage());
+            throw new OrmDbException(ret.getMessage(), ret.getKlog(), ret.getStackTrace());
         }
     }
 
@@ -110,7 +110,7 @@ public abstract class KdbApiAbstract implements  KdbApi {
     public void editDataSource(DataSourceInfo dataSourceInfo) {
         KdbRet<String> ret = post(dataSourceInfo, EDIT_DS_URL, String.class);
         if (ret.getErrorCode() != 0) {
-            throw new OrmDbException(ret.getMessage());
+            throw new OrmDbException(ret.getMessage(), ret.getKlog(), ret.getStackTrace());
         }
     }
 
@@ -120,7 +120,7 @@ public abstract class KdbApiAbstract implements  KdbApi {
         params.put("sourceName", sourceName);
         KdbRet ret = post(params, DELETE_DS_URL, String.class);
         if (ret.getErrorCode() != 0) {
-            throw new OrmDbException(ret.getMessage());
+            throw new OrmDbException(ret.getMessage(), ret.getKlog(), ret.getStackTrace());
         }
 
     }
@@ -143,7 +143,7 @@ public abstract class KdbApiAbstract implements  KdbApi {
     public void addFun(AddFunctionInfo argv) {
         KdbRet ret = post(argv, ADD_FUN_URL, String.class);
         if (ret.getErrorCode() != 0) {
-            throw new OrmDbException(ret.getMessage());
+            throw new OrmDbException(ret.getMessage(), ret.getKlog(), ret.getStackTrace());
         }
     }
 
@@ -151,7 +151,7 @@ public abstract class KdbApiAbstract implements  KdbApi {
     public void editFun(EditFunctionInfo argv) {
         KdbRet ret = post(argv, EDIT_FUN_URL, String.class);
         if (ret.getErrorCode() != 0) {
-            throw new OrmDbException(ret.getMessage());
+            throw new OrmDbException(ret.getMessage(), ret.getKlog(), ret.getStackTrace());
         }
     }
 
@@ -161,7 +161,7 @@ public abstract class KdbApiAbstract implements  KdbApi {
         params.put("id", funId);
         KdbRet ret = post(params, DELETE_FUN_URL, String.class);
         if (ret.getErrorCode() != 0) {
-            throw new OrmDbException(ret.getMessage());
+            throw new OrmDbException(ret.getMessage(), ret.getKlog(), ret.getStackTrace());
         }
     }
 
@@ -185,21 +185,12 @@ public abstract class KdbApiAbstract implements  KdbApi {
             String requestBody = JsonUtil.toJson(params);
             // 拼接请求
             String url = getServer() +  api;
-            // 发起进攻，杀
-
             long t1 = System.currentTimeMillis();
-            // 杀敌一万，满身是血
             String responseBody = HttpUtil.postBody(url, requestBody, Collections.emptyMap());
-            // 洗洗，换身好衣服
             KdbRet<T> ret = JsonUtil.toBean(responseBody, KdbRet.class, tClass);
-            // 看看死了没
-            // 灰都没了
             if (ret == null) {
-                throw new OrmDbException("kdb响应数据不合法，响应内容:" + responseBody);
+                throw new OrmDbException("响应数据不合法" + responseBody);
             }
-//            else if (ret.getErrorCode() != 0) {
-//                throw new OrmDbException("kdb响应数据不合法，响应内容:" + ret.getMessage());
-//            }
             return ret;
         }
         catch (HttpClientException e) {
@@ -236,9 +227,9 @@ public abstract class KdbApiAbstract implements  KdbApi {
 
     @Override
     @SneakyThrows
-    public File downloadFile(String path, String fileName, String prefix, String subfix) {
+    public File downloadFile(String path, String fileName, String prefix, String suffix) {
         String url = getServer() + DOWN_URL + "/" + URLEncoder.encode(fileName, "utf-8") +"?path=" + URLEncoder.encode(path, "utf-8");
-        return HttpUtil.downloadFile(url, path, prefix, subfix);
+        return HttpUtil.downloadFile(url, path, prefix, suffix);
     }
 
     /** 设置接口地址 **/

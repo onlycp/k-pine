@@ -13,6 +13,7 @@ import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.config.MyHttpServletRequestWrapper;
 import com.kingsware.kdev.core.context.ClientInfo;
 import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.enums.RetEnum;
 import com.kingsware.kdev.core.excel.ExcelWorker;
 import com.kingsware.kdev.core.excel.KExcel;
@@ -180,10 +181,22 @@ public class KAuthFilter implements Filter {
                 callByFlow(request, response, api, path, argvMap);
             }
         }
-        catch (BusinessException | OrmDbException e) {
+        catch (BusinessException e) {
             errorMessage = e.getMessage();
             responseCode = RetEnum.SERVICE_FAIL.getCode();
             ServletUtil.responseJson(response, BaseRet.failMessage(e.getMessage()));
+        }
+        catch (OrmDbException e) {
+            errorMessage = e.getMessage();
+            responseCode = RetEnum.SERVICE_FAIL.getCode();
+            String devMode = SpringContext.getProperties("app.mode.dev", "true");
+            if ("true".equals(devMode)) {
+                ServletUtil.responseJson(response, BaseRet.failMessage(e.getMessage(), e.getKlog(), e.getExceptionTrace()));
+            }
+            else {
+                ServletUtil.responseJson(response, BaseRet.failMessage(e.getMessage()));
+            }
+
         }
         catch (UnauthorizedException e) {
             errorMessage = e.getMessage();

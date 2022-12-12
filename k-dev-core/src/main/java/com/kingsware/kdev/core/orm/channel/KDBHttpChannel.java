@@ -175,7 +175,8 @@ public class KDBHttpChannel implements DbChannel{
                 throw new OrmDbException("kdb响应数据不合法，响应内容:" + responseBody);
             }
             if (ret.getErrorCode() != 0) {
-                throw new OrmDbException(ret.getMessage());
+                logger.error(responseBody);
+                throw new OrmDbException(ret.getMessage(), ret.getKlog(), ret.getStackTrace());
             }
             return ret.getResponseBody();
 
