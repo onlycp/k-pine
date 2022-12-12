@@ -118,8 +118,8 @@ public class TokenUtil {
             logger.warn("current's Ip:{}, token's IP:{}", ip, authToken.getIp());
             //throw new UnauthorizedException(I18n.t("auth. unauthorized-e005", "用户未登录，错误码: E005"));
         }
-        // 当模拟session的有效时间小于0时，走jwt的校验
-        if (mockSessionExpireMinutes <= 0) {
+        // 当模拟session的有效时间小于0时，走jwt的校验, 或者登录30秒之内
+        if (mockSessionExpireMinutes <= 0 || (authToken.getWhenCreated() + 1000*30) > System.currentTimeMillis()) {
             // 校验令牌有效性
             long expireTime = authToken.getWhenCreated() + ((long) tokenExpireMinutes * 60 * 1000);
             if (expireTime < System.currentTimeMillis()) {
