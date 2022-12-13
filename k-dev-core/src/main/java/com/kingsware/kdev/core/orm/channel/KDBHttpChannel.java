@@ -5,11 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kingsware.kdev.core.exception.HttpClientException;
 import com.kingsware.kdev.core.orm.DBConnectConfig;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
-import com.kingsware.kdev.core.orm.kdb.KDBConnectConfig;
-import com.kingsware.kdev.core.orm.kdb.KdbArgv;
-import com.kingsware.kdev.core.orm.kdb.KdbRet;
+import com.kingsware.kdev.core.orm.kdb.*;
 import com.kingsware.kdev.core.util.HttpUtil;
 import com.kingsware.kdev.core.util.JsonUtil;
+import com.kingsware.kdev.core.util.StringUtils;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -139,6 +138,11 @@ public class KDBHttpChannel implements DbChannel{
     private KdbArgv makePassThrough(String sql, List<Object> objects) {
         KdbArgv argv = new KdbArgv();
         argv.setFlowID(passThroughFlowId);
+        TransactionCache cache = TransactionManager.getInstance().getTransactionCache();
+        if (cache != null) {
+            logger.info("FAAS事务任务，签名:{}, ID:{}", cache.getSignName(), cache.getId());
+        }
+
         // 将数据源名称作为节点id
         argv.addStep(kdbConnectConfig.getDataSource(), sql, kdbConnectConfig.getDataSource(), objects);
 //        argv.addStep(executeStep, sql, kdbConnectConfig.getDataSource(), objects);

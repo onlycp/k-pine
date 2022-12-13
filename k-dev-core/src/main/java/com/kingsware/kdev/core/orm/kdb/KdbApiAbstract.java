@@ -5,8 +5,10 @@ import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.HttpClientException;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
+import com.kingsware.kdev.core.orm.exception.TransactionException;
 import com.kingsware.kdev.core.util.HttpUtil;
 import com.kingsware.kdev.core.util.JsonUtil;
+import com.kingsware.kdev.core.util.PageUtil;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -48,6 +50,8 @@ public abstract class KdbApiAbstract implements  KdbApi {
     public static final String UPLOAD_URL = "/upload";
     /** 下载文件 **/
     public static final String DOWN_URL = "/download";
+    /** 事务 **/
+    public static final String TRAN_URL = "/api/execute/transaction";
 
 
     @Override
@@ -230,6 +234,27 @@ public abstract class KdbApiAbstract implements  KdbApi {
     public File downloadFile(String path, String fileName, String prefix, String suffix) {
         String url = getServer() + DOWN_URL + "/" + URLEncoder.encode(fileName, "utf-8") +"?path=" + URLEncoder.encode(path, "utf-8");
         return HttpUtil.downloadFile(url, path, prefix, suffix);
+    }
+
+    /**
+     * 事务接口
+     *
+     * @param transactionInfo
+     */
+    @Override
+    public String transaction(TransactionInfo transactionInfo) {
+        try {
+            KdbRet<TransactionRet> ret = post(transactionInfo, TRAN_URL, TransactionRet.class);
+            if (ret.getErrorCode() != 0) {
+                throw new TransactionException(ret.getMessage(), ret.getKlog(), ret.getStackTrace());
+            }
+            return ret.getResponseBody().getTransactionUuid();
+        }
+        catch (OrmDbException  | HttpClientException e) {
+            throw new TransactionException(e.getMessage());
+        }
+
+
     }
 
     /** 设置接口地址 **/

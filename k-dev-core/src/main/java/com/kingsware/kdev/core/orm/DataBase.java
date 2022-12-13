@@ -1,6 +1,8 @@
 package com.kingsware.kdev.core.orm;
 
 import com.kingsware.kdev.core.orm.expression.Expression;
+import com.kingsware.kdev.core.orm.kdb.KdbRet;
+import com.kingsware.kdev.core.orm.kdb.TransactionInfo;
 
 import java.util.List;
 
@@ -223,6 +225,12 @@ public interface DataBase {
      * @return  表定义
      */
     List<ColumnDefine> columns(String tableName);
+
+    /**
+     * 事务
+     * @param tran
+     */
+    String transaction(TransactionInfo tran);
 
 
 

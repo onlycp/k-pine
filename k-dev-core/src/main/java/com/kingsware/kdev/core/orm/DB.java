@@ -4,6 +4,8 @@ import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.orm.expression.Expression;
 import com.kingsware.kdev.core.orm.kdb.KDataBase;
 import com.kingsware.kdev.core.orm.kdb.KdbApi;
+import com.kingsware.kdev.core.orm.kdb.KdbRet;
+import com.kingsware.kdev.core.orm.kdb.TransactionInfo;
 
 import java.util.List;
 
@@ -268,6 +270,9 @@ public class DB {
         }
     }
 
+    public static String transaction(TransactionInfo tran) {
+         return getDefault().transaction(tran);
+    }
     /**
      * 获取表定义
      * @param tableName 表名

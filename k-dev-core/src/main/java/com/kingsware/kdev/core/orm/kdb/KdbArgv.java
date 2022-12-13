@@ -22,6 +22,8 @@ import java.util.Map;
 public class KdbArgv {
     /** 流程id **/
     private String flowID;
+    /** 事务id **/
+    private String transactionUuid;
     /** 实例id **/
     private String instID;
     /** 节点可变参数 **/
