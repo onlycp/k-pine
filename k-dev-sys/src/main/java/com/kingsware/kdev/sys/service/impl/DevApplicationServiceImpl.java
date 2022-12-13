@@ -245,15 +245,17 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 continue;
             }
 //            DB.byName("kingDB").executeUpdateSql("delete from flow where flowid=?", flowInfo.getFlowId());
-
             KdbFlowQueryArgv kdbFlowQueryArgv = new KdbFlowQueryArgv();
             kdbFlowQueryArgv.setFlowId(flowInfo.getFlowId());
             List<FlowInfo> functionInfoList = DB.kdbApi().query(kdbFlowQueryArgv);
 
             // 如果没有，则新增
             if (functionInfoList.isEmpty() ) {
-                String sql = "insert into flow (flowid,name,content,description) values (?,?,?,?)";
-                DB.byName("kingDB").executeUpdateSql(sql, flowInfo.getFlowId(), flowInfo.getName(), flowInfo.getContent(), flowInfo.getDescription());
+                AddFlowInfo addFlowInfo = new AddFlowInfo();
+                addFlowInfo.setContent(flowInfo.getContent());
+                addFlowInfo.setName(flowInfo.getName());
+                addFlowInfo.setDescription(flowInfo.getDescription());
+                DB.kdbApi().addFlow(addFlowInfo);
             }
             else {
                 EditFlowInfo editFlowInfo = new EditFlowInfo();
@@ -272,8 +274,12 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             List<Functions> functionInfoList = DB.kdbApi().queryFunction(functionQueryArgv);
             // 如果没有，则新增
             if (functionInfoList.isEmpty() ) {
-                String sql = "insert into functions (id,name,type,desc,script) values (?,?,?,?,?)";
-                DB.byName("kingDB").executeUpdateSql(sql, functions.getId(), functions.getName(), functions.getType(), functions.getDesc(), functions.getScript());
+                AddFunctionInfo addFunctionInfo = new AddFunctionInfo();
+                addFunctionInfo.setName(functions.getName());
+                addFunctionInfo.setDesc(functions.getDesc());
+                addFunctionInfo.setScript(functions.getScript());
+                addFunctionInfo.setType(functions.getType());
+                DB.kdbApi().addFun(addFunctionInfo);
             }
             else {
                 EditFunctionInfo editFunctionInfo = new EditFunctionInfo();

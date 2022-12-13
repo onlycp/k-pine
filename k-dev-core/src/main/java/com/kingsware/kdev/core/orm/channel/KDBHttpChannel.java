@@ -141,7 +141,9 @@ public class KDBHttpChannel implements DbChannel{
         TransactionCache cache = TransactionManager.getInstance().getTransactionCache();
         if (cache != null) {
             logger.info("FAAS事务任务，签名:{}, ID:{}", cache.getSignName(), cache.getId());
+            argv.setTransactionUuid(cache.getId());
         }
+
 
         // 将数据源名称作为节点id
         argv.addStep(kdbConnectConfig.getDataSource(), sql, kdbConnectConfig.getDataSource(), objects);
