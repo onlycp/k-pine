@@ -131,9 +131,9 @@ public class LicenseManager {
      */
     private boolean validateMac(String macAddress) {
         // 如果是万能mac。直接通过
-        if (allPurposeMac.equalsIgnoreCase(macAddress)) {
-            return true;
-        }
+//        if (allPurposeMac.equalsIgnoreCase(macAddress)) {
+//            return true;
+//        }
         try {
             java.util.Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces();
             StringBuilder sb = new StringBuilder();
