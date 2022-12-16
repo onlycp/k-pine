@@ -74,16 +74,16 @@ create table kfaas_lib
 
 create table sys_i18n
 (
-    id            varchar(32)  not null
+    id            varchar(36)  not null
         constraint sys_i18n_PK_kfaas_lib
             primary key,
     i18n_key      varchar(255) not null,
     message       text,
-    app_id        varchar(32),
+    app_id        varchar(36),
     when_created  varchar(20),
-    who_created   varchar(32),
+    who_created   varchar(36),
     when_modified varchar(20),
-    who_modified  varchar(32)
+    who_modified  varchar(36)
 );
 
 

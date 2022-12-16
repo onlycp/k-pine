@@ -1,7 +1,7 @@
 CREATE TABLE  IF NOT EXISTS "open_account" (
                                          "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
                                          "access_name" varchar(128) COLLATE "pg_catalog"."default",
-                                         "access_id" varchar(32) COLLATE "pg_catalog"."default",
+                                         "access_id" varchar(36) COLLATE "pg_catalog"."default",
                                          "auth_type" int4,
                                          "sign_key" varchar(50) COLLATE "pg_catalog"."default",
                                          "validate_sign" int4 DEFAULT 0,
@@ -9,9 +9,9 @@ CREATE TABLE  IF NOT EXISTS "open_account" (
                                          "invalid_date" varchar(20) COLLATE "pg_catalog"."default",
                                          "status" int4 DEFAULT 1,
                                          "auth_params" text COLLATE "pg_catalog"."default",
-                                         "who_created" varchar(32) COLLATE "pg_catalog"."default",
+                                         "who_created" varchar(36) COLLATE "pg_catalog"."default",
                                          "when_created" varchar(20) COLLATE "pg_catalog"."default",
-                                         "who_modified" varchar(32) COLLATE "pg_catalog"."default",
+                                         "who_modified" varchar(36) COLLATE "pg_catalog"."default",
                                          "when_modified" varchar(20) COLLATE "pg_catalog"."default",
                                          CONSTRAINT "open_account_pk_dev_power_tree" PRIMARY KEY ("id")
 )
@@ -49,11 +49,11 @@ COMMENT ON COLUMN "open_account"."who_modified" IS '修改人';
 COMMENT ON COLUMN "open_account"."when_modified" IS '修改时间';
 
 CREATE TABLE IF NOT EXISTS  "open_account_api" (
-                                             "id" varchar(32) COLLATE "pg_catalog"."default" NOT NULL,
-                                             "account_id" varchar(32) COLLATE "pg_catalog"."default",
-                                             "api_id" varchar(32) COLLATE "pg_catalog"."default",
+                                             "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
+                                             "account_id" varchar(36) COLLATE "pg_catalog"."default",
+                                             "api_id" varchar(36) COLLATE "pg_catalog"."default",
                                              "when_created" varchar(20) COLLATE "pg_catalog"."default",
-                                             "who_created" varchar(32) COLLATE "pg_catalog"."default",
+                                             "who_created" varchar(36) COLLATE "pg_catalog"."default",
                                              CONSTRAINT "open_account_api_pk_open_account" PRIMARY KEY ("id")
 )
 ;
@@ -72,13 +72,13 @@ COMMENT ON COLUMN "open_account_api"."who_created" IS '创建人';
 COMMENT ON TABLE "open_account_api" IS '开放账号接口关联';
 
 CREATE TABLE IF NOT EXISTS "dev_power_tree" (
-                                           "id" varchar(32) COLLATE "pg_catalog"."default" NOT NULL,
+                                           "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
                                            "name" varchar(128) COLLATE "pg_catalog"."default",
-                                           "parent_id" varchar(32) COLLATE "pg_catalog"."default",
+                                           "parent_id" varchar(36) COLLATE "pg_catalog"."default",
                                            "note" varchar(255) COLLATE "pg_catalog"."default",
-                                           "who_created" varchar(32) COLLATE "pg_catalog"."default",
+                                           "who_created" varchar(36) COLLATE "pg_catalog"."default",
                                            "when_created" varchar(20) COLLATE "pg_catalog"."default",
-                                           "who_modified" varchar(32) COLLATE "pg_catalog"."default",
+                                           "who_modified" varchar(36) COLLATE "pg_catalog"."default",
                                            "when_modified" varchar(20) COLLATE "pg_catalog"."default",
                                            "path" text COLLATE "pg_catalog"."default",
                                            CONSTRAINT "dev_power_tree_pk_dev_power_link" PRIMARY KEY ("id")
@@ -108,11 +108,11 @@ COMMENT ON TABLE "dev_power_tree" IS '开发-能力树表';
 
 
 CREATE TABLE IF NOT EXISTS "dev_power_link" (
-                                           "id" varchar(32) COLLATE "pg_catalog"."default" NOT NULL,
-                                           "tree_id" varchar(32) COLLATE "pg_catalog"."default",
+                                           "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
+                                           "tree_id" varchar(36) COLLATE "pg_catalog"."default",
                                            "power_id" varchar(36) COLLATE "pg_catalog"."default",
                                            "power_type" int4,
-                                           "who_created" varchar(32) COLLATE "pg_catalog"."default",
+                                           "who_created" varchar(36) COLLATE "pg_catalog"."default",
                                            "when_created" varchar(20) COLLATE "pg_catalog"."default",
                                            CONSTRAINT "dev_power_link_pk_" PRIMARY KEY ("id")
 );

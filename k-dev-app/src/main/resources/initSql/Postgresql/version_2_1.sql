@@ -3,20 +3,20 @@
 -- Table structure for dev_api
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "dev_api" (
-    "id" varchar(32) COLLATE "pg_catalog"."default" NOT NULL,
+    "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
     "api_name" varchar(50) COLLATE "pg_catalog"."default",
-    "application_id" varchar(32) COLLATE "pg_catalog"."default",
+    "application_id" varchar(36) COLLATE "pg_catalog"."default",
     "api_url" varchar(128) COLLATE "pg_catalog"."default",
     "api_note" text COLLATE "pg_catalog"."default",
     "api_tags" varchar(128) COLLATE "pg_catalog"."default",
-    "api_method" varchar(32) COLLATE "pg_catalog"."default" DEFAULT 'get'::character varying,
+    "api_method" varchar(36) COLLATE "pg_catalog"."default" DEFAULT 'get'::character varying,
     "api_argv_type" int8,
     "api_req_argv" text COLLATE "pg_catalog"."default",
     "api_rsp_argv" text COLLATE "pg_catalog"."default",
     "api_result_handler" varchar(128) COLLATE "pg_catalog"."default",
-    "who_created" varchar(32) COLLATE "pg_catalog"."default",
+    "who_created" varchar(36) COLLATE "pg_catalog"."default",
     "when_created" varchar(20) COLLATE "pg_catalog"."default",
-    "who_modified" varchar(32) COLLATE "pg_catalog"."default",
+    "who_modified" varchar(36) COLLATE "pg_catalog"."default",
     "when_modified" varchar(20) COLLATE "pg_catalog"."default",
     "api_flow_id" varchar(50) COLLATE "pg_catalog"."default",
     "api_code" varchar(50) COLLATE "pg_catalog"."default",
@@ -206,9 +206,9 @@ CREATE TABLE IF NOT EXISTS "dev_view_model" (
     "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
     "name" varchar(50) COLLATE "pg_catalog"."default",
     "note" text COLLATE "pg_catalog"."default",
-    "who_created" varchar(32) COLLATE "pg_catalog"."default",
+    "who_created" varchar(36) COLLATE "pg_catalog"."default",
     "when_created" varchar(20) COLLATE "pg_catalog"."default",
-    "who_modified" varchar(32) COLLATE "pg_catalog"."default",
+    "who_modified" varchar(36) COLLATE "pg_catalog"."default",
     "when_modified" varchar(20) COLLATE "pg_catalog"."default",
     "deleted" int8 DEFAULT '0'::bigint,
     "tag" varchar(100) COLLATE "pg_catalog"."default",
@@ -220,17 +220,17 @@ CREATE TABLE IF NOT EXISTS "dev_view_model" (
 -- Table structure for dev_view_model_field
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "dev_view_model_field" (
-    "id" varchar(32) COLLATE "pg_catalog"."default" NOT NULL,
-    "view_model_id" varchar(32) COLLATE "pg_catalog"."default",
+    "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
+    "view_model_id" varchar(36) COLLATE "pg_catalog"."default",
     "field" varchar(50) COLLATE "pg_catalog"."default",
     "label" varchar(50) COLLATE "pg_catalog"."default",
     "type" varchar(20) COLLATE "pg_catalog"."default",
     "format_type" varchar(20) COLLATE "pg_catalog"."default",
     "format_pattern" varchar(50) COLLATE "pg_catalog"."default",
     "default_text" varchar(50) COLLATE "pg_catalog"."default",
-    "who_created" varchar(32) COLLATE "pg_catalog"."default",
+    "who_created" varchar(36) COLLATE "pg_catalog"."default",
     "when_created" varchar(20) COLLATE "pg_catalog"."default",
-    "who_modified" varchar(32) COLLATE "pg_catalog"."default",
+    "who_modified" varchar(36) COLLATE "pg_catalog"."default",
     "when_modified" varchar(20) COLLATE "pg_catalog"."default",
     "hidden" int8 DEFAULT '0'::bigint,
     "order_num" int8 DEFAULT '0'::bigint,
@@ -242,12 +242,12 @@ CREATE TABLE IF NOT EXISTS "dev_view_model_field" (
 -- Table structure for dev_view_model_flow
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "dev_view_model_flow" (
-    "id" varchar(32) COLLATE "pg_catalog"."default" NOT NULL,
+    "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
     "flow_id" varchar(36) COLLATE "pg_catalog"."default",
-    "view_model_id" varchar(32) COLLATE "pg_catalog"."default",
-    "who_created" varchar(32) COLLATE "pg_catalog"."default",
+    "view_model_id" varchar(36) COLLATE "pg_catalog"."default",
+    "who_created" varchar(36) COLLATE "pg_catalog"."default",
     "when_created" varchar(20) COLLATE "pg_catalog"."default",
-    "who_modified" varchar(32) COLLATE "pg_catalog"."default",
+    "who_modified" varchar(36) COLLATE "pg_catalog"."default",
     "when_modified" varchar(20) COLLATE "pg_catalog"."default",
     "app_id" varchar(36) COLLATE "pg_catalog"."default"
     )
@@ -292,19 +292,19 @@ CREATE TABLE IF NOT EXISTS "ext_plugin_tree" (
 -- Table structure for sys_api
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "sys_api" (
-    "id" varchar(32) COLLATE "pg_catalog"."default" NOT NULL,
+    "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
     "api_name" varchar(50) COLLATE "pg_catalog"."default",
     "api_url" varchar(128) COLLATE "pg_catalog"."default",
     "api_note" text COLLATE "pg_catalog"."default",
     "api_tags" varchar(128) COLLATE "pg_catalog"."default",
-    "api_method" varchar(32) COLLATE "pg_catalog"."default" DEFAULT 'get'::character varying,
+    "api_method" varchar(36) COLLATE "pg_catalog"."default" DEFAULT 'get'::character varying,
     "api_argv_type" int8,
     "api_req_argv" text COLLATE "pg_catalog"."default",
     "api_rsp_argv" text COLLATE "pg_catalog"."default",
     "api_result_handler" varchar(128) COLLATE "pg_catalog"."default",
-    "who_created" varchar(32) COLLATE "pg_catalog"."default",
+    "who_created" varchar(36) COLLATE "pg_catalog"."default",
     "when_created" varchar(20) COLLATE "pg_catalog"."default",
-    "who_modified" varchar(32) COLLATE "pg_catalog"."default",
+    "who_modified" varchar(36) COLLATE "pg_catalog"."default",
     "when_modified" varchar(20) COLLATE "pg_catalog"."default",
     "api_flow_id" varchar(50) COLLATE "pg_catalog"."default",
     "api_code" varchar(50) COLLATE "pg_catalog"."default",
@@ -323,9 +323,9 @@ CREATE TABLE IF NOT EXISTS "sys_config" (
     "value" varchar(255) COLLATE "pg_catalog"."default",
     "is_sys" int8,
     "note" varchar(255) COLLATE "pg_catalog"."default",
-    "who_created" varchar(32) COLLATE "pg_catalog"."default",
+    "who_created" varchar(36) COLLATE "pg_catalog"."default",
     "when_created" varchar(20) COLLATE "pg_catalog"."default",
-    "who_modified" varchar(32) COLLATE "pg_catalog"."default",
+    "who_modified" varchar(36) COLLATE "pg_catalog"."default",
     "when_modified" varchar(20) COLLATE "pg_catalog"."default",
     "value_type" int8 DEFAULT '0'::bigint,
     "app_id" varchar(36) COLLATE "pg_catalog"."default"
@@ -336,13 +336,13 @@ CREATE TABLE IF NOT EXISTS "sys_config" (
 -- Table structure for sys_data_access
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "sys_data_access" (
-    "id" varchar(32) COLLATE "pg_catalog"."default" NOT NULL,
+    "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
     "name" varchar(50) COLLATE "pg_catalog"."default",
     "status" int8,
     "note" text COLLATE "pg_catalog"."default",
-    "who_created" varchar(32) COLLATE "pg_catalog"."default",
+    "who_created" varchar(36) COLLATE "pg_catalog"."default",
     "when_created" varchar(20) COLLATE "pg_catalog"."default",
-    "who_modified" varchar(32) COLLATE "pg_catalog"."default",
+    "who_modified" varchar(36) COLLATE "pg_catalog"."default",
     "when_modified" varchar(20) COLLATE "pg_catalog"."default",
     "app_id" varchar(36) COLLATE "pg_catalog"."default"
     )
@@ -352,11 +352,11 @@ CREATE TABLE IF NOT EXISTS "sys_data_access" (
 -- Table structure for sys_data_access_resource
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "sys_data_access_resource" (
-    "id" varchar(32) COLLATE "pg_catalog"."default" NOT NULL,
+    "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
     "data_id" varchar(36) COLLATE "pg_catalog"."default",
     "access_id" varchar(36) COLLATE "pg_catalog"."default",
     "table_name" varchar(50) COLLATE "pg_catalog"."default",
-    "who_created" varchar(32) COLLATE "pg_catalog"."default",
+    "who_created" varchar(36) COLLATE "pg_catalog"."default",
     "when_created" varchar(20) COLLATE "pg_catalog"."default",
     "app_id" varchar(36) COLLATE "pg_catalog"."default"
     )
@@ -366,10 +366,10 @@ CREATE TABLE IF NOT EXISTS "sys_data_access_resource" (
 -- Table structure for sys_data_access_user
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "sys_data_access_user" (
-    "id" varchar(32) COLLATE "pg_catalog"."default" NOT NULL,
-    "sys_user_id" varchar(32) COLLATE "pg_catalog"."default",
+    "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
+    "sys_user_id" varchar(36) COLLATE "pg_catalog"."default",
     "sys_data_access_id" varchar(50) COLLATE "pg_catalog"."default",
-    "who_created" varchar(32) COLLATE "pg_catalog"."default",
+    "who_created" varchar(36) COLLATE "pg_catalog"."default",
     "when_created" varchar(20) COLLATE "pg_catalog"."default",
     "app_id" varchar(36) COLLATE "pg_catalog"."default"
     )
@@ -379,7 +379,7 @@ CREATE TABLE IF NOT EXISTS "sys_data_access_user" (
 -- Table structure for sys_data_resource
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "sys_data_resource" (
-    "id" varchar(32) COLLATE "pg_catalog"."default" NOT NULL,
+    "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
     "name" varchar(50) COLLATE "pg_catalog"."default",
     "table_name" varchar(50) COLLATE "pg_catalog"."default",
     "label_field" varchar(50) COLLATE "pg_catalog"."default",
@@ -388,9 +388,9 @@ CREATE TABLE IF NOT EXISTS "sys_data_resource" (
     "is_tree" int8,
     "is_only_leaf" int8,
     "status" int8,
-    "who_created" varchar(32) COLLATE "pg_catalog"."default",
+    "who_created" varchar(36) COLLATE "pg_catalog"."default",
     "when_created" varchar(20) COLLATE "pg_catalog"."default",
-    "who_modified" varchar(32) COLLATE "pg_catalog"."default",
+    "who_modified" varchar(36) COLLATE "pg_catalog"."default",
     "when_modified" varchar(20) COLLATE "pg_catalog"."default",
     "extra_sql" text COLLATE "pg_catalog"."default",
     "app_id" varchar(36) COLLATE "pg_catalog"."default"
@@ -401,13 +401,13 @@ CREATE TABLE IF NOT EXISTS "sys_data_resource" (
 -- Table structure for sys_dict
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "sys_dict" (
-    "id" varchar(32) COLLATE "pg_catalog"."default" NOT NULL,
+    "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
     "name" varchar(50) COLLATE "pg_catalog"."default" NOT NULL,
     "code" varchar(50) COLLATE "pg_catalog"."default" NOT NULL,
     "note" text COLLATE "pg_catalog"."default",
-    "who_created" varchar(32) COLLATE "pg_catalog"."default",
+    "who_created" varchar(36) COLLATE "pg_catalog"."default",
     "when_created" varchar(20) COLLATE "pg_catalog"."default",
-    "who_modified" varchar(32) COLLATE "pg_catalog"."default",
+    "who_modified" varchar(36) COLLATE "pg_catalog"."default",
     "when_modified" varchar(20) COLLATE "pg_catalog"."default",
     "app_id" varchar(36) COLLATE "pg_catalog"."default"
     )
@@ -417,17 +417,17 @@ CREATE TABLE IF NOT EXISTS "sys_dict" (
 -- Table structure for sys_dict_item
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "sys_dict_item" (
-    "id" varchar(32) COLLATE "pg_catalog"."default" NOT NULL,
+    "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
     "name" varchar(50) COLLATE "pg_catalog"."default",
     "group_name" varchar(50) COLLATE "pg_catalog"."default",
-    "sys_dict_id" varchar(32) COLLATE "pg_catalog"."default",
+    "sys_dict_id" varchar(36) COLLATE "pg_catalog"."default",
     "code" varchar(50) COLLATE "pg_catalog"."default",
     "value" varchar(20) COLLATE "pg_catalog"."default",
     "order_num" int8,
     "note" text COLLATE "pg_catalog"."default",
-    "who_created" varchar(32) COLLATE "pg_catalog"."default",
+    "who_created" varchar(36) COLLATE "pg_catalog"."default",
     "when_created" varchar(20) COLLATE "pg_catalog"."default",
-    "who_modified" varchar(32) COLLATE "pg_catalog"."default",
+    "who_modified" varchar(36) COLLATE "pg_catalog"."default",
     "when_modified" varchar(20) COLLATE "pg_catalog"."default",
     "app_id" varchar(36) COLLATE "pg_catalog"."default"
     )
@@ -437,7 +437,7 @@ CREATE TABLE IF NOT EXISTS "sys_dict_item" (
 -- Table structure for sys_file
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "sys_file" (
-    "id" varchar(32) COLLATE "pg_catalog"."default" NOT NULL,
+    "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
     "file_name" varchar(100) COLLATE "pg_catalog"."default",
     "file_original_name" varchar(100) COLLATE "pg_catalog"."default",
     "file_size" int8,
@@ -447,9 +447,9 @@ CREATE TABLE IF NOT EXISTS "sys_file" (
     "save_type" int8,
     "file_path" varchar(100) COLLATE "pg_catalog"."default",
     "file_content" text COLLATE "pg_catalog"."default",
-    "who_created" varchar(32) COLLATE "pg_catalog"."default",
+    "who_created" varchar(36) COLLATE "pg_catalog"."default",
     "when_created" varchar(20) COLLATE "pg_catalog"."default",
-    "who_modified" varchar(32) COLLATE "pg_catalog"."default",
+    "who_modified" varchar(36) COLLATE "pg_catalog"."default",
     "when_modified" varchar(20) COLLATE "pg_catalog"."default",
     "app_id" varchar(36) COLLATE "pg_catalog"."default"
     )
@@ -462,15 +462,15 @@ CREATE TABLE IF NOT EXISTS "sys_logic_flow" (
     "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
     "name" varchar(255) COLLATE "pg_catalog"."default",
     "flow_id" varchar(36) COLLATE "pg_catalog"."default",
-    "application_id" varchar(32) COLLATE "pg_catalog"."default",
+    "application_id" varchar(36) COLLATE "pg_catalog"."default",
     "tags" varchar(255) COLLATE "pg_catalog"."default",
     "in_argv" text COLLATE "pg_catalog"."default",
     "out_argv" text COLLATE "pg_catalog"."default",
     "sub_flow_ids" text COLLATE "pg_catalog"."default",
     "note" varchar(255) COLLATE "pg_catalog"."default",
-    "who_created" varchar(32) COLLATE "pg_catalog"."default",
+    "who_created" varchar(36) COLLATE "pg_catalog"."default",
     "when_created" varchar(20) COLLATE "pg_catalog"."default",
-    "who_modified" varchar(32) COLLATE "pg_catalog"."default",
+    "who_modified" varchar(36) COLLATE "pg_catalog"."default",
     "when_modified" varchar(20) COLLATE "pg_catalog"."default",
     "app_id" varchar(36) COLLATE "pg_catalog"."default"
     )
@@ -480,9 +480,9 @@ CREATE TABLE IF NOT EXISTS "sys_logic_flow" (
 -- Table structure for sys_login_log
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "sys_login_log" (
-    "id" varchar(32) COLLATE "pg_catalog"."default" NOT NULL,
+    "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
     "operate_time" varchar(20) COLLATE "pg_catalog"."default",
-    "operator" varchar(32) COLLATE "pg_catalog"."default",
+    "operator" varchar(36) COLLATE "pg_catalog"."default",
     "ip" varchar(20) COLLATE "pg_catalog"."default",
     "times" int8,
     "response_code" int8,
@@ -495,9 +495,9 @@ CREATE TABLE IF NOT EXISTS "sys_login_log" (
 -- Table structure for sys_menu
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "sys_menu" (
-    "id" varchar(32) COLLATE "pg_catalog"."default" NOT NULL,
+    "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
     "name" varchar(50) COLLATE "pg_catalog"."default",
-    "parent_id" varchar(32) COLLATE "pg_catalog"."default",
+    "parent_id" varchar(36) COLLATE "pg_catalog"."default",
     "icon" varchar(50) COLLATE "pg_catalog"."default",
     "code" varchar(50) COLLATE "pg_catalog"."default",
     "router_path" varchar(255) COLLATE "pg_catalog"."default",
@@ -510,9 +510,9 @@ CREATE TABLE IF NOT EXISTS "sys_menu" (
     "path" text COLLATE "pg_catalog"."default",
     "order_num" int8 DEFAULT '0'::bigint,
     "status" int8 DEFAULT '1'::bigint,
-    "who_created" varchar(32) COLLATE "pg_catalog"."default",
+    "who_created" varchar(36) COLLATE "pg_catalog"."default",
     "when_created" varchar(20) COLLATE "pg_catalog"."default",
-    "who_modified" varchar(32) COLLATE "pg_catalog"."default",
+    "who_modified" varchar(36) COLLATE "pg_catalog"."default",
     "when_modified" varchar(20) COLLATE "pg_catalog"."default",
     "app_id" varchar(36) COLLATE "pg_catalog"."default",
     "data_type" int8,
@@ -568,8 +568,8 @@ CREATE TABLE IF NOT EXISTS "sys_notice_record" (
 -- Table structure for sys_online_user
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "sys_online_user" (
-    "id" varchar(32) COLLATE "pg_catalog"."default" NOT NULL,
-    "user_id" varchar(32) COLLATE "pg_catalog"."default",
+    "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
+    "user_id" varchar(36) COLLATE "pg_catalog"."default",
     "login_time" varchar(20) COLLATE "pg_catalog"."default",
     "login_ip" varchar(20) COLLATE "pg_catalog"."default",
     "login_token" varchar(1024) COLLATE "pg_catalog"."default",
@@ -583,12 +583,12 @@ CREATE TABLE IF NOT EXISTS "sys_online_user" (
 -- Table structure for sys_operate_log
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "sys_operate_log" (
-    "id" varchar(32) COLLATE "pg_catalog"."default" NOT NULL,
+    "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
     "module" varchar(100) COLLATE "pg_catalog"."default",
     "action" varchar(255) COLLATE "pg_catalog"."default",
     "url" varchar(255) COLLATE "pg_catalog"."default",
     "operate_time" varchar(20) COLLATE "pg_catalog"."default",
-    "operator" varchar(32) COLLATE "pg_catalog"."default",
+    "operator" varchar(36) COLLATE "pg_catalog"."default",
     "ip" varchar(20) COLLATE "pg_catalog"."default",
     "times" int8,
     "request_body" text COLLATE "pg_catalog"."default",
@@ -603,14 +603,14 @@ CREATE TABLE IF NOT EXISTS "sys_operate_log" (
 -- Table structure for sys_role
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "sys_role" (
-    "id" varchar(32) COLLATE "pg_catalog"."default" NOT NULL,
+    "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
     "name" varchar(50) COLLATE "pg_catalog"."default" NOT NULL,
     "code" varchar(50) COLLATE "pg_catalog"."default" NOT NULL,
     "note" text COLLATE "pg_catalog"."default",
     "status" int8,
-    "who_created" varchar(32) COLLATE "pg_catalog"."default",
+    "who_created" varchar(36) COLLATE "pg_catalog"."default",
     "when_created" varchar(20) COLLATE "pg_catalog"."default",
-    "who_modified" varchar(32) COLLATE "pg_catalog"."default",
+    "who_modified" varchar(36) COLLATE "pg_catalog"."default",
     "when_modified" varchar(20) COLLATE "pg_catalog"."default",
     "app_id" varchar(36) COLLATE "pg_catalog"."default"
     )
@@ -620,10 +620,10 @@ CREATE TABLE IF NOT EXISTS "sys_role" (
 -- Table structure for sys_role_menu
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "sys_role_menu" (
-    "id" varchar(32) COLLATE "pg_catalog"."default" NOT NULL,
-    "sys_menu_id" varchar(32) COLLATE "pg_catalog"."default",
+    "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
+    "sys_menu_id" varchar(36) COLLATE "pg_catalog"."default",
     "sys_role_id" varchar(50) COLLATE "pg_catalog"."default",
-    "who_created" varchar(32) COLLATE "pg_catalog"."default",
+    "who_created" varchar(36) COLLATE "pg_catalog"."default",
     "when_created" varchar(20) COLLATE "pg_catalog"."default",
     "app_id" varchar(36) COLLATE "pg_catalog"."default"
     )
@@ -633,11 +633,11 @@ CREATE TABLE IF NOT EXISTS "sys_role_menu" (
 -- Table structure for sys_task
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "sys_task" (
-    "id" varchar(32) COLLATE "pg_catalog"."default" NOT NULL,
+    "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
     "name" varchar(100) COLLATE "pg_catalog"."default",
     "cron" varchar(50) COLLATE "pg_catalog"."default",
     "distributed" int8,
-    "application_id" varchar(32) COLLATE "pg_catalog"."default",
+    "application_id" varchar(36) COLLATE "pg_catalog"."default",
     "task_type" int8 DEFAULT '1'::bigint,
     "task_resource_id" varchar(36) COLLATE "pg_catalog"."default",
     "class_name" varchar(255) COLLATE "pg_catalog"."default",
@@ -651,9 +651,9 @@ CREATE TABLE IF NOT EXISTS "sys_task" (
     "lock_for_least" int8 DEFAULT '1'::bigint,
     "lock_for_time" varchar(20) COLLATE "pg_catalog"."default",
     "note" text COLLATE "pg_catalog"."default",
-    "who_created" varchar(32) COLLATE "pg_catalog"."default",
+    "who_created" varchar(36) COLLATE "pg_catalog"."default",
     "when_created" varchar(20) COLLATE "pg_catalog"."default",
-    "who_modified" varchar(32) COLLATE "pg_catalog"."default",
+    "who_modified" varchar(36) COLLATE "pg_catalog"."default",
     "when_modified" varchar(20) COLLATE "pg_catalog"."default",
     "app_id" varchar(36) COLLATE "pg_catalog"."default"
     )
@@ -662,9 +662,9 @@ CREATE TABLE IF NOT EXISTS "sys_task" (
 -- Table structure for sys_unit
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "sys_unit" (
-    "id" varchar(32) COLLATE "pg_catalog"."default" NOT NULL,
+    "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
     "name" varchar(50) COLLATE "pg_catalog"."default",
-    "parent_id" varchar(32) COLLATE "pg_catalog"."default",
+    "parent_id" varchar(36) COLLATE "pg_catalog"."default",
     "path" text COLLATE "pg_catalog"."default",
     "leader" varchar(255) COLLATE "pg_catalog"."default",
     "mobile" varchar(20) COLLATE "pg_catalog"."default",
@@ -672,9 +672,9 @@ CREATE TABLE IF NOT EXISTS "sys_unit" (
     "status" int8 DEFAULT '1'::bigint,
     "note" text COLLATE "pg_catalog"."default",
     "order_num" int8 DEFAULT '0'::bigint,
-    "who_created" varchar(32) COLLATE "pg_catalog"."default",
+    "who_created" varchar(36) COLLATE "pg_catalog"."default",
     "when_created" varchar(20) COLLATE "pg_catalog"."default",
-    "who_modified" varchar(32) COLLATE "pg_catalog"."default",
+    "who_modified" varchar(36) COLLATE "pg_catalog"."default",
     "when_modified" varchar(20) COLLATE "pg_catalog"."default",
     "app_id" varchar(36) COLLATE "pg_catalog"."default"
     )
@@ -691,13 +691,13 @@ CREATE TABLE IF NOT EXISTS "sys_user" (
     "mobile" varchar(20) COLLATE "pg_catalog"."default",
     "email" varchar(50) COLLATE "pg_catalog"."default",
     "sex" int8,
-    "sys_unit_id" varchar(32) COLLATE "pg_catalog"."default",
+    "sys_unit_id" varchar(36) COLLATE "pg_catalog"."default",
     "post" varchar(50) COLLATE "pg_catalog"."default",
     "status" int8 DEFAULT '1'::bigint,
     "note" text COLLATE "pg_catalog"."default",
-    "who_created" varchar(32) COLLATE "pg_catalog"."default",
+    "who_created" varchar(36) COLLATE "pg_catalog"."default",
     "when_created" varchar(20) COLLATE "pg_catalog"."default",
-    "who_modified" varchar(32) COLLATE "pg_catalog"."default",
+    "who_modified" varchar(36) COLLATE "pg_catalog"."default",
     "when_modified" varchar(20) COLLATE "pg_catalog"."default",
     "deleted" int8 DEFAULT '0'::bigint,
     "avatar" varchar(255) COLLATE "pg_catalog"."default",
@@ -710,9 +710,9 @@ CREATE TABLE IF NOT EXISTS "sys_user" (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "sys_user_role" (
     "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
-    "sys_user_id" varchar(32) COLLATE "pg_catalog"."default",
-    "sys_role_id" varchar(32) COLLATE "pg_catalog"."default",
-    "who_created" varchar(32) COLLATE "pg_catalog"."default",
+    "sys_user_id" varchar(36) COLLATE "pg_catalog"."default",
+    "sys_role_id" varchar(36) COLLATE "pg_catalog"."default",
+    "who_created" varchar(36) COLLATE "pg_catalog"."default",
     "when_created" varchar(20) COLLATE "pg_catalog"."default",
     "app_id" varchar(36) COLLATE "pg_catalog"."default"
     )
@@ -725,9 +725,9 @@ CREATE TABLE IF NOT EXISTS "sys_view_model" (
     "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
     "name" varchar(50) COLLATE "pg_catalog"."default",
     "note" text COLLATE "pg_catalog"."default",
-    "who_created" varchar(32) COLLATE "pg_catalog"."default",
+    "who_created" varchar(36) COLLATE "pg_catalog"."default",
     "when_created" varchar(20) COLLATE "pg_catalog"."default",
-    "who_modified" varchar(32) COLLATE "pg_catalog"."default",
+    "who_modified" varchar(36) COLLATE "pg_catalog"."default",
     "when_modified" varchar(20) COLLATE "pg_catalog"."default",
     "deleted" int8 DEFAULT '0'::bigint,
     "tag" varchar(100) COLLATE "pg_catalog"."default"
@@ -738,17 +738,17 @@ CREATE TABLE IF NOT EXISTS "sys_view_model" (
 -- Table structure for sys_view_model_field
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "sys_view_model_field" (
-    "id" varchar(32) COLLATE "pg_catalog"."default",
-    "view_model_id" varchar(32) COLLATE "pg_catalog"."default",
+    "id" varchar(36) COLLATE "pg_catalog"."default",
+    "view_model_id" varchar(36) COLLATE "pg_catalog"."default",
     "field" varchar(50) COLLATE "pg_catalog"."default",
     "label" varchar(50) COLLATE "pg_catalog"."default",
     "type" varchar(20) COLLATE "pg_catalog"."default",
     "format_type" varchar(20) COLLATE "pg_catalog"."default",
     "format_pattern" varchar(50) COLLATE "pg_catalog"."default",
     "default_text" varchar(50) COLLATE "pg_catalog"."default",
-    "who_created" varchar(32) COLLATE "pg_catalog"."default",
+    "who_created" varchar(36) COLLATE "pg_catalog"."default",
     "when_created" varchar(20) COLLATE "pg_catalog"."default",
-    "who_modified" varchar(32) COLLATE "pg_catalog"."default",
+    "who_modified" varchar(36) COLLATE "pg_catalog"."default",
     "when_modified" varchar(20) COLLATE "pg_catalog"."default",
     "hidden" int8 DEFAULT '0'::bigint,
     "order_num" int8 DEFAULT '0'::bigint
@@ -759,12 +759,12 @@ CREATE TABLE IF NOT EXISTS "sys_view_model_field" (
 -- Table structure for sys_view_model_flow
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "sys_view_model_flow" (
-    "id" varchar(32) COLLATE "pg_catalog"."default" NOT NULL,
+    "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
     "flow_id" varchar(36) COLLATE "pg_catalog"."default",
-    "view_model_id" varchar(32) COLLATE "pg_catalog"."default",
-    "who_created" varchar(32) COLLATE "pg_catalog"."default",
+    "view_model_id" varchar(36) COLLATE "pg_catalog"."default",
+    "who_created" varchar(36) COLLATE "pg_catalog"."default",
     "when_created" varchar(20) COLLATE "pg_catalog"."default",
-    "who_modified" varchar(32) COLLATE "pg_catalog"."default",
+    "who_modified" varchar(36) COLLATE "pg_catalog"."default",
     "when_modified" timestamp(6)
     )
 ;
