@@ -64,14 +64,14 @@ CREATE TABLE IF NOT EXISTS `kfaas_lib`
 
 CREATE TABLE IF NOT EXISTS `sys_i18n`
 (
-    `id`            varchar(32)  NOT NULL,
+    `id`            varchar(36)  NOT NULL,
     `i18n_key`      varchar(255) NOT NULL,
     `message`       text NULL,
-    `app_id`        varchar(32) NULL DEFAULT NULL,
+    `app_id`        varchar(36) NULL DEFAULT NULL,
     `when_created`  varchar(20) NULL DEFAULT NULL,
-    `who_created`   varchar(32) NULL DEFAULT NULL,
+    `who_created`   varchar(36) NULL DEFAULT NULL,
     `when_modified` varchar(20) NULL DEFAULT NULL,
-    `who_modified`  varchar(32) NULL DEFAULT NULL,
+    `who_modified`  varchar(36) NULL DEFAULT NULL,
     PRIMARY KEY (`id`)
 );
 
