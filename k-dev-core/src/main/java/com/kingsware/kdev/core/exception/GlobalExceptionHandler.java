@@ -1,8 +1,11 @@
 package com.kingsware.kdev.core.exception;
 
 import com.kingsware.kdev.core.bean.BaseRet;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.enums.RetEnum;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
+import com.kingsware.kdev.core.orm.exception.TransactionException;
+import com.kingsware.kdev.core.util.ExceptionUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -29,7 +32,48 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = OrmDbException.class)
     @ResponseBody
     public BaseRet<?> ormExceptionHandler(HttpServletRequest request, OrmDbException e) {
-        return BaseRet.failMessage(e.getMessage());
+        String devMode = SpringContext.getProperties("app.mode.dev", "true");
+        String message = String.format("数据库操作异常:%s", e.getMessage());
+        if ("true".equals(devMode)) {
+            return BaseRet.failMessage(message, e.getKlog(), e.getExceptionTrace());
+        }
+        else {
+            return BaseRet.failMessage(message);
+        }
+
+    }
+
+    /**
+     * 业务异常
+     */
+    @ExceptionHandler(value = Exception.class)
+    @ResponseBody
+    public BaseRet<?> exceptionHandler(HttpServletRequest request, Exception e) {
+        String devMode = SpringContext.getProperties("app.mode.dev", "true");
+        String message = String.format("系统内部异常:%s", e.getMessage());
+        if ("true".equals(devMode)) {
+            return BaseRet.failMessage(message, null, ExceptionUtils.getStackTrace(e));
+        }
+        else {
+            return BaseRet.failMessage(message);
+        }
+
+    }
+
+    /**
+     * 业务异常
+     */
+    @ExceptionHandler(value = TransactionException.class)
+    @ResponseBody
+    public BaseRet<?> transactionExceptionHandler(HttpServletRequest request, TransactionException e) {
+        String devMode = SpringContext.getProperties("app.mode.dev", "true");
+        if ("true".equals(devMode)) {
+            return BaseRet.failMessage(e.getMessage(), e.getKlog(), e.getExceptionTrace());
+        }
+        else {
+            return BaseRet.failMessage(e.getMessage());
+        }
+
     }
 
     /**

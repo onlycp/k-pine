@@ -273,7 +273,7 @@ public class DynamicTask implements CommandLineRunner {
                 }
                 if (task instanceof KRunner) {
                     ((KRunner)task).runNow();
-                    log.info("定时任务启动时即运行:{}", task.name());
+//                    log.info("定时任务启动时即运行:{}", task.name());
                 }
             } catch (Exception e) {
                 log.error("定时类扫描初始化失败:{}" , e.getMessage());

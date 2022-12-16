@@ -39,9 +39,9 @@ public class SysSqlInitialize implements SystemInitialize {
     @Override
     public void execute() {
         List<ExecutionFile> fileList = getFileList(getMaxExecuteVersion());
-        log.info("初始化数据... starting");
+        //log.info("初始化数据... starting");
         fileList.stream().sorted((Comparator.comparingInt(ExecutionFile::getVersion))).forEach(this::executeSqlFile);
-        log.info("初始化数据... end");
+        //log.info("初始化数据... end");
     }
 
     private int getMaxExecuteVersion() {

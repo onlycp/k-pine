@@ -22,6 +22,17 @@ public class BaseRet<T> implements Serializable {
     /** 日志 **/
     private String log;
 
+    public String getExceptionStack() {
+        return exceptionStack;
+    }
+
+    public void setExceptionStack(String exceptionStack) {
+        this.exceptionStack = exceptionStack;
+    }
+
+    /** 错误堆栈 **/
+    private String exceptionStack;
+
     public BaseRet() {
     }
 
@@ -81,7 +92,21 @@ public class BaseRet<T> implements Serializable {
      * @return      返回成功结果
      */
     public static <T> BaseRet<T> failMessage(String message) {
-        return new BaseRet<>(RetEnum.SERVICE_FAIL.getCode(), message, null);
+        BaseRet ret = new BaseRet<>(RetEnum.SERVICE_FAIL.getCode(), message, null);
+        return ret;
+    }
+
+    public static <T> BaseRet<T> failMessage(String message, String klog) {
+        BaseRet ret = new BaseRet<>(RetEnum.SERVICE_FAIL.getCode(), message, null);
+        ret.setLog(klog);
+        return ret;
+    }
+
+    public static <T> BaseRet<T> failMessage(String message, String klog, String exceptionStack) {
+        BaseRet ret = new BaseRet<>(RetEnum.SERVICE_FAIL.getCode(), message, null);
+        ret.setLog(klog);
+        ret.setExceptionStack(exceptionStack);
+        return ret;
     }
 
     /**

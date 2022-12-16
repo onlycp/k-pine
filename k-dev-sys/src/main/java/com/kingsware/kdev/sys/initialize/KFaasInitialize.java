@@ -166,8 +166,13 @@ public class KFaasInitialize implements SystemInitialize {
                 // 需要先初始化数据源
                 initBaseFlow();
                 // 创建数据库
-                String createSchemaSql = String.format("CREATE DATABASE IF NOT EXISTS `%s` DEFAULT CHARSET utf8 COLLATE utf8_general_ci;",  dbName);
-                DB.byName(initDs.getSourceName()).executeUpdateSql(createSchemaSql);
+                try {
+                    String createSchemaSql = String.format("CREATE DATABASE IF NOT EXISTS `%s` DEFAULT CHARSET utf8 COLLATE utf8_general_ci;",  dbName);
+                    DB.byName(initDs.getSourceName()).executeUpdateSql(createSchemaSql);
+                }
+                catch (Exception ignored) {
+                }
+
             }
             else if ("postgresql".equalsIgnoreCase(jdbcUrl.getDbType())) {
                 jdbcUrl.setDbName("postgres");
@@ -188,14 +193,16 @@ public class KFaasInitialize implements SystemInitialize {
                 // 需要先初始化数据源
                 initBaseFlow();
                 // 创建数据库
-                // 先判断数据库是否存在在
-                long count = DB.byName(initDs.getSourceName()).findCount(String.format("select count(1) from pg_database where datname = '%s'", dbName));
-                if (count == 0) {
-                    String createSchemaSql = String.format("CREATE DATABASE \"%s\";",  dbName);
-                    DB.byName(initDs.getSourceName()).executeUpdateSql(createSchemaSql);
+                try {
+                    // 先判断数据库是否存在在
+                    long count = DB.byName(initDs.getSourceName()).findCount(String.format("select count(1) from pg_database where datname = '%s'", dbName));
+                    if (count == 0) {
+                        String createSchemaSql = String.format("CREATE DATABASE \"%s\";",  dbName);
+                        DB.byName(initDs.getSourceName()).executeUpdateSql(createSchemaSql);
+                    }
                 }
-
-
+                catch (Exception ignored) {
+                }
             }
         }
         finally {

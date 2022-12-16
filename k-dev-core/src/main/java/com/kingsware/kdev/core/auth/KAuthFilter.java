@@ -13,6 +13,7 @@ import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.config.MyHttpServletRequestWrapper;
 import com.kingsware.kdev.core.context.ClientInfo;
 import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.enums.RetEnum;
 import com.kingsware.kdev.core.excel.ExcelWorker;
 import com.kingsware.kdev.core.excel.KExcel;
@@ -124,13 +125,14 @@ public class KAuthFilter implements Filter {
             if (url.contains("//")) {
                 url = url.replaceAll("//", "/");
             }
+            String apiUrlPrefix = request.getContextPath() + "/api";
             // 如果是静态文件
-            if (!url.startsWith("/api") &&  StringUtils.isEmpty(contextPath)) {
+            if (!url.startsWith(apiUrlPrefix) ) {
                 filterChain.doFilter(wrapperRequest, response);
                 return;
             }
-            if (url.startsWith("/api"))  {
-                contextPath = "/api";
+            if (url.startsWith(apiUrlPrefix))  {
+                contextPath = apiUrlPrefix;
             }
             // 获取配置的接口信息
             String path = url.replaceFirst(contextPath, "");
@@ -180,15 +182,27 @@ public class KAuthFilter implements Filter {
                 callByFlow(request, response, api, path, argvMap);
             }
         }
-        catch (BusinessException | OrmDbException e) {
+        catch (BusinessException e) {
             errorMessage = e.getMessage();
             responseCode = RetEnum.SERVICE_FAIL.getCode();
             ServletUtil.responseJson(response, BaseRet.failMessage(e.getMessage()));
         }
+        catch (OrmDbException e) {
+            errorMessage = e.getMessage();
+            responseCode = RetEnum.SERVICE_FAIL.getCode();
+            String devMode = SpringContext.getProperties("app.mode.dev", "true");
+            if ("true".equals(devMode)) {
+                ServletUtil.responseJson(response, BaseRet.failMessage(e.getMessage(), e.getKlog(), e.getExceptionTrace()));
+            }
+            else {
+                ServletUtil.responseJson(response, BaseRet.failMessage(e.getMessage()));
+            }
+
+        }
         catch (UnauthorizedException e) {
             errorMessage = e.getMessage();
             responseCode = RetEnum.UNAUTHORIZED.getCode();
-            log.error("用户未登录，接口路径:{}, 请求方法:{}", url, method);
+            log.error("用户未登录，接口路径:{}, 请求方法:{}， 异常信息:{}", url, method, e.getMessage());
             ServletUtil.responseJson(response, BaseRet.fail(e.getMessage(), RetEnum.UNAUTHORIZED.getCode()));
         }
         catch (LicenseException e) {

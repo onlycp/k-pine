@@ -30,6 +30,7 @@ import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
+import com.kingsware.kdev.core.orm.annotation.Transactional;
 import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.*;
@@ -69,7 +70,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     @Resource
     private EncryptProperties encryptProperties;
 
-    @Value("${encrypt.aes.secret}")
+    @Value("${encrypt.aes.secret:PsLZlcuUJBUB8yPo}")
     private String aesSecret;
 
     @Resource
@@ -173,6 +174,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     }
 
     @Override
+    @Transactional
     public void edit(SysUserArgv argv) {
         SysUser model = DB.findById(SysUser.class, argv.getId());
         model.setRealName(argv.getRealName());
@@ -345,6 +347,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     }
 
     @Override
+
     public void delete(MultiIdArgv argv) {
         for (String id : argv.getIds()) {
             // 移除关联的部门

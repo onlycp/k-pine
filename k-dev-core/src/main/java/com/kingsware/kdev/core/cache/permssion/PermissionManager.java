@@ -42,7 +42,7 @@ public class PermissionManager {
      * @param roleIds   角色id
      */
     public void refreshPermissions(String roleIds) {
-        log.info("刷新权限: {}", roleIds);
+//        log.info("刷新权限: {}", roleIds);
         // 如果是管理员，直接跳过
         if (AccessManager.getInstance().isSupperAdmin(roleIds)) {
             return;
@@ -104,7 +104,7 @@ public class PermissionManager {
      * 刷新权限
      */
     public void refreshAll() {
-        log.info("刷新权限");
+//        log.info("刷新权限");
         Set<String> keys = permissionMap.keySet();
         for (String key: keys) {
             refreshPermissions(key);

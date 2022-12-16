@@ -129,4 +129,11 @@ public interface KdbApi {
 
     @SneakyThrows
     File downloadFile(String path, String fileName, String prefix, String subfix);
+
+    /**
+     * 事务接口
+     * @param transactionInfo
+     */
+    String transaction(TransactionInfo transactionInfo);
+
 }

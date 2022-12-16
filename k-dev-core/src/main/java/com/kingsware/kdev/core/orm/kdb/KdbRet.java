@@ -13,6 +13,8 @@ import lombok.Data;
 public class KdbRet<T> {
     /** 响应码 **/
     private int errorCode;
+    /** 异常堆栈信息 **/
+    private String stackTrace;
     /** 信息 **/
     private String message;
     /** 响应体 **/

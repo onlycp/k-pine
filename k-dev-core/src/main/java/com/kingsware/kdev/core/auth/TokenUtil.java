@@ -65,7 +65,7 @@ public class TokenUtil {
         // 实例一个令牌对象
         AuthToken authToken = new AuthToken();
         authToken.setIp(ip);
-        authToken.setIss(iss);
+//        authToken.setIss(iss);
         authToken.setWhenCreated(System.currentTimeMillis());
         authToken.setUserInfo(userInfo);
         authToken.setKSessionId(sessionId);
@@ -91,12 +91,14 @@ public class TokenUtil {
     public static BaseUserInfo getUserInfoByToken(String token, String dataSecret,  String iss, String ip, int tokenExpireMinutes, int mockSessionExpireMinutes) {
         // 如果令牌为空
         if (StringUtils.isEmpty(token)) {
+            logger.info("token: {}", token);
             throw new UnauthorizedException(I18n.t("auth. unauthorized-e001", "用户未登录，错误码: E001"));
         }
         // 解密令牌
         String decryptToken = AESUtil.decrypt(token, dataSecret);
         // 如果令牌无法解密
         if (StringUtils.isEmpty(decryptToken)) {
+            logger.info("token: {}", token);
             throw new UnauthorizedException(I18n.t("auth. unauthorized-e002", "用户未登录，错误码: E002"));
         }
         AuthToken authToken;
@@ -107,18 +109,20 @@ public class TokenUtil {
             throw new UnauthorizedException(I18n.t("auth. unauthorized-e003", "用户未登录，错误码: E003"));
         }
         // 校验发行机构
-        if (!iss.equals(authToken.getIss())) {
-            throw new UnauthorizedException(I18n.t("auth. unauthorized-e004", "用户未登录，错误码: E004"));
-        }
+//        if (!iss.equals(authToken.getIss())) {
+//            throw new UnauthorizedException(I18n.t("auth. unauthorized-e004", "用户未登录，错误码: E004"));
+//        }
         // 校验ip
         if (!ip.equals(authToken.getIp())) {
-            throw new UnauthorizedException(I18n.t("auth. unauthorized-e005", "用户未登录，错误码: E005"));
+            logger.warn("current's Ip:{}, token's IP:{}", ip, authToken.getIp());
+            //throw new UnauthorizedException(I18n.t("auth. unauthorized-e005", "用户未登录，错误码: E005"));
         }
-        // 当模拟session的有效时间小于0时，走jwt的校验
-        if (mockSessionExpireMinutes <= 0) {
+        // 当模拟session的有效时间小于0时，走jwt的校验, 或者登录30秒之内
+        if (mockSessionExpireMinutes <= 0 || (authToken.getWhenCreated() + 1000*30) > System.currentTimeMillis()) {
             // 校验令牌有效性
             long expireTime = authToken.getWhenCreated() + ((long) tokenExpireMinutes * 60 * 1000);
             if (expireTime < System.currentTimeMillis()) {
+                logger.info("token: {}", token);
                 throw new UnauthorizedException(I18n.t("auth. unauthorized-e006", "登录已失效"));
             }
         }
@@ -126,6 +130,7 @@ public class TokenUtil {
         else {
             TokenSession ts = SessionManager.getInstance().getByToken(authToken.getUserInfo().getId(), token);
             if (ts == null) {
+                logger.info("token: {}", token);
                 throw new UnauthorizedException(I18n.t("auth. unauthorized-e007", "登录会话不存在，请重新登录"));
             }
             long expireTime = ts.getActiveTime().getTime() + ((long) mockSessionExpireMinutes * 60 * 1000);
@@ -136,6 +141,7 @@ public class TokenUtil {
                     DB.delete(onlineUser);
                     SessionManager.getInstance().removeSession(onlineUser.getUserId(), onlineUser.getLoginToken());
                 }
+                logger.info("token: {}", token);
                 throw new UnauthorizedException(I18n.t("auth. unauthorized-e006", "登录已失效"));
             }
         }
@@ -183,7 +189,11 @@ public class TokenUtil {
         String auth = request.getHeader(AUTH_HEADER);
         // 如果auth为空，则提示用户登录
         if (StringUtils.isEmpty(auth)) {
-            return "";
+            auth = request.getParameter("token");
+            if (StringUtils.isEmpty(auth)) {
+                return "";
+            }
+
         }
         // 获取当前令牌
         return auth.replace(AUTH_PREFIX, "");
