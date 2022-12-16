@@ -174,7 +174,6 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     }
 
     @Override
-    @Transactional
     public void edit(SysUserArgv argv) {
         SysUser model = DB.findById(SysUser.class, argv.getId());
         model.setRealName(argv.getRealName());
