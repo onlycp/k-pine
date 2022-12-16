@@ -19,4 +19,6 @@ public class SysFlowDebugRet {
     private String responseBody;
     /** 日志 **/
     private String log;
+    /** 异常堆栈 **/
+    private String exceptionStack;
 }

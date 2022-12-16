@@ -17,4 +17,6 @@ public class KdbFlowResult {
     private Object data;
     /** 日志信息 **/
     private String log;
+    /** 异常堆栈 **/
+    private String exceptionStack;
 }

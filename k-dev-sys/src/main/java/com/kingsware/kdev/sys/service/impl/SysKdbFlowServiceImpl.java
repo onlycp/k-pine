@@ -546,6 +546,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         ret.setTakeMs(t2 - t1);
         ret.setResponseBody(JsonUtil.toJson(result.getData()));
         ret.setLog(result.getLog());
+        ret.setExceptionStack(result.getExceptionStack());
         return ret;
     }
 
