@@ -6,6 +6,7 @@ import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.KFlowContext;
@@ -86,7 +87,7 @@ public class SysConfigServiceImpl extends BaseServiceImpl implements SysConfigSe
         // 执行校验
         checker.checkUnique();
     }
-    
+
     @Override
     @SuppressWarnings("unchecked")
     public PageDataRet<SysConfigRet> query(SysConfigQueryArgv argv) {
@@ -120,7 +121,7 @@ public class SysConfigServiceImpl extends BaseServiceImpl implements SysConfigSe
     public Map<String, Object> getSysConfig(HttpServletRequest request) {
         String ip = ServletUtil.getClientIp(request);
         String token = TokenUtil.getTokenString(request);
-        BaseUserInfo userInfo = TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), ip, appAuthProperties.getTokenExpireMinutes(), appAuthProperties.getMockSessionExpireMinutes());
+        //BaseUserInfo userInfo = TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), ip, appAuthProperties.getTokenExpireMinutes(), appAuthProperties.getMockSessionExpireMinutes());
 
         List<Object> codeList = new ArrayList<>();
         codeList.add("application.name");
@@ -129,7 +130,7 @@ public class SysConfigServiceImpl extends BaseServiceImpl implements SysConfigSe
         // 拼装sql
         SqlWrapper wrapper = new SqlWrapper("select * from sys_config where 1=1 ");
 //        wrapper.in("code", codeList);
-        if (userInfo.getId() == null) {
+        if (KClientContext.getContext().getUserInfo() != null) {
             wrapper.addCondition("code", Op.LIKE, "application.%");
         }
         if (KFlowContext.isDevMode()) {

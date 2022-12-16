@@ -125,13 +125,14 @@ public class KAuthFilter implements Filter {
             if (url.contains("//")) {
                 url = url.replaceAll("//", "/");
             }
+            String apiUrlPrefix = request.getContextPath() + "/api";
             // 如果是静态文件
-            if (!url.startsWith("/api") &&  StringUtils.isEmpty(contextPath)) {
+            if (!url.startsWith(apiUrlPrefix) ) {
                 filterChain.doFilter(wrapperRequest, response);
                 return;
             }
-            if (url.startsWith("/api"))  {
-                contextPath = "/api";
+            if (url.startsWith(apiUrlPrefix))  {
+                contextPath = apiUrlPrefix;
             }
             // 获取配置的接口信息
             String path = url.replaceFirst(contextPath, "");

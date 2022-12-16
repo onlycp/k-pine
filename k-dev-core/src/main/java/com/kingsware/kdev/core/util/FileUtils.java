@@ -225,4 +225,30 @@ public class FileUtils {
         return !pattern.matcher(fileFrom).matches();
     }
 
+    /**
+     * 判断是否是文本文件
+     * @param f
+     * @return
+     * @throws IOException
+     */
+    public static boolean isTextFile(File f) {
+        try {
+            String type = Files.probeContentType(f.toPath());
+            if (type == null) {
+                //type couldn't be determined, assume binary
+                return false;
+            } else if (type.startsWith("text")) {
+                return true;
+            } else {
+                //type isn't text
+                return false;
+            }
+        }
+        catch (Exception e) {
+            log.error("error", e);
+        }
+        return false;
+
+    }
+
 }
