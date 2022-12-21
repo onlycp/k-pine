@@ -131,7 +131,7 @@ public class SysFileController extends BaseController {
     public void downloadWithPath(HttpServletRequest httpServletRequest) throws ServletException, IOException {
         // 获取后面多层目录
         String uri = httpServletRequest.getRequestURI();
-        String prefix = "/"+ Version.V1 + "/sys-files" + "/download/";
+        String prefix = httpServletRequest.getContextPath() + "/"+ Version.V1 + "/sys-files" + "/download/";
         String relativePath = uri.replaceFirst(prefix,"");
 
         sysFileService.download(relativePath);
