@@ -57,12 +57,14 @@ public abstract class KdbApiAbstract implements  KdbApi {
     @Override
     public String addFlow(AddFlowInfo flowInfo) {
        KdbRet<AddFlowInfoRet> ret = post(flowInfo, ADD_FLOW_URL, AddFlowInfoRet.class);
+//       log.info("新增逻辑编排响应:{}", JsonUtil.toJson(ret));
        return ret.getResponseBody().getFlowId();
     }
 
     @Override
     public void editFlow(EditFlowInfo flowInfo) {
         KdbRet ret = post(flowInfo, EDIT_FLOW_URL, String.class);
+//        log.info("编辑逻辑编排响应:{}", JsonUtil.toJson(ret));
         if (ret.getErrorCode() != 0) {
             throw BusinessException.serviceThrow("保存失败,错误信息:" + ret.getMessage());
         }

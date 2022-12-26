@@ -73,6 +73,8 @@ public class KAuthFilter implements Filter {
     @Value("${app.auth.log-ignore-tags:websocket,ping,session}")
     private String logIgnoreTags;
 
+    @Value("${app.mode.dev:false}")
+    private boolean modeDev;
 
 
 
@@ -142,6 +144,8 @@ public class KAuthFilter implements Filter {
             initContext(request, response);
             // 如果是openapi，表示是ignore
             boolean ignore = false;
+            // 是否开发
+            boolean dev = false;
             callType = CallType.CONTROLLER;
             argvMap = ServletUtil.getRequestParams(api, path, request, requestBody);
             // 流程调用方式
@@ -155,11 +159,16 @@ public class KAuthFilter implements Filter {
                 if (apiDefine != null) {
                     apiCode = apiDefine.getApiCode();
                     ignore = apiDefine.isIgnore();
+                    dev = apiDefine.isDev();
                 }
                 else {
                     filterChain.doFilter(wrapperRequest, response);
                     return;
                 }
+            }
+            if ((!modeDev) && dev) {
+                ServletUtil.responseJson(response, BaseRet.fail("发布模式无权访问此接口", RetEnum.ONLY_DEV.getCode()));
+                return;
             }
             // 判断是否开放接口
             isOpenApi = StringUtils.isNotEmpty(apiCode) && apiCode.startsWith(openApiFlag) && api != null;

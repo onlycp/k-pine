@@ -3,7 +3,9 @@ package com.kingsware.kdev.sys.service.impl;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.i18n.I18n;
+import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
@@ -13,6 +15,7 @@ import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysRoleArgv;
 import com.kingsware.kdev.sys.argv.SysRoleMenuArgv;
 import com.kingsware.kdev.sys.argv.SysRoleQueryArgv;
+import com.kingsware.kdev.sys.model.SysMenu;
 import com.kingsware.kdev.sys.model.SysRole;
 import com.kingsware.kdev.sys.model.SysRoleMenu;
 import com.kingsware.kdev.sys.ret.SysRoleRet;
@@ -118,6 +121,7 @@ public class SysRoleServiceImpl extends BaseServiceImpl implements SysRoleServic
         List<String> allMenuIds = DB.findSingleAttributeList(String.class, wrapper.getSql(), wrapper.getParams().toArray(new Object[0]));
         // 转为set
         Set<String> menuIdSet = new HashSet<>();
+
         for (String str: allMenuIds) {
             String[] arr = str.split("/");
             for (String id: arr) {
@@ -128,6 +132,16 @@ public class SysRoleServiceImpl extends BaseServiceImpl implements SysRoleServic
             }
         }
         menuIdSet.addAll(menuIds);
+        // 校验是否越权
+//        if (!KFlowContext.isAdmin()) {
+//            SysMenu
+//            SqlWrapper roleWrapper = new SqlWrapper("select id from sys_menu where 1=1");
+//            wrapper.in("code",  Arrays.asList(KClientContext.getContext().getUserInfo().getPermissions().toArray()));
+//            List<String> myRoleIds = DB.findSingleAttributeList(String.class, roleWrapper.getSql(), roleWrapper.getParams().toArray(new Object[0]));
+//            for (String )
+//
+//        }
+
         List<SysRoleMenu> models = new ArrayList<>();
         for (String menuId: menuIdSet) {
             SysRoleMenu roleMenu = new SysRoleMenu();

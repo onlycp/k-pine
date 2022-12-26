@@ -251,11 +251,8 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
 
             // 如果没有，则新增
             if (functionInfoList.isEmpty() ) {
-                AddFlowInfo addFlowInfo = new AddFlowInfo();
-                addFlowInfo.setContent(flowInfo.getContent());
-                addFlowInfo.setName(flowInfo.getName());
-                addFlowInfo.setDescription(flowInfo.getDescription());
-                DB.kdbApi().addFlow(addFlowInfo);
+                String sql = "insert into flow (flowid,name,content,description) values (?,?,?,?)";
+                DB.byName("kingDB").executeUpdateSql(sql, flowInfo.getFlowId(), flowInfo.getName(), flowInfo.getContent(), flowInfo.getDescription());
             }
             else {
                 EditFlowInfo editFlowInfo = new EditFlowInfo();
@@ -264,6 +261,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 editFlowInfo.setName(flowInfo.getName());
                 editFlowInfo.setDescription(flowInfo.getDescription());
                 DB.kdbApi().editFlow(editFlowInfo);
+                log.info("更新FAAS逻辑编排:{}", editFlowInfo.getName() );
             }
         }
         // faas逻辑
@@ -274,12 +272,8 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             List<Functions> functionInfoList = DB.kdbApi().queryFunction(functionQueryArgv);
             // 如果没有，则新增
             if (functionInfoList.isEmpty() ) {
-                AddFunctionInfo addFunctionInfo = new AddFunctionInfo();
-                addFunctionInfo.setName(functions.getName());
-                addFunctionInfo.setDesc(functions.getDesc());
-                addFunctionInfo.setScript(functions.getScript());
-                addFunctionInfo.setType(functions.getType());
-                DB.kdbApi().addFun(addFunctionInfo);
+                String sql = "insert into functions (id,name,type,desc,script) values (?,?,?,?,?)";
+                DB.byName("kingDB").executeUpdateSql(sql, functions.getId(), functions.getName(), functions.getType(), functions.getDesc(), functions.getScript());
             }
             else {
                 EditFunctionInfo editFunctionInfo = new EditFunctionInfo();

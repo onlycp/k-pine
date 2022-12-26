@@ -20,6 +20,8 @@ public class ApiDefine {
     private String name;
     /** 模块 **/
     private String module;
+    /** 是否开发模式 **/
+    private boolean dev;
     /** url **/
     private String url;
     /** 方法 **/

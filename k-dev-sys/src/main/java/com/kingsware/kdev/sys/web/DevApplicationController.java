@@ -1,6 +1,7 @@
 package com.kingsware.kdev.sys.web;
 
 import com.kingsware.kdev.core.auth.ApiIgnore;
+import com.kingsware.kdev.core.auth.Dev;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -47,6 +48,7 @@ public class DevApplicationController extends BaseController {
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
     @ResponseBody
+    @Dev
     @GetMapping("/query")
     public BaseRet<PageDataRet<DevApplicationRet>> page(DevApplicationQueryArgv argv) {
         return BaseRet.success(devApplicationService.query(argv));
@@ -58,6 +60,7 @@ public class DevApplicationController extends BaseController {
      */
     @ApiOperation(value = "详情 " ,notes = "详情")
     @ResponseBody
+    @Dev
     @GetMapping("/{id}")
     public BaseRet<DevApplicationRet> get(@PathVariable String id) {
         return BaseRet.success(devApplicationService.get(id));
@@ -67,6 +70,7 @@ public class DevApplicationController extends BaseController {
      *  新增
      * @return 提示
      */
+    @Dev
     @ApiOperation(value = "新增 " ,notes = "新增")
     @ResponseBody
     @PostMapping
@@ -83,6 +87,7 @@ public class DevApplicationController extends BaseController {
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @ResponseBody
     @PutMapping
+    @Dev
     public BaseRet<?> edit(@RequestBody DevApplicationArgv argv) {
         devApplicationService.edit(argv);
         return BaseRet.success();
@@ -94,6 +99,7 @@ public class DevApplicationController extends BaseController {
      */
     @ApiOperation(value = "删除 " ,notes = "删除")
     @ResponseBody
+    @Dev
     @PostMapping(value = "/delete")
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         devApplicationService.delete(argv);
@@ -102,6 +108,7 @@ public class DevApplicationController extends BaseController {
 
     @ApiOperation(value = "安装应用 " ,notes = "安装应用")
     @ResponseBody
+    @Dev
     @PostMapping(value = "/install")
     public BaseRet<?> install(@RequestBody DevAppInstallArgv argv) {
         return BaseRet.success(devApplicationService.install(argv));
