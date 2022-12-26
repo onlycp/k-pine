@@ -7,6 +7,7 @@ import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.bean.TreeDataRet;
 import com.kingsware.kdev.core.constants.Version;
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.sys.argv.SysMenuArgv;
 import com.kingsware.kdev.sys.argv.SysMenuQueryArgv;
 import com.kingsware.kdev.sys.ret.SysMenuRet;
@@ -53,6 +54,17 @@ public class SysMenuController extends BaseController {
     public BaseRet<List<TreeDataRet<Object>>> treeOptions(@PathVariable String excludeId, String roleIds, boolean isMobile) {
         return BaseRet.success(SysMenuService.treeOptions(excludeId, roleIds, isMobile));
     }
+
+    /**
+     *  查询树结构
+     * @return 查询树结构
+     */
+    @ApiOperation(value = "我的菜单 " ,notes = "我的菜单")
+    @GetMapping("/my")
+    public BaseRet<List<TreeDataRet<Object>>> my(boolean isMobile) {
+        return BaseRet.success(SysMenuService.treeOptions("0", KClientContext.getContext().getUserInfo().getRoleIds(), isMobile));
+    }
+
 
     /**
      * 详细信息

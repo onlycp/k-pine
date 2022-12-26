@@ -183,6 +183,7 @@ public class SysUserController extends BaseController {
      */
     @ApiOperation(value = "重置密码 " ,notes = "重置密码")
     @PostMapping(value = "/reset-password")
+    @ApiCode("sysinfo:user:resetpwd")
     public BaseRet<?> resetPassword(HttpServletRequest request, @RequestBody SysUserResetPasswordArgv argv) {
         sysUserService.resetPassword(argv);
         return BaseRet.success();
