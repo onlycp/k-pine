@@ -103,10 +103,12 @@ public class KAuthFilter implements Filter {
         }
         ContentCachingResponseWrapper wrapperResponse = new ContentCachingResponseWrapper(response);
 
+
         // 获取请求方式
         String method = request.getMethod().toLowerCase();
         // 获取上下文路径
         String contextPath = request.getContextPath();
+//        log.info("上下文:{},路径:{}", contextPath, request.getRequestURI()  );
         String apiCode = "";
         // 接口信息
         ApiInfo api = null;
@@ -162,6 +164,7 @@ public class KAuthFilter implements Filter {
                     dev = apiDefine.isDev();
                 }
                 else {
+//                    log.info("上下文-2:{},路径:{}", contextPath, request.getRequestURI()  );
                     filterChain.doFilter(wrapperRequest, response);
                     return;
                 }
@@ -502,6 +505,10 @@ public class KAuthFilter implements Filter {
     private ApiDefine getApiDefine(HttpServletRequest request, HttpServletResponse response) {
         // 获取请求路径
         String url = request.getRequestURI();
+        String contextPath = request.getContextPath();
+        if (StringUtils.isNotEmpty(contextPath) && !"/".equals(contextPath)) {
+            url = url.substring(contextPath.length());
+        }
         // 获取请求方式
         String method = request.getMethod().toLowerCase();
         // 获取api

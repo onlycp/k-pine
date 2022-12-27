@@ -30,8 +30,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class LicenseManager {
     private static LicenseManager instance;
-    /** 万能mac **/
-    private final String allPurposeMac = "kingsware@2022";
+
 
     /**
      * license 信息
@@ -156,9 +155,9 @@ public class LicenseManager {
                     for (int i = 0; i < mac.length; i++) {
                         sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
                     }
-                    log.info("license: {}, server:{}", macAddress, sb);
+//                    log.info("license: {}, server:{}", macAddress, sb);
                     if (macAddress.equalsIgnoreCase(sb.toString().trim())) {
-                        log.info("license: {}, server:{} 校验通过", macAddress, sb);
+//                        log.info("license: {}, server:{} 校验通过", macAddress, sb);
                         return true;
                     }
                 }

@@ -1,6 +1,7 @@
 package com.kingsware.kdev.sys.web;
 
 import com.kingsware.kdev.core.auth.ApiCode;
+import com.kingsware.kdev.core.auth.BaseUserInfo;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -14,6 +15,7 @@ import com.kingsware.kdev.sys.ret.SysMenuRet;
 import com.kingsware.kdev.sys.service.SysMenuService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -28,6 +30,7 @@ import java.util.List;
  */
 @Api(value = "部门管理", tags = {"部门管理"})
 @RestController
+@Slf4j
 @RequestMapping("/"+ Version.V1 + "/sys-menus")
 public class SysMenuController extends BaseController {
 
@@ -62,7 +65,14 @@ public class SysMenuController extends BaseController {
     @ApiOperation(value = "我的菜单 " ,notes = "我的菜单")
     @GetMapping("/my")
     public BaseRet<List<TreeDataRet<Object>>> my(boolean isMobile) {
-        return BaseRet.success(SysMenuService.treeOptions("0", KClientContext.getContext().getUserInfo().getRoleIds(), isMobile));
+        try {
+            return BaseRet.success(SysMenuService.treeOptions("0", KClientContext.getContext().getUserInfo().getRoleIds(), isMobile));
+        }
+        catch (Exception e) {
+            log.error("error", e);
+        }
+        return null;
+
     }
 
 
