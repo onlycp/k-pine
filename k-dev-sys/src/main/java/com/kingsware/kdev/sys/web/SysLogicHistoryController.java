@@ -1,6 +1,7 @@
 package com.kingsware.kdev.sys.web;
 
 import com.kingsware.kdev.core.auth.ApiIgnore;
+import com.kingsware.kdev.core.auth.Dev;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -36,6 +37,7 @@ public class SysLogicHistoryController extends BaseController {
      *  查询
      * @return 分页
      */
+    @Dev
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
     public BaseRet<PageDataRet<SysLogicHistoryRet>> page(SysLogicHistoryQueryArgv argv) {
@@ -46,6 +48,7 @@ public class SysLogicHistoryController extends BaseController {
      * 详细信息
      * @return 详细信息
      */
+    @Dev
     @ApiOperation(value = "详情 " ,notes = "详情")
     @GetMapping("/{id}")
     public BaseRet<SysLogicHistoryRet> get(@PathVariable String id) {
@@ -56,6 +59,7 @@ public class SysLogicHistoryController extends BaseController {
      *  新增
      * @return 提示
      */
+    @Dev
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
     @ApiIgnore
@@ -71,6 +75,7 @@ public class SysLogicHistoryController extends BaseController {
      */
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
+    @Dev
     public BaseRet<?> edit(@RequestBody SysLogicHistoryArgv argv) {
         sysLogicHistoryService.edit(argv);
         return BaseRet.success();
@@ -80,6 +85,7 @@ public class SysLogicHistoryController extends BaseController {
      *  删除
      * @return 提示
      */
+    @Dev
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
@@ -92,6 +98,7 @@ public class SysLogicHistoryController extends BaseController {
      *  回滚
      * @return 提示
      */
+    @Dev
     @ApiOperation(value = "回滚 " ,notes = "回滚")
     @PostMapping("/rollback")
     public BaseRet<?> rollback(@RequestBody SysLogicHistoryArgv argv) {

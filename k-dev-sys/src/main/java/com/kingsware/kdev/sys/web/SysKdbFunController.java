@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.Dev;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -35,6 +36,7 @@ public class SysKdbFunController extends BaseController {
      *  查询
      * @return 分页
      */
+    @Dev
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
     public BaseRet<PageDataRet<SysKdbFunRet>> page(SysKdbFunQueryArgv argv) {
@@ -45,6 +47,7 @@ public class SysKdbFunController extends BaseController {
      * 详细信息
      * @return 详细信息
      */
+    @Dev
     @ApiOperation(value = "详情 " ,notes = "详情")
     @GetMapping("/{id}")
     public BaseRet<SysKdbFunRet> get(@PathVariable String id) {
@@ -55,6 +58,7 @@ public class SysKdbFunController extends BaseController {
      *  新增
      * @return 提示
      */
+    @Dev
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
     public BaseRet<?> add(@RequestBody SysKdbFunArgv argv) {
@@ -67,6 +71,7 @@ public class SysKdbFunController extends BaseController {
      *  编辑
      * @return 提示
      */
+    @Dev
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
     public BaseRet<?> edit(@RequestBody SysKdbFunArgv argv) {
@@ -78,6 +83,7 @@ public class SysKdbFunController extends BaseController {
      *  删除
      * @return 提示
      */
+    @Dev
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {

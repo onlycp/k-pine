@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.Dev;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -39,6 +40,7 @@ public class SysKdbFlowController extends BaseController {
      *  查询
      * @return 分页
      */
+    @Dev
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
     public BaseRet<PageDataRet<SysKdbFlowRet>> page(SysKdbFlowQueryArgv argv) {
@@ -59,6 +61,7 @@ public class SysKdbFlowController extends BaseController {
      * 拷贝
      * @return 拷贝
      */
+    @Dev
     @ApiOperation(value = "拷贝 " ,notes = "拷贝")
     @GetMapping("/copy/{id}")
     public BaseRet<?> copy(@PathVariable String id) {
@@ -71,6 +74,7 @@ public class SysKdbFlowController extends BaseController {
      * 详细信息
      * @return 详细信息
      */
+    @Dev
     @ApiOperation(value = "流程定义 " ,notes = "流程定义")
     @GetMapping("/define/{id}")
     public BaseRet<SysFlowDefineRet> getDefine(@PathVariable String id) {
@@ -81,6 +85,7 @@ public class SysKdbFlowController extends BaseController {
      *  新增
      * @return 提示
      */
+    @Dev
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
     public BaseRet<?> add(@RequestBody SysKdbFlowArgv argv) {
@@ -93,6 +98,7 @@ public class SysKdbFlowController extends BaseController {
      *  编辑
      * @return 提示
      */
+    @Dev
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
     public BaseRet<?> edit(@RequestBody SysKdbFlowArgv argv) {
@@ -104,6 +110,7 @@ public class SysKdbFlowController extends BaseController {
      *  编辑流程定义
      * @return 提示
      */
+    @Dev
     @ApiOperation(value = "编辑流程定义 " ,notes = "编辑流程定义")
     @PutMapping("/define")
     public BaseRet<?> edit(@RequestBody SysFlowDefineArgv argv) {
@@ -115,6 +122,7 @@ public class SysKdbFlowController extends BaseController {
      *  删除
      * @return 提示
      */
+    @Dev
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
@@ -126,6 +134,7 @@ public class SysKdbFlowController extends BaseController {
      *  流程调试
      * @return 提示
      */
+    @Dev
     @ApiOperation(value = "流程调试 " ,notes = "流程调试")
     @PostMapping("/debug")
     public BaseRet<SysFlowDebugRet> debug(@RequestBody SysFlowDebugArgv argv) {

@@ -73,6 +73,8 @@ public class KAuthFilter implements Filter {
     @Value("${app.auth.log-ignore-tags:websocket,ping,session}")
     private String logIgnoreTags;
 
+    @Value("${app.mode.dev:false}")
+    private boolean modeDev;
 
 
 
@@ -101,10 +103,12 @@ public class KAuthFilter implements Filter {
         }
         ContentCachingResponseWrapper wrapperResponse = new ContentCachingResponseWrapper(response);
 
+
         // 获取请求方式
         String method = request.getMethod().toLowerCase();
         // 获取上下文路径
         String contextPath = request.getContextPath();
+//        log.info("上下文:{},路径:{}", contextPath, request.getRequestURI()  );
         String apiCode = "";
         // 接口信息
         ApiInfo api = null;
@@ -142,6 +146,8 @@ public class KAuthFilter implements Filter {
             initContext(request, response);
             // 如果是openapi，表示是ignore
             boolean ignore = false;
+            // 是否开发
+            boolean dev = false;
             callType = CallType.CONTROLLER;
             argvMap = ServletUtil.getRequestParams(api, path, request, requestBody);
             // 流程调用方式
@@ -155,11 +161,17 @@ public class KAuthFilter implements Filter {
                 if (apiDefine != null) {
                     apiCode = apiDefine.getApiCode();
                     ignore = apiDefine.isIgnore();
+                    dev = apiDefine.isDev();
                 }
                 else {
+//                    log.info("上下文-2:{},路径:{}", contextPath, request.getRequestURI()  );
                     filterChain.doFilter(wrapperRequest, response);
                     return;
                 }
+            }
+            if ((!modeDev) && dev) {
+                ServletUtil.responseJson(response, BaseRet.fail("发布模式无权访问此接口", RetEnum.ONLY_DEV.getCode()));
+                return;
             }
             // 判断是否开放接口
             isOpenApi = StringUtils.isNotEmpty(apiCode) && apiCode.startsWith(openApiFlag) && api != null;
@@ -493,6 +505,10 @@ public class KAuthFilter implements Filter {
     private ApiDefine getApiDefine(HttpServletRequest request, HttpServletResponse response) {
         // 获取请求路径
         String url = request.getRequestURI();
+        String contextPath = request.getContextPath();
+        if (StringUtils.isNotEmpty(contextPath) && !"/".equals(contextPath)) {
+            url = url.substring(contextPath.length());
+        }
         // 获取请求方式
         String method = request.getMethod().toLowerCase();
         // 获取api

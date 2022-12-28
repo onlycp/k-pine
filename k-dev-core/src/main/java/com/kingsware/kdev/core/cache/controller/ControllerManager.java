@@ -2,6 +2,7 @@ package com.kingsware.kdev.core.cache.controller;
 
 import com.kingsware.kdev.core.auth.ApiCode;
 import com.kingsware.kdev.core.auth.ApiIgnore;
+import com.kingsware.kdev.core.auth.Dev;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.ApiDefine;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
@@ -127,6 +128,7 @@ public class ControllerManager {
                 if (method.isAnnotationPresent(ApiOperation.class)) {
                     apiName = method.getAnnotation(ApiOperation.class).value();
                 }
+                apiDefine.setDev(method.isAnnotationPresent(Dev.class));
                 apiDefine.setName(apiName);
                 apiDefine.setCallMethod(clazz.getName() +"." +method.getName());
                 String actionUrl = "";
