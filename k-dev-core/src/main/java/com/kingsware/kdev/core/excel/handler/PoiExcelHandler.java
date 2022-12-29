@@ -12,6 +12,7 @@ import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.usermodel.*;
 import org.springframework.util.FileCopyUtils;
 
@@ -137,6 +138,17 @@ public class PoiExcelHandler implements KExcelHandler{
                         else {
                             cell.setCellValue(region.getValue().toString());
                         }
+                    }
+                    // 设置校验
+                    if (!region.getItems().isEmpty()) {
+                        DataValidationHelper dvHelper = sheet.getDataValidationHelper();
+                        DataValidationConstraint dvConstraint = dvHelper.createExplicitListConstraint(region.getItems().toArray(new String[0]));
+                        CellRangeAddressList addressList = new CellRangeAddressList(region.getStartCell().getRowIndex(), region.getEndCell().getRowIndex(), region.getStartCell().getColumnIndex(), region.getEndCell().getColumnIndex());
+                        DataValidation validation = dvHelper.createValidation(dvConstraint, addressList);
+                        //这两行设置单元格只能是列表中的内容，否则报错
+                        validation.setSuppressDropDownArrow(true);
+                        validation.setShowErrorBox(true);
+                        sheet.addValidationData(validation);
                     }
                     // 设置格式
                     try {

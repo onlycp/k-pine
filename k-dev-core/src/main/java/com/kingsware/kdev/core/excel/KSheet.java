@@ -105,5 +105,21 @@ public class KSheet {
         return region;
     }
 
+    /**
+     *  增加区域
+     * @param rowIndex1      行号1
+     * @param columnIndex1   列号1
+     * @param rowIndex2      行号2
+     * @param columnIndex2   列号2
+     * @param value         值
+     * @return              返回当前区域
+     */
+    public KRegion addRegion(int rowIndex1, int columnIndex1, int rowIndex2, int columnIndex2,  Object value, KRegionStyle style, List<String> items) {
+        // 创建区域
+        KRegion region = addRegion(rowIndex1, columnIndex1, rowIndex2, columnIndex2, value, style);
+        region.setItems(items);
+        return region;
+    }
+
 
 }

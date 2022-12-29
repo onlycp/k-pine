@@ -2,6 +2,7 @@ package com.kingsware.kdev.core.kflow.handler;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.kingsware.kdev.core.excel.KExcel;
+import com.kingsware.kdev.core.excel.KRegion;
 import com.kingsware.kdev.core.excel.KRegionStyle;
 import com.kingsware.kdev.core.excel.KSheet;
 import com.kingsware.kdev.core.kflow.FlowUtils;
@@ -60,15 +61,25 @@ public class KExcelExResultHandler implements KFlowResultHandler {
                     type = regionMap.get("type").toString();
                 }
                 Object value = regionMap.get("value");
+                KRegion region = null;
                 if (regionMap.containsKey("x2") && regionMap.containsKey("y2")) {
                     int x2 = Integer.parseInt(regionMap.get("x2").toString());
                     int y2 = Integer.parseInt(regionMap.get("y2").toString());
-                    kSheet.addRegion(x1, y1, x2, y2, value, style).setType(type);
+                    region = kSheet.addRegion(x1, y1, x2, y2, value, style);
                 }
                 else {
-                    kSheet.addCellRegion(x1, y1, value, style).setType(type);
+                    region = kSheet.addCellRegion(x1, y1, value, style);
                 }
-
+                region.setType(type);
+                // 判断是否有items
+                if (regionMap.containsKey("items")) {
+                    Object items = regionMap.get("items");
+                    if (items instanceof Iterable) {
+                        Iterable it = (Iterable)items;
+                        KRegion finalRegion = region;
+                        it.forEach(ite -> finalRegion.getItems().add(ite.toString()));
+                    }
+                }
             }
         }
         result.setData(kExcel);

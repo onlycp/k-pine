@@ -4,13 +4,13 @@ import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.cache.kcache.KCache;
+import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
-import com.kingsware.kdev.core.util.BeanUtils;
-import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.sys.argv.DevPageArgv;
 import com.kingsware.kdev.sys.argv.DevPageQueryArgv;
 import com.kingsware.kdev.sys.model.DevApplication;
@@ -18,7 +18,14 @@ import com.kingsware.kdev.sys.model.DevPage;
 import com.kingsware.kdev.sys.ret.DevPageRet;
 import com.kingsware.kdev.sys.service.DevPageService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
+
+import java.io.File;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 业务实现类
@@ -29,6 +36,9 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 public class DevPageServiceImpl extends BaseServiceImpl implements DevPageService {
+
+    @Value("${amis.version:2.4.1}")
+    private String amisVersion;
 
     @Override
     public DevPageRet get(String id) {
@@ -93,5 +103,36 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
         for (String id: argv.getIds()) {
             DB.delete(DevPage.class, id);
         }
+    }
+
+    /**
+     * 查看页面
+     *
+     * @param id
+     */
+    @Override
+    public void render (String id) {
+        //控response以什么码表写数据
+        ServletUtil.response().setCharacterEncoding("utf-8");
+        //指定浏览器以什么码表解码服务器发送的数据
+        ServletUtil.response().setContentType("text/html; charset=UTF-8");
+        try (PrintWriter writer = ServletUtil.response().getWriter()) {
+
+            // 查找页面
+            DevPage model = DB.findById(DevPage.class, id);
+            // 读取模板文件
+            File file = ResourceUtils.getFile("classpath:templates/page.html");
+            String html = FileUtils.readFile(file);
+            // 替换标题
+            Map<String, String> context = new HashMap<>();
+            context.put("title", model.getName());
+            context.put("json", model.getPageJson());
+            String renderHtml = TemplateUtil.render(html, context);
+            writer.write(renderHtml);
+        }
+        catch (Exception e) {
+            throw BusinessException.serviceThrow("页面渲染失败");
+        }
+
     }
 }

@@ -49,4 +49,9 @@ public interface DevPageService extends BaseService {
      */
     void delete(MultiIdArgv argv);
 
+    /**
+     * 渲染页面
+     * @param id
+     */
+    void render(String id);
 }

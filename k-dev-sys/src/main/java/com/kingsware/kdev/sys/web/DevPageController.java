@@ -12,6 +12,7 @@ import com.kingsware.kdev.sys.ret.DevPageRet;
 import com.kingsware.kdev.sys.service.DevPageService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -24,7 +25,7 @@ import javax.annotation.Resource;
  * @date 2021/12/23 11:23 上午
  */
 @Api(value = "应用页面管理", tags = {"应用页面管理"})
-@RestController
+@Controller
 @RequestMapping("/"+ Version.V1 + "/dev-page")
 public class DevPageController extends BaseController {
 
@@ -37,6 +38,7 @@ public class DevPageController extends BaseController {
      * @return 分页
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
+    @ResponseBody
     @GetMapping("/query")
     public BaseRet<PageDataRet<DevPageRet>> page(DevPageQueryArgv argv) {
         return BaseRet.success(devPageService.query(argv));
@@ -47,9 +49,21 @@ public class DevPageController extends BaseController {
      * @return 详细信息
      */
     @ApiOperation(value = "详情 " ,notes = "详情")
+    @ResponseBody
     @GetMapping("/{id}")
     public BaseRet<DevPageRet> get(@PathVariable String id) {
         return BaseRet.success(devPageService.get(id));
+    }
+
+    /**
+     * 渲染页面
+     * @return 渲染页面
+     */
+    @ApiOperation(value = "渲染页面 " ,notes = "渲染页面")
+    @GetMapping("/render/{id}")
+    @ApiIgnore
+    public void render(@PathVariable String id) {
+        devPageService.render(id);
     }
 
     /**
@@ -57,6 +71,7 @@ public class DevPageController extends BaseController {
      * @return 详细信息
      */
     @ApiOperation(value = "根据路径查询页面 " ,notes = "根据路径查询页面")
+    @ResponseBody
     @GetMapping("/getByPath")
     @ApiIgnore
     public BaseRet<DevPageRet> getByPath(String path) {
@@ -68,6 +83,7 @@ public class DevPageController extends BaseController {
      * @return 提示
      */
     @ApiOperation(value = "新增 " ,notes = "新增")
+    @ResponseBody
     @PostMapping
     public BaseRet<?> add(@RequestBody DevPageArgv argv) {
         devPageService.add(argv);
@@ -80,6 +96,7 @@ public class DevPageController extends BaseController {
      * @return 提示
      */
     @ApiOperation(value = "编辑 " ,notes = "编辑")
+    @ResponseBody
     @PutMapping
     public BaseRet<?> edit(@RequestBody DevPageArgv argv) {
         devPageService.edit(argv);
@@ -91,6 +108,7 @@ public class DevPageController extends BaseController {
      * @return 提示
      */
     @ApiOperation(value = "删除 " ,notes = "删除")
+    @ResponseBody
     @PostMapping(value = "/delete")
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         devPageService.delete(argv);

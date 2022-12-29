@@ -2,6 +2,9 @@ package com.kingsware.kdev.core.excel;
 
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Excel的区域
  *
@@ -21,6 +24,8 @@ public class KRegion {
     private String type;
     /** 样式 **/
     private KRegionStyle style;
+    /** 数据项 **/
+    private List<String> items = new ArrayList<>();
 
     /**
      * 是否单个单元格
