@@ -85,10 +85,6 @@ public class KAuthFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         // 获取请求路径
         String url = request.getRequestURI();
-//        if (1 ==1) {
-//            filterChain.doFilter(request, response);
-//            return;
-//        }
 
         MyHttpServletRequestWrapper wrapperRequest = null;
         String requestBody = "{}";
@@ -102,7 +98,6 @@ public class KAuthFilter implements Filter {
 
         }
         ContentCachingResponseWrapper wrapperResponse = new ContentCachingResponseWrapper(response);
-
 
         // 获取请求方式
         String method = request.getMethod().toLowerCase();

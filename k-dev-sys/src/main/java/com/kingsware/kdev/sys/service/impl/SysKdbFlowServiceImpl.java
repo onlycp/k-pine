@@ -28,6 +28,7 @@ import com.kingsware.kdev.sys.ret.SysKdbFlowRet;
 import com.kingsware.kdev.sys.service.SysApiService;
 import com.kingsware.kdev.sys.service.SysKdbFlowService;
 import com.kingsware.kdev.sys.service.SysLogicHistoryService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -47,6 +48,8 @@ import java.util.stream.Collectors;
 public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlowService {
     @Resource
     private SysApiService sysApiService;
+    @Value("${app.mode.dev:false}")
+    private boolean modeDev;
 
     @Override
     public SysKdbFlowRet get(String id) {
@@ -474,6 +477,14 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         // 排序
         if (!filterList.isEmpty()) {
             filterList.sort(((o1, o2) -> o2.getWhenCreated().compareTo(o1.getWhenCreated())));
+        }
+        if (!modeDev) {
+            filterList.forEach(it -> {
+                it.setContent(null);
+                it.setApiUrl(null);
+                it.setInArgv(null);
+                it.setOutArgv(null);
+            });
         }
         return PageUtil.memoryPage(argv, filterList, SysKdbFlowRet.class);
     }

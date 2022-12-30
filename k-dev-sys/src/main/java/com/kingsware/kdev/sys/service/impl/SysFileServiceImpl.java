@@ -116,6 +116,12 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
     @SneakyThrows
     @Override
     public List<SysFileRet> upload(MultipartFile[] files, String fileFrom, Integer saveType) {
+
+        if (StringUtils.isNotEmpty(fileFrom)) {
+            if (fileFrom.contains(".")) {
+                throw BusinessException.serviceThrow("参数不合法");
+            }
+        }
         List<SysFileRet> retList = new ArrayList<>();
         // 如果是自动转为faas的，那么新上传的文件也改为faas
         if (isFileLocalToFaas() && saveType == 1) {
