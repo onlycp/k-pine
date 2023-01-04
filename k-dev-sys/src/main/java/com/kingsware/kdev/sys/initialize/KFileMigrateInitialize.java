@@ -1,23 +1,9 @@
 package com.kingsware.kdev.sys.initialize;
 
 import com.kingsware.kdev.core.base.SystemInitialize;
-import com.kingsware.kdev.core.exception.BusinessException;
-import com.kingsware.kdev.core.orm.DB;
-import com.kingsware.kdev.core.orm.kdb.KdbRet;
-import com.kingsware.kdev.core.util.JsonUtil;
-import com.kingsware.kdev.sys.bean.FaasUploadRet;
-import com.kingsware.kdev.sys.model.SysFile;
-import com.kingsware.kdev.sys.service.impl.DevApplicationServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * 青松安装包初始化

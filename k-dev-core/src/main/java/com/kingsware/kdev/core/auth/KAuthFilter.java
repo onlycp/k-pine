@@ -79,6 +79,13 @@ public class KAuthFilter implements Filter {
 
 
     @Override
+    /**
+     * A filter function, which is used to intercept all requests.
+     *
+     * @param servletRequest The request object
+     * @param servletResponse The response object of the servlet
+     * @param filterChain The filter chain object, which is used to call the next filter in the chain.
+     */
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
 
         HttpServletRequest request = (HttpServletRequest) servletRequest;
@@ -88,15 +95,13 @@ public class KAuthFilter implements Filter {
 
         MyHttpServletRequestWrapper wrapperRequest = null;
         String requestBody = "{}";
-        if (servletRequest != null) {
-            wrapperRequest = new MyHttpServletRequestWrapper((HttpServletRequest) request);
-            String contentType = request.getContentType();
-            if (contentType == null || !contentType.toLowerCase().contains("multipart/form-data")) {
-                wrapperRequest.getInputStream();
-                requestBody = new String(wrapperRequest.getRequestBody(), StandardCharsets.UTF_8);
-            }
-
+        wrapperRequest = new MyHttpServletRequestWrapper(request);
+        String contentType = request.getContentType();
+        if (contentType == null || !contentType.toLowerCase().contains("multipart/form-data")) {
+            wrapperRequest.getInputStream();
+            requestBody = new String(wrapperRequest.getRequestBody(), StandardCharsets.UTF_8);
         }
+
         ContentCachingResponseWrapper wrapperResponse = new ContentCachingResponseWrapper(response);
 
         // 获取请求方式
@@ -126,67 +131,68 @@ public class KAuthFilter implements Filter {
             }
             String apiUrlPrefix = request.getContextPath() + "/api";
             // 如果是静态文件
-            if (!url.startsWith(apiUrlPrefix) ) {
-                filterChain.doFilter(wrapperRequest, response);
-                return;
-            }
-            if (url.startsWith(apiUrlPrefix))  {
-                contextPath = apiUrlPrefix;
-            }
-            // 获取配置的接口信息
-            String path = url.replaceFirst(contextPath, "");
-            api = ApiManager.getInstance().getApi(method, path);
-            apiDefine = getApiDefine(request, response);
-            // 初始化青松上下文
-            initContext(request, response);
-            // 如果是openapi，表示是ignore
-            boolean ignore = false;
-            // 是否开发
-            boolean dev = false;
-            callType = CallType.CONTROLLER;
-            argvMap = ServletUtil.getRequestParams(api, path, request, requestBody);
-            // 流程调用方式
-            if (api != null && api.getCallType() == 2 && kFlowProperties.isEnable()) {
-                callType = CallType.KFLOW;
-                apiCode = api.getApiCode();
-                // 是否允许跳过权限
-                ignore = StringUtils.isNotEmpty(api.getApiCode()) && apiCode.startsWith(ignoreApi);
-            }
-            else {
-                if (apiDefine != null) {
-                    apiCode = apiDefine.getApiCode();
-                    ignore = apiDefine.isIgnore();
-                    dev = apiDefine.isDev();
+            if (url.startsWith(apiUrlPrefix)) {
+                if (url.startsWith(apiUrlPrefix)) {
+                    contextPath = apiUrlPrefix;
                 }
-                else {
-//                    log.info("上下文-2:{},路径:{}", contextPath, request.getRequestURI()  );
-                    filterChain.doFilter(wrapperRequest, response);
+                // 获取配置的接口信息
+                String path = url.replaceFirst(contextPath, "");
+                api = ApiManager.getInstance().getApi(method, path);
+                apiDefine = getApiDefine(request, response);
+                // 初始化青松上下文
+                initContext(request, response);
+                // 如果是openapi，表示是ignore
+                boolean ignore = false;
+                // 是否开发
+                boolean dev = false;
+                callType = CallType.CONTROLLER;
+                argvMap = ServletUtil.getRequestParams(api, path, request, requestBody);
+                // 接口定义不存在
+                if (api == null && apiDefine == null) {
+                    ServletUtil.responseJson(response, BaseRet.fail("接口不存在", RetEnum.SERVICE_FAIL.getCode()));
                     return;
                 }
-            }
-            if ((!modeDev) && dev) {
-                ServletUtil.responseJson(response, BaseRet.fail("发布模式无权访问此接口", RetEnum.ONLY_DEV.getCode()));
-                return;
-            }
-            // 判断是否开放接口
-            isOpenApi = StringUtils.isNotEmpty(apiCode) && apiCode.startsWith(openApiFlag) && api != null;
-            if (isOpenApi) {
-                // 处理请求变量
-                this.checkOpenApi(api, argvMap);
-            }
-            else {
-                this.checkPermission(request, response, ignore, apiCode);
-            }
-            // 校验license
-            if (!ignore) {
-                checkLicense();
-            }
-            // 根据不同的调用类型，进行调用相关处理
-            if (callType == CallType.CONTROLLER) {
-                filterChain.doFilter(wrapperRequest, wrapperResponse);
-            }
-            else {
-                callByFlow(request, response, api, path, argvMap);
+                // 流程调用方式
+                if (api != null && api.getCallType() == 2 && kFlowProperties.isEnable()) {
+                    callType = CallType.KFLOW;
+                    apiCode = api.getApiCode();
+                    // 是否允许跳过权限
+                    ignore = StringUtils.isNotEmpty(api.getApiCode()) && apiCode.startsWith(ignoreApi);
+                } else {
+                    if (apiDefine != null) {
+                        apiCode = apiDefine.getApiCode();
+                        ignore = apiDefine.isIgnore();
+                        dev = apiDefine.isDev();
+                    } else {
+    //                    log.info("上下文-2:{},路径:{}", contextPath, request.getRequestURI()  );
+                        filterChain.doFilter(wrapperRequest, response);
+                        return;
+                    }
+                }
+                if ((!modeDev) && dev) {
+                    ServletUtil.responseJson(response, BaseRet.fail("发布模式无权访问此接口", RetEnum.ONLY_DEV.getCode()));
+                    return;
+                }
+                // 判断是否开放接口
+                isOpenApi = StringUtils.isNotEmpty(apiCode) && apiCode.startsWith(openApiFlag) && api != null;
+                if (isOpenApi) {
+                    // 处理请求变量
+                    this.checkOpenApi(api, argvMap);
+                } else {
+                    this.checkPermission(request, response, ignore, apiCode);
+                }
+                // 校验license
+                if (!ignore) {
+                    checkLicense();
+                }
+                // 根据不同的调用类型，进行调用相关处理
+                if (callType == CallType.CONTROLLER) {
+                    filterChain.doFilter(wrapperRequest, wrapperResponse);
+                } else {
+                    callByFlow(request, response, api, path, argvMap);
+                }
+            } else {
+                filterChain.doFilter(wrapperRequest, response);
             }
         }
         catch (BusinessException e) {

@@ -5,20 +5,20 @@ import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.KdbRet;
+import com.kingsware.kdev.core.plugins.CdnPlugin;
 import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.bean.FaasUploadRet;
-import com.kingsware.kdev.sys.model.SysFile;
+import com.kingsware.kdev.core.model.SysFile;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.util.FileSystemUtils;
-import org.springframework.util.StreamUtils;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.util.Base64;
+import java.util.List;
 import java.util.regex.Matcher;
 
 /**
@@ -74,10 +74,10 @@ public class FileManager {
      * @return
      */
     @SuppressWarnings("all")
-    public SysFile register(InputStream inputStream, String fileName, int fileSize,  String fileFrom, Integer saveType, String basePath) {
+    public SysFile register(InputStream inputStream, String fileName, int fileSize,  String targetDir, Integer saveType, String basePath) {
         try {
             boolean isCloseReplaceMode = PropertiesConstant.TRUE.equals(SpringContext.getProperties("file.close-replace-mode", PropertiesConstant.FALSE));
-            fileFrom = fileFrom.replaceAll("/", Matcher.quoteReplacement(File.separator));
+            String fileFrom = targetDir.replaceAll("/", Matcher.quoteReplacement(File.separator));
             SysFile sysFile = new SysFile();
             // 真实文件名
             String realName =  fileName;
@@ -155,6 +155,22 @@ public class FileManager {
                 sysFile.setFileMd5(FileUtils.getMD5(inputStream));
 
             }
+            else {
+                CdnPlugin cdnPlugin = getCdn(saveType);
+                if (cdnPlugin != null) {
+                    // 磁盘存储路径
+                    String filePath = basePath + "/" + targetDir;
+                    filePath = filePath.replace("//", "/");
+                    String saveFileName = fileName;
+                    if (isCloseReplaceMode) {
+                        saveFileName = realName;
+                    }
+                    cdnPlugin.upload(inputStream, saveFileName, filePath);
+                    sysFile.setFilePath((filePath + "/" + saveFileName).replace("//", "/"));
+                    // 文件md5码
+                    sysFile.setFileMd5(FileUtils.getMD5(inputStream));
+                }
+            }
             DB.save(sysFile);
             // 返回id
             return sysFile;
@@ -162,5 +178,21 @@ public class FileManager {
         catch (IOException e) {
             throw BusinessException.serviceThrow("源文件路径不存在, IO异常:" + e.getMessage());
         }
+    }
+
+
+    /**
+     * 获取cdn
+     * @param saveType 存储类型
+     * @return  cdn插件实例
+     */
+    public CdnPlugin getCdn(int saveType) {
+        List<CdnPlugin> cdnPlugins = SpringContext.getBeansOfType(CdnPlugin.class);
+        for (CdnPlugin plugin: cdnPlugins) {
+            if (plugin.saveType() == saveType) {
+                return plugin;
+            }
+        }
+        return null;
     }
 }

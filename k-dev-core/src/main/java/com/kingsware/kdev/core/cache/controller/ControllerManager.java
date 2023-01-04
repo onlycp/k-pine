@@ -18,9 +18,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.IntStream;
 
 /**
  * 控制器管理
@@ -66,21 +65,24 @@ public class ControllerManager {
                 // url路径
                 String[] reqArr = url.split("/");
                 String[] restArr = api.getUrl().split("/");
-                if (reqArr.length == restArr.length) {
-                    for (int i = 0; i < reqArr.length; i++) {
-                        // segment部分跳过
-                        if (restArr[i].startsWith("{") && restArr[i].endsWith("}")) {
-                            continue;
-                        }
-                        if (!reqArr[i].equals(restArr[i])) {
-                            return false;
-                        }
-                    }
-                    return true;
+                if (reqArr.length != restArr.length) {
+                    return false;
                 }
-                return false;
+                // segment部分跳过
+                return IntStream.range(0, reqArr.length).filter(i -> !restArr[i].startsWith("{") || !restArr[i].endsWith("}")).allMatch(i -> reqArr[i].equals(restArr[i]));
 
             }).findFirst();
+            if (optional.isPresent()) {
+                return optional.get();
+            }
+            // 匹配 /**
+            optional = myApis.stream()
+                    .filter(f -> f.getMethod().contains(method))
+                    .filter(it -> it.getUrl().endsWith("/**"))
+                    .filter(it -> {
+                        String prefix = it.getUrl().substring(0, it.getUrl().length()-3);
+                        return url.startsWith(prefix);
+                    }).findFirst();
             return optional.orElse(null);
         } catch (Exception e) {
             log.error("error", e);
@@ -96,9 +98,13 @@ public class ControllerManager {
     @PostConstruct
     public void scanController() {
         // 扫描所有的class
-        List<Class<?>> controllerList = ClassUtils.getClassesByParentClass(scanPackage, BaseController.class);
+        List<Class<?>> controllerList1 = ClassUtils.getClassesByAnnotationClass(scanPackage, Controller.class);
+        List<Class<?>> controllerList2 = ClassUtils.getClassesByAnnotationClass(scanPackage, RestController.class);
+        Set<Class<?>> controllerSet = new HashSet<>();
+        controllerSet.addAll(controllerList1);
+        controllerSet.addAll(controllerList2);
         // 获取所有的接口请求
-        for(Class<?> clazz: controllerList) {
+        for(Class<?> clazz: controllerSet) {
             // 如果没有@Controller注释或@RestController，跳过
             if (!clazz.isAnnotationPresent(Controller.class) && !clazz.isAnnotationPresent(RestController.class)) {
                 continue;

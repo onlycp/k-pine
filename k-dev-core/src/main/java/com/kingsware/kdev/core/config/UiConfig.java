@@ -30,11 +30,10 @@ public class UiConfig extends WebMvcConfigurationSupport {
     @Override
     protected void addResourceHandlers(ResourceHandlerRegistry registry) {
         // 判断只有目录真实存在的时候才生效
+        registry.addResourceHandler("/html/**").addResourceLocations("classpath:/static/html/");
         if (new File(ui).exists()) {
-
             // 替换内容
             String contextPath = SpringContext.getProperties("server.servlet.context-path", "");
-
             if (contextPath.endsWith("/")) {
                 contextPath = contextPath.substring(0, contextPath.length()-1);
             }
@@ -44,21 +43,20 @@ public class UiConfig extends WebMvcConfigurationSupport {
                 String replaceText = String.format("url(%s/static/fonts/",contextPath);
                 replaceText(new File(ui), text, replaceText);
             }
-
-
             registry.addResourceHandler("/**").addResourceLocations("file:" +  ui);
-            super.addResourceHandlers(registry);
+
         }
+        super.addResourceHandlers(registry);
 
     }
 
     /**
      * 替换文本内容
      * @param path  路径
-     * @param text
      */
     private void replaceText(File path , String text, String replaceText) {
         File[] files = path.listFiles();
+        assert files != null;
         for (File file: files) {
             if (file.isDirectory()) {
                 replaceText(file, text, replaceText);

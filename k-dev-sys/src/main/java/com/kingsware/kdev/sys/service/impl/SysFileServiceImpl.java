@@ -11,21 +11,20 @@ import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
+import com.kingsware.kdev.core.plugins.CdnPlugin;
 import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.sys.argv.SysFileQueryArgv;
 import com.kingsware.kdev.sys.manager.FileManager;
 import com.kingsware.kdev.sys.manager.NonStaticResourceHttpRequestHandler;
-import com.kingsware.kdev.sys.model.SysFile;
+import com.kingsware.kdev.core.model.SysFile;
 import com.kingsware.kdev.sys.ret.SysFileRet;
 import com.kingsware.kdev.sys.service.SysFileService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.yaml.snakeyaml.util.UriEncoder;
 
-import javax.annotation.Resource;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -201,7 +200,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                 }
             } else if (file.getSaveType() == 1) {
                 File localFile = getLocalFile(file.getFilePath());
-                if (localFile != null && localFile.exists()) {
+                if (localFile.exists()) {
                     fileRealPath = localFile.getAbsolutePath();
                 }
             } else if (file.getSaveType() == 2) {
@@ -211,6 +210,12 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                     fileRealPath = faasFile.getAbsolutePath();
                 }
             }
+            else {
+                CdnPlugin cdnPlugin = FileManager.getInstance().getCdn(file.getSaveType());
+                if (cdnPlugin != null) {
+                    fileRealPath = cdnPlugin.download(file.getFilePath());
+                }
+            }
         }
         if (fileRealPath == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -218,6 +223,18 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             return ;
         }
 //        response.reset();
+        String userFileName = request.getParameter("fileName");
+        if (StringUtils.isNotEmpty(userFileName)) {
+            // 获取后缀
+            String[] arr = fileName.split("\\.");
+            if (userFileName.contains(".") || arr.length != 2) {
+                fileName = userFileName;
+            }
+            else {
+                fileName = userFileName + "." + arr[1];
+            }
+
+        }
         contentType = Files.probeContentType(Paths.get(fileRealPath));
         response.setContentType(contentType);
         response.setCharacterEncoding("utf-8");
