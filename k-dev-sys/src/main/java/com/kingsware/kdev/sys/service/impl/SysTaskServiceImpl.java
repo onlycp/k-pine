@@ -63,6 +63,7 @@ public class SysTaskServiceImpl extends BaseServiceImpl implements SysTaskServic
         model.setEnable(argv.getEnable());
         model.setDistributed(argv.getDistributed());
         model.setNote(argv.getNote());
+        model.setTaskArgv(argv.getTaskArgv());
         // 校验
         checkUnique(model);
         // 保存
