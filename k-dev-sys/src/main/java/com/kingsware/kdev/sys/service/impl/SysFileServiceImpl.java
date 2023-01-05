@@ -151,6 +151,9 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
      * @throws IOException
      */
     private void downloadByPath(String path) throws ServletException, IOException {
+        if (path.contains("..")) {
+            throw BusinessException.serviceThrow("参数不合法");
+        }
         // 进行url编码
         path = UriEncoder.decode(path);
         SysFile file = DB.findById(SysFile.class, path);

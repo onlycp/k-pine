@@ -92,6 +92,10 @@ public class KAuthFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         // 获取请求路径
         String url = request.getRequestURI();
+        if (url.contains("websocket")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         MyHttpServletRequestWrapper wrapperRequest = null;
         String requestBody = "{}";
@@ -277,11 +281,6 @@ public class KAuthFilter implements Filter {
                     operateLog.setRequestMethod(KClientContext.getContext().getRequest().getMethod());
                     operateLog.setResponseBody(ServletUtil.getResponseBody(wrapperResponse));
                     operateLog.setRequestBody(requestBody);
-                    try {
-                        wrapperResponse.copyBodyToResponse();
-                    }
-                    catch (Exception ignored) {
-                    }
                     KmqMessageCenter.getInstance().produce("t_operate_log", JsonUtil.toJson(operateLog) );
                     // 保存登录日志
                     if (callType == CallType.CONTROLLER && "登录".equals(apiDefine.getName())) {
@@ -297,6 +296,11 @@ public class KAuthFilter implements Filter {
                     }
                 }
 
+            }
+            try {
+                wrapperResponse.copyBodyToResponse();
+            }
+            catch (Exception ignored) {
             }
         }
 
