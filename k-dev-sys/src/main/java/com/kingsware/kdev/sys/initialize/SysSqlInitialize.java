@@ -1,8 +1,10 @@
 package com.kingsware.kdev.sys.initialize;
 
 import com.kingsware.kdev.core.base.SystemInitialize;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.kflow.FlowUtils;
 import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.util.MD5Utils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.bean.ExecutionFile;
@@ -10,8 +12,10 @@ import com.kingsware.kdev.sys.model.DevSqlRun;
 import com.kingsware.kdev.sys.ret.DevSqlRunRet;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
+import org.springframework.util.StreamUtils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -19,7 +23,6 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * @author andyzheng
@@ -38,6 +41,8 @@ public class SysSqlInitialize implements SystemInitialize {
     private String initDbType;
     @Override
     public void execute() {
+
+
         List<ExecutionFile> fileList = getFileList(getMaxExecuteVersion());
         //log.info("初始化数据... starting");
         fileList.stream().sorted((Comparator.comparingInt(ExecutionFile::getVersion))).forEach(this::executeSqlFile);
@@ -49,14 +54,12 @@ public class SysSqlInitialize implements SystemInitialize {
         try {
             DevSqlRunRet ret = DB.findOne(DevSqlRunRet.class, "select max(version) as max from dev_sql_run where success=1 ");
             if (ret != null && ret.getMax() != null && ret.getMax() > max) {
-                max = (int) ret.getMax();
+                max = ret.getMax();
             }
         }
         catch (Exception ignored) {
-            max = 0;
-        } finally {
-            return max;
         }
+        return max;
 
     }
 
@@ -67,46 +70,46 @@ public class SysSqlInitialize implements SystemInitialize {
 //        if (".".equals(initDatasourcePath)) {
 //            initDatasourcePath = SysSqlInitialize.class.getResource("/").getPath();
 //        }
-        String dbConfigFilePath = initDatasourcePath + File.separator + "initSql" + File.separator + initDbType;
-        File fileList = new File(dbConfigFilePath);
-        File[] allFile = fileList.listFiles();
-        if (allFile == null || allFile.length == 0) {
-            return resultList;
+        Resource[] resources = SpringContext.getResources(ResourceUtils.CLASSPATH_URL_PREFIX + "initSql/" + initDbType + "/**");
+        if (resources != null) {
+            for(Resource resource : resources) {
+                ExecutionFile executionFile = new ExecutionFile();
+                String filename = resource.getFilename();
+                if (StringUtils.isEmpty(filename)) {
+                    continue;
+                }
+                // 从initSql目录下读所有version_[版本号]_[是否只执行1次].sql文件
+                Pattern pattern = Pattern.compile("version_(\\d+)_([0,1]).sql");
+                Matcher matcher = pattern.matcher(filename);
+                boolean isOnce = true;
+                int version = 0;
+                if (matcher.find()) {
+                    version = Integer.parseInt(matcher.group(1));
+                    isOnce = "1".equals(matcher.group(2));
+                }
+                if (resource.isFile() && ((!isOnce) || (version > maxVersion))) {
+                    executionFile.setResource(resource);
+                    executionFile.setName(filename);
+                    executionFile.setVersion(version);
+                    executionFile.setOnce(isOnce);
+                    resultList.add(executionFile);
+                    log.info("数据库文件:" + resource.getFilename() );
+                }
+            }
         }
-        return Arrays.stream(allFile).map(file -> {
-            ExecutionFile executionFile = new ExecutionFile();
-            String filename = file.getName();
-            // 从initSql目录下读所有version_[版本号]_[是否只执行1次].sql文件
-            Pattern pattern = Pattern.compile("version_(\\d+)_([0,1]).sql");
-            Matcher matcher = pattern.matcher(filename);
-            boolean isOnce = true;
-            int version = 0;
-            if (matcher.find()) {
-                version = Integer.parseInt(matcher.group(1));
-                isOnce = "1".equals(matcher.group(2));
-            }
-
-            if (file.isFile() && ((!isOnce) || (version > maxVersion))) {
-                executionFile.setFile(file);
-                executionFile.setName(filename);
-                executionFile.setVersion(version);
-                executionFile.setOnce(isOnce);
-                return executionFile;
-            }
-            return null;
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+        return resultList;
     }
 
     public void executeSqlFile(ExecutionFile file) {
         if (file == null) {
             return;
         }
-        log.info("运行数据库脚本:" + file.getFile().getAbsolutePath());
+        log.info("运行数据库脚本:" + file.getName());
         long start = System.currentTimeMillis();
         boolean success = false;
         StringBuilder sqlSumary = new StringBuilder();
         try {
-            List<String> sqlList = parseSqlList(file.getFile());
+            List<String> sqlList = parseSqlList(file.getResource());
             for (String sql: sqlList) {
                 long eachSqlStart = System.currentTimeMillis();
                 sql = sql.trim();
@@ -157,10 +160,10 @@ public class SysSqlInitialize implements SystemInitialize {
      * @param file  文件
      * @return  sql列表
      */
-    private List<String> parseSqlList(File file) {
+    private List<String> parseSqlList(Resource file) {
 
         try {
-            List<String> readList = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
+            List<String> readList = FileUtils.readAllLine(file.getInputStream());
             List<String> sqlList = new ArrayList<>();
             StringBuffer sql = new StringBuffer();
             readList.forEach(line -> {

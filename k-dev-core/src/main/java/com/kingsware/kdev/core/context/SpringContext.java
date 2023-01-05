@@ -8,9 +8,11 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.PropertySource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.StandardServletEnvironment;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -88,6 +90,21 @@ public class SpringContext implements ApplicationContextAware {
      */
     public static String getBootProperties(String key, String defaultValue) {
         return applicationContext.getEnvironment().getProperty(key, defaultValue);
+
+    }
+
+    /**
+     * 获取所有的资源
+     *
+     * @param pattern 路径
+     * @return 资源列表
+     */
+    public static Resource[] getResources(String pattern) {
+        try {
+            return applicationContext.getResources(pattern);
+        } catch (IOException e) {
+            return null;
+        }
 
     }
 

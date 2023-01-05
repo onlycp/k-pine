@@ -144,6 +144,42 @@ public class FileUtils {
 
     }
 
+    /**
+     * 从输入流中读取文本内容
+     * @param stream 输入流
+     * @return  按行返回
+     */
+    public static List<String> readAllLine(InputStream stream) {
+        InputStreamReader isr = null;
+        BufferedReader br = null;
+        List<String> lines = new ArrayList<>();
+        try {
+            isr = new InputStreamReader(stream);
+            br = new BufferedReader(isr);
+            String str;
+            // 通过readLine()方法按行读取字符串
+            while ((str = br.readLine()) != null) {
+                lines.add(str);
+            }
+        } catch (IOException e) {
+            log.error("error", e);
+        } finally {
+            // 统一在finally中关闭流，防止发生异常的情况下，文件流未能正常关闭
+            try {
+                if (br != null) {
+                    br.close();
+                }
+                if (isr != null) {
+                    isr.close();
+                }
+            } catch (IOException e) {
+                log.error("error", e);
+            }
+        }
+        return lines;
+
+    }
+
 
     /**
      * 创建临时文件

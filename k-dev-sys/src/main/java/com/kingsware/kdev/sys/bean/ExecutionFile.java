@@ -2,6 +2,7 @@ package com.kingsware.kdev.sys.bean;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.core.io.Resource;
 
 import java.io.File;
 
@@ -20,7 +21,9 @@ public class ExecutionFile {
     private int version;
     /** 是否只执行1次 */
     private boolean isOnce;
-    /** 文件 */
-    private File file;
+//    /** 文件 */
+//    private File file;
+    /** 资源 **/
+    private Resource resource;
 
 }
