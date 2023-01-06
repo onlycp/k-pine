@@ -41,8 +41,13 @@ public class KFlowContext {
         sysMap.put("when", DateUtils.getNow());
         sysMap.put("uuid", StringUtils.getUUID());
         sysMap.put("realName",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getRealName() : "");
+        sysMap.put("mobile",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getMobile() : "");
+        sysMap.put("email",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getEmail() : "");
         sysMap.put("roleIds",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getRoleIds() : "");
         sysMap.put("roleCodes",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getRoleCodes() : "");
+        sysMap.put("roleNames",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getRoleNames() : "");
+        sysMap.put("sysUnitIds",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getSysUnitIds() : "");
+        sysMap.put("sysUnitNames",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getSysUnitNames() : "");
         sysMap.put("isAdmin",  isAdmin());
         context.getSystemContext().put("sys", sysMap);
         context.getSystemContext().put("devMode", isDevMode());

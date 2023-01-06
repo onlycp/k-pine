@@ -233,7 +233,6 @@ public class DynamicTask implements CommandLineRunner {
                 }
             }
             KFlowContext context = KFlowContext.createBaseContext(inArgv, outArgv);
-            log.info("任务:{}", JsonUtil.toJson(sysTask));
             Map<String, Object> params = new HashMap<>();
             if (StringUtils.isNotEmpty(sysTask.getTaskArgv())) {
                 Map<String, Object> taskArgvMap = JsonUtil.toMap(sysTask.getTaskArgv());
