@@ -380,6 +380,16 @@ public class ServletUtil {
         return "{}";
     }
 
+    /**
+     * 获取上下文路径
+     * @return 上下文路径
+     */
+    public static String getContextPath() {
+        String contextPath = SpringContext.getProperties("server.servlet.context-path", "");
+        String virtualPath = SpringContext.getProperties("server.servlet.virtual-path", "");
+        return contextPath + virtualPath;
+    }
+
 
 
 }

@@ -2,6 +2,7 @@ package com.kingsware.kdev.core.config;
 
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.util.FileUtils;
+import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,7 +34,7 @@ public class UiConfig extends WebMvcConfigurationSupport {
         registry.addResourceHandler("/html/**").addResourceLocations("classpath:/static/html/");
         if (new File(ui).exists()) {
             // 替换内容
-            String contextPath = SpringContext.getProperties("server.servlet.context-path", "");
+            String contextPath = ServletUtil.getContextPath();
             if (contextPath.endsWith("/")) {
                 contextPath = contextPath.substring(0, contextPath.length()-1);
             }
