@@ -312,6 +312,18 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         if (zipFile == null) {
             throw BusinessException.serviceThrow("文件压缩失败");
         }
+        String userFileName = ServletUtil.request().getParameter("fileName");
+        if (StringUtils.isNotEmpty(userFileName)) {
+            // 获取后缀
+            String[] arr = fileName.split("\\.");
+            if (userFileName.contains(".") || arr.length != 2) {
+                fileName = userFileName;
+            }
+            else {
+                fileName = userFileName + ".zip";
+            }
+
+        }
         ServletUtil.responseFile(zipFile, fileName);
 
     }

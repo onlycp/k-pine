@@ -7,6 +7,7 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.*;
+import java.util.*;
 
 /**
  * @author:
@@ -16,11 +17,49 @@ public class MyHttpServletRequestWrapper extends HttpServletRequestWrapper {
     private byte[] requestBody;
     //Http请求对象
     private HttpServletRequest request;
+    // 请求头
+    private Map<String,String> headers=new HashMap<>();
 
     public MyHttpServletRequestWrapper(HttpServletRequest request) throws IOException {
         super(request);
         this.request = request;
     }
+
+
+    public void addHeader(String name,String value){
+        headers.put(name, value);
+    }
+
+    @Override
+    public String getHeader(String name) {
+        String value=super.getHeader(name);
+
+        if (headers.containsKey(name)){
+            value=headers.get(name);
+        }
+
+        return value;
+    }
+
+    @Override
+    public Enumeration<String> getHeaderNames() {
+        List<String> names = Collections.list(super.getHeaderNames());
+        names.addAll(headers.keySet());
+
+        return Collections.enumeration(names);
+    }
+
+    @Override
+    public Enumeration<String> getHeaders(String name) {
+        List<String> list= Collections.list(super.getHeaders(name));
+
+        if (headers.containsKey(name)){
+            list.add(headers.get(name));
+        }
+
+        return Collections.enumeration(list);
+    }
+
 
     /**
      * @return

@@ -233,7 +233,14 @@ public class DynamicTask implements CommandLineRunner {
                 }
             }
             KFlowContext context = KFlowContext.createBaseContext(inArgv, outArgv);
-            KdbFlowResult kdbFlowResult = KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), "", new HashMap<>(), context, false);
+            Map<String, Object> params = new HashMap<>();
+            if (StringUtils.isNotEmpty(sysTask.getTaskArgv())) {
+                Map<String, Object> taskArgvMap = JsonUtil.toMap(sysTask.getTaskArgv());
+                if (taskArgvMap != null) {
+                    params = taskArgvMap;
+                }
+            }
+            KdbFlowResult kdbFlowResult = KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), "", params, context, false);
 //            log.info("流程任务：{}, 结果:{}", sysTask.getName(), JsonUtil.toJson(kdbFlowResult));
         }
         else {

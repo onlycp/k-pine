@@ -108,6 +108,16 @@ public class SpringContext implements ApplicationContextAware {
 
     }
 
+    /**
+     * 获取所有的资源
+     *
+     * @param resourceName 路径
+     * @return 资源列表
+     */
+    public static Resource getResource(String resourceName) {
+        return applicationContext.getResource(resourceName);
+    }
+
 
     /**
      * 获取所有的配置项

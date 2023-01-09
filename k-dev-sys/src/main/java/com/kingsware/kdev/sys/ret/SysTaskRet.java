@@ -52,4 +52,6 @@ public class SysTaskRet extends BaseManageRet {
     private String note;
     /** 所属应用ID **/
     private String appId;
+    /** 任务参数 **/
+    private String taskArgv;
 }
