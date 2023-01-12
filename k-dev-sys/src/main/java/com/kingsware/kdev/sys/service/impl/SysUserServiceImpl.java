@@ -852,6 +852,19 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         return checkVerifyCode(uuid, code, encryptCode) ? BaseRet.success(true) : BaseRet.failMessage("验证码有误！");
     }
 
+    @Override
+    public void addRoles(SysUserArgv argv) {
+        String userIds = argv.getSysUserIds();
+        if (StringUtils.isNotEmpty(userIds)) {
+            String[] userIdArr = userIds.trim().split(",");
+            if (userIdArr != null && userIdArr.length > 0) {
+                for (String userId : userIdArr) {
+                    saveUserRoles(userId, argv.getSysRoleIds());
+                }
+            }
+        }
+    }
+
     private boolean checkVerifyCode(String uuid, String code, String encryptCode) {
 //        String decodedCode = AESUtil.decrypt(encryptCode, aesSecret);
 //        boolean valid = decodedCode.equalsIgnoreCase(code);

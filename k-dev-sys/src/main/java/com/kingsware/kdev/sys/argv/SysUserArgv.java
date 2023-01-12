@@ -41,4 +41,6 @@ public class SysUserArgv {
     private String sysRoleIds;
     /** 所属应用ID **/
     private String appId;
+    /** 用户ID **/
+    private String sysUserIds;
 }

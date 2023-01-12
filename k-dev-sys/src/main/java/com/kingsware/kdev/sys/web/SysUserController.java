@@ -130,6 +130,19 @@ public class SysUserController extends BaseController {
     }
 
     /**
+     * 按批量添加用户角色
+     * @param argv
+     * @return
+     */
+    @ApiOperation(value = "按批量添加用户角色" ,notes = "按批量添加用户角色")
+    @PostMapping("addRoles")
+    @ApiCode("sysinfo:user:addRoles")
+    public BaseRet<?> addRoles(@RequestBody SysUserArgv argv) {
+        sysUserService.addRoles(argv);
+        return BaseRet.success();
+    }
+
+    /**
      *  删除
      * @return 提示
      */

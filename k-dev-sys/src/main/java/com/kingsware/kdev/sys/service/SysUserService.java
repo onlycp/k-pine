@@ -101,4 +101,6 @@ public interface SysUserService extends BaseService {
     BaseRet<VerificationCodeRet> getVerificationCode() throws IOException;
 
     BaseRet<?> validVerificationCode(String uuid, String code, String encryptCode);
+
+    void addRoles(SysUserArgv argv);
 }
