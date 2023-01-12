@@ -103,12 +103,79 @@ public class HttpUtil {
 
 
     /**
+     * Get请求
+     * @param apiUrl   请求路径
+     * @param headerMap 请求头
+     * @return  返回结果
+     */
+    public static String get(String apiUrl,  Map<String, String> headerMap) throws HttpClientException{
+        // http连接
+        HttpURLConnection connection = null;
+
+        try {
+            URL url = new URL(apiUrl);
+            // 根据URL生成HttpURLConnection
+            connection = (HttpURLConnection) url.openConnection();
+            // 设置body模式
+            connection.setDoOutput(true);
+            connection.setDoInput(true);
+            // 设置post方式
+            connection.setRequestMethod("GET");
+            // 禁用缓存
+            connection.setUseCaches(false);
+            // 设置超时时间
+            connection.setConnectTimeout(10000);
+            connection.setReadTimeout(1000*60*10);
+            // 自动执行自定向
+            connection.setInstanceFollowRedirects(true);
+            // 连接复用
+            connection.setRequestProperty("connection", "Keep-Alive");
+            // 设置编码
+            connection.setRequestProperty("charset", "utf-8");
+            //  设置content-type
+            connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+            // 将额外的请求头加入进来
+            if (headerMap != null && !headerMap.isEmpty()) {
+                for (Map.Entry<String, String> entry: headerMap.entrySet()) {
+                    connection.setRequestProperty(entry.getKey(), entry.getValue());
+                }
+            }
+            // 建立连接
+            connection.connect();
+            // 获取body
+            String responseBody = getBody(connection.getInputStream());
+            // 获取响应结果
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                // 如果是ok，直接返回body
+                return responseBody;
+            }
+            else {
+                throw new HttpClientException("Get请求失败", connection.getResponseCode(), apiUrl, "");
+            }
+        } catch (IOException e) {
+            throw new HttpClientException(e.getLocalizedMessage(), -1, apiUrl, "");
+        }
+    }
+
+
+
+    /**
      * 上传文件
      * @param fileName 文件名
      * @param apiUrl    接口地路
      */
     public static String uploadFile(String apiUrl, String fileName, String formName, InputStream inputStream, String path) {
+        Map<String, Object> formMap = new HashMap<>();
+        formMap.put("path", path);
+        return uploadFile(apiUrl, fileName, formName, inputStream, formMap, new HashMap<>());
+    }
 
+    /**
+     * 上传文件
+     * @param fileName 文件名
+     * @param apiUrl    接口地路
+     */
+    public static String uploadFile(String apiUrl, String fileName, String formName, InputStream inputStream, Map<String, Object> formMap, Map<String, String> header) {
 
         HttpURLConnection conn = null;
         try {
@@ -123,14 +190,20 @@ public class HttpUtil {
             //设置请求头参数
             conn.setRequestProperty("Connection", "Keep-Alive");
             conn.setRequestProperty("Charset", "UTF-8");
+            for (Map.Entry<String, String> entry: header.entrySet()) {
+                conn.setRequestProperty(entry.getKey(), entry.getValue());
+            }
             conn.setRequestProperty("Content-Type", CONTENT_TYPE+";boundary=" + BOUNDARY);
-            log.info("文件上传, 文件名:{}, 路径:{}", fileName, path);
+
             //上传参数
             DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
             //getStrParams()为一个
             Map<String, String> strParams = new HashMap<>();
-            strParams.put("path", new String(path.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1));
-            dos.writeBytes( getStrParams(strParams).toString() );
+            formMap.forEach((k, v) -> {
+                strParams.put(k, new String(v.toString().getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1));
+            });
+
+            dos.writeBytes(getStrParams(strParams).toString() );
             dos.flush();
 
             //文件上传

@@ -147,22 +147,22 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         // 应用处理
         if (pineMap.containsKey("info")) {
             Map<String, Object> map = (Map<String, Object>) pineMap.get("info");
-            transMapBooleanToInt( map,"devStatus", "enableStatus");
-            transMapDateToString(map, "whenCreated", "whenModified");
+            MapUtil.transMapBooleanToInt( map,"devStatus", "enableStatus");
+            MapUtil.transMapDateToString(map, "whenCreated", "whenModified");
         }
         if (pineMap.containsKey("pages")) {
             List<Map<String, Object>> list = (List<Map<String, Object>>) pineMap.get("pages");
             for (Map<String, Object> map: list) {
-                transMapBooleanToInt( map,"devStatus", "enableStatus");
-                transMapDateToString(map, "whenCreated", "whenModified");
+                MapUtil.transMapBooleanToInt( map,"devStatus", "enableStatus");
+                MapUtil.transMapDateToString(map, "whenCreated", "whenModified");
             }
 
         }
         if (pineMap.containsKey("menus")) {
             List<Map<String, Object>> list = (List<Map<String, Object>>) pineMap.get("menus");
             for (Map<String, Object> map: list) {
-                transMapBooleanToInt( map,"isDev", "status");
-                transMapIntToBoolean(map, "isHidden");
+                MapUtil.transMapBooleanToInt( map,"isDev", "status");
+                MapUtil.transMapIntToBoolean(map, "isHidden");
                 map.put("hidden", map.get("isHidden"));
             }
         }
@@ -353,48 +353,4 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         return logStack.formatMessages();
     }
 
-    private void transMapBooleanToInt(Map<String, Object> map, String...keys) {
-        for (String key: keys) {
-            if (map.containsKey(key)) {
-                if (map.get(key) instanceof Boolean) {
-                    map.put(key, map.get(key).equals(true) ? 1: 0);
-                }
-                else {
-                    map.put(key, 0);
-                }
-            }
-        }
-
-    }
-
-
-    private void transMapIntToBoolean(Map<String, Object> map, String...keys) {
-        for (String key: keys) {
-            if (map.containsKey(key)) {
-                Object value = map.get(key);
-                if (value == null) {
-                    map.put(key, null);
-                }
-                else {
-                    map.put(key, "1".equals(map.get(key).toString().trim()));
-                }
-            }
-            else {
-                map.put(key, false);
-            }
-        }
-
-    }
-
-    private void transMapDateToString(Map<String, Object> map, String...keys) {
-        for (String key: keys) {
-            if (map.get(key) != null) {
-                if (map.get(key) instanceof Long) {
-                    map.put(key, DateUtils.formatDate(new Date((Long)map.get(key)), "yyyy-MM-dd HH:mm:ss"));
-                }
-
-            }
-        }
-
-    }
 }

@@ -1,11 +1,14 @@
 package com.kingsware.kdev.sys.service;
 
 import com.kingsware.kdev.core.base.BaseService;
+import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.sys.argv.SysApiArgv;
 import com.kingsware.kdev.sys.argv.SysApiQueryArgv;
 import com.kingsware.kdev.sys.ret.SysApiRet;
+
+import java.util.Map;
 
 /**
  * 接口业务类
@@ -47,5 +50,12 @@ public interface SysApiService extends BaseService {
      * @param argv  查询
      */
     void delete(MultiIdArgv argv);
+
+
+    /**
+     * 调用uniops接口
+     * @return  调用数据
+     */
+    BaseRet<?> callUniops(Map<String, Object> params);
 
 }

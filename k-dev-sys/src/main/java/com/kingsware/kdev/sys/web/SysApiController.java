@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -14,6 +15,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.Map;
 
 /**
  * 演示控制器
@@ -83,6 +85,12 @@ public class SysApiController extends BaseController {
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         sysApiService.delete(argv);
         return BaseRet.success();
+    }
+
+    @ApiOperation(value = "调用uniops接口 " ,notes = "调用uniops接口")
+    @PostMapping(value = "/callUniOps")
+    public BaseRet<?> callUniOps(@RequestBody Map<String, Object> params) {
+        return sysApiService.callUniops(params);
     }
 
 }

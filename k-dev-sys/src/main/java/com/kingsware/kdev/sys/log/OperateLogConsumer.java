@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.kmq.KmqConsumer;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.model.SysOperateLog;
+import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -23,6 +24,9 @@ public class OperateLogConsumer implements KmqConsumer {
         List<SysOperateLog> sysOperateLogs = new ArrayList<>();
         for (String payload: payloads) {
             SysOperateLog sysOperateLog = JsonUtil.toBean(payload, SysOperateLog.class);
+            if (StringUtils.isNotEmpty(sysOperateLog.getResponseBody()) && sysOperateLog.getResponseBody().length() > 1000) {
+                sysOperateLog.setResponseBody(sysOperateLog.getResponseBody().substring(0,1000));
+            }
             sysOperateLogs.add(sysOperateLog);
         }
         DB.saveAll(sysOperateLogs);
