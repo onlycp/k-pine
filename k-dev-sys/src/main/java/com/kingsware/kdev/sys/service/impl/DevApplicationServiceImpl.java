@@ -138,73 +138,14 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         }
     }
 
+
+
     @Override
     @SuppressWarnings("all")
     public String importApp(String json) {
 
-        Map<String, Object> pineMap = JsonUtil.toMap(json);
-        // 处理特殊的字段
-        // 应用处理
-        if (pineMap.containsKey("info")) {
-            Map<String, Object> map = (Map<String, Object>) pineMap.get("info");
-            MapUtil.transMapBooleanToInt( map,"devStatus", "enableStatus");
-            MapUtil.transMapDateToString(map, "whenCreated", "whenModified");
-        }
-        if (pineMap.containsKey("pages")) {
-            List<Map<String, Object>> list = (List<Map<String, Object>>) pineMap.get("pages");
-            for (Map<String, Object> map: list) {
-                MapUtil.transMapBooleanToInt( map,"devStatus", "enableStatus");
-                MapUtil.transMapDateToString(map, "whenCreated", "whenModified");
-            }
-
-        }
-        if (pineMap.containsKey("menus")) {
-            List<Map<String, Object>> list = (List<Map<String, Object>>) pineMap.get("menus");
-            for (Map<String, Object> map: list) {
-                MapUtil.transMapBooleanToInt( map,"isDev", "status");
-                MapUtil.transMapIntToBoolean(map, "isHidden");
-                map.put("hidden", map.get("isHidden"));
-            }
-        }
-        if (pineMap.containsKey("kdbFlows")) {
-            List<Map<String, Object>> list = (List<Map<String, Object>>) pineMap.get("kdbFlows");
-            for (Map<String, Object> map: list) {
-                map.put("flowId", map.get("flowid"));
-                map.put("updateTime", map.get("updatetime"));
-                map.put("createTime", map.get("createtime"));
-            }
-        }
-        if (pineMap.containsKey("functions")) {
-            List<Map<String, Object>> list = (List<Map<String, Object>>) pineMap.get("functions");
-            for (Map<String, Object> map: list) {
-                map.put("updateTime", map.get("updatetime"));
-                map.put("createTime", map.get("createtime"));
-            }
-        }
-
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        DevPine devPine = null;
-        try {
-            devPine = objectMapper.readValue(JsonUtil.toJson(pineMap), DevPine.class);
-        } catch (JsonProcessingException e) {
-            throw BusinessException.serviceThrow("应用包数据解析异常");
-        }
-        // 处理menu
-        if (devPine.getMenus() != null) {
-            devPine.getMenus().stream().forEach(it -> {
-                if (it.getHidden() == null) {
-                    it.setHidden(false);
-                }
-            });
-        }
         int subSize = 3500;
-//        devPine.getPages().stream().filter(it->it.getPageJson().length()>subSize).forEach(it -> {
-//            log.info("页面名称:{}, 长度:{}", it.getName(), it.getPageJson().length());
-//            it.setPageJson(it.getPageJson().substring(0, subSize));
-//        });
+        DevPine devPine = appData2Pine(json);
         log.info("开始导入数据");
         // 处理应用信息
         long appCount = DB.saveOrUpdate(devPine.getInfo(), DevApplication.class);
@@ -351,6 +292,77 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         }
 
         return logStack.formatMessages();
+    }
+
+    /**
+     * json字符串转pine
+     *
+     * @param appData json
+     * @return pine
+     */
+    @Override
+    @SuppressWarnings("all")
+    public DevPine appData2Pine(String appData) {
+
+        Map<String, Object> pineMap = JsonUtil.toMap(appData);
+        // 处理特殊的字段
+        // 应用处理
+        if (pineMap.containsKey("info")) {
+            Map<String, Object> map = (Map<String, Object>) pineMap.get("info");
+            MapUtil.transMapBooleanToInt( map,"devStatus", "enableStatus");
+            MapUtil.transMapDateToString(map, "whenCreated", "whenModified");
+        }
+        if (pineMap.containsKey("pages")) {
+            List<Map<String, Object>> list = (List<Map<String, Object>>) pineMap.get("pages");
+            for (Map<String, Object> map: list) {
+                MapUtil.transMapBooleanToInt( map,"devStatus", "enableStatus");
+                MapUtil.transMapDateToString(map, "whenCreated", "whenModified");
+            }
+
+        }
+        if (pineMap.containsKey("menus")) {
+            List<Map<String, Object>> list = (List<Map<String, Object>>) pineMap.get("menus");
+            for (Map<String, Object> map: list) {
+                MapUtil.transMapBooleanToInt( map,"isDev", "status");
+                MapUtil.transMapIntToBoolean(map, "isHidden");
+                map.put("hidden", map.get("isHidden"));
+            }
+        }
+        if (pineMap.containsKey("kdbFlows")) {
+            List<Map<String, Object>> list = (List<Map<String, Object>>) pineMap.get("kdbFlows");
+            for (Map<String, Object> map: list) {
+                map.put("flowId", map.get("flowid"));
+                map.put("updateTime", map.get("updatetime"));
+                map.put("createTime", map.get("createtime"));
+            }
+        }
+        if (pineMap.containsKey("functions")) {
+            List<Map<String, Object>> list = (List<Map<String, Object>>) pineMap.get("functions");
+            for (Map<String, Object> map: list) {
+                map.put("updateTime", map.get("updatetime"));
+                map.put("createTime", map.get("createtime"));
+            }
+        }
+
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        DevPine devPine = null;
+        try {
+            devPine = objectMapper.readValue(JsonUtil.toJson(pineMap), DevPine.class);
+        } catch (JsonProcessingException e) {
+            throw BusinessException.serviceThrow("应用包数据解析异常");
+        }
+        // 处理menu
+        if (devPine.getMenus() != null) {
+            devPine.getMenus().stream().forEach(it -> {
+                if (it.getHidden() == null) {
+                    it.setHidden(false);
+                }
+            });
+        }
+        return devPine;
     }
 
 }

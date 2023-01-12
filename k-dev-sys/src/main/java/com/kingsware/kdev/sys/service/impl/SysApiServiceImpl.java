@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.service.impl;
 
+import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -16,6 +17,7 @@ import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.sys.argv.SysApiArgv;
 import com.kingsware.kdev.sys.argv.SysApiQueryArgv;
+import com.kingsware.kdev.sys.manager.UniOpsTokenStore;
 import com.kingsware.kdev.sys.model.SysApi;
 import com.kingsware.kdev.sys.ret.SysApiRet;
 import com.kingsware.kdev.sys.service.SysApiService;
@@ -157,7 +159,7 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
             token = UniOpsUtil.getUniOpsToken();
         }
         else {
-            token = request.getHeader("token");
+            token = UniOpsTokenStore.getInstance().getUniOpsToken(TokenUtil.getTokenString(request));
         }
         // 获取uniops地址
         String uniopsServer = SpringContext.getProperties("uniops.server", "http://localhost:3456");
