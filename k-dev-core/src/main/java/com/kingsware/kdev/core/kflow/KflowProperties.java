@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "app.k-flow")
 @Data
-public class KFlowProperties {
+public class KflowProperties {
     /** 是否启用 **/
     private boolean enable;
 }

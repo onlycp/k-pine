@@ -31,9 +31,9 @@ import com.kingsware.kdev.core.model.SysOperateLog;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.util.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import javax.annotation.Resource;
@@ -57,11 +57,11 @@ import java.util.*;
 @Slf4j
 public class KAuthFilter implements Filter {
 
-    @Resource
-    private KFlowProperties kFlowProperties;
-    @Resource
+    @Autowired
+    private KflowProperties kflowProperties;
+    @Autowired
     private AppAuthProperties appAuthProperties;
-    @Resource
+    @Autowired
     private ControllerManager controllerManager;
     /** 忽略的接口 **/
     private static final String ignoreApi = ":open";
@@ -159,7 +159,7 @@ public class KAuthFilter implements Filter {
                     return;
                 }
                 // 流程调用方式
-                if (api != null && api.getCallType() == 2 && kFlowProperties.isEnable()) {
+                if (api != null && api.getCallType() == 2 && kflowProperties.isEnable()) {
                     callType = CallType.KFLOW;
                     apiCode = api.getApiCode();
                     // 是否允许跳过权限

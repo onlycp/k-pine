@@ -35,10 +35,11 @@ public class UiConfig extends WebMvcConfigurationSupport {
         log.info("前端目录:{}", ui);
         if (new File(ui).exists()) {
             // 替换内容
-            String contextPath = ServletUtil.getContextPath();
+            String contextPath = SpringContext.getProperties("app.ui.prefix", SpringContext.getBootProperties("server.servlet.context-path", "") );
             if (contextPath.endsWith("/")) {
                 contextPath = contextPath.substring(0, contextPath.length()-1);
             }
+            log.info("当前上下文：" + contextPath);
             if (StringUtils.isNotEmpty(contextPath)) {
                 // 替换字体
                 String text = "url(/static/fonts/";
