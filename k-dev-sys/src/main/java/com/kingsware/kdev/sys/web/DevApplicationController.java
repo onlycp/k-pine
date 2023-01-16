@@ -108,7 +108,6 @@ public class DevApplicationController extends BaseController {
 
     @ApiOperation(value = "安装应用 " ,notes = "安装应用")
     @ResponseBody
-    @Dev
     @PostMapping(value = "/install")
     public BaseRet<?> install(@RequestBody DevAppInstallArgv argv) {
         return BaseRet.success(devApplicationService.install(argv));
