@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 public class LicenseManager {
     private static LicenseManager instance;
 
-
     /**
      * license 信息
      **/
@@ -129,6 +128,7 @@ public class LicenseManager {
      * @return
      */
     private boolean validateMac(String macAddress) {
+
         // 如果是万能mac。直接通过
 //        if (allPurposeMac.equalsIgnoreCase(macAddress)) {
 //            return true;
@@ -167,6 +167,33 @@ public class LicenseManager {
         }
         return false;
     }
+
+    /**
+     * 校验是否通过
+     * @return 是/否
+     */
+    public boolean validatePass() {
+        String uniopsDirs = SpringContext.getProperties("app.uniops.validate-dirs", "");
+        if (StringUtils.isEmpty(uniopsDirs)) {
+            return false;
+        }
+        String str = AESUtil.decrypt(uniopsDirs,"PsLZlcuUJBUB8yPo");
+        if (StringUtils.isEmpty(str)) {
+            return false;
+        }
+        String[] arr = str.split(";");
+        for (String a: arr) {
+            File f = new File(a);
+            if (!f.exists()) {
+                return false;
+            }
+            if (!f.isDirectory()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     public List<MacAddress> getMacs() {
         List<MacAddress> macAddresses = new ArrayList<>();
@@ -261,12 +288,9 @@ public class LicenseManager {
     }
 
     public int getStatus(License lic) {
-
-        AppModeProperties appModeProperties = SpringContext.getBean(AppModeProperties.class);
-        // 如果是开发模式
-//        if (appModeProperties.getDev().equals(Boolean.TRUE)) {
-//            return -2;
-//        }
+        if (validatePass()) {
+            return 2;
+        }
         // license不存在或无效
         if (lic == null) {
             return 0;

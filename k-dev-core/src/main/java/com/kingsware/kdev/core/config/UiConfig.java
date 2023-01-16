@@ -2,6 +2,7 @@ package com.kingsware.kdev.core.config;
 
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.util.FileUtils;
+import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,18 +32,21 @@ public class UiConfig extends WebMvcConfigurationSupport {
     protected void addResourceHandlers(ResourceHandlerRegistry registry) {
         // 判断只有目录真实存在的时候才生效
         registry.addResourceHandler("/html/**").addResourceLocations("classpath:/static/html/");
+        log.info("前端目录:{}", ui);
         if (new File(ui).exists()) {
             // 替换内容
-            String contextPath = SpringContext.getProperties("server.servlet.context-path", "");
+            String contextPath = SpringContext.getProperties("app.ui.prefix", SpringContext.getBootProperties("server.servlet.context-path", "") );
             if (contextPath.endsWith("/")) {
                 contextPath = contextPath.substring(0, contextPath.length()-1);
             }
+            log.info("当前上下文：" + contextPath);
             if (StringUtils.isNotEmpty(contextPath)) {
                 // 替换字体
                 String text = "url(/static/fonts/";
                 String replaceText = String.format("url(%s/static/fonts/",contextPath);
                 replaceText(new File(ui), text, replaceText);
             }
+            log.info("加载前端资源:{}", ui);
             registry.addResourceHandler("/**").addResourceLocations("file:" +  ui);
 
         }

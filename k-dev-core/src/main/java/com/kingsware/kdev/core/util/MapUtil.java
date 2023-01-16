@@ -1,9 +1,6 @@
 package com.kingsware.kdev.core.util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * map工具类
@@ -49,5 +46,50 @@ public class MapUtil {
             }
         }
         return mergedMap;
+    }
+
+    public static void transMapBooleanToInt(Map<String, Object> map, String...keys) {
+        for (String key: keys) {
+            if (map.containsKey(key)) {
+                if (map.get(key) instanceof Boolean) {
+                    map.put(key, map.get(key).equals(true) ? 1: 0);
+                }
+                else {
+                    map.put(key, 0);
+                }
+            }
+        }
+
+    }
+
+
+    public static void transMapIntToBoolean(Map<String, Object> map, String...keys) {
+        for (String key: keys) {
+            if (map.containsKey(key)) {
+                Object value = map.get(key);
+                if (value == null) {
+                    map.put(key, null);
+                }
+                else {
+                    map.put(key, "1".equals(map.get(key).toString().trim()));
+                }
+            }
+            else {
+                map.put(key, false);
+            }
+        }
+
+    }
+
+    public static void transMapDateToString(Map<String, Object> map, String...keys) {
+        for (String key: keys) {
+            if (map.get(key) != null) {
+                if (map.get(key) instanceof Long) {
+                    map.put(key, DateUtils.formatDate(new Date((Long)map.get(key)), "yyyy-MM-dd HH:mm:ss"));
+                }
+
+            }
+        }
+
     }
 }

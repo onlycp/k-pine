@@ -3,7 +3,7 @@ package com.kingsware.kdev.core.cache.api;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.cron.KRunner;
 import com.kingsware.kdev.core.cron.KTask;
-import com.kingsware.kdev.core.kflow.KFlowProperties;
+import com.kingsware.kdev.core.kflow.KflowProperties;
 import com.kingsware.kdev.core.orm.DB;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,7 +28,7 @@ public class ApiTask implements KTask, KRunner {
      */
     @Override
     public void execute() {
-        KFlowProperties kFlowProperties = SpringContext.getBean(KFlowProperties.class);
+        KflowProperties kFlowProperties = SpringContext.getBean(KflowProperties.class);
         if (!kFlowProperties.isEnable()) {
             return;
         }

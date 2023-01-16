@@ -1,23 +1,33 @@
 package com.kingsware.kdev.sys.service.impl;
 
+import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
+import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.cache.api.ApiManager;
+import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
-import com.kingsware.kdev.core.util.BeanUtils;
-import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.sys.argv.SysApiArgv;
 import com.kingsware.kdev.sys.argv.SysApiQueryArgv;
+import com.kingsware.kdev.sys.manager.UniOpsTokenStore;
 import com.kingsware.kdev.sys.model.SysApi;
 import com.kingsware.kdev.sys.ret.SysApiRet;
 import com.kingsware.kdev.sys.service.SysApiService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 角色业务实现类
@@ -28,6 +38,9 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService {
+
+    @Value("${app.mode.dev:false}")
+    private boolean modeDev;
 
     @Override
     public SysApiRet get(String id) {
@@ -126,6 +139,77 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
         for (String id: argv.getIds()) {
             DB.delete(SysApi.class, id);
             ApiManager.getInstance().removeApi(id);
+        }
+    }
+
+
+
+    /**
+     * 调用uniops接口
+     *
+     * @return 调用数据
+     */
+    @Override
+    public BaseRet<?> callUniops(Map<String, Object> params) {
+        HttpServletRequest request = ServletUtil.request();
+        HttpServletResponse response = ServletUtil.response();
+        // 获取令牌
+        String token = null;
+        if(modeDev) {
+            token = UniOpsUtil.getUniOpsToken();
+        }
+        else {
+            token = UniOpsTokenStore.getInstance().getUniOpsToken(TokenUtil.getTokenString(request));
+        }
+        // 获取uniops地址
+        String uniopsServer = SpringContext.getProperties("uniops.server", "http://localhost:3456");
+        if (!params.containsKey("url")) {
+            throw BusinessException.serviceThrow("缺少url参数");
+        }
+        // 获取请求路径和方法
+        String url = params.get("url").toString();
+        String method = "get";
+        String callUrl = url;
+        String[] arr = url.split(":");
+        if (arr.length == 2) {
+            method = arr[0];
+            callUrl = arr[1];
+        }
+        String apiUrl = uniopsServer + callUrl;
+        // 封装请求头
+        Map<String, String> headers = new HashMap<>();
+        headers.put("token", token);
+        String responseBody = null;
+        if ("get".equalsIgnoreCase(method)) {
+            responseBody = HttpUtil.get(apiUrl, headers);
+        }
+        else if ("post".equalsIgnoreCase(method)) {
+            // 移除url
+            Map<String, Object> bodyMap = new HashMap<>(params);
+            bodyMap.remove("url");
+            // 发起请求
+            responseBody = HttpUtil.postBody(apiUrl, JsonUtil.toJson(bodyMap), headers);
+        }
+        else {
+            throw BusinessException.serviceThrow("当前仅支持get和post请求!");
+        }
+        Map<String, Object> retMap = JsonUtil.toMap(responseBody);
+        int errorCode = (int)retMap.get("errorCode");
+        if (errorCode != 0) {
+            Object msg = retMap.getOrDefault("message", "uniops接口调用失败");
+            throw BusinessException.serviceThrow(msg == null ? "uniops接口调用失败": msg.toString());
+        }
+        else {
+            Object msg = retMap.getOrDefault("message", "成功");
+            if (msg == null) {
+                msg = "成功";
+            }
+            if (retMap.containsKey("responseBody")) {
+                return BaseRet.success(retMap.get("responseBody"), msg.toString());
+            }
+            else {
+                return BaseRet.successMessage(msg.toString());
+            }
         }
     }
 }

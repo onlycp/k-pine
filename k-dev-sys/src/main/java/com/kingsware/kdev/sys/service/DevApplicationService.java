@@ -6,6 +6,7 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.sys.argv.DevAppInstallArgv;
 import com.kingsware.kdev.sys.argv.DevApplicationArgv;
 import com.kingsware.kdev.sys.argv.DevApplicationQueryArgv;
+import com.kingsware.kdev.sys.argv.DevPine;
 import com.kingsware.kdev.sys.ret.DevApplicationRet;
 
 import java.util.Map;
@@ -61,4 +62,11 @@ public interface DevApplicationService extends BaseService {
      * @param argv
      */
     Map<String, Object> install(DevAppInstallArgv argv);
+
+    /**
+     * json字符串转pine
+     * @param appData json
+     * @return  pine
+     */
+    DevPine appData2Pine(String appData);
 }

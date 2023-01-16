@@ -31,9 +31,9 @@ import com.kingsware.kdev.core.model.SysOperateLog;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.util.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import javax.annotation.Resource;
@@ -57,11 +57,11 @@ import java.util.*;
 @Slf4j
 public class KAuthFilter implements Filter {
 
-    @Resource
-    private KFlowProperties kFlowProperties;
-    @Resource
+    @Autowired
+    private KflowProperties kflowProperties;
+    @Autowired
     private AppAuthProperties appAuthProperties;
-    @Resource
+    @Autowired
     private ControllerManager controllerManager;
     /** 忽略的接口 **/
     private static final String ignoreApi = ":open";
@@ -96,17 +96,8 @@ public class KAuthFilter implements Filter {
             filterChain.doFilter(request, response);
             return;
         }
-
-        MyHttpServletRequestWrapper wrapperRequest = null;
         String requestBody = "{}";
-        wrapperRequest = new MyHttpServletRequestWrapper(request);
-        String contentType = request.getContentType();
-        if (contentType == null || !contentType.toLowerCase().contains("multipart/form-data")) {
-            wrapperRequest.getInputStream();
-            requestBody = new String(wrapperRequest.getRequestBody(), StandardCharsets.UTF_8);
-        }
 
-        ContentCachingResponseWrapper wrapperResponse = new ContentCachingResponseWrapper(response);
 
         // 获取请求方式
         String method = request.getMethod().toLowerCase();
@@ -129,6 +120,8 @@ public class KAuthFilter implements Filter {
         // 请求时间
         String now = DateUtils.getNow();
         long t1 = System.currentTimeMillis();
+        MyHttpServletRequestWrapper wrapperRequest = null;
+        ContentCachingResponseWrapper wrapperResponse = null;
         try {
             if (url.contains("//")) {
                 url = url.replaceAll("//", "/");
@@ -136,6 +129,15 @@ public class KAuthFilter implements Filter {
             String apiUrlPrefix = request.getContextPath() + "/api";
             // 如果是静态文件
             if (url.startsWith(apiUrlPrefix)) {
+
+                wrapperRequest = new MyHttpServletRequestWrapper(request);
+                String contentType = request.getContentType();
+                if (contentType == null || !contentType.toLowerCase().contains("multipart/form-data")) {
+                    wrapperRequest.getInputStream();
+                    requestBody = new String(wrapperRequest.getRequestBody(), StandardCharsets.UTF_8);
+                }
+
+                wrapperResponse = new ContentCachingResponseWrapper(response);
                 if (url.startsWith(apiUrlPrefix)) {
                     contextPath = apiUrlPrefix;
                 }
@@ -157,7 +159,7 @@ public class KAuthFilter implements Filter {
                     return;
                 }
                 // 流程调用方式
-                if (api != null && api.getCallType() == 2 && kFlowProperties.isEnable()) {
+                if (api != null && api.getCallType() == 2 && kflowProperties.isEnable()) {
                     callType = CallType.KFLOW;
                     apiCode = api.getApiCode();
                     // 是否允许跳过权限
@@ -196,7 +198,7 @@ public class KAuthFilter implements Filter {
                     callByFlow(request, response, api, path, argvMap);
                 }
             } else {
-                filterChain.doFilter(wrapperRequest, response);
+                filterChain.doFilter(request, response);
             }
         }
         catch (BusinessException e) {
@@ -279,7 +281,10 @@ public class KAuthFilter implements Filter {
                     operateLog.setOperateTime(new Timestamp(System.currentTimeMillis()));
                     operateLog.setMethod(callType == CallType.CONTROLLER ? apiDefine.getCallMethod() + "()": api.getApiName());
                     operateLog.setRequestMethod(KClientContext.getContext().getRequest().getMethod());
-                    operateLog.setResponseBody(ServletUtil.getResponseBody(wrapperResponse));
+                    if (wrapperResponse != null) {
+                        operateLog.setResponseBody(ServletUtil.getResponseBody(wrapperResponse));
+                    }
+
                     operateLog.setRequestBody(requestBody);
                     KmqMessageCenter.getInstance().produce("t_operate_log", JsonUtil.toJson(operateLog) );
                     // 保存登录日志
@@ -298,7 +303,9 @@ public class KAuthFilter implements Filter {
 
             }
             try {
-                wrapperResponse.copyBodyToResponse();
+                if (wrapperResponse != null) {
+                    wrapperResponse.copyBodyToResponse();
+                }
             }
             catch (Exception ignored) {
             }

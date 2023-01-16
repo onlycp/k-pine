@@ -46,6 +46,10 @@ public class LicenseServiceImpl implements LicenseService {
     @Override
     public LicenseRet getLicense() {
 
+        if (LicenseManager.getInstance().validatePass()) {
+            return getVirtualLicense();
+        }
+
         LicenseRet ret = new LicenseRet();
         // 读取文件
         License license = LicenseManager.getInstance().getLicense();
@@ -61,8 +65,21 @@ public class LicenseServiceImpl implements LicenseService {
         return ret;
     }
 
+    private LicenseRet getVirtualLicense() {
+        LicenseRet ret = new LicenseRet();
+        ret.setCustomer("K-UniOps");
+        ret.setStatus(2);
+        ret.setMac("00-00-00-00-00-00");
+        ret.setValidDate("2022-01-01");
+        ret.setInvalidDate("2099-01-01");
+        return ret;
+    }
+
     @Override
     public LicenseRet active(SysLicenseActive licenseActive) {
+        if (LicenseManager.getInstance().validatePass()) {
+            return getVirtualLicense();
+        }
         License license = LicenseManager.getInstance().parseLicense(licenseActive.getLicense());
         int status = LicenseManager.getInstance().getStatus(license);
         if ( status == -1) {
