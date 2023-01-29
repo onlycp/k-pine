@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * @author andyzheng
@@ -71,10 +72,16 @@ public class SysSqlInitialize implements SystemInitialize {
 //            initDatasourcePath = SysSqlInitialize.class.getResource("/").getPath();
 //        }
         Resource[] resources = SpringContext.getResources(ResourceUtils.CLASSPATH_URL_PREFIX + "initSql/" + initDbType + "/**");
+        Arrays.sort(resources, (comparator, comparator2) -> {
+            return comparator.getFilename().compareTo(comparator2.getFilename());
+        });
+        log.info("[k-pine:SysSqlInitialize path]" + ResourceUtils.CLASSPATH_URL_PREFIX + "initSql/" + initDbType + "/**");
+        log.info("[k-pine:SysSqlInitialize resources]" + resources);
         if (resources != null) {
             for(Resource resource : resources) {
                 ExecutionFile executionFile = new ExecutionFile();
                 String filename = resource.getFilename();
+                log.info("[k-pine:SysSqlInitialize filename]" + filename);
                 if (StringUtils.isEmpty(filename)) {
                     continue;
                 }
