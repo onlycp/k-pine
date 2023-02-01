@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.auth.DataAccessUtil;
 import com.kingsware.kdev.core.auth.SqlLink;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.util.ExceptionUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,7 @@ public class Functions {
      */
     public static String getDataAccessSql(String tableName, String alias, String sqlType) {
         String authoritySql = DataAccessUtil.getDataAccessSql(tableName, alias, SqlLink.DATA_IN);
+        log.info("权限sql:{}", authoritySql);
         if (StringUtils.isNotEmpty(authoritySql)) {
             return " and " + authoritySql;
         }
@@ -89,7 +91,7 @@ public class Functions {
             return invokeMethod.invoke(null, params.toArray(new Object[0]));
         }
         catch (IllegalAccessException | InvocationTargetException e) {
-            throw BusinessException.serviceThrow("函数调用异常：" + methodName + ", 异常信息:" + e.getMessage());
+            throw BusinessException.serviceThrow("函数调用异常：" + methodName + ", 异常信息:" + ExceptionUtils.getStackTrace(e));
         }
     }
 }

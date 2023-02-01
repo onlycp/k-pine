@@ -90,7 +90,7 @@ public class DataAccessUtil {
         }
         else if (sqlLink == SqlLink.DATA_IN) {
             // 拼接权限sql(由于id是uuid，这里忽略table_name)
-            String sql = MessageFormat.format("select ar.data_id from sys_data_access_resource ar where (ar.table_name=''{0}'' and  ar.access_id in ({1})) {2}", table, StringUtils.joinToString(inSet, ","), extraSql);
+            String sql = MessageFormat.format("select ar.data_id from sys_data_access_resource ar where (ar.table_name=''{0}'' and  ar.access_id in ({1}))", table, StringUtils.joinToString(inSet, ","));
             List<String> accessIds = DB.findSingleAttributeList(String.class, sql);
             List<String> accessSet = new ArrayList<>();
             if (accessIds.isEmpty()) {
@@ -101,7 +101,10 @@ public class DataAccessUtil {
                     accessSet.add("'" + a + "'");
                 }
             }
-            return MessageFormat.format("{0}.{1} in ({2})", alias, queryColumn, StringUtils.joinToString(accessSet, ","));
+            if (StringUtils.isEmpty(extraSql)) {
+                extraSql = "";
+            }
+            return MessageFormat.format("({0}.{1} in ({2}) {3})", alias, queryColumn, StringUtils.joinToString(accessSet, ","), extraSql);
         }
         return null;
     }
