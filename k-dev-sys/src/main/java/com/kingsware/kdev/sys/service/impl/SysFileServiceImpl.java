@@ -159,6 +159,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         SysFile file = DB.findById(SysFile.class, path);
         HttpServletResponse response =  KClientContext.getContext().getResponse();
         HttpServletRequest request =  KClientContext.getContext().getRequest();
+        response.setCharacterEncoding("utf-8");
         String fileRealPath = null;
         String fileName = "";
         String contentType = "application/octet-stream";
@@ -195,6 +196,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             if (file.getSaveType() == 0) {
                 try {
                     byte[] content = Base64.getDecoder().decode(file.getFileContent());
+                    response.setHeader("Content-Disposition", "attachment;filename=" + UriEncoder.encode(fileName));
                     response.setContentLength(content.length);
                     response.getOutputStream().write(content);
                     response.getOutputStream().flush();
@@ -220,11 +222,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                 }
             }
         }
-        if (fileRealPath == null) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
-            return ;
-        }
+
 //        response.reset();
         String userFileName = request.getParameter("fileName");
         if (StringUtils.isNotEmpty(userFileName)) {
@@ -238,12 +236,16 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             }
 
         }
-        contentType = Files.probeContentType(Paths.get(fileRealPath));
-        response.setContentType(contentType);
-        response.setCharacterEncoding("utf-8");
         response.setHeader("Content-Disposition", "attachment;filename=" + UriEncoder.encode(fileName));
 
-        request.setAttribute(NonStaticResourceHttpRequestHandler.ATTR_FILE, fileRealPath);
+        if (fileRealPath == null) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
+        } else {
+            contentType = Files.probeContentType(Paths.get(fileRealPath));
+            response.setContentType(contentType);
+            request.setAttribute(NonStaticResourceHttpRequestHandler.ATTR_FILE, fileRealPath);
+        }
         nonStaticResourceHttpRequestHandler.handleRequest(request, response);
     }
 
