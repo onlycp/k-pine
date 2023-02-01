@@ -9,5 +9,6 @@ package com.kingsware.kdev.core.auth;
  */
 public enum SqlLink {
     IN,
-    EXISTS
+    EXISTS,
+    DATA_IN
 }

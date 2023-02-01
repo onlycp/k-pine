@@ -3,14 +3,12 @@ package com.kingsware.kdev.core.auth;
 import com.kingsware.kdev.core.cache.access.AccessManager;
 import com.kingsware.kdev.core.cache.access.DataResourceInfo;
 import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.DataSourceInfo;
 import com.kingsware.kdev.core.util.StringUtils;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 数据权限工具类
@@ -90,6 +88,23 @@ public class DataAccessUtil {
         else if (sqlLink == SqlLink.IN) {
             return MessageFormat.format("{0}.{1} in (select ar.data_id from sys_data_access_resource ar where (ar.table_name=''{2}'' and  ar.access_id in ({3})) {4})", alias, queryColumn, table, StringUtils.joinToString(inSet, ","), extraSql);
         }
+        else if (sqlLink == SqlLink.DATA_IN) {
+            // 拼接权限sql(由于id是uuid，这里忽略table_name)
+            String sql = MessageFormat.format("select ar.data_id from sys_data_access_resource ar where (ar.table_name=''{0}'' and  ar.access_id in ({1})) {2}", table, StringUtils.joinToString(inSet, ","), extraSql);
+            List<String> accessIds = DB.findSingleAttributeList(String.class, sql);
+            List<String> accessSet = new ArrayList<>();
+            if (accessIds.isEmpty()) {
+                accessSet.add("'-1'");
+            }
+            else {
+                for (String a: accessIds) {
+                    accessSet.add("'" + a + "'");
+                }
+            }
+            return MessageFormat.format("{0}.{1} in ({2})", alias, queryColumn, StringUtils.joinToString(accessSet, ","));
+        }
         return null;
     }
+
+
 }

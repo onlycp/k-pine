@@ -39,6 +39,22 @@ public class Functions {
     }
 
     /**
+     * 获取数据权限sql
+     * @param tableName  表名
+     * @param alias      alias
+     * @return           权限sql
+     */
+    public static String getDataAccessSql(String tableName, String alias, String sqlType) {
+        String authoritySql = DataAccessUtil.getDataAccessSql(tableName, alias, SqlLink.DATA_IN);
+        if (StringUtils.isNotEmpty(authoritySql)) {
+            return " and " + authoritySql;
+        }
+        else {
+            return "";
+        }
+    }
+
+    /**
      * 获取所有的系统配置
      * @return
      */
