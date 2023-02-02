@@ -148,25 +148,25 @@ public class KFaasInitialize implements SystemInitialize {
         catch (Exception ignored) {}
         try {
             if ("mysql".equalsIgnoreCase(jdbcUrl.getDbType())) {
-                jdbcUrl.setDbName("mysql");
-                initDs.setJdbcUrl(jdbcUrl.build());
-                initDs.setSourceName(sourceName);
-                // 创建数据源
-                DB.kdbApi().addDataSource(initDs);
-                // 创建本地sql
-                KDBConnectConfig config = new KDBConnectConfig();
-                config.setChannel("kdbHttp");
-                config.setDatabaseType("kdb");
-                config.setInnerType(jdbcUrl.getDbType());
-                config.setDbName(sourceName);
-                config.setDataSource(sourceName);
-                config.setServer(SpringContext.getProperties("database.sources.db.server", ""));
-                config.setExecuteSqlApi(SpringContext.getProperties("database.sources.db.executeSqlApi", ""));
-                DbContext.getInstance().createDataBase(sourceName, config);
-                // 需要先初始化数据源
-                initBaseFlow();
                 // 创建数据库
                 try {
+                    jdbcUrl.setDbName("mysql");
+                    initDs.setJdbcUrl(jdbcUrl.build());
+                    initDs.setSourceName(sourceName);
+                    // 创建数据源
+                    DB.kdbApi().addDataSource(initDs);
+                    // 创建本地sql
+                    KDBConnectConfig config = new KDBConnectConfig();
+                    config.setChannel("kdbHttp");
+                    config.setDatabaseType("kdb");
+                    config.setInnerType(jdbcUrl.getDbType());
+                    config.setDbName(sourceName);
+                    config.setDataSource(sourceName);
+                    config.setServer(SpringContext.getProperties("database.sources.db.server", ""));
+                    config.setExecuteSqlApi(SpringContext.getProperties("database.sources.db.executeSqlApi", ""));
+                    DbContext.getInstance().createDataBase(sourceName, config);
+                    // 需要先初始化数据源
+                    initBaseFlow();
                     String createSchemaSql = String.format("CREATE DATABASE IF NOT EXISTS `%s` DEFAULT CHARSET utf8 COLLATE utf8_general_ci;",  dbName);
                     DB.byName(initDs.getSourceName()).executeUpdateSql(createSchemaSql);
                 }
@@ -175,25 +175,26 @@ public class KFaasInitialize implements SystemInitialize {
 
             }
             else if ("postgresql".equalsIgnoreCase(jdbcUrl.getDbType())) {
-                jdbcUrl.setDbName("postgres");
-                initDs.setJdbcUrl(jdbcUrl.build());
-                initDs.setSourceName(sourceName);
-                // 创建数据源
-                DB.kdbApi().addDataSource(initDs);
-                // 创建本地sql
-                KDBConnectConfig config = new KDBConnectConfig();
-                config.setChannel("kdbHttp");
-                config.setDatabaseType("kdb");
-                config.setInnerType(jdbcUrl.getDbType());
-                config.setDbName(sourceName);
-                config.setDataSource(sourceName);
-                config.setServer(SpringContext.getProperties("database.sources.db.server", ""));
-                config.setExecuteSqlApi(SpringContext.getProperties("database.sources.db.executeSqlApi", ""));
-                DbContext.getInstance().createDataBase(sourceName, config);
-                // 需要先初始化数据源
-                initBaseFlow();
                 // 创建数据库
                 try {
+                    jdbcUrl.setDbName("postgres");
+                    initDs.setJdbcUrl(jdbcUrl.build());
+                    initDs.setSourceName(sourceName);
+                    // 创建数据源
+                    DB.kdbApi().addDataSource(initDs);
+                    // 创建本地sql
+                    KDBConnectConfig config = new KDBConnectConfig();
+                    config.setChannel("kdbHttp");
+                    config.setDatabaseType("kdb");
+                    config.setInnerType(jdbcUrl.getDbType());
+                    config.setDbName(sourceName);
+                    config.setDataSource(sourceName);
+                    config.setServer(SpringContext.getProperties("database.sources.db.server", ""));
+                    config.setExecuteSqlApi(SpringContext.getProperties("database.sources.db.executeSqlApi", ""));
+                    DbContext.getInstance().createDataBase(sourceName, config);
+                    // 需要先初始化数据源
+                    initBaseFlow();
+
                     // 先判断数据库是否存在在
                     long count = DB.byName(initDs.getSourceName()).findCount(String.format("select count(1) from pg_database where datname = '%s'", dbName));
                     if (count == 0) {
