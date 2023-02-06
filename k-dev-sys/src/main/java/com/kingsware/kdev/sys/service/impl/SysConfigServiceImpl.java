@@ -118,6 +118,9 @@ public class SysConfigServiceImpl extends BaseServiceImpl implements SysConfigSe
     }
 
     @Override
+    /**
+     * 代码码版本已低于逻辑编排版，>2.0.0版本不会进入这里，应该从导出系统数据去使用
+     */
     public Map<String, Object> getSysConfig(HttpServletRequest request) {
         String ip = ServletUtil.getClientIp(request);
         String token = TokenUtil.getTokenString(request);

@@ -74,12 +74,12 @@ public class SysSqlInitialize implements SystemInitialize {
 //        }
         Resource[] resources = SpringContext.getResources(ResourceUtils.CLASSPATH_URL_PREFIX + "initSql/" + initDbType + "/**");
         log.info("[k-pine:SysSqlInitialize path]" + ResourceUtils.CLASSPATH_URL_PREFIX + "initSql/" + initDbType + "/**");
-        log.info("[k-pine:SysSqlInitialize resources]" + resources);
+//        log.info("[k-pine:SysSqlInitialize resources]" + resources);
         if (resources != null) {
             for(Resource resource : resources) {
                 ExecutionFile executionFile = new ExecutionFile();
                 String filename = resource.getFilename();
-                log.info("[k-pine:SysSqlInitialize filename]" + filename + "----" + maxVersion);
+//                log.info("[k-pine:SysSqlInitialize filename]" + filename + "----" + maxVersion);
                 if (StringUtils.isEmpty(filename)) {
                     continue;
                 }
@@ -92,7 +92,7 @@ public class SysSqlInitialize implements SystemInitialize {
                     version = Integer.parseInt(matcher.group(1));
                     isOnce = "1".equals(matcher.group(2));
                 }
-                log.info("[k-pine:SysSqlInitialize add resultList]" + version + "----" + maxVersion + "----" + isOnce + "----" + resource.isFile());
+//                log.info("[k-pine:SysSqlInitialize add resultList]" + version + "----" + maxVersion + "----" + isOnce + "----" + resource.isFile());
                 if (((!isOnce) || (version > maxVersion))) {
                     executionFile.setResource(resource);
                     executionFile.setName(filename);
