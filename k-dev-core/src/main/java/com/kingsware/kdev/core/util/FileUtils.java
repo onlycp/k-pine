@@ -248,7 +248,7 @@ public class FileUtils {
             String[] arr = fileProperties.getWriteList().trim().split(",");
             writeList = Arrays.asList(arr);
         }
-        return writeList.contains(extName);
+        return writeList.contains(extName.toLowerCase());
     }
 
     public static boolean checkFileFrom(String fileFrom) {
