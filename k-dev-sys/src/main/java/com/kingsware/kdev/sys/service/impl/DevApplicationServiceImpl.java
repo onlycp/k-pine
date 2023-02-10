@@ -192,8 +192,12 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
 
             // 如果没有，则新增
             if (functionInfoList.isEmpty() ) {
-                String sql = "insert into flow (flowid,name,content,description) values (?,?,?,?)";
-                DB.byName("kingDB").executeUpdateSql(sql, flowInfo.getFlowId(), flowInfo.getName(), flowInfo.getContent(), flowInfo.getDescription());
+                AddFlowInfo addFlowInfo = new AddFlowInfo();
+                addFlowInfo.setFlowId(flowInfo.getFlowId());
+                addFlowInfo.setContent(flowInfo.getContent());
+                addFlowInfo.setName(flowInfo.getName());
+                addFlowInfo.setDescription(flowInfo.getDescription());
+                DB.kdbApi().addFlow(addFlowInfo);
             }
             else {
                 EditFlowInfo editFlowInfo = new EditFlowInfo();
@@ -213,8 +217,13 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             List<Functions> functionInfoList = DB.kdbApi().queryFunction(functionQueryArgv);
             // 如果没有，则新增
             if (functionInfoList.isEmpty() ) {
-                String sql = "insert into functions (id,name,type,desc,script) values (?,?,?,?,?)";
-                DB.byName("kingDB").executeUpdateSql(sql, functions.getId(), functions.getName(), functions.getType(), functions.getDesc(), functions.getScript());
+                AddFunctionInfo addFunctionInfo = new AddFunctionInfo();
+                addFunctionInfo.setId(functions.getId());
+                addFunctionInfo.setName(functions.getName());
+                addFunctionInfo.setDesc(functions.getDesc());
+                addFunctionInfo.setScript(functions.getScript());
+                addFunctionInfo.setType(functions.getType());
+                DB.kdbApi().addFun(addFunctionInfo);
             }
             else {
                 EditFunctionInfo editFunctionInfo = new EditFunctionInfo();

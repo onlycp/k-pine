@@ -339,7 +339,10 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         }
         // 保存到kdb
         KdbApi api = (KdbApi) (DB.getDefault());
+        String logicFlowId = StringUtils.getUUID();
+        info.setFlowId(logicFlowId);
         String flowId = api.addFlow(info);
+
         // 将平台信息保存
         SysLogicFlow logicFlow = new SysLogicFlow();
         logicFlow.setName(argv.getName());

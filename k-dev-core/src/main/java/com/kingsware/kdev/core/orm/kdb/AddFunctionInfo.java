@@ -10,6 +10,8 @@ import lombok.Data;
  */
 @Data
 public class AddFunctionInfo {
+    /** id **/
+    private String id;
     /** name **/
     private String name;
     /** 脚本 **/

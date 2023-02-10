@@ -11,6 +11,7 @@ import com.kingsware.kdev.sys.argv.SysKdbFunArgv;
 import com.kingsware.kdev.sys.argv.SysKdbFunQueryArgv;
 import com.kingsware.kdev.sys.ret.SysKdbFunRet;
 import com.kingsware.kdev.sys.service.SysKdbFunService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -26,6 +27,7 @@ import java.util.List;
  * @date 2021/12/23 9:36 上午
  */
 @Service
+@Slf4j
 public class SysKdbFunServiceImpl extends BaseServiceImpl implements SysKdbFunService {
 
     @Override
@@ -79,11 +81,13 @@ public class SysKdbFunServiceImpl extends BaseServiceImpl implements SysKdbFunSe
     public void add(SysKdbFunArgv argv) {
 
         AddFunctionInfo info = new AddFunctionInfo();
+        info.setId(StringUtils.getUUID());
         info.setName(argv.getName());
         info.setScript(argv.getScript());
         info.setType(argv.getType());
         info.setDesc(argv.getDesc());
         DB.kdbApi().addFun(info);
+        log.info("函数id:{}", info.getId());
     }
 
     @Override

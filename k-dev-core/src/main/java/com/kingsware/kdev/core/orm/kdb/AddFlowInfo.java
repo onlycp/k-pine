@@ -12,6 +12,8 @@ import lombok.Data;
 @Data
 public class AddFlowInfo {
 
+    /** 流程id **/
+    private String flowId;
     /** 流程内容 **/
     private String content;
     /** 名称 **/
