@@ -139,9 +139,12 @@ public abstract class KdbApiAbstract implements  KdbApi {
     }
 
     @Override
-    public KdbRet<String> executeFlow(KdbArgv argv, boolean debug) {
+    public KdbRet<String> executeFlow(KdbArgv argv, boolean debug, boolean sync ) {
         // 加入当前环境变量
         String executeFlowUrl = debug ? "/api/execute4debug" : "/api/execute";
+        if (sync) {
+            executeFlowUrl = "/api/async/execute";
+        }
         return post(argv, executeFlowUrl, String.class);
     }
 
@@ -192,6 +195,9 @@ public abstract class KdbApiAbstract implements  KdbApi {
             // 拼接请求
             String url = getServer() +  api;
             long t1 = System.currentTimeMillis();
+            if (api.contains("sync")) {
+                System.currentTimeMillis();
+            }
             String responseBody = HttpUtil.postBody(url, requestBody, Collections.emptyMap());
             KdbRet<T> ret = JsonUtil.toBean(responseBody, KdbRet.class, tClass);
             if (ret == null) {

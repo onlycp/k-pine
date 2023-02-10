@@ -188,6 +188,10 @@ public class DynamicTask implements CommandLineRunner {
                 log.info("任务执行完成，名称:{}, 执行结果:{}, 用时:{}, 信息:{}", myTask.getName(), executeStatus==1 ?"成功":"失败", (t2-t1), errorMessage);
             }
             else {
+                // 如果流程任务，延迟1秒更新日志
+                if (myTask.getTaskType() == 2) {
+                    ThreadUtils.sleep(1000);
+                }
                 String sql = "update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ?,  last_execute_time=?, lock_status=0 where id=?";
                 DB.executeUpdateSql(sql, executeStatus, (t2 - t1),  errorMessage, DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME), myTask.getId());
             }
@@ -240,7 +244,10 @@ public class DynamicTask implements CommandLineRunner {
                     params = taskArgvMap;
                 }
             }
-            KdbFlowResult kdbFlowResult = KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), "", params, context, false);
+            long t1 = System.currentTimeMillis();
+            KdbFlowResult kdbFlowResult = KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), "", params, context, false, true);
+            long t2 = System.currentTimeMillis();
+            log.info("任务用时:{}", t2-t1);
 //            log.info("流程任务：{}, 结果:{}", sysTask.getName(), JsonUtil.toJson(kdbFlowResult));
         }
         else {

@@ -49,7 +49,7 @@ public class KdbFlowExecutor {
      * @param context      上下文信息
      * @return             执行结果
      */
-    public KdbFlowResult execute(String flowId, String subFlowIds, Map<String, Object> params, KFlowContext context, boolean debug) {
+    public KdbFlowResult execute(String flowId, String subFlowIds, Map<String, Object> params, KFlowContext context, boolean debug, boolean sync) {
 
         long t1 = System.currentTimeMillis();
         String statusMessage = "失败";
@@ -74,6 +74,7 @@ public class KdbFlowExecutor {
                 params.put("start", (page-1)*pageSize + "") ;
                 params.put("limit", pageSize + "");
                 params.put("end", page*pageSize);
+                params.put("pageSize", pageSize);
             }
             if (params.containsKey("pageQuery")) {
                 params.put("pageQuery", params.getOrDefault("pageQuery", false).toString());
@@ -100,7 +101,7 @@ public class KdbFlowExecutor {
                 }
             }
             // 执行流程
-            KdbRet<String> ret = DB.kdbApi().executeFlow(argv, debug);
+            KdbRet<String> ret = DB.kdbApi().executeFlow(argv, debug, sync);
             if (ret.getErrorCode() != 0) {
                 result.setType(KFlowConstant.RESULT_JSON);
                 result.setData(new ErrorResult(ret.getMessage() == null ? "流程处理失败": ret.getMessage()));

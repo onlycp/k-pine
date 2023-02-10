@@ -5,7 +5,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 新增流程实体
@@ -46,6 +48,8 @@ public class SysFlowDefineRet extends BaseSimpleRet {
         private String afterContent;
         /** 大小写 **/
         private String columnLabelCase;
+        /** 表单值 **/
+        private Object exeData = new HashMap<>();
     }
 
 
@@ -95,7 +99,7 @@ public class SysFlowDefineRet extends BaseSimpleRet {
     /** 设置 **/
     public void addNode(String id, String label, String type,  String executeType, String sourceName, String zIndex,
                         String position, String beforeContent, String content, String afterContent,
-                        String flowId, String subFlowName, String columnLabelCase) {
+                        String flowId, String subFlowName, String columnLabelCase, Object exeData) {
         Node node = new Node();
         node.setId(id);
         node.setType(type);
@@ -110,6 +114,7 @@ public class SysFlowDefineRet extends BaseSimpleRet {
         node.setFlowId(flowId);
         node.setSubFlowName(subFlowName);
         node.setColumnLabelCase(columnLabelCase);
+        node.setExeData(exeData);
         this.nodes.add(node);
     }
 

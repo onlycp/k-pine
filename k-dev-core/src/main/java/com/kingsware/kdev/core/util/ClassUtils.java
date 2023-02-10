@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
@@ -21,6 +22,7 @@ import java.util.List;
  * @version %I%, %G%
  * @date 2021/12/17 10:21 下午
  */
+@Slf4j
 public class ClassUtils {
 
     /** 日志打印 **/
@@ -86,6 +88,7 @@ public class ClassUtils {
                     MetadataReader reader = readerFactory.getMetadataReader(resource);
                     String className = reader.getClassMetadata().getClassName();
                     Class<?> clazz = Class.forName(className);
+//                    log.info("Class:" + clazz.getName());
                     if (clazz.isAnnotationPresent(annotationClass)) {
                         result.add(clazz);
                     }

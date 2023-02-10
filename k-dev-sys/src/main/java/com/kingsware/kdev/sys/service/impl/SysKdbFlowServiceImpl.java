@@ -21,6 +21,7 @@ import com.kingsware.kdev.core.util.PageUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.*;
 import com.kingsware.kdev.core.model.SysLogicFlow;
+import com.kingsware.kdev.sys.model.DevFaasNode;
 import com.kingsware.kdev.sys.model.SysLogicHistory;
 import com.kingsware.kdev.sys.ret.SysFlowDebugRet;
 import com.kingsware.kdev.sys.ret.SysFlowDefineRet;
@@ -28,6 +29,7 @@ import com.kingsware.kdev.sys.ret.SysKdbFlowRet;
 import com.kingsware.kdev.sys.service.SysApiService;
 import com.kingsware.kdev.sys.service.SysKdbFlowService;
 import com.kingsware.kdev.sys.service.SysLogicHistoryService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -45,6 +47,7 @@ import java.util.stream.Collectors;
  * @date 2021/12/23 9:36 上午
  */
 @Service
+@Slf4j
 public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlowService {
     @Resource
     private SysApiService sysApiService;
@@ -100,6 +103,10 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         if (flowDefinition == null) {
             return defineRet;
         }
+        // 查找所有节点模板
+        List<DevFaasNode> devFaasNodes = DB.findList(DevFaasNode.class, "select * from dev_faas_node");
+        Map<String, DevFaasNode> faasNodeMap = devFaasNodes.stream().collect(Collectors.toMap(DevFaasNode::getCode, node -> node));
+
         Set<String> nodeIds = new HashSet<>();
         for (NodeDefinition nodeDefinition : flowDefinition.getNodeDefinitions()) {
             String executeType = "";
@@ -138,8 +145,19 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
                     subFlowName = subFlowInfo.getName();
                 }
             }
+            if (nodeDefinition.getExtra().containsKey("exeData") ) {
+                Map<String, Object> exeData = (Map<String, Object>) nodeDefinition.getExtra().get("exeData");
+                if (!exeData.isEmpty()) {
+                    DevFaasNode faasNode = faasNodeMap.get(exeData.get("code"));
+                    if (faasNode != null) {
+                        exeData.put("icon", faasNode.getIcon());
+                        exeData.put("name", faasNode.getName());
+                        nodeDefinition.getExtra().put("exeData", exeData);
+                    }
+                }
+            }
             defineRet.addNode(nodeDefinition.getId(), nodeDefinition.getName(), nodeDefinition.getType(), executeType,
-                    dataSource, zIndex, position, beforeContent, content, afterContent, nodeDefinition.getFlowId(), subFlowName, columnLabelCase);
+                    dataSource, zIndex, position, beforeContent, content, afterContent, nodeDefinition.getFlowId(), subFlowName, columnLabelCase, nodeDefinition.getExtra().get("exeData"));
             nodeIds.add(nodeDefinition.getId());
         }
         // 处理连线
@@ -179,6 +197,10 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             Map<String, Object> extra = new HashMap<>();
             extra.put("zIndex", node.getZIndex());
             extra.put("position", node.getPosition());
+            // 判断是否有执行器数据
+            if (node.getExeData() != null && !node.getExeData().isEmpty()) {
+                extra.put("exeData", node.getExeData());
+            }
 
             // 如果是子流程
             if (node.getType().equalsIgnoreCase(NodeTypeEnum.SUB.getValue())) {
@@ -551,8 +573,10 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         requestMap.put("body", json);
         argvMap.put("request", requestMap);
         // 调用流程
-        KdbFlowResult result = KdbFlowExecutor.getInstance().execute(argv.getFlowId(), logicFlow == null ? "" : logicFlow.getSubFlowIds(), argvMap, context, true);
+        KdbFlowResult result = KdbFlowExecutor.getInstance().execute(argv.getFlowId(), logicFlow == null ? "" : logicFlow.getSubFlowIds(), argvMap, context, true, false);
         long t2 = System.currentTimeMillis();
+        log.info("用时:{}", t2-t1);
+
         SysFlowDebugRet ret = new SysFlowDebugRet();
         ret.setTakeMs(t2 - t1);
         ret.setResponseBody(JsonUtil.toJson(result.getData()));

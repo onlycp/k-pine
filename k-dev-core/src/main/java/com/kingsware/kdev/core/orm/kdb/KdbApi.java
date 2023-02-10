@@ -83,9 +83,10 @@ public interface KdbApi {
      *
      * @param argv  参数
      * @param debug
+     * @param sync 是否异步
      * @return 流程执行结果
      */
-    KdbRet<String>  executeFlow(KdbArgv argv, boolean debug);
+    KdbRet<String>  executeFlow(KdbArgv argv, boolean debug, boolean sync);
 
     /**
      * 新增函数
@@ -127,7 +128,6 @@ public interface KdbApi {
     File downloadFile(String path, String fileName);
 
 
-    @SneakyThrows
     File downloadFile(String path, String fileName, String prefix, String subfix);
 
     /**

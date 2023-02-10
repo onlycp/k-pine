@@ -116,7 +116,8 @@ public class LicenseManager {
             }
             return myLicense;
         } catch (Exception e) {
-            throw BusinessException.serviceThrow("license无效");
+            log.error("error", e);
+            throw BusinessException.serviceThrow("license无效:"  + ExceptionUtils.getStackTrace(e));
         }
     }
 

@@ -18,7 +18,6 @@
   </licenses>
   <properties>
     <docker.registry.name>k-pine</docker.registry.name>
-    <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
     <docker.maven.plugin.version>1.4.10</docker.maven.plugin.version>
     <docker.repostory>192.168.6.11</docker.repostory>
   </properties>
@@ -33,7 +32,6 @@
     </dependency>
   </dependencies>
   <build>
-    <finalName>kpine</finalName>
     <plugins>
       <plugin>
         <groupId>org.springframework.boot</groupId>
@@ -58,41 +56,6 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>timestamp-property</id>
-            <goals>
-              <goal>timestamp-property</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <name>build.time</name>
-          <pattern>YYYYMMddHHmm</pattern>
-          <timeZone>GMT+8</timeZone>
-          <fileSet />
-          <regex />
-          <source />
-          <value />
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <archive>
-            <manifestEntries>
-              <Build-Time>${maven.build.timestamp}</Build-Time>
-              <Author>${user.name}</Author>
-              <Os-Name>${os.name}</Os-Name>
-              <Os-Arch>${os.arch}</Os-Arch>
-              <Os-Version>${os.version}</Os-Version>
-            </manifestEntries>
-          </archive>
-        </configuration>
-      </plugin>
-      <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
@@ -106,6 +69,23 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.spotify</groupId>
+        <artifactId>dockerfile-maven-plugin</artifactId>
+        <version>${docker.maven.plugin.version}</version>
+        <executions>
+          <execution />
+        </executions>
+        <configuration>
+          <contextDirectory>${project.basedir}</contextDirectory>
+          <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
+          <repository>${docker.repostory}/${docker.registry.name}/${project.artifactId}</repository>
+          <tag>${kdev.version}</tag>
+          <buildArgs>
+            <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
+          </buildArgs>
+        </configuration>
       </plugin>
     </plugins>
   </build>

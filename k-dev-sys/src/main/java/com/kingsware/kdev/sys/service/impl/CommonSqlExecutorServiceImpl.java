@@ -49,7 +49,7 @@ public class CommonSqlExecutorServiceImpl extends BaseServiceImpl implements Com
         KFlowContext context = KFlowContext.createBaseContext("{}", "{}");
 
         // 调用流程
-        KdbFlowResult result = KdbFlowExecutor.getInstance().execute(FLOW_ID, "", argvMap, context, true);
+        KdbFlowResult result = KdbFlowExecutor.getInstance().execute(FLOW_ID, "", argvMap, context, true, false);
         return result.getData();
     }
 

@@ -57,7 +57,7 @@ public class SysSearchConfigServiceImpl extends BaseServiceImpl implements SysSe
         KFlowContext context = KFlowContext.createBaseContext("{}", "{}");
 
         // 调用流程
-        KdbFlowResult result = KdbFlowExecutor.getInstance().execute(FLOW_ID, "", argvMap, context, true);
+        KdbFlowResult result = KdbFlowExecutor.getInstance().execute(FLOW_ID, "", argvMap, context, true, false);
         String dataJson = JsonUtil.toJson(result.getData());
         PageDataRet ret = JsonUtil.toBean(dataJson, PageDataRet.class);
         return ret;

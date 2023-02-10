@@ -370,7 +370,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             SysConfigInfo beforeFlow = ConfigManager.getInstance().getItem("application.customLoginBeforeFlow");
             if (beforeFlow != null && StringUtils.isNotEmpty(beforeFlow.getValue())) {
                 KFlowContext beforeIc = KFlowContext.createBaseContext("{}", "{}");
-                KdbFlowResult beforeFlowResult = KdbFlowExecutor.getInstance().execute(beforeFlow.getValue(), "", argv, beforeIc, false);
+                KdbFlowResult beforeFlowResult = KdbFlowExecutor.getInstance().execute(beforeFlow.getValue(), "", argv, beforeIc, false, false);
                 beforeFlowResultMap = (Map<String, Object>) beforeFlowResult.getData();
             }
         }
@@ -498,7 +498,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 afterParams.putAll(beforeFlowResultMap);
                 afterParams.putAll(argv);
                 afterParams.put("password", null);
-                KdbFlowResult afterFlowResult = KdbFlowExecutor.getInstance().execute(afterFlow.getValue(), "", afterParams, afterIc, false);
+                KdbFlowResult afterFlowResult = KdbFlowExecutor.getInstance().execute(afterFlow.getValue(), "", afterParams, afterIc, false, false);
                 Object afterFlowResultMap = afterFlowResult.getData();
                 ret.setOtherParams(afterFlowResultMap);
             }
