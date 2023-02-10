@@ -247,7 +247,6 @@ public class DynamicTask implements CommandLineRunner {
             long t1 = System.currentTimeMillis();
             KdbFlowResult kdbFlowResult = KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), "", params, context, false, true);
             long t2 = System.currentTimeMillis();
-            log.info("任务用时:{}", t2-t1);
 //            log.info("流程任务：{}, 结果:{}", sysTask.getName(), JsonUtil.toJson(kdbFlowResult));
         }
         else {
