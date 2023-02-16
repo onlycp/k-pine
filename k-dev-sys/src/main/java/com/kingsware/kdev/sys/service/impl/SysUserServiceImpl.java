@@ -448,8 +448,8 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         userInfo.setSysUnitIds(unitMap.get("unitIds"));
         userInfo.setSysUnitNames(unitMap.get("unitNames"));
         // 获取数据权限id
-        String accessSql = "select sys_data_access_id from sys_data_access_user au inner join sys_data_access da on (da.id=au.sys_data_access_id and da.status=1) where au.sys_user_id=?";
-        List<String> accessIds = DB.findSingleAttributeList(String.class, accessSql, model.getId());
+        String accessSql = "select sys_data_access_id from sys_data_access_user au inner join sys_data_access da on (da.id=au.sys_data_access_id and da.status=1) where au.sys_user_id=? or au.sys_user_id in (select sys_unit_id from sys_user_unit where sys_user_id=?)";
+        List<String> accessIds = DB.findSingleAttributeList(String.class, accessSql, model.getId(), model.getId());
 
         if (userInfo.getRoleIds() == null || userInfo.getRoleIds().isEmpty()) {
             throw new UnauthorizedException("你当前没有权限访问系统功能，请联系业务部门授权后，再访问系统。");

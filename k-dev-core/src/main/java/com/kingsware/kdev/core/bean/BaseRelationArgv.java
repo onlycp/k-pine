@@ -17,5 +17,7 @@ public class BaseRelationArgv {
     private String id;
     /** 关联的id集合 **/
     private Set<String> relationIds;
+    /** 机构id **/
+    private Set<String> unitIds;
 
 }
