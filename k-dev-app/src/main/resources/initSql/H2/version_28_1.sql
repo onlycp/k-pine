@@ -1,0 +1,1 @@
+alter table `sys_dict_item` modify column `value` varchar(255) DEFAULT NULL COMMENT '值';
