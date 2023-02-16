@@ -1,5 +1,8 @@
 package com.kingsware.kdev.core.util;
 
+import com.kingsware.catalina.Bootstrap;
+import com.kingsware.catalina.sdk.FaasSdk;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.HttpClientException;
 import lombok.Cleanup;
@@ -29,7 +32,9 @@ public class HttpUtil {
     private static final String PREFIX = "--";                            //前缀
     private static final String BOUNDARY = UUID.randomUUID().toString();  //边界标识 随机生成
     private static final String CONTENT_TYPE = "multipart/form-data";     //内容类型
-    private static final String LINE_END = "\r\n";                        //换行
+    private static final String LINE_END = "\r\n";
+
+    private static boolean  faasSdkInited = false;//换行
 
 
     /**
@@ -37,68 +42,38 @@ public class HttpUtil {
      */
     private HttpUtil() {}
 
-    /**
-     * post请求， body方式
-     * @param apiUrl   请求路径
-     * @param body  请求内容体
-     * @param headerMap 请求头
-     * @return  返回结果
-     */
-    public static String postBody(String apiUrl, String body, Map<String, String> headerMap) throws HttpClientException{
-        // http连接
-        HttpURLConnection connection = null;
-        // 输出流
-        OutputStream outputStream = null;
 
-        try {
-            URL url = new URL(apiUrl);
-            // 根据URL生成HttpURLConnection
-            connection = (HttpURLConnection) url.openConnection();
-            // 设置body模式
-            connection.setDoOutput(true);
-            connection.setDoInput(true);
-            // 设置post方式
-            connection.setRequestMethod("POST");
-            // 禁用缓存
-            connection.setUseCaches(false);
-            // 设置超时时间
-            connection.setConnectTimeout(10000);
-            connection.setReadTimeout(1000*60*10);
-            // 自动执行自定向
-            connection.setInstanceFollowRedirects(true);
-            // 连接复用
-            connection.setRequestProperty("connection", "Keep-Alive");
-            // 设置编码
-            connection.setRequestProperty("charset", "utf-8");
-            //  设置content-type
-            connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-            // 将额外的请求头加入进来
-            if (headerMap != null && !headerMap.isEmpty()) {
-                for (Map.Entry<String, String> entry: headerMap.entrySet()) {
-                    connection.setRequestProperty(entry.getKey(), entry.getValue());
-                }
-            }
-            // 建立连接
-            connection.connect();
-            // 设置参数
-            outputStream = new DataOutputStream(connection.getOutputStream());
-            outputStream.write(body.getBytes(StandardCharsets.UTF_8));
-            // 关闭输出流
-            outputStream.flush();
-            outputStream.close();
-            // 获取body
-            String responseBody = getBody(connection.getInputStream());
-            // 获取响应结果
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                // 如果是ok，直接返回body
-                return responseBody;
-            }
-            else {
-                throw new HttpClientException(body, connection.getResponseCode(), apiUrl, body);
-            }
-        } catch (IOException e) {
-            throw new HttpClientException(e.getLocalizedMessage(), -1, apiUrl, body);
+    public static String callSdk(String apiUrl, String body, Map<String, String> headerMap) throws HttpClientException{
+        if (!faasSdkInited) {
+            faasSdkInited = true;
+            Bootstrap.main(null);
         }
+        /**
+         * {
+         *     "method": "POST",
+         *     "postInfo": {
+         *         "flowID": "e91cb405d1914e21809a6f01cb44ef2f",
+         *         "script": {},
+         *         "variables": {
+         *             "id": "7a8f44729b8a485cb8c9f750096f4fa0"
+         *         }
+         *     },
+         *     "url": "/api/execute"
+         * }
+         */
+        Map<String, Object> callParams = new HashMap<>();
+        callParams.put("method", "POST");
+        callParams.put("url", apiUrl.replaceAll(SpringContext.getProperties("database.sources.db.server", ""), ""));
+        callParams.put("postInfo", JsonUtil.toMap(body));
+        // 调用sdk返回数据
+        try {
+            String ret = FaasSdk.invoke(JsonUtil.toJson(callParams));
+            return ret;
+        }
+        catch (Exception e) {
+            throw new HttpClientException(e.getMessage(), -1, apiUrl, body);
+        }
+
     }
 
 
@@ -158,6 +133,84 @@ public class HttpUtil {
     }
 
 
+    public static String callHttp(String apiUrl, String body, Map<String, String> headerMap) throws HttpClientException {
+        if (!faasSdkInited) {
+            faasSdkInited = true;
+            Bootstrap.main(null);
+        }
+        // http连接
+        HttpURLConnection connection = null;
+        // 输出流
+        OutputStream outputStream = null;
+
+        try {
+            URL url = new URL(apiUrl);
+            // 根据URL生成HttpURLConnection
+            connection = (HttpURLConnection) url.openConnection();
+            // 设置body模式
+            connection.setDoOutput(true);
+            connection.setDoInput(true);
+            // 设置post方式
+            connection.setRequestMethod("POST");
+            // 禁用缓存
+            connection.setUseCaches(false);
+            // 设置超时时间
+            connection.setConnectTimeout(10000);
+            connection.setReadTimeout(1000*60*10);
+            // 自动执行自定向
+            connection.setInstanceFollowRedirects(true);
+            // 连接复用
+            connection.setRequestProperty("connection", "Keep-Alive");
+            // 设置编码
+            connection.setRequestProperty("charset", "utf-8");
+            //  设置content-type
+            connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+            // 将额外的请求头加入进来
+            if (headerMap != null && !headerMap.isEmpty()) {
+                for (Map.Entry<String, String> entry: headerMap.entrySet()) {
+                    connection.setRequestProperty(entry.getKey(), entry.getValue());
+                }
+            }
+            // 建立连接
+            connection.connect();
+            // 设置参数
+            outputStream = new DataOutputStream(connection.getOutputStream());
+            outputStream.write(body.getBytes(StandardCharsets.UTF_8));
+            // 关闭输出流
+            outputStream.flush();
+            outputStream.close();
+            // 获取body
+            String responseBody = getBody(connection.getInputStream());
+            // 获取响应结果
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                // 如果是ok，直接返回body
+                return responseBody;
+            }
+            else {
+                throw new HttpClientException(body, connection.getResponseCode(), apiUrl, body);
+            }
+        } catch (IOException e) {
+            throw new HttpClientException(e.getLocalizedMessage(), -1, apiUrl, body);
+        }
+    }
+    /**
+     * post请求， body方式
+     * @param apiUrl   请求路径
+     * @param body  请求内容体
+     * @param headerMap 请求头
+     * @return  返回结果
+     */
+    public static String postBody(String apiUrl, String body, Map<String, String> headerMap) throws HttpClientException{
+        String faasCallMode = SpringContext.getProperties("app.k-flow.call-model", "http");
+        if ("http".equals(faasCallMode)) {
+            return callHttp(apiUrl, body, headerMap);
+        }
+        else {
+            return callSdk(apiUrl, body, headerMap);
+        }
+
+    }
+
 
     /**
      * 上传文件
@@ -165,17 +218,7 @@ public class HttpUtil {
      * @param apiUrl    接口地路
      */
     public static String uploadFile(String apiUrl, String fileName, String formName, InputStream inputStream, String path) {
-        Map<String, Object> formMap = new HashMap<>();
-        formMap.put("path", path);
-        return uploadFile(apiUrl, fileName, formName, inputStream, formMap, new HashMap<>());
-    }
 
-    /**
-     * 上传文件
-     * @param fileName 文件名
-     * @param apiUrl    接口地路
-     */
-    public static String uploadFile(String apiUrl, String fileName, String formName, InputStream inputStream, Map<String, Object> formMap, Map<String, String> header) {
 
         HttpURLConnection conn = null;
         try {
@@ -190,20 +233,14 @@ public class HttpUtil {
             //设置请求头参数
             conn.setRequestProperty("Connection", "Keep-Alive");
             conn.setRequestProperty("Charset", "UTF-8");
-            for (Map.Entry<String, String> entry: header.entrySet()) {
-                conn.setRequestProperty(entry.getKey(), entry.getValue());
-            }
             conn.setRequestProperty("Content-Type", CONTENT_TYPE+";boundary=" + BOUNDARY);
-
+            log.info("文件上传, 文件名:{}, 路径:{}", fileName, path);
             //上传参数
             DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
             //getStrParams()为一个
             Map<String, String> strParams = new HashMap<>();
-            formMap.forEach((k, v) -> {
-                strParams.put(k, new String(v.toString().getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1));
-            });
-
-            dos.writeBytes(getStrParams(strParams).toString() );
+            strParams.put("path", new String(path.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1));
+            dos.writeBytes( getStrParams(strParams).toString() );
             dos.flush();
 
             //文件上传
