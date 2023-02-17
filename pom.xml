@@ -59,13 +59,7 @@
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.kingsware.faas</groupId>
-			<artifactId>faas</artifactId>
-			<version>1.0.0</version>
-			<scope>system</scope>
-			<systemPath>/Users/mac/IdeaProjects/k-dev-cli-api/lib/kfaas.jar</systemPath>
-		</dependency>
+
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>

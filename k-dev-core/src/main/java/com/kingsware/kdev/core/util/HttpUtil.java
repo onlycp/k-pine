@@ -1,10 +1,9 @@
 package com.kingsware.kdev.core.util;
 
-import com.kingsware.catalina.Bootstrap;
-import com.kingsware.catalina.sdk.FaasSdk;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.HttpClientException;
+import com.kingsware.kdev.core.plugins.FaasChannelPlugin;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,6 +12,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -43,38 +43,6 @@ public class HttpUtil {
     private HttpUtil() {}
 
 
-    public static String callSdk(String apiUrl, String body, Map<String, String> headerMap) throws HttpClientException{
-        if (!faasSdkInited) {
-            faasSdkInited = true;
-            Bootstrap.main(null);
-        }
-        /**
-         * {
-         *     "method": "POST",
-         *     "postInfo": {
-         *         "flowID": "e91cb405d1914e21809a6f01cb44ef2f",
-         *         "script": {},
-         *         "variables": {
-         *             "id": "7a8f44729b8a485cb8c9f750096f4fa0"
-         *         }
-         *     },
-         *     "url": "/api/execute"
-         * }
-         */
-        Map<String, Object> callParams = new HashMap<>();
-        callParams.put("method", "POST");
-        callParams.put("url", apiUrl.replaceAll(SpringContext.getProperties("database.sources.db.server", ""), ""));
-        callParams.put("postInfo", JsonUtil.toMap(body));
-        // 调用sdk返回数据
-        try {
-            String ret = FaasSdk.invoke(JsonUtil.toJson(callParams));
-            return ret;
-        }
-        catch (Exception e) {
-            throw new HttpClientException(e.getMessage(), -1, apiUrl, body);
-        }
-
-    }
 
 
     /**
@@ -134,10 +102,6 @@ public class HttpUtil {
 
 
     public static String callHttp(String apiUrl, String body, Map<String, String> headerMap) throws HttpClientException {
-        if (!faasSdkInited) {
-            faasSdkInited = true;
-            Bootstrap.main(null);
-        }
         // http连接
         HttpURLConnection connection = null;
         // 输出流
@@ -202,11 +166,13 @@ public class HttpUtil {
      */
     public static String postBody(String apiUrl, String body, Map<String, String> headerMap) throws HttpClientException{
         String faasCallMode = SpringContext.getProperties("app.k-flow.call-model", "http");
-        if ("http".equals(faasCallMode)) {
+        FaasChannelPlugin faasChannelPlugin = getFaasChannel(faasCallMode);
+        if (faasChannelPlugin == null) {
+            log.info("i");
             return callHttp(apiUrl, body, headerMap);
         }
         else {
-            return callSdk(apiUrl, body, headerMap);
+            return faasChannelPlugin.send(apiUrl, body, headerMap);
         }
 
     }
@@ -365,5 +331,19 @@ public class HttpUtil {
             result.append(line);
         }
         return result.toString();
+    }
+
+    /**
+     * 获取通道
+     * @return  通道
+     */
+    public static FaasChannelPlugin getFaasChannel(String name) {
+        List<FaasChannelPlugin> faasChannelPlugins = SpringContext.getBeansOfType(FaasChannelPlugin.class);
+        for (FaasChannelPlugin plugin: faasChannelPlugins) {
+            if (name.equalsIgnoreCase(plugin.name())) {
+                return plugin;
+            }
+        }
+        return null;
     }
 }
