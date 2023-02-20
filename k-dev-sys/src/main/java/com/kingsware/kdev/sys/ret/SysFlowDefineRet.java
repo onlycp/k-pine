@@ -89,6 +89,8 @@ public class SysFlowDefineRet extends BaseSimpleRet {
     private String outArgv;
     /** 输入参数示例 **/
     private String inExample;
+    /** 是否开始事务 **/
+    private String tranCtrl;
     /** 默认数据源 **/
     private String defaultSourceName;
     /** 节点列表 **/

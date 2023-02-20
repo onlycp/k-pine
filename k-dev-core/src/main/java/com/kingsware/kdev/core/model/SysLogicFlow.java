@@ -1,6 +1,7 @@
 package com.kingsware.kdev.core.model;
 
 import com.kingsware.kdev.core.bean.BaseManageModel;
+import com.kingsware.kdev.core.orm.annotation.Column;
 import com.kingsware.kdev.core.orm.annotation.Table;
 import com.kingsware.kdev.core.orm.kdb.FlowInfo;
 import lombok.Data;
@@ -35,5 +36,8 @@ public class SysLogicFlow extends BaseManageModel {
     private String subFlowIds;
     /** 默认数据源 **/
     private String defaultSourceName;
+    /** 是否开始事务控制 **/
+    @Column(name = "app_id")
+    private String tranCtrl;
 
 }

@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.kflow;
 
+import com.kingsware.kdev.core.cache.logic.LogicFlowManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.kflow.bean.ErrorResult;
@@ -8,10 +9,13 @@ import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.kflow.handler.KResultHandlers;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
+import com.kingsware.kdev.core.orm.exception.TransactionException;
 import com.kingsware.kdev.core.orm.kdb.KdbArgv;
 import com.kingsware.kdev.core.orm.kdb.KdbRet;
+import com.kingsware.kdev.core.orm.kdb.TransactionManager;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.utils.Lists;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,15 +58,16 @@ public class KdbFlowExecutor {
         long t1 = System.currentTimeMillis();
         String statusMessage = "失败";
         KdbFlowResult result = new KdbFlowResult();
+        boolean executeResult = true;
         // 流程参数
         KdbArgv argv = new KdbArgv();
         try {
 
             // 设置流程id
             argv.setFlowID(flowId);
-            String saas =  SpringContext.getProperties("app.is-saas", "false");
+            String saas = SpringContext.getProperties("app.is-saas", "false");
             if ("true".equals(saas)) {
-                if (KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null && StringUtils.isNotEmpty(KClientContext.getContext().getUserInfo().getSysUnitIds())) {
+                if (KClientContext.getContext() != null && KClientContext.getContext().getUserInfo() != null && StringUtils.isNotEmpty(KClientContext.getContext().getUserInfo().getSysUnitIds())) {
                     argv.setInstID(KClientContext.getContext().getUserInfo().getSysUnitIds());
                 }
 
@@ -71,9 +76,9 @@ public class KdbFlowExecutor {
             if (params.containsKey("page") && (params.containsKey("pageSize") || params.containsKey("perPage"))) {
                 int page = Integer.parseInt(params.getOrDefault("page", "1").toString());
                 int pageSize = Integer.parseInt(params.getOrDefault("pageSize", params.getOrDefault("perPage", "10")).toString());
-                params.put("start", (page-1)*pageSize + "") ;
+                params.put("start", (page - 1) * pageSize + "");
                 params.put("limit", pageSize + "");
-                params.put("end", page*pageSize);
+                params.put("end", page * pageSize);
                 params.put("pageSize", pageSize);
             }
             if (params.containsKey("pageQuery")) {
@@ -91,42 +96,54 @@ public class KdbFlowExecutor {
                 String[] arr = subFlowIds.split(",");
                 // 拼接in ids
                 List<String> afterArr = new ArrayList<>();
-                for (String s: arr) {
-                    afterArr.add("'" +  s + "'");
+                for (String s : arr) {
+                    afterArr.add("'" + s + "'");
                 }
                 String sql = "select in_argv from sys_logic_flow where flow_id in (" + StringUtils.joinToString(afterArr, ",") + ")";
                 List<String> inArgvList = DB.findSingleAttributeList(String.class, sql);
-                for (String string: inArgvList) {
+                for (String string : inArgvList) {
                     FlowUtils.handleInArgv(argv.getVariables(), string);
                 }
             }
+            if (LogicFlowManager.getInstance().isTranCtrl(argv.getFlowID())) {
+                // 发起事务
+                TransactionManager.getInstance().begin(60, null, flowId);
+            }
             // 执行流程
             KdbRet<String> ret = DB.kdbApi().executeFlow(argv, debug, sync);
+            if (LogicFlowManager.getInstance().isTranCtrl(argv.getFlowID())) {
+                // 提交事务
+                TransactionManager.getInstance().commit();
+            }
             if (ret.getErrorCode() != 0) {
                 result.setType(KFlowConstant.RESULT_JSON);
-                result.setData(new ErrorResult(ret.getMessage() == null ? "流程处理失败": ret.getMessage()));
-            }
-            else if (StringUtils.isNotEmpty(ret.getResponseBody())){
+                result.setData(new ErrorResult(ret.getMessage() == null ? "流程处理失败" : ret.getMessage()));
+            } else if (StringUtils.isNotEmpty(ret.getResponseBody())) {
                 KFlowMessage message = FlowUtils.getHandlerName(ret.getResponseBody());
                 result = KResultHandlers.getInstance().getHandler(message.getHandlerName()).parser(message.getData(), context);
-            }
-            else {
+            } else {
                 result.setType(KFlowConstant.RESULT_JSON);
                 result.setData(null);
             }
             result.setLog(ret.getKlog());
             result.setExceptionStack(ret.getStackTrace());
             return result;
-        }
-        catch (OrmDbException ormDbException) {
-
+        } catch (OrmDbException ormDbException) {
+            if (LogicFlowManager.getInstance().isTranCtrl(argv.getFlowID())) {
+                try {
+                    TransactionManager.getInstance().rollback();
+                } catch (TransactionException ex) {
+                    log.warn("error", ex);
+                }
+            }
             result.setType(KFlowConstant.RESULT_JSON);
-            result.setData(new ErrorResult(ormDbException.getMessage() == null ? "流程处理失败": ormDbException.getMessage()));
+            result.setData(new ErrorResult(ormDbException.getMessage() == null ? "流程处理失败" : ormDbException.getMessage()));
             result.setLog(ormDbException.getKlog());
             result.setExceptionStack(ormDbException.getExceptionTrace());
             return result;
         }
-        finally {
+
+//        finally {
 //            // todo 临时应对万达poc处理， 后面要删除掉
 //            if (argv.getVariables().containsKey("withLogTableId")) {
 //                try {
@@ -146,12 +163,8 @@ public class KdbFlowExecutor {
 //                }
 //
 //            }
-
-
-
-        }
-
     }
+
 
 
 }

@@ -81,6 +81,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             defineRet.setApplicationId(logicFlow.getApplicationId());
             defineRet.setTags(logicFlow.getTags());
             defineRet.setDefaultSourceName(logicFlow.getDefaultSourceName());
+            defineRet.setTranCtrl(logicFlow.getTranCtrl());
             // 定义mock的merge map
             List<Map<String, Object>> mockMapList = new ArrayList<>();
             Map<String, Object> mockMap = JsonschemaMock.getInstance().mockMap(logicFlow.getInArgv());
@@ -265,12 +266,13 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             }
             flowDefinition.getNodeLinks().add(nodeLink);
         }
-
+        SysLogicFlow sysLogicFlow = DB.findOne(SysLogicFlow.class, Expr.builder().add("flowId", "=", argv.getId()).build());
         SysKdbFlowArgv sysKdbFlowArgv = new SysKdbFlowArgv();
         sysKdbFlowArgv.setInArgv(argv.getInArgv());
         sysKdbFlowArgv.setOutArgv(argv.getOutArgv());
         sysKdbFlowArgv.setId(argv.getId());
         sysKdbFlowArgv.setName(argv.getName());
+        sysKdbFlowArgv.setTranCtrl(sysLogicFlow.getTranCtrl());
         sysKdbFlowArgv.setTags(argv.getTags());
         sysKdbFlowArgv.setApplicationId(argv.getApplicationId());
         sysKdbFlowArgv.setContent(flowDefinition.toJson());
@@ -321,7 +323,9 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             flowRet.setApplicationName(logicFlow.getApplicationName());
             flowRet.setApplicationId(logicFlow.getApplicationId());
             flowRet.setApiUrl(logicFlow.getApiUrl());
+            flowRet.setTranCtrl(logicFlow.getTranCtrl());
             flowRet.setApiMethod(logicFlow.getApiMethod());
+
         }
         return flowRet;
     }
@@ -352,6 +356,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         logicFlow.setOutArgv(argv.getOutArgv());
         logicFlow.setTags(argv.getTags());
         logicFlow.setFlowId(flowId);
+        logicFlow.setTranCtrl(argv.getTranCtrl());
 
         // 保存历史记录
         SysLogicHistory flowHistory = new SysLogicHistory();
@@ -402,6 +407,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             logicFlow.setTags(argv.getTags());
             logicFlow.setFlowId(argv.getId());
             logicFlow.setSubFlowIds(subFlowIds);
+            logicFlow.setTranCtrl(argv.getTranCtrl());
             DB.save(logicFlow);
         } else {
             logicFlow.setName(argv.getName());
@@ -412,6 +418,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             logicFlow.setTags(argv.getTags());
             logicFlow.setFlowId(argv.getId());
             logicFlow.setSubFlowIds(subFlowIds);
+            logicFlow.setTranCtrl(argv.getTranCtrl());
             DB.update(logicFlow);
         }
 
@@ -455,7 +462,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         List<FlowInfo> list = api.query(info);
         List<Object> params = new ArrayList<>();
         // 从数据库里查询所有数据
-        String sql = "select t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name, sa.api_url, sa.api_method " +
+        String sql = "select t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t0.app_id tran_ctrl, t1.name as application_name, sa.api_url, sa.api_method " +
                 " from sys_logic_flow t0 " +
                 " left join sys_api sa on sa.api_flow_id = t0.flow_id " +
                 " left join dev_application t1 on t1.id=t0.application_id" +
