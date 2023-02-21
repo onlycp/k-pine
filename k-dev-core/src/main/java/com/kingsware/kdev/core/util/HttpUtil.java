@@ -168,7 +168,6 @@ public class HttpUtil {
         String faasCallMode = SpringContext.getProperties("app.k-flow.call-model", "http");
         FaasChannelPlugin faasChannelPlugin = getFaasChannel(faasCallMode);
         if (faasChannelPlugin == null) {
-            log.info("i");
             return callHttp(apiUrl, body, headerMap);
         }
         else {

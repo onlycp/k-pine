@@ -12,6 +12,7 @@ import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.plugins.CdnPlugin;
+import com.kingsware.kdev.core.plugins.file.FileEncryptPlugin;
 import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.sys.argv.SysFileQueryArgv;
 import com.kingsware.kdev.sys.manager.FileManager;
@@ -31,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -242,7 +244,19 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
         } else {
-            contentType = Files.probeContentType(Paths.get(fileRealPath));
+            // 获取是否加密
+            Path path1 = Paths.get(fileRealPath);
+            String realFileName = path1.toFile().getName();
+            String[] arr = realFileName.split("\\.");
+            if (arr.length > 1 ) {
+                String encryptMode = arr[arr.length-1];
+                // 获取加密插件
+                FileEncryptPlugin fileEncryptPlugin = getFileEncryptPlugin(encryptMode);
+                File encryptFile = fileEncryptPlugin.encrypt(path1.toFile());
+                // 设置新的文件
+                fileRealPath = encryptFile.getAbsolutePath();
+            }
+            contentType = Files.probeContentType(path1);
             response.setContentType(contentType);
             request.setAttribute(NonStaticResourceHttpRequestHandler.ATTR_FILE, fileRealPath);
         }
@@ -401,5 +415,19 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             return new FileEntry(faasFile, sysFile.getFileName());
         }
         throw BusinessException.serviceThrow("文件不存在，可能被移动或删除！");
+    }
+
+    /**
+     * 获取通道
+     * @return  通道
+     */
+    public static FileEncryptPlugin getFileEncryptPlugin(String name) {
+        List<FileEncryptPlugin> plugins = SpringContext.getBeansOfType(FileEncryptPlugin.class);
+        for (FileEncryptPlugin plugin: plugins) {
+            if (name.equalsIgnoreCase(plugin.name())) {
+                return plugin;
+            }
+        }
+        return null;
     }
 }
