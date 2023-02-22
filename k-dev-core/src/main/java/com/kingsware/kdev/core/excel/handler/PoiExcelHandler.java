@@ -5,6 +5,7 @@ import com.kingsware.kdev.core.excel.KExcel;
 import com.kingsware.kdev.core.excel.KRegion;
 import com.kingsware.kdev.core.excel.KRegionStyle;
 import com.kingsware.kdev.core.excel.KSheet;
+import com.kingsware.kdev.core.plugins.file.FileEncryptPlugin;
 import com.kingsware.kdev.core.util.*;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
@@ -20,10 +21,13 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 import static org.apache.poi.ss.usermodel.FillPatternType.SOLID_FOREGROUND;
@@ -203,7 +207,37 @@ public class PoiExcelHandler implements KExcelHandler{
                 }
 
             }
-            workbook.write(out);
+
+            // 获取文件插件
+            String realFileName = excel.getFileNme();
+            String[] arr = realFileName.split("\\.");
+            if (arr.length > 1 ) {
+                String encryptMode = arr[arr.length-1];
+                // 获取加密插件
+                FileEncryptPlugin fileEncryptPlugin = getFileEncryptPlugin(encryptMode);
+                if (fileEncryptPlugin != null) {
+                    String tempDir = "temp";
+                    if (!Files.exists(new File("temp").toPath())) {
+                        new File("temp").mkdirs();
+                    }
+                    String tempFile = tempDir + File.separator + realFileName;
+                    Path path = Paths.get(tempFile);
+                    Files.deleteIfExists(new File(tempFile).toPath());
+                    workbook.write(Files.newOutputStream(path));
+                    File encryptFile = fileEncryptPlugin.encrypt(path.toFile());
+                    // 设置新的文件
+                    out.write(Files.readAllBytes(encryptFile.toPath()));
+                }
+                else {
+                    workbook.write(out);
+                }
+            }
+            else {
+                workbook.write(out);
+            }
+
+
+            //
         }
         catch (Exception e) {
             log.error("error", e);
@@ -211,6 +245,20 @@ public class PoiExcelHandler implements KExcelHandler{
         }
 
 
+    }
+
+    /**
+     * 获取通道
+     * @return  通道
+     */
+    public static FileEncryptPlugin getFileEncryptPlugin(String name) {
+        List<FileEncryptPlugin> plugins = SpringContext.getBeansOfType(FileEncryptPlugin.class);
+        for (FileEncryptPlugin plugin: plugins) {
+            if (name.equalsIgnoreCase(plugin.name())) {
+                return plugin;
+            }
+        }
+        return null;
     }
 
     /**

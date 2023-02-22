@@ -34,7 +34,11 @@ public class KExcelExResultHandler implements KFlowResultHandler {
             return null;
         }
         // 获取文件名
-        String fileName = map.getOrDefault("name", "导出文件—" + DateUtils.DATE_TIME_1).toString() + ".xlsx";
+        String fileName = map.getOrDefault("name", "导出文件—" + DateUtils.DATE_TIME_1).toString() ;
+        if (!fileName.contains(".xls")) {
+            fileName = fileName + ".xlsx";
+        }
+
         // 创建k-excel
         KExcel kExcel = new KExcel(fileName);
         // sheets

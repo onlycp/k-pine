@@ -252,9 +252,12 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                 String encryptMode = arr[arr.length-1];
                 // 获取加密插件
                 FileEncryptPlugin fileEncryptPlugin = getFileEncryptPlugin(encryptMode);
-                File encryptFile = fileEncryptPlugin.encrypt(path1.toFile());
-                // 设置新的文件
-                fileRealPath = encryptFile.getAbsolutePath();
+                if (fileEncryptPlugin != null) {
+                    File encryptFile = fileEncryptPlugin.encrypt(path1.toFile());
+                    // 设置新的文件
+                    fileRealPath = encryptFile.getAbsolutePath();
+                }
+
             }
             contentType = Files.probeContentType(path1);
             response.setContentType(contentType);
