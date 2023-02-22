@@ -28,4 +28,10 @@ public class SysInstance extends BaseModel {
     private String heartBeatTime;
     /** 注册时间 **/
     private String regTime;
+    /** 在线状态 **/
+    private Integer online;
+
+    public String instanceName() {
+        return hostName + ":" + port;
+    }
 }

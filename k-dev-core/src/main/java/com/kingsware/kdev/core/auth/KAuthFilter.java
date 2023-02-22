@@ -70,7 +70,7 @@ public class KAuthFilter implements Filter {
     /** 签名噪音 **/
     private final Set<String> signNonces = new TreeSet<String>();
 
-    @Value("${app.auth.log-ignore-tags:websocket,ping,session}")
+    @Value("${app.auth.log-ignore-tags:websocket,ping,session,executeTask}")
     private String logIgnoreTags;
 
     @Value("${app.mode.dev:false}")

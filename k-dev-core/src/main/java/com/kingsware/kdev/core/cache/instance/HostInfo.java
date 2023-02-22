@@ -15,4 +15,8 @@ public class HostInfo {
     private String hostName;
     /** 端口 **/
     private Integer port;
+
+    public String instanceName() {
+        return hostName + ":" + port;
+    }
 }

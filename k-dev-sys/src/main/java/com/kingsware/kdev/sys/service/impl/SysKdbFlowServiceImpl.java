@@ -585,7 +585,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         // 调用流程
         KdbFlowResult result = KdbFlowExecutor.getInstance().execute(argv.getFlowId(), logicFlow == null ? "" : logicFlow.getSubFlowIds(), argvMap, context, true, false);
         long t2 = System.currentTimeMillis();
-        log.info("用时:{}", t2-t1);
+//        log.info("用时:{}", t2-t1);
 
         SysFlowDebugRet ret = new SysFlowDebugRet();
         ret.setTakeMs(t2 - t1);

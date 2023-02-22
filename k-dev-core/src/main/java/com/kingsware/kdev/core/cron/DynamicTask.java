@@ -1,8 +1,12 @@
 package com.kingsware.kdev.core.cron;
 
+import com.kingsware.kdev.core.bean.BaseRet;
+import com.kingsware.kdev.core.cache.instance.InstanceManager;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
+import com.kingsware.kdev.core.model.SysInstance;
 import com.kingsware.kdev.core.model.SysLogicFlow;
 import com.kingsware.kdev.core.model.SysTask;
 import com.kingsware.kdev.core.orm.DB;
@@ -27,6 +31,7 @@ import java.util.*;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -61,7 +66,7 @@ public class DynamicTask implements CommandLineRunner {
     public DynamicTask() {
         this.scheduledFutureMap = new HashMap<>(1);
         this.threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
-        this.threadPoolTaskScheduler.setPoolSize(10);
+        this.threadPoolTaskScheduler.setPoolSize(15);
         this.threadPoolTaskScheduler.initialize();
     }
 
@@ -120,26 +125,19 @@ public class DynamicTask implements CommandLineRunner {
      * @param sysTask   任务便利店
      */
     private void runTask(SysTask sysTask) {
-
+        sysTask = DB.findById(SysTask.class, sysTask.getId());
+        if (sysTask.getEnable() == 0) {
+            return;
+        }
         // 如果不是分布式任务，直接运行
         if (sysTask.getDistributed() == 0) {
             executeTask(sysTask);
             return;
         }
         if (distributedAuto) {
-            // 设置锁，通过返回的数量才判断是否被锁
-            long cnt = DB.executeUpdateSql("update sys_task set lock_status=1, lock_for_time=? where id=? and lock_status=0", DateUtils.getNow(), sysTask.getId());
-            // 如果影响行数为0，说明当前是锁定状态
-            if (cnt == 0) {
-//            log.info("任务:{} 处于锁定状态", sysTask.getName());
-                return;
-            }
+            AtomicInteger atomicInteger = new AtomicInteger(0);
+            callTask(sysTask, atomicInteger, "");
 
-            SysTask myTask = DB.findById(SysTask.class, sysTask.getId());
-            if (myTask.getEnable() == 0) {
-                return;
-            }
-            executeTask(myTask);
         }
         else {
             if (distributedRun) {
@@ -150,15 +148,67 @@ public class DynamicTask implements CommandLineRunner {
                 executeTask(myTask);
             }
         }
+    }
 
+    /**
+     * 调用http接口
+     * @param sysTask    任务
+     */
+    public void callTask(SysTask sysTask, AtomicInteger atomicInteger,String excludeInstanceName) {
+        if (atomicInteger.intValue() == 3) {
+            log.warn("任务:{}执行失败次数为:{}, 调度器将终止任务执行", sysTask.getName(), atomicInteger.intValue() );
+        }
+        // 取主实例作为调度器
+        SysInstance masterInstance = InstanceManager.getInstance().masterInstance();
+        // 只有是调度器才执行
+        if (SystemUtil.getHost().instanceName().equalsIgnoreCase(masterInstance.instanceName())) {
+            atomicInteger.incrementAndGet();
+            // 随机取一个实例
+            SysInstance executeInstance =  InstanceManager.getInstance().getToExecuteInstance(sysTask.getId(), excludeInstanceName);
+            // 如果是当前实例，直接调用即可，不通过http调用
+            if (executeInstance.instanceName().equalsIgnoreCase(masterInstance.instanceName())) {
+                log.info("本机触发定时任务，任务id:{}", sysTask.getId());
+                executeTask(sysTask);
+            }
+            // 通过http调用
+            else {
+                String contextPath = SpringContext.getProperties("server.servlet.context-path", "/");
+                if (StringUtils.isEmpty(contextPath)) {
+                    contextPath = "/";
+                }
+                if (!contextPath.endsWith("/")) {
+                    contextPath = contextPath + "/";
+                }
 
+                String url = "http://" + executeInstance.getHostName() + ":" + executeInstance.getPort() + contextPath + "api/v1/sys-tasks/executeTask/" + sysTask.getId();
+                try {
+                    String res = HttpUtil.get(url, new HashMap<>());
+                    BaseRet<?> ret = JsonUtil.toBean(res, BaseRet.class);
+                    if (ret.getCode() != 200)  {
+                        log.error("实例：{} 执行任务失败，系统将重试,异常信息:{}", executeInstance.instanceName(), ret.getMessage());
+                        callTask(sysTask, atomicInteger, executeInstance.instanceName());
+                    }
+                    else  {
+                        log.info("http触发定时任务，任务id:{}，url:{},响应信息:{}", sysTask.getId(), url, ret.getMessage());
+                    }
+
+                }
+                catch (Exception e) {
+                    // 如果发生异常，那么就重试
+                    log.error("实例：{} 执行任务失败，系统将重试,异常信息:{}", executeInstance.instanceName(), e);
+                    callTask(sysTask, atomicInteger, executeInstance.instanceName());
+                }
+
+            }
+
+        }
     }
 
     /**
      * 运行任务
      * @param myTask
      */
-    private void executeTask(SysTask myTask)  {
+    public void executeTask(SysTask myTask)  {
         long t1 = System.currentTimeMillis();
         int executeStatus = 1;
         String errorMessage = "";
@@ -192,8 +242,9 @@ public class DynamicTask implements CommandLineRunner {
                 if (myTask.getTaskType() == 2) {
                     ThreadUtils.sleep(1000);
                 }
-                String sql = "update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ?,  last_execute_time=?, lock_status=0 where id=?";
-                DB.executeUpdateSql(sql, executeStatus, (t2 - t1),  errorMessage, DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME), myTask.getId());
+                String sql = "update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ?,  last_execute_time=?, lock_status=0, next_inst=? where id=?";
+                DB.executeUpdateSql(sql, executeStatus, (t2 - t1), errorMessage, DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME), SystemUtil.getHost().instanceName(), myTask.getId());
+
             }
 
         }

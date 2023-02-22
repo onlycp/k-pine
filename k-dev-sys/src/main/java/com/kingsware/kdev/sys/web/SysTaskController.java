@@ -1,6 +1,7 @@
 package com.kingsware.kdev.sys.web;
 
 import com.kingsware.kdev.core.auth.ApiCode;
+import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -89,5 +90,17 @@ public class SysTaskController extends BaseController {
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         sysTaskService.delete(argv);
         return BaseRet.success();
+    }
+
+    /**
+     * 详细信息
+     * @return 详细信息
+     */
+    @ApiOperation(value = "详情 " ,notes = "详情")
+    @GetMapping("/executeTask/{id}")
+    @ApiIgnore
+    public BaseRet<?> executeTask(@PathVariable String id) {
+        sysTaskService.executeTask(id);
+        return BaseRet.successMessage("任务执行成功");
     }
 }
