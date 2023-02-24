@@ -3,6 +3,7 @@ package com.kingsware.kdev.core.util;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.HttpClientException;
+import com.kingsware.kdev.core.orm.FaasFailRecord;
 import com.kingsware.kdev.core.plugins.FaasChannelPlugin;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
@@ -11,10 +12,9 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 
 /**
  * Http工具类
@@ -34,7 +34,6 @@ public class HttpUtil {
     private static final String CONTENT_TYPE = "multipart/form-data";     //内容类型
     private static final String LINE_END = "\r\n";
 
-    private static boolean  faasSdkInited = false;//换行
 
 
     /**
@@ -157,6 +156,80 @@ public class HttpUtil {
             throw new HttpClientException(e.getLocalizedMessage(), -1, apiUrl, body);
         }
     }
+
+    /**
+     * 调用http集群
+     * @param apiUrl    a
+     * @param body
+     * @param headerMap
+     * @param anyone 是否任意一个成功即可
+     * @return
+     * @throws HttpClientException
+     */
+    public static String callHttpCluster(String apiUrl, String body, Map<String, String> headerMap, boolean anyone) throws HttpClientException {
+        String[] urls = apiUrl.split(";");
+        List<String> urlList = new ArrayList<>();
+        Collections.addAll(urlList, urls);
+        // 打乱，避免每次都同一个节点
+        Collections.shuffle(urlList);
+        String responseBody = null;
+        List<String> failList = new ArrayList<>();
+        for (int i = 0; i< urlList.size(); i++) {
+            String url = urlList.get(i);
+            if (url.contains("edit")) {
+                System.currentTimeMillis();
+            }
+            try {
+                responseBody = callHttp(url, body, headerMap);
+                if (anyone) {
+                    return responseBody;
+                }
+            }
+            catch (Exception e) {
+                if (i == (urls.length -1) && anyone) {
+                    throw e;
+                }
+                if (!anyone) {
+                    failList.add(url);
+                    // 如果全部失败，那么就直接返回异常
+                    if (failList.size() == urlList.size()) {
+                        throw e;
+                    }
+                }
+                if (i < (url.length()-1)) {
+                    try {
+                        log.info("当前请求网络异常，将自动转移到下一节点, 当前节点:{}, 下一节点:{}", url,  urlList.get(i+1));
+                    }
+                    catch (Exception x) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        // 如果是要求写所有的，此时有失败，则记录一下
+        if (!failList.isEmpty()) {
+            List<String> lines = new ArrayList<>();
+            for (String failUrl: failList) {
+                FaasFailRecord record = new FaasFailRecord();
+                record.setUrl(failUrl);
+                record.setTime(System.currentTimeMillis());
+                record.setHeaderMap(headerMap);
+                record.setBody(body);
+                lines.add(Base64.getEncoder().encodeToString(JsonUtil.toJson(record).getBytes(StandardCharsets.UTF_8)) );
+            }
+            // faas的失败日志存储目录
+            String pathName = "fail";
+            Path path = Paths.get(pathName);
+            if (!path.toFile().exists()) {
+                path.toFile().mkdirs();
+            }
+            // 保存文件名
+            String filePath = pathName + File.separator + "faas.log";
+            FileUtils.writeLineToTxt(lines, filePath);
+        }
+        return responseBody;
+    }
+
     /**
      * post请求， body方式
      * @param apiUrl   请求路径
@@ -165,15 +238,25 @@ public class HttpUtil {
      * @return  返回结果
      */
     public static String postBody(String apiUrl, String body, Map<String, String> headerMap) throws HttpClientException{
+        return postBody(apiUrl, body, headerMap, true);
+    }
+
+    /**
+     * post请求， body方式
+     * @param apiUrl   请求路径
+     * @param body  请求内容体
+     * @param headerMap 请求头
+     * @return  返回结果
+     */
+    public static String postBody(String apiUrl, String body, Map<String, String> headerMap, boolean anyone) throws HttpClientException{
         String faasCallMode = SpringContext.getProperties("app.k-flow.call-model", "http");
         FaasChannelPlugin faasChannelPlugin = getFaasChannel(faasCallMode);
         if (faasChannelPlugin == null) {
-            return callHttp(apiUrl, body, headerMap);
+            return callHttpCluster(apiUrl, body, headerMap, anyone);
         }
         else {
             return faasChannelPlugin.send(apiUrl, body, headerMap);
         }
-
     }
 
 

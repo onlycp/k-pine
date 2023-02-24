@@ -29,7 +29,7 @@ public class UniOpsUtil {
         params.put("userName", username);
         params.put("password", password);
         // 发起请求
-        String responseBody = HttpUtil.postBody(url, JsonUtil.toJson(params), new HashMap<>());
+        String responseBody = HttpUtil.postBody(url, JsonUtil.toJson(params), new HashMap<>(), true);
         Map<String, Object> retMap = JsonUtil.toMap(responseBody);
         int errorCode = (int)retMap.get("errorCode");
         if (errorCode == 0) {

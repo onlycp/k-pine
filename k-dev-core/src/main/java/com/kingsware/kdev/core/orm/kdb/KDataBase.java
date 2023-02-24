@@ -307,7 +307,7 @@ public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
 
 
     @Override
-    String getServer() {
-        return this.dbConnectConfig.getServer();
+    String[] getServer() {
+        return this.dbConnectConfig.getServer().split(";");
     }
 }

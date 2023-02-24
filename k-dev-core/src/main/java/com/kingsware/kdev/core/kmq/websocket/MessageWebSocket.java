@@ -53,7 +53,7 @@ public class MessageWebSocket {
         removeSession(session);
     }
     /**
-     * 发生错误时调用
+
      *
      */
     @OnError
@@ -70,10 +70,8 @@ public class MessageWebSocket {
         // 查找session
         Set<SessionToken> copiedSet = new HashSet<>(sessionTokenSet);
         Optional<SessionToken> optional = copiedSet.stream().filter(it -> it.getSession().getId().equalsIgnoreCase(session.getId())).findFirst();
-        if (optional.isPresent()) {
-            sessionTokenSet.remove(optional.get());
-            // logger.info("用户:【userId={}, token={}】退出，当前在线人数为:{} ", optional.get().getUserId(), optional.get().getToken(), sessionTokenSet.size());
-        }
+        // logger.info("用户:【userId={}, token={}】退出，当前在线人数为:{} ", optional.get().getUserId(), optional.get().getToken(), sessionTokenSet.size());
+        optional.ifPresent(sessionTokenSet::remove);
     }
 
     /**

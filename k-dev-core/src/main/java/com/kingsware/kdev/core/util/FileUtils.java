@@ -3,6 +3,7 @@ package com.kingsware.kdev.core.util;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.encrypt.EncryptProperties;
 import com.kingsware.kdev.core.properties.FileProperties;
+import lombok.Cleanup;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -286,5 +287,26 @@ public class FileUtils {
         return false;
 
     }
+
+    /**
+     * 写入行
+     * @param list
+     * @param filePath
+     */
+    public static void writeLineToTxt(List<String> list,String filePath){
+        StringBuilder sb = new StringBuilder();
+        for(int i=0;i<list.size();i++){
+            sb.append(list.get(i)).append("\r\n");
+        }
+        try{
+            @Cleanup FileWriter writer = new FileWriter(filePath, true);
+            @Cleanup BufferedWriter bw = new BufferedWriter(writer);
+            bw.write(sb.toString());
+        }catch(Exception e){
+            log.error("error", e);
+        }
+
+    }
+
 
 }

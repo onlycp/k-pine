@@ -13,10 +13,7 @@ import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * KBD的http通道
@@ -165,10 +162,15 @@ public class KDBHttpChannel implements DbChannel{
             // 转为json
             String requestBody = JsonUtil.toJson(kdbArgv);
             // 拼接请求
-            String url = kdbConnectConfig.getServer() +  "/api/execute";
+            List<String> urls = new ArrayList<>();
+            String[] arr = kdbConnectConfig.getServer().split(";");
+            for (String a: arr) {
+                urls.add(a +  "/api/execute");
+            }
+            String url = StringUtils.joinToString(urls, ";");
             long t1 = System.currentTimeMillis();
             // 发起请求
-            String  responseBody = HttpUtil.postBody(url, requestBody, Collections.emptyMap());
+            String  responseBody = HttpUtil.postBody(url, requestBody, Collections.emptyMap(), true);
             long takeTime = System.currentTimeMillis() - t1;
             if (takeTime < 10000) {
                 logger.debug("url:{} , Take: {} ,请求体: {}", url, takeTime ,requestBody);
@@ -192,4 +194,5 @@ public class KDBHttpChannel implements DbChannel{
             throw new OrmDbException(e.getMessage());
         }
     }
+
 }
