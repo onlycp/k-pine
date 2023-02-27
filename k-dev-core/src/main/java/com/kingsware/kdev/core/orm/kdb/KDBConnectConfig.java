@@ -26,6 +26,7 @@ public class KDBConnectConfig extends DBConnectConfig {
     /** 数据源名称 **/
     private String dataSource;
 
+
     /**
      * 将配置转为多个, 针对kdb的内部多数据源
      * @return  多个数据源

@@ -188,7 +188,7 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
             Map<String, Object> bodyMap = new HashMap<>(params);
             bodyMap.remove("url");
             // 发起请求
-            responseBody = HttpUtil.postBody(apiUrl, JsonUtil.toJson(bodyMap), headers);
+            responseBody = HttpUtil.postBody(apiUrl, JsonUtil.toJson(bodyMap), headers, true);
         }
         else {
             throw BusinessException.serviceThrow("当前仅支持get和post请求!");

@@ -173,7 +173,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         log.info("完成导入任务调度信息：{}", taskCount);
         // 系度配置
         long configCount = DB.batchSaveOrUpdate(devPine.getConfigs(), SysConfig.class);
-        log.info("完成导入系度配置：{}", configCount);
+        log.info("完成导入系统配置：{}", configCount);
         // 菜单
         long menuCount = DB.batchSaveOrUpdate(devPine.getMenus(), SysMenu.class);
         log.info("完成导入菜单：{}", menuCount);
@@ -191,18 +191,18 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             List<FlowInfo> functionInfoList = DB.kdbApi().query(kdbFlowQueryArgv);
 
             // 如果没有，则新增
-//            if (functionInfoList.isEmpty() ) {
-//                AddFlowInfo addFlowInfo = new AddFlowInfo();
-//                addFlowInfo.setFlowId(flowInfo.getFlowId());
-//                addFlowInfo.setContent(flowInfo.getContent());
-//                addFlowInfo.setName(flowInfo.getName());
-//                addFlowInfo.setDescription(flowInfo.getDescription());
-//                DB.kdbApi().addFlow(addFlowInfo);
-//            }
             if (functionInfoList.isEmpty() ) {
-                String sql = "insert into flow (flowid,name,content,description) values (?,?,?,?)";
-                DB.byName("kingDB").executeUpdateSql(sql, flowInfo.getFlowId(), flowInfo.getName(), flowInfo.getContent(), flowInfo.getDescription());
+                AddFlowInfo addFlowInfo = new AddFlowInfo();
+                addFlowInfo.setFlowId(flowInfo.getFlowId());
+                addFlowInfo.setContent(flowInfo.getContent());
+                addFlowInfo.setName(flowInfo.getName());
+                addFlowInfo.setDescription(flowInfo.getDescription());
+                DB.kdbApi().addFlow(addFlowInfo);
             }
+//            if (functionInfoList.isEmpty() ) {
+//                String sql = "insert into flow (flowid,name,content,description) values (?,?,?,?)";
+//                DB.byName("kingDB").executeUpdateSql(sql, flowInfo.getFlowId(), flowInfo.getName(), flowInfo.getContent(), flowInfo.getDescription());
+//            }
             else {
                 EditFlowInfo editFlowInfo = new EditFlowInfo();
                 editFlowInfo.setFlowId(flowInfo.getFlowId());
@@ -220,19 +220,19 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             functionQueryArgv.setId(functions.getId());
             List<Functions> functionInfoList = DB.kdbApi().queryFunction(functionQueryArgv);
             // 如果没有，则新增
-//            if (functionInfoList.isEmpty() ) {
-//                AddFunctionInfo addFunctionInfo = new AddFunctionInfo();
-//                addFunctionInfo.setId(functions.getId());
-//                addFunctionInfo.setName(functions.getName());
-//                addFunctionInfo.setDesc(functions.getDesc());
-//                addFunctionInfo.setScript(functions.getScript());
-//                addFunctionInfo.setType(functions.getType());
-//                DB.kdbApi().addFun(addFunctionInfo);
-//            }
             if (functionInfoList.isEmpty() ) {
-                String sql = "insert into functions (id,name,type,desc,script) values (?,?,?,?,?)";
-                DB.byName("kingDB").executeUpdateSql(sql, functions.getId(), functions.getName(), functions.getType(), functions.getDesc(), functions.getScript());
+                AddFunctionInfo addFunctionInfo = new AddFunctionInfo();
+                addFunctionInfo.setId(functions.getId());
+                addFunctionInfo.setName(functions.getName());
+                addFunctionInfo.setDesc(functions.getDesc());
+                addFunctionInfo.setScript(functions.getScript());
+                addFunctionInfo.setType(functions.getType());
+                DB.kdbApi().addFun(addFunctionInfo);
             }
+//            if (functionInfoList.isEmpty() ) {
+//                String sql = "insert into functions (id,name,type,desc,script) values (?,?,?,?,?)";
+//                DB.byName("kingDB").executeUpdateSql(sql, functions.getId(), functions.getName(), functions.getType(), functions.getDesc(), functions.getScript());
+//            }
             else {
                 EditFunctionInfo editFunctionInfo = new EditFunctionInfo();
                 editFunctionInfo.setId(functions.getId());
@@ -283,7 +283,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                     String sign = SignUtil.getSign(body, channel.getSignSecret());
                     body.put("sign", sign);
                     logStack.addMessage("准备请求远程数据, URL：" + apiUrl);
-                    String responseBody = HttpUtil.postBody(apiUrl, JsonUtil.toJson(body), new HashMap<>());
+                    String responseBody = HttpUtil.postBody(apiUrl, JsonUtil.toJson(body), new HashMap<>(), true);
                     logStack.addMessage("完成请求远程数据，准备安装应用." );
                     String result = importApp(responseBody);
                     logStack.addMessage("应用安装完成：" + result);

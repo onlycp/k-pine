@@ -16,10 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URLEncoder;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * kdb抽象类
@@ -69,14 +66,14 @@ public abstract class KdbApiAbstract implements KdbApi {
 
     @Override
     public String addFlow(AddFlowInfo flowInfo) {
-        KdbRet<AddFlowInfoRet> ret = post(flowInfo, ADD_FLOW_URL, AddFlowInfoRet.class);
+        KdbRet<AddFlowInfoRet> ret = post(getServer(), flowInfo, ADD_FLOW_URL, AddFlowInfoRet.class, false);
 //       log.info("新增逻辑编排响应:{}", JsonUtil.toJson(ret));
         return ret.getResponseBody().getFlowId();
     }
 
     @Override
     public void editFlow(EditFlowInfo flowInfo) {
-        KdbRet ret = post(flowInfo, EDIT_FLOW_URL, String.class);
+        KdbRet ret = post(getServer(), flowInfo, EDIT_FLOW_URL, String.class, false);
 //        log.info("编辑逻辑编排响应:{}", JsonUtil.toJson(ret));
         if (ret.getErrorCode() != 0) {
             throw BusinessException.serviceThrow("保存失败,错误信息:" + ret.getMessage());
@@ -103,7 +100,7 @@ public abstract class KdbApiAbstract implements KdbApi {
     public void deleteFlow(String flowId) {
         Map<String, Object> params = new HashMap<>(1);
         params.put("flowId", flowId);
-        KdbRet ret = post(params, DELETE_FLOW_URL, String.class);
+        KdbRet ret = post(getServer(), params, DELETE_FLOW_URL, String.class, false);
         if (ret.getErrorCode() != 0) {
             throw new OrmDbException(ret.getMessage(), ret.getKlog(), ret.getStackTrace());
         }
@@ -112,14 +109,14 @@ public abstract class KdbApiAbstract implements KdbApi {
 
     @Override
     public List<FlowInfo> query(KdbFlowQueryArgv flowInfo) {
-        KdbRet<List> list = post(flowInfo, QUERY_FLOW_URL, List.class);
+        KdbRet<List> list = post(getServer(), flowInfo, QUERY_FLOW_URL, List.class, true);
         String json = JsonUtil.toJson(list.getResponseBody());
         return JsonUtil.toListBean(json, FlowInfo.class);
     }
 
     @Override
     public void addDataSource(DataSourceInfo dataSourceInfo) {
-        KdbRet<String> ret = post(dataSourceInfo, ADD_DS_URL, String.class);
+        KdbRet<String> ret = post(getServer(), dataSourceInfo, ADD_DS_URL, String.class, false);
         if (ret.getErrorCode() != 0) {
             throw new OrmDbException(ret.getMessage(), ret.getKlog(), ret.getStackTrace());
         }
@@ -127,7 +124,7 @@ public abstract class KdbApiAbstract implements KdbApi {
 
     @Override
     public void editDataSource(DataSourceInfo dataSourceInfo) {
-        KdbRet<String> ret = post(dataSourceInfo, EDIT_DS_URL, String.class);
+        KdbRet<String> ret = post(getServer(), dataSourceInfo, EDIT_DS_URL, String.class, false);
         if (ret.getErrorCode() != 0) {
             throw new OrmDbException(ret.getMessage(), ret.getKlog(), ret.getStackTrace());
         }
@@ -137,7 +134,7 @@ public abstract class KdbApiAbstract implements KdbApi {
     public void deleteDataSource(String sourceName) {
         Map<String, Object> params = new HashMap<>(1);
         params.put("sourceName", sourceName);
-        KdbRet ret = post(params, DELETE_DS_URL, String.class);
+        KdbRet ret = post(getServer(), params, DELETE_DS_URL, String.class, false);
         if (ret.getErrorCode() != 0) {
             throw new OrmDbException(ret.getMessage(), ret.getKlog(), ret.getStackTrace());
         }
@@ -146,7 +143,7 @@ public abstract class KdbApiAbstract implements KdbApi {
 
     @Override
     public List<DataSourceInfo> queryDataSource(DataSourceQueryArgv dataSourceInfo) {
-        KdbRet<List> list = post(dataSourceInfo, QUERY_DS_URL, List.class);
+        KdbRet<List> list = post(getServer(), dataSourceInfo, QUERY_DS_URL, List.class, true);
         String json = JsonUtil.toJson(list.getResponseBody());
         return JsonUtil.toListBean(json, DataSourceInfo.class);
     }
@@ -158,12 +155,12 @@ public abstract class KdbApiAbstract implements KdbApi {
         if (sync) {
             executeFlowUrl = "/api/async/execute";
         }
-        return post(argv, executeFlowUrl, String.class);
+        return post(getServer(), argv, executeFlowUrl, String.class, true);
     }
 
     @Override
     public void addFun(AddFunctionInfo argv) {
-        KdbRet ret = post(argv, ADD_FUN_URL, String.class);
+        KdbRet ret = post(getServer(), argv, ADD_FUN_URL, String.class, false);
         if (ret.getErrorCode() != 0) {
             throw new OrmDbException(ret.getMessage(), ret.getKlog(), ret.getStackTrace());
         }
@@ -171,7 +168,7 @@ public abstract class KdbApiAbstract implements KdbApi {
 
     @Override
     public void editFun(EditFunctionInfo argv) {
-        KdbRet ret = post(argv, EDIT_FUN_URL, String.class);
+        KdbRet ret = post(getServer(), argv, EDIT_FUN_URL, String.class, false);
         if (ret.getErrorCode() != 0) {
             throw new OrmDbException(ret.getMessage(), ret.getKlog(), ret.getStackTrace());
         }
@@ -181,7 +178,7 @@ public abstract class KdbApiAbstract implements KdbApi {
     public void deleteFun(String funId) {
         Map<String, Object> params = new HashMap<>(1);
         params.put("id", funId);
-        KdbRet ret = post(params, DELETE_FUN_URL, String.class);
+        KdbRet ret = post(getServer(), params, DELETE_FUN_URL, String.class, false);
         if (ret.getErrorCode() != 0) {
             throw new OrmDbException(ret.getMessage(), ret.getKlog(), ret.getStackTrace());
         }
@@ -190,7 +187,7 @@ public abstract class KdbApiAbstract implements KdbApi {
     @Override
     @SuppressWarnings("all")
     public List<Functions> queryFunction(FunctionQueryArgv argv) {
-        KdbRet<List> list = post(argv, QUERY_FUN_URL, List.class);
+        KdbRet<List> list = post(getServer(), argv, QUERY_FUN_URL, List.class, true);
         String json = JsonUtil.toJson(list.getResponseBody());
         return JsonUtil.toListBean(json, Functions.class);
     }
@@ -202,17 +199,21 @@ public abstract class KdbApiAbstract implements KdbApi {
      * @return body
      */
     @SuppressWarnings("all")
-    private <T> KdbRet<T> post(Object params, String api, Class<T> tClass) {
+    private <T> KdbRet<T> post(String[] severs, Object params, String api, Class<T> tClass, boolean anyone) {
         try {
             // 转为json
             String requestBody = JsonUtil.toJson(params);
             // 拼接请求
-            String url = getServer() + api;
+            List<String> urls = new ArrayList<>();
+            for (String a: severs) {
+                urls.add(a +  api);
+            }
+            String url = StringUtils.joinToString(urls, ";");
             long t1 = System.currentTimeMillis();
             if (api.contains("sync")) {
                 System.currentTimeMillis();
             }
-            String responseBody = HttpUtil.postBody(url, requestBody, Collections.emptyMap());
+            String responseBody = HttpUtil.postBody(url, requestBody, Collections.emptyMap(), anyone);
             KdbRet<T> ret = JsonUtil.toBean(responseBody, KdbRet.class, tClass);
             if (ret == null) {
                 throw new OrmDbException("响应数据不合法" + responseBody);
@@ -228,7 +229,7 @@ public abstract class KdbApiAbstract implements KdbApi {
     @SuppressWarnings("all")
     public KdbRet<String> uploadFile(InputStream inputStream, String fileName, String path) {
         try {
-            String url = getServer() + UPLOAD_URL;
+            String url = chooseServer()[0] + UPLOAD_URL;
             // 发起请求上传文件
             String responseBody = HttpUtil.uploadFile(url, fileName, "file", inputStream, path);
             KdbRet<String> ret = JsonUtil.toBean(responseBody, KdbRet.class, String.class);
@@ -245,14 +246,14 @@ public abstract class KdbApiAbstract implements KdbApi {
     @Override
     @SneakyThrows
     public File downloadFile(String path, String fileName) {
-        String url = getServer() + DOWN_URL + "/" + URLEncoder.encode(fileName, "utf-8") + "?path=" + URLEncoder.encode(path, "utf-8");
+        String url = chooseServer()[0] + DOWN_URL + "/" + URLEncoder.encode(fileName, "utf-8") + "?path=" + URLEncoder.encode(path, "utf-8");
         return HttpUtil.downloadFile(url, path);
     }
 
     @Override
     @SneakyThrows
     public File downloadFile(String path, String fileName, String prefix, String suffix) {
-        String url = getServer() + DOWN_URL + "/" + URLEncoder.encode(fileName, "utf-8") + "?path=" + URLEncoder.encode(path, "utf-8");
+        String url = chooseServer()[0] + DOWN_URL + "/" + URLEncoder.encode(fileName, "utf-8") + "?path=" + URLEncoder.encode(path, "utf-8");
         return HttpUtil.downloadFile(url, path, prefix, suffix);
     }
 
@@ -264,7 +265,8 @@ public abstract class KdbApiAbstract implements KdbApi {
     @Override
     public String transaction(TransactionInfo transactionInfo) {
         try {
-            KdbRet<TransactionRet> ret = post(transactionInfo, TRAN_URL, TransactionRet.class);
+            // todo 应该为同一个url
+            KdbRet<TransactionRet> ret = post(chooseServer(), transactionInfo, TRAN_URL, TransactionRet.class, true);
             if (ret.getErrorCode() != 0) {
                 throw new TransactionException(ret.getMessage(), ret.getKlog(), ret.getStackTrace());
             }
@@ -279,5 +281,14 @@ public abstract class KdbApiAbstract implements KdbApi {
     /**
      * 设置接口地址
      **/
-    abstract String getServer();
+    abstract String[] getServer();
+
+    /**
+     * 获取服务器
+     * @return
+     */
+    private String[] chooseServer() {
+        int index = new Random().nextInt(getServer().length);
+        return new String[] {getServer()[index]};
+    }
 }

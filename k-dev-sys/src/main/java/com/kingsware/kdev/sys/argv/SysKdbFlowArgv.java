@@ -34,5 +34,7 @@ public class SysKdbFlowArgv {
     private String apiUrl;
     /** 关联接口请求方式 **/
     private String apiMethod;
+    /** 是否开始事务 **/
+    private String tranCtrl;
 
 }

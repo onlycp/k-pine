@@ -47,4 +47,10 @@ public interface SysTaskService extends BaseService {
      * @param argv  查询
      */
     void delete(MultiIdArgv argv);
+
+    /**
+     * 任务执行
+     * @param task
+     */
+    void executeTask(String task);
 }

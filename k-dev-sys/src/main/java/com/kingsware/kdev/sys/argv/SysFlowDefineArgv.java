@@ -94,5 +94,7 @@ public class SysFlowDefineArgv extends BasePageArgv {
     private List<Node> nodes = new ArrayList<>();
     /** 连续 **/
     private List<Link> links = new ArrayList<>();
+    /** 是否开始事务 **/
+    private String tranCtrl;
 
 }

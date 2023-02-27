@@ -9,16 +9,21 @@ import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
+import com.kingsware.kdev.core.util.AESUtil;
 import com.kingsware.kdev.core.util.BeanUtils;
+import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysTaskArgv;
 import com.kingsware.kdev.sys.argv.SysTaskQueryArgv;
 import com.kingsware.kdev.core.model.SysTask;
 import com.kingsware.kdev.sys.ret.SysTaskRet;
 import com.kingsware.kdev.sys.service.SysTaskService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Map;
 
 /**
  * 任务调度
@@ -28,10 +33,14 @@ import javax.annotation.Resource;
  * @date 2021/12/23 9:36 上午
  */
 @Service
+@Slf4j
 public class SysTaskServiceImpl extends BaseServiceImpl implements SysTaskService {
 
-//    @Resource
-//    private DynamicTask dynamicTask;
+    @Resource
+    private DynamicTask dynamicTask;
+
+    @Value("${encrypt.aes.secret:PsLZlcuUJBUB8yPo}")
+    private String aesSecret;
 
     @Override
     public SysTaskRet get(String id) {
@@ -111,5 +120,17 @@ public class SysTaskServiceImpl extends BaseServiceImpl implements SysTaskServic
         for (String id: argv.getIds()) {
             DB.delete(SysTask.class, id);
         }
+    }
+
+    /**
+     * 任务执行
+     *
+     * @param taskId   任务id
+     */
+    @Override
+    public void executeTask(String taskId) {
+        log.info("Http触发定时任务，任务id:{}", taskId);
+        SysTask sysTask = DB.findById(SysTask.class, taskId);
+        new Thread(() -> dynamicTask.executeTask(sysTask)).start();
     }
 }

@@ -53,5 +53,7 @@ public class SysTask extends BaseManageModel {
     private Integer lockStatus;
     /** 任务参数 **/
     private String taskArgv;
+    /** 下一个实例 **/
+    private String nextInst;
 
 }
