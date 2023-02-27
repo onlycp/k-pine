@@ -43,7 +43,7 @@ public class SysDictServiceImpl extends BaseServiceImpl implements SysDictServic
         // 唯一性校验
         DBChecker<SysDict> checker =DBChecker.build(model, SysDict.class);
         // 名称唯一
-        checker.uni("name", I18n.t("SysDict.name.unique", "字典名称必须唯一"));
+//        checker.uni("name", I18n.t("SysDict.name.unique", "字典名称必须唯一"));
         // 编码唯一
         checker.uni("code", I18n.t("SysDict.code.unique", "字典代码必须唯一"));
         // 执行校验
