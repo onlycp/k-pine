@@ -196,14 +196,6 @@ public class HttpUtil {
                         throw e;
                     }
                 }
-                if (i < (url.length()-1)) {
-                    try {
-                        log.info("当前请求网络异常，将自动转移到下一节点, 当前节点:{}, 下一节点:{}", url,  urlList.get(i+1));
-                    }
-                    catch (Exception x) {
-                        e.printStackTrace();
-                    }
-                }
             }
         }
         // 如果是要求写所有的，此时有失败，则记录一下
