@@ -66,7 +66,7 @@ public class DynamicTask implements CommandLineRunner {
     public DynamicTask() {
         this.scheduledFutureMap = new HashMap<>(1);
         this.threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
-        this.threadPoolTaskScheduler.setPoolSize(15);
+        this.threadPoolTaskScheduler.setPoolSize(20);
         this.threadPoolTaskScheduler.initialize();
     }
 
@@ -189,7 +189,7 @@ public class DynamicTask implements CommandLineRunner {
                         callTask(sysTask, atomicInteger, executeInstance.instanceName());
                     }
                     else  {
-                        log.info("http触发定时任务，任务id:{}，url:{},响应信息:{}", sysTask.getId(), url, ret.getMessage());
+//                        log.info("http触发定时任务，任务id:{}，url:{},响应信息:{}", sysTask.getId(), url, ret.getMessage());
                     }
 
                 }
@@ -352,6 +352,9 @@ public class DynamicTask implements CommandLineRunner {
          threadPoolTaskScheduler.schedule(() -> {
              try {
                  List<SysTask> tasks = DB.findList(SysTask.class, "select * from sys_task");
+                 if ((tasks.size() + 5) > threadPoolTaskScheduler.getPoolSize())  {
+                     threadPoolTaskScheduler.setPoolSize(tasks.size() + 5);
+                 }
                  for (SysTask task: tasks) {
                      registerTask(task);
                  }

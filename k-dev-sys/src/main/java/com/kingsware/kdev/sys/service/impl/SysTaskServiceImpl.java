@@ -129,7 +129,7 @@ public class SysTaskServiceImpl extends BaseServiceImpl implements SysTaskServic
      */
     @Override
     public void executeTask(String taskId) {
-        log.info("Http触发定时任务，任务id:{}", taskId);
+//        log.info("Http触发定时任务，任务id:{}", taskId);
         SysTask sysTask = DB.findById(SysTask.class, taskId);
         new Thread(() -> dynamicTask.executeTask(sysTask)).start();
     }
