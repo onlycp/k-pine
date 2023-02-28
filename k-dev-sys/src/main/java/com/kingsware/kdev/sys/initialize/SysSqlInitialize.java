@@ -1,11 +1,13 @@
 package com.kingsware.kdev.sys.initialize;
 
 import com.kingsware.kdev.core.base.SystemInitialize;
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.kflow.FlowUtils;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.util.MD5Utils;
+import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.bean.ExecutionFile;
 import com.kingsware.kdev.sys.model.DevSqlRun;
@@ -17,10 +19,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StreamUtils;
 
+import javax.swing.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.concurrent.BlockingDeque;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -68,15 +72,20 @@ public class SysSqlInitialize implements SystemInitialize {
     private List<ExecutionFile> getFileList(int maxVersion) {
         List<ExecutionFile> resultList = new ArrayList<>();
         List<File> allFileList = new ArrayList<>();
-        // 在windows环境中，代码版运行./xx会找不到文件，需要改成.\xx
-//        if (".".equals(initDatasourcePath)) {
-//            initDatasourcePath = SysSqlInitialize.class.getResource("/").getPath();
-//        }
-        Resource[] resources = SpringContext.getResources(ResourceUtils.CLASSPATH_URL_PREFIX + "initSql/" + initDbType + "/**");
-        log.info("[k-pine:SysSqlInitialize path]" + ResourceUtils.CLASSPATH_URL_PREFIX + "initSql/" + initDbType + "/**");
+        boolean isCustomInitSqlPath = new Boolean(SpringContext.getProperties("file.is-custom-init-sql-path", "false"));
+        String path = ResourceUtils.CLASSPATH_URL_PREFIX + "initSql/" + initDbType + "/**";
+        if (isCustomInitSqlPath) {
+            // 在windows环境中，代码版运行./xx会找不到文件，需要改成.\xx
+            File fileList = new File("");
+            path = "file:" + initDatasourcePath + File.separator + "initSql" + File.separator + initDbType + "/**";
+            log.info("[k-pine:SysSqlInitialize isCustomInitSqlPath]: true");
+        }
+        log.info("[k-pine:SysSqlInitialize path]" + path);
+        Resource[] resources = SpringContext.getResources(path);
 //        log.info("[k-pine:SysSqlInitialize resources]" + resources);
         if (resources != null) {
             for(Resource resource : resources) {
+                log.info(resource.getFilename());
                 ExecutionFile executionFile = new ExecutionFile();
                 String filename = resource.getFilename();
 //                log.info("[k-pine:SysSqlInitialize filename]" + filename + "----" + maxVersion);

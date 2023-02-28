@@ -40,6 +40,7 @@ public class KFlowContext {
         sysMap.put("username",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getUsername() : "");
         sysMap.put("when", DateUtils.getNow());
         sysMap.put("uuid", StringUtils.getUUID());
+        sysMap.put("avatar", KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getAvatar() : "");
         sysMap.put("realName",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getRealName() : "");
         sysMap.put("mobile",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getMobile() : "");
         sysMap.put("email",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getEmail() : "");
