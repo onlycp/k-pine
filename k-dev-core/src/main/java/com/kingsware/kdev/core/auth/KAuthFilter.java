@@ -350,7 +350,8 @@ public class KAuthFilter implements Filter {
         KFlowContext context = KFlowContext.createBaseContext(StringUtils.isNotEmpty(api.getInArgv()) ? api.getInArgv() : "{}", StringUtils.isNotEmpty(api.getOutArgv()) ? api.getOutArgv() : "{}");
         // 调用流程
         KdbFlowResult result = KdbFlowExecutor.getInstance().execute(api.getApiFlowId(), api.getSubFlowIds(), argvMap, context, false, false);
-        // 转为api格式
+        KdbRetFile kdbRetFile = null;
+                // 转为api格式
         switch (result.getType()) {
             case KFlowConstant.RESULT_JSON:
                 ServletUtil.responseJson(response, FlowUtils.toJsonResult(result.getData(), result.getLog()));
@@ -359,8 +360,12 @@ public class KAuthFilter implements Filter {
                 ExcelWorker.getInstance().writeToWeb(response, (KExcel) result.getData());
                 break;
             case KFlowConstant.RESULT_FILE:
-                KdbRetFile kdbRetFile = (KdbRetFile) result.getData();
+                kdbRetFile = (KdbRetFile) result.getData();
                 ServletUtil.responseFile(response, kdbRetFile.getFileName(), kdbRetFile.getData());
+                break;
+            case KFlowConstant.RESULT_BASE64_TO_FILE:
+                kdbRetFile = (KdbRetFile) result.getData();
+                ServletUtil.responseFile(response, kdbRetFile.getFileName(), Base64.getDecoder().decode(kdbRetFile.getData()));
                 break;
         }
     }

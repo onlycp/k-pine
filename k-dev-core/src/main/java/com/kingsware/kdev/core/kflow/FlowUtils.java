@@ -387,6 +387,11 @@ public class FlowUtils {
             message.setHandlerName("file");
             message.setData(text);
         }
+        else if (responseBody.startsWith(KFlowConstant.BASE64_TO_FILE_FLAG)) {
+            String text = responseBody.substring(KFlowConstant.BASE64_TO_FILE_FLAG.length());
+            message.setHandlerName("base64ToFile");
+            message.setData(text);
+        }
         else if (responseBody.startsWith(KFlowConstant.ERROR_FLAG)) {
             String text = responseBody.replace(KFlowConstant.ERROR_FLAG, "");
             message.setHandlerName("error");
