@@ -66,7 +66,7 @@ public class DynamicTask implements CommandLineRunner {
     public DynamicTask() {
         this.scheduledFutureMap = new HashMap<>(1);
         this.threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
-        this.threadPoolTaskScheduler.setPoolSize(20);
+        this.threadPoolTaskScheduler.setPoolSize(50);
         this.threadPoolTaskScheduler.initialize();
     }
 
@@ -242,7 +242,7 @@ public class DynamicTask implements CommandLineRunner {
                 if (myTask.getTaskType() == 2) {
                     ThreadUtils.sleep(1000);
                 }
-                String sql = "update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ?,  last_execute_time=?, lock_status=0, next_inst=? where id=?";
+                String sql = "update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ?,  last_execute_time=?, next_inst=? where id=?";
                 DB.executeUpdateSql(sql, executeStatus, (t2 - t1), errorMessage, DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME), SystemUtil.getHost().instanceName(), myTask.getId());
 
             }
@@ -352,9 +352,6 @@ public class DynamicTask implements CommandLineRunner {
          threadPoolTaskScheduler.schedule(() -> {
              try {
                  List<SysTask> tasks = DB.findList(SysTask.class, "select * from sys_task");
-                 if ((tasks.size() + 5) > threadPoolTaskScheduler.getPoolSize())  {
-                     threadPoolTaskScheduler.setPoolSize(tasks.size() + 5);
-                 }
                  for (SysTask task: tasks) {
                      registerTask(task);
                  }
@@ -370,7 +367,7 @@ public class DynamicTask implements CommandLineRunner {
                      stopTask(scheduledFutureMap.get(tid).getSysTask());
                  }
                  // 解锁任务
-                 unlockTask(tasks);
+                 // unlockTask(tasks);
              }
              catch (Exception e) {
                  log.error("定时任务注册失败, {}", e.getMessage());
@@ -378,23 +375,5 @@ public class DynamicTask implements CommandLineRunner {
 
         }, new CronTrigger("0/30 * * * * ?"));
 
-    }
-
-    private void unlockTask(final List<SysTask> tasks) {
-        // 解锁任务
-        List<SysTask> lockedTasks = tasks.stream().filter(it -> it.getLockStatus() != null && it.getLockStatus() == 1).collect(Collectors.toList());
-        for (SysTask task: lockedTasks) {
-            Integer lockForMost = task.getLockForMost();
-            if (task.getLockForMost() == null) {
-                lockForMost = 60;
-            }
-            // 如果达到解锁标准了
-            if (task.getLockForTime() != null) {
-                if ((task.getLockForTime().getTime() + lockForMost*1000) < System.currentTimeMillis()) {
-                    DB.executeUpdateSql("update sys_task set lock_status=0 where id=?", task.getId());
-                    log.info("定时任务:{} 自动解锁", task.getName());
-                }
-            }
-        }
     }
 }
