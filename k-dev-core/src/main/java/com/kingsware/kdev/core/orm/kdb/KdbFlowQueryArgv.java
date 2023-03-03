@@ -1,7 +1,7 @@
 package com.kingsware.kdev.core.orm.kdb;
 
-import com.kingsware.kdev.core.orm.annotation.Table;
 import lombok.Data;
+import java.util.List;
 
 /**
  * 流程信息
@@ -22,4 +22,12 @@ public class KdbFlowQueryArgv {
     private String name = "";
     /** 父流程id **/
     private String parentId = "";
+    /** 当前页 **/
+    private Integer page;
+    /** 每页数量 **/
+    private Integer offset;
+    /** 流程id集合 **/
+    private List<String> flowIds;
+    /** 是否分页 **/
+    private boolean pageQuery;
 }
