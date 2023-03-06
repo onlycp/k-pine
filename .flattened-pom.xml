@@ -24,6 +24,7 @@
     <module>k-dev-core</module>
     <module>k-dev-sys</module>
     <module>k-dev-app</module>
+    <module>k-dev-resources</module>
   </modules>
   <distributionManagement>
     <repository>
@@ -55,6 +56,11 @@
       <dependency>
         <groupId>com.kingsware.dev</groupId>
         <artifactId>k-dev-sys</artifactId>
+        <version>${kdev.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.kingsware.dev</groupId>
+        <artifactId>k-dev-resources</artifactId>
         <version>${kdev.version}</version>
       </dependency>
     </dependencies>
