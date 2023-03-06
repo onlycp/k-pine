@@ -32,6 +32,7 @@ public class UiConfig extends WebMvcConfigurationSupport {
     protected void addResourceHandlers(ResourceHandlerRegistry registry) {
         // 判断只有目录真实存在的时候才生效
         registry.addResourceHandler("/html/**").addResourceLocations("classpath:/static/html/");
+        registry.addResourceHandler("/static/**").addResourceLocations("file:./static/");
         log.info("前端目录:{}", ui);
         if (new File(ui).exists()) {
             // 替换内容
