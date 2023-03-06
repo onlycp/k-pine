@@ -17,10 +17,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>com.kingsware.dev</groupId>
-            <artifactId>k-dev-resources</artifactId>
-        </dependency>
     </dependencies>
 
 
