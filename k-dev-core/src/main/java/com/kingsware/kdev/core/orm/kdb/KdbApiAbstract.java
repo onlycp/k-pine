@@ -280,7 +280,7 @@ public abstract class KdbApiAbstract implements KdbApi {
 
     @Override
     public KdbDataRet<FlowInfo> queryFlow(KdbFlowQueryArgv flowInfo) {
-        KdbRet<List> list =  post(flowInfo, QUERY_FLOW_URL, List.class);
+        KdbRet<List> list =  post(chooseServer(),flowInfo, QUERY_FLOW_URL, List.class, true);
         String json = JsonUtil.toJson(list.getResponseBody());
         List<FlowInfo> flowInfoList = JsonUtil.toListBean(json, FlowInfo.class);
         KdbDataRet<FlowInfo> flowDataRet = new KdbDataRet<>();

@@ -3,33 +3,17 @@ package com.kingsware.kdev.sys.service.impl;
 import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
-import com.kingsware.kdev.core.exception.LicenseException;
 import com.kingsware.kdev.core.i18n.I18n;
-import com.kingsware.kdev.core.orm.DB;
-import com.kingsware.kdev.core.orm.kdb.DataSourceInfo;
-import com.kingsware.kdev.core.orm.kdb.DataSourceQueryArgv;
 import com.kingsware.kdev.core.util.FileUtils;
-import com.kingsware.kdev.core.util.JsonUtil;
-import com.kingsware.kdev.core.util.RSAUtils;
-import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.core.cache.license.License;
 import com.kingsware.kdev.sys.argv.SysLicenseActive;
 import com.kingsware.kdev.sys.ret.LicenseRet;
 import com.kingsware.kdev.sys.service.LicenseService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * License业务实现类
@@ -46,7 +30,7 @@ public class LicenseServiceImpl implements LicenseService {
     @Override
     public LicenseRet getLicense() {
 
-        if (LicenseManager.getInstance().validatePass()) {
+        if (LicenseManager.getInstance().isUniopsApp()) {
             return getVirtualLicense();
         }
 
@@ -77,7 +61,7 @@ public class LicenseServiceImpl implements LicenseService {
 
     @Override
     public LicenseRet active(SysLicenseActive licenseActive) {
-        if (LicenseManager.getInstance().validatePass()) {
+        if (LicenseManager.getInstance().isUniopsApp()) {
             return getVirtualLicense();
         }
         License license = LicenseManager.getInstance().parseLicense(licenseActive.getLicense());

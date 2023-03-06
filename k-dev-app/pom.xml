@@ -25,6 +25,10 @@
             <artifactId>k-dev-sys</artifactId>
             <groupId>com.kingsware.dev</groupId>
         </dependency>
+        <dependency>
+            <groupId>com.kingsware.dev</groupId>
+            <artifactId>k-dev-resources</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

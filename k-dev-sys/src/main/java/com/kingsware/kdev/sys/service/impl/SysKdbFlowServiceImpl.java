@@ -12,6 +12,7 @@ import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.kflow.define.*;
 import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.orm.PagedList;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.orm.kdb.*;
@@ -36,6 +37,7 @@ import javax.annotation.Resource;
 import java.sql.Array;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 角色业务实现类
@@ -454,13 +456,10 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
     @Override
     @SuppressWarnings("")
     public PageDataRet<SysKdbFlowRet> query(SysKdbFlowQueryArgv argv) {
-        KdbFlowQueryArgv info = new KdbFlowQueryArgv();
-        // 查询所有数据
-        KdbApi api = (KdbApi) (DB.getDefault());
-        List<FlowInfo> list = api.query(info);
+
+
+        long t0 = System.currentTimeMillis();
         List<Object> params = new ArrayList<>();
-        // 从数据库里查询所有数据
-        String sql = "select t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t0.app_id tran_ctrl, t1.name as application_name, sa.api_url, sa.api_method " +
         // 根据条件查询appId、tags和apiUrl数据
         String sql = "select distinct t0.name,t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name, sa.api_url, sa.api_method, t0.when_created " +
                 " from sys_logic_flow t0 " +
@@ -481,32 +480,30 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         if (StringUtils.isNotEmpty(argv.getTags())) {
             sql += " and t0.tags like '%" + argv.getTags() + "%'";
         }
-        List<SysKdbFlowRet> logicFlows = DB.findList(SysKdbFlowRet.class, sql, params.toArray());
         if (StringUtils.isNotEmpty(argv.getName())) {
             sql += " and t0.name like '%" + argv.getName() + "%'";
         }
         sql += " ORDER BY t0.when_created DESC";
 
         int total = 0;
+        List<SysKdbFlowRet> logicFlows = null;
         // 分页
         if (argv.isPageQuery()) {
-            // 查询总数
-            String totalSql = "select count(1) from (" + sql + ") AS a";
-            total = (int) DB.findCount(totalSql);
-
-            Integer page = argv.getPage();
-            Integer pageSize = argv.getPageSize();
-            int start = (page - 1) * pageSize;
-            sql += " limit " + start + ", " + pageSize;
+            PagedList<SysKdbFlowRet> pagedList = DB.findPagedList(SysKdbFlowRet.class, argv.getPage(), argv.getPageSize(), sql, params.toArray(new Object[0]));
+            total = pagedList.getTotalCount();
+            logicFlows = pagedList.getList();
         }
-
-        List<SysKdbFlowRet> logicFlows = DB.findList(SysKdbFlowRet.class, sql);
+        else {
+            logicFlows = DB.findList(SysKdbFlowRet.class, sql,  params.toArray(new Object[0]));
+            total = logicFlows.size();
+        }
         // 根据flowId批量查询
         List<String> flowIds = new ArrayList<>();
         logicFlows.forEach(logicFlow -> flowIds.add(logicFlow.getId()));
 
         KdbFlowQueryArgv info = new KdbFlowQueryArgv();
 
+        long t1 = System.currentTimeMillis();
         // 查询faas流程数据
         KdbApi api = (KdbApi) (DB.getDefault());
         if (!flowIds.isEmpty()) {
@@ -515,6 +512,8 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         info.setPageQuery(false);
 
         KdbDataRet<FlowInfo> flowDataRet = api.queryFlow(info);
+        long t2 = System.currentTimeMillis();
+        log.info("faas查询用时:{}, {}", (t1-t0), (t2 - t1));
 
         Map<String, SysKdbFlowRet> dbMap = new HashMap<>();
         logicFlows.forEach(it -> dbMap.put(it.getId(), it));
@@ -539,7 +538,6 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
                 it.setOutArgv(null);
             });
         }
-        return PageUtil.memoryPage(argv, filterList, SysKdbFlowRet.class);
         return pageDataRet;
     }
 

@@ -167,7 +167,7 @@ public class DynamicTask implements CommandLineRunner {
             SysInstance executeInstance =  InstanceManager.getInstance().getToExecuteInstance(sysTask.getId(), excludeInstanceName);
             // 如果是当前实例，直接调用即可，不通过http调用
             if (executeInstance.instanceName().equalsIgnoreCase(masterInstance.instanceName())) {
-                log.info("本机触发定时任务，任务id:{}", sysTask.getId());
+//                log.info("本机触发定时任务，任务id:{}", sysTask.getId());
                 executeTask(sysTask);
             }
             // 通过http调用

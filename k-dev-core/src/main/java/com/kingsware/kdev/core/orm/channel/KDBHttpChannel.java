@@ -172,7 +172,7 @@ public class KDBHttpChannel implements DbChannel{
             // 发起请求
             String  responseBody = HttpUtil.postBody(url, requestBody, Collections.emptyMap(), true);
             long takeTime = System.currentTimeMillis() - t1;
-            if (takeTime < 10000) {
+            if (takeTime < 3000) {
                 logger.debug("url:{} , Take: {} ,请求体: {}", url, takeTime ,requestBody);
             }
             else {

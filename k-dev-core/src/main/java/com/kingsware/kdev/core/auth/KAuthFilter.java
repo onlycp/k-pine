@@ -253,11 +253,11 @@ public class KAuthFilter implements Filter {
                 recordMap.put("id", StringUtils.getUUID());
                 recordMap.put("apiName", api.getApiName());
                 recordMap.put("accessId", accessId);
-                recordMap.put("requestParams", JsonUtil.toJson(argvMap));
+                recordMap.put("requestParams", StringUtils.retrench(JsonUtil.toJson(argvMap), 1000));
                 recordMap.put("requestTime", now);
                 recordMap.put("useTime", System.currentTimeMillis() - t1);
                 recordMap.put("success", StringUtils.isNotEmpty(errorMessage) ? 0: 1);
-                recordMap.put("errorMessage", errorMessage);
+                recordMap.put("errorMessage", StringUtils.retrench(errorMessage, 1000));
                 recordMap.put("requestIp", ServletUtil.getClientIp(request));
                 KmqMessageCenter.getInstance().produce("openApiQueue",  JsonUtil.toJson(recordMap));
             }
@@ -277,7 +277,7 @@ public class KAuthFilter implements Filter {
                     operateLog.setTimes(takeTime);
                     operateLog.setUrl(KClientContext.getContext().getUrl());
                     operateLog.setResponseCode(responseCode);
-                    operateLog.setResponseMessage(errorMessage);
+                    operateLog.setResponseMessage(StringUtils.retrench(errorMessage, 1000));
                     operateLog.setOperateTime(new Timestamp(System.currentTimeMillis()));
                     operateLog.setMethod(callType == CallType.CONTROLLER ? apiDefine.getCallMethod() + "()": api.getApiName());
                     operateLog.setRequestMethod(KClientContext.getContext().getRequest().getMethod());
@@ -285,7 +285,8 @@ public class KAuthFilter implements Filter {
                         operateLog.setResponseBody(ServletUtil.getResponseBody(wrapperResponse));
                     }
 
-                    operateLog.setRequestBody(requestBody);
+                    operateLog.setRequestBody(StringUtils.retrench(requestBody, 1000));
+
                     KmqMessageCenter.getInstance().produce("t_operate_log", JsonUtil.toJson(operateLog) );
                     // 保存登录日志
                     if (callType == CallType.CONTROLLER && "登录".equals(apiDefine.getName())) {
@@ -295,7 +296,7 @@ public class KAuthFilter implements Filter {
                         loginLog.setIp(KClientContext.getContext().getIp());
                         loginLog.setResponseCode(responseCode);
                         loginLog.setTimes(takeTime);
-                        loginLog.setResponseMessage(errorMessage);
+                        loginLog.setResponseMessage(StringUtils.retrench(errorMessage, 1000));
                         loginLog.setOperateTime(new Timestamp(System.currentTimeMillis()));
                         KmqMessageCenter.getInstance().produce("t_login_log", JsonUtil.toJson(loginLog) );
                     }

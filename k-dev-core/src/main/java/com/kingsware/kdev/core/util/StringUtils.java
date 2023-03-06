@@ -331,5 +331,24 @@ public class StringUtils {
     }
 
 
+    /**
+     * 精简字符串
+     * @param str   原始字符串
+     * @param size  字符串长度
+     * @return      精简后的字符串
+     */
+    public static String retrench(String str, int size) {
+        if (StringUtils.isEmpty(str)) {
+            return str;
+        }
+        if (str.length() <= size) {
+            return str;
+        }
+        // 获取平均长度
+        int avgSize = (size-4)/2;
+        return str.substring(0, avgSize) + "...." + str.substring(str.length()-avgSize);
+    }
+
+
 
 }
