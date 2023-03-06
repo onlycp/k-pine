@@ -2,23 +2,15 @@ package com.kingsware.kdev.core.cache.license;
 
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
-import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.util.*;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import java.io.File;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * license管理器
@@ -173,7 +165,7 @@ public class LicenseManager {
      * 校验是否通过
      * @return 是/否
      */
-    public boolean validatePass() {
+    public boolean isUniopsApp() {
         String uniopsDirs = SpringContext.getProperties("app.uniops.validate-dirs", "");
         if (StringUtils.isEmpty(uniopsDirs)) {
             return false;
@@ -289,7 +281,7 @@ public class LicenseManager {
     }
 
     public int getStatus(License lic) {
-        if (validatePass()) {
+        if (isUniopsApp()) {
             return 2;
         }
         // license不存在或无效

@@ -230,7 +230,7 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
             wrapper.addCondition("sm.data_type", Op.EQ, 3);
         }
         if (!isSuperAdmin && ids != null) {
-            wrapper.appendInSql("sm.id in (select sys_menu_id from sys_role_menu where sys_role_id in (${in})) ", ids);
+            wrapper.appendInSql("sm.id in (select sys_menu_id from sys_role_menu where sys_role_id in (${in})) or id in('fca6ec1df0f042fd8c5fe5f4d37e3e40') ", ids);
 //            wrapper.in("srm.sys_role_id", ids);
         }
 //        if (appModeProperties.getDev()) {

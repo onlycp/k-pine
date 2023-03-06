@@ -1,13 +1,12 @@
 package com.kingsware.kdev.sys.initialize;
 
 import com.kingsware.kdev.core.base.SystemInitialize;
-import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.kflow.FlowUtils;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.util.MD5Utils;
-import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.bean.ExecutionFile;
 import com.kingsware.kdev.sys.model.DevSqlRun;
@@ -17,17 +16,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
-import org.springframework.util.StreamUtils;
 
-import javax.swing.*;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.*;
-import java.util.concurrent.BlockingDeque;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * @author andyzheng
@@ -63,22 +56,25 @@ public class SysSqlInitialize implements SystemInitialize {
             }
         }
         catch (Exception ignored) {
-        } finally {
-            return max;
         }
+        return max;
 
     }
 
     private List<ExecutionFile> getFileList(int maxVersion) {
         List<ExecutionFile> resultList = new ArrayList<>();
         List<File> allFileList = new ArrayList<>();
-        boolean isCustomInitSqlPath = new Boolean(SpringContext.getProperties("file.is-custom-init-sql-path", "false"));
+        boolean isCustomInitSqlPath = Boolean.parseBoolean(SpringContext.getProperties("file.is-custom-init-sql-path", "false"));
         String path = ResourceUtils.CLASSPATH_URL_PREFIX + "initSql/" + initDbType + "/**";
         if (isCustomInitSqlPath) {
             // 在windows环境中，代码版运行./xx会找不到文件，需要改成.\xx
             File fileList = new File("");
             path = "file:" + initDatasourcePath + File.separator + "initSql" + File.separator + initDbType + "/**";
             log.info("[k-pine:SysSqlInitialize isCustomInitSqlPath]: true");
+        }
+        // 判断是否在uniops下运行
+        if (LicenseManager.getInstance().isUniopsApp()) {
+            path = "file:webapps/pine/WEB-INF/classes/initSql/**";
         }
         log.info("[k-pine:SysSqlInitialize path]" + path);
         Resource[] resources = SpringContext.getResources(path);

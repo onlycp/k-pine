@@ -7,7 +7,8 @@
         <module>k-dev-core</module>
 		<module>k-dev-sys</module>
         <module>k-dev-app</module>
-	</modules>
+        <module>k-dev-resources</module>
+    </modules>
     <parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -85,6 +86,11 @@
 			</dependency>
 			<dependency>
 				<artifactId>k-dev-sys</artifactId>
+				<groupId>com.kingsware.dev</groupId>
+				<version>${kdev.version}</version>
+			</dependency>
+			<dependency>
+				<artifactId>k-dev-resources</artifactId>
 				<groupId>com.kingsware.dev</groupId>
 				<version>${kdev.version}</version>
 			</dependency>

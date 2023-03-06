@@ -136,4 +136,11 @@ public interface KdbApi {
      */
     String transaction(TransactionInfo transactionInfo);
 
+
+    /**
+     * 流程查询
+     * @param flowInfo
+     * @return
+     */
+    KdbDataRet<FlowInfo> queryFlow(KdbFlowQueryArgv flowInfo);
 }
