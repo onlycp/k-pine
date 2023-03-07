@@ -30,6 +30,7 @@ import com.kingsware.kdev.core.model.SysLoginLog;
 import com.kingsware.kdev.core.model.SysOperateLog;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.util.*;
+import com.kingsware.kdev.core.util.jWi.JWildcard;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,6 +46,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
 
@@ -268,26 +270,44 @@ public class KAuthFilter implements Filter {
                     if (apiDefine != null &&"登录".equals(apiDefine.getName())) {
                         opertator = argvMap.get("username").toString();
                     }
-                    // 保存操作日志
-                    SysOperateLog operateLog = new SysOperateLog();
-                    operateLog.setOperator(opertator);
-                    operateLog.setAction(callType == CallType.CONTROLLER ? apiDefine.getName(): api.getApiName());
-                    operateLog.setModule(callType == CallType.CONTROLLER ? apiDefine.getModule(): api.getApiTags());
-                    operateLog.setIp(KClientContext.getContext().getIp());
-                    operateLog.setTimes(takeTime);
-                    operateLog.setUrl(KClientContext.getContext().getUrl());
-                    operateLog.setResponseCode(responseCode);
-                    operateLog.setResponseMessage(StringUtils.retrench(errorMessage, 1000));
-                    operateLog.setOperateTime(new Timestamp(System.currentTimeMillis()));
-                    operateLog.setMethod(callType == CallType.CONTROLLER ? apiDefine.getCallMethod() + "()": api.getApiName());
-                    operateLog.setRequestMethod(KClientContext.getContext().getRequest().getMethod());
-                    if (wrapperResponse != null) {
-                        operateLog.setResponseBody(ServletUtil.getResponseBody(wrapperResponse));
+                    // 获取日志过滤配置
+                    String operateFilter = SpringContext.getBootProperties("app.operate.log-filter","");
+                    boolean saveLoginOn = false;
+                    if (!StringUtils.isEmpty(operateFilter)) {
+                        String[] opFilters = operateFilter.split(";");
+                        for (String pattern: opFilters) {
+                            if (Pattern.matches(JWildcard.wildcardToRegex(pattern), request.getRequestURI())) {
+                                saveLoginOn  = true;
+                                break;
+                            }
+                        }
+
+                    } else {
+                        saveLoginOn = true;
+                    }
+                    if (saveLoginOn) {
+                        // 保存操作日志
+                        SysOperateLog operateLog = new SysOperateLog();
+                        operateLog.setOperator(opertator);
+                        operateLog.setAction(callType == CallType.CONTROLLER ? apiDefine.getName(): api.getApiName());
+                        operateLog.setModule(callType == CallType.CONTROLLER ? apiDefine.getModule(): api.getApiTags());
+                        operateLog.setIp(KClientContext.getContext().getIp());
+                        operateLog.setTimes(takeTime);
+                        operateLog.setUrl(KClientContext.getContext().getUrl());
+                        operateLog.setResponseCode(responseCode);
+                        operateLog.setResponseMessage(StringUtils.retrench(errorMessage, 1000));
+                        operateLog.setOperateTime(new Timestamp(System.currentTimeMillis()));
+                        operateLog.setMethod(callType == CallType.CONTROLLER ? apiDefine.getCallMethod() + "()": api.getApiName());
+                        operateLog.setRequestMethod(KClientContext.getContext().getRequest().getMethod());
+                        if (wrapperResponse != null) {
+                            operateLog.setResponseBody(ServletUtil.getResponseBody(wrapperResponse));
+                        }
+                        operateLog.setRequestBody(StringUtils.retrench(requestBody, 1000));
+//                        log.info("操作日志保存:{}, url:{}" , operateLog.getAction(), request.getRequestURI());
+                        KmqMessageCenter.getInstance().produce("t_operate_log", JsonUtil.toJson(operateLog) );
+
                     }
 
-                    operateLog.setRequestBody(StringUtils.retrench(requestBody, 1000));
-
-                    KmqMessageCenter.getInstance().produce("t_operate_log", JsonUtil.toJson(operateLog) );
                     // 保存登录日志
                     if (callType == CallType.CONTROLLER && "登录".equals(apiDefine.getName())) {
                         // 获取表单信息
