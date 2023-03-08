@@ -72,10 +72,6 @@ public class SysSqlInitialize implements SystemInitialize {
             path = "file:" + initDatasourcePath + File.separator + "initSql" + File.separator + initDbType + "/**";
             log.info("[k-pine:SysSqlInitialize isCustomInitSqlPath]: true");
         }
-        // 判断是否在uniops下运行
-        if (LicenseManager.getInstance().isUniopsApp()) {
-            path = "file:webapps/pine/WEB-INF/classes/initSql/**";
-        }
         log.info("[k-pine:SysSqlInitialize path]" + path);
         Resource[] resources = SpringContext.getResources(path);
 //        log.info("[k-pine:SysSqlInitialize resources]" + resources);

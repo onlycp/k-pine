@@ -25,6 +25,7 @@ public class OperateLogConsumer implements KmqConsumer {
         for (String payload: payloads) {
             SysOperateLog sysOperateLog = JsonUtil.toBean(payload, SysOperateLog.class);
             if (StringUtils.isNotEmpty(sysOperateLog.getResponseBody()) && sysOperateLog.getResponseBody().length() > 1000) {
+
                 sysOperateLog.setResponseBody(sysOperateLog.getResponseBody().substring(0,1000));
             }
             sysOperateLogs.add(sysOperateLog);
