@@ -94,7 +94,8 @@ public class KAuthFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         // 获取请求路径
         String url = request.getRequestURI();
-        if (url.contains("websocket")) {
+        if (url.contains("websocket") || url.contains("eiac")) {
+            initContext(request, response);
             filterChain.doFilter(request, response);
             return;
         }
