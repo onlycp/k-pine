@@ -11,6 +11,7 @@ import com.kingsware.kdev.core.cache.open.OpenApiManager;
 import com.kingsware.kdev.core.cache.permssion.PermissionManager;
 import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.config.MyHttpServletRequestWrapper;
+import com.kingsware.kdev.core.config.UiConfig;
 import com.kingsware.kdev.core.context.ClientInfo;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
@@ -65,6 +66,8 @@ public class KAuthFilter implements Filter {
     private AppAuthProperties appAuthProperties;
     @Autowired
     private ControllerManager controllerManager;
+    @Autowired
+    private UiConfig uiConfig;
     /** 忽略的接口 **/
     private static final String ignoreApi = ":open";
     /** 开放接口 **/
@@ -94,6 +97,12 @@ public class KAuthFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         // 获取请求路径
         String url = request.getRequestURI();
+        // 判断是否静态文件
+        if (uiConfig.isStaticsResource(url)) {
+            log.info("静态资源:" + url);
+            filterChain.doFilter(request, response);
+            return;
+        }
         if (url.contains("websocket") || url.contains("eiac")) {
             initContext(request, response);
             filterChain.doFilter(request, response);
@@ -201,6 +210,7 @@ public class KAuthFilter implements Filter {
                     callByFlow(request, response, api, path, argvMap);
                 }
             } else {
+                log.info("url:{}", url );
                 filterChain.doFilter(request, response);
             }
         }
