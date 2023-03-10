@@ -393,7 +393,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         }
 
         String openValidationCode = SpringContext.getProperties("application.openValidateCode", PropertiesConstant.FALSE);
-        if (KClientContext.getContext().isValidateCodeFlag() && PropertiesConstant.TRUE.equals(openValidationCode)) {
+        if (KClientContext.getContext() != null &&KClientContext.getContext().isValidateCodeFlag() && PropertiesConstant.TRUE.equals(openValidationCode)) {
             String encryptCode = (String) argv.get("encryptCode");
             String verifyUuid = (String) argv.get("verifyUuid");
             String code = (String) argv.get("code");
