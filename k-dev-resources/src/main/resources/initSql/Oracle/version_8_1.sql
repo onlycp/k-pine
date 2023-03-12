@@ -1,1 +1,1 @@
-alter table sys_dict_item modify column value varchar2(255) ;
+alter table sys_dict_item modify  value varchar2(255) ;
