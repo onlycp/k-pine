@@ -311,7 +311,7 @@ public class KAuthFilter implements Filter {
                         operateLog.setMethod(callType == CallType.CONTROLLER ? apiDefine.getCallMethod() + "()": api.getApiName());
                         operateLog.setRequestMethod(KClientContext.getContext().getRequest().getMethod());
                         if (wrapperResponse != null) {
-                            operateLog.setResponseBody(ServletUtil.getResponseBody(wrapperResponse));
+                            operateLog.setResponseBody(StringUtils.retrench(ServletUtil.getResponseBody(wrapperResponse),100));
                         }
                         operateLog.setRequestBody(StringUtils.retrench(requestBody, 1000));
 //                        log.info("操作日志保存:{}, url:{}" , operateLog.getAction(), request.getRequestURI());
@@ -436,9 +436,13 @@ public class KAuthFilter implements Filter {
             userInfo =  TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret(), appAuthProperties.getIss(),
                     KClientContext.getContext().getIp(), appAuthProperties.getTokenExpireMinutes(), appAuthProperties.getMockSessionExpireMinutes());
             // 校验接口编码
-            if(!PermissionManager.getInstance().hasPermission(userInfo.getRoleIds(),apiCode)) {
-                throw new ForbiddenException(I18n.t("permission.api-forbidden", "接口无权限"));
+            String devMode = SpringContext.getProperties("app.mode.dev", "true");
+            if (!"true".equalsIgnoreCase(devMode)) {
+                if(!PermissionManager.getInstance().hasPermission(userInfo.getRoleIds(),apiCode)) {
+                    throw new ForbiddenException(I18n.t("permission.api-forbidden", "接口无权限"));
+                }
             }
+
 
         }
         else {

@@ -461,9 +461,9 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         long t0 = System.currentTimeMillis();
         List<Object> params = new ArrayList<>();
         // 根据条件查询appId、tags和apiUrl数据
-        String sql = "select distinct t0.name,t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name, sa.api_url, sa.api_method, t0.when_created " +
+        String sql = "select t0.name,t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name, sa.api_url, sa.api_method, t0.when_created " +
                 " from sys_logic_flow t0 " +
-                " left join sys_api sa on sa.api_flow_id = t0.flow_id " +
+                " inner join sys_api sa on sa.api_flow_id = t0.flow_id " +
                 " left join dev_application t1 on t1.id=t0.application_id " +
                 " where 1=1";
         if (StringUtils.isNotEmpty(argv.getApplicationId())) {
@@ -489,9 +489,11 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         List<SysKdbFlowRet> logicFlows = null;
         // 分页
         if (argv.isPageQuery()) {
+
             PagedList<SysKdbFlowRet> pagedList = DB.findPagedList(SysKdbFlowRet.class, argv.getPage(), argv.getPageSize(), sql, params.toArray(new Object[0]));
             total = pagedList.getTotalCount();
             logicFlows = pagedList.getList();
+            log.info("分页查询: {}, 参数:{}, 总数:{}， 当前页：{}", sql, JsonUtil.toJson(params), total, pagedList.getList().size());
         }
         else {
             logicFlows = DB.findList(SysKdbFlowRet.class, sql,  params.toArray(new Object[0]));
@@ -499,6 +501,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         }
         // 根据flowId批量查询
         List<String> flowIds = new ArrayList<>();
+        flowIds.add("-1");
         logicFlows.forEach(logicFlow -> flowIds.add(logicFlow.getId()));
 
         KdbFlowQueryArgv info = new KdbFlowQueryArgv();
@@ -506,6 +509,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         long t1 = System.currentTimeMillis();
         // 查询faas流程数据
         KdbApi api = (KdbApi) (DB.getDefault());
+
         if (!flowIds.isEmpty()) {
             info.setFlowIds(flowIds);
         }

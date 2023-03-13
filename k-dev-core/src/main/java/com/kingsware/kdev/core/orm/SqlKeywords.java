@@ -26,6 +26,11 @@ public class SqlKeywords {
         Set<String> gbaseServerKeywords = new HashSet<>();
         gbaseServerKeywords.add("distributed");
         keywords.put("GBase", gbaseServerKeywords);
+        /** dm **/
+        Set<String> dmKeywords = new HashSet<>();
+        dmKeywords.add("distributed");
+        dmKeywords.add("online");
+        keywords.put("DM", dmKeywords);
 
     }
 
@@ -65,6 +70,9 @@ public class SqlKeywords {
         }
         else if (dataBaseTypeEnum.equalsIgnoreCase("GBase")) {
             return "`"+ columnName + "`";
+        }
+        else if (dataBaseTypeEnum.equalsIgnoreCase("DM")) {
+            return "\""+ columnName.toUpperCase() + "\"";
         }
         return columnName;
     }
