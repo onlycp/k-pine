@@ -1,0 +1,1 @@
+ALTER TABLE sys_unit ADD required_unit int DEFAULT 0 NULL COMMENT '是否必选部门';
