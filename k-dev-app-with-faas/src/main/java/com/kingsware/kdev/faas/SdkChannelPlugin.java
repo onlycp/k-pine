@@ -53,7 +53,7 @@ public class SdkChannelPlugin implements FaasChannelPlugin {
          */
         Map<String, Object> callParams = new HashMap<>();
         callParams.put("method", "POST");
-        callParams.put("url", apiUrl.replaceAll(SpringContext.getProperties("database.sources.db.server", ""), ""));
+        callParams.put("url", "");
         callParams.put("postInfo", JsonUtil.toMap(body));
         // 调用sdk返回数据
         try {

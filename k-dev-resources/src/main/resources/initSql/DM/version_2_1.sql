@@ -133,16 +133,16 @@ create table DEV_PAGE
     DEV_STATUS     NUMBER(3),
     PAGE_JSON      CLOB
 );
-
-create table DEV_PAGE_HISTORY
+create table dev_page_history
 (
-    ID           VARCHAR2(36 char) not null
-        constraint DEV_PAGE_HISTORY_PK_DEV_PAGE
+    id               varchar(36) not null
         primary key,
-    PAGE_ID      VARCHAR2(36 char),
-    PAGE_JSON    CLOB,
-    WHEN_CREATED VARCHAR2(20 char),
-    WHO_CREATED  VARCHAR2(36 char)
+    page_id          varchar(36) ,
+    page_json        clob   ,
+    when_created     timestamp   ,
+    who_created      varchar(36) ,
+    version_tag      varchar(50) ,
+    version_tag_time varchar(30)
 );
 
 create table DEV_POWER_LINK
@@ -593,17 +593,17 @@ create table SYS_LOGIC_FLOW
     DEFAULT_SOURCE_NAME VARCHAR2(100 char)
 );
 
-create table SYS_LOGIC_HISTORY
+create table sys_logic_history
 (
-    ID           VARCHAR2(36 char) not null
-        constraint IND_11837FCF33865305
+    id               varchar(36) not null
         primary key,
-    FLOW_ID      VARCHAR2(36 char),
-    FLOW_JSON    CLOB,
-    WHEN_CREATED VARCHAR2(20 char),
-    WHO_CREATED  VARCHAR2(36 char)
+    flow_id          varchar(36) null ,
+    flow_json        clob    null ,
+    when_created     timestamp   null ,
+    who_created      varchar(36) null ,
+    version_tag      varchar(50) null ,
+    version_tag_time varchar(30) null
 );
-
 create table SYS_LOGIC_TEMPLATE
 (
     ID            VARCHAR2(36 char) not null
