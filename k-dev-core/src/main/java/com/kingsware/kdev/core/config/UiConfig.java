@@ -63,6 +63,18 @@ public class UiConfig extends WebMvcConfigurationSupport {
     }
 
     /**
+     * 是否静态资源
+     * @param url
+     * @return
+     */
+    public boolean isStaticsResource(String url) {
+        String path = ui + url;
+        path = path.replace("//", "/");
+        return Files.exists(Paths.get(path));
+
+    }
+
+    /**
      * 解压ui
      */
     private void unzipUi() {

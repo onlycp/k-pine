@@ -6,6 +6,7 @@ import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.DataSourceInfo;
 import com.kingsware.kdev.core.util.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.text.MessageFormat;
 import java.util.*;
@@ -17,6 +18,7 @@ import java.util.*;
  * @version 1.0.0
  * @date 2022/1/11 5:51 下午
  */
+@Slf4j
 public class DataAccessUtil {
 
     public static final String IN_OR_EXISTS =  "IN";
@@ -89,9 +91,27 @@ public class DataAccessUtil {
             return MessageFormat.format("{0}.{1} in (select ar.data_id from sys_data_access_resource ar where (ar.table_name=''{2}'' and  ar.access_id in ({3})) {4})", alias, queryColumn, table, StringUtils.joinToString(inSet, ","), extraSql);
         }
         else if (sqlLink == SqlLink.DATA_IN) {
+            // 判断有无[]，如果有，那就是涉及到跨库查询，当前
+            if (StringUtils.isNotEmpty(extraSql) && extraSql.contains("[") && extraSql.contains("]")) {
+                int startIndex = extraSql.indexOf("[");
+                int endIndex = extraSql.indexOf("]");
+                while (startIndex >=0 && endIndex >=0) {
+                    String dbSql = extraSql.substring(startIndex+1, endIndex);
+                    // 查找数据
+                    List<String> ids = DB.findSingleAttributeList(String.class, dbSql );
+                    if (ids.isEmpty()) {
+                        ids.add("-1");
+                    }
+                    String afterString = StringUtils.joinToString(ids, ",", "'", "'");
+                    extraSql = extraSql.substring(0, startIndex) + afterString + extraSql.substring(endIndex+1);
+                    // 重新生成附加sql
+                    startIndex = extraSql.indexOf("[");
+                    endIndex = extraSql.indexOf("]");
+                }
+
+            }
             // 拼接权限sql(由于id是uuid，这里忽略table_name)
-            String sql = MessageFormat.format("select ar.data_id from sys_data_access_resource ar where (ar.table_name=''{0}'' and  ar.access_id in ({1}))", table, StringUtils.joinToString(inSet, ","));
-            List<String> accessIds = DB.findSingleAttributeList(String.class, sql);
+            String sql = MessageFormat.format("select ar.data_id from sys_data_access_resource ar where (ar.table_name=''{0}'' and  ar.access_id in ({1}))", table, StringUtils.joinToString(inSet, ","));            List<String> accessIds = DB.findSingleAttributeList(String.class, sql);
             List<String> accessSet = new ArrayList<>();
             if (accessIds.isEmpty()) {
                 accessSet.add("'-1'");
@@ -104,10 +124,18 @@ public class DataAccessUtil {
             if (StringUtils.isEmpty(extraSql)) {
                 extraSql = "";
             }
+            else {
+                log.info("扩展Sql:{}", extraSql);
+            }
+
             return MessageFormat.format("({0}.{1} in ({2}) {3})", alias, queryColumn, StringUtils.joinToString(accessSet, ","), extraSql);
         }
         return null;
     }
+
+
+
+
 
 
 }

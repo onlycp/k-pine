@@ -21,5 +21,98 @@
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
+<!--    <build>-->
+<!--        <plugins>-->
+<!--            &lt;!&ndash; proguard混淆插件&ndash;&gt;-->
+<!--            <plugin>-->
+<!--                <groupId>com.github.wvengen</groupId>-->
+<!--                <artifactId>proguard-maven-plugin</artifactId>-->
+<!--                <version>2.2.0</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        &lt;!&ndash; 打包的时候开始混淆&ndash;&gt;-->
+<!--                        <phase>package</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>proguard</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--                <configuration>-->
+<!--                    <injar>${project.build.finalName}.jar</injar>-->
+<!--                    &lt;!&ndash;输出的jar&ndash;&gt;-->
+<!--                    <outjar>${project.build.finalName}.jar</outjar>-->
+<!--                    &lt;!&ndash; 是否混淆&ndash;&gt;-->
+<!--                    <obfuscate>true</obfuscate>-->
+<!--                    <options>-->
+<!--                        &lt;!&ndash;指定java版本号&ndash;&gt;-->
+<!--                        <option>-target 1.8</option>-->
+<!--                        &lt;!&ndash;默认开启，不做收缩（删除注释、未被引用代码）&ndash;&gt;-->
+<!--                        <option>-dontshrink</option>-->
+<!--                        &lt;!&ndash;默认是开启的，这里关闭字节码级别的优化&ndash;&gt;-->
+<!--                        <option>-dontoptimize</option>-->
+<!--                        &lt;!&ndash;混淆类名之后，对使用Class.forName('className')之类的地方进行相应替代&ndash;&gt;-->
+<!--                        <option>-adaptclassstrings</option>-->
+<!--                        &lt;!&ndash; 忽略warn消息,如果提示org.apache.http.* 这个包里的类有问题，那么就加入下述代码：-keep class org.apache.http.** { *; }    -dontwarn org.apache.http.**&ndash;&gt;-->
+<!--                        <option>-ignorewarnings</option>-->
+<!--                        <option>-keep class org.apache.logging.log4j.util.* { *; }</option>-->
+<!--                        <option>-dontwarn org.apache.logging.log4j.util.**</option>-->
+<!--                        &lt;!&ndash;对异常、注解信息在runtime予以保留，不然影响springboot启动&ndash;&gt;-->
+<!--                        <option>-keepattributes-->
+<!--                            Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,*Annotation*,EnclosingMethod-->
+<!--                        </option>-->
+<!--                        &lt;!&ndash;不混淆所有interface接口&ndash;&gt;-->
+<!--                        <option>-keepnames interface **</option>-->
+<!--                        &lt;!&ndash;不混淆所有包名，Spring配置中有大量固定写法的包名&ndash;&gt;-->
+<!--                        <option>-keeppackagenames</option>-->
+<!--                        <option>-keepnames class **</option>-->
+<!--                        <option>-renamesourcefileattribute</option>-->
+<!--                        &lt;!&ndash;保留枚举成员及方法&ndash;&gt;-->
+<!--                        <option>-keepclassmembers enum * { *; }</option>-->
+<!--                        <option>-keepparameternames</option>-->
+<!--                        &lt;!&ndash;保留main方法的类及其方法名&ndash;&gt;-->
+<!--                        <option>-keepclasseswithmembers public class * {-->
+<!--                            public static void main(java.lang.String[]);}-->
+<!--                        </option>-->
+
+<!--                        &lt;!&ndash;忽略note消息，如果提示javax.annotation有问题，那麽就加入以下代码&ndash;&gt;-->
+<!--                        <option>-dontnote javax.annotation.**</option>-->
+<!--                        <option>-dontnote sun.applet.**</option>-->
+<!--                        <option>-dontnote sun.tools.jar.**</option>-->
+<!--                        <option>-dontnote org.apache.commons.logging.**</option>-->
+<!--                        <option>-dontnote javax.inject.**</option>-->
+<!--                        <option>-dontnote org.aopalliance.intercept.**</option>-->
+<!--                        <option>-dontnote org.aopalliance.aop.**</option>-->
+<!--                        <option>-dontnote org.apache.logging.log4j.**</option>-->
+
+<!--                        &lt;!&ndash;  ##### 以下为需要根据项目情况修改 &ndash;&gt;-->
+<!--                        &lt;!&ndash;入口程序类不能混淆，混淆会导致springboot启动不了&ndash;&gt;-->
+<!--                        <option>-keep class com.kingsware.kdev.core.kflow.* {*;}</option>-->
+<!--                        &lt;!&ndash;  ##### 以上为需要根据项目情况修改  comment by 郭秀志 20200719 ##### &ndash;&gt;-->
+
+<!--                        <option>-keep interface * extends * { *; }</option>-->
+<!--                        &lt;!&ndash;不混淆所有类,保存原始定义的注释&ndash;&gt;-->
+<!--                        <option>-keepclassmembers class * {-->
+<!--                            @org.springframework.beans.factory.annotation.Autowired *;-->
+<!--                            @org.springframework.beans.factory.annotation.Value *;-->
+<!--                            }-->
+<!--                        </option>-->
+<!--                    </options>-->
+<!--                    <libs>-->
+<!--                        &lt;!&ndash; 添加依赖 java8&ndash;&gt;-->
+<!--                        <lib>${java.home}/lib/rt.jar</lib>-->
+<!--                        <lib>${java.home}/lib/jce.jar</lib>-->
+<!--                    </libs>-->
+<!--                </configuration>-->
+<!--                <dependencies>-->
+<!--                    &lt;!&ndash; https://mvnrepository.com/artifact/net.sf.proguard/proguard-base &ndash;&gt;-->
+<!--                    <dependency>-->
+<!--                        <groupId>net.sf.proguard</groupId>-->
+<!--                        <artifactId>proguard-base</artifactId>-->
+<!--                        <version>6.1.1</version>-->
+<!--                    </dependency>-->
+<!--                </dependencies>-->
+<!--            </plugin>-->
+<!--        </plugins>-->
+<!--    </build>-->
 
 </project>

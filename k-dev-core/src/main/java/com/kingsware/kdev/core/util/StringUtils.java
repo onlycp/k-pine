@@ -126,6 +126,15 @@ public class StringUtils {
      * @return  拼接后的字符串
      */
     public static String joinToString(List<?> list, String separator) {
+        return joinToString(list, separator, "", "");
+    }
+    /**
+     *  将列表转为字符串
+     * @param list          列表
+     * @param separator     分隔符
+     * @return  拼接后的字符串
+     */
+    public static String joinToString(List<?> list, String separator, String prefix, String suffix) {
         // 如果为空，返回null
         if (list == null) {
             return null;
@@ -136,7 +145,9 @@ public class StringUtils {
         // 遍历拼接字符串
         StringBuilder stringBuffer = new StringBuilder();
         for (int i = 0; i < list.size(); i++) {
+            stringBuffer.append(prefix);
             stringBuffer.append(list.get(i));
+            stringBuffer.append(suffix);
             // 如果不是最后一个元素，那么就加上分隔符
             if (i != (list.size() -1)) {
                 stringBuffer.append(separator);

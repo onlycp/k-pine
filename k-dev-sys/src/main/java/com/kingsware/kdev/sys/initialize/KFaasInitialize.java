@@ -2,6 +2,7 @@ package com.kingsware.kdev.sys.initialize;
 
 import com.kingsware.kdev.core.base.SystemInitialize;
 import com.kingsware.kdev.core.bean.JdbcUrl;
+import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.kflow.define.FlowDefinition;
 import com.kingsware.kdev.core.orm.DB;
@@ -58,7 +59,7 @@ public class KFaasInitialize implements SystemInitialize {
         startFaas();
         // 1. 初始化数据源
         // 读取文件
-        // 在windows环境中，代码版运行./xx会找不到文件，需要改成.\xx，所以
+        // 在windows环境中，代码版运行./xx会找不到文件，需要改成.\xx
         String dbConfigFilePath = initDatasourcePath + File.separator + "db.json";
         File dbConfigFile = new File(dbConfigFilePath);
         if (dbConfigFile.exists()) {

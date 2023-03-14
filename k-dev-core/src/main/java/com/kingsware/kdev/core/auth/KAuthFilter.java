@@ -11,6 +11,7 @@ import com.kingsware.kdev.core.cache.open.OpenApiManager;
 import com.kingsware.kdev.core.cache.permssion.PermissionManager;
 import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.config.MyHttpServletRequestWrapper;
+import com.kingsware.kdev.core.config.UiConfig;
 import com.kingsware.kdev.core.context.ClientInfo;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
@@ -65,6 +66,8 @@ public class KAuthFilter implements Filter {
     private AppAuthProperties appAuthProperties;
     @Autowired
     private ControllerManager controllerManager;
+    @Autowired
+    private UiConfig uiConfig;
     /** 忽略的接口 **/
     private static final String ignoreApi = ":open";
     /** 开放接口 **/
@@ -94,7 +97,14 @@ public class KAuthFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         // 获取请求路径
         String url = request.getRequestURI();
-        if (url.contains("websocket")) {
+        // 判断是否静态文件
+        if (uiConfig.isStaticsResource(url)) {
+            log.info("静态资源:" + url);
+            filterChain.doFilter(request, response);
+            return;
+        }
+        if (url.contains("websocket") || url.contains("eiac")) {
+            initContext(request, response);
             filterChain.doFilter(request, response);
             return;
         }
@@ -200,6 +210,7 @@ public class KAuthFilter implements Filter {
                     callByFlow(request, response, api, path, argvMap);
                 }
             } else {
+                log.info("url:{}", url );
                 filterChain.doFilter(request, response);
             }
         }
@@ -300,7 +311,7 @@ public class KAuthFilter implements Filter {
                         operateLog.setMethod(callType == CallType.CONTROLLER ? apiDefine.getCallMethod() + "()": api.getApiName());
                         operateLog.setRequestMethod(KClientContext.getContext().getRequest().getMethod());
                         if (wrapperResponse != null) {
-                            operateLog.setResponseBody(ServletUtil.getResponseBody(wrapperResponse));
+                            operateLog.setResponseBody(StringUtils.retrench(ServletUtil.getResponseBody(wrapperResponse),100));
                         }
                         operateLog.setRequestBody(StringUtils.retrench(requestBody, 1000));
 //                        log.info("操作日志保存:{}, url:{}" , operateLog.getAction(), request.getRequestURI());
@@ -425,9 +436,13 @@ public class KAuthFilter implements Filter {
             userInfo =  TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret(), appAuthProperties.getIss(),
                     KClientContext.getContext().getIp(), appAuthProperties.getTokenExpireMinutes(), appAuthProperties.getMockSessionExpireMinutes());
             // 校验接口编码
-            if(!PermissionManager.getInstance().hasPermission(userInfo.getRoleIds(),apiCode)) {
-                throw new ForbiddenException(I18n.t("permission.api-forbidden", "接口无权限"));
+            String devMode = SpringContext.getProperties("app.mode.dev", "true");
+            if (!"true".equalsIgnoreCase(devMode)) {
+                if(!PermissionManager.getInstance().hasPermission(userInfo.getRoleIds(),apiCode)) {
+                    throw new ForbiddenException(I18n.t("permission.api-forbidden", "接口无权限"));
+                }
             }
+
 
         }
         else {

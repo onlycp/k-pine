@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>k-dev-parent</artifactId>
+        <groupId>com.kingsware.dev</groupId>
+        <version>${kdev.version}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>k-dev-app-with-ops</artifactId>
+    <packaging>war</packaging>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <artifactId>k-dev-core</artifactId>
+            <groupId>com.kingsware.dev</groupId>
+        </dependency>
+        <dependency>
+            <artifactId>k-dev-sys</artifactId>
+            <groupId>com.kingsware.dev</groupId>
+        </dependency>
+        <dependency>
+            <groupId>com.kingsware.dev</groupId>
+            <artifactId>k-dev-resources</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.kingsware.dev</groupId>
+            <artifactId>k-dev-faas</artifactId>
+            <version>${kdev.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-websocket</artifactId>
+        </dependency>
+    </dependencies>
+    <build>
+        <finalName>pine</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>
+                        com.kingsware.com.kingsware.kdev.App
+                    </mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
