@@ -25,6 +25,9 @@
     <module>k-dev-sys</module>
     <module>k-dev-app</module>
     <module>k-dev-resources</module>
+    <module>k-dev-app-with-faas</module>
+    <module>k-dev-faas</module>
+    <module>k-dev-app-with-ops</module>
   </modules>
   <distributionManagement>
     <repository>

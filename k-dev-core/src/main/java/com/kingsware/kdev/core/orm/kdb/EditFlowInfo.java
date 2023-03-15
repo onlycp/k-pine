@@ -20,4 +20,14 @@ public class EditFlowInfo {
     private String name;
     /** 描述 **/
     private String description = "";
+
+    @Override
+    public String toString() {
+        return "EditFlowInfo{" +
+                "flowId='" + flowId + '\'' +
+//                ", content='" + content + '\'' +
+                ", name='" + name + '\'' +
+//                ", description='" + description + '\'' +
+                '}';
+    }
 }
