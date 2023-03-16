@@ -6,6 +6,7 @@ import com.kingsware.kdev.core.enums.RetEnum;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.orm.exception.TransactionException;
 import com.kingsware.kdev.core.util.ExceptionUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -15,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     /**

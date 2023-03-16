@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="cn">
+<head>
+    <title>自动登录</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <script>
+        /**
+         * 处理登录
+         */
+        function doLogin() {
+            const argv = JSON.parse(${context.get('argv')});
+            const token = argv.token;
+            if (token !== "") {
+                localStorage.setItem('vue_admin_template_token', token);
+                const successMsg = argv.successMsg;
+                const successUrl = argv.successUrl;
+                if (successMsg !== "") {
+                    alert(successMsg);
+                }
+                location.href = successUrl;
+            }
+            else {
+                const failMessage = argv.failMessage;
+                const failUrl =  argv.failUrl;
+                if(failMessage !== ""  && failMessage !== null && failMessage !== undefined) {
+                    alert(urlDecode(failMessage));
+                }
+                if (failUrl !== ""  && failUrl !== null && failUrl !== undefined) {
+                    location.href = failUrl;
+                }
+            }
+        }
+    </script>
+
+</head>
+<body onload="doLogin()">
+</body>
+</html>

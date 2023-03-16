@@ -72,6 +72,8 @@ public class KAuthFilter implements Filter {
     private static final String ignoreApi = ":open";
     /** 开放接口 **/
     private static final String openApiFlag = ":open:";
+    /** 页面 **/
+    private static final String kPageFlag = "/k-pages/";
     /** 签名噪音 **/
     private final Set<String> signNonces = new TreeSet<String>();
 
@@ -98,7 +100,7 @@ public class KAuthFilter implements Filter {
         // 获取请求路径
         String url = request.getRequestURI();
         // 判断是否静态文件
-        if (uiConfig.isStaticsResource(url) || url.contains("/open")) {
+        if (uiConfig.isStaticsResource(url)) {
             log.info("静态资源:" + url);
             filterChain.doFilter(request, response);
             return;
@@ -139,8 +141,8 @@ public class KAuthFilter implements Filter {
                 url = url.replaceAll("//", "/");
             }
             String apiUrlPrefix = request.getContextPath() + "/api";
-            // 如果是静态文件
-            if (url.startsWith(apiUrlPrefix)) {
+            // 如果是接口或者url文件
+            if (url.startsWith(apiUrlPrefix) || url.startsWith(kPageFlag)) {
 
                 wrapperRequest = new MyHttpServletRequestWrapper(request);
                 String contentType = request.getContentType();
@@ -382,7 +384,6 @@ public class KAuthFilter implements Filter {
         KFlowContext context = KFlowContext.createBaseContext(StringUtils.isNotEmpty(api.getInArgv()) ? api.getInArgv() : "{}", StringUtils.isNotEmpty(api.getOutArgv()) ? api.getOutArgv() : "{}");
         // 调用流程
         KdbFlowResult result = KdbFlowExecutor.getInstance().execute(api.getApiFlowId(), api.getSubFlowIds(), argvMap, context, false, false);
-        KdbRetFile kdbRetFile = null;
                 // 转为api格式
         switch (result.getType()) {
             case KFlowConstant.RESULT_JSON:
@@ -392,9 +393,13 @@ public class KAuthFilter implements Filter {
                 ExcelWorker.getInstance().writeToWeb(response, (KExcel) result.getData());
                 break;
             case KFlowConstant.RESULT_FILE:
-                kdbRetFile = (KdbRetFile) result.getData();
+                KdbRetFile kdbRetFile = (KdbRetFile) result.getData();
                 ServletUtil.responseFile(response, kdbRetFile.getFileName(), kdbRetFile.getData());
                 break;
+            case KFlowConstant.RESULT_HTML:
+                ServletUtil.responseHtml(response, result.getData().toString());
+                break;
+
             case KFlowConstant.RESULT_BASE64_TO_FILE:
                 kdbRetFile = (KdbRetFile) result.getData();
                 ServletUtil.responseFile(response, kdbRetFile.getFileName(), Base64.getDecoder().decode(kdbRetFile.getData()));

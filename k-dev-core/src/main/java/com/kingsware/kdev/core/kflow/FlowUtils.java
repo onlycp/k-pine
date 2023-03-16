@@ -402,6 +402,11 @@ public class FlowUtils {
             message.setHandlerName("message");
             message.setData(text);
         }
+        else if (responseBody.startsWith(KFlowConstant.HTML_FLAG)) {
+            String text = responseBody.replace(KFlowConstant.HTML_FLAG, "");
+            message.setHandlerName("html");
+            message.setData(text);
+        }
         else {
             message.setHandlerName("simple");
             message.setData(responseBody);

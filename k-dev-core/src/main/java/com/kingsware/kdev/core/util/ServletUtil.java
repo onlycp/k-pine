@@ -135,6 +135,23 @@ public class ServletUtil {
 
 
     /**
+     * 响应文件
+     * @param response 响应
+     * @param html html内容
+     */
+    public static void responseHtml(HttpServletResponse response, String html) {
+        response.setContentType("text/html;charset=UTF-8");
+        response.setCharacterEncoding("utf-8");
+        try (PrintWriter writer = response.getWriter()) {
+            writer.write(html);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+
+    /**
      * 获取cookie值
      * @param name              名称
      * @param defaultValue      默认值

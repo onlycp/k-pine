@@ -23,7 +23,6 @@ public class PermissionManager {
     private static PermissionManager instance;
     /** 权限map **/
     private final Map<String, Set<String>> permissionMap = new HashMap<>();
-
     public static PermissionManager getInstance() {
         if (instance == null) {
             instance = new PermissionManager();

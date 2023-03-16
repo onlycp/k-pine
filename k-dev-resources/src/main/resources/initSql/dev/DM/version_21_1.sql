@@ -77,6 +77,7 @@ INSERT INTO sys_role_menu (id, app_id, when_created, who_created, sys_menu_id, s
 INSERT INTO sys_role_menu (id, app_id, when_created, who_created, sys_menu_id, sys_role_id) VALUES('e6aba4bae0d7412aa54b5074440b7923', NULL, '2022-09-28 15:08:24', '056fb0eeb9a44cb0953534b4c0ca01fa', 'f8bb5559a95d4b4e81b4aa7901fc4914', '4a30f4d346074b4ba8363944f004c1d9');
 INSERT INTO sys_role_menu (id, app_id, when_created, who_created, sys_menu_id, sys_role_id) VALUES('f57ed28579ef404ab657f9c6ac04dc28', NULL, '2022-09-28 15:08:24', '056fb0eeb9a44cb0953534b4c0ca01fa', 'd0c39e53a5b34747abd4c40922dfc929', '4a30f4d346074b4ba8363944f004c1d9');
 INSERT INTO sys_role_menu (id, app_id, when_created, who_created, sys_menu_id, sys_role_id) VALUES('f601cb53844340c9881ff2b96578bb7c', NULL, '2022-09-28 15:08:32', '056fb0eeb9a44cb0953534b4c0ca01fa', '9bb44b43cf184446b04f6992403023f5', '3fc43c9c69f44144bd032d9451ba328b');
+INSERT INTO sys_role_menu (id, sys_menu_id, sys_role_id, who_created, when_created, app_id) VALUES('6e87f5009f3443b28bf1eb1a103c16b7', '6b76a5249255430a9101b2892fa0edbe', '4a30f4d346074b4ba8363944f004c1d9', '056fb0eeb9a44cb0953534b4c0ca01fa', '2022-06-08 16:21:49', NULL);
 
 
 INSERT INTO sys_dict (id, name, code, note, who_created, when_created, who_modified, when_modified, app_id) VALUES('27906b13c5c0484396e284a4368b24b3', '参数类型', 'sys_config_value_type', NULL, '', '2022-01-17 17:36:40', '', '2022-01-17 17:36:40', NULL);

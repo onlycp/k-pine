@@ -463,7 +463,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         // 根据条件查询appId、tags和apiUrl数据
         String sql = "select t0.name,t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name, sa.api_url, sa.api_method, t0.when_created " +
                 " from sys_logic_flow t0 " +
-                " inner join sys_api sa on sa.api_flow_id = t0.flow_id " +
+                " left join sys_api sa on sa.api_flow_id = t0.flow_id " +
                 " left join dev_application t1 on t1.id=t0.application_id " +
                 " where 1=1";
         if (StringUtils.isNotEmpty(argv.getApplicationId())) {
