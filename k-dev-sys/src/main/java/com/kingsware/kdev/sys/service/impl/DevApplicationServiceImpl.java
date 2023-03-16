@@ -209,6 +209,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 editFlowInfo.setContent(flowInfo.getContent());
                 editFlowInfo.setName(flowInfo.getName());
                 editFlowInfo.setDescription(flowInfo.getDescription());
+                log.info("更新FAAS逻辑编排完整信息:{}", editFlowInfo.toString() );
                 DB.kdbApi().editFlow(editFlowInfo);
                 log.info("更新FAAS逻辑编排:{}", editFlowInfo.getName() );
             }
