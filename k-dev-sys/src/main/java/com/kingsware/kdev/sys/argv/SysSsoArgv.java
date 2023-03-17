@@ -12,4 +12,6 @@ public class SysSsoArgv {
     private Integer type;
     /** uid **/
     private String uid;
+    /** 安全key **/
+    private String secretKey;
 }
