@@ -2,6 +2,7 @@ package com.kingsware.kdev.core.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
+import com.kingsware.kdev.core.cache.instance.HostInfo;
 import com.kingsware.kdev.core.config.MyHttpServletRequestWrapper;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;

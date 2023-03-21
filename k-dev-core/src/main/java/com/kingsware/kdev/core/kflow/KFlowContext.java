@@ -2,11 +2,14 @@ package com.kingsware.kdev.core.kflow;
 
 import com.kingsware.kdev.core.auth.BaseUserInfo;
 import com.kingsware.kdev.core.cache.access.AccessManager;
+import com.kingsware.kdev.core.cache.instance.HostInfo;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.util.DateUtils;
+import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.core.util.SystemUtil;
 import lombok.Data;
 
 import java.util.HashMap;
@@ -50,6 +53,12 @@ public class KFlowContext {
         sysMap.put("sysUnitIds",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getSysUnitIds() : "");
         sysMap.put("sysUnitNames",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getSysUnitNames() : "");
         sysMap.put("isAdmin",  isAdmin());
+        HostInfo hostInfo = SystemUtil.getHost();
+        String baseUrl = "http://" + hostInfo.getHostName() + ":" + hostInfo.getPort() + ServletUtil.getContextPath();
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length()-1);
+        }
+        sysMap.put("baseUrl", baseUrl);
         context.getSystemContext().put("sys", sysMap);
         context.getSystemContext().put("devMode", isDevMode());
         // 设置输入参数

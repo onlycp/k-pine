@@ -2,6 +2,7 @@ package com.kingsware.kdev.sys.service.impl;
 
 
 import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.JsonUtil;
@@ -17,9 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import javax.crypto.SecretKey;
-import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
+
 
 @Slf4j
 @Service
@@ -38,6 +37,12 @@ public class SysSsoServiceImpl implements SysSsoService {
     @Override
     public SysUserLoginRet doLogin(SysSsoArgv ssoArgv) {
         try {
+            String str = "{\"errorUrl\": \"/\",\"successUrl\":\"/\",\"username\": \"chenp\"}";
+            // 查询安全令牌
+            String secretKey = SpringContext.getProperties("sso.key", "ZiKaPsJkw9AFjztH");
+            if (!secretKey.equals(ssoArgv.getSecretKey())) {
+                throw new BusinessException("认证不合法！");
+            }
             log.info("用户自动登录:{}", JsonUtil.toJson(ssoArgv));
             // 根据账号查询用户并进行登录
             SysUser user = null;
@@ -57,7 +62,11 @@ public class SysSsoServiceImpl implements SysSsoService {
             SysUserLoginRet ret = sysUserService.login(JsonUtil.beanToMap(loginArgv));
             log.info("自动登录结果:"  + JsonUtil.toJson(ret));
             return ret;
-        } catch (Exception e) {
+        }
+        catch (BusinessException businessException) {
+            throw businessException;
+        }
+        catch (Exception e) {
             log.error("error", e);
             throw BusinessException.serviceThrow("自动登录失败:" + e.getMessage());
         }
