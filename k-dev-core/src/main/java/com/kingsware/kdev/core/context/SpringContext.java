@@ -85,6 +85,31 @@ public class SpringContext implements ApplicationContextAware {
     /**
      * 获取配置项
      * @param key           key
+     * @param appId         应用id
+     * @param defaultValue  默认值
+     * @return              返回配置项，如果不存在，返回默认值
+     */
+    public static String getProperties(String key, String appId, String defaultValue) {
+        // 先读取应用专属的
+        String keyOfApp = appId + "." + key;
+        SysConfigInfo configInfo = ConfigManager.getInstance().getItem(keyOfApp);
+        if (configInfo != null) {
+            return configInfo.getValue();
+        }
+        // 如果系统配置里，优先读取系统配置的
+        configInfo = ConfigManager.getInstance().getItem(key);
+        if (configInfo != null ) {
+            return configInfo.getValue();
+        }
+        else {
+            return applicationContext.getEnvironment().getProperty(key, defaultValue);
+        }
+
+    }
+
+    /**
+     * 获取配置项
+     * @param key           key
      * @param defaultValue  默认值
      * @return              返回配置项，如果不存在，返回默认值
      */

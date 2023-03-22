@@ -1,11 +1,13 @@
 package com.kingsware.kdev.sys.web;
 
 import com.kingsware.kdev.core.auth.ApiIgnore;
+import com.kingsware.kdev.core.auth.Dev;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
+import com.kingsware.kdev.sys.argv.CopyContextArgv;
 import com.kingsware.kdev.sys.argv.DevPageArgv;
 import com.kingsware.kdev.sys.argv.DevPageQueryArgv;
 import com.kingsware.kdev.sys.ret.DevPageRet;
@@ -112,6 +114,19 @@ public class DevPageController extends BaseController {
     @PostMapping(value = "/delete")
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         devPageService.delete(argv);
+        return BaseRet.success();
+    }
+
+    /**
+     *  拷贝
+     * @return 提示
+     */
+    @Dev
+    @ApiOperation(value = "深度拷贝 " ,notes = "深度拷贝")
+    @PostMapping("/copyData")
+    @ResponseBody
+    public BaseRet<?> copyData(@RequestBody CopyContextArgv argv, String id) {
+        devPageService.copyData(id, argv);
         return BaseRet.success();
     }
 

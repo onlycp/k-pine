@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.base.BaseService;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.sys.argv.CopyContextArgv;
 import com.kingsware.kdev.sys.argv.SysApiArgv;
 import com.kingsware.kdev.sys.argv.SysApiQueryArgv;
 import com.kingsware.kdev.sys.ret.SysApiRet;
@@ -57,5 +58,13 @@ public interface SysApiService extends BaseService {
      * @return  调用数据
      */
     BaseRet<?> callUniops(Map<String, Object> params);
+
+
+    /**
+     * 拷贝
+     * @param id        id
+     * @param copyData  拷贝参数
+     */
+    void copyData(String id, CopyContextArgv copyData);
 
 }

@@ -27,6 +27,7 @@ public class BaseRet<T> implements Serializable {
     }
 
     public void setExceptionStack(String exceptionStack) {
+
         this.exceptionStack = exceptionStack;
     }
 

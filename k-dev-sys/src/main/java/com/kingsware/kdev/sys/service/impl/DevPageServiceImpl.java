@@ -11,8 +11,11 @@ import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.*;
+import com.kingsware.kdev.sys.argv.CopyContextArgv;
 import com.kingsware.kdev.sys.argv.DevPageArgv;
 import com.kingsware.kdev.sys.argv.DevPageQueryArgv;
+import com.kingsware.kdev.sys.bean.CopyProcessData;
+import com.kingsware.kdev.sys.manager.CopyAppManager;
 import com.kingsware.kdev.sys.model.DevApplication;
 import com.kingsware.kdev.sys.model.DevPage;
 import com.kingsware.kdev.sys.ret.DevPageRet;
@@ -134,5 +137,16 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
             throw BusinessException.serviceThrow("页面渲染失败");
         }
 
+    }
+
+
+    @Override
+    public void copyData(String id, CopyContextArgv context) {
+        // 拷贝
+        CopyProcessData copyProcessData = new CopyProcessData();
+        // 拷贝
+        CopyAppManager.getInstance().copyPageData(id, context, copyProcessData);
+        // 开始
+//        CopyAppManager.getInstance().action(copyProcessData, context);
     }
 }

@@ -16,12 +16,11 @@ import com.kingsware.kdev.core.orm.PagedList;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.orm.kdb.*;
-import com.kingsware.kdev.core.util.JsonUtil;
-import com.kingsware.kdev.core.util.MapUtil;
-import com.kingsware.kdev.core.util.PageUtil;
-import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.sys.argv.*;
 import com.kingsware.kdev.core.model.SysLogicFlow;
+import com.kingsware.kdev.sys.bean.CopyProcessData;
+import com.kingsware.kdev.sys.manager.CopyAppManager;
 import com.kingsware.kdev.sys.model.DevFaasNode;
 import com.kingsware.kdev.sys.model.SysLogicHistory;
 import com.kingsware.kdev.sys.ret.SysFlowDebugRet;
@@ -29,12 +28,10 @@ import com.kingsware.kdev.sys.ret.SysFlowDefineRet;
 import com.kingsware.kdev.sys.ret.SysKdbFlowRet;
 import com.kingsware.kdev.sys.service.SysApiService;
 import com.kingsware.kdev.sys.service.SysKdbFlowService;
-import com.kingsware.kdev.sys.service.SysLogicHistoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
-import java.sql.Array;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -308,6 +305,8 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         flowRet.setContent(info.getContent());
         flowRet.setName(info.getName());
         flowRet.setDescription(info.getDescription());
+        flowRet.setDbId(logicFlow.getDbId());
+
         if (info.getCreateTime() != null) {
             flowRet.setWhenCreated(new Timestamp(info.getCreateTime()));
         } else {
@@ -461,7 +460,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         long t0 = System.currentTimeMillis();
         List<Object> params = new ArrayList<>();
         // 根据条件查询appId、tags和apiUrl数据
-        String sql = "select t0.name,t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name, sa.api_url, sa.api_method, t0.when_created " +
+        String sql = "select t0.id as db_id, t0.name,t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name, sa.api_url, sa.api_method, t0.when_created " +
                 " from sys_logic_flow t0 " +
                 " left join sys_api sa on sa.api_flow_id = t0.flow_id " +
                 " left join dev_application t1 on t1.id=t0.application_id " +
@@ -618,5 +617,18 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         ret.setExceptionStack(result.getExceptionStack());
         return ret;
     }
+
+    @Override
+    public void copyData(String id, CopyContextArgv context) {
+        // 拷贝过程数据
+        CopyProcessData copyProcessData = new CopyProcessData();
+        // 拷贝逻辑编排数据
+        CopyAppManager.getInstance().copyFlowData(id, context, copyProcessData);
+        // 开始替换
+        CopyAppManager.getInstance().action(copyProcessData, context);
+    }
+
+
+
 
 }

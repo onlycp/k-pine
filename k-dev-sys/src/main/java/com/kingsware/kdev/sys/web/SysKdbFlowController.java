@@ -6,10 +6,7 @@ import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
-import com.kingsware.kdev.sys.argv.SysFlowDebugArgv;
-import com.kingsware.kdev.sys.argv.SysFlowDefineArgv;
-import com.kingsware.kdev.sys.argv.SysKdbFlowArgv;
-import com.kingsware.kdev.sys.argv.SysKdbFlowQueryArgv;
+import com.kingsware.kdev.sys.argv.*;
 import com.kingsware.kdev.sys.ret.SysFlowDebugRet;
 import com.kingsware.kdev.sys.ret.SysFlowDefineRet;
 import com.kingsware.kdev.sys.ret.SysKdbFlowRet;
@@ -139,6 +136,18 @@ public class SysKdbFlowController extends BaseController {
     @PostMapping("/debug")
     public BaseRet<SysFlowDebugRet> debug(@RequestBody SysFlowDebugArgv argv) {
         return BaseRet.success(sysKdbFlowService.debug(argv));
+    }
+
+    /**
+     *  流程调试
+     * @return 提示
+     */
+    @Dev
+    @ApiOperation(value = "深度拷贝 " ,notes = "深度拷贝")
+    @PostMapping("/copyData")
+    public BaseRet<?> copyData(@RequestBody CopyContextArgv argv, String id) {
+        sysKdbFlowService.copyData(id, argv);
+        return BaseRet.success();
     }
 
 }

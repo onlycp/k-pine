@@ -2,10 +2,8 @@ package com.kingsware.kdev.sys.service;
 
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
-import com.kingsware.kdev.sys.argv.SysFlowDebugArgv;
-import com.kingsware.kdev.sys.argv.SysFlowDefineArgv;
-import com.kingsware.kdev.sys.argv.SysKdbFlowArgv;
-import com.kingsware.kdev.sys.argv.SysKdbFlowQueryArgv;
+import com.kingsware.kdev.sys.argv.*;
+import com.kingsware.kdev.sys.bean.CopyProcessData;
 import com.kingsware.kdev.sys.ret.SysFlowDebugRet;
 import com.kingsware.kdev.sys.ret.SysFlowDefineRet;
 import com.kingsware.kdev.sys.ret.SysKdbFlowRet;
@@ -83,4 +81,12 @@ public interface SysKdbFlowService {
      * @return      返回调试结果
      */
     SysFlowDebugRet debug(SysFlowDebugArgv argv);
+
+
+    /**
+     * 拷贝逻辑编排
+     * @param id        逻辑编排id
+     * @param copyData  拷贝参数
+     */
+    void copyData(String id, CopyContextArgv copyData);
 }

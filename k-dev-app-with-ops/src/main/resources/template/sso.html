@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="cn">
+<head>
+    <meta charset="UTF-8">
+    <title>正在跳转</title>
+</head>
+<body onload="doLogin()">
+</body>
+<script>
+
+function doLogin() {
+    // const pineToken = localStorage.getItem('vue_admin_template_token');
+    // 如果青松没有登录，那么就先登录青松
+    const pineToken = "${pineToken}";
+    if (pineToken !== '') {
+        localStorage.setItem('vue_admin_template_token', pineToken);
+        location.href = '${to}';
+    }
+    else {
+        const opsToken = localStorage.getItem("ACCESS_TOKEN");
+        let href = location.href;
+        if (href.indexOf("?") > -1) {
+            href += ("&opsToken=" + opsToken);
+        }
+        else {
+            href += ("opsToken=" + opsToken);
+        }
+        location.href = href;
+
+    }
+}
+</script>
+</html>

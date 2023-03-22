@@ -33,4 +33,14 @@ public class BaseManageModel extends BaseModel {
     @Column(auto = AutoEnum.WHEN)
     private Timestamp whenModified;
 
+    /**
+     * 清空星星
+     */
+    public void cleanAuthor() {
+        this.whenCreated = null;
+        this.whenModified = null;
+        this.whoCreated = null;
+        this.whoModified = null;
+    }
+
 }

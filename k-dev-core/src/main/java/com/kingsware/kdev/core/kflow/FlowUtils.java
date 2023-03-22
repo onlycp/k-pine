@@ -256,7 +256,7 @@ public class FlowUtils {
                             else {
                                 retValue = itemValue;
                             }
-                            log.info("系统配置:{}, {}", key, retValue);
+//                            log.info("系统配置:{}, {}", key, retValue);
 
                         }
                         else {

@@ -15,8 +15,11 @@ import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.*;
+import com.kingsware.kdev.sys.argv.CopyContextArgv;
 import com.kingsware.kdev.sys.argv.SysApiArgv;
 import com.kingsware.kdev.sys.argv.SysApiQueryArgv;
+import com.kingsware.kdev.sys.bean.CopyProcessData;
+import com.kingsware.kdev.sys.manager.CopyAppManager;
 import com.kingsware.kdev.sys.manager.UniOpsTokenStore;
 import com.kingsware.kdev.sys.model.SysApi;
 import com.kingsware.kdev.sys.ret.SysApiRet;
@@ -131,7 +134,7 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
             wrapper.addCondition("call_type", Op.EQ, argv.getCallType());
         }
         wrapper.sortBy("when_created desc");
-        return (PageDataRet<SysApiRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysApi.class, SysApiRet.class);
+        return (PageDataRet<SysApiRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysApiRet.class);
     }
 
     @Override
@@ -211,5 +214,17 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
                 return BaseRet.successMessage(msg.toString());
             }
         }
+    }
+
+
+
+    @Override
+    public void copyData(String id, CopyContextArgv context) {
+        // 拷贝
+        CopyProcessData copyProcessData = new CopyProcessData();
+        // 拷贝
+        CopyAppManager.getInstance().copyApiData(id, context, copyProcessData);
+        // 开始
+        CopyAppManager.getInstance().action(copyProcessData, context);
     }
 }

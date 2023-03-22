@@ -17,6 +17,8 @@ import java.sql.Timestamp;
 public class SysKdbFlowRet extends BaseSimpleRet {
     /** 流程id **/
     private String id;
+    /** 数据库数据id **/
+    private String dbId;
     /** 流程内容 **/
     private String content;
     /** 名称 **/

@@ -22,4 +22,6 @@ public class SysConfigInfo {
     private Integer isSys;
     /** 备注 */
     private String note;
+    /**  应用id **/
+    private String appId;
 }

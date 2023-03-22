@@ -3,6 +3,7 @@ package com.kingsware.kdev.core.cache.config;
 import com.kingsware.kdev.core.cron.KRunner;
 import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.util.StringUtils;
 
 import java.util.List;
 
@@ -28,6 +29,9 @@ public class ConfigTask implements KTask, KRunner {
         List<SysConfigInfo> list = DB.findList(SysConfigInfo.class, "select * from sys_config");
         for (SysConfigInfo data: list) {
             ConfigManager.getInstance().addItem(data.getCode(), data);
+            if (StringUtils.isNotEmpty(data.getAppId())) {
+                ConfigManager.getInstance().addItem(data.getAppId() + "." + data.getCode(), data);
+            }
         }
     }
 

@@ -1,11 +1,13 @@
 package com.kingsware.kdev.sys.web;
 
 import com.kingsware.kdev.core.auth.ApiIgnore;
+import com.kingsware.kdev.core.auth.Dev;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
+import com.kingsware.kdev.sys.argv.CopyContextArgv;
 import com.kingsware.kdev.sys.argv.SysApiArgv;
 import com.kingsware.kdev.sys.argv.SysApiQueryArgv;
 import com.kingsware.kdev.sys.ret.SysApiRet;
@@ -91,6 +93,18 @@ public class SysApiController extends BaseController {
     @PostMapping(value = "/callUniOps")
     public BaseRet<?> callUniOps(@RequestBody Map<String, Object> params) {
         return sysApiService.callUniops(params);
+    }
+
+    /**
+     *  拷贝
+     * @return 提示
+     */
+    @Dev
+    @ApiOperation(value = "深度拷贝 " ,notes = "深度拷贝")
+    @PostMapping("/copyData")
+    public BaseRet<?> copyData(@RequestBody CopyContextArgv argv, String id) {
+        sysApiService.copyData(id, argv);
+        return BaseRet.success();
     }
 
 }

@@ -42,5 +42,7 @@ public class ApiInfo{
     private String outArgv;
     /** 子流程ids **/
     private String subFlowIds;
+    /** 应用id **/
+    private String appId;
 
 }
