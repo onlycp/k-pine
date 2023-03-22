@@ -166,25 +166,11 @@ public class LicenseManager {
      * @return 是/否
      */
     public boolean isUniopsApp() {
-        String uniopsDirs = SpringContext.getProperties("app.uniops.validate-dirs", "");
+        String uniopsDirs = SpringContext.getProperties("app.uniops.dir", "webapps/pine");
         if (StringUtils.isEmpty(uniopsDirs)) {
             return false;
         }
-        String str = AESUtil.decrypt(uniopsDirs,"PsLZlcuUJBUB8yPo");
-        if (StringUtils.isEmpty(str)) {
-            return false;
-        }
-        String[] arr = str.split(";");
-        for (String a: arr) {
-            File f = new File(a);
-            if (!f.exists()) {
-                return false;
-            }
-            if (!f.isDirectory()) {
-                return false;
-            }
-        }
-        return true;
+        return new File(uniopsDirs).exists();
     }
 
 

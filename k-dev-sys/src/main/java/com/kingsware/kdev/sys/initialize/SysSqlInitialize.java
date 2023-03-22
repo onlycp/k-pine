@@ -5,6 +5,7 @@ import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.kflow.FlowUtils;
 import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.util.MD5Utils;
 import com.kingsware.kdev.core.util.StringUtils;
@@ -77,7 +78,6 @@ public class SysSqlInitialize implements SystemInitialize {
 //        log.info("[k-pine:SysSqlInitialize resources]" + resources);
         if (resources != null) {
             for(Resource resource : resources) {
-                log.info(resource.getFilename());
                 ExecutionFile executionFile = new ExecutionFile();
                 String filename = resource.getFilename();
 //                log.info("[k-pine:SysSqlInitialize filename]" + filename + "----" + maxVersion);
@@ -130,10 +130,9 @@ public class SysSqlInitialize implements SystemInitialize {
 //                }
                 try {
                     DB.executeUpdateSql(FlowUtils.buildCDATASql(sql));
-                } catch (Exception e) {
-                    if (e.getMessage().toLowerCase().contains("duplicate")
-                        || e.getMessage().toLowerCase().contains("already exists")) {
-                        log.warn("sql执行失败: " + sql + ", error: " + e.getMessage());
+                } catch (OrmDbException e) {
+                    if (e.getExceptionTrace().toLowerCase().contains("duplicate") || e.getMessage().toLowerCase().contains("duplicate")
+                        || e.getExceptionTrace().toLowerCase().contains("already exists") || e.getMessage().toLowerCase().contains("already exists")) {
                         continue;
                     }
                     log.error("sql执行失败: " + sql + ", error: " + e.getMessage(), e);

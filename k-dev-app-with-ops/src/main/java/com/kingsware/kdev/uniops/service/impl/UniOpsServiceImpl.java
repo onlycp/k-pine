@@ -71,14 +71,9 @@ public class UniOpsServiceImpl implements UniOpsService {
             if (StringUtils.isNotEmpty(token)) {
                 if (!UniOpsTokenStore.getInstance().containKey(token)) {
                     // 发起http请求
-                    String uniopsServer = SpringContext.getProperties("uniops.server", "http://localhost:3456");
+                    String uniopsServer = serverConfig.getIp();
                     String url = uniopsServer + "/ops/userInfo";
                     Map<String, String> headers = new HashMap<>();
-//                    Enumeration<String> hEnums = request.getHeaderNames();
-//                    while (hEnums.hasMoreElements()) {
-//                        String header = hEnums.nextElement();
-//                        headers.put(header, request.getHeader(header));
-//                    }
                     headers.put("token", to.getOpsToken());
                     String body = HttpUtil.postBody(url, "{}", headers);
                     BaseUserInfo userInfo = JsonUtil.toBean(body, BaseUserInfo.class);
