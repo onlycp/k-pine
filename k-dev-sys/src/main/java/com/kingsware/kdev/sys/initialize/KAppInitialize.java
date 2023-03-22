@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
  */
 @Component
 @Slf4j
-public class KAppInitialize implements SystemInitialize {
+public class KAppInitialize {
 
     @Value("${app.init-psi-path:.}")
     private String initPsiPath;
@@ -37,7 +37,6 @@ public class KAppInitialize implements SystemInitialize {
     @Resource
     private DevApplicationServiceImpl devApplicationService;
 
-    @Override
     public void execute() {
         String regex = ".*\\.pine";
 //        executeExportFlowSql();
@@ -76,8 +75,4 @@ public class KAppInitialize implements SystemInitialize {
         }
     }
 
-    @Override
-    public int sort() {
-        return 4;
-    }
 }

@@ -143,10 +143,7 @@ public class SysSqlInitialize implements SystemInitialize {
             }
             success = true;
         } catch (Exception e) {
-//            e.printStackTrace();
             log.error(String.format("SQL版本执行失败：%s", file.getVersion()));
-
-            success = false;
 
         } finally {
             long end = System.currentTimeMillis();
@@ -154,9 +151,7 @@ public class SysSqlInitialize implements SystemInitialize {
             model.setExecutionTime(end - start);
             model.setSuccess(success ? 1 : 0);
             model.setMd5(MD5Utils.md5(sqlSumary.toString()));
-            if (file != null) {
-                model.setVersion(file.getVersion());
-            }
+            model.setVersion(file.getVersion());
             DB.save(model);
         }
     }
