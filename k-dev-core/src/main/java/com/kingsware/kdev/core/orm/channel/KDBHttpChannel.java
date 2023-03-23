@@ -61,7 +61,7 @@ public class KDBHttpChannel implements DbChannel{
             return null;
         }
         else if (list.size() > 1){
-            throw new OrmDbException(String.format("期望查询的结果数量为%d，但发现了%d条数据", 1, list.size()));
+            throw new OrmDbException(String.format("期望查询的结果数量为%d，但发现了%d条数据, sql:%s, 参数:%s", 1, list.size(), sql, JsonUtil.toJson(objects)));
         }
         return list.get(0);
     }

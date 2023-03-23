@@ -147,6 +147,6 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
         // 拷贝
         CopyAppManager.getInstance().copyPageData(id, context, copyProcessData);
         // 开始
-//        CopyAppManager.getInstance().action(copyProcessData, context);
+         CopyAppManager.getInstance().action(copyProcessData, context);
     }
 }

@@ -22,10 +22,9 @@ import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.orm.kdb.*;
 import com.kingsware.kdev.core.util.*;
-import com.kingsware.kdev.sys.argv.DevAppInstallArgv;
-import com.kingsware.kdev.sys.argv.DevApplicationArgv;
-import com.kingsware.kdev.sys.argv.DevApplicationQueryArgv;
-import com.kingsware.kdev.sys.argv.DevPine;
+import com.kingsware.kdev.sys.argv.*;
+import com.kingsware.kdev.sys.bean.CopyProcessData;
+import com.kingsware.kdev.sys.manager.CopyAppManager;
 import com.kingsware.kdev.sys.model.*;
 import com.kingsware.kdev.sys.ret.DevApplicationRet;
 import com.kingsware.kdev.sys.service.DevApplicationService;
@@ -381,6 +380,29 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             });
         }
         return devPine;
+    }
+
+    @Override
+    public void copyData(String id, CopyAppArgv context) {
+        CopyContextArgv contextArgv = new CopyContextArgv();
+        contextArgv.setWithSystemData(0);
+        contextArgv.setDeepCopy(1);
+        contextArgv.setCodeSuffix(context.getCodeSuffix());
+        contextArgv.setNameSuffix(context.getNameSuffix());
+        contextArgv.setUrlSuffix(context.getUrlSuffix());
+        // 拷贝
+        CopyProcessData copyProcessData = new CopyProcessData();
+        // 拷贝
+        CopyAppManager.getInstance().copyAppData(id, context.getName(), contextArgv, copyProcessData);
+        // 开始
+        CopyAppManager.getInstance().action(copyProcessData, contextArgv);
+        // 创建关联
+        DevTeamApp teamApp = new DevTeamApp();
+        teamApp.setTeamId(context.getTeamId());
+        teamApp.setAppId(copyProcessData.getAppIds().toArray(new String[0])[0]);
+        teamApp.setTeamType(0);
+        DB.save(teamApp);
+
     }
 
 }

@@ -3,10 +3,7 @@ package com.kingsware.kdev.sys.service;
 import com.kingsware.kdev.core.base.BaseService;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
-import com.kingsware.kdev.sys.argv.DevAppInstallArgv;
-import com.kingsware.kdev.sys.argv.DevApplicationArgv;
-import com.kingsware.kdev.sys.argv.DevApplicationQueryArgv;
-import com.kingsware.kdev.sys.argv.DevPine;
+import com.kingsware.kdev.sys.argv.*;
 import com.kingsware.kdev.sys.ret.DevApplicationRet;
 
 import java.util.Map;
@@ -69,4 +66,11 @@ public interface DevApplicationService extends BaseService {
      * @return  pine
      */
     DevPine appData2Pine(String appData);
+
+    /**
+     * 拷贝
+     * @param id        id
+     * @param copyData  拷贝参数
+     */
+    void copyData(String id, CopyAppArgv copyData);
 }

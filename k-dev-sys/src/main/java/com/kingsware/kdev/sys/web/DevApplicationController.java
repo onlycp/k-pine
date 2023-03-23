@@ -7,9 +7,7 @@ import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
-import com.kingsware.kdev.sys.argv.DevAppInstallArgv;
-import com.kingsware.kdev.sys.argv.DevApplicationArgv;
-import com.kingsware.kdev.sys.argv.DevApplicationQueryArgv;
+import com.kingsware.kdev.sys.argv.*;
 import com.kingsware.kdev.sys.ret.DevApplicationRet;
 import com.kingsware.kdev.sys.service.DevApplicationService;
 import io.swagger.annotations.Api;
@@ -111,6 +109,19 @@ public class DevApplicationController extends BaseController {
     @PostMapping(value = "/install")
     public BaseRet<?> install(@RequestBody DevAppInstallArgv argv) {
         return BaseRet.success(devApplicationService.install(argv));
+    }
+
+    /**
+     *  拷贝
+     * @return 提示
+     */
+    @Dev
+    @ApiOperation(value = "深度拷贝 " ,notes = "深度拷贝")
+    @PostMapping("/copyData")
+    @ResponseBody
+    public BaseRet<?> copyData(@RequestBody CopyAppArgv argv, String id) {
+        devApplicationService.copyData(id, argv);
+        return BaseRet.success();
     }
 
 }

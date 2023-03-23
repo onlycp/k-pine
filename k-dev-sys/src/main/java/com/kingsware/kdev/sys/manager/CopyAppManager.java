@@ -1,10 +1,12 @@
 package com.kingsware.kdev.sys.manager;
 
 import com.jayway.jsonpath.JsonPath;
+import com.kingsware.kdev.core.auth.Dev;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.cache.api.ApiManager;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.model.SysLogicFlow;
+import com.kingsware.kdev.core.model.SysTask;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.AddFlowInfo;
 import com.kingsware.kdev.core.orm.kdb.FlowInfo;
@@ -60,6 +62,9 @@ public class CopyAppManager {
         KdbApi kdbApi = (KdbApi) (DB.getDefault());
         // 查询逻辑编排数据
         FlowInfo faasFlow = kdbApi.get(sysLogicFlow.getFlowId());
+        if (faasFlow == null) {
+            return;
+        }
         // 查询子流程
         String faasContent = faasFlow.getContent();
         List<String> childFaasFlowIds = JsonPath.read(faasContent, "$.node_definition[*].flowID");
@@ -78,13 +83,19 @@ public class CopyAppManager {
             this.copyFlowData(childLogicFlow.getId(), copyContext, copyProcessData);
         }
         // 加入到待拷贝列表
-        String logicDbName = String.format("%s-%s", sysLogicFlow.getName(), copyContext.getNameSuffix());
+        String logicDbName = sysLogicFlow.getName();
+        if (StringUtils.isNotEmpty(copyContext.getNameSuffix())) {
+            logicDbName = String.format("%s-%s", sysLogicFlow.getName(), copyContext.getNameSuffix());
+        }
         // 只有不唯一，并且不参与关联的字段
         sysLogicFlow.setName(logicDbName);
         copyProcessData.addCopyObject(sysLogicFlow);
         copyProcessData.addMapping(sysLogicFlow.getId(), StringUtils.getUUID());
         // 拷贝FAAS里的逻辑编排
-        String logicFaasName = String.format("%s-%s", faasFlow.getName(), copyContext.getNameSuffix());
+        String logicFaasName = faasFlow.getName();
+        if (StringUtils.isNotEmpty(copyContext.getNameSuffix())) {
+            logicFaasName = String.format("%s-%s", faasFlow.getName(), copyContext.getNameSuffix());
+        }
         AddFlowInfo addFlowInfo = BeanUtils.copyObject(faasFlow, AddFlowInfo.class);
         addFlowInfo.setName(logicFaasName);
         copyProcessData.addCopyObject(addFlowInfo);
@@ -103,7 +114,11 @@ public class CopyAppManager {
         // 查找逻辑编排
         SysApi sysApi = DB.findById(SysApi.class, id);
         // 新名称
-        sysApi.setApiName(String.format("%s-%s", sysApi.getApiName(), copyContext.getNameSuffix()));
+        String apiName = sysApi.getApiName();
+        if (StringUtils.isNotEmpty(copyContext.getNameSuffix())) {
+            apiName = String.format("%s-%s", sysApi.getApiName(), copyContext.getNameSuffix());
+        }
+        sysApi.setApiName(apiName);
         if (StringUtils.isNotEmpty(sysApi.getApiCode()) && !":open".equalsIgnoreCase(sysApi.getApiCode())) {
             sysApi.setApiCode(String.format("%s-%s", sysApi.getApiCode(), copyContext.getCodeSuffix()));
         }
@@ -115,12 +130,15 @@ public class CopyAppManager {
         copyProcessData.addMapping(sysApi.getId(), StringUtils.getUUID());
         if (copyContext.getDeepCopy() == 1) {
             // 拷贝逻辑编排
-            SysLogicFlow flow = DB.findOne(SysLogicFlow.class, "select * from sys_logic_flow where flow_id=?", sysApi.getApiFlowId());
-            if (pineAppId.equalsIgnoreCase(flow.getApplicationId()) && copyContext.getWithSystemData() == 0) {
-                return;
+            List<SysLogicFlow> flows = DB.findList(SysLogicFlow.class, "select * from sys_logic_flow where flow_id=?", sysApi.getApiFlowId());
+            for (SysLogicFlow flow: flows) {
+                if (pineAppId.equalsIgnoreCase(flow.getApplicationId()) && copyContext.getWithSystemData() == 0) {
+                    continue;
+                }
+
+                this.copyFlowData(flow.getId(), copyContext, copyProcessData);
             }
 
-            this.copyFlowData(flow.getId(), copyContext, copyProcessData);
         }
 
 
@@ -138,7 +156,11 @@ public class CopyAppManager {
         // 查找逻辑编排
         DevPage devPage = DB.findById(DevPage.class, id);
         // 新名称
-        devPage.setName(String.format("%s-%s", devPage.getName(), copyContext.getNameSuffix()));
+        String pageName = devPage.getName();
+        if (StringUtils.isNotEmpty(copyContext.getNameSuffix())) {
+            pageName = String.format("%s-%s", devPage.getName(), copyContext.getNameSuffix());
+        }
+        devPage.setName(pageName);
         if (StringUtils.isNotEmpty(devPage.getPath())) {
             devPage.setPath(String.format("%s-%s", devPage.getPath(), copyContext.getCodeSuffix()));
         }
@@ -236,8 +258,8 @@ public class CopyAppManager {
                     }
                 }
             }
-
             // endregion 字典
+
         }
     }
 
@@ -265,6 +287,91 @@ public class CopyAppManager {
             copyProcessData.addCopyObject(dictItem);
             copyProcessData.addMapping(dictItem.getId(), StringUtils.getUUID());
 
+        }
+
+    }
+
+    /**
+     * 拷贝系统配置
+     *
+     * @param id          系统配置id
+     * @param copyContext 拷贝参数
+     */
+
+    public void copyConfigData(String id, CopyContextArgv copyContext, CopyProcessData copyProcessData) {
+        if (StringUtils.isNotEmpty(copyContext.getSourceAppId()) && StringUtils.isNotEmpty(copyContext.getTargetAppId()) && (!copyContext.getSourceAppId().equals(copyContext.getTargetAppId()))) {
+            SysConfig sysConfig = DB.findById(SysConfig.class, id);
+            // 拷贝FAAS里的逻辑编排
+            copyProcessData.addCopyObject(sysConfig);
+            copyProcessData.addMapping(sysConfig.getId(), StringUtils.getUUID());
+        }
+    }
+
+    /**
+     * 拷贝任务调试
+     *
+     * @param id          任务id
+     * @param copyContext 拷贝参数
+     */
+
+    public void copyTaskData(String id, CopyContextArgv copyContext, CopyProcessData copyProcessData) {
+        SysTask sysTask = DB.findById(SysTask.class, id);
+        // 拷贝FAAS里的逻辑编排
+        copyProcessData.addCopyObject(sysTask);
+        copyProcessData.addMapping(sysTask.getId(), StringUtils.getUUID());
+    }
+
+
+    /**
+     * 拷贝应用
+     *
+     * @param id          字典id
+     * @param copyContext 拷贝参数
+     */
+
+    public void copyAppData(String id, String appName,CopyContextArgv copyContext, CopyProcessData copyProcessData) {
+
+        try {
+            DevApplication application = DB.findById(DevApplication.class, id);
+            application.setName(appName);
+            // 拷贝应用
+            String newAppId = StringUtils.getUUID();
+            copyProcessData.addCopyObject(application);
+            copyProcessData.addMapping(application.getId(), newAppId);
+            copyContext.setSourceAppId(id);
+            copyContext.setTargetAppId(newAppId);
+            copyContext.setDeepCopy(1);
+            copyContext.setWithSystemData(0);
+            // 拷贝所有页面
+            List<String> pageIds = DB.findSingleAttributeList(String.class, "select id from dev_page where app_id=? and deleted = 0", id);
+            for (String pageId: pageIds) {
+                this.copyPageData(pageId, copyContext, copyProcessData);
+            }
+            // 拷贝所有的逻辑编排
+            List<String> apiIds = DB.findSingleAttributeList(String.class, "select id from sys_api where app_id=?", id);
+            for (String apiId: apiIds) {
+                this.copyApiData(apiId, copyContext, copyProcessData);
+            }
+            // 拷贝所有字典
+            List<String> dictIds = DB.findSingleAttributeList(String.class, "select id from sys_dict where app_id=?", id);
+            for (String dictId: dictIds) {
+                this.copyDictData(dictId, copyContext, copyProcessData);
+            }
+            // 拷贝所有系统配置
+            List<String> configIds = DB.findSingleAttributeList(String.class, "select id from sys_config where app_id=?", id);
+            for (String configId: configIds) {
+                this.copyConfigData(configId, copyContext, copyProcessData);
+            }
+            // 拷贝任务调度
+            List<String> taskIds = DB.findSingleAttributeList(String.class, "select id from sys_task where application_id=?", id);
+            for (String taskId: taskIds) {
+                this.copyTaskData(taskId, copyContext, copyProcessData);
+            }
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw e;
         }
 
     }
@@ -351,7 +458,23 @@ public class CopyAppManager {
                     sysConfig.cleanAuthor();
                     DB.save(sysConfig);
                     copyProcessData.getConfigIds().add(sysConfig.getId());
-                    log.info("数据拷贝---字典项管理：{}, 进度:{}/{}", sysConfig.getName(), i + 1, total);
+                    log.info("数据拷贝---系统配置管理：{}, 进度:{}/{}", sysConfig.getName(), i + 1, total);
+                }
+                else if (obj instanceof SysTask) {
+                    SysTask sysTask = replaceObj(copyProcessData, obj, SysTask.class);
+                    sysTask.setApplicationId(context.getTargetAppId());
+                    sysTask.cleanAuthor();
+                    DB.save(sysTask);
+                    copyProcessData.getTaskIds().add(sysTask.getId());
+                    log.info("数据拷贝---任务调度管理：{}, 进度:{}/{}", sysTask.getName(), i + 1, total);
+                }
+                else if (obj instanceof DevApplication) {
+                    DevApplication devApplication = replaceObj(copyProcessData, obj, DevApplication.class);
+                    devApplication.cleanAuthor();
+                    DB.save(devApplication);
+                    copyProcessData.getAppIds().add(devApplication.getId());
+                    log.info("数据拷贝---应用管理：{}, 进度:{}/{}", devApplication.getName(), i + 1, total);
+
                 }
             }
         } catch (Exception e) {
@@ -416,6 +539,56 @@ public class CopyAppManager {
                 try {
                     log.info("数据拷贝---回滚Page:{}", id);
                     DB.delete(DevPage.class, id);
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        if (!copyProcessData.getDictIds().isEmpty()) {
+            log.info("数据拷贝---开始回滚字典管理");
+            for (String id : copyProcessData.getDictIds()) {
+                try {
+                    log.info("数据拷贝---回滚Dict:{}", id);
+                    DB.delete(SysDict.class, id);
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        if (!copyProcessData.getDictItemIds().isEmpty()) {
+            log.info("数据拷贝---开始回滚字典项管理");
+            for (String id : copyProcessData.getDictItemIds()) {
+                try {
+                    log.info("数据拷贝---回滚DictItem:{}", id);
+                    DB.delete(SysDictItem.class, id);
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        if (!copyProcessData.getConfigIds().isEmpty()) {
+            log.info("数据拷贝---开始回滚字系统配置管理");
+            for (String id : copyProcessData.getConfigIds()) {
+                try {
+                    log.info("数据拷贝---回滚Config:{}", id);
+                    DB.delete(SysConfig.class, id);
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        if (!copyProcessData.getTaskIds().isEmpty()) {
+            log.info("数据拷贝---开始回滚字系统配置管理");
+            for (String id : copyProcessData.getTaskIds()) {
+                try {
+                    log.info("数据拷贝---回滚Task:{}", id);
+                    DB.delete(SysTask.class, id);
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        if (!copyProcessData.getAppIds().isEmpty()) {
+            log.info("数据拷贝---开始回滚字APP管理");
+            for (String id : copyProcessData.getAppIds()) {
+                try {
+                    log.info("数据拷贝---回滚App:{}", id);
+                    DB.delete(DevApplication.class, id);
                 } catch (Exception ignored) {
                 }
             }

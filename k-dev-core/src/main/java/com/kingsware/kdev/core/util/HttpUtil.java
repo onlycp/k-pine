@@ -1,8 +1,12 @@
 package com.kingsware.kdev.core.util;
 
 import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.cron.KRunner;
+import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.HttpClientException;
+import com.kingsware.kdev.core.model.SysTask;
+import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.FaasFailRecord;
 import com.kingsware.kdev.core.plugins.FaasChannelPlugin;
 import lombok.Cleanup;
@@ -242,13 +246,21 @@ public class HttpUtil {
      */
     public static String postBody(String apiUrl, String body, Map<String, String> headerMap, boolean anyone) throws HttpClientException{
         String faasCallMode = SpringContext.getProperties("app.k-flow.call-model", "http");
-        FaasChannelPlugin faasChannelPlugin = getFaasChannel(faasCallMode);
-        if (faasChannelPlugin == null) {
+        if (faasCallMode.equals("http")) {
             return callHttpCluster(apiUrl, body, headerMap, anyone);
         }
         else {
-            return faasChannelPlugin.send(apiUrl, body, headerMap);
+            FaasChannelPlugin faasChannelPlugin = getFaasChannel(faasCallMode);
+            if (faasChannelPlugin != null)  {
+                return faasChannelPlugin.send(apiUrl, body, headerMap);
+            }
+            else {
+                log.info("当前模式:{}, 找不到插件", faasCallMode);
+                throw new HttpClientException("faas插件找不到", -1, apiUrl, "");
+            }
+
         }
+
     }
 
     /**
@@ -500,12 +512,21 @@ public class HttpUtil {
      * @return  通道
      */
     public static FaasChannelPlugin getFaasChannel(String name) {
-        List<FaasChannelPlugin> faasChannelPlugins = SpringContext.getBeansOfType(FaasChannelPlugin.class);
-        for (FaasChannelPlugin plugin: faasChannelPlugins) {
-            if (name.equalsIgnoreCase(plugin.name())) {
-                return plugin;
+
+        List<Class<?>> classList =  ClassUtils.getClassesByParentClass("com.kingsware", FaasChannelPlugin.class);
+        for (Class<?> tClass: classList) {
+            // 生成实例
+            try {
+                FaasChannelPlugin plugin = (FaasChannelPlugin) tClass.newInstance();
+                if (name.equalsIgnoreCase(plugin.name())) {
+                    return plugin;
+                }
+            } catch (Exception e) {
+                log.error("定时类扫描初始化失败:{}" , e.getMessage());
             }
         }
+
         return null;
+
     }
 }

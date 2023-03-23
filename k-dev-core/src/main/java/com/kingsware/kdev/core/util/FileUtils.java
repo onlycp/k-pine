@@ -308,5 +308,50 @@ public class FileUtils {
 
     }
 
+    /**
+     * 目录拷贝
+     * @param sourcePath
+     * @param newPath
+     * @throws IOException
+     */
+    public static void copyDir(String sourcePath, String newPath) throws IOException {
+
+        File file = new File(sourcePath);
+        String[] filePath = file.list();
+        if (!(new File(newPath)).exists()) {
+            (new File(newPath)).mkdirs();
+        }
+        assert filePath != null;
+        for (String s : filePath) {
+            if ((new File(sourcePath + File.separator + s)).isDirectory()) {
+                copyDir(sourcePath + File.separator + s, newPath + File.separator + s);
+            }
+            if (new File(sourcePath + File.separator + s).isFile()) {
+                copyFile(sourcePath + File.separator + s, newPath + file.separator + s);
+
+            }
+        }
+    }
+
+    /**
+     * 拷贝文件
+     * @param oldPath   旧目录
+     * @param newPath   新目录
+     * @throws IOException
+     */
+    public static void copyFile(String oldPath, String newPath) throws IOException {
+
+        File oldFile = new File(oldPath);
+        File file = new File(newPath);
+        @Cleanup FileInputStream in = new FileInputStream(oldFile);
+        @Cleanup FileOutputStream out = new FileOutputStream(file);
+        byte[] buffer=new byte[2097152];
+        while((in.read(buffer)) != -1){
+            out.write(buffer);
+        }
+        out.close();
+        in.close();
+    }
+
 
 }

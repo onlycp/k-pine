@@ -1,6 +1,7 @@
 package com.kingsware.kdev.sys.bean;
 
 import com.kingsware.kdev.core.model.SysLogicFlow;
+import com.kingsware.kdev.core.model.SysTask;
 import com.kingsware.kdev.core.orm.kdb.AddFlowInfo;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.sys.model.*;
@@ -28,6 +29,10 @@ public class CopyProcessData {
     private Set<String> dictItemIds = new HashSet<>();
     /** 系统配置 **/
     private Set<String> configIds = new HashSet<>();
+    /** 系统配置 **/
+    private Set<String> taskIds = new HashSet<>();
+    /** 应用ids **/
+    private Set<String> appIds = new HashSet<>();
     /** 数据拷贝列表 **/
     private List<Object> toCopySet = new ArrayList<>();
 
@@ -135,6 +140,15 @@ public class CopyProcessData {
             if (obj instanceof SysConfig) {
                 SysConfig o1 = (SysConfig) curObj;
                 SysConfig o2 = (SysConfig) obj;
+                if (o1.getId().equals(o2.getId())) {
+                    exist = true;
+                    break;
+                }
+            }
+            // 任务调度
+            if (obj instanceof SysTask) {
+                SysTask o1 = (SysTask) curObj;
+                SysTask o2 = (SysTask) obj;
                 if (o1.getId().equals(o2.getId())) {
                     exist = true;
                     break;
