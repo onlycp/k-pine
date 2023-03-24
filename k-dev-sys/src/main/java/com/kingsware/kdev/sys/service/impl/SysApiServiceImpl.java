@@ -156,16 +156,18 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
     public BaseRet<?> callUniops(Map<String, Object> params) {
         HttpServletRequest request = ServletUtil.request();
         HttpServletResponse response = ServletUtil.response();
+        String username = SpringContext.getProperties("uniops.user", "admin");
+        String password = SpringContext.getProperties("uniops.pwd", "WzcwLDIwNiwxMTUsNTksNjUsMTk1LDIzMiw5OSwxMDksOTAsMTM3LDcyLDYsMTQxLDkxLDE1OF0=");
+        String uniopsServer = SpringContext.getProperties("uniops.server", "http://localhost:8080");
         // 获取令牌
         String token = null;
         if(modeDev) {
-            token = UniOpsUtil.getUniOpsToken();
+            token = UniOpsUtil.getUniOpsToken(uniopsServer, username, password);
         }
         else {
             token = UniOpsTokenStore.getInstance().getUniOpsToken(TokenUtil.getTokenString(request));
         }
         // 获取uniops地址
-        String uniopsServer = SpringContext.getProperties("uniops.server", "http://localhost:3456");
         if (!params.containsKey("url")) {
             throw BusinessException.serviceThrow("缺少url参数");
         }
