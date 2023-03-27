@@ -68,10 +68,16 @@ public class MessageWebSocket {
      */
     private void removeSession(Session session) {
         // 查找session
-        Set<SessionToken> copiedSet = new HashSet<>(sessionTokenSet);
-        Optional<SessionToken> optional = copiedSet.stream().filter(it -> it.getSession().getId().equalsIgnoreCase(session.getId())).findFirst();
-        // logger.info("用户:【userId={}, token={}】退出，当前在线人数为:{} ", optional.get().getUserId(), optional.get().getToken(), sessionTokenSet.size());
-        optional.ifPresent(sessionTokenSet::remove);
+        try {
+            Set<SessionToken> copiedSet = new HashSet<>(sessionTokenSet);
+            Optional<SessionToken> optional = copiedSet.stream().filter(it -> it.getSession().getId().equalsIgnoreCase(session.getId())).findFirst();
+            // logger.info("用户:【userId={}, token={}】退出，当前在线人数为:{} ", optional.get().getUserId(), optional.get().getToken(), sessionTokenSet.size());
+            optional.ifPresent(sessionTokenSet::remove);
+        }
+        catch (Exception ignored) {
+
+        }
+
     }
 
     /**
