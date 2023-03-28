@@ -1,6 +1,10 @@
 package com.kingsware.kdev.core.kmq;
 
+import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.kmq.websocket.WmMessage;
+import com.kingsware.kdev.core.kmq.websocket.WmMessageArgv;
 import com.kingsware.kdev.core.util.ClassUtils;
+import com.kingsware.kdev.core.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,6 +12,8 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import static com.kingsware.kdev.core.kmq.websocket.WebsocketConstants.MQ_TO_WEBSOCKET;
 
 /**
  * KMQ手消息队列仓库存储
@@ -106,6 +112,41 @@ public class KmqMessageCenter {
         // 将消息加入队列中
         LinkedBlockingQueue<String> queue = blockingQueueMap.computeIfAbsent(topic, key -> new LinkedBlockingQueue<>(QUEUE_MAX_SIZE));
         queue.addAll(payloads);
+    }
+
+    /**
+     * 发送消息给当前会话
+     * @param topic
+     * @param message
+     */
+    public void produceWebsocketMessageToSession(String topic, String message) {
+
+        WmMessage wmMessage = new WmMessage();
+        wmMessage.setTopic(topic);
+        wmMessage.setBody(message);
+        WmMessageArgv argv = new WmMessageArgv();
+        argv.setToken(KClientContext.getContext().getToken());
+        argv.setMessage(JsonUtil.toJson(wmMessage));
+        this.produce(MQ_TO_WEBSOCKET, JsonUtil.toJson(argv));
+
+    }
+
+    /**
+     * 发送给用户
+     * @param userId    用户id
+     * @param topic     topic
+     * @param message   消息内容
+     */
+    public void produceWebsocketMessageToUser(String userId, String topic, String message) {
+
+        WmMessage wmMessage = new WmMessage();
+        wmMessage.setTopic(topic);
+        wmMessage.setBody(message);
+        WmMessageArgv argv = new WmMessageArgv();
+        argv.setUserId(userId);
+        argv.setMessage(JsonUtil.toJson(wmMessage));
+        this.produce(MQ_TO_WEBSOCKET, JsonUtil.toJson(argv));
+
     }
 
 
