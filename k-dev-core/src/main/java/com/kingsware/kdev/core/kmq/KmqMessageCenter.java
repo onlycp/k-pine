@@ -88,7 +88,6 @@ public class KmqMessageCenter {
         }
     }
 
-
     /**
      *  生产消息
      * @param topic     主题
