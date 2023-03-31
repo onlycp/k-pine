@@ -312,6 +312,8 @@ public class KAuthFilter implements Filter {
                         operateLog.setOperateTime(new Timestamp(System.currentTimeMillis()));
                         operateLog.setMethod(callType == CallType.CONTROLLER ? apiDefine.getCallMethod() + "()": api.getApiName());
                         operateLog.setRequestMethod(KClientContext.getContext().getRequest().getMethod());
+                        operateLog.setAppId(KClientContext.getContext().getRequest().getHeader("appId"));
+                        System.out.println("-----------------------" + KClientContext.getContext().getRequest().getHeader("appId")+ "**********" + operateLog.getAppId());
                         if (wrapperResponse != null) {
                             operateLog.setResponseBody(StringUtils.retrench(ServletUtil.getResponseBody(wrapperResponse),100));
                         }
