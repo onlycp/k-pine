@@ -1,8 +1,11 @@
 package com.kingsware.kdev.sys.argv;
 
 import com.kingsware.kdev.core.bean.BaseArgv;
+import com.kingsware.kdev.core.kflow.bean.DebugNode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.List;
 
 /**
  * 流程调试参数
@@ -18,4 +21,6 @@ public class SysFlowDebugArgv extends BaseArgv {
     private String flowId;
     /** json传参 **/
     private String json;
+    /** 调试节点列表 **/
+    private List<DebugNode> debugger;
 }

@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.orm.kdb;
 
+import com.kingsware.kdev.core.kflow.bean.DebugNode;
 import com.kingsware.kdev.core.util.JsonUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,6 +31,8 @@ public class KdbArgv {
     private Map<String, StepArgv> script = new LinkedHashMap<>();
     /** 上下文变量 **/
     private Map<String, Object> variables = new LinkedHashMap<>();
+    /** 调试节点列表 **/
+    private List<DebugNode> debugger;
 
     /**
      * 增加节点参数

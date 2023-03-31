@@ -3,6 +3,7 @@ package com.kingsware.kdev.core.kflow;
 import com.kingsware.kdev.core.cache.logic.LogicFlowManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.kflow.bean.DebugNode;
 import com.kingsware.kdev.core.kflow.bean.ErrorResult;
 import com.kingsware.kdev.core.kflow.bean.KFlowMessage;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
@@ -45,7 +46,6 @@ public class KdbFlowExecutor {
     }
 
 
-
     /**
      *  执行流程
      * @param flowId        流程id
@@ -53,8 +53,7 @@ public class KdbFlowExecutor {
      * @param context      上下文信息
      * @return             执行结果
      */
-    public KdbFlowResult execute(String flowId, String subFlowIds, Map<String, Object> params, KFlowContext context, boolean debug, boolean sync) {
-
+    public KdbFlowResult execute(String flowId, String subFlowIds, Map<String, Object> params, KFlowContext context, boolean debug, boolean sync, List<DebugNode> debugger) {
         long t1 = System.currentTimeMillis();
         String statusMessage = "失败";
         KdbFlowResult result = new KdbFlowResult();
@@ -65,6 +64,8 @@ public class KdbFlowExecutor {
 
             // 设置流程id
             argv.setFlowID(flowId);
+            // 调试参数
+            argv.setDebugger(debugger);
             String saas = SpringContext.getProperties("app.is-saas", "false");
             if ("true".equals(saas)) {
                 if (KClientContext.getContext() != null && KClientContext.getContext().getUserInfo() != null && StringUtils.isNotEmpty(KClientContext.getContext().getUserInfo().getSysUnitIds())) {
@@ -142,27 +143,18 @@ public class KdbFlowExecutor {
             result.setExceptionStack(ormDbException.getExceptionTrace());
             return result;
         }
+    }
 
-//        finally {
-//            // todo 临时应对万达poc处理， 后面要删除掉
-//            if (argv.getVariables().containsKey("withLogTableId")) {
-//                try {
-//                    long t2 = System.currentTimeMillis();
-//                    Map<String, Object> logMap = new HashMap<>();
-//                    logMap.put("pocTableId", argv.getVariables().get("withLogTableId"));
-//                    logMap.put("taskTime", DateUtils.formatDate(new Date(t1), DateUtils.DATE_TIME));
-//                    logMap.put("taskStatus", result.getData() instanceof ErrorResult ? "失败": "成功");
-//                    logMap.put("taskUseTime", t2-t1);
-//                    KdbArgv logArgv =JsonUtil.toBean(JsonUtil.toJson(argv), KdbArgv.class);
-//                    logArgv.setFlowID("f4c29a689b9b4e7e9a49e5967b68d67d");
-//                    logArgv.getVariables().putAll(logMap);
-//                    DB.kdbApi().executeFlow(logArgv, debug);
-//                }
-//                catch (Exception e) {
-//                    // 什么都不用管
-//                }
-//
-//            }
+
+    /**
+     *  执行流程
+     * @param flowId        流程id
+     * @param params       参数对
+     * @param context      上下文信息
+     * @return             执行结果
+     */
+    public KdbFlowResult execute(String flowId, String subFlowIds, Map<String, Object> params, KFlowContext context, boolean debug, boolean sync) {
+        return this.execute(flowId, subFlowIds, params, context, debug, sync, new ArrayList<>());
     }
 
 

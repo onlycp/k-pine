@@ -26,6 +26,7 @@ import java.util.*;
  * @date 2022/1/13 6:05 下午
  */
 @Slf4j
+@SuppressWarnings("all")
 public abstract class KdbApiAbstract implements KdbApi {
 
     /**
