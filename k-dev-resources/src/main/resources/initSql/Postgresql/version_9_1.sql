@@ -15,23 +15,7 @@ CREATE TABLE IF NOT EXISTS "sys_i18n" (
 
 
 
-COMMENT ON COLUMN "sys_i18n"."id" IS '主键';
 
-COMMENT ON COLUMN "sys_i18n"."i18n_key" IS '键名';
-
-COMMENT ON COLUMN "sys_i18n"."message" IS '国际化配置信息，JSON保存';
-
-COMMENT ON COLUMN "sys_i18n"."app_id" IS '归属应用ID';
-
-COMMENT ON COLUMN "sys_i18n"."when_created" IS '创建时间';
-
-COMMENT ON COLUMN "sys_i18n"."who_created" IS '创建人员';
-
-COMMENT ON COLUMN "sys_i18n"."when_modified" IS '修改时间';
-
-COMMENT ON COLUMN "sys_i18n"."who_modified" IS '修改人员';
-
-COMMENT ON TABLE "sys_i18n" IS '系统表-国际化配置';
 
 ALTER TABLE "sys_api"
     ADD COLUMN "module_id" VARCHAR(36) null ;

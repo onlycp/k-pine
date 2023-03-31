@@ -138,6 +138,9 @@ public class KFaasInitialize implements SystemInitialize {
     private void createInitDb(final DataSourceInfo dataSourceInfo) {
         // 解析url
         JdbcUrl jdbcUrl = JdbcUrlUtils.parseUrl(dataSourceInfo.getJdbcUrl());
+        if (jdbcUrl == null) {
+            return;
+        }
         DataSourceInfo initDs = BeanUtils.copyObject(dataSourceInfo, DataSourceInfo.class);
         String dbName = jdbcUrl.getDbName();
         String sourceName = dataSourceInfo.getSourceName() + "PineInit";

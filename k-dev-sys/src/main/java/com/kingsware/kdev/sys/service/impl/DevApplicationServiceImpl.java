@@ -219,7 +219,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             FunctionQueryArgv functionQueryArgv = new FunctionQueryArgv();
             functionQueryArgv.setId(functions.getId());
             List<Functions> functionInfoList = DB.kdbApi().queryFunction(functionQueryArgv);
-//            // 如果没有，则新增
+            // 如果没有，则新增
 //            if (functionInfoList.isEmpty() ) {
 //                AddFunctionInfo addFunctionInfo = new AddFunctionInfo();
 //                addFunctionInfo.setId(functions.getId());

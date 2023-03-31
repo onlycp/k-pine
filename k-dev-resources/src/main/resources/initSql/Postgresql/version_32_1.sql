@@ -1,2 +1,2 @@
-ALTER TABLE "sys_instance"
-    ADD COLUMN "online" int;
+ALTER TABLE sys_instance
+    ADD COLUMN online int;
