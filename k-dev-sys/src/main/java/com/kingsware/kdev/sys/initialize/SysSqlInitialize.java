@@ -135,7 +135,7 @@ public class SysSqlInitialize implements SystemInitialize {
                         || e.getExceptionTrace().toLowerCase().contains("already exists") || e.getMessage().toLowerCase().contains("already exists")) {
                         continue;
                     }
-                    log.error("sql执行失败: " + sql + ", error: " + e.getMessage(), e);
+                    log.error("sql执行失败: " + sql + ", error: " + e.getExceptionTrace(), e);
                     throw e;
                 }
                 long eachSqlEnd = System.currentTimeMillis();
