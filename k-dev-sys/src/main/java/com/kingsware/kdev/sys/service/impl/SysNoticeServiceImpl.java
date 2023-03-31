@@ -1,5 +1,7 @@
 package com.kingsware.kdev.sys.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kingsware.kdev.core.auth.AppAuthProperties;
 import com.kingsware.kdev.core.auth.BaseUserInfo;
 import com.kingsware.kdev.core.auth.TokenUtil;
@@ -7,6 +9,7 @@ import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.kmq.KmqMessageCenter;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
@@ -118,9 +121,19 @@ public class SysNoticeServiceImpl extends BaseServiceImpl implements SysNoticeSe
             modelRecord.setContent(modelNotice.getContent());
             // 保存
             DB.save(modelRecord);
+
+
+            // websocket推送给前端
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                String jsonString = null;
+                jsonString = mapper.writeValueAsString(modelRecord);
+                System.out.println(jsonString);
+                KmqMessageCenter.getInstance().produceWebsocketMessageToSession("notice-center", jsonString);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
         }
-
-
     }
 
 }
