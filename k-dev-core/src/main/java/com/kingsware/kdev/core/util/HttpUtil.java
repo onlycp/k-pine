@@ -128,6 +128,7 @@ public class HttpUtil {
             connection.setInstanceFollowRedirects(true);
             // 连接复用
             connection.setRequestProperty("connection", "Keep-Alive");
+            connection.setRequestProperty("Accept", "gzip, deflate, br");
             // 设置编码
             connection.setRequestProperty("charset", "utf-8");
             //  设置content-type

@@ -36,7 +36,7 @@ public class LicenseServiceImpl implements LicenseService {
 
         LicenseRet ret = new LicenseRet();
         // 读取文件
-        License license = LicenseManager.getInstance().getLicense();
+        License license = LicenseManager.getInstance().parseLicense();
         ret.setStatus(LicenseManager.getInstance().getStatus());
         if (license != null) {
             ret.setCustomer(license.getCustomer());

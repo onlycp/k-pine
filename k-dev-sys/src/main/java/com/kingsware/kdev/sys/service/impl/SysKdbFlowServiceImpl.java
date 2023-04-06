@@ -45,6 +45,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
+@SuppressWarnings("all")
 public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlowService {
     @Resource
     private SysApiService sysApiService;
@@ -150,6 +151,12 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
                     if (faasNode != null) {
                         exeData.put("icon", faasNode.getIcon());
                         exeData.put("name", faasNode.getName());
+                        if (exeData.containsKey("formData")) {
+                            Map<String, Object> formData = (Map<String, Object>) exeData.get("formData");
+                            if (formData.containsKey("content")) {
+//                                formData.put("content", content);
+                            }
+                        }
                         nodeDefinition.getExtra().put("exeData", exeData);
                     }
                 }

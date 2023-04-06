@@ -24,6 +24,11 @@ public class LicenseManager {
     private static LicenseManager instance;
 
     /**
+     * mac地址列表
+     */
+    private final Set<String> macAddresses = new HashSet<>();
+
+    /**
      * license 信息
      **/
     private License license;
@@ -33,6 +38,7 @@ public class LicenseManager {
             synchronized (LicenseManager.class) {
                 if (instance == null) {
                     instance = new LicenseManager();
+                    instance.initAndGetsMac();
                 }
             }
         }
@@ -47,7 +53,7 @@ public class LicenseManager {
      *
      * @return 返回license
      */
-    public License getLicense() {
+    public License parseLicense() {
 
         try {
             this.license = this.loadLicense();
@@ -120,15 +126,10 @@ public class LicenseManager {
      *
      * @return
      */
-    private boolean validateMac(String macAddress) {
-
-        // 如果是万能mac。直接通过
-//        if (allPurposeMac.equalsIgnoreCase(macAddress)) {
-//            return true;
-//        }
+    private boolean initAndGetsMac() {
         try {
             java.util.Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces();
-            StringBuilder sb = new StringBuilder();
+
             while (en.hasMoreElements()) {
                 NetworkInterface networkInterface = en.nextElement();
                 List<InterfaceAddress> addresses = networkInterface.getInterfaceAddresses();
@@ -139,20 +140,17 @@ public class LicenseManager {
                         continue;
                     }
                     byte[] mac = network.getHardwareAddress();
-                    String name = network.getName();
-
                     if (mac == null) {
                         continue;
                     }
-                    sb.delete(0, sb.length());
+                    StringBuilder sb = new StringBuilder();
                     for (int i = 0; i < mac.length; i++) {
                         sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
                     }
-//                    log.info("license: {}, server:{}", macAddress, sb);
-                    if (macAddress.equalsIgnoreCase(sb.toString().trim())) {
-//                        log.info("license: {}, server:{} 校验通过", macAddress, sb);
-                        return true;
-                    }
+                    // 加入小写
+                    macAddresses.add(sb.toString().toLowerCase());
+                    // 加入大写
+                    macAddresses.add(sb.toString().toUpperCase());
                 }
             }
 
@@ -283,7 +281,7 @@ public class LicenseManager {
         //  获取端口
         String port = SpringContext.getBootProperties("server.port", "0");
 //        log.info("license port: {}, server port:{}", lic.getAppPort(), port);
-        if (!validateMac(lic.getMac()) ) {
+        if (!macAddresses.contains(lic.getMac()) ) {
             log.info("mac不一致");
             return -1;
         }
@@ -310,7 +308,7 @@ public class LicenseManager {
      */
     public int getStatus() {
 //        return 2;
-        getLicense();
+        parseLicense();
         return this.getStatus(this.license);
     }
 }
