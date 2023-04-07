@@ -172,12 +172,12 @@ public class KDBHttpChannel implements DbChannel{
             // 发起请求
             String  responseBody = HttpUtil.postBody(url, requestBody, Collections.emptyMap(), true);
             long takeTime = System.currentTimeMillis() - t1;
-            if (takeTime < 3000) {
-                logger.debug("url:{} , Take: {} ,请求体: {}", url, takeTime ,requestBody);
-            }
-            else {
-                logger.warn("url:{} , Take: {} ,请求体: {}", url, takeTime ,requestBody);
-            }
+//            if (takeTime < 3000) {
+//                logger.debug("url:{} , Take: {} ,请求体: {}", url, takeTime ,requestBody);
+//            }
+//            else {
+//                logger.warn("url:{} , Take: {} ,请求体: {}", url, takeTime ,requestBody);
+//            }
             KdbRet<String> ret = JsonUtil.toBean(responseBody, KdbRet.class, String.class);
             if (ret == null) {
                 throw new OrmDbException("kdb响应数据不合法，响应内容:" + responseBody);
