@@ -56,7 +56,9 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
     public void add(SysMenuArgv argv) {
         SysMenu model = BeanUtils.copyObject(argv, SysMenu.class);
         // 生成path，规则为上级的path + /id
-        model.setId(StringUtils.getUUID());
+        if(StringUtils.isEmpty(model.getId())) {
+            model.setId(StringUtils.getUUID());
+        }
         // 设置path
         model.setPath(generateNodePath(model.getId(), argv.getParentId()));
         // 唯一性校验

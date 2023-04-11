@@ -108,7 +108,9 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     @Override
     public void add(SysUserArgv argv) {
         SysUser model = BeanUtils.copyObject(argv, SysUser.class);
-        model.setId(StringUtils.getUUID());
+        if(StringUtils.isEmpty(model.getId())) {
+            model.setId(StringUtils.getUUID());
+        }
         // 把参数里的加密密码解密出来
         model.setPassword(decodeBase64(argv.getPassword()));
         // 设置密码
