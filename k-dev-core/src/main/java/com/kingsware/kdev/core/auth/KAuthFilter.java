@@ -27,8 +27,8 @@ import com.kingsware.kdev.core.kflow.*;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
 import com.kingsware.kdev.core.kmq.KmqMessageCenter;
-import com.kingsware.kdev.core.model.SysLoginLog;
-import com.kingsware.kdev.core.model.SysOperateLog;
+import com.kingsware.kdev.core.model.*;
+import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.core.util.jWi.JWildcard;
@@ -112,6 +112,8 @@ public class KAuthFilter implements Filter {
         }
         String requestBody = "{}";
 
+        long tt0 = System.currentTimeMillis();;
+
 
         // 获取请求方式
         String method = request.getMethod().toLowerCase();
@@ -140,6 +142,7 @@ public class KAuthFilter implements Filter {
             if (url.contains("//")) {
                 url = url.replaceAll("//", "/");
             }
+            log.info("Take-{}, {}",1,  (System.currentTimeMillis()-tt0));
             String apiUrlPrefix = request.getContextPath() + "/api";
             // 如果是接口或者url文件
             if (url.startsWith(apiUrlPrefix) || url.startsWith(kPageFlag)) {
@@ -155,6 +158,7 @@ public class KAuthFilter implements Filter {
                 if (url.startsWith(apiUrlPrefix)) {
                     contextPath = apiUrlPrefix;
                 }
+                log.info("Take-{}, {}",2,  (System.currentTimeMillis()-tt0));
                 // 获取配置的接口信息
                 String path = url.replaceFirst(contextPath, "");
                 api = ApiManager.getInstance().getApi(method, path);
@@ -172,6 +176,7 @@ public class KAuthFilter implements Filter {
                     ServletUtil.responseJson(response, BaseRet.fail("接口不存在", RetEnum.SERVICE_FAIL.getCode()));
                     return;
                 }
+                log.info("Take-{}, {}",3,  (System.currentTimeMillis()-tt0));
                 // 流程调用方式
                 if (api != null && api.getCallType() == 2 && kflowProperties.isEnable()) {
                     callType = CallType.KFLOW;
@@ -193,6 +198,7 @@ public class KAuthFilter implements Filter {
                     ServletUtil.responseJson(response, BaseRet.fail("发布模式无权访问此接口", RetEnum.ONLY_DEV.getCode()));
                     return;
                 }
+                log.info("Take-{}, {}",4,  (System.currentTimeMillis()-tt0));
                 // 判断是否开放接口
                 isOpenApi = StringUtils.isNotEmpty(apiCode) && apiCode.startsWith(openApiFlag) && api != null;
                 if (isOpenApi) {
@@ -201,16 +207,53 @@ public class KAuthFilter implements Filter {
                 } else {
                     this.checkPermission(request, response, ignore, apiCode);
                 }
+
+                log.info("Take-{}, {}",5,  (System.currentTimeMillis()-tt0));
                 // 校验license
                 if (!ignore) {
                     checkLicense();
                 }
+                log.info("Take-{}, {}",6,  (System.currentTimeMillis()-tt0));
                 // 根据不同的调用类型，进行调用相关处理
+                String name = "";
+                SysApiMock apiMock = new SysApiMock();
+                String mockUrl = request.getRequestURI();
+                if (StringUtils.isNotEmpty(request.getQueryString())) {
+                    mockUrl = mockUrl + "?" + request.getQueryString();
+                }
+                apiMock.setUrl(mockUrl);
+                Map<String, Object> mockMap = new TreeMap<>(argvMap);
+                mockMap.remove("t");
+                mockMap.remove("request");
+                apiMock.setRequestBody(JsonUtil.toJson(mockMap));
+                apiMock.setEnableMock(1);
+                apiMock.setRequestMethod(request.getMethod().toLowerCase());
+                apiMock.setMockMd5(MD5Utils.md5(apiMock.getName() + apiMock.getRequestMethod() + apiMock.getRequestBody()));
+
                 if (callType == CallType.CONTROLLER) {
+                    apiMock.setGroupName(apiDefine.getModule());
+                    apiMock.setName(apiDefine.getName());
+
                     filterChain.doFilter(wrapperRequest, wrapperResponse);
                 } else {
+                    log.info("Take-{}, {}",7,  (System.currentTimeMillis()-tt0));
+                    apiMock.setName(api.getApiName());
+                    apiMock.setUrl(request.getRequestURI());
                     callByFlow(request, response, api, path, argvMap);
+                    log.info("Take-{}, {}",8,  (System.currentTimeMillis()-tt0));
                 }
+
+//                // 保存api-mock
+//                try {
+//                    // 查找一下是否存在
+//                    SysApiMock old = DB.findOne(SysApiMock.class, "select * from sys_api_mock where mock_md5=?",  apiMock.getMockMd5());
+//                    if (old == null) {
+//                        DB.save(apiMock);
+//                    }
+//                }
+//                catch (Exception e) {
+//                    e.printStackTrace();
+//                }
             } else {
                 log.info("url:{}", url );
                 filterChain.doFilter(request, response);
@@ -380,12 +423,26 @@ public class KAuthFilter implements Filter {
 
 
 
+    @SuppressWarnings("all")
     private void  callByFlow(HttpServletRequest request, HttpServletResponse response, ApiInfo api, String path, Map<String, Object> argvMap) {
         // 获取视图模型
         KFlowContext context = KFlowContext.createBaseContext(StringUtils.isNotEmpty(api.getInArgv()) ? api.getInArgv() : "{}", StringUtils.isNotEmpty(api.getOutArgv()) ? api.getOutArgv() : "{}");
         // 调用流程
         KdbFlowResult result = KdbFlowExecutor.getInstance().execute(api.getApiFlowId(), api.getSubFlowIds(), argvMap, context, false, false);
-                // 转为api格式
+        // 用于接口测试，指定id
+        if (argvMap.containsKey("replaceBody")) {
+            Map<String, Object> sysMap = JsonUtil.toMap(argvMap.get("replaceBody").toString());
+            if (sysMap != null) {
+                if (sysMap.containsKey("id")) {
+                    Map<String, Object> contextMap = (Map<String, Object>)context.getSystemContext().get("sys");
+                    contextMap.put("uuid", sysMap.get(sysMap.get("id")));
+                }
+            }
+
+        }
+
+        KdbRetFile kdbRetFile = null;
+        // 转为api格式
         switch (result.getType()) {
             case KFlowConstant.RESULT_JSON:
                 ServletUtil.responseJson(response, FlowUtils.toJsonResult(result.getData(), result.getLog()));
@@ -394,13 +451,12 @@ public class KAuthFilter implements Filter {
                 ExcelWorker.getInstance().writeToWeb(response, (KExcel) result.getData());
                 break;
             case KFlowConstant.RESULT_FILE:
-                KdbRetFile kdbRetFile = (KdbRetFile) result.getData();
+                kdbRetFile = (KdbRetFile) result.getData();
                 ServletUtil.responseFile(response, kdbRetFile.getFileName(), kdbRetFile.getData());
                 break;
             case KFlowConstant.RESULT_HTML:
                 ServletUtil.responseHtml(response, result.getData().toString());
                 break;
-
             case KFlowConstant.RESULT_BASE64_TO_FILE:
                 kdbRetFile = (KdbRetFile) result.getData();
                 ServletUtil.responseFile(response, kdbRetFile.getFileName(), Base64.getDecoder().decode(kdbRetFile.getData()));

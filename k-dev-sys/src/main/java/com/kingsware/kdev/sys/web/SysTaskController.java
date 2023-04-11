@@ -24,7 +24,7 @@ import javax.annotation.Resource;
  * @version 1.0.0
  * @date 2021/12/23 11:23 上午
  */
-@Api(value = "数据访问配置", tags = {"数据访问配置"})
+@Api(value = "任务调度", tags = {"任务调度"})
 @RestController
 @RequestMapping("/"+ Version.V1 + "/sys-tasks")
 public class SysTaskController extends BaseController {
