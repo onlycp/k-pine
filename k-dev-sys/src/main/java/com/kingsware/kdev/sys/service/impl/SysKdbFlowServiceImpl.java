@@ -308,31 +308,32 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
 
     private SysKdbFlowRet toRet(FlowInfo info, SysKdbFlowRet logicFlow) {
         SysKdbFlowRet flowRet = new SysKdbFlowRet();
-        flowRet.setId(info.getFlowId());
-        flowRet.setContent(info.getContent());
-        flowRet.setName(info.getName());
-        flowRet.setDescription(info.getDescription());
+        flowRet.setInArgv(logicFlow.getInArgv());
+        flowRet.setOutArgv(logicFlow.getOutArgv());
+        flowRet.setTags(logicFlow.getTags());
+        flowRet.setApplicationName(logicFlow.getApplicationName());
+        flowRet.setApplicationId(logicFlow.getApplicationId());
+        flowRet.setApiUrl(logicFlow.getApiUrl());
+        flowRet.setTranCtrl(logicFlow.getTranCtrl());
+        flowRet.setApiMethod(logicFlow.getApiMethod());
+        flowRet.setId(logicFlow.getId());
+        flowRet.setName(logicFlow.getName());
+        flowRet.setDescription(logicFlow.getDescription());
         flowRet.setDbId(logicFlow.getDbId());
 
-        if (info.getCreateTime() != null) {
-            flowRet.setWhenCreated(new Timestamp(info.getCreateTime()));
-        } else {
-            flowRet.setWhenCreated(new Timestamp(0));
+        if (info != null) {
+            flowRet.setContent(info.getContent());
+            if (info.getCreateTime() != null) {
+                flowRet.setWhenCreated(new Timestamp(info.getCreateTime()));
+            } else {
+                flowRet.setWhenCreated(new Timestamp(0));
+            }
+            if (info.getUpdateTime() != null) {
+                flowRet.setWhenModified(new Timestamp(info.getUpdateTime()));
+            }
         }
-        if (info.getUpdateTime() != null) {
-            flowRet.setWhenModified(new Timestamp(info.getUpdateTime()));
-        }
-        if (logicFlow != null) {
-            flowRet.setInArgv(logicFlow.getInArgv());
-            flowRet.setOutArgv(logicFlow.getOutArgv());
-            flowRet.setTags(logicFlow.getTags());
-            flowRet.setApplicationName(logicFlow.getApplicationName());
-            flowRet.setApplicationId(logicFlow.getApplicationId());
-            flowRet.setApiUrl(logicFlow.getApiUrl());
-            flowRet.setTranCtrl(logicFlow.getTranCtrl());
-            flowRet.setApiMethod(logicFlow.getApiMethod());
 
-        }
+
         return flowRet;
     }
 
@@ -398,6 +399,10 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         info.setDescription(argv.getDescription());
         // 获取子流程id
         String subFlowIds = getSubFlowIds(argv.getContent());
+        if (StringUtils.isEmpty(argv.getContent())) {
+            FlowDefinition definition = FlowDefinition.start(argv.getName()).toEnd();
+            info.setContent(definition.toJson());
+        }
         // 保存到kdb
         KdbApi api = (KdbApi) (DB.getDefault());
         api.editFlow(info);
@@ -467,7 +472,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         long t0 = System.currentTimeMillis();
         List<Object> params = new ArrayList<>();
         // 根据条件查询appId、tags和apiUrl数据
-        String sql = "select t0.id as db_id, t0.name,t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name, sa.api_url, sa.api_method, t0.when_created " +
+        String sql = "select t0.id as db_id, t0.name,t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name, sa.api_url, sa.api_method, t0.when_created, t0.note  as description, t0.app_id as tran_ctrl " +
                 " from sys_logic_flow t0 " +
                 " left join sys_api sa on sa.api_flow_id = t0.flow_id " +
                 " left join dev_application t1 on t1.id=t0.application_id " +
@@ -525,13 +530,14 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         long t2 = System.currentTimeMillis();
         log.info("faas查询用时:{}, {}", (t1-t0), (t2 - t1));
 
-        Map<String, SysKdbFlowRet> dbMap = new HashMap<>();
-        logicFlows.forEach(it -> dbMap.put(it.getId(), it));
+        Map<String, FlowInfo> dbMap = new HashMap<>();
+        flowDataRet.getList().forEach(it -> dbMap.put(it.getFlowId(), it));
         // 转为ret类
         List<SysKdbFlowRet> filterList = new ArrayList<>();
-        for (FlowInfo infoL : flowDataRet.getList()) {
-            filterList.add(toRet(infoL, dbMap.get(infoL.getFlowId())));
+        for (SysKdbFlowRet flowRet: logicFlows) {
+            filterList.add(toRet(dbMap.get(flowRet.getId()), flowRet));
         }
+
         PageDataRet<SysKdbFlowRet> pageDataRet;
         if (argv.isPageQuery()) {
             pageDataRet = PageUtil.memoryPage(argv, filterList, total);
@@ -631,6 +637,9 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         CopyProcessData copyProcessData = new CopyProcessData();
         // 拷贝逻辑编排数据
         CopyAppManager.getInstance().copyFlowData(id, context, copyProcessData);
+        if (copyProcessData.getToCopySet().size() <= 1) {
+            throw BusinessException.serviceThrow("当前逻辑编排流程定义为空，不允许拷贝！");
+        }
         // 开始替换
         CopyAppManager.getInstance().action(copyProcessData, context);
     }
