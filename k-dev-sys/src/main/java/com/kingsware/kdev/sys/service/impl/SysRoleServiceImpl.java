@@ -101,7 +101,12 @@ public class SysRoleServiceImpl extends BaseServiceImpl implements SysRoleServic
     @Override
     public void delete(MultiIdArgv argv) {
         for (String id: argv.getIds()) {
-            DB.delete(SysRole.class, id);
+            if (id != null && !id.equals("")) {
+                // 需要先解绑掉已绑定的角色关系
+                DB.executeUpdateSql("delete from sys_user_role where sys_role_id = ?", id);
+                //  执行删除
+                DB.delete(SysRole.class, id);
+            }
         }
     }
 

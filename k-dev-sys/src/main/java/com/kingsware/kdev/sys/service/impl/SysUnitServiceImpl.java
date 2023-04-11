@@ -47,7 +47,9 @@ public class SysUnitServiceImpl extends BaseServiceImpl implements SysUnitServic
     public void add(SysUnitArgv argv) {
         SysUnit model = BeanUtils.copyObject(argv, SysUnit.class);
         // 生成path，规则为上级的path + /id
-        model.setId(StringUtils.getUUID());
+        if(StringUtils.isEmpty(model.getId())) {
+            model.setId(StringUtils.getUUID());
+        }
         // 设置path
         model.setPath(generateNodePath(model.getId(), argv.getParentId()));
         // 唯一性校验
