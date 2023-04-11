@@ -427,19 +427,20 @@ public class KAuthFilter implements Filter {
     private void  callByFlow(HttpServletRequest request, HttpServletResponse response, ApiInfo api, String path, Map<String, Object> argvMap) {
         // 获取视图模型
         KFlowContext context = KFlowContext.createBaseContext(StringUtils.isNotEmpty(api.getInArgv()) ? api.getInArgv() : "{}", StringUtils.isNotEmpty(api.getOutArgv()) ? api.getOutArgv() : "{}");
-        // 调用流程
-        KdbFlowResult result = KdbFlowExecutor.getInstance().execute(api.getApiFlowId(), api.getSubFlowIds(), argvMap, context, false, false);
         // 用于接口测试，指定id
         if (argvMap.containsKey("replaceBody")) {
             Map<String, Object> sysMap = JsonUtil.toMap(argvMap.get("replaceBody").toString());
             if (sysMap != null) {
                 if (sysMap.containsKey("id")) {
                     Map<String, Object> contextMap = (Map<String, Object>)context.getSystemContext().get("sys");
-                    contextMap.put("uuid", sysMap.get(sysMap.get("id")));
+                    contextMap.put("uuid",sysMap.get("id"));
                 }
             }
 
         }
+
+        // 调用流程
+        KdbFlowResult result = KdbFlowExecutor.getInstance().execute(api.getApiFlowId(), api.getSubFlowIds(), argvMap, context, false, false);
 
         KdbRetFile kdbRetFile = null;
         // 转为api格式
