@@ -498,7 +498,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                     KFlowContext afterIc = KFlowContext.createBaseContext("{}", "{}");
                     afterParams.putAll(beforeFlowResultMap);
                     afterParams.putAll(argv);
- M                   afterParams.put("password", null);
+                    afterParams.put("password", null);
                     KdbFlowResult afterFlowResult = KdbFlowExecutor.getInstance().execute(afterFlow.getValue(), "", afterParams, afterIc, false, false);
                     Object afterFlowResultMap = afterFlowResult.getData();
                     ret.setOtherParams(afterFlowResultMap);
