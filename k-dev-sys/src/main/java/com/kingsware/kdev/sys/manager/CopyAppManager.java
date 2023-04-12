@@ -58,6 +58,9 @@ public class CopyAppManager {
 
         // 查找逻辑编排
         SysLogicFlow sysLogicFlow = DB.findById(SysLogicFlow.class, id);
+        if (sysLogicFlow == null) {
+            return;
+        }
         // 获取faas的逻辑编排
         KdbApi kdbApi = (KdbApi) (DB.getDefault());
         // 查询逻辑编排数据
@@ -113,6 +116,9 @@ public class CopyAppManager {
     public void copyApiData(String id, CopyContextArgv copyContext, CopyProcessData copyProcessData) {
         // 查找逻辑编排
         SysApi sysApi = DB.findById(SysApi.class, id);
+        if (sysApi == null) {
+            return;
+        }
         // 新名称
         String apiName = sysApi.getApiName();
         if (StringUtils.isNotEmpty(copyContext.getNameSuffix())) {
@@ -155,6 +161,9 @@ public class CopyAppManager {
     public void copyPageData(String id, CopyContextArgv copyContext, CopyProcessData copyProcessData) {
         // 查找逻辑编排
         DevPage devPage = DB.findById(DevPage.class, id);
+        if (devPage == null) {
+            return;
+        }
         // 新名称
         String pageName = devPage.getName();
         if (StringUtils.isNotEmpty(copyContext.getNameSuffix())) {
@@ -274,6 +283,9 @@ public class CopyAppManager {
     public void copyDictData(String id, CopyContextArgv copyContext, CopyProcessData copyProcessData) {
 
         SysDict sysDict = DB.findById(SysDict.class, id);
+        if (sysDict == null) {
+            return;
+        }
         String newCode = String.format("%s-%s", sysDict.getCode(), copyContext.getCodeSuffix());
         String oldCode = sysDict.getCode();
         sysDict.setCode(String.format("%s-%s", sysDict.getCode(), copyContext.getCodeSuffix()));
@@ -301,6 +313,9 @@ public class CopyAppManager {
     public void copyConfigData(String id, CopyContextArgv copyContext, CopyProcessData copyProcessData) {
         if (StringUtils.isNotEmpty(copyContext.getSourceAppId()) && StringUtils.isNotEmpty(copyContext.getTargetAppId()) && (!copyContext.getSourceAppId().equals(copyContext.getTargetAppId()))) {
             SysConfig sysConfig = DB.findById(SysConfig.class, id);
+            if (sysConfig == null) {
+                return;
+            }
             // 拷贝FAAS里的逻辑编排
             copyProcessData.addCopyObject(sysConfig);
             copyProcessData.addMapping(sysConfig.getId(), StringUtils.getUUID());
@@ -316,6 +331,9 @@ public class CopyAppManager {
 
     public void copyTaskData(String id, CopyContextArgv copyContext, CopyProcessData copyProcessData) {
         SysTask sysTask = DB.findById(SysTask.class, id);
+        if (sysTask == null) {
+            return;
+        }
         // 拷贝FAAS里的逻辑编排
         copyProcessData.addCopyObject(sysTask);
         copyProcessData.addMapping(sysTask.getId(), StringUtils.getUUID());

@@ -108,8 +108,8 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
         // 拼装sql
         SqlWrapper wrapper = new SqlWrapper("select sa.id, sa.api_name,sa.api_url,sa.api_note,sa.api_tags,sa.api_method,sa.api_argv_type," +
                 "sa.api_req_argv,sa.api_rsp_argv,sa.api_result_handler,sa.who_created,sa.when_created,sa.who_modified,sa.when_modified," +
-                "lf.id api_flow_id,sa.api_code,sa.call_type,sa.app_id,sa.module_id" +
-                " from sys_api sa left join sys_logic_flow lf on lf.id=sa.api_flow_id where 1=1 ");
+                "lf.flow_id api_flow_id,sa.api_code,sa.call_type,sa.app_id,sa.module_id" +
+                " from sys_api sa left join sys_logic_flow lf  on lf.flow_id=sa.api_flow_id where 1=1 ");
         // 拼装查询sql
         if (StringUtils.isNotEmpty(argv.getApiName())) {
             wrapper.addCondition("sa.api_name", Op.LIKE, "%" +argv.getApiName() +"%");
