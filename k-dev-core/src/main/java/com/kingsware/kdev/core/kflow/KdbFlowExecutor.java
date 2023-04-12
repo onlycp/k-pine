@@ -109,6 +109,7 @@ public class KdbFlowExecutor {
             if (LogicFlowManager.getInstance().isTranCtrl(argv.getFlowID())) {
                 // 发起事务
                 TransactionManager.getInstance().begin(60, null, flowId);
+                argv.setTransactionUuid(TransactionManager.getInstance().getTransactionCache().getId());
             }
             // 执行流程
             KdbRet<String> ret = DB.kdbApi().executeFlow(argv, debug, sync);
