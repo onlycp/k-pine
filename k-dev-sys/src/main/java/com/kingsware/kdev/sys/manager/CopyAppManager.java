@@ -333,7 +333,11 @@ public class CopyAppManager {
 
         try {
             DevApplication application = DB.findById(DevApplication.class, id);
-            application.setName(appName);
+            application.setName(appName + "-" + copyContext.getNameSuffix());
+            String currentShortName = StringUtils.isEmpty(application.getShortName()) ?"": application.getShortName();
+            String currentUrl = StringUtils.isEmpty(application.getDefaultPath()) ?"": application.getDefaultPath();
+            application.setShortName(currentShortName + "-" + copyContext.getCodeSuffix());
+            application.setDefaultPath(currentUrl + "/" + copyContext.getUrlSuffix());
             // 拷贝应用
             String newAppId = StringUtils.getUUID();
             copyProcessData.addCopyObject(application);
