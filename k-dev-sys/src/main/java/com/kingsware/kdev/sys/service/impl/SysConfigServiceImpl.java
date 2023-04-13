@@ -81,7 +81,7 @@ public class SysConfigServiceImpl extends BaseServiceImpl implements SysConfigSe
         // 唯一性校验
         DBChecker<SysConfig> checker =DBChecker.build(model, SysConfig.class);
         // 参数名称唯一
-        checker.uni(new String[]{"code", "appId"}, I18n.t("SysConfig.name.unique", "参数名称必须唯一"));
+        checker.uni(new String[]{"name", "appId"}, I18n.t("SysConfig.name.unique", "参数名称必须唯一"));
         // 参数键名唯一
         checker.uni(new String[]{"code", "appId"}, I18n.t("SysConfig.code.unique", "参数键名必须唯一"));
         // 执行校验

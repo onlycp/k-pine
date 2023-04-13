@@ -85,22 +85,17 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         // 转换成ret对象
         SysUserRet userRet = (SysUserRet) model2Ret(model, SysUserRet.class);
         // 获取角色信息
-        List<SysUserRole> userRoles = DB.findList(SysUserRole.class, Expr.builder().add("sysUserId", "=", model.getId()).build());
-        if (!userRoles.isEmpty()) {
-            List<String> ids = new ArrayList<>();
-            for (SysUserRole userRole : userRoles) {
-                ids.add(userRole.getSysRoleId());
-            }
-            userRet.setSysRoleIds(StringUtils.joinToString(ids, ","));
+        List<String> roleIds = DB.findSingleAttributeList(String.class, "select r.id from sys_user_role ur inner join sys_role r on r.id=ur.sys_role_id where ur.sys_user_id=?", model.getId());
+        if (!roleIds.isEmpty()) {
+            Set<String> set = new HashSet<>(roleIds);
+            userRet.setSysRoleIds(StringUtils.joinToString(new ArrayList<>(set), ","));
         }
-        // 获取部门信息
-        List<SysUserUnit> userUnits = DB.findList(SysUserUnit.class, Expr.builder().add("sysUserId", "=", model.getId()).build());
-        if (!userUnits.isEmpty()) {
-            List<String> ids = new ArrayList<>();
-            for (SysUserUnit userUnit : userUnits) {
-                ids.add(userUnit.getSysUnitId());
-            }
-            userRet.setSysUnitIds(StringUtils.joinToString(ids, ","));
+
+        // 查询单位
+        List<String> unitIds = DB.findSingleAttributeList(String.class, "select r.id from sys_user_unit ur inner join sys_unit r on r.id=ur.sys_unit_id where ur.sys_user_id=?", model.getId());
+        if (!unitIds.isEmpty()) {
+            Set<String> set = new HashSet<>(unitIds);
+            userRet.setSysRoleIds(StringUtils.joinToString(new ArrayList<>(set), ","));
         }
         return userRet;
     }
