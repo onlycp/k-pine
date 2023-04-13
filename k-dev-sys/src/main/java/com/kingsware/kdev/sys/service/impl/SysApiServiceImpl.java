@@ -131,7 +131,7 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
         }
         if (StringUtils.isNotEmpty(argv.getAppId())) {
 //            wrapper.addCondition("app_id", Op.EQ, argv.getAppId());
-            wrapper.appendSql(" and (sa.app_id = ? or sa.app_id is null)", argv.getAppId());
+            wrapper.appendSql(" and (sa.app_id = ?)", argv.getAppId());
         }
         if (argv.getCallType() != null) {
             wrapper.addCondition("sa.call_type", Op.EQ, argv.getCallType());

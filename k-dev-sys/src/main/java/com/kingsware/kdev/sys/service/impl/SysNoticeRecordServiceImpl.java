@@ -54,7 +54,7 @@ public class SysNoticeRecordServiceImpl extends BaseServiceImpl implements SysNo
             wrapper.addCondition("notice_id", Op.EQ, argv.getNoticeId());
         }
         if (StringUtils.isNotEmpty(argv.getAppId())) {
-            wrapper.appendSql(" and (app_id = ? or app_id is null)", argv.getAppId());
+            wrapper.appendSql(" and (app_id = ?)", argv.getAppId());
         }
         wrapper.sortBy(" order by notice_time desc ");
         return (PageDataRet<SysNoticeRecordRet>) query(wrapper.getSql(), wrapper.getParams(), argv,SysNoticeRecord.class, SysNoticeRecordRet.class);
