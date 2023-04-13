@@ -45,4 +45,10 @@ public class DevPage extends BaseManageModel {
     /** 页面JSON */
     private String pageJson;
 
+    /** 应用标签 */
+    private String tags;
+
+    /** 模块ID */
+    private String moduleId;
+
 }
