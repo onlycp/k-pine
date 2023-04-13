@@ -2,6 +2,7 @@ package com.kingsware.kdev.core.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
+import com.kingsware.kdev.core.orm.annotation.Column;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -226,6 +227,12 @@ public class JsonUtil {
             if (field.getType().isAssignableFrom(Boolean.class)) {
                 String boolName = "is" + StringUtils.capitalize(field.getName());
                 fieldMap.put(boolName, field);
+            }
+            if (field.isAnnotationPresent(Column.class)) {
+                Column column = field.getAnnotation(Column.class);
+                if (StringUtils.isNotEmpty(column.name())) {
+                    fieldMap.put(StringUtils.lineToHump(column.name()), field);
+                }
             }
         }
         //  遍历map，将值写入到实体
