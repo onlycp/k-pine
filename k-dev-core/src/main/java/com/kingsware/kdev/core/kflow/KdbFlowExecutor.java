@@ -109,12 +109,24 @@ public class KdbFlowExecutor {
             if (LogicFlowManager.getInstance().isTranCtrl(argv.getFlowID())) {
                 // 发起事务
                 TransactionManager.getInstance().begin(60, null, flowId);
+                argv.setTransactionUuid(TransactionManager.getInstance().getTransactionCache().getId());
             }
             // 执行流程
             KdbRet<String> ret = DB.kdbApi().executeFlow(argv, debug, sync);
+
             if (LogicFlowManager.getInstance().isTranCtrl(argv.getFlowID())) {
-                // 提交事务
-                TransactionManager.getInstance().commit();
+                if (ret.getErrorCode() == 0) {
+                    // 提交事务
+                    TransactionManager.getInstance().commit();
+                }
+                else {
+                    try {
+                        TransactionManager.getInstance().rollback();
+                    } catch (TransactionException ex) {
+                        log.warn("error", ex);
+                    }
+                }
+
             }
             if (ret.getErrorCode() != 0) {
                 result.setType(KFlowConstant.RESULT_JSON);

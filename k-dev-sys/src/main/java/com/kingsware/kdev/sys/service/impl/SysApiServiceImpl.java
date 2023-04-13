@@ -106,34 +106,37 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
     @SuppressWarnings("unchecked")
     public PageDataRet<SysApiRet> query(SysApiQueryArgv argv) {
         // 拼装sql
-        SqlWrapper wrapper = new SqlWrapper("select * from sys_api where 1=1 ");
+        SqlWrapper wrapper = new SqlWrapper("select sa.id, sa.api_name,sa.api_url,sa.api_note,sa.api_tags,sa.api_method,sa.api_argv_type," +
+                "sa.api_req_argv,sa.api_rsp_argv,sa.api_result_handler,sa.who_created,sa.when_created,sa.who_modified,sa.when_modified," +
+                "lf.flow_id api_flow_id,sa.api_code,sa.call_type,sa.app_id,sa.module_id" +
+                " from sys_api sa left join sys_logic_flow lf  on lf.flow_id=sa.api_flow_id where 1=1 ");
         // 拼装查询sql
         if (StringUtils.isNotEmpty(argv.getApiName())) {
-            wrapper.addCondition("api_name", Op.LIKE, "%" +argv.getApiName() +"%");
+            wrapper.addCondition("sa.api_name", Op.LIKE, "%" +argv.getApiName() +"%");
         }
         if (StringUtils.isNotEmpty(argv.getApiCode())) {
-            wrapper.addCondition("api_code", Op.LIKE, "%" +argv.getApiCode() +"%");
+            wrapper.addCondition("sa.api_code", Op.LIKE, "%" +argv.getApiCode() +"%");
         }
         if (StringUtils.isNotEmpty(argv.getApiFlowId())) {
-            wrapper.addCondition("api_flow_id", Op.LIKE, "%" +argv.getApiFlowId() +"%");
+            wrapper.addCondition("sa.api_flow_id", Op.LIKE, "%" +argv.getApiFlowId() +"%");
         }
         if (StringUtils.isNotEmpty(argv.getApiMethod())) {
-            wrapper.addCondition("api_method", Op.LIKE, "%" +argv.getApiMethod() +"%");
+            wrapper.addCondition("sa.api_method", Op.LIKE, "%" +argv.getApiMethod() +"%");
         }
         if (StringUtils.isNotEmpty(argv.getApiUrl())) {
-            wrapper.addCondition("api_url", Op.LIKE, "%" +argv.getApiUrl() +"%");
+            wrapper.addCondition("sa.api_url", Op.LIKE, "%" +argv.getApiUrl() +"%");
         }
         if (StringUtils.isNotEmpty(argv.getApiTags())) {
-            wrapper.addCondition("api_tags", Op.LIKE, "%" +argv.getApiTags() +"%");
+            wrapper.addCondition("sa.api_tags", Op.LIKE, "%" +argv.getApiTags() +"%");
         }
         if (StringUtils.isNotEmpty(argv.getAppId())) {
 //            wrapper.addCondition("app_id", Op.EQ, argv.getAppId());
-            wrapper.appendSql(" and (app_id = ? or app_id is null)", argv.getAppId());
+            wrapper.appendSql(" and (sa.app_id = ? or sa.app_id is null)", argv.getAppId());
         }
         if (argv.getCallType() != null) {
-            wrapper.addCondition("call_type", Op.EQ, argv.getCallType());
+            wrapper.addCondition("sa.call_type", Op.EQ, argv.getCallType());
         }
-        wrapper.sortBy("when_created desc");
+        wrapper.sortBy("sa.when_created desc");
         return (PageDataRet<SysApiRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysApiRet.class);
     }
 
