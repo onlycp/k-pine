@@ -223,7 +223,7 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
 //        if (!isSuperAdmin && ids != null) {
 //            sql.append(" right join sys_role_menu srm on srm.sys_menu_id = sm.id ");
 //        }
-        sql.append(" where 1=1  ");
+        sql.append(" where sm.status = 1 ");
         SqlWrapper wrapper = new SqlWrapper(sql.toString());
         if (excludeId != null) {
             wrapper.addCondition("sm.path", Op.NOT_LIKE, "%/"+ excludeId + "/%");
