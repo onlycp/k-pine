@@ -142,8 +142,10 @@ public class SysUnitServiceImpl extends BaseServiceImpl implements SysUnitServic
         // 然后通过in查询相关的部门(包括上级关系)
         Set<Object> ids = new HashSet<>();
         for (SysUnit unit: units) {
-            String[] splits = unit.getPath().split("/");
-            ids.addAll(Arrays.asList(splits));
+            if(StringUtils.isNotEmpty(unit.getPath())) {
+                String[] splits = unit.getPath().split("/");
+                ids.addAll(Arrays.asList(splits));
+            }
         }
         // 重新查询自己想要的
         SqlWrapper wantWrapper = new SqlWrapper("select sun.id, sun.name, sun.parent_id, sun.path, sun.mobile, sun.email, sun.status, sun.note, sun.order_num, sun.who_created, sun.when_created, sun.who_modified, sun.when_modified, sun.app_id"
