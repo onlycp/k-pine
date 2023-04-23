@@ -402,17 +402,18 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         String subFlowIds = getSubFlowIds(argv.getContent());
         // 保存到数据库
         SysLogicFlow logicFlow = DB.findOne(SysLogicFlow.class, Expr.builder().add("flowId", "=", argv.getId()).build());
-        logicFlow.setName(argv.getName());
-        logicFlow.setApplicationId(argv.getApplicationId());
-        logicFlow.setNote(argv.getDescription());
-        logicFlow.setInArgv(argv.getInArgv());
-        logicFlow.setOutArgv(argv.getOutArgv());
-        logicFlow.setTags(argv.getTags());
-        logicFlow.setFlowId(argv.getId());
-        logicFlow.setSubFlowIds(subFlowIds);
-        logicFlow.setTranCtrl(argv.getTranCtrl());
-        DB.update(logicFlow);
-
+        if (logicFlow != null) {
+            logicFlow.setName(argv.getName());
+            logicFlow.setApplicationId(argv.getApplicationId());
+            logicFlow.setNote(argv.getDescription());
+            logicFlow.setInArgv(argv.getInArgv());
+            logicFlow.setOutArgv(argv.getOutArgv());
+            logicFlow.setTags(argv.getTags());
+            logicFlow.setFlowId(argv.getId());
+            logicFlow.setSubFlowIds(subFlowIds);
+            logicFlow.setTranCtrl(argv.getTranCtrl());
+            DB.update(logicFlow);
+        }
 
     }
 

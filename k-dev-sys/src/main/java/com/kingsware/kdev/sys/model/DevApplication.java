@@ -1,6 +1,7 @@
 package com.kingsware.kdev.sys.model;
 
 import com.kingsware.kdev.core.bean.BaseManageModel;
+import com.kingsware.kdev.core.orm.annotation.Column;
 import com.kingsware.kdev.core.orm.annotation.LogicDelete;
 import com.kingsware.kdev.core.orm.annotation.Table;
 import lombok.Data;
@@ -28,9 +29,11 @@ public class DevApplication extends BaseManageModel {
     private String description;
 
     /** 可用状态 */
+    @Column(intToStrSchemeType = "Postgresql")
     private Integer enableStatus;
 
     /** 开发状态 */
+    @Column(intToStrSchemeType = "Postgresql")
     private Integer devStatus;
 
     /** 当前发布版本 */
