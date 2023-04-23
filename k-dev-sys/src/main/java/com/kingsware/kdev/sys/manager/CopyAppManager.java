@@ -282,24 +282,24 @@ public class CopyAppManager {
 
     public void copyDictData(String id, CopyContextArgv copyContext, CopyProcessData copyProcessData) {
 
-        SysDict sysDict = DB.findById(SysDict.class, id);
-        if (sysDict == null) {
-            return;
-        }
-        String newCode = String.format("%s-%s", sysDict.getCode(), copyContext.getCodeSuffix());
-        String oldCode = sysDict.getCode();
-        sysDict.setCode(String.format("%s-%s", sysDict.getCode(), copyContext.getCodeSuffix()));
-        // 拷贝FAAS里的逻辑编排
-        copyProcessData.addCopyObject(sysDict);
-        copyProcessData.addMapping(sysDict.getId(), StringUtils.getUUID());
-        copyProcessData.addMapping(oldCode, newCode);
-        // 拷贝字典项
-        List<SysDictItem> sysDictItems = DB.findList(SysDictItem.class, "select * from sys_dict_item where sys_dict_id=?", id);
-        for (SysDictItem dictItem: sysDictItems) {
-            copyProcessData.addCopyObject(dictItem);
-            copyProcessData.addMapping(dictItem.getId(), StringUtils.getUUID());
-
-        }
+//        SysDict sysDict = DB.findById(SysDict.class, id);
+//        if (sysDict == null) {
+//            return;
+//        }
+//        //String newCode = String.format("%s-%s", sysDict.getCode(), copyContext.getCodeSuffix());
+//        //String oldCode = sysDict.getCode();
+//        // sysDict.setCode(String.format("%s-%s", sysDict.getCode(), copyContext.getCodeSuffix()));
+//        // 拷贝FAAS里的逻辑编排
+//        copyProcessData.addCopyObject(sysDict);
+//        copyProcessData.addMapping(sysDict.getId(), StringUtils.getUUID());
+//        // copyProcessData.addMapping(oldCode, newCode);
+//        // 拷贝字典项
+//        List<SysDictItem> sysDictItems = DB.findList(SysDictItem.class, "select * from sys_dict_item where sys_dict_id=?", id);
+//        for (SysDictItem dictItem: sysDictItems) {
+//            copyProcessData.addCopyObject(dictItem);
+//            copyProcessData.addMapping(dictItem.getId(), StringUtils.getUUID());
+//
+//        }
 
     }
 
@@ -500,7 +500,8 @@ public class CopyAppManager {
                 }
             }
         } catch (Exception e) {
-            log.warn("数据拷贝---应用拷贝异常，将进行回滚...");
+
+            log.warn("数据拷贝---应用拷贝异常，将进行回滚...{}", e);
             rollback(copyProcessData);
         }
         log.info("数据拷贝---完成： 总拷贝数:{}", copyProcessData.getToCopySet().size());
@@ -511,9 +512,12 @@ public class CopyAppManager {
         AtomicReference<String> json = new AtomicReference<>(JsonUtil.toJson(obj));
         // 替换
         for (Map.Entry<String, String> entry : copyProcessData.getUidMap().entrySet()) {
-            String k = entry.getKey();
-            String v = entry.getValue();
-            json.set(json.get().replace(k, v));
+            if (entry != null) {
+                String k = entry.getKey();
+                String v = entry.getValue();
+                json.set(json.get().replace(k, v));
+            }
+
         }
         return JsonUtil.toBean(json.get(), tClass);
     }

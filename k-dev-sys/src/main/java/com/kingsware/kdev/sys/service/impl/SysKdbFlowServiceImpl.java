@@ -57,7 +57,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         // 转换成ret对象
         FlowInfo kdbFlow = DB.kdbApi().get(id);
         // 从数据库查询
-        String sql = "select t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name from sys_logic_flow t0 left join dev_application t1 on t1.id=t0.application_id where flow_id=?";
+        String sql = "select t0.in_argv, t0.name, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name from sys_logic_flow t0 left join dev_application t1 on t1.id=t0.application_id where flow_id=?";
         SysKdbFlowRet logicFlow = DB.findOne(SysKdbFlowRet.class, sql, id);
         return toRet(kdbFlow, logicFlow);
     }

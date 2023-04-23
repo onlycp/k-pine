@@ -399,9 +399,12 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         // 创建关联
         DevTeamApp teamApp = new DevTeamApp();
         teamApp.setTeamId(context.getTeamId());
-        teamApp.setAppId(copyProcessData.getAppIds().toArray(new String[0])[0]);
-        teamApp.setTeamType(0);
-        DB.save(teamApp);
+        if (copyProcessData.getAppIds() != null && !copyProcessData.getAppIds().isEmpty()) {
+            teamApp.setAppId(copyProcessData.getAppIds().toArray(new String[0])[0]);
+            teamApp.setTeamType(0);
+            DB.save(teamApp);
+        }
+
 
     }
 

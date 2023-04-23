@@ -29,11 +29,11 @@ public class DevApplication extends BaseManageModel {
     private String description;
 
     /** 可用状态 */
-    @Column(intToStrSchemeType = "Postgresql")
+//    @Column(intToStrSchemeType = "Postgresql")
     private Integer enableStatus;
 
     /** 开发状态 */
-    @Column(intToStrSchemeType = "Postgresql")
+//    @Column(intToStrSchemeType = "Postgresql")
     private Integer devStatus;
 
     /** 当前发布版本 */

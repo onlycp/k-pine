@@ -98,6 +98,8 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
         if (StringUtils.isNotEmpty(model.getApiCode()) && !model.getApiCode().trim().equals(":open")) {
             checker.uni("apiCode", I18n.t("SysApi.apiCode.unique", "接口编码必须唯一"));
         }
+
+        checker.uni(new String[]{"apiUrl", "apiMethod"}, I18n.t("SysApi.url.unique", "请求路径已存在"));
         // 执行校验
         checker.checkUnique();
     }
