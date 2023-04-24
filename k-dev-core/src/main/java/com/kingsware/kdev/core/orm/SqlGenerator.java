@@ -379,7 +379,7 @@ public class SqlGenerator {
         String head = cleanSql.substring(0, selectIndex + select.length());
         String tail = cleanSql.substring(fromIndex);
         // 去掉order by
-        int orderByIndex = tail.lastIndexOf("order by");
+        int orderByIndex = tail.toLowerCase().lastIndexOf("order by");
         if (orderByIndex > -1) {
             String orderBy = tail.substring(orderByIndex);
             if (!orderBy.contains("(") && !orderBy.contains(")")) {
