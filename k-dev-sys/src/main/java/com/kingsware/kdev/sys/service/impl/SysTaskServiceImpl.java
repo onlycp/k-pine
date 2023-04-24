@@ -109,7 +109,7 @@ public class SysTaskServiceImpl extends BaseServiceImpl implements SysTaskServic
             wrapper.addCondition("t.task_type", Op.EQ, argv.getTaskType());
         }
         if (StringUtils.isNotEmpty(argv.getAppId())) {
-            wrapper.appendSql(" and (t.app_id = ?)", argv.getAppId());
+            wrapper.appendSql(" and (t.application_id = ?)", argv.getAppId());
         }
         wrapper.sortBy("when_created desc");
         return (PageDataRet<SysTaskRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysTask.class, SysTaskRet.class);

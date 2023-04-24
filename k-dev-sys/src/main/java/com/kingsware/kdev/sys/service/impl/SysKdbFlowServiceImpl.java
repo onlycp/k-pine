@@ -57,7 +57,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         // 转换成ret对象
         FlowInfo kdbFlow = DB.kdbApi().get(id);
         // 从数据库查询
-        String sql = "select t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name from sys_logic_flow t0 left join dev_application t1 on t1.id=t0.application_id where flow_id=?";
+        String sql = "select t0.in_argv, t0.name, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name from sys_logic_flow t0 left join dev_application t1 on t1.id=t0.application_id where flow_id=?";
         SysKdbFlowRet logicFlow = DB.findOne(SysKdbFlowRet.class, sql, id);
         return toRet(kdbFlow, logicFlow);
     }
@@ -270,18 +270,23 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             }
             flowDefinition.getNodeLinks().add(nodeLink);
         }
-        SysLogicFlow sysLogicFlow = DB.findOne(SysLogicFlow.class, Expr.builder().add("flowId", "=", argv.getId()).build());
-        SysKdbFlowArgv sysKdbFlowArgv = new SysKdbFlowArgv();
-        sysKdbFlowArgv.setInArgv(argv.getInArgv());
-        sysKdbFlowArgv.setOutArgv(argv.getOutArgv());
-        sysKdbFlowArgv.setId(argv.getId());
-        sysKdbFlowArgv.setName(argv.getName());
-        sysKdbFlowArgv.setTranCtrl(sysLogicFlow.getTranCtrl());
-        sysKdbFlowArgv.setTags(argv.getTags());
-        sysKdbFlowArgv.setApplicationId(argv.getApplicationId());
-        sysKdbFlowArgv.setContent(flowDefinition.toJson());
-        sysKdbFlowArgv.setDefaultSourceName(argv.getDefaultSourceName());
-        this.edit(sysKdbFlowArgv);
+
+        // 查询到FAAS
+        EditFlowInfo info = new EditFlowInfo();
+        info.setContent(flowDefinition.toJson());
+        info.setName(argv.getName());
+        info.setFlowId(argv.getId());
+        info.setDescription(argv.getDescription());
+        // 保存到kdb
+        KdbApi api = (KdbApi) (DB.getDefault());
+        api.editFlow(info);
+
+        // 保存历史记录
+        SysLogicHistory flowHistory = new SysLogicHistory();
+        flowHistory.setFlowId(argv.getId());
+        flowHistory.setFlowJson(info.getContent());
+        DB.save(flowHistory);
+
     }
 
     /**
@@ -392,35 +397,12 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
 
     @Override
     public void edit(SysKdbFlowArgv argv) {
-        EditFlowInfo info = new EditFlowInfo();
-        info.setContent(argv.getContent());
-        info.setName(argv.getName());
-        info.setFlowId(argv.getId());
-        info.setDescription(argv.getDescription());
+
         // 获取子流程id
         String subFlowIds = getSubFlowIds(argv.getContent());
-        if (StringUtils.isEmpty(argv.getContent())) {
-            FlowDefinition definition = FlowDefinition.start(argv.getName()).toEnd();
-            info.setContent(definition.toJson());
-        }
-        // 保存到kdb
-        KdbApi api = (KdbApi) (DB.getDefault());
-        api.editFlow(info);
         // 保存到数据库
         SysLogicFlow logicFlow = DB.findOne(SysLogicFlow.class, Expr.builder().add("flowId", "=", argv.getId()).build());
-        if (logicFlow == null) {
-            logicFlow = new SysLogicFlow();
-            logicFlow.setName(argv.getName());
-            logicFlow.setApplicationId(argv.getApplicationId());
-            logicFlow.setNote(argv.getDescription());
-            logicFlow.setInArgv(argv.getInArgv());
-            logicFlow.setOutArgv(argv.getOutArgv());
-            logicFlow.setTags(argv.getTags());
-            logicFlow.setFlowId(argv.getId());
-            logicFlow.setSubFlowIds(subFlowIds);
-            logicFlow.setTranCtrl(argv.getTranCtrl());
-            DB.save(logicFlow);
-        } else {
+        if (logicFlow != null) {
             logicFlow.setName(argv.getName());
             logicFlow.setApplicationId(argv.getApplicationId());
             logicFlow.setNote(argv.getDescription());
@@ -433,11 +415,6 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             DB.update(logicFlow);
         }
 
-        // 保存历史记录
-        SysLogicHistory flowHistory = new SysLogicHistory();
-        flowHistory.setFlowId(argv.getId());
-        flowHistory.setFlowJson(info.getContent());
-        DB.save(flowHistory);
     }
 
     @Override

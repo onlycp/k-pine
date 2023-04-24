@@ -54,6 +54,9 @@ public class MapUtil {
                 if (map.get(key) instanceof Boolean) {
                     map.put(key, map.get(key).equals(true) ? 1: 0);
                 }
+                else if(map.get(key) instanceof Integer || map.get(key) instanceof Long ) {
+                    map.put(key, map.get(key));
+                }
                 else {
                     map.put(key, 0);
                 }

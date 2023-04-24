@@ -163,6 +163,16 @@ public class SqlGenerator {
         else if (value instanceof Boolean) {
             params.add(Boolean.TRUE.equals(value) ? 1: 0);
         }
+        else if (value instanceof Integer) {
+            boolean toStr = false;
+            if (field.isAnnotationPresent(Column.class)) {
+                Column column = field.getAnnotation(Column.class);
+                if (StringUtils.isNotEmpty(column.intToStrSchemeType()) && column.intToStrSchemeType().toLowerCase().contains(dbType.toLowerCase())) {
+                    toStr = true;
+                }
+            }
+            params.add(toStr ? value.toString(): value);
+        }
         else if (value instanceof String ) {
             if (((String) value).length() >=2000 && "oracle".equalsIgnoreCase(dbType)) {
                 List<String> items = StringUtils.subStringToArray((String) value, 2000);

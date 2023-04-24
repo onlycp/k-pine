@@ -27,5 +27,7 @@ public @interface Column {
     boolean updatable() default true;
     /** 自动赋值 **/
     AutoEnum auto() default AutoEnum.NONE;
+    /** 整型转为字符型 **/
+    String intToStrSchemeType() default "";
 
 }

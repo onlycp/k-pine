@@ -95,7 +95,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         List<String> unitIds = DB.findSingleAttributeList(String.class, "select r.id from sys_user_unit ur inner join sys_unit r on r.id=ur.sys_unit_id where ur.sys_user_id=?", model.getId());
         if (!unitIds.isEmpty()) {
             Set<String> set = new HashSet<>(unitIds);
-            userRet.setSysRoleIds(StringUtils.joinToString(new ArrayList<>(set), ","));
+            userRet.setSysUnitIds(StringUtils.joinToString(new ArrayList<>(set), ","));
         }
         return userRet;
     }
@@ -122,6 +122,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         saveUserRoles(model.getId(), argv.getSysRoleIds());
         // 保存用户和部门的关系
         saveUserUnits(model.getId(), argv.getSysUnitIds());
+
     }
 
     /**

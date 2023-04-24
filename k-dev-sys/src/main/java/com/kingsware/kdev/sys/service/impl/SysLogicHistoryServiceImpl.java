@@ -6,6 +6,9 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
+import com.kingsware.kdev.core.orm.kdb.EditFlowInfo;
+import com.kingsware.kdev.core.orm.kdb.FlowInfo;
+import com.kingsware.kdev.core.orm.kdb.KdbApi;
 import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysKdbFlowArgv;
@@ -60,11 +63,19 @@ public class SysLogicHistoryServiceImpl extends BaseServiceImpl implements SysLo
         SysKdbFlowRet ret = sysKdbFlowService.get(argv.getFlowId());
 
         if (ret != null) {
-            SysKdbFlowArgv flowArgv = new SysKdbFlowArgv();
-            BeanUtils.copyProperties(ret, flowArgv);
-            flowArgv.setContent(argv.getFlowJson());
-            // 保存
-            sysKdbFlowService.edit(flowArgv);
+
+            // 保存到kdb
+            KdbApi api = (KdbApi) (DB.getDefault());
+            // 查询到FAAS
+            FlowInfo flowInfo = api.get(ret.getId());
+            EditFlowInfo info = new EditFlowInfo();
+            info.setContent(argv.getFlowJson());
+            info.setName(flowInfo.getName());
+            info.setFlowId(ret.getId());
+            info.setDescription(ret.getDescription());
+
+            api.editFlow(info);
+
         }
     }
 

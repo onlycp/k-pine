@@ -142,7 +142,7 @@ public class KAuthFilter implements Filter {
             if (url.contains("//")) {
                 url = url.replaceAll("//", "/");
             }
-            log.info("Take-{}, {}",1,  (System.currentTimeMillis()-tt0));
+            // log.info("Take-{}, {}",1,  (System.currentTimeMillis()-tt0));
             String apiUrlPrefix = request.getContextPath() + "/api";
             // 如果是接口或者url文件
             if (url.startsWith(apiUrlPrefix) || url.startsWith(kPageFlag)) {
@@ -158,7 +158,7 @@ public class KAuthFilter implements Filter {
                 if (url.startsWith(apiUrlPrefix)) {
                     contextPath = apiUrlPrefix;
                 }
-                log.info("Take-{}, {}",2,  (System.currentTimeMillis()-tt0));
+                // log.info("Take-{}, {}",2,  (System.currentTimeMillis()-tt0));
                 // 获取配置的接口信息
                 String path = url.replaceFirst(contextPath, "");
                 api = ApiManager.getInstance().getApi(method, path);
@@ -176,7 +176,7 @@ public class KAuthFilter implements Filter {
                     ServletUtil.responseJson(response, BaseRet.fail("接口不存在", RetEnum.SERVICE_FAIL.getCode()));
                     return;
                 }
-                log.info("Take-{}, {}",3,  (System.currentTimeMillis()-tt0));
+                // log.info("Take-{}, {}",3,  (System.currentTimeMillis()-tt0));
                 // 流程调用方式
                 if (api != null && api.getCallType() == 2 && kflowProperties.isEnable()) {
                     callType = CallType.KFLOW;
@@ -198,7 +198,7 @@ public class KAuthFilter implements Filter {
                     ServletUtil.responseJson(response, BaseRet.fail("发布模式无权访问此接口", RetEnum.ONLY_DEV.getCode()));
                     return;
                 }
-                log.info("Take-{}, {}",4,  (System.currentTimeMillis()-tt0));
+                // log.info("Take-{}, {}",4,  (System.currentTimeMillis()-tt0));
                 // 判断是否开放接口
                 isOpenApi = StringUtils.isNotEmpty(apiCode) && apiCode.startsWith(openApiFlag) && api != null;
                 if (isOpenApi) {
@@ -208,12 +208,12 @@ public class KAuthFilter implements Filter {
                     this.checkPermission(request, response, ignore, apiCode);
                 }
 
-                log.info("Take-{}, {}",5,  (System.currentTimeMillis()-tt0));
+                // log.info("Take-{}, {}",5,  (System.currentTimeMillis()-tt0));
                 // 校验license
                 if (!ignore) {
                     checkLicense();
                 }
-                log.info("Take-{}, {}",6,  (System.currentTimeMillis()-tt0));
+                // log.info("Take-{}, {}",6,  (System.currentTimeMillis()-tt0));
                 // 根据不同的调用类型，进行调用相关处理
                 String name = "";
                 SysApiMock apiMock = new SysApiMock();
@@ -236,11 +236,11 @@ public class KAuthFilter implements Filter {
 
                     filterChain.doFilter(wrapperRequest, wrapperResponse);
                 } else {
-                    log.info("Take-{}, {}",7,  (System.currentTimeMillis()-tt0));
+                    // log.info("Take-{}, {}",7,  (System.currentTimeMillis()-tt0));
                     apiMock.setName(api.getApiName());
                     apiMock.setUrl(request.getRequestURI());
                     callByFlow(request, response, api, path, argvMap);
-                    log.info("Take-{}, {}",8,  (System.currentTimeMillis()-tt0));
+                    // log.info("Take-{}, {}",8,  (System.currentTimeMillis()-tt0));
                 }
 
 //                // 保存api-mock
