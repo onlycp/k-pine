@@ -149,15 +149,15 @@ public class SysUnitServiceImpl extends BaseServiceImpl implements SysUnitServic
         }
         // 重新查询自己想要的
         SqlWrapper wantWrapper = new SqlWrapper("select sun.id, sun.name, sun.parent_id, sun.path, sun.mobile, sun.email, sun.status, sun.note, sun.order_num, sun.who_created, sun.when_created, sun.who_modified, sun.when_modified, sun.app_id"
-                + " , su.id as leader_id, su.real_name as leader from sys_unit sun left join sys_user su on sun.leader = su.id where 1=1 ");
+                + " , sun.leader, su.real_name as leader_name from sys_unit sun left join sys_user su on sun.leader = su.id where 1=1 ");
         // 加一个不可能存在的id进去
         ids.add(StringUtils.getUUID());
         wantWrapper.in("sun.id", ids);
-        List<SysUnit> wantList = DB.findList(SysUnit.class, wantWrapper.getSql(), wantWrapper.getParams().toArray());
+        List<SysUnitRet> wantList = DB.findList(SysUnitRet.class, wantWrapper.getSql(), wantWrapper.getParams().toArray());
         // 将结果转为树
         List<SysUnitRet> retList = new ArrayList<>();
-        List<SysUnit> roots = wantList.stream().filter(it -> StringUtils.isEmpty(it.getParentId())).collect(Collectors.toList());
-        for (SysUnit root: roots) {
+        List<SysUnitRet> roots = wantList.stream().filter(it -> StringUtils.isEmpty(it.getParentId())).collect(Collectors.toList());
+        for (SysUnitRet root: roots) {
             retList.add(recursiveHandleRet(root, wantList));
 
         }
@@ -210,10 +210,10 @@ public class SysUnitServiceImpl extends BaseServiceImpl implements SysUnitServic
      * @param familyList 列表
      * @return         ret
      */
-    private SysUnitRet recursiveHandleRet(SysUnit root, List<SysUnit> familyList) {
+    private SysUnitRet recursiveHandleRet(SysUnitRet root, List<SysUnitRet> familyList) {
         // 创建树节点
-        SysUnitRet ret = (SysUnitRet) model2Ret(root, SysUnitRet.class);
-        for (SysUnit child: familyList) {
+        SysUnitRet ret = root;
+        for (SysUnitRet child: familyList) {
             if (StringUtils.isNotEmpty(child.getParentId()) && child.getParentId().equals(root.getId())) {
                 ret.getChildren().add(recursiveHandleRet(child, familyList));
 

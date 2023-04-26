@@ -22,6 +22,8 @@ public class SysUnitRet extends BaseManageRet {
     private String name;
     /** 父节点id */
     private String parentId;
+    /** 负责人 **/
+    private String leaderName;
     /** 路径 */
     private String path;
     /** 负责人 **/
