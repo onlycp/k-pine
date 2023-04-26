@@ -414,6 +414,18 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             logicFlow.setTranCtrl(argv.getTranCtrl());
             DB.update(logicFlow);
         }
+        // 更新流程名称
+        KdbApi api = (KdbApi) (DB.getDefault());
+        // 查询到FAAS
+        FlowInfo flowInfo = api.get(argv.getId());
+        EditFlowInfo info = new EditFlowInfo();
+        info.setContent(flowInfo.getContent());
+        info.setName(argv.getName());
+        info.setFlowId(argv.getId());
+        info.setDescription(argv.getDescription());
+        // 保存到kdb
+
+        api.editFlow(info);
 
     }
 

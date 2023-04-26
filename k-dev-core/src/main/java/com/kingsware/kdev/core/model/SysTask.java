@@ -55,5 +55,7 @@ public class SysTask extends BaseManageModel {
     private String taskArgv;
     /** 下一个实例 **/
     private String nextInst;
+    /** 应用id **/
+    private String appId;
 
 }
