@@ -98,7 +98,7 @@ public class TcpClientContext {
                     }
                 }
                 catch (Exception e) {
-                    log.info("消息发送失败", e);
+//                    log.info("消息发送失败", e);
                 }
             }
         }).start(); ;

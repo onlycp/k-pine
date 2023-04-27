@@ -133,7 +133,7 @@ public class MessageWebSocket {
 //            logger.info("发送消息:" + JsonUtil.toJson(message));
         }
         catch (Exception e) {
-            logger.error("消息发送失败: {}", message);
+//            logger.error("消息发送失败: {}", message);
         }
     }
 

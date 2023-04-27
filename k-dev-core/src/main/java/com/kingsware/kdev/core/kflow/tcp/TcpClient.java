@@ -113,7 +113,7 @@ public class TcpClient {
                 this.socket.getOutputStream().flush();
             }
             catch (Exception e) {
-                log.error("消息发送消息");
+//                log.error("消息发送消息");
             }
 
         }
