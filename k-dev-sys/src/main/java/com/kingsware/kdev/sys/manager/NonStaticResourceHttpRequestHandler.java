@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -22,8 +23,17 @@ public class NonStaticResourceHttpRequestHandler extends ResourceHttpRequestHand
 
     @Override
     protected Resource getResource(HttpServletRequest request) {
-        String path = (String) request.getAttribute(ATTR_FILE);
-        Path filePath = Paths.get(path);
-        return new FileSystemResource(filePath);
+        Object attrFile = request.getAttribute(ATTR_FILE);
+        Resource resource = null;
+        if (attrFile instanceof File) {
+            File file = (File) attrFile;
+            resource = new FileSystemResource(file);
+            file.delete();
+        } else {
+            String path = (String) attrFile;
+            Path filePath = Paths.get(path);
+            resource = new FileSystemResource(filePath);
+        }
+        return resource;
     }
 }

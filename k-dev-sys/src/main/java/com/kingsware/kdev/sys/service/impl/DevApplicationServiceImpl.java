@@ -333,6 +333,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                     SysFile sysFile = DB.findById(SysFile.class, fileId);
                     File file = sysFileService.getFaasFile(sysFile.getFilePath());
                     String json = FileUtils.readFile(file);
+                    file.delete();
                     logStack.addMessage("开始安装应用:" + sysFile.getFileOriginalName());
                     String result = importApp(json);
                     logStack.addMessage("应用安装完成：" + result);

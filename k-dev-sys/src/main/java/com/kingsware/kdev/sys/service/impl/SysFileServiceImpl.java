@@ -165,6 +165,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         String fileRealPath = null;
         String fileName = "";
         String contentType = "application/octet-stream";
+        File tmpFile = null;
         if (file == null) {
             // 如果是ID格式，不是路径格式，则文件已不存在
             if (StringUtils.isUuid(path)) {
@@ -188,8 +189,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                     else {
                         fileName = path.substring(index + 1);
                     }
-
-
+                    tmpFile = faasFile;
                 }
             }
         } else {
@@ -215,6 +215,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                 File faasFile = getFaasFile(file.getFilePath());
                 if (faasFile != null && faasFile.exists()) {
                     fileRealPath = faasFile.getAbsolutePath();
+                    tmpFile = faasFile;
                 }
             }
             else {
@@ -263,6 +264,9 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             contentType = Files.probeContentType(path1);
             response.setContentType(contentType);
             request.setAttribute(NonStaticResourceHttpRequestHandler.ATTR_FILE, fileRealPath);
+            if (tmpFile != null) {
+                request.setAttribute(NonStaticResourceHttpRequestHandler.ATTR_FILE, tmpFile);
+            }
         }
         nonStaticResourceHttpRequestHandler.handleRequest(request, response);
     }
@@ -285,6 +289,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         File tempFile = DB.kdbApi().downloadFile(downloadPath, fileName, "", fileExt);
         if (tempFile != null && tempFile.exists()) {
             tempFile.deleteOnExit();
+//            tempFile.delete();
         }
         return tempFile;
     }
