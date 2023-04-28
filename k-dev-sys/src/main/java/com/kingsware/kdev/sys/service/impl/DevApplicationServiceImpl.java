@@ -243,6 +243,41 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 DB.kdbApi().editFun(editFunctionInfo);
             }
         }
+        // 插入FAAS扩展节点类型
+        if (devPine.getDevFaasNodeTypes() != null && !devPine.getDevFaasNodeTypes().isEmpty()) {
+            long tCount = DB.batchSaveOrUpdate(devPine.getDevFaasNodeTypes(), DevFaasNodeType.class);
+            log.info("完成导入FAAS扩展节点类型：{}", tCount);
+        }
+        // 插入FAAS扩展节点
+        if (devPine.getDevFaasNodes() != null && !devPine.getDevFaasNodes().isEmpty()) {
+            long tCount = DB.batchSaveOrUpdate(devPine.getDevFaasNodes(), DevFaasNode.class);
+            log.info("完成导入FAAS扩展节点：{}", tCount);
+        }
+        // 能力关联
+        if (devPine.getPowerLinks() != null && !devPine.getPowerLinks().isEmpty()) {
+            long tCount = DB.batchSaveOrUpdate(devPine.getPowerLinks(), DevPowerLink.class);
+            log.info("完成导入能力关联：{}", tCount);
+        }
+        // 能力树
+        if (devPine.getDevPowerTrees() != null && !devPine.getDevPowerTrees().isEmpty()) {
+            long tCount = DB.batchSaveOrUpdate(devPine.getDevPowerTrees(), DevPowerTree.class);
+            log.info("完成导入能力树：{}", tCount);
+        }
+        // 插件树
+        if (devPine.getExtPluginTrees() != null && !devPine.getExtPluginTrees().isEmpty()) {
+            long tCount = DB.batchSaveOrUpdate(devPine.getExtPluginTrees(), ExtPluginTree.class);
+            log.info("完成导入插件树：{}", tCount);
+        }
+        // 插件接口
+        if (devPine.getExtPluginInterfaces() != null && !devPine.getExtPluginInterfaces().isEmpty()) {
+            long tCount = DB.batchSaveOrUpdate(devPine.getExtPluginInterfaces(), ExtPluginInterface.class);
+            log.info("完成导入插件接口：{}", tCount);
+        }
+        // 编辑编排模板
+        if (devPine.getSysLogicTemplates() != null && !devPine.getSysLogicTemplates().isEmpty()) {
+            long tCount = DB.batchSaveOrUpdate(devPine.getSysLogicTemplates(), SysLogicTemplate.class);
+            log.info("完成导入编辑编排模板：{}", tCount);
+        }
         String result = String.format("导入应用数:%d, 页面数:%d, 接口数:%d, 字典分类数:%d, 字典项数:%d, 任务调度数:%d, 系统配置数:%d， 菜单数:%d, pine逻辑:%d, faas逻辑:%d, 函数数:%d"
                 , appCount, pageCount, apiCount, dictCount, dictItemCount, taskCount
                 , configCount, menuCount, pineFlowCount, devPine.getKdbFlows().size()

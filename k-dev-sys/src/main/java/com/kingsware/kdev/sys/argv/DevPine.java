@@ -43,4 +43,19 @@ public class DevPine {
     private List<SysTask> tasks;
     /** 应用信息 **/
     private DevApplication info;
+    /** 能力中间表 **/
+    private List<DevPowerLink> powerLinks;
+    /** 能力树 **/
+    private List<DevPowerTree> devPowerTrees;
+    /** 插件接口 **/
+    private List<ExtPluginInterface> extPluginInterfaces;
+    /** 插件树 **/
+    private List<ExtPluginTree> extPluginTrees;
+    /** 逻辑编排模板 **/
+    private List<SysLogicTemplate> sysLogicTemplates;
+    /** faas扩展节点类型 **/
+    private List<DevFaasNodeType> devFaasNodeTypes;
+    /** faas节点 **/
+    private List<DevFaasNode> devFaasNodes;
+
 }

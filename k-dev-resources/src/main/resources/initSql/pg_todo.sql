@@ -259,3 +259,6 @@ VALUES('e0047b3716fa48789d8d2377b1d23195', '064b3b44b85a45fe87fcce88d72b2519', 0
 INSERT INTO dev_module
 (id, app_id, has_path, is_sys, name, parent_id, path, sort, when_created, when_modified, who_created, who_modified)
 VALUES('fbe9d1e36a37423aa9ab4711c569093f', '064b3b44b85a45fe87fcce88d72b2519', 0, 1, '基础功能', NULL, NULL, 2, '2023-03-29 09:26:54', '2023-03-29 09:26:54', '7aed8c297a6940f681c26eb6ab68893d', '7aed8c297a6940f681c26eb6ab68893d');
+
+ALTER TABLE "ext_plugin_tree"
+    ADD COLUMN "clazz_name" varchar(255);
