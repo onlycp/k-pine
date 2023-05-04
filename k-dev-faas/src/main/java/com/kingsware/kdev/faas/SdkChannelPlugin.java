@@ -56,6 +56,22 @@ public class SdkChannelPlugin implements FaasChannelPlugin {
             log.info("当前为k-uniops模式，faas-ext:{}, faas-lib:{}", extPath, libPath);
             FEnv.setConfig(config);
         }
+//        else {
+//            JSONObject config = new JSONObject();
+//            config.put("httpPort", 10081);
+////            String extPath =  "../faas/ext";
+////            String libPath =  "../faas/lib";
+////            config.put("ext.path", extPath);
+////            config.put("lib.path", libPath);
+////            // 如果目录不存在，则创建
+////            if (!new File(extPath).exists())  {
+////                new File(extPath).mkdirs();
+////            }
+////            if (!new File(libPath).exists())  {
+////                new File(libPath).mkdirs();
+////            }
+//            FEnv.setConfig(config);
+//        }
         log.info("插件加载准备:{}",  name());
         Bootstrap.main(null);
         log.info("插件加载完成:{}",  name());

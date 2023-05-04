@@ -49,7 +49,7 @@ public class UniopsInstallInitialize implements SystemInitialize {
                 uniOpsService.publishMenu(stringBuffer.toString());
             }
             catch (Exception e) {
-                log.error("文件读取失败: ", e);
+                log.error("uniops菜单安装失败: ", e);
             }
 
         }
