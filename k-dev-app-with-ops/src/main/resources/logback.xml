@@ -42,4 +42,5 @@
         <appender-ref ref="logFile"/>
         <appender-ref ref="errorFile"/>
     </logger>
+    <logger name ="com.kingsware.flow.mem.MemDFlowEngine" level="warn"/>
 </configuration>

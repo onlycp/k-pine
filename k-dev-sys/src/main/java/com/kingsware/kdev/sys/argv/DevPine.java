@@ -57,5 +57,9 @@ public class DevPine {
     private List<DevFaasNodeType> devFaasNodeTypes;
     /** faas节点 **/
     private List<DevFaasNode> devFaasNodes;
+    /** 开发平台角色 **/
+    private List<SysRole> devRoles;
+    /** 开发平台角色菜单 **/
+    private List<SysRoleMenu> devRoleMenus;
 
 }

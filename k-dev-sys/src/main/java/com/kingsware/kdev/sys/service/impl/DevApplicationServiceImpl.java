@@ -176,6 +176,18 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         // 菜单
         long menuCount = DB.batchSaveOrUpdate(devPine.getMenus(), SysMenu.class);
         log.info("完成导入菜单：{}", menuCount);
+        // 开发平台角色
+        long devRoleCount = 0;
+        if (devPine.getDevRoles() != null && !devPine.getDevRoles().isEmpty()) {
+            devRoleCount = DB.batchSaveOrUpdate(devPine.getDevRoles(), SysRole.class);
+        }
+        log.info("完成导入开发平台角色：{}", devRoleCount);
+        // 开发平台角色菜单
+        long devRoleMenuCount = 0;
+        if (devPine.getDevRoleMenus() != null && !devPine.getDevRoleMenus().isEmpty()) {
+            devRoleMenuCount = DB.batchSaveOrUpdate(devPine.getDevRoleMenus(), SysRoleMenu.class);
+        }
+        log.info("完成导入开发平台角色菜单：{}", devRoleMenuCount);
         // pine逻辑
         long pineFlowCount = DB.batchSaveOrUpdate(devPine.getLogicFlows(), SysLogicFlow.class);
         log.info("完成导入pine逻辑：{}", pineFlowCount);
@@ -278,10 +290,10 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             long tCount = DB.batchSaveOrUpdate(devPine.getSysLogicTemplates(), SysLogicTemplate.class);
             log.info("完成导入编辑编排模板：{}", tCount);
         }
-        String result = String.format("导入应用数:%d, 页面数:%d, 接口数:%d, 字典分类数:%d, 字典项数:%d, 任务调度数:%d, 系统配置数:%d， 菜单数:%d, pine逻辑:%d, faas逻辑:%d, 函数数:%d"
+        String result = String.format("导入应用数:%d, 页面数:%d, 接口数:%d, 字典分类数:%d, 字典项数:%d, 任务调度数:%d, 系统配置数:%d， 菜单数:%d, pine逻辑:%d, faas逻辑:%d, 函数数:%d, 开发平台角色:%d, 开发平台角色菜单:%d"
                 , appCount, pageCount, apiCount, dictCount, dictItemCount, taskCount
                 , configCount, menuCount, pineFlowCount, devPine.getKdbFlows().size()
-                , devPine.getFunctions().size());
+                , devPine.getFunctions().size(), devRoleCount, devRoleMenuCount);
         // 清理缓存
         KCacheManager.getInstance().clear();
         log.info(result);
