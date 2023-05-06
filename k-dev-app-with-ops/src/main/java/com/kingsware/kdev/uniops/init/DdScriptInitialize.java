@@ -18,10 +18,10 @@ import java.io.IOException;
 @Component
 public class DdScriptInitialize implements SystemInitialize {
 
-    @Value("${app.faas.db-source-dir}")
+    @Value("${app.faas.db-source-dir:../db}")
     private String dbSourceDir;
 
-    @Value("${app.faas.db-target-dir}")
+    @Value("${app.faas.db-target-dir:../db}")
     private String dbTargetDir;
     /**
      * 系统初始化处理

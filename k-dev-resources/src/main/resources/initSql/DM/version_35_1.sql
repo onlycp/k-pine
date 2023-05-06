@@ -105,186 +105,6 @@ CREATE TABLE IF NOT EXISTS dev_table_update_log
 alter table sys_operate_log modify  operate_time varchar(20);
 alter table dev_application modify  enable_status int NULL DEFAULT NULL;
 alter table dev_application modify  dev_status int NULL DEFAULT NULL;
-INSERT INTO DEV_FAAS_NODE (ID, NAME, TYPE_ID, TEMPLATE, ICON, PUB_STATUS, ORDER_NUM, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, CONFIG, CODE) VALUES ('2dc3aa0ca085438790ef0020d2df2cc7', '编辑', '107d4c31f6ce4cf69a467d1c2df3bc94', '
-// 表名称
-var tableName = `{{table}}`;
-// 数据源名称
-var sourceName = `{{sourceName}}`;
-// ID列
-var idCol = `{{idCol}}`;
-// 调用通用编辑
-const result = curdUpdate(sourceName, tableName, idCol, {})
-// 写入上下文
-setResult(''result'', result);', 'k-curd-update', 1, '2', '2023-01-30 15:13:40', '94123ca363dc4dfaa62a6bb5dcd3bf50', '2023-02-09 09:49:11', '94123ca363dc4dfaa62a6bb5dcd3bf50', '{
-  "form": [
-    {
-      "label": "数据源",
-      "field": "sourceName",
-      "editor": "select",
-      "source": "flow:d4ae54a989f04dba9e0af1b9815161f2"
-    },
-    {
-      "label": "表名",
-      "field": "table",
-      "editor": "input"
-    },
-    {
-      "label": "ID列",
-      "field": "idCol",
-      "editor": "input",
-      "default": "id"
-    }
-  ]
-}', 'curd_update');
-INSERT INTO DEV_FAAS_NODE (ID, NAME, TYPE_ID, TEMPLATE, ICON, PUB_STATUS, ORDER_NUM, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, CONFIG, CODE) VALUES ('5d2e5853dab241ac931c7d26eaa9fb48', '新增', '107d4c31f6ce4cf69a467d1c2df3bc94', '// 表名称
-var tableName = `{{table}}`;
-// 数据源名称
-var sourceName = `{{sourceName}}`;
-// 调用通用新增
-const result = curdAdd(sourceName, tableName, {});
-// 写入上下文
-setResult(''result'', result);', 'k-curd-add', 1, '1', '2023-01-29 10:40:36', '94123ca363dc4dfaa62a6bb5dcd3bf50', '2023-02-09 09:49:40', '94123ca363dc4dfaa62a6bb5dcd3bf50', '{
-  "form": [
-    {
-      "label": "数据源",
-      "field": "sourceName",
-      "editor": "select",
-      "source": "flow:d4ae54a989f04dba9e0af1b9815161f2"
-    },
-    {
-      "label": "表名",
-      "field": "table",
-      "editor": "input"
-    }
-  ]
-}', 'curd_add');
-INSERT INTO DEV_FAAS_NODE (ID, NAME, TYPE_ID, TEMPLATE, ICON, PUB_STATUS, ORDER_NUM, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, CONFIG, CODE) VALUES ('640aee70854247d8a20216af547baa33', '下载任务', '1418ab1b9dc24275bbf951d90a512185', '
-// 数据源名称
-var sourceName = `{{sourceName}}`;
-// 值属性
-var contennt = `{{content}}`;
-// 文件名称
-var contennt = `{{content}}`;
-// 调用通用编辑
-const result = sysOfflineDownload(sourceName, contennt, fileName, {})
-// 写入上下文
-setResult(''result'', JSON.stringify(result))', 'download', 1, '1', '2023-02-27 15:51:04', '94123ca363dc4dfaa62a6bb5dcd3bf50', '2023-02-27 16:25:28', '94123ca363dc4dfaa62a6bb5dcd3bf50', '{
-  "form": [
-    {
-      "label": "数据源",
-      "field": "sourceName",
-      "editor": "select",
-      "source": "flow:d4ae54a989f04dba9e0af1b9815161f2"
-    },
-    {
-      "label": "文件名称",
-      "field": "fileName",
-      "editor": "input"
-    },
-        {
-          "label": "任务名称",
-          "field": "taskName",
-          "editor": "input"
-        },
-    {
-      "label": "查询语句",
-      "field": "content",
-      "editor": "code"
-    }
-  ]
-}', 'offline-downlad');
-INSERT INTO DEV_FAAS_NODE (ID, NAME, TYPE_ID, TEMPLATE, ICON, PUB_STATUS, ORDER_NUM, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, CONFIG, CODE) VALUES ('6cf81a5268444bd6b28ace29995df12a', '查询单条数据', '107d4c31f6ce4cf69a467d1c2df3bc94', '
-// 数据源名称
-var sourceName = `{{sourceName}}`;
-// 值属性
-var contennt = `{{content}}`;
-// 调用通用编辑
-const result = curdGetOne(sourceName, contennt, {})
-// 写入上下文
-setResult(''result'', JSON.stringify(result))', 'k-curd-one', 1, '5', '2023-02-08 17:56:09', '94123ca363dc4dfaa62a6bb5dcd3bf50', '2023-02-18 11:56:07', '94123ca363dc4dfaa62a6bb5dcd3bf50', '{
-    "form": [
-        {
-            "label": "数据源",
-            "field": "sourceName",
-            "editor": "select",
-            "source": "flow:d4ae54a989f04dba9e0af1b9815161f2"
-        },
-        {
-            "label": "查询语句",
-            "field": "content",
-            "editor": "code"
-        }
-    ]
-}', 'curd-one');
-INSERT INTO DEV_FAAS_NODE (ID, NAME, TYPE_ID, TEMPLATE, ICON, PUB_STATUS, ORDER_NUM, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, CONFIG, CODE) VALUES ('713b6a1a35d74371aea23d54140566d4', '删除', '107d4c31f6ce4cf69a467d1c2df3bc94', '
-// 表名称
-var tableName = `{{table}}`;
-// 数据源名称
-var sourceName = `{{sourceName}}`;
-// ID列
-var idCol = `{{idCol}}`;
-// 值属性
-var valueField = `{{valueField}}`;
-// 调用通用编辑
-const result = curdDelete(sourceName, tableName, idCol, valueField, {})
-// 写入上下文
-setResult(''result'', result);', 'k-curd-delete', 1, '3', '2023-02-07 10:39:50', '94123ca363dc4dfaa62a6bb5dcd3bf50', '2023-02-09 09:47:01', '94123ca363dc4dfaa62a6bb5dcd3bf50', '{
-  "form": [
-    {
-      "label": "数据源",
-      "field": "sourceName",
-      "editor": "select",
-      "source": "flow:d4ae54a989f04dba9e0af1b9815161f2"
-    },
-    {
-      "label": "表名",
-      "field": "table",
-      "editor": "input"
-    },
-    {
-      "label": "ID列",
-      "field": "idCol",
-      "editor": "input",
-      "default": "id"
-    },
-      {
-        "label": "值属性名",
-        "field": "valueField",
-        "editor": "input",
-        "default": "id"
-      }
-  ]
-}', 'curd_delete');
-INSERT INTO DEV_FAAS_NODE (ID, NAME, TYPE_ID, TEMPLATE, ICON, PUB_STATUS, ORDER_NUM, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, CONFIG, CODE) VALUES ('c0611398a04e40b7bb51651186214c97', '分页查询', '107d4c31f6ce4cf69a467d1c2df3bc94', '
-// 数据源名称
-var sourceName = `{{sourceName}}`;
-// 值属性
-var contennt = `{{content}}`;
-// 调用通用编辑
-const result = curdPage(sourceName, contennt, {})
-// 写入上下文
-setResult(''result'', JSON.stringify(result))', 'k-curd-page', 1, '4', '2023-02-07 17:51:48', '94123ca363dc4dfaa62a6bb5dcd3bf50', '2023-02-09 09:46:39', '94123ca363dc4dfaa62a6bb5dcd3bf50', '{
-  "form": [
-    {
-      "label": "数据源",
-      "field": "sourceName",
-      "editor": "select",
-      "source": "flow:d4ae54a989f04dba9e0af1b9815161f2"
-    },
-    {
-      "label": "查询语句",
-      "field": "content",
-      "editor": "code"
-    }
-  ]
-}', 'curd_page');
-
-INSERT INTO DEV_FAAS_NODE_TYPE (ID, NAME, PUB_STATUS, ICON, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED) VALUES ('107d4c31f6ce4cf69a467d1c2df3bc94', '关系数据库', 1, 'database', '2023-01-28 16:54:28', '94123ca363dc4dfaa62a6bb5dcd3bf50', '2023-01-28 16:54:28', '94123ca363dc4dfaa62a6bb5dcd3bf50');
-INSERT INTO DEV_FAAS_NODE_TYPE (ID, NAME, PUB_STATUS, ICON, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED) VALUES ('1418ab1b9dc24275bbf951d90a512185', '系统工具', 1, 'tools', '2023-02-27 15:48:57', '94123ca363dc4dfaa62a6bb5dcd3bf50', '2023-02-27 15:48:57', '94123ca363dc4dfaa62a6bb5dcd3bf50');
-INSERT INTO DEV_FAAS_NODE_TYPE (ID, NAME, PUB_STATUS, ICON, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED) VALUES ('2e512cbbfede45218dd6ab3f1c2a72e2', 'NoSql', 1, 'NoSql', '2023-01-28 16:57:47', '94123ca363dc4dfaa62a6bb5dcd3bf50', '2023-01-28 16:58:30', '94123ca363dc4dfaa62a6bb5dcd3bf50');
-INSERT INTO DEV_FAAS_NODE_TYPE (ID, NAME, PUB_STATUS, ICON, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED) VALUES ('8fc3ea0e4c884bf4a5e5e5bfa3a79c88', '消息队列', 1, 'MQ', '2023-01-28 16:58:48', '94123ca363dc4dfaa62a6bb5dcd3bf50', '2023-01-28 16:58:48', '94123ca363dc4dfaa62a6bb5dcd3bf50');
-INSERT INTO DEV_FAAS_NODE_TYPE (ID, NAME, PUB_STATUS, ICON, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED) VALUES ('c94977f8e74240d8927f9fde864be80b', '脚本语言', 1, 'SCRIPT', '2023-01-28 16:59:13', '94123ca363dc4dfaa62a6bb5dcd3bf50', '2023-01-28 16:59:13', '94123ca363dc4dfaa62a6bb5dcd3bf50');
-
 
 create table if not exists sf_ext_form
 (
@@ -494,6 +314,17 @@ create table dev_application_version_history
     note         varchar(255) null,
     export_data  text         null
 );
+
+INSERT INTO DEV_MODULE (ID, NAME, PATH, HAS_PATH, PARENT_ID, SORT, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, IS_SYS, APP_ID) VALUES ('0913bc0b384c44d99e384b992cb7fe40', '开发平台', '/dev', 1, null, 1, '2023-03-29 10:43:48', '7aed8c297a6940f681c26eb6ab68893d', '2023-03-30 09:55:00', '7aed8c297a6940f681c26eb6ab68893d', 1, '064b3b44b85a45fe87fcce88d72b2519');
+INSERT INTO DEV_MODULE (ID, NAME, PATH, HAS_PATH, PARENT_ID, SORT, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, IS_SYS, APP_ID) VALUES ('09e4ec197da14de3844b6b04c4fa5ee9', '开发平台管理', null, 0, null, 3, '2023-03-29 10:48:15', '7aed8c297a6940f681c26eb6ab68893d', '2023-03-29 10:48:15', '7aed8c297a6940f681c26eb6ab68893d', 1, '064b3b44b85a45fe87fcce88d72b2519');
+INSERT INTO DEV_MODULE (ID, NAME, PATH, HAS_PATH, PARENT_ID, SORT, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, IS_SYS, APP_ID) VALUES ('1e329b86988b4dd79b49887b774b0879', '示例', null, 0, null, 18, '2023-03-29 16:28:22', '7aed8c297a6940f681c26eb6ab68893d', '2023-03-29 16:28:22', '7aed8c297a6940f681c26eb6ab68893d', 1, '064b3b44b85a45fe87fcce88d72b2519');
+INSERT INTO DEV_MODULE (ID, NAME, PATH, HAS_PATH, PARENT_ID, SORT, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, IS_SYS, APP_ID) VALUES ('5a10d15671704b6cbc01cc3a8bed365a', '公共库', null, 0, null, 4, '2022-05-31 15:18:08', '7aed8c297a6940f681c26eb6ab68893d', '2022-05-31 15:24:40', '7aed8c297a6940f681c26eb6ab68893d', 1, '064b3b44b85a45fe87fcce88d72b2519');
+INSERT INTO DEV_MODULE (ID, NAME, PATH, HAS_PATH, PARENT_ID, SORT, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, IS_SYS, APP_ID) VALUES ('90f2c2ea0f9942d181388e24fd6ee936', 'v3开发', '/dev/v3', 1, '0913bc0b384c44d99e384b992cb7fe40', 1, '2023-03-29 17:37:35', '7aed8c297a6940f681c26eb6ab68893d', '2023-03-30 09:55:12', '7aed8c297a6940f681c26eb6ab68893d', 1, '064b3b44b85a45fe87fcce88d72b2519');
+INSERT INTO DEV_MODULE (ID, NAME, PATH, HAS_PATH, PARENT_ID, SORT, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, IS_SYS, APP_ID) VALUES ('9bbe33574d0547e78f72f5982bea26cd', '子页面', null, 0, '0913bc0b384c44d99e384b992cb7fe40', 0, '2023-03-29 10:46:23', '7aed8c297a6940f681c26eb6ab68893d', '2023-03-30 09:55:08', '7aed8c297a6940f681c26eb6ab68893d', 1, '064b3b44b85a45fe87fcce88d72b2519');
+INSERT INTO DEV_MODULE (ID, NAME, PATH, HAS_PATH, PARENT_ID, SORT, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, IS_SYS, APP_ID) VALUES ('d4820db91eab4cdc9c82703cf1d4df83', '流程关联表单页', null, 0, '1e329b86988b4dd79b49887b774b0879', 0, '2023-03-29 16:28:46', '7aed8c297a6940f681c26eb6ab68893d', '2023-03-29 16:28:46', '7aed8c297a6940f681c26eb6ab68893d', 0, '064b3b44b85a45fe87fcce88d72b2519');
+INSERT INTO DEV_MODULE (ID, NAME, PATH, HAS_PATH, PARENT_ID, SORT, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, IS_SYS, APP_ID) VALUES ('e0047b3716fa48789d8d2377b1d23195', '系统配置', null, 0, null, 2, '2023-03-29 09:27:04', '7aed8c297a6940f681c26eb6ab68893d', '2023-03-29 09:27:04', '7aed8c297a6940f681c26eb6ab68893d', 1, '064b3b44b85a45fe87fcce88d72b2519');
+INSERT INTO DEV_MODULE (ID, NAME, PATH, HAS_PATH, PARENT_ID, SORT, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, IS_SYS, APP_ID) VALUES ('fbe9d1e36a37423aa9ab4711c569093f', '基础功能', null, 0, null, 2, '2023-03-29 09:26:54', '7aed8c297a6940f681c26eb6ab68893d', '2023-03-29 09:26:54', '7aed8c297a6940f681c26eb6ab68893d', 1, '064b3b44b85a45fe87fcce88d72b2519');
+
 
 
 
