@@ -1,12 +1,15 @@
 package com.kingsware.kdev.sys.manager;
 
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -27,8 +30,12 @@ public class NonStaticResourceHttpRequestHandler extends ResourceHttpRequestHand
         Resource resource = null;
         if (attrFile instanceof File) {
             File file = (File) attrFile;
-            resource = new FileSystemResource(file);
-            file.delete();
+            try {
+                resource = new InputStreamResource(new FileInputStream(file));
+                file.delete();
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
         } else {
             String path = (String) attrFile;
             Path filePath = Paths.get(path);
