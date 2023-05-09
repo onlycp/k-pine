@@ -49,7 +49,7 @@ public class SysKdbFlowController extends BaseController {
      */
     @ApiOperation(value = "详情 " ,notes = "详情")
     @GetMapping("/{id}")
-    @Dev
+//    @Dev
     public BaseRet<SysKdbFlowRet> get(@PathVariable String id) {
         return BaseRet.success(sysKdbFlowService.get(id));
     }

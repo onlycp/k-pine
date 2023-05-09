@@ -72,8 +72,9 @@ public class IpUtil {
             if (socket.getLocalAddress() instanceof Inet4Address) {
                 return Optional.of((Inet4Address) socket.getLocalAddress());
             }
-        } catch (UnknownHostException networkInterfaces) {
-            throw new RuntimeException(networkInterfaces);
+        }
+        catch (Exception e) {
+
         }
         return Optional.empty();
     }
