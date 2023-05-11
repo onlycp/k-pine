@@ -6,6 +6,7 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.sys.argv.CopyContextArgv;
 import com.kingsware.kdev.sys.argv.DevPageArgv;
 import com.kingsware.kdev.sys.argv.DevPageQueryArgv;
+import com.kingsware.kdev.sys.model.DevPage;
 import com.kingsware.kdev.sys.ret.DevPageRet;
 
 /**
@@ -36,6 +37,12 @@ public interface DevPageService extends BaseService {
      * @param argv 编辑
      */
     void edit(DevPageArgv argv);
+
+    /**
+     * 校验唯一
+     * @param model
+     */
+    void checkUnique(DevPage model);
 
     /**
      * 编辑
