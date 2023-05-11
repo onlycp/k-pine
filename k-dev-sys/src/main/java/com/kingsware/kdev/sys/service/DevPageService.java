@@ -63,4 +63,12 @@ public interface DevPageService extends BaseService {
      * @param copyData  拷贝参数
      */
     void copyData(String id, CopyContextArgv copyData);
+
+    /**
+     * 导出pine包
+     * @param argv
+     * @return
+     */
+    void exportPine(MultiIdArgv argv);
+
 }

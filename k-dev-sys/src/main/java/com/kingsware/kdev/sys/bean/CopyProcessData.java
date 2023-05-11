@@ -8,6 +8,7 @@ import com.kingsware.kdev.sys.model.*;
 import lombok.Data;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author chenp
@@ -67,6 +68,48 @@ public class CopyProcessData {
         if (!existCopyObject(obj)) {
             this.toCopySet.add(obj);
         }
+    }
+
+    /**
+     * 获取流程id
+     * @return
+     */
+    public Set<String> getFlowIdsFromObjects() {
+        Set<String> strings = new HashSet<>();
+        for (Object curObj: toCopySet) {
+            if (curObj instanceof SysLogicFlow) {
+                strings.add(((SysLogicFlow)curObj).getId());
+            }
+        }
+        return strings.isEmpty()? null: strings;
+    }
+
+    /**
+     * 获取接口id
+     * @return
+     */
+    public Set<String> getApiIdsFromObjects() {
+        Set<String> strings = new HashSet<>();
+        for (Object curObj: toCopySet) {
+            if (curObj instanceof SysApi) {
+                strings.add(((SysApi)curObj).getId());
+            }
+        }
+        return strings.isEmpty()? null: strings;
+    }
+
+    /**
+     * 获取页面id
+     * @return
+     */
+    public Set<String> getPageIdsFromObjects() {
+        Set<String> strings = new HashSet<>();
+        for (Object curObj: toCopySet) {
+            if (curObj instanceof DevPage) {
+                strings.add(((DevPage)curObj).getId());
+            }
+        }
+        return strings.isEmpty()? null: strings;
     }
 
 

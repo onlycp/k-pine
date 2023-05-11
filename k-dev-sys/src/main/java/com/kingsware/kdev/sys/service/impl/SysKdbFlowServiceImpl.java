@@ -10,6 +10,7 @@ import com.kingsware.kdev.core.jsonschema.JsonschemaMock;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
+import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
 import com.kingsware.kdev.core.kflow.define.*;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.PagedList;
@@ -19,8 +20,12 @@ import com.kingsware.kdev.core.orm.kdb.*;
 import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.sys.argv.*;
 import com.kingsware.kdev.core.model.SysLogicFlow;
+import com.kingsware.kdev.sys.bean.ApplicationConfig;
 import com.kingsware.kdev.sys.bean.CopyProcessData;
+import com.kingsware.kdev.sys.bean.ExportData;
+import com.kingsware.kdev.sys.bean.ExportRootData;
 import com.kingsware.kdev.sys.manager.CopyAppManager;
+import com.kingsware.kdev.sys.model.DevApplication;
 import com.kingsware.kdev.sys.model.DevFaasNode;
 import com.kingsware.kdev.sys.model.SysLogicHistory;
 import com.kingsware.kdev.sys.ret.SysFlowDebugRet;
@@ -32,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -51,6 +57,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
     private SysApiService sysApiService;
     @Value("${app.mode.dev:false}")
     private boolean modeDev;
+
 
     @Override
     public SysKdbFlowRet get(String id) {
@@ -633,7 +640,25 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         CopyAppManager.getInstance().action(copyProcessData, context);
     }
 
+    @Override
+    public void exportPine(MultiIdArgv argv) {
 
+        CopyContextArgv contextArgv = new CopyContextArgv();
+        contextArgv.setDeepCopy(1);
+        contextArgv.setUrlSuffix("v1");
+        contextArgv.setCodeSuffix("v1");
+        contextArgv.setTargetAppId("hello-world");
+        contextArgv.setSourceAppId("hello-world");
+        contextArgv.setWithSystemData(1);
+        contextArgv.setNameSuffix("hello-world");
+        CopyProcessData copyProcessData = new CopyProcessData();
+        for (String id: argv.getIds()) {
+            SysLogicFlow sysLogicFlow = DB.findById(SysLogicFlow.class, id);
+            CopyAppManager.getInstance().copyFlowData(id, contextArgv, copyProcessData);
+        }
+        KdbRetFile retFile = CopyAppManager.getInstance().exportPine(copyProcessData);
+        ServletUtil.responseFile(ServletUtil.response(), "Logic" + DateUtils.formatDate(new Date(), DateUtils.DATE_TIME_1) + ".pine", retFile.getData());
+    }
 
 
 }

@@ -107,4 +107,14 @@ public class SysApiController extends BaseController {
         return BaseRet.success();
     }
 
+    /**
+     *  导出pine
+     * @return 提示
+     */
+    @ApiOperation(value = "导出pine " ,notes = "导出pine")
+    @PostMapping("/export-pine")
+    public void exportPine(@RequestBody MultiIdArgv argv) {
+        sysApiService.exportPine(argv);
+    }
+
 }
