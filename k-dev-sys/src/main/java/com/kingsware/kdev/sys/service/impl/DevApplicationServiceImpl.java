@@ -437,7 +437,6 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
 
     @Override
     public void copyData(String id, CopyAppArgv context) {
-        BorderStyle.DASH_DOT_DOT
         CopyContextArgv contextArgv = new CopyContextArgv();
         contextArgv.setWithSystemData(0);
         contextArgv.setDeepCopy(1);
