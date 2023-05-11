@@ -197,10 +197,12 @@ public class PoiExcelHandler implements KExcelHandler {
 
                     // 合并单元格
                     if (!region.isSingleCell()) {
-
                         for (int i=region.getStartCell().getColumnIndex(); i<=region.getEndCell().getColumnIndex(); i++) {
-                            for (int j=region.getStartCell().getRowIndex(); j<=region.getEndCell().getRowIndex(); j++) {
-                                Row iRow = sheet.getRow(j);
+                            for (int k=region.getStartCell().getRowIndex(); k<=region.getEndCell().getRowIndex(); k++) {
+                                Row iRow = sheet.getRow(k);
+                                if (iRow == null) {
+                                    iRow = sheet.createRow(k);
+                                }
                                 if (iRow != null) {
                                     Cell iCell = iRow.getCell(i);
                                     if (iCell != null) {
@@ -306,7 +308,9 @@ public class PoiExcelHandler implements KExcelHandler {
             }
             font.setBold(style.isBold());
             font.setItalic(style.isItalic());
-            font.setFontHeightInPoints(style.getFontSize().shortValue());
+            if (style.getFontSize() != null) {
+                font.setFontHeightInPoints(style.getFontSize().shortValue());
+            }
 
             if (StringUtils.isNotEmpty(style.getFontColor())) {
                 try {
