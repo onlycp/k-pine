@@ -40,9 +40,14 @@ public class ExportData {
      */
     public static ExportData createData(String type, Set<String> ids) {
         ExportData exportData = new ExportData();
-        List<String> resIds = new ArrayList<>();
-        resIds.addAll(ids);
-        exportData.setIds(resIds);
+        if (ids!= null && !ids.isEmpty()) {
+            List<String> resIds = new ArrayList<>();
+            resIds.addAll(ids);
+            exportData.setIds(resIds);
+        }
+        else {
+            exportData.setIds(null);
+        }
         exportData.setType(type);
         return exportData;
     }
