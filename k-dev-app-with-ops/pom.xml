@@ -57,7 +57,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <mainClass>
-                        com.kingsware.com.kingsware.kdev.App
+                        com.kingsware.kdev.App
                     </mainClass>
                 </configuration>
             </plugin>

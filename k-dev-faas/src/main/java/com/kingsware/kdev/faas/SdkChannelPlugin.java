@@ -37,41 +37,20 @@ public class SdkChannelPlugin implements FaasChannelPlugin {
         if (inited) {
             return;
         }
-        // 如果是uniops，那么就调整目录
-        if (LicenseManager.getInstance().isUniopsApp()) {
-            log.info("当前为uniops应用");
-            JSONObject config = new JSONObject();
-            config.put("httpPort", 10081);
-            String extPath =  "faas/ext";
-            String libPath =  "faas/lib";
-            config.put("ext.path", extPath);
-            config.put("lib.path", libPath);
-            // 如果目录不存在，则创建
-            if (!new File(extPath).exists())  {
-                new File(extPath).mkdirs();
-            }
-            if (!new File(libPath).exists())  {
-                new File(libPath).mkdirs();
-            }
-            log.info("当前为k-uniops模式，faas-ext:{}, faas-lib:{}", extPath, libPath);
-            FEnv.setConfig(config);
-        }
-//        else {
-//            JSONObject config = new JSONObject();
-//            config.put("httpPort", 10081);
-////            String extPath =  "../faas/ext";
-////            String libPath =  "../faas/lib";
-////            config.put("ext.path", extPath);
-////            config.put("lib.path", libPath);
-////            // 如果目录不存在，则创建
-////            if (!new File(extPath).exists())  {
-////                new File(extPath).mkdirs();
-////            }
-////            if (!new File(libPath).exists())  {
-////                new File(libPath).mkdirs();
-////            }
-//            FEnv.setConfig(config);
+        JSONObject config = new JSONObject();
+        config.put("httpPort", 10081);
+//        String extPath =  "./ext";
+//        String libPath =  "./lib";
+//        config.put("ext.path", extPath);
+//        config.put("lib.path", libPath);
+//        // 如果目录不存在，则创建
+//        if (!new File(extPath).exists())  {
+//            new File(extPath).mkdirs();
 //        }
+//        if (!new File(libPath).exists())  {
+//            new File(libPath).mkdirs();
+//        }
+        FEnv.setConfig(config);
         log.info("插件加载准备:{}",  name());
         Bootstrap.main(null);
         log.info("插件加载完成:{}",  name());

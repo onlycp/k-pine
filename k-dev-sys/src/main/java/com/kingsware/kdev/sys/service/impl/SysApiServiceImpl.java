@@ -10,6 +10,8 @@ import com.kingsware.kdev.core.cache.api.ApiManager;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
+import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
+import com.kingsware.kdev.core.model.SysLogicFlow;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
@@ -29,6 +31,7 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -234,4 +237,25 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
         // 开始
         CopyAppManager.getInstance().action(copyProcessData, context);
     }
+
+    @Override
+    public void exportPine(MultiIdArgv argv) {
+
+        CopyContextArgv contextArgv = new CopyContextArgv();
+        contextArgv.setDeepCopy(1);
+        contextArgv.setUrlSuffix("v1");
+        contextArgv.setCodeSuffix("v1");
+        contextArgv.setTargetAppId("hello-world");
+        contextArgv.setSourceAppId("hello-world");
+        contextArgv.setWithSystemData(1);
+        contextArgv.setNameSuffix("hello-world");
+        CopyProcessData copyProcessData = new CopyProcessData();
+        for (String id: argv.getIds()) {
+            CopyAppManager.getInstance().copyApiData(id, contextArgv, copyProcessData);
+        }
+        KdbRetFile retFile = CopyAppManager.getInstance().exportPine(copyProcessData);
+        ServletUtil.responseFile(ServletUtil.response(), "Api" + DateUtils.formatDate(new Date(), DateUtils.DATE_TIME_1) + ".pine", retFile.getData());
+    }
+
+
 }

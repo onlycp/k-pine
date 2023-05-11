@@ -67,4 +67,11 @@ public interface SysApiService extends BaseService {
      */
     void copyData(String id, CopyContextArgv copyData);
 
+    /**
+     * 导出pine包
+     * @param argv
+     * @return
+     */
+    void exportPine(MultiIdArgv argv);
+
 }

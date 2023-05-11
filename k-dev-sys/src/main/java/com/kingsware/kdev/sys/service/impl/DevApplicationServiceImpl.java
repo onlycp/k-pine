@@ -13,6 +13,7 @@ import com.kingsware.kdev.core.cache.kcache.KCacheManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
+import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
 import com.kingsware.kdev.core.model.SysFile;
 import com.kingsware.kdev.core.model.SysLogicFlow;
 import com.kingsware.kdev.core.model.SysTask;
@@ -30,6 +31,7 @@ import com.kingsware.kdev.sys.ret.DevApplicationRet;
 import com.kingsware.kdev.sys.service.DevApplicationService;
 import com.kingsware.kdev.sys.service.SysFileService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -147,7 +149,10 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         DevPine devPine = appData2Pine(json);
         log.info("开始导入数据");
         // 处理应用信息
-        long appCount = DB.saveOrUpdate(devPine.getInfo(), DevApplication.class);
+        long appCount = 0;
+        if (devPine.getInfo() != null && StringUtils.isNotEmpty(devPine.getInfo().getId())) {
+            appCount = DB.saveOrUpdate(devPine.getInfo(), DevApplication.class);
+        }
         log.info("完成导入应用信息：{}", appCount);
         // 处理页面
         long pageCount = DB.batchSaveOrUpdate(devPine.getPages(), DevPage.class);
@@ -432,6 +437,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
 
     @Override
     public void copyData(String id, CopyAppArgv context) {
+        BorderStyle.DASH_DOT_DOT
         CopyContextArgv contextArgv = new CopyContextArgv();
         contextArgv.setWithSystemData(0);
         contextArgv.setDeepCopy(1);
@@ -455,5 +461,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
 
 
     }
+
+
 
 }

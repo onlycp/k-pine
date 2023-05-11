@@ -6,6 +6,7 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.cache.kcache.KCache;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
+import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
@@ -27,6 +28,7 @@ import org.springframework.util.ResourceUtils;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -148,5 +150,25 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
         CopyAppManager.getInstance().copyPageData(id, context, copyProcessData);
         // 开始
          CopyAppManager.getInstance().action(copyProcessData, context);
+    }
+
+
+    @Override
+    public void exportPine(MultiIdArgv argv) {
+
+        CopyContextArgv contextArgv = new CopyContextArgv();
+        contextArgv.setDeepCopy(1);
+        contextArgv.setUrlSuffix("v1");
+        contextArgv.setCodeSuffix("v1");
+        contextArgv.setTargetAppId("hello-world");
+        contextArgv.setSourceAppId("hello-world");
+        contextArgv.setWithSystemData(1);
+        contextArgv.setNameSuffix("hello-world");
+        CopyProcessData copyProcessData = new CopyProcessData();
+        for (String id: argv.getIds()) {
+            CopyAppManager.getInstance().copyPageData(id, contextArgv, copyProcessData);
+        }
+        KdbRetFile retFile = CopyAppManager.getInstance().exportPine(copyProcessData);
+        ServletUtil.responseFile(ServletUtil.response(), "Page" + DateUtils.formatDate(new Date(), DateUtils.DATE_TIME_1) + ".pine", retFile.getData());
     }
 }

@@ -5,6 +5,10 @@ import com.kingsware.kdev.core.auth.Dev;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.cache.api.ApiManager;
 import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.kflow.KFlowContext;
+import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
+import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
+import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
 import com.kingsware.kdev.core.model.SysLogicFlow;
 import com.kingsware.kdev.core.model.SysTask;
 import com.kingsware.kdev.core.orm.DB;
@@ -15,13 +19,16 @@ import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.CopyContextArgv;
+import com.kingsware.kdev.sys.bean.ApplicationConfig;
 import com.kingsware.kdev.sys.bean.CopyProcessData;
+import com.kingsware.kdev.sys.bean.ExportData;
+import com.kingsware.kdev.sys.bean.ExportRootData;
 import com.kingsware.kdev.sys.model.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -32,7 +39,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 @Slf4j
 public class CopyAppManager {
-    private String pineAppId = "064b3b44b85a45fe87fcce88d72b2519";
+    public static String pineAppId = "064b3b44b85a45fe87fcce88d72b2519";
 
     private static CopyAppManager instance;
 
@@ -621,6 +628,70 @@ public class CopyAppManager {
         }
         log.info("数据拷贝---完成回滚");
 
+    }
+
+
+    /**
+     * 导出pine
+     * @param copyProcessData
+     * @return
+     */
+    public KdbRetFile exportPine(CopyProcessData copyProcessData) {
+        // 应用信息直接使用青松信息
+        ExportRootData rootData = new ExportRootData();
+        rootData.setDownloadSys(false);
+        // 初始化应用数据, 这里直接使用青松开发平台，因为可能存在导多个不同应用的数据
+        {
+            DevApplication application = DB.findById(DevApplication.class, CopyAppManager.pineAppId);
+            ApplicationConfig config = new ApplicationConfig();
+            config.setName(application.getName());
+            config.setId(application.getId());
+            config.setPinePort(10082);
+            config.setFaasPort(10081);
+            config.setDataSource("");
+            config.setVersion("1.0");
+            config.setVersionType("linux");
+            rootData.setApplicationConfig(config);
+        }
+        // 初如化其他数据
+        {
+
+            List<ExportData> exportDataList = new ArrayList<>();
+            exportDataList.add(ExportData.createData("page", copyProcessData.getPageIdsFromObjects()));
+            exportDataList.add(ExportData.createData("api", copyProcessData.getApiIdsFromObjects()));
+            exportDataList.add(ExportData.createData("task"));
+            exportDataList.add(ExportData.createData("dict"));
+            exportDataList.add(ExportData.createData("config"));
+            exportDataList.add(ExportData.createData("baseMenu"));
+            exportDataList.add(ExportData.createData("flow", copyProcessData.getFlowIdsFromObjects()));
+            rootData.setExportData(exportDataList);
+        }
+
+        // 请求
+        // 创建上下文
+        KFlowContext context = KFlowContext.createBaseContext("{}", "{}");
+        // 调用流程
+        String exportFlowId = SpringContext.getProperties("app.export.flowId", "609a655bae59402babe2c1f439849e03");
+
+        KdbFlowResult result = KdbFlowExecutor.getInstance().execute(exportFlowId, "", JsonUtil.beanToMap(rootData), context, true, false, new ArrayList<>());
+        KdbRetFile kdbRetFile = (KdbRetFile) result.getData();
+        // 转为map
+        Map<String, Object> devMap = JsonUtil.toMap(new String(kdbRetFile.getData()));
+        devMap.put("powerLinks", Collections.emptyList());
+        devMap.put("functions", Collections.emptyList());
+        devMap.put("devRoleMenus", Collections.emptyList());
+        devMap.put("devPowerTrees", Collections.emptyList());
+        devMap.put("devFaasNodes", Collections.emptyList());
+        devMap.put("devRoles", Collections.emptyList());
+        devMap.put("extPluginInterfaces", Collections.emptyList());
+        devMap.put("extPluginTrees", Collections.emptyList());
+        devMap.put("devFaasNodeTypes", Collections.emptyList());
+        devMap.put("menus", Collections.emptyList());
+        devMap.put("tasks", Collections.emptyList());
+        devMap.put("configs", Collections.emptyList());
+        devMap.put("sysLogicTemplates", Collections.emptyList());
+        kdbRetFile.setData(JsonUtil.toJson(devMap).getBytes(StandardCharsets.UTF_8));
+        return kdbRetFile;
     }
 
 
