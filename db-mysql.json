@@ -1,16 +1,16 @@
 [
   {
     "sourceName":"MySql",
-    "driverClass":"org.h2.Driver",
-    "jdbcUrl":"jdbc:h2:~/kpine7;MODE=MYSQL;DATABASE_TO_UPPER=false",
+    "driverClass":"com.mysql.jdbc.Driver",
+    "jdbcUrl":"jdbc:mysql://127.0.0.1:3306/k-pine?serverTimezone=GMT%2B8&verifyServerCertificate=false&useSSL=false&characterEncoding=UTF-8&allowPublicKeyRetrieval=true",
     "userName":"root",
-    "password":"123456"
+    "password":"Kpine@2022"
   },
   {
     "sourceName":"MySql2",
-    "driverClass":"org.h2.Driver",
-    "jdbcUrl":"jdbc:h2:~/kpine7;MODE=MYSQL;DATABASE_TO_UPPER=false",
+    "driverClass":"com.mysql.jdbc.Driver",
+    "jdbcUrl":"jdbc:mysql://127.0.0.1:3306/k-pine?serverTimezone=GMT%2B8&verifyServerCertificate=false&useSSL=false&characterEncoding=UTF-8&allowPublicKeyRetrieval=true",
     "userName":"root",
-    "password":"123456"
+    "password":"Kpine@2022"
   }
 ]
