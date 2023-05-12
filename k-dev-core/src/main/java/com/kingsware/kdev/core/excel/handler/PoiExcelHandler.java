@@ -285,7 +285,6 @@ public class PoiExcelHandler implements KExcelHandler {
 
 
     }
-
     /**
      * 生成字体
 
@@ -299,7 +298,7 @@ public class PoiExcelHandler implements KExcelHandler {
             return fontCache.get(fontUniKey);
         }
         else {
-            Font font = workbook.createFont();
+            XSSFFont font = ((XSSFWorkbook)workbook).createFont();
             try {
                 font.setFontName(style.getFontName());
             }
@@ -312,12 +311,13 @@ public class PoiExcelHandler implements KExcelHandler {
                 font.setFontHeightInPoints(style.getFontSize().shortValue());
             }
 
+
             if (StringUtils.isNotEmpty(style.getFontColor())) {
                 try {
                     java.awt.Color color = ColorUtil.toColorFromString(style.getFontColor());
                     XSSFColor xssfColor = new XSSFColor();
                     xssfColor.setRGB(new byte[]{(byte) color.getRed(), (byte) color.getGreen(), (byte) color.getBlue()});
-                    font.setColor(HSSFColor.HSSFColorPredefined.AQUA.getIndex());
+                    font.setColor(xssfColor);
                 }
                 catch (Exception ignored) {
 
