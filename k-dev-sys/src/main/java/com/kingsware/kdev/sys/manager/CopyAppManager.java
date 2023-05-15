@@ -24,6 +24,8 @@ import com.kingsware.kdev.sys.bean.CopyProcessData;
 import com.kingsware.kdev.sys.bean.ExportData;
 import com.kingsware.kdev.sys.bean.ExportRootData;
 import com.kingsware.kdev.sys.model.*;
+import com.kingsware.kdev.sys.service.DevPageService;
+import com.kingsware.kdev.sys.service.SysApiService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -414,12 +416,13 @@ public class CopyAppManager {
     private List<Object> parseByPath(String json, String tags) {
         String[] findTags = tags.trim().split(",");
         // 查找所有的接口段
-        List<Object> resultList = new ArrayList<>();
+        Set<Object> resultList = new HashSet<>();
         for (String tag: findTags) {
-            List<Object> apiList = JsonPath.read(json, "$..*." + tag.trim());
+            String searchTag = "$..*.." + tag.trim();
+            List<Object> apiList = JsonPath.read(json, searchTag);
             resultList.addAll(apiList);
         }
-        return resultList;
+        return Arrays.asList(resultList.toArray());
     }
 
     /**
@@ -453,6 +456,13 @@ public class CopyAppManager {
                     SysApi sysApi = replaceObj(copyProcessData, obj, SysApi.class);
                     sysApi.setAppId(context.getTargetAppId());
                     sysApi.cleanAuthor();
+                    {
+                        SysApi checkObj = BeanUtils.copyObject(sysApi, SysApi.class);
+                        checkObj.setId(null);
+                        SysApiService sysApiService = SpringContext.getBean(SysApiService.class);
+                        sysApiService.checkUnique(checkObj);
+                    }
+
                     DB.save(sysApi);
                     copyProcessData.getApiIds().add(sysApi.getId());
                     log.info("数据拷贝---接口编排：{}, 进度:{}/{}", sysApi.getApiName(), i + 1, total);
@@ -461,6 +471,12 @@ public class CopyAppManager {
                     DevPage devPage = replaceObj(copyProcessData, obj, DevPage.class);
                     devPage.setAppId(context.getTargetAppId());
                     devPage.cleanAuthor();
+                    {
+                        DevPage checkObj = BeanUtils.copyObject(devPage, DevPage.class);
+                        checkObj.setId(null);
+                        DevPageService devPageService = SpringContext.getBean(DevPageService.class);
+                        devPageService.checkUnique(checkObj);
+                    }
                     DB.save(devPage);
                     copyProcessData.getPageIds().add(devPage.getId());
                     log.info("数据拷贝---页面管理：{}, 进度:{}/{}", devPage.getName(), i + 1, total);
@@ -510,6 +526,7 @@ public class CopyAppManager {
 
             log.warn("数据拷贝---应用拷贝异常，将进行回滚...{}", e);
             rollback(copyProcessData);
+            throw e;
         }
         log.info("数据拷贝---完成： 总拷贝数:{}", copyProcessData.getToCopySet().size());
 

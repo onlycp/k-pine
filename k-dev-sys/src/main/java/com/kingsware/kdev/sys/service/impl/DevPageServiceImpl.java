@@ -79,11 +79,12 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
         DB.update(model);
     }
 
-    private void checkUnique(DevPage model) {
+    @Override
+    public void checkUnique(DevPage model) {
         // 唯一性校验
         DBChecker<DevPage> checker =DBChecker.build(model, DevPage.class);
         // 页面路径唯一
-        checker.uni("path", I18n.t("DevPage.path.unique", "页面路径必须唯一"));
+        checker.uni("path", I18n.t("DevPage.path.unique", model.getPath() + "页面路径必须唯一"));
         // 执行校验
         checker.checkUnique();
     }

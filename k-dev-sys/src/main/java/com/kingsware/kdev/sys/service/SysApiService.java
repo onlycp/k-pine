@@ -7,6 +7,7 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.sys.argv.CopyContextArgv;
 import com.kingsware.kdev.sys.argv.SysApiArgv;
 import com.kingsware.kdev.sys.argv.SysApiQueryArgv;
+import com.kingsware.kdev.sys.model.SysApi;
 import com.kingsware.kdev.sys.ret.SysApiRet;
 
 import java.util.Map;
@@ -45,6 +46,13 @@ public interface SysApiService extends BaseService {
      * @return 查询结果
      */
      PageDataRet<SysApiRet> query(SysApiQueryArgv argv);
+
+
+    /**
+     * 校验
+     * @param model
+     */
+    void checkUnique(SysApi model);
 
     /**
      * 删除
