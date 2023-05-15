@@ -220,6 +220,9 @@ public class LicenseManager {
                     if (StringUtils.isEmpty(ipAddress)) {
                         continue;
                     }
+                    if (sb.toString().equalsIgnoreCase("00-50-56-C0-00-01")) {
+                        continue;
+                    }
                     MacAddress macAddress = new MacAddress();
                     macAddress.setName(macName);
                     macAddress.setMac(sb.toString().trim());
