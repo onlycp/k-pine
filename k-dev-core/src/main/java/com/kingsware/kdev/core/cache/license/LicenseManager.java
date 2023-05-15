@@ -164,11 +164,7 @@ public class LicenseManager {
      * @return 是/否
      */
     public boolean isUniopsApp() {
-        String uniopsDirs = SpringContext.getProperties("app.uniops.dir", "webapps/pine");
-        if (StringUtils.isEmpty(uniopsDirs)) {
-            return false;
-        }
-        return new File(uniopsDirs).exists();
+        return ClassUtils.isClassExists("com.kingsware.kdev.uniops.service.impl.UniOpsServiceImpl");
     }
 
 

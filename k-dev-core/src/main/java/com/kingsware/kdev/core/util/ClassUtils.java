@@ -101,4 +101,22 @@ public class ClassUtils {
         return result;
     }
 
+    /**
+     * 判断某个类是否存在
+     * @param className 要检查的类的名称
+     * @return 存在返回 true，否则返回 false
+     */
+    public static boolean isClassExists(String className) {
+        try {
+            // 通过反射获取 className 所表示的类的引用
+            Class.forName(className);
+            // 如果没有抛出 ClassNotFoundException 异常，说明类存在，返回 true
+            return true;
+        } catch (ClassNotFoundException e) {
+            // 如果抛出 ClassNotFoundException 异常，说明类不存在，返回 false
+            return false;
+        }
+    }
+
+
 }
