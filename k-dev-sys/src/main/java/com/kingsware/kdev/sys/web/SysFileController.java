@@ -10,6 +10,7 @@ import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.sys.argv.SysFileQueryArgv;
 import com.kingsware.kdev.sys.ret.SysFileRet;
+import com.kingsware.kdev.sys.ret.SysStaticFileRet;
 import com.kingsware.kdev.sys.service.SysFileService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -77,6 +78,18 @@ public class SysFileController extends BaseController {
     }
 
     /**
+     *  删除
+     * @return 提示
+     */
+    @ApiOperation(value = "删除静态文件" ,notes = "删除静态文件")
+    @PostMapping(value = "/deleteStaticFile")
+    @ResponseBody
+    public BaseRet<?> deleteStaticFile(@RequestBody MultiIdArgv argv) throws IOException {
+        sysFileService.deleteStaticFile(argv);
+        return BaseRet.success();
+    }
+
+    /**
      * 文件上传
      * @param files         文件列表
      * @param fileFrom      来源
@@ -111,6 +124,19 @@ public class SysFileController extends BaseController {
     }
 
     /**
+     * 静态文件上传，使
+     * @param files         文件列表
+     * @param fileFrom      来源
+     * @return             文件信息列表
+     */
+    @ApiOperation(value = "静态文件上传 " ,notes = "静态文件上传")
+    @PostMapping(value = "/uploadStaticFile", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public BaseRet<List<SysFileRet>> uploadStaticFile(@RequestParam("files") MultipartFile[] files, String fileFrom, boolean unzip) throws Exception {
+        return BaseRet.success(sysFileService.uploadStaticFile(files, fileFrom, unzip));
+    }
+
+    /**
      * 文件下载
      * @param id         文件id
      */
@@ -137,6 +163,22 @@ public class SysFileController extends BaseController {
         sysFileService.download(relativePath);
     }
 
+
+    /**
+     * 文件下载
+     */
+    @ApiOperation(value = "文件下载 " ,notes = "文件下载")
+    @GetMapping("/downloadStatic/**")
+    @ApiIgnore
+    public void downloadStatic(HttpServletRequest httpServletRequest) throws ServletException, IOException {
+        // 获取后面多层目录
+        String uri = httpServletRequest.getRequestURI();
+        String prefix = httpServletRequest.getContextPath() + "/"+ Version.V1 + "/sys-files" + "/downloadStatic/";
+        String relativePath = uri.replaceFirst(prefix,"");
+
+        sysFileService.downloadStaticFile(relativePath);
+    }
+
     /**
      * 文件下载
      * @param ids         文件ids，多个用逗号隔开
@@ -146,5 +188,13 @@ public class SysFileController extends BaseController {
     @ApiIgnore
     public void downloadZip(@PathVariable String ids) {
         sysFileService.downloadZip(ids);
+    }
+
+    @ApiOperation(value = "静态文件树 " ,notes = "静态文件树")
+    @GetMapping("/getStaticFileTree")
+    @ResponseBody
+    @ApiIgnore
+    public BaseRet<List<SysStaticFileRet>> getStaticFileTree(boolean onlyFolder) throws IOException {
+        return sysFileService.getStaticFileTree(onlyFolder);
     }
 }

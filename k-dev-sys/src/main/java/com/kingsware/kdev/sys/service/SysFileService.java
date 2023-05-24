@@ -1,10 +1,12 @@
 package com.kingsware.kdev.sys.service;
 
 import com.kingsware.kdev.core.base.BaseService;
+import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.sys.argv.SysFileQueryArgv;
 import com.kingsware.kdev.sys.ret.SysFileRet;
+import com.kingsware.kdev.sys.ret.SysStaticFileRet;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletException;
@@ -63,10 +65,25 @@ public interface SysFileService extends BaseService {
      */
     void downloadZip(String ids);
 
+    void downloadStaticFile(String path) throws ServletException, IOException;
+
     /**
      * 从faas里下载文件
      * @param path
      * @return
      */
     File getFaasFile(String path);
+
+    /**
+     * 静态文件上传
+     * @param files         静态文件列表
+     * @param fileFrom      来源
+     * @return             文件信息列表
+     */
+    List<SysFileRet> uploadStaticFile(MultipartFile[] files, String fileFrom, Boolean unzip) throws Exception;
+
+    BaseRet<List<SysStaticFileRet>> getStaticFileTree(boolean onlyFolder) throws IOException;
+
+    void deleteStaticFile(MultiIdArgv argv) throws IOException;
+
 }

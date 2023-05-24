@@ -15,7 +15,7 @@ import java.util.List;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class SysFileRet extends BaseManageRet {
+public class SysStaticFileRet extends BaseManageRet {
     /**
      * 文件名称
      */
@@ -46,8 +46,12 @@ public class SysFileRet extends BaseManageRet {
     private String filePath;
     /** 文件来源 **/
     private String fileFrom;
+    /** 文件来源 **/
+    private String parentFileName;
     /** 所属应用ID **/
     private String appId;
 
-    private List<SysFileRet> children;
+    private Boolean isFold;
+
+    private List<SysStaticFileRet> children;
 }

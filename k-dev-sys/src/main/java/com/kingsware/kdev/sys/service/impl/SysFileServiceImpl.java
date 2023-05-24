@@ -1,6 +1,7 @@
 package com.kingsware.kdev.sys.service.impl;
 
 import com.kingsware.kdev.core.base.BaseServiceImpl;
+import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.FileEntry;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
@@ -19,9 +20,12 @@ import com.kingsware.kdev.sys.manager.FileManager;
 import com.kingsware.kdev.sys.manager.NonStaticResourceHttpRequestHandler;
 import com.kingsware.kdev.core.model.SysFile;
 import com.kingsware.kdev.sys.ret.SysFileRet;
+import com.kingsware.kdev.sys.ret.SysStaticFileRet;
 import com.kingsware.kdev.sys.service.SysFileService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.archivers.zip.ZipUtil;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.yaml.snakeyaml.util.UriEncoder;
@@ -31,9 +35,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.sql.Timestamp;
 import java.util.*;
 
 /**
@@ -53,6 +57,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
 //
 //    @Value("${app.file-local-to-faas:false}")
 //    private boolean fileLocalToFaas;
+    private final String STATIC_FILE_FOLD = "res";
 
     /**
      * 获取基础目录
@@ -117,22 +122,144 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
     @SneakyThrows
     @Override
     public List<SysFileRet> upload(MultipartFile[] files, String fileFrom, Integer saveType) {
+        return uploadFile(files, fileFrom, saveType, false, false);
+    }
 
-        if (StringUtils.isNotEmpty(fileFrom)) {
-            if (fileFrom.contains(".")) {
-                throw BusinessException.serviceThrow("参数不合法");
+    @Override
+    public List<SysFileRet> uploadStaticFile(MultipartFile[] files, String fileFrom, Boolean unzip) throws Exception {
+        if (StringUtils.isEmpty(fileFrom)) {
+            fileFrom = ".";
+        }
+        return uploadFile(files, fileFrom, 1, true, unzip);
+    }
+
+    @Override
+    public BaseRet<List<SysStaticFileRet>> getStaticFileTree(boolean onlyFolder) throws IOException {
+        String path = "file:" + STATIC_FILE_FOLD + File.separator + "/**";
+        String rootPath = "file:**";
+        Resource[] rootResources = SpringContext.getResources(rootPath);
+        String rootPathUrl = rootResources[0].getFile().getParent() + "/";
+//        System.out.println("----------------" + rootPathUrl);
+        Resource[] resources = SpringContext.getResources(path);
+        List<String> files = new ArrayList<>();
+        List<SysStaticFileRet> fileTree = new ArrayList<>();
+        if (resources != null) {
+            for (Resource resource : resources) {
+                SysStaticFileRet sFile = new SysStaticFileRet();
+                String fileName = resource.getFilename();
+                File file = resource.getFile();
+                if (onlyFolder && !file.isDirectory()) {
+                    continue;
+                }
+                String parentName = resource.getFile().getParent();
+//                System.out.println(file.isDirectory());
+                sFile.setFileFrom(parentName.replace(rootPathUrl, ""));
+                sFile.setFileName(fileName);
+                sFile.setFileOriginalName(fileName);
+                sFile.setIsFold(file.isDirectory());
+                sFile.setWhenModified(new Timestamp(file.lastModified()));
+                sFile.setSaveType(1);
+                if (file.exists() && file.isFile()) {
+                    sFile.setFileMd5(FileUtils.getMD5(resource.getInputStream()));
+                    sFile.setFileExt(FileUtils.getFileExt(fileName));
+                    sFile.setFileSize((int) file.length());
+                }
+                sFile.setFilePath(file.getPath().replace(rootPathUrl, ""));
+                fileTree.add(sFile);
+//                System.out.println(sFile);
+//                System.out.println(resource.getURL());
+                if (fileName != null && resource.isFile()) {
+                    files.add(fileName);
+                }
             }
         }
+
+        List<SysStaticFileRet> tmpFileTree = new ArrayList<>();
+        fileTree.sort((a, b) -> {
+            return b.getIsFold().compareTo(a.getIsFold());
+        });
+        fileTree.stream().forEach(item -> {
+            if (item.getIsFold()) {
+                List<SysStaticFileRet> list = item.getChildren();
+                list = fileTree.stream().filter(sub -> sub.getFileFrom().equals(item.getFilePath())).map(sub -> {
+                    sub.setParentFileName(item.getFileName());
+                    return sub;
+                }).toList();
+
+                item.setChildren(list);
+            }
+
+        });
+        tmpFileTree = fileTree.stream().filter(item -> item.getFileFrom().equals(STATIC_FILE_FOLD)).toList();
+//        System.out.println(tmpFileTree);
+        return BaseRet.success(tmpFileTree);
+    }
+
+    @Override
+    public void deleteStaticFile(MultiIdArgv argv) throws IOException {
+        for (String id: argv.getIds()) {
+            String rootPath = "file:" + id;
+            if (!FileUtils.checkFileFrom(id)) {
+                throw BusinessException.serviceThrow("文件目录命名不符合规范!");
+            }
+            Resource[] rootResources = SpringContext.getResources(rootPath);
+            if (rootResources == null && rootResources.length == 0) {
+                continue;
+            }
+            Resource resource = rootResources[0];
+            File file = resource.getFile();
+            if (file == null || !file.exists()) {
+                continue;
+            }
+            if (!file.delete() && file.isDirectory()) {
+                Path path = Paths.get(resource.getURL().getPath());
+                Files.walkFileTree(path, new SimpleFileVisitor<>() {
+                    @Override
+                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                        Files.delete(file);
+                        return FileVisitResult.CONTINUE;
+                    }
+
+                    @Override
+                    public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                        Files.delete(dir);
+                        return FileVisitResult.CONTINUE;
+                    }
+                });
+            }
+
+        }
+    }
+
+    private List<SysFileRet> uploadFile(MultipartFile[] files, String fileFrom, Integer saveType, boolean isLocal, boolean unzip) throws Exception {
+//        if (StringUtils.isNotEmpty(fileFrom)) {
+//            if (fileFrom.contains(".")) {
+//                throw BusinessException.serviceThrow("参数不合法");
+//            }
+//        }
         List<SysFileRet> retList = new ArrayList<>();
         // 如果是自动转为faas的，那么新上传的文件也改为faas
-        if (isFileLocalToFaas() && saveType == 1) {
+        if (!isLocal && isFileLocalToFaas() && saveType == 1) {
             saveType = 2;
         }
         // 遍历处理文件
         for (MultipartFile file: files) {
-            SysFile sysFile = FileManager.getInstance().register(file.getInputStream(), file.getOriginalFilename(), (int)file.getSize(), fileFrom, saveType, getBasePath());
+            if (!FileUtils.checkFileNaming(file.getOriginalFilename())) {
+                throw BusinessException.serviceThrow("文件名命名不符合规范，请重新命名后再上传!");
+            }
+            if (!FileUtils.checkFileFrom(fileFrom)) {
+                throw BusinessException.serviceThrow("文件目录命名不符合规范!");
+            }
+            String fileExt = FileUtils.getFileExt(file.getOriginalFilename());
+            if (!FileUtils.checkFileExt(fileExt)) {
+                throw BusinessException.serviceThrow(FileUtils.getFileExt(file.getOriginalFilename()) + "文件后缀名不在上传文件白名单中!");
+            }
+            SysFile sysFile = FileManager.getInstance().register(file.getInputStream(), file.getOriginalFilename(), (int)file.getSize(), fileFrom, saveType, isLocal ? STATIC_FILE_FOLD : getBasePath(), isLocal);
             if (sysFile == null) {
                 throw BusinessException.serviceThrow("文件保存失败");
+            }
+            if (unzip && fileExt.equalsIgnoreCase("zip")) {
+                ZipUtils.unzip(STATIC_FILE_FOLD, STATIC_FILE_FOLD + sysFile.getFilePath());
             }
             retList.add(BeanUtils.copyObject(sysFile, SysFileRet.class));
         }
@@ -143,7 +270,12 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
 
     @Override
     public void download(String id) throws ServletException, IOException {
-        downloadByPath(id);
+        downloadByPath(id, false);
+    }
+
+    @Override
+    public void downloadStaticFile(String path) throws ServletException, IOException {
+        downloadByPath(path, true);
     }
 
     /**
@@ -152,7 +284,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
      * @throws ServletException
      * @throws IOException
      */
-    private void downloadByPath(String path) throws ServletException, IOException {
+    private void downloadByPath(String path, boolean isStatic) throws ServletException, IOException {
         if (path.contains("..")) {
             throw BusinessException.serviceThrow("参数不合法");
         }
@@ -174,6 +306,9 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             // 通过ID找不到文件，按路径处理，共有2处方式，1种是本地文件，2种是FAAS文件
             // 在本地找是否存在文件
             File localFile = getLocalFile(path);
+            if (isStatic) {
+                localFile = getStaticFile(path);
+            }
             if (localFile != null && localFile.exists()) {
                 fileRealPath = localFile.getAbsolutePath();
                 fileName = localFile.getName();
@@ -240,7 +375,6 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
 
         }
         response.setHeader("Content-Disposition", "attachment;filename=" + UriEncoder.encode(fileName));
-
         if (fileRealPath == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
@@ -274,6 +408,10 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
     private File getLocalFile(String path) {
         String absFilePath = getBasePath() + path;
         return new File(absFilePath);
+    }
+
+    private File getStaticFile(String path) {
+        return new File(path);
     }
 
     public File getFaasFile(String path) {
