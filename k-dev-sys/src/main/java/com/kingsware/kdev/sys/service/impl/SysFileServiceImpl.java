@@ -136,8 +136,8 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
 
     @Override
     public BaseRet<List<SysStaticFileRet>> getStaticFileTree(boolean onlyFolder) throws IOException {
-        String path = "file:./" + STATIC_FILE_FOLD + File.separator + "/**";
-        String rootPath = "file:./**";
+        String path = "file:" + STATIC_FILE_FOLD + File.separator + "/**";
+        String rootPath = "file:*.*";
         Resource[] rootResources = SpringContext.getResources(rootPath);
         String rootPathUrl = rootResources[0].getFile().getParent() + "/";
         log.info("rootPathUrl: " + rootPathUrl);
