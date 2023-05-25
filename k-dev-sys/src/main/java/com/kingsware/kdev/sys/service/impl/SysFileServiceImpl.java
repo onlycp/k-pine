@@ -140,7 +140,8 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         String rootPath = "file:./**";
         Resource[] rootResources = SpringContext.getResources(rootPath);
         String rootPathUrl = rootResources[0].getFile().getParent() + "/";
-//        System.out.println("----------------" + rootPathUrl);
+        log.info("rootPathUrl: " + rootPathUrl);
+
         Resource[] resources = SpringContext.getResources(path);
         List<String> files = new ArrayList<>();
         List<SysStaticFileRet> fileTree = new ArrayList<>();
@@ -169,6 +170,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                 fileTree.add(sFile);
 //                System.out.println(sFile);
 //                System.out.println(resource.getURL());
+                log.info("每个文件路径: " + resource.getURL());
                 if (fileName != null && resource.isFile()) {
                     files.add(fileName);
                 }
