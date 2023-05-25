@@ -214,7 +214,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             }
             if (!file.delete() && file.isDirectory()) {
                 Path path = Paths.get(resource.getURL().getPath());
-                Files.walkFileTree(path, new SimpleFileVisitor<>() {
+                Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
                     @Override
                     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                         Files.delete(file);
