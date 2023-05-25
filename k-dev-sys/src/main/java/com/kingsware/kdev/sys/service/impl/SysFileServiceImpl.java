@@ -39,6 +39,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 文件实现类
@@ -184,13 +185,13 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                 list = fileTree.stream().filter(sub -> sub.getFileFrom().equals(item.getFilePath())).map(sub -> {
                     sub.setParentFileName(item.getFileName());
                     return sub;
-                }).toList();
+                }).collect(Collectors.toList());
 
                 item.setChildren(list);
             }
 
         });
-        tmpFileTree = fileTree.stream().filter(item -> item.getFileFrom().equals(STATIC_FILE_FOLD)).toList();
+        tmpFileTree = fileTree.stream().filter(item -> item.getFileFrom().equals(STATIC_FILE_FOLD)).collect(Collectors.toList());
 //        System.out.println(tmpFileTree);
         return BaseRet.success(tmpFileTree);
     }
