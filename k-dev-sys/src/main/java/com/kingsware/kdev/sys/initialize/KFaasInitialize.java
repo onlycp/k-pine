@@ -99,9 +99,10 @@ public class KFaasInitialize implements SystemInitialize {
 
                 }
             }
+            // 重新初始化baseFlow
+            initBaseFlow();
         }
-        // 重新初始化baseFlow
-        initBaseFlow();
+
     }
 
     private void initBaseFlow() {
