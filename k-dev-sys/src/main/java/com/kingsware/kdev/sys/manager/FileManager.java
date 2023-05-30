@@ -75,6 +75,10 @@ public class FileManager {
      */
     @SuppressWarnings("all")
     public SysFile register(InputStream inputStream, String fileName, int fileSize,  String targetDir, Integer saveType, String basePath) {
+       return register(inputStream, fileName, fileSize, targetDir, saveType, basePath, false);
+    }
+
+    public SysFile register(InputStream inputStream, String fileName, int fileSize,  String targetDir, Integer saveType, String basePath, boolean withoutChecking) {
         try {
             boolean isCloseReplaceMode = PropertiesConstant.TRUE.equals(SpringContext.getProperties("file.close-replace-mode", PropertiesConstant.FALSE));
             String fileFrom = targetDir.replaceAll("/", Matcher.quoteReplacement(File.separator));
@@ -85,14 +89,16 @@ public class FileManager {
             sysFile.setFileName(realName);
             String fileExt =  FileUtils.getFileExt(realName);
 
-            if (!FileUtils.checkFileNaming(fileName)) {
-                throw BusinessException.serviceThrow("文件名命名不符合规范，请重新命名后再上传!");
-            }
-            if (!FileUtils.checkFileFrom(fileFrom)) {
-                throw BusinessException.serviceThrow("文件目录命名不符合规范!");
-            }
-            if (!FileUtils.checkFileExt(fileExt)) {
-                throw BusinessException.serviceThrow(fileExt + "文件后缀名不在上传文件白名单中!");
+            if (!withoutChecking) {
+                if (!FileUtils.checkFileNaming(fileName)) {
+                    throw BusinessException.serviceThrow("文件名命名不符合规范，请重新命名后再上传!");
+                }
+                if (!FileUtils.checkFileFrom(fileFrom)) {
+                    throw BusinessException.serviceThrow("文件目录命名不符合规范!");
+                }
+                if (!FileUtils.checkFileExt(fileExt)) {
+                    throw BusinessException.serviceThrow(fileExt + "文件后缀名不在上传文件白名单中!");
+                }
             }
 
             if (StringUtils.isNotEmpty(fileExt)) {
@@ -125,7 +131,7 @@ public class FileManager {
                 boolean status = path.mkdirs();
                 // 拷贝文件
                 String saveFileName = fileName;
-                if (isCloseReplaceMode) {
+                if (!withoutChecking && isCloseReplaceMode) {
                     saveFileName = realName;
                 }
                 File saveFile = new File(path.getAbsolutePath() + "/" + saveFileName);
@@ -142,7 +148,7 @@ public class FileManager {
                 // 磁盘存储路径
                 String filePath = basePath +  relativePath;
                 String saveFileName = fileName;
-                if (isCloseReplaceMode) {
+                if (!withoutChecking && isCloseReplaceMode) {
                     saveFileName = realName;
                 }
                 KdbRet<String> kdbRet =  DB.kdbApi().uploadFile(inputStream, saveFileName, filePath);
@@ -162,7 +168,7 @@ public class FileManager {
                     String filePath = basePath + "/" + targetDir;
                     filePath = filePath.replace("//", "/");
                     String saveFileName = fileName;
-                    if (isCloseReplaceMode) {
+                    if (!withoutChecking && isCloseReplaceMode) {
                         saveFileName = realName;
                     }
                     cdnPlugin.upload(inputStream, saveFileName, filePath);
@@ -179,7 +185,6 @@ public class FileManager {
             throw BusinessException.serviceThrow("源文件路径不存在, IO异常:" + e.getMessage());
         }
     }
-
 
     /**
      * 获取cdn
