@@ -33,7 +33,7 @@ public class SdkChannelPlugin implements FaasChannelPlugin {
     @Value("${faas.ext-path:../faas/ext}")
     private String extPath;
 
-    @Value("${faas.lib-path:../faas/ext}")
+    @Value("${faas.lib-path:../faas/lib}")
     private String libPath;
 
 

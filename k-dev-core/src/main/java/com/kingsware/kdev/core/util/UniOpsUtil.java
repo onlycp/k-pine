@@ -20,15 +20,6 @@ public class UniOpsUtil {
     private UniOpsUtil() {}
 
     @SuppressWarnings("all")
-    public static String getUniOpsToken() {
-        String username = SpringContext.getProperties("uniops.user", "admin");
-        String password = SpringContext.getProperties("uniops.pwd", "WzcwLDIwNiwxMTUsNTksNjUsMTk1LDIzMiw5OSwxMDksOTAsMTM3LDcyLDYsMTQxLDkxLDE1OF0=");
-        String uniopsServer = SpringContext.getProperties("uniops.server", "http://localhost:8080");
-        return getUniOpsToken(uniopsServer, username, password);
-
-    }
-
-    @SuppressWarnings("all")
     public static String getUniOpsToken(String server, String user, String pwd) {
         String username = user;
         String password = pwd;
@@ -40,7 +31,7 @@ public class UniOpsUtil {
         params.put("userName", username);
         params.put("password", password);
         // 发起请求
-        String responseBody = HttpUtil.postBody(url, JsonUtil.toJson(params), new HashMap<>(), true);
+        String responseBody = HttpUtil.callHttp(url, JsonUtil.toJson(params), new HashMap<>());
         log.info("uniops令牌请求:{}", responseBody);
         Map<String, Object> retMap = JsonUtil.toMap(responseBody);
         int errorCode = (int)retMap.get("errorCode");

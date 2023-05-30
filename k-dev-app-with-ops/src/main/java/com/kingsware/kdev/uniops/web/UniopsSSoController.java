@@ -9,10 +9,7 @@ import com.kingsware.kdev.uniops.argv.ToPageArgv;
 import com.kingsware.kdev.uniops.service.UniOpsService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -59,5 +56,14 @@ public class UniopsSSoController {
         this.uniOpsService.uninstall(menus);
         return BaseRet.successMessage("卸载成功");
     }
+
+    @ApiOperation(value = "卸载 " ,notes = "卸载")
+    @GetMapping("/token")
+    @ResponseBody
+    @ApiIgnore
+    public BaseRet<?> token() {
+        return BaseRet.success(uniOpsService.getUniOpsToken());
+    }
+
 
 }

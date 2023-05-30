@@ -490,7 +490,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         if (StringUtils.isNotEmpty(argv.getName())) {
             sql += " and t0.name like '%" + argv.getName() + "%'";
         }
-        sql += " ORDER BY t0.when_created DESC";
+        sql += " order by t0.when_created desc";
 
         int total = 0;
         List<SysKdbFlowRet> logicFlows = null;

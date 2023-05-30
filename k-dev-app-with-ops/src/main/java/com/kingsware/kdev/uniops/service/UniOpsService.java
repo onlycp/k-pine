@@ -36,5 +36,11 @@ public interface UniOpsService {
      */
     void uninstall(List<SysMenu> menus);
 
+    /**
+     * 获取uniops
+     * @return
+     */
+    String getUniOpsToken();
+
 
 }

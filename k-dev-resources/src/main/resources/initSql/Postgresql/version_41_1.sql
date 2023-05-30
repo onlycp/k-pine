@@ -1,4 +1,3 @@
-#
 ALTER TABLE "wf_ext_category"
     ALTER COLUMN "order_num" TYPE varchar(16) USING "order_num"::varchar(16);
 

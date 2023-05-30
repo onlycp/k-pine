@@ -19,6 +19,7 @@ import com.kingsware.kdev.uniops.argv.UniOpsMenu;
 import com.kingsware.kdev.uniops.config.ServerConfig;
 import com.kingsware.kdev.uniops.service.UniOpsService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StreamUtils;
@@ -61,7 +62,7 @@ public class UniOpsServiceImpl implements UniOpsService {
     @Override
     public void page(ToPageArgv to) {
         String pineToken = "";
-        String toUrl = serverConfig.getIp();
+        String toUrl = SpringContext.getProperties("uniops.master.url", "http://localhost:8080");
         org.springframework.core.io.Resource resource500 = SpringContext.getResource(ResourceUtils.CLASSPATH_URL_PREFIX + "template/500.html");
         String templateContent = getResourceText(resource500);
         String exceptionStack = "";
@@ -71,11 +72,11 @@ public class UniOpsServiceImpl implements UniOpsService {
             if (StringUtils.isNotEmpty(token)) {
                 if (!UniOpsTokenStore.getInstance().containKey(token)) {
                     // 发起http请求
-                    String uniopsServer = serverConfig.getIp();
+                    String uniopsServer = SpringContext.getProperties("uniops.master.url", "http://localhost:8080");
                     String url = uniopsServer + "/ops/userInfo";
                     Map<String, String> headers = new HashMap<>();
                     headers.put("token", to.getOpsToken());
-                    String body = HttpUtil.postBody(url, "{}", headers);
+                    String body = HttpUtil.callHttp(url, "{}", headers);
                     BaseUserInfo userInfo = JsonUtil.toBean(body, BaseUserInfo.class);
                     userInfo.setAvatar(null);
                     String pineKey = TokenUtil.createToken(appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), KClientContext.getContext().getIp(), "-1", userInfo);
@@ -127,7 +128,6 @@ public class UniOpsServiceImpl implements UniOpsService {
             String appData = JsonUtil.toJson(obj);
             // 安装应用
             devApplicationService.importApp(appData);
-            // 注册菜单
             publishMenu(appData);
 
         }
@@ -146,6 +146,11 @@ public class UniOpsServiceImpl implements UniOpsService {
     public void publishMenu(String appData) {
 
         try {
+            // 注册菜单
+            String publishMenuEnable = SpringContext.getProperties("uniops.publish.menu", "true");
+            if (!"true".equalsIgnoreCase(publishMenuEnable)) {
+                return;
+            }
             DevPine devPine = devApplicationService.appData2Pine(appData);;
             // 处理menu
             if (devPine.getMenus() == null) {
@@ -166,7 +171,7 @@ public class UniOpsServiceImpl implements UniOpsService {
             Path jsonPath = Files.createTempFile("uniops-menu", "json");
             FileUtils.writeToFile(jsonPath.toFile(), JsonUtil.toJson(uMenus).getBytes(StandardCharsets.UTF_8));
             // 导入到UniOps
-            String uniopsServer = serverConfig.getIp();
+            String uniopsServer = SpringContext.getProperties("uniops.master.url", "http://localhost:8080");
             String url = uniopsServer + "/ops/system/menu/import";
             Map<String, Object> params = new HashMap<>();
             params.put("cover", false);
@@ -205,13 +210,13 @@ public class UniOpsServiceImpl implements UniOpsService {
             }
         }
         // 删除菜单
-        String uniopsServer = serverConfig.getIp();
+        String uniopsServer = SpringContext.getProperties("uniops.master.url", "http://localhost:8080");
         String url = uniopsServer + "/ops/script/deleteMenuByKeys";
         Map<String, String> headers = new HashMap<>();
         headers.put("token", getUniOpsToken());
         Map<String, Object> bodyMap = new HashMap<>();
         bodyMap.put("keys", StringUtils.joinToString(keys, ","));
-        String body = HttpUtil.postBody(url, JsonUtil.toJson(bodyMap), headers);
+        String body = HttpUtil.callHttp(url, JsonUtil.toJson(bodyMap), headers);
         Map<String, Object> retMap = JsonUtil.toMap(body);
         int errorCode = (int)retMap.get("errorCode");
         if (errorCode != 0) {
@@ -223,10 +228,13 @@ public class UniOpsServiceImpl implements UniOpsService {
 
     }
 
-    private String getUniOpsToken() {
-        String username = SpringContext.getProperties("uniops.user", "admin");
-        String password = SpringContext.getProperties("uniops.pwd", "WzcwLDIwNiwxMTUsNTksNjUsMTk1LDIzMiw5OSwxMDksOTAsMTM3LDcyLDYsMTQxLDkxLDE1OF0=");
-        return UniOpsUtil.getUniOpsToken(serverConfig.getIp(), username, password);
+    @Override
+    public String getUniOpsToken() {
+
+        String username = SpringContext.getProperties("uniops.master.user", "admin");
+        String password = SpringContext.getProperties("uniops.master.pwd", "WzcwLDIwNiwxMTUsNTksNjUsMTk1LDIzMiw5OSwxMDksOTAsMTM3LDcyLDYsMTQxLDkxLDE1OF0=");
+        String uniopsServer = SpringContext.getProperties("uniops.master.url", "http://localhost:8080");
+        return UniOpsUtil.getUniOpsToken(uniopsServer, username, password);
     }
 
 
@@ -267,7 +275,7 @@ public class UniOpsServiceImpl implements UniOpsService {
         uniOpsMenu.setPineId(menu.getId());
         uniOpsMenu.setControl(Arrays.asList("hidden", "outernet"));
         if (StringUtils.isNotEmpty(menu.getParentId())) {
-            uniOpsMenu.setLink("/pine/api/v1/uniops/page?to=" + menu.getFullPath());
+            uniOpsMenu.setLink("/ops/pine/api/v1/uniops/page?to=" + menu.getFullPath());
             uniOpsMenu.setKey( name);
         }
         else {

@@ -105,61 +105,64 @@ public class HttpUtil {
 
 
     public static String callHttp(String apiUrl, String body, Map<String, String> headerMap) throws HttpClientException {
-        // http连接
+
+        try {
+            return doPost(apiUrl, body, headerMap);
+        } catch (Exception e) {
+            throw new HttpClientException(e.getLocalizedMessage(), -1, apiUrl, body);
+        }
+    }
+
+    public static String doPost(String apiUrl, String body, Map<String, String> headerMap) throws IOException {
         HttpURLConnection connection = null;
-        // 输出流
         OutputStream outputStream = null;
+        InputStream inputStream = null;
+        BufferedReader reader = null;
+        StringBuilder responseBody = new StringBuilder();
 
         try {
             URL url = new URL(apiUrl);
-            // 根据URL生成HttpURLConnection
             connection = (HttpURLConnection) url.openConnection();
-            // 设置body模式
             connection.setDoOutput(true);
-            connection.setDoInput(true);
-            // 设置post方式
             connection.setRequestMethod("POST");
-            // 禁用缓存
-            connection.setUseCaches(false);
-            // 设置超时时间
-            connection.setConnectTimeout(10000);
-            connection.setReadTimeout(1000*60*10);
-            // 自动执行自定向
-            connection.setInstanceFollowRedirects(true);
-            // 连接复用
-            connection.setRequestProperty("connection", "Keep-Alive");
-            connection.setRequestProperty("Accept", "gzip, deflate, br");
-            // 设置编码
-            connection.setRequestProperty("charset", "utf-8");
-            //  设置content-type
             connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-            // 将额外的请求头加入进来
-            if (headerMap != null && !headerMap.isEmpty()) {
-                for (Map.Entry<String, String> entry: headerMap.entrySet()) {
-                    connection.setRequestProperty(entry.getKey(), entry.getValue());
-                }
+            if (headerMap!= null && !headerMap.isEmpty()) {
+                headerMap.forEach(connection::setRequestProperty);
             }
-            // 建立连接
-            connection.connect();
-            // 设置参数
-            outputStream = new DataOutputStream(connection.getOutputStream());
+
+            outputStream = connection.getOutputStream();
             outputStream.write(body.getBytes(StandardCharsets.UTF_8));
-            // 关闭输出流
             outputStream.flush();
-            outputStream.close();
-            // 获取body
-            String responseBody = getBody(connection.getInputStream());
-            // 获取响应结果
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                // 如果是ok，直接返回body
-                return responseBody;
+
+            int responseCode = connection.getResponseCode();
+
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                inputStream = connection.getInputStream();
+                reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    responseBody.append(line);
+                }
+            } else {
+                throw new IOException("HTTP POST request failed with response code: " + responseCode);
             }
-            else {
-                throw new HttpClientException(body, connection.getResponseCode(), apiUrl, body);
+        } finally {
+            if (outputStream != null) {
+                outputStream.close();
             }
-        } catch (IOException e) {
-            throw new HttpClientException(e.getLocalizedMessage(), -1, apiUrl, body);
+            if (reader != null) {
+                reader.close();
+            }
+            if (inputStream != null) {
+                inputStream.close();
+            }
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
+
+        return responseBody.toString();
     }
 
     /**
