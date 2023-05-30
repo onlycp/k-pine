@@ -252,3 +252,22 @@ ALTER TABLE "wf_surrogate"
 ALTER TABLE "wf_task"
     ADD CONSTRAINT "wf_task_pkey" PRIMARY KEY ("id");
 
+CREATE TABLE "sys_offline_download"
+(
+    "id"            varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
+    "file_name"     varchar(90) COLLATE "pg_catalog"."default",
+    "task_name"     varchar(255) COLLATE "pg_catalog"."default",
+    "file_path"     varchar(255) COLLATE "pg_catalog"."default",
+    "end_time"      varchar(255) COLLATE "pg_catalog"."default",
+    "script"        varchar(1024) COLLATE "pg_catalog"."default",
+    "process" int4,
+    "status"        varchar(255) COLLATE "pg_catalog"."default",
+    "params"        varchar(255) COLLATE "pg_catalog"."default",
+    "error_message" varchar(900) COLLATE "pg_catalog"."default",
+    "who_created"   varchar(36) COLLATE "pg_catalog"."default",
+    "when_created"  varchar(20) COLLATE "pg_catalog"."default",
+    CONSTRAINT "sys_offline_download_pkey" PRIMARY KEY ("id")
+)
+;
+
+

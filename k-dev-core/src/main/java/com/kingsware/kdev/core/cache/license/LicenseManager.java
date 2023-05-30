@@ -210,7 +210,7 @@ public class LicenseManager {
                         continue;
                     }
                     // 去掉虚拟网卡以及不活动网卡
-                    if (network.isVirtual() || !network.isUp()) {
+                    if (network.isVirtual()) {
                         continue;
                     }
                     String ipAddress = "";

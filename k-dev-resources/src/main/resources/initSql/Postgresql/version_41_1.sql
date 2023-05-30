@@ -1,6 +1,4 @@
-
-ALTER TABLE "rep_dataset"
-    ALTER COLUMN "ds_type" TYPE varchar(32) USING "ds_type"::varchar(32);
+#
 ALTER TABLE "wf_ext_category"
     ALTER COLUMN "order_num" TYPE varchar(16) USING "order_num"::varchar(16);
 
