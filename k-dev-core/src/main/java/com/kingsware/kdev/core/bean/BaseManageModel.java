@@ -37,8 +37,8 @@ public class BaseManageModel extends BaseModel {
      * 清空星星
      */
     public void cleanAuthor() {
-        this.whenCreated = null;
-        this.whenModified = null;
+//        this.whenCreated = null;
+//        this.whenModified = null;
         this.whoCreated = null;
         this.whoModified = null;
     }

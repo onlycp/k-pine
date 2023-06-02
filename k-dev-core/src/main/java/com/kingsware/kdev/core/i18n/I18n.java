@@ -33,7 +33,13 @@ public class I18n {
      * @return      国际化消息
      */
     public static String t(String key, String defaultMessage, Object... params) {
-        return MessageFormat.format(defaultMessage, params);
+        if (params.length == 0) {
+            return defaultMessage;
+        }
+        else {
+            return MessageFormat.format(defaultMessage, params);
+        }
+
     }
 
 

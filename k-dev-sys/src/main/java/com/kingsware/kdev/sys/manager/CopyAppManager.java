@@ -1,7 +1,9 @@
 package com.kingsware.kdev.sys.manager;
 
+import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.kingsware.kdev.core.auth.Dev;
+import com.kingsware.kdev.core.bean.JsonPathSearchResult;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.cache.api.ApiManager;
 import com.kingsware.kdev.core.context.SpringContext;
@@ -27,6 +29,7 @@ import com.kingsware.kdev.sys.model.*;
 import com.kingsware.kdev.sys.service.DevPageService;
 import com.kingsware.kdev.sys.service.SysApiService;
 import lombok.extern.slf4j.Slf4j;
+import net.minidev.json.JSONArray;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.nio.charset.StandardCharsets;
@@ -186,39 +189,30 @@ public class CopyAppManager {
         copyProcessData.addCopyObject(devPage);
         copyProcessData.addMapping(devPage.getId(), StringUtils.getUUID());
         if (copyContext.getDeepCopy() == 1 && StringUtils.isNotEmpty(devPage.getPageJson())) {
+            DocumentContext documentContext = JsonPath.parse(devPage.getPageJson());
             // region 接口
             {
-                String apiMatchTags = SpringContext.getBootProperties("app.amis.api-tags", "api,initApi,schemaApi,addApi,editApi,deleteApi, deferApi,searchApi,quickSaveApi,checkApi,source");
+                String apiMatchTags = SpringContext.getBootProperties("app.amis.api-tags", "api,initApi,schemaApi,addApi,editApi,deleteApi, deferApi,searchApi,quickSaveApi,checkApi,source,url");
                 // 查找所有的接口段
-                List<Object> apiList = this.parseByPath(devPage.getPageJson(), apiMatchTags);
+                Set<JsonPathSearchResult> apiList = this.parseByPath(documentContext, apiMatchTags);
                 // 查找对应的api
-                for (Object segment: apiList) {
+                for (JsonPathSearchResult segment: apiList) {
                     // 如果是字符串
                     String apiMethod = "get";
-                    String apiUrl = null;
-                    if (segment instanceof String) {
-                        String url = segment.toString();
-                        // 只有包含/才认为是有效的url
-                        if (!url.contains("/")) {
-                            continue;
-                        }
-                        apiUrl = url;
-                        if (url.contains(":")) {
-                            String[] arr = url.split(":");
-                            apiUrl = arr[1];
-                            apiMethod = arr[0];
-                        }
+                    String apiUrl = "";
+                    String url = segment.getValue().get(segment.getField()).toString();
+                    // 只有包含/才认为是有效的url
+                    if (!url.contains("/")) {
+                        continue;
                     }
-                    else if (segment instanceof Map) {
-                        Map<String, Object> apiMap = JsonUtil.toMap(JsonUtil.toJson(segment));
-                        if (apiMap != null) {
-                            if (apiMap.containsKey("method")) {
-                                apiMethod = apiMap.get("method").toString();
-                            }
-                            if (apiMap.containsKey("url")) {
-                                apiUrl = apiMap.get("url").toString();
-                            }
-                        }
+                    apiUrl = url;
+                    if (url.contains(":")) {
+                        String[] arr = url.split(":");
+                        apiUrl = arr[1];
+                        apiMethod = arr[0];
+                    }
+                    if (segment.getValue().containsKey("method")) {
+                        apiMethod = segment.getValue().get("method").toString();
                     }
                     // 通过url查找接口信息
                     if (StringUtils.isNotEmpty(apiUrl)) {
@@ -234,6 +228,11 @@ public class CopyAppManager {
                             }
                             log.info("拷贝api:{}, name:{}, url:{}", apiInfo.getId(), apiInfo.getApiName(), apiInfo.getApiUrl());
                             this.copyApiData(apiInfo.getId(), copyContext, copyProcessData);
+                            String url1 = String.format("%s-%s", apiUrl, copyContext.getUrlSuffix());
+                            String afterUrl = apiUrl.replace(url, url1);
+                            Map<String, Object> finalMap = JsonUtil.toMap(JsonUtil.toJson(segment.getValue()));
+                            finalMap.put(segment.getField(), afterUrl);
+                            documentContext.set(segment.getPath(), finalMap);
                         }
                     }
                 }
@@ -243,39 +242,38 @@ public class CopyAppManager {
             {
                 String dictMatchTags = SpringContext.getBootProperties("app.amis.dict-tags", "source");
                 // 查找所有用到的
-                List<Object> list = this.parseByPath(devPage.getPageJson(), dictMatchTags);
-                for (Object segment: list) {
+                Set<JsonPathSearchResult> list = this.parseByPath(documentContext, dictMatchTags);
+                for (JsonPathSearchResult segment: list) {
                     // 只有字符串类型才处理
-                    if (segment instanceof String) {
-                        String body = segment.toString();
-                        if (body.contains("$") && body.contains("|") &&body.contains("filterDictList") && body.contains("filterDictValue")) {
-                            String cleanBody = body.replace("$", "")
-                                    .replace("{", "")
-                                    .replace("}", "")
-                                    .replace("'", "");
-                            String dictCode = null;
-                            if (cleanBody.contains("filterDictList")) {
-                                dictCode = cleanBody.split("\\|")[0].trim();
-                            }
-                            else {
-                                dictCode = cleanBody.split(":")[1].trim();
-                            }
-                            if (StringUtils.isEmpty(dictCode)) {
-                                continue;
-                            }
-                            // 查找字典管理
-                            SysDict dict = DB.findOne(SysDict.class, "select * from sys_dict where code=?", dictCode);
-                            if (dict == null) {
-                                continue;
-                            }
-                            if (pineAppId.equalsIgnoreCase(dict.getAppId()) && copyContext.getWithSystemData() == 0) {
-                                continue;
-                            }
-                            this.copyDictData(dict.getId(), copyContext, copyProcessData);
+                    String body = segment.getValue().get(segment.getField()).toString();
+                    if (body.contains("$") && body.contains("|") &&body.contains("filterDictList") && body.contains("filterDictValue")) {
+                        String cleanBody = body.replace("$", "")
+                                .replace("{", "")
+                                .replace("}", "")
+                                .replace("'", "");
+                        String dictCode = null;
+                        if (cleanBody.contains("filterDictList")) {
+                            dictCode = cleanBody.split("\\|")[0].trim();
                         }
+                        else {
+                            dictCode = cleanBody.split(":")[1].trim();
+                        }
+                        if (StringUtils.isEmpty(dictCode)) {
+                            continue;
+                        }
+                        // 查找字典管理
+                        SysDict dict = DB.findOne(SysDict.class, "select * from sys_dict where code=?", dictCode);
+                        if (dict == null) {
+                            continue;
+                        }
+                        if (pineAppId.equalsIgnoreCase(dict.getAppId()) && copyContext.getWithSystemData() == 0) {
+                            continue;
+                        }
+                        this.copyDictData(dict.getId(), copyContext, copyProcessData);
                     }
                 }
             }
+            devPage.setPageJson(documentContext.jsonString());
             // endregion 字典
 
         }
@@ -409,20 +407,50 @@ public class CopyAppManager {
 
     /**
      * 根据路径解析数据
-     * @param json  json
+     * @param documentContext  文档
      * @param tags  标签
      * @return
      */
-    private List<Object> parseByPath(String json, String tags) {
+    @SuppressWarnings("all")
+    private Set<JsonPathSearchResult> parseByPath(DocumentContext documentContext, String tags) {
         String[] findTags = tags.trim().split(",");
         // 查找所有的接口段
-        Set<Object> resultList = new HashSet<>();
+        Set<JsonPathSearchResult> jsonPathSearchResults = new HashSet<>();
         for (String tag: findTags) {
-            String searchTag = "$..*.." + tag.trim();
-            List<Object> apiList = JsonPath.read(json, searchTag);
-            resultList.addAll(apiList);
+            String trimTag = tag.trim();
+            String searchTag = "$..*.." + trimTag;
+            List<Object> apiList = documentContext.read(searchTag);
+
+            for (Object api: apiList) {
+
+                if (api instanceof String) {
+                    String value = (String) api;
+                    if (StringUtils.isEmpty(value)) {
+                        continue;
+                    }
+                    String path = String.format("$..[?(@.%s == '%s')]", tag.trim(), value);
+                    String[] arr = trimTag.split("\\.");
+                    JSONArray jsonArray = documentContext.read(path);
+
+                    for (int i=0; i < jsonArray.size(); i++) {
+                        JsonPathSearchResult searchResult  = new JsonPathSearchResult();
+                        searchResult.setField(arr[arr.length-1]);
+                        Map<String, Object> node = (Map<String, Object>) jsonArray.get(i);
+                        List<String> paths = new ArrayList<>();
+                        node.forEach((k, v) -> {
+                            if (v instanceof String) {
+                                String pa = String.format("@.%s == '%s'", k, v);
+                                paths.add(pa);
+                            }
+                        });
+                        searchResult.setPath("$..[?(" + StringUtils.joinToString(paths, " && ") + ")]");
+                        searchResult.setValue(node);
+                        jsonPathSearchResults.add(searchResult);
+                    }
+                }
+            }
         }
-        return Arrays.asList(resultList.toArray());
+        return jsonPathSearchResults;
     }
 
     /**
