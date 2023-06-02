@@ -1,3 +1,113 @@
+CREATE TABLE if not exists "wf_ext_category" (
+                                            "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
+                                            "category_name" varchar(50) COLLATE "pg_catalog"."default",
+                                            "order_num" varchar(16) COLLATE "pg_catalog"."default",
+                                            "when_created" varchar(20) COLLATE "pg_catalog"."default",
+                                            "when_modified" varchar(20) COLLATE "pg_catalog"."default",
+                                            "who_created" varchar(36) COLLATE "pg_catalog"."default",
+                                            "who_modified" varchar(36) COLLATE "pg_catalog"."default",
+                                            CONSTRAINT "wf_ext_category_pkey" PRIMARY KEY ("id")
+);
+
+CREATE TABLE if not exists  "wf_ext_comment" (
+                                           "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
+                                           "message" varchar(255) COLLATE "pg_catalog"."default",
+                                           "proc_inst_id" varchar(36) COLLATE "pg_catalog"."default",
+                                           "task_id" varchar(36) COLLATE "pg_catalog"."default",
+                                           "task_name" varchar(50) COLLATE "pg_catalog"."default",
+                                           "type" varchar(20) COLLATE "pg_catalog"."default",
+                                           "user_id" varchar(36) COLLATE "pg_catalog"."default",
+                                           "when_created" varchar(20) COLLATE "pg_catalog"."default",
+                                           "parent_inst_id" varchar(50) COLLATE "pg_catalog"."default",
+                                           CONSTRAINT "wf_ext_comment_pkey" PRIMARY KEY ("id")
+)
+;
+
+CREATE TABLE if not exists "wf_ext_node_attribute" (
+                                                  "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
+                                                  "actions" varchar(100) COLLATE "pg_catalog"."default",
+                                                  "exec_mode" varchar(50) COLLATE "pg_catalog"."default",
+                                                  "flow_id" varchar(100) COLLATE "pg_catalog"."default",
+                                                  "form_attribute" text COLLATE "pg_catalog"."default",
+                                                  "msg_send_rule" varchar(100) COLLATE "pg_catalog"."default",
+                                                  "next_user" varchar(500) COLLATE "pg_catalog"."default",
+                                                  "node_id" varchar(100) COLLATE "pg_catalog"."default",
+                                                  "node_type" varchar(50) COLLATE "pg_catalog"."default",
+                                                  "pass_ok" varchar(50) COLLATE "pg_catalog"."default",
+                                                  "person" varchar(50) COLLATE "pg_catalog"."default",
+                                                  "time_out" varchar(50) COLLATE "pg_catalog"."default",
+                                                  "back_node" varchar(500) COLLATE "pg_catalog"."default",
+                                                  "when_created" varchar(50) COLLATE "pg_catalog"."default",
+                                                  "when_modified" varchar(50) COLLATE "pg_catalog"."default",
+                                                  "who_created" varchar(100) COLLATE "pg_catalog"."default",
+                                                  "who_modified" varchar(100) COLLATE "pg_catalog"."default",
+                                                  CONSTRAINT "wf_ext_node_attribute_pkey" PRIMARY KEY ("id")
+)
+;
+
+CREATE TABLE  if not exists  "wf_ext_procdef" (
+                                           "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
+                                           "category_id" varchar(36) COLLATE "pg_catalog"."default",
+                                           "content" text COLLATE "pg_catalog"."default",
+                                           "deploy_md5" varchar(255) COLLATE "pg_catalog"."default",
+                                           "deploy_status" int2,
+                                           "deploy_time" varchar(20) COLLATE "pg_catalog"."default",
+                                           "form_key" varchar(50) COLLATE "pg_catalog"."default",
+                                           "form_page_id" varchar(36) COLLATE "pg_catalog"."default",
+                                           "icon" varchar(50) COLLATE "pg_catalog"."default",
+                                           "inst_desc" varchar(255) COLLATE "pg_catalog"."default",
+                                           "order_num" int4,
+                                           "proc_definition_id" varchar(36) COLLATE "pg_catalog"."default",
+                                           "proc_definition_key" varchar(100) COLLATE "pg_catalog"."default",
+                                           "proc_name" varchar(100) COLLATE "pg_catalog"."default",
+                                           "proc_version" int4,
+                                           "when_created" varchar(20) COLLATE "pg_catalog"."default",
+                                           "when_modified" varchar(20) COLLATE "pg_catalog"."default",
+                                           "who_created" varchar(36) COLLATE "pg_catalog"."default",
+                                           "who_modified" varchar(36) COLLATE "pg_catalog"."default",
+                                           "work_num" varchar(100) COLLATE "pg_catalog"."default",
+                                           CONSTRAINT "wf_ext_procdef_pkey" PRIMARY KEY ("id")
+)
+;
+CREATE TABLE  if not exists  "wf_ext_procdef" (
+                                                  "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
+                                                  "category_id" varchar(36) COLLATE "pg_catalog"."default",
+                                                  "content" text COLLATE "pg_catalog"."default",
+                                                  "deploy_md5" varchar(255) COLLATE "pg_catalog"."default",
+                                                  "deploy_status" int2,
+                                                  "deploy_time" varchar(20) COLLATE "pg_catalog"."default",
+                                                  "form_key" varchar(50) COLLATE "pg_catalog"."default",
+                                                  "form_page_id" varchar(36) COLLATE "pg_catalog"."default",
+                                                  "icon" varchar(50) COLLATE "pg_catalog"."default",
+                                                  "inst_desc" varchar(255) COLLATE "pg_catalog"."default",
+                                                  "order_num" int4,
+                                                  "proc_definition_id" varchar(36) COLLATE "pg_catalog"."default",
+                                                  "proc_definition_key" varchar(100) COLLATE "pg_catalog"."default",
+                                                  "proc_name" varchar(100) COLLATE "pg_catalog"."default",
+                                                  "proc_version" int4,
+                                                  "when_created" varchar(20) COLLATE "pg_catalog"."default",
+                                                  "when_modified" varchar(20) COLLATE "pg_catalog"."default",
+                                                  "who_created" varchar(36) COLLATE "pg_catalog"."default",
+                                                  "who_modified" varchar(36) COLLATE "pg_catalog"."default",
+                                                  "work_num" varchar(100) COLLATE "pg_catalog"."default",
+                                                  CONSTRAINT "wf_ext_procdef_pkey" PRIMARY KEY ("id")
+)
+;
+
+CREATE TABLE if not exists  "wf_ext_procinst" (
+                                            "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
+                                            "bill_code" varchar(50) COLLATE "pg_catalog"."default",
+                                            "bill_title" varchar(100) COLLATE "pg_catalog"."default",
+                                            "form_data" text COLLATE "pg_catalog"."default",
+                                            "main_inst_id" varchar(50) COLLATE "pg_catalog"."default",
+                                            "main_task_id" varchar(50) COLLATE "pg_catalog"."default",
+                                            "proc_inst_id" varchar(36) COLLATE "pg_catalog"."default",
+                                            "starter" varchar(36) COLLATE "pg_catalog"."default",
+                                            "when_created" varchar(20) COLLATE "pg_catalog"."default",
+                                            CONSTRAINT "wf_ext_procinst_pkey" PRIMARY KEY ("id")
+)
+;
+
 ALTER TABLE "wf_ext_category"
     ALTER COLUMN "order_num" TYPE varchar(16) USING "order_num"::varchar(16);
 
@@ -29,6 +139,23 @@ ALTER TABLE "ext_plugin_interface" RENAME COLUMN "updateTime" TO "update_time";
 
 ALTER TABLE "ext_plugin_interface" RENAME COLUMN "updateuser" TO "update_user";
 ALTER TABLE "ext_plugin_interface" ADD COLUMN "deleted" int4 DEFAULT 0;
+CREATE TABLE if not exists "dev_page_template" (
+                                                   "id" varchar(36) COLLATE "pg_catalog"."default" NOT NULL,
+                                                   "when_created" varchar(20) COLLATE "pg_catalog"."default",
+                                                   "when_modified" varchar(20) COLLATE "pg_catalog"."default",
+                                                   "who_created" varchar(36) COLLATE "pg_catalog"."default",
+                                                   "who_modified" varchar(36) COLLATE "pg_catalog"."default",
+                                                   "deleted" int2,
+                                                   "app_id" varchar(36) COLLATE "pg_catalog"."default",
+                                                   "name" varchar(255) COLLATE "pg_catalog"."default",
+                                                   "description" varchar(255) COLLATE "pg_catalog"."default",
+                                                   "app_type" varchar(100) COLLATE "pg_catalog"."default",
+                                                   "page_json" text COLLATE "pg_catalog"."default",
+                                                   "tags" varchar(255) COLLATE "pg_catalog"."default",
+                                                   "module_id" varchar(36) COLLATE "pg_catalog"."default",
+                                                   CONSTRAINT "dev_page_template_pkey" PRIMARY KEY ("id")
+)
+;
 ALTER TABLE "dev_page_template"
     ALTER COLUMN "when_created" TYPE varchar(20) USING "when_created"::varchar(20),
 ALTER COLUMN "when_modified" TYPE varchar(20) USING "when_modified"::varchar(20);
