@@ -260,14 +260,16 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             if (!FileUtils.checkFileExt(fileExt)) {
                 throw BusinessException.serviceThrow(FileUtils.getFileExt(file.getOriginalFilename()) + "文件后缀名不在上传文件白名单中!");
             }
-            SysFile sysFile = FileManager.getInstance().register(file.getInputStream(), file.getOriginalFilename(), (int)file.getSize(), fileFrom, saveType, isLocal ? STATIC_FILE_FOLD : getBasePath(), isLocal);
-            if (sysFile == null) {
-                throw BusinessException.serviceThrow("文件保存失败");
+            try (InputStream inputStream = file.getInputStream()){
+                SysFile sysFile = FileManager.getInstance().register(inputStream, file.getOriginalFilename(), (int)file.getSize(), fileFrom, saveType, isLocal ? STATIC_FILE_FOLD : getBasePath(), isLocal);
+                if (sysFile == null) {
+                    throw BusinessException.serviceThrow("文件保存失败");
+                }
+                if (unzip && fileExt.equalsIgnoreCase("zip")) {
+                    ZipUtils.unzip(STATIC_FILE_FOLD, STATIC_FILE_FOLD + sysFile.getFilePath());
+                }
+                retList.add(BeanUtils.copyObject(sysFile, SysFileRet.class));
             }
-            if (unzip && fileExt.equalsIgnoreCase("zip")) {
-                ZipUtils.unzip(STATIC_FILE_FOLD, STATIC_FILE_FOLD + sysFile.getFilePath());
-            }
-            retList.add(BeanUtils.copyObject(sysFile, SysFileRet.class));
         }
 
         return retList;
