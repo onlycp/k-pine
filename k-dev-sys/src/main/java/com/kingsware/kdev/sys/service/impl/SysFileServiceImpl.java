@@ -162,7 +162,10 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                 sFile.setWhenModified(new Timestamp(file.lastModified()));
                 sFile.setSaveType(1);
                 if (file.exists() && file.isFile()) {
-                    sFile.setFileMd5(FileUtils.getMD5(resource.getInputStream()));
+                    try (InputStream inputStream = resource.getInputStream()){
+                        sFile.setFileMd5(FileUtils.getMD5(inputStream));
+                    }
+
                     sFile.setFileExt(FileUtils.getFileExt(fileName));
                     sFile.setFileSize((int) file.length());
                 }
