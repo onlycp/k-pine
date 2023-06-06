@@ -13,7 +13,6 @@ import com.kingsware.kdev.core.cache.kcache.KCacheManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
-import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
 import com.kingsware.kdev.core.model.SysFile;
 import com.kingsware.kdev.core.model.SysLogicFlow;
 import com.kingsware.kdev.core.model.SysTask;
@@ -31,16 +30,18 @@ import com.kingsware.kdev.sys.ret.DevApplicationRet;
 import com.kingsware.kdev.sys.service.DevApplicationService;
 import com.kingsware.kdev.sys.service.SysFileService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.BorderStyle;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 业务实现类
+ *
  * @author AndyZheng
  * @version 1.0.0
  * @date 2022-02-13 10:20
@@ -81,7 +82,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
 
     private void checkUnique(DevApplication model) {
         // 唯一性校验
-        DBChecker<DevApplication> checker =DBChecker.build(model, DevApplication.class);
+        DBChecker<DevApplication> checker = DBChecker.build(model, DevApplication.class);
         // 应用短英文名唯一
         checker.uni("shortName", I18n.t("DevApplication.shortName.unique", "应用短英文名必须唯一"));
         // 执行校验
@@ -134,11 +135,10 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
 
     @Override
     public void delete(MultiIdArgv argv) {
-        for (String id: argv.getIds()) {
+        for (String id : argv.getIds()) {
             DB.delete(DevApplication.class, id);
         }
     }
-
 
 
     @Override
@@ -165,8 +165,8 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         log.info("完成导入字典信息：{}", dictCount);
         // 字典项
         // 先删除已有字典项
-        if (devPine.getDictItems() != null &&  !devPine.getDictItems().isEmpty()) {
-            for (SysDictItem item: devPine.getDictItems()) {
+        if (devPine.getDictItems() != null && !devPine.getDictItems().isEmpty()) {
+            for (SysDictItem item : devPine.getDictItems()) {
                 DB.delete(item);
             }
         }
@@ -197,7 +197,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         long pineFlowCount = DB.batchSaveOrUpdate(devPine.getLogicFlows(), SysLogicFlow.class);
         log.info("完成导入pine逻辑：{}", pineFlowCount);
         // faas逻辑
-        for (FlowInfo flowInfo: devPine.getKdbFlows()) {
+        for (FlowInfo flowInfo : devPine.getKdbFlows()) {
             if (flowInfo.getFlowId().equalsIgnoreCase("base_flow")) {
                 continue;
             }
@@ -207,50 +207,55 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             List<FlowInfo> functionInfoList = DB.kdbApi().query(kdbFlowQueryArgv);
 
             // 如果没有，则新增
-//            if (functionInfoList.isEmpty() ) {
-//                AddFlowInfo addFlowInfo = new AddFlowInfo();
-//                addFlowInfo.setFlowId(flowInfo.getFlowId());
-//                addFlowInfo.setContent(flowInfo.getContent());
-//                addFlowInfo.setName(flowInfo.getName());
-//                addFlowInfo.setDescription(flowInfo.getDescription());
-//                DB.kdbApi().addFlow(addFlowInfo);
-//            }
-            if (functionInfoList.isEmpty() ) {
-                String sql = "insert into flow (flowid,name,content,description) values (?,?,?,?)";
-                DB.byName("kingDB").executeUpdateSql(sql, flowInfo.getFlowId(), flowInfo.getName(), flowInfo.getContent(), flowInfo.getDescription());
-            }
-            else {
+            if (functionInfoList.isEmpty()) {
+                try {
+
+                    AddFlowInfo addFlowInfo = new AddFlowInfo();
+                    addFlowInfo.setFlowId(flowInfo.getFlowId());
+                    addFlowInfo.setContent(flowInfo.getContent());
+                    addFlowInfo.setName(flowInfo.getName());
+                    addFlowInfo.setDescription(flowInfo.getDescription());
+                    DB.kdbApi().addFlow(addFlowInfo);
+
+                } catch (Exception e) {
+                    String sql = "insert into flow (flowid,name,content,description) values (?,?,?,?)";
+                    DB.byName("kingDB").executeUpdateSql(sql, flowInfo.getFlowId(), flowInfo.getName(), flowInfo.getContent(), flowInfo.getDescription());
+                }
+            } else {
                 EditFlowInfo editFlowInfo = new EditFlowInfo();
                 editFlowInfo.setFlowId(flowInfo.getFlowId());
                 editFlowInfo.setContent(flowInfo.getContent());
                 editFlowInfo.setName(flowInfo.getName());
                 editFlowInfo.setDescription(flowInfo.getDescription());
-                log.info("更新FAAS逻辑编排完整信息:{}", editFlowInfo.toString() );
+                log.info("更新FAAS逻辑编排完整信息:{}", editFlowInfo.toString());
                 DB.kdbApi().editFlow(editFlowInfo);
-                log.info("更新FAAS逻辑编排:{}", editFlowInfo.getName() );
+                log.info("更新FAAS逻辑编排:{}", editFlowInfo.getName());
             }
         }
         // faas逻辑
-        for (Functions functions: devPine.getFunctions()) {
+        for (Functions functions : devPine.getFunctions()) {
 
             FunctionQueryArgv functionQueryArgv = new FunctionQueryArgv();
             functionQueryArgv.setId(functions.getId());
             List<Functions> functionInfoList = DB.kdbApi().queryFunction(functionQueryArgv);
             // 如果没有，则新增
-//            if (functionInfoList.isEmpty() ) {
-//                AddFunctionInfo addFunctionInfo = new AddFunctionInfo();
-//                addFunctionInfo.setId(functions.getId());
-//                addFunctionInfo.setName(functions.getName());
-//                addFunctionInfo.setDesc(functions.getDesc());
-//                addFunctionInfo.setScript(functions.getScript());
-//                addFunctionInfo.setType(functions.getType());
-//                DB.kdbApi().addFun(addFunctionInfo);
-//            }
-            if (functionInfoList.isEmpty() ) {
-                String sql = "insert into functions (id,name,type,desc,script) values (?,?,?,?,?)";
-                DB.byName("kingDB").executeUpdateSql(sql, functions.getId(), functions.getName(), functions.getType(), functions.getDesc(), functions.getScript());
-            }
-            else {
+            if (functionInfoList.isEmpty()) {
+                try {
+
+                    AddFunctionInfo addFunctionInfo = new AddFunctionInfo();
+                    addFunctionInfo.setId(functions.getId());
+                    addFunctionInfo.setName(functions.getName());
+                    addFunctionInfo.setDesc(functions.getDesc());
+                    addFunctionInfo.setScript(functions.getScript());
+                    addFunctionInfo.setType(functions.getType());
+                    DB.kdbApi().addFun(addFunctionInfo);
+
+                } catch (Exception e) {
+                    String sql = "insert into functions (id,name,type,desc,script) values (?,?,?,?,?)";
+                    DB.byName("kingDB").executeUpdateSql(sql, functions.getId(), functions.getName(), functions.getType(), functions.getDesc(), functions.getScript());
+                }
+
+            } else {
                 EditFunctionInfo editFunctionInfo = new EditFunctionInfo();
                 editFunctionInfo.setId(functions.getId());
                 editFunctionInfo.setName(functions.getName());
@@ -260,41 +265,47 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 DB.kdbApi().editFun(editFunctionInfo);
             }
         }
-        // 插入FAAS扩展节点类型
-        if (devPine.getDevFaasNodeTypes() != null && !devPine.getDevFaasNodeTypes().isEmpty()) {
-            long tCount = DB.batchSaveOrUpdate(devPine.getDevFaasNodeTypes(), DevFaasNodeType.class);
-            log.info("完成导入FAAS扩展节点类型：{}", tCount);
+        try {
+            // 插入FAAS扩展节点类型
+            if (devPine.getDevFaasNodeTypes() != null && !devPine.getDevFaasNodeTypes().isEmpty()) {
+                long tCount = DB.batchSaveOrUpdate(devPine.getDevFaasNodeTypes(), DevFaasNodeType.class);
+                log.info("完成导入FAAS扩展节点类型：{}", tCount);
+            }
+            // 插入FAAS扩展节点
+            if (devPine.getDevFaasNodes() != null && !devPine.getDevFaasNodes().isEmpty()) {
+                long tCount = DB.batchSaveOrUpdate(devPine.getDevFaasNodes(), DevFaasNode.class);
+                log.info("完成导入FAAS扩展节点：{}", tCount);
+            }
+            // 能力关联
+            if (devPine.getPowerLinks() != null && !devPine.getPowerLinks().isEmpty()) {
+                long tCount = DB.batchSaveOrUpdate(devPine.getPowerLinks(), DevPowerLink.class);
+                log.info("完成导入能力关联：{}", tCount);
+            }
+            // 能力树
+            if (devPine.getDevPowerTrees() != null && !devPine.getDevPowerTrees().isEmpty()) {
+                long tCount = DB.batchSaveOrUpdate(devPine.getDevPowerTrees(), DevPowerTree.class);
+                log.info("完成导入能力树：{}", tCount);
+            }
+            // 插件树
+            if (devPine.getExtPluginTrees() != null && !devPine.getExtPluginTrees().isEmpty()) {
+                long tCount = DB.batchSaveOrUpdate(devPine.getExtPluginTrees(), ExtPluginTree.class);
+                log.info("完成导入插件树：{}", tCount);
+            }
+            // 插件接口
+            if (devPine.getExtPluginInterfaces() != null && !devPine.getExtPluginInterfaces().isEmpty()) {
+                long tCount = DB.batchSaveOrUpdate(devPine.getExtPluginInterfaces(), ExtPluginInterface.class);
+                log.info("完成导入插件接口：{}", tCount);
+            }
+            // 编辑编排模板
+            if (devPine.getSysLogicTemplates() != null && !devPine.getSysLogicTemplates().isEmpty()) {
+                long tCount = DB.batchSaveOrUpdate(devPine.getSysLogicTemplates(), SysLogicTemplate.class);
+                log.info("完成导入编辑编排模板：{}", tCount);
+            }
         }
-        // 插入FAAS扩展节点
-        if (devPine.getDevFaasNodes() != null && !devPine.getDevFaasNodes().isEmpty()) {
-            long tCount = DB.batchSaveOrUpdate(devPine.getDevFaasNodes(), DevFaasNode.class);
-            log.info("完成导入FAAS扩展节点：{}", tCount);
+        catch (Exception e) {
+            log.warn("导入时发生非关键异常(可忽略)，不影响应用使用：" + e.getMessage());
         }
-        // 能力关联
-        if (devPine.getPowerLinks() != null && !devPine.getPowerLinks().isEmpty()) {
-            long tCount = DB.batchSaveOrUpdate(devPine.getPowerLinks(), DevPowerLink.class);
-            log.info("完成导入能力关联：{}", tCount);
-        }
-        // 能力树
-        if (devPine.getDevPowerTrees() != null && !devPine.getDevPowerTrees().isEmpty()) {
-            long tCount = DB.batchSaveOrUpdate(devPine.getDevPowerTrees(), DevPowerTree.class);
-            log.info("完成导入能力树：{}", tCount);
-        }
-        // 插件树
-        if (devPine.getExtPluginTrees() != null && !devPine.getExtPluginTrees().isEmpty()) {
-            long tCount = DB.batchSaveOrUpdate(devPine.getExtPluginTrees(), ExtPluginTree.class);
-            log.info("完成导入插件树：{}", tCount);
-        }
-        // 插件接口
-        if (devPine.getExtPluginInterfaces() != null && !devPine.getExtPluginInterfaces().isEmpty()) {
-            long tCount = DB.batchSaveOrUpdate(devPine.getExtPluginInterfaces(), ExtPluginInterface.class);
-            log.info("完成导入插件接口：{}", tCount);
-        }
-        // 编辑编排模板
-        if (devPine.getSysLogicTemplates() != null && !devPine.getSysLogicTemplates().isEmpty()) {
-            long tCount = DB.batchSaveOrUpdate(devPine.getSysLogicTemplates(), SysLogicTemplate.class);
-            log.info("完成导入编辑编排模板：{}", tCount);
-        }
+
         String result = String.format("导入应用数:%d, 页面数:%d, 接口数:%d, 字典分类数:%d, 字典项数:%d, 任务调度数:%d, 系统配置数:%d， 菜单数:%d, pine逻辑:%d, faas逻辑:%d, 函数数:%d, 开发平台角色:%d, 开发平台角色菜单:%d"
                 , appCount, pageCount, apiCount, dictCount, dictItemCount, taskCount
                 , configCount, menuCount, pineFlowCount, devPine.getKdbFlows().size()
@@ -318,7 +329,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             DevApplication application = DB.findById(DevApplication.class, argv.getAppId());
             logStack.addMessage("启动...");
             // 在线升级
-            if (argv.getMode() == 1 ) {
+            if (argv.getMode() == 1) {
                 // 获取通道信息
                 DevOtaChannel channel = DB.findById(DevOtaChannel.class, argv.getChannelId());
                 // 通道类型
@@ -336,7 +347,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                     body.put("sign", sign);
                     logStack.addMessage("准备请求远程数据, URL：" + apiUrl);
                     String responseBody = HttpUtil.postBody(apiUrl, JsonUtil.toJson(body), new HashMap<>(), true);
-                    logStack.addMessage("完成请求远程数据，准备安装应用." );
+                    logStack.addMessage("完成请求远程数据，准备安装应用.");
                     String result = importApp(responseBody);
                     logStack.addMessage("应用安装完成：" + result);
 
@@ -346,7 +357,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             else {
                 // 先将文件下载下来
                 String[] ids = argv.getLocalFileIds().split(",");
-                for (String fileId: ids) {
+                for (String fileId : ids) {
                     SysFile sysFile = DB.findById(SysFile.class, fileId);
                     File file = sysFileService.getFaasFile(sysFile.getFilePath());
                     String json = FileUtils.readFile(file);
@@ -356,8 +367,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                     logStack.addMessage("应用安装完成：" + result);
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logStack.addMessage(ExceptionUtils.getStackTrace(e));
         }
 
@@ -379,28 +389,28 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         // 应用处理
         if (pineMap.containsKey("info")) {
             Map<String, Object> map = (Map<String, Object>) pineMap.get("info");
-            MapUtil.transMapBooleanToInt( map,"devStatus", "enableStatus");
+            MapUtil.transMapBooleanToInt(map, "devStatus", "enableStatus");
             MapUtil.transMapDateToString(map, "whenCreated", "whenModified");
         }
         if (pineMap.containsKey("pages")) {
             List<Map<String, Object>> list = (List<Map<String, Object>>) pineMap.get("pages");
-            for (Map<String, Object> map: list) {
-                MapUtil.transMapBooleanToInt( map,"devStatus", "enableStatus");
+            for (Map<String, Object> map : list) {
+                MapUtil.transMapBooleanToInt(map, "devStatus", "enableStatus");
                 MapUtil.transMapDateToString(map, "whenCreated", "whenModified");
             }
 
         }
         if (pineMap.containsKey("menus")) {
             List<Map<String, Object>> list = (List<Map<String, Object>>) pineMap.get("menus");
-            for (Map<String, Object> map: list) {
-                MapUtil.transMapBooleanToInt( map,"isDev", "status");
+            for (Map<String, Object> map : list) {
+                MapUtil.transMapBooleanToInt(map, "isDev", "status");
                 MapUtil.transMapIntToBoolean(map, "isHidden");
                 map.put("hidden", map.get("isHidden"));
             }
         }
         if (pineMap.containsKey("kdbFlows")) {
             List<Map<String, Object>> list = (List<Map<String, Object>>) pineMap.get("kdbFlows");
-            for (Map<String, Object> map: list) {
+            for (Map<String, Object> map : list) {
                 map.put("flowId", map.get("flowid"));
                 map.put("updateTime", map.get("updatetime"));
                 map.put("createTime", map.get("createtime"));
@@ -408,7 +418,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         }
         if (pineMap.containsKey("functions")) {
             List<Map<String, Object>> list = (List<Map<String, Object>>) pineMap.get("functions");
-            for (Map<String, Object> map: list) {
+            for (Map<String, Object> map : list) {
                 map.put("updateTime", map.get("updatetime"));
                 map.put("createTime", map.get("createtime"));
             }
@@ -460,7 +470,6 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
 
 
     }
-
 
 
 }
