@@ -372,6 +372,8 @@ public class DynamicTask implements CommandLineRunner {
                 try {
                     registerTask(task);
                 } catch (Exception e) {
+                    task.setLastExecuteMsg("任务注册失败:" + e.getMessage());
+                    DB.update(task);
                     log.error("定时任务注册失败, 任务名称:{}, 表达式:{}, {}", task.getName(), task.getCron(), e.getMessage());
                 }
 
