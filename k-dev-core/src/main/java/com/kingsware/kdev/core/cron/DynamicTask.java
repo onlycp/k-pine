@@ -10,29 +10,21 @@ import com.kingsware.kdev.core.model.SysInstance;
 import com.kingsware.kdev.core.model.SysLogicFlow;
 import com.kingsware.kdev.core.model.SysTask;
 import com.kingsware.kdev.core.orm.DB;
-import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.kdb.FlowInfo;
 import com.kingsware.kdev.core.orm.kdb.KdbFlowQueryArgv;
 import com.kingsware.kdev.core.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ConcurrentReferenceHashMap;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 /**
  * 动态定时任务
@@ -47,14 +39,20 @@ import java.util.stream.Collectors;
 public class DynamicTask implements CommandLineRunner {
 
     @Value("${schedule.scan-package:com.kingsware.kdev}")
-    private String scanPackage ;
-    /** 是否将结果回写到数据库 **/
+    private String scanPackage;
+    /**
+     * 是否将结果回写到数据库
+     **/
     @Value("${schedule.result-to-db:true}")
-    private boolean resultToDb ;
-    /** 是否自动分布式 **/
+    private boolean resultToDb;
+    /**
+     * 是否自动分布式
+     **/
     @Value("${schedule.distributed-auto:true}")
     private boolean distributedAuto;
-    /** 是否运行分布式 **/
+    /**
+     * 是否运行分布式
+     **/
     @Value("${schedule.distributed-run:true}")
     private boolean distributedRun;
 
@@ -70,9 +68,10 @@ public class DynamicTask implements CommandLineRunner {
         this.threadPoolTaskScheduler.initialize();
     }
 
-    public void startTask (SysTask sysTask) {
+    public void startTask(SysTask sysTask) {
         //将任务交给任务调度器执行
-        ScheduledFuture<?> schedule = threadPoolTaskScheduler.schedule(() -> runTask(sysTask), new CronTrigger(sysTask.getCron()));
+        String cron = fixedCron(sysTask.getCron());
+        ScheduledFuture<?> schedule = threadPoolTaskScheduler.schedule(() -> runTask(sysTask), new CronTrigger(cron));
         //将任务包装成ScheduledFutureHolder
         ScheduledFutureHolder scheduledFutureHolder = new ScheduledFutureHolder();
         scheduledFutureHolder.setScheduledFuture(schedule);
@@ -80,10 +79,33 @@ public class DynamicTask implements CommandLineRunner {
         scheduledFutureMap.put(sysTask.getId(), scheduledFutureHolder);
     }
 
+    /**
+     * 修复表达式
+     * @param cron
+     * @return
+     */
+    private static String fixedCron(String cron) {
+        String tempCron = cron.trim();
+        String[] cronArr = tempCron.split(" ");
+        if (cronArr.length == 7) {
+            tempCron = tempCron.substring(0,tempCron.lastIndexOf(" ")).trim();
+        }
+        return tempCron;
+    }
+
+//    public static void main(String[] argv) {
+//        String c1 = "0 20 05 ? * 2 *";
+//        System.out.println(fixedCron(c1));
+//        String c2 = "0 20 05 ? * 2 ";
+//        System.out.println(fixedCron(c2));
+//        String c3 = "0 20 05 ? * 2";
+//        System.out.println(fixedCron(c3));
+//    }
+
 
     public void stopTask(SysTask sysTask) {
         //如果包含这个任务
-        if(scheduledFutureMap.containsKey(sysTask.getId())){
+        if (scheduledFutureMap.containsKey(sysTask.getId())) {
             log.info("停止定时任务:{}", sysTask.getName());
             ScheduledFutureHolder scheduledFutureHolder = scheduledFutureMap.get(sysTask.getId());
             ScheduledFuture<?> scheduledFuture = scheduledFutureHolder.getScheduledFuture();
@@ -95,8 +117,7 @@ public class DynamicTask implements CommandLineRunner {
     public void updateTask(SysTask sysTask) {
         if (sysTask.getEnable() == 0) {
             stopTask(sysTask);
-        }
-        else {
+        } else {
             stopTask(sysTask);
             startTask(sysTask);
         }
@@ -108,13 +129,12 @@ public class DynamicTask implements CommandLineRunner {
         ScheduledFutureHolder scheduledFutureHolder = scheduledFutureMap.get(sysTask.getId());
         if (scheduledFutureHolder != null) {
             // 如果表达式和启用状态相同，直接返回
-            if (sysTask.getEnable().equals(scheduledFutureHolder.getSysTask().getEnable())  && sysTask.getCron().equals(scheduledFutureHolder.getSysTask().getCron())) {
+            if (sysTask.getEnable().equals(scheduledFutureHolder.getSysTask().getEnable()) && sysTask.getCron().equals(scheduledFutureHolder.getSysTask().getCron())) {
                 scheduledFutureHolder.setSysTask(sysTask);
                 return;
             }
             updateTask(sysTask);
-        }
-        else if (sysTask.getEnable() == 1){
+        } else if (sysTask.getEnable() == 1) {
             startTask(sysTask);
         }
 
@@ -122,7 +142,8 @@ public class DynamicTask implements CommandLineRunner {
 
     /**
      * 运行任务
-     * @param sysTask   任务便利店
+     *
+     * @param sysTask 任务便利店
      */
     private void runTask(SysTask sysTask) {
         sysTask = DB.findById(SysTask.class, sysTask.getId());
@@ -138,8 +159,7 @@ public class DynamicTask implements CommandLineRunner {
             AtomicInteger atomicInteger = new AtomicInteger(0);
             callTask(sysTask, atomicInteger, "");
 
-        }
-        else {
+        } else {
             if (distributedRun) {
                 SysTask myTask = DB.findById(SysTask.class, sysTask.getId());
                 if (myTask.getEnable() == 0) {
@@ -152,11 +172,12 @@ public class DynamicTask implements CommandLineRunner {
 
     /**
      * 调用http接口
-     * @param sysTask    任务
+     *
+     * @param sysTask 任务
      */
-    public void callTask(SysTask sysTask, AtomicInteger atomicInteger,String excludeInstanceName) {
+    public void callTask(SysTask sysTask, AtomicInteger atomicInteger, String excludeInstanceName) {
         if (atomicInteger.intValue() == 3) {
-            log.warn("任务:{}执行失败次数为:{}, 调度器将终止任务执行", sysTask.getName(), atomicInteger.intValue() );
+            log.warn("任务:{}执行失败次数为:{}, 调度器将终止任务执行", sysTask.getName(), atomicInteger.intValue());
         }
         // 取主实例作为调度器
         SysInstance masterInstance = InstanceManager.getInstance().masterInstance();
@@ -164,7 +185,7 @@ public class DynamicTask implements CommandLineRunner {
         if (SystemUtil.getHost().instanceName().equalsIgnoreCase(masterInstance.instanceName())) {
             atomicInteger.incrementAndGet();
             // 随机取一个实例
-            SysInstance executeInstance =  InstanceManager.getInstance().getToExecuteInstance(sysTask.getId(), excludeInstanceName);
+            SysInstance executeInstance = InstanceManager.getInstance().getToExecuteInstance(sysTask.getId(), excludeInstanceName);
             // 如果是当前实例，直接调用即可，不通过http调用
             if (executeInstance.instanceName().equalsIgnoreCase(masterInstance.instanceName())) {
 //                log.info("本机触发定时任务，任务id:{}", sysTask.getId());
@@ -184,16 +205,14 @@ public class DynamicTask implements CommandLineRunner {
                 try {
                     String res = HttpUtil.get(url, new HashMap<>());
                     BaseRet<?> ret = JsonUtil.toBean(res, BaseRet.class);
-                    if (ret.getCode() != 200)  {
+                    if (ret.getCode() != 200) {
                         log.error("实例：{} 执行任务失败，系统将重试,异常信息:{}", executeInstance.instanceName(), ret.getMessage());
                         callTask(sysTask, atomicInteger, executeInstance.instanceName());
-                    }
-                    else  {
+                    } else {
 //                        log.info("http触发定时任务，任务id:{}，url:{},响应信息:{}", sysTask.getId(), url, ret.getMessage());
                     }
 
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     // 如果发生异常，那么就重试
                     log.error("实例：{} 执行任务失败，系统将重试,异常信息:{}", executeInstance.instanceName(), e);
                     callTask(sysTask, atomicInteger, executeInstance.instanceName());
@@ -206,9 +225,10 @@ public class DynamicTask implements CommandLineRunner {
 
     /**
      * 运行任务
+     *
      * @param myTask
      */
-    public void executeTask(SysTask myTask)  {
+    public void executeTask(SysTask myTask) {
         long t1 = System.currentTimeMillis();
         int executeStatus = 1;
         String errorMessage = "";
@@ -216,28 +236,23 @@ public class DynamicTask implements CommandLineRunner {
             // 如果是java类
             if (myTask.getTaskType() == 1) {
                 runJavaTask(myTask);
-            }
-            else if (myTask.getTaskType() == 2) {
+            } else if (myTask.getTaskType() == 2) {
                 runFlowTask(myTask);
             }
-        }
-        catch (CronException e) {
-            if (e.getErrorCode() == 1 || e.getErrorCode() == 2 ) {
+        } catch (CronException e) {
+            if (e.getErrorCode() == 1 || e.getErrorCode() == 2) {
                 executeStatus = 0;
                 errorMessage = e.getMessage();
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("定时任务执行失败, 任务名: {}， 错误信息:{}", myTask.getName(), e.getMessage());
             executeStatus = 0;
             errorMessage = ExceptionUtils.getStackTrace(e);
-        }
-        finally {
+        } finally {
             long t2 = System.currentTimeMillis();
-            if ((!resultToDb) && myTask.getDistributed()==0) {
-                log.info("任务执行完成，名称:{}, 执行结果:{}, 用时:{}, 信息:{}", myTask.getName(), executeStatus==1 ?"成功":"失败", (t2-t1), errorMessage);
-            }
-            else {
+            if ((!resultToDb) && myTask.getDistributed() == 0) {
+                log.info("任务执行完成，名称:{}, 执行结果:{}, 用时:{}, 信息:{}", myTask.getName(), executeStatus == 1 ? "成功" : "失败", (t2 - t1), errorMessage);
+            } else {
                 // 如果流程任务，延迟1秒更新日志
                 if (myTask.getTaskType() == 2) {
                     ThreadUtils.sleep(1000);
@@ -253,7 +268,8 @@ public class DynamicTask implements CommandLineRunner {
 
     /**
      * 执行java类任务
-     * @param sysTask   任务
+     *
+     * @param sysTask 任务
      */
     private void runJavaTask(SysTask sysTask) throws Exception {
         try {
@@ -268,6 +284,7 @@ public class DynamicTask implements CommandLineRunner {
 
     /**
      * 运行流程任务
+     *
      * @param sysTask 流程
      */
     private void runFlowTask(SysTask sysTask) {
@@ -299,8 +316,7 @@ public class DynamicTask implements CommandLineRunner {
             KdbFlowResult kdbFlowResult = KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), "", params, context, false, true);
             long t2 = System.currentTimeMillis();
 //            log.info("流程任务：{}, 结果:{}", sysTask.getName(), JsonUtil.toJson(kdbFlowResult));
-        }
-        else {
+        } else {
             throw new CronException("流程不存在", 2);
         }
 
@@ -311,8 +327,8 @@ public class DynamicTask implements CommandLineRunner {
      */
     private void scanJavaClassTask(String scanPackage) {
         // 扫描所有的定时器类
-        List<Class<?>> classList =  ClassUtils.getClassesByParentClass(scanPackage, KTask.class);
-        for (Class<?> tClass: classList) {
+        List<Class<?>> classList = ClassUtils.getClassesByParentClass(scanPackage, KTask.class);
+        for (Class<?> tClass : classList) {
             // 生成实例
             try {
                 KTask task = (KTask) tClass.newInstance();
@@ -336,11 +352,11 @@ public class DynamicTask implements CommandLineRunner {
                     log.info("发现任务，任务名称:{}, cron:{}, Class: {}", sysTask.getName(), sysTask.getCron(), sysTask.getClassName());
                 }
                 if (task instanceof KRunner) {
-                    ((KRunner)task).runNow();
+                    ((KRunner) task).runNow();
 //                    log.info("定时任务启动时即运行:{}", task.name());
                 }
             } catch (Exception e) {
-                log.error("定时类扫描初始化失败:{}" , e.getMessage());
+                log.error("定时类扫描初始化失败:{}", e.getMessage());
             }
         }
     }
@@ -349,29 +365,31 @@ public class DynamicTask implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         scanJavaClassTask(scanPackage);
-         threadPoolTaskScheduler.schedule(() -> {
-             try {
-                 List<SysTask> tasks = DB.findList(SysTask.class, "select * from sys_task");
-                 for (SysTask task: tasks) {
-                     registerTask(task);
-                 }
-                 // 删除不存在的任务
-                 Set<String> deleteTaskIds = new HashSet<>();
-                 scheduledFutureMap.forEach((k, v) ->{
-                     boolean match = tasks.stream().anyMatch(it -> it.getId().equals(v.getSysTask().getId()));
-                     if (!match) {
-                        deleteTaskIds.add(k);
-                     }
-                 });
-                 for (String tid: deleteTaskIds) {
-                     stopTask(scheduledFutureMap.get(tid).getSysTask());
-                 }
-                 // 解锁任务
-                 // unlockTask(tasks);
-             }
-             catch (Exception e) {
-                 log.error("定时任务注册失败, {}", e.getMessage());
-             }
+        threadPoolTaskScheduler.schedule(() -> {
+
+            List<SysTask> tasks = DB.findList(SysTask.class, "select * from sys_task order by when_created asc");
+            for (SysTask task : tasks) {
+                try {
+                    registerTask(task);
+                } catch (Exception e) {
+                    log.error("定时任务注册失败, 任务名称:{}, 表达式:{}, {}", task.getName(), task.getCron(), e.getMessage());
+                }
+
+            }
+            // 删除不存在的任务
+            Set<String> deleteTaskIds = new HashSet<>();
+            scheduledFutureMap.forEach((k, v) -> {
+                boolean match = tasks.stream().anyMatch(it -> it.getId().equals(v.getSysTask().getId()));
+                if (!match) {
+                    deleteTaskIds.add(k);
+                }
+            });
+            for (String tid : deleteTaskIds) {
+                stopTask(scheduledFutureMap.get(tid).getSysTask());
+            }
+            // 解锁任务
+            // unlockTask(tasks);
+
 
         }, new CronTrigger("0/30 * * * * ?"));
 
