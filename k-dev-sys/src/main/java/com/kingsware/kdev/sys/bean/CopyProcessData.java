@@ -147,7 +147,7 @@ public class CopyProcessData {
             if (obj instanceof SysApi) {
                 SysApi o1 = (SysApi) curObj;
                 SysApi o2 = (SysApi) obj;
-                if (o1.getId().equals(o2.getId())) {
+                if (o1.getId().equals(o2.getId()) || (o1.getApiUrl().equals(o2.getApiUrl()) && o1.getApiMethod().equals(o2.getApiMethod()) && o1.getApiFlowId().equals(o2.getApiFlowId()))) {
                     exist = true;
                     break;
                 }

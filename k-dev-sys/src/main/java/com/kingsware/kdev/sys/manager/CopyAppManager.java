@@ -7,6 +7,7 @@ import com.kingsware.kdev.core.bean.JsonPathSearchResult;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.cache.api.ApiManager;
 import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
@@ -232,7 +233,13 @@ public class CopyAppManager {
                             String afterUrl = apiUrl.replace(url, url1);
                             Map<String, Object> finalMap = JsonUtil.toMap(JsonUtil.toJson(segment.getValue()));
                             finalMap.put(segment.getField(), afterUrl);
-                            documentContext.set(segment.getPath(), finalMap);
+                            try {
+                                documentContext.set(segment.getPath(), finalMap);
+                            }
+                            catch (Exception e) {
+                                log.warn("warn", e);
+                            }
+
                         }
                     }
                 }
@@ -424,29 +431,44 @@ public class CopyAppManager {
             for (Object api: apiList) {
 
                 if (api instanceof String) {
-                    String value = (String) api;
-                    if (StringUtils.isEmpty(value)) {
-                        continue;
-                    }
-                    String path = String.format("$..[?(@.%s == '%s')]", tag.trim(), value);
-                    String[] arr = trimTag.split("\\.");
-                    JSONArray jsonArray = documentContext.read(path);
 
-                    for (int i=0; i < jsonArray.size(); i++) {
-                        JsonPathSearchResult searchResult  = new JsonPathSearchResult();
-                        searchResult.setField(arr[arr.length-1]);
-                        Map<String, Object> node = (Map<String, Object>) jsonArray.get(i);
-                        List<String> paths = new ArrayList<>();
-                        node.forEach((k, v) -> {
-                            if (v instanceof String) {
-                                String pa = String.format("@.%s == '%s'", k, v);
-                                paths.add(pa);
+                        String value = (String) api;
+                        if (StringUtils.isEmpty(value)) {
+                            continue;
+                        }
+                        if(value.contains("'")) {
+                            value = value.replace("'", "\\'");
+                        }
+                        String path = String.format("$..[?(@.%s == '%s')]", tag.trim(), value);
+                        String[] arr = trimTag.split("\\.");
+                        try {
+                            JSONArray jsonArray = documentContext.read(path);
+
+                            for (int i=0; i < jsonArray.size(); i++) {
+                                JsonPathSearchResult searchResult  = new JsonPathSearchResult();
+                                searchResult.setField(arr[arr.length-1]);
+                                Map<String, Object> node = (Map<String, Object>) jsonArray.get(i);
+                                List<String> paths = new ArrayList<>();
+                                node.forEach((k, v) -> {
+                                    if (v instanceof String) {
+                                        String str = (String) v;
+                                        if(str.contains("'")) {
+                                            str = str.replace("'", "\\'");
+                                        }
+                                        String pa = String.format("@.%s == '%s'", k, str);
+                                        paths.add(pa);
+                                    }
+                                });
+                                searchResult.setPath("$..[?(" + StringUtils.joinToString(paths, " && ") + ")]");
+                                searchResult.setValue(node);
+                                jsonPathSearchResults.add(searchResult);
                             }
-                        });
-                        searchResult.setPath("$..[?(" + StringUtils.joinToString(paths, " && ") + ")]");
-                        searchResult.setValue(node);
-                        jsonPathSearchResults.add(searchResult);
+                        }
+                        catch (Exception e) {
+                            log.warn("json-path匹配出错，path:{}", path);
+
                     }
+
                 }
             }
         }
@@ -488,12 +510,19 @@ public class CopyAppManager {
                         SysApi checkObj = BeanUtils.copyObject(sysApi, SysApi.class);
                         checkObj.setId(null);
                         SysApiService sysApiService = SpringContext.getBean(SysApiService.class);
-                        sysApiService.checkUnique(checkObj);
-                    }
+                        try {
+                            sysApiService.checkUnique(checkObj);
+                            DB.save(sysApi);
+                        }
+                        catch (BusinessException e) {
+                            log.warn("接口保存失败，将跳过，原因:{}", e.getMessage());
+                        }
 
-                    DB.save(sysApi);
+
+                    }
                     copyProcessData.getApiIds().add(sysApi.getId());
                     log.info("数据拷贝---接口编排：{}, 进度:{}/{}", sysApi.getApiName(), i + 1, total);
+
                 }
                 else if (obj instanceof DevPage) {
                     DevPage devPage = replaceObj(copyProcessData, obj, DevPage.class);
