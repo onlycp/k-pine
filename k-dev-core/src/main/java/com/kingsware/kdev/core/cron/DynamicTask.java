@@ -151,7 +151,7 @@ public class DynamicTask implements CommandLineRunner {
             return;
         }
         // 如果不是分布式任务，直接运行
-        if (sysTask.getDistributed() == 0) {
+        if (sysTask.getDistributed() != null && sysTask.getDistributed() == 0) {
             executeTask(sysTask);
             return;
         }
@@ -368,6 +368,7 @@ public class DynamicTask implements CommandLineRunner {
         threadPoolTaskScheduler.schedule(() -> {
 
             List<SysTask> tasks = DB.findList(SysTask.class, "select * from sys_task order by when_created asc");
+            log.info("线程池数量：{}，当前活动：{}， 任务数:{}", threadPoolTaskScheduler.getPoolSize(),  threadPoolTaskScheduler.getActiveCount(),  tasks.size());
             for (SysTask task : tasks) {
                 try {
                     registerTask(task);
@@ -393,7 +394,7 @@ public class DynamicTask implements CommandLineRunner {
             // unlockTask(tasks);
 
 
-        }, new CronTrigger("0/30 * * * * ?"));
+        }, new CronTrigger("0/5 * * * * ?"));
 
     }
 }
