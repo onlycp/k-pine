@@ -100,37 +100,11 @@ public class KFaasInitialize implements SystemInitialize {
                 }
             }
             // 重新初始化baseFlow
-            initBaseFlow();
+            DB.kdbApi().refreshBaseFlow();
         }
 
     }
 
-    private void initBaseFlow() {
-        // 2. 修改基础流程
-        FlowInfo flowInfo = DB.kdbApi().get("base_flow");
-        // 转为流程定义
-        FlowDefinition flowDefinition = JsonUtil.toBean(flowInfo.getContent(), FlowDefinition.class);
-        if (flowDefinition != null) {
-            // 获取所有的数据源
-            List<DataSourceInfo> dataSourceInfos = DB.kdbApi().queryDataSource(new DataSourceQueryArgv());
-            // 根据数据源生成流程
-            for (DataSourceInfo info: dataSourceInfos) {
-                // 判断是否已存在，不存在才会加进去
-                boolean has = flowDefinition.getNodeDefinitions().stream().anyMatch(it -> it.getId().equals(info.getSourceName()));
-                if (!has) {
-                    String expr = "compare(${nodeId}=" + info.getSourceName() + ")";
-                    flowDefinition.resetCurrentNode("数据源分支节点").toSqlWithId(info.getSourceName(), info.getSourceName(), info.getSourceName(), "select version()", expr).toEnd();
-                }
-            }
-            // 重新保存
-            EditFlowInfo editFlowInfo = new EditFlowInfo();
-            editFlowInfo.setFlowId(flowInfo.getFlowId());
-            editFlowInfo.setName("基础流程");
-            editFlowInfo.setContent(flowDefinition.toJson());
-            editFlowInfo.setDescription(flowInfo.getDescription());
-            DB.kdbApi().editFlow(editFlowInfo);
-        }
-    }
 
     /**
      * 创建的数据库初始化
@@ -171,7 +145,7 @@ public class KFaasInitialize implements SystemInitialize {
                     config.setExecuteSqlApi(SpringContext.getProperties("database.sources.db.executeSqlApi", ""));
                     DbContext.getInstance().createDataBase(sourceName, config);
                     // 需要先初始化数据源
-                    initBaseFlow();
+                    DB.kdbApi().refreshBaseFlow();
                     String createSchemaSql = String.format("CREATE DATABASE IF NOT EXISTS `%s` DEFAULT CHARSET utf8 COLLATE utf8_general_ci;",  dbName);
                     DB.byName(initDs.getSourceName()).executeUpdateSql(createSchemaSql);
                 }
@@ -198,7 +172,7 @@ public class KFaasInitialize implements SystemInitialize {
                     config.setExecuteSqlApi(SpringContext.getProperties("database.sources.db.executeSqlApi", ""));
                     DbContext.getInstance().createDataBase(sourceName, config);
                     // 需要先初始化数据源
-                    initBaseFlow();
+                    DB.kdbApi().refreshBaseFlow();
 
                     // 先判断数据库是否存在在
                     long count = DB.byName(initDs.getSourceName()).findCount(String.format("select count(1) from pg_database where datname = '%s'", dbName));

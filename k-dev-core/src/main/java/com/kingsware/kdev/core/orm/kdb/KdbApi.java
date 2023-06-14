@@ -136,6 +136,11 @@ public interface KdbApi {
      */
     String transaction(TransactionInfo transactionInfo);
 
+    /***
+     * 刷新base-flow
+     */
+    void refreshBaseFlow();
+
 
     /**
      * 流程查询
