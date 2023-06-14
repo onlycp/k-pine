@@ -29,7 +29,11 @@ public class MD5Utils {
             byte[] md5 = md.digest(source.getBytes(StandardCharsets.UTF_8));
             // 将字节数据转换为十六进制
             for (byte b : md5) {
-                sb.append(Integer.toHexString(b & 0xff));
+                String hex = Integer.toHexString(b & 0xff);
+                if (hex.length() == 1) {
+                    hex = "0" + hex;
+                }
+                sb.append(hex);
             }
         } catch (NoSuchAlgorithmException e) {
             log.error("error", e);
