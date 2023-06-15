@@ -161,11 +161,10 @@ public class DynamicTask implements CommandLineRunner {
 
         } else {
             if (distributedRun) {
-                SysTask myTask = DB.findById(SysTask.class, sysTask.getId());
-                if (myTask.getEnable() == 0) {
+                if (sysTask.getEnable() == 0) {
                     return;
                 }
-                executeTask(myTask);
+                executeTask(sysTask);
             }
         }
     }
@@ -288,6 +287,7 @@ public class DynamicTask implements CommandLineRunner {
      * @param sysTask 流程
      */
     private void runFlowTask(SysTask sysTask) {
+
         // 先查找一下看流程是否存在
         KdbFlowQueryArgv flowInfo = new KdbFlowQueryArgv();
         flowInfo.setFlowId(sysTask.getTaskResourceId());
@@ -367,29 +367,36 @@ public class DynamicTask implements CommandLineRunner {
         scanJavaClassTask(scanPackage);
         threadPoolTaskScheduler.schedule(() -> {
 
-            List<SysTask> tasks = DB.findList(SysTask.class, "select * from sys_task order by when_created asc");
-            log.info("线程池数量：{}，当前活动：{}， 任务数:{}", threadPoolTaskScheduler.getPoolSize(),  threadPoolTaskScheduler.getActiveCount(),  tasks.size());
-            for (SysTask task : tasks) {
-                try {
-                    registerTask(task);
-                } catch (Exception e) {
-                    task.setLastExecuteMsg("任务注册失败:" + e.getMessage());
-                    DB.update(task);
-                    log.error("定时任务注册失败, 任务名称:{}, 表达式:{}, {}", task.getName(), task.getCron(), e.getMessage());
-                }
+            try {
+                List<SysTask> tasks = DB.findList(SysTask.class, "select * from sys_task order by when_created asc");
+                log.info("线程池数量：{}，当前活动：{}， 任务数:{}", threadPoolTaskScheduler.getPoolSize(),  threadPoolTaskScheduler.getActiveCount(),  tasks.size());
+                for (SysTask task : tasks) {
+                    try {
+                        registerTask(task);
+                    } catch (Exception e) {
+                        task.setEnable(0);
+                        task.setLastExecuteMsg("任务注册失败:" + e.getMessage());
+                        DB.update(task);
+                        log.error("定时任务注册失败, 任务名称:{}, 表达式:{}, {}", task.getName(), task.getCron(), e.getMessage());
+                    }
 
-            }
-            // 删除不存在的任务
-            Set<String> deleteTaskIds = new HashSet<>();
-            scheduledFutureMap.forEach((k, v) -> {
-                boolean match = tasks.stream().anyMatch(it -> it.getId().equals(v.getSysTask().getId()));
-                if (!match) {
-                    deleteTaskIds.add(k);
                 }
-            });
-            for (String tid : deleteTaskIds) {
-                stopTask(scheduledFutureMap.get(tid).getSysTask());
+                // 删除不存在的任务
+                Set<String> deleteTaskIds = new HashSet<>();
+                scheduledFutureMap.forEach((k, v) -> {
+                    boolean match = tasks.stream().anyMatch(it -> it.getId().equals(v.getSysTask().getId()));
+                    if (!match) {
+                        deleteTaskIds.add(k);
+                    }
+                });
+                for (String tid : deleteTaskIds) {
+                    stopTask(scheduledFutureMap.get(tid).getSysTask());
+                }
             }
+            catch (Exception e) {
+                log.error("error", e);
+            }
+
             // 解锁任务
             // unlockTask(tasks);
 
