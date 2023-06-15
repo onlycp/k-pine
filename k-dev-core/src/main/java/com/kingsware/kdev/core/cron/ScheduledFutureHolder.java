@@ -17,5 +17,5 @@ public class ScheduledFutureHolder {
     /** 任务调度器 **/
     private ScheduledFuture<?> scheduledFuture;
     /**  任务 **/
-    private SysTask sysTask;
+    private String cron;
 }

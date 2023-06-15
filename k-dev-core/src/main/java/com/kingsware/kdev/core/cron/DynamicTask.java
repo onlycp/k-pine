@@ -23,8 +23,12 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * 动态定时任务
@@ -61,6 +65,13 @@ public class DynamicTask implements CommandLineRunner {
 
     private final Map<String, ScheduledFutureHolder> scheduledFutureMap;
 
+    private CopyOnWriteArrayList<SysTask> sysTaskList = new CopyOnWriteArrayList<>();
+
+    /**
+     * 线程池
+     */
+    private static final ExecutorService executorService = Executors.newFixedThreadPool(5);
+
     public DynamicTask() {
         this.scheduledFutureMap = new HashMap<>(1);
         this.threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
@@ -68,16 +79,6 @@ public class DynamicTask implements CommandLineRunner {
         this.threadPoolTaskScheduler.initialize();
     }
 
-    public void startTask(SysTask sysTask) {
-        //将任务交给任务调度器执行
-        String cron = fixedCron(sysTask.getCron());
-        ScheduledFuture<?> schedule = threadPoolTaskScheduler.schedule(() -> runTask(sysTask), new CronTrigger(cron));
-        //将任务包装成ScheduledFutureHolder
-        ScheduledFutureHolder scheduledFutureHolder = new ScheduledFutureHolder();
-        scheduledFutureHolder.setScheduledFuture(schedule);
-        scheduledFutureHolder.setSysTask(sysTask);
-        scheduledFutureMap.put(sysTask.getId(), scheduledFutureHolder);
-    }
 
     /**
      * 修复表达式
@@ -103,39 +104,18 @@ public class DynamicTask implements CommandLineRunner {
 //    }
 
 
-    public void stopTask(SysTask sysTask) {
-        //如果包含这个任务
-        if (scheduledFutureMap.containsKey(sysTask.getId())) {
-            log.info("停止定时任务:{}", sysTask.getName());
-            ScheduledFutureHolder scheduledFutureHolder = scheduledFutureMap.get(sysTask.getId());
-            ScheduledFuture<?> scheduledFuture = scheduledFutureHolder.getScheduledFuture();
-            scheduledFuture.cancel(true);
-            scheduledFutureMap.remove(sysTask.getId());
-        }
-    }
 
-    public void updateTask(SysTask sysTask) {
-        if (sysTask.getEnable() == 0) {
-            stopTask(sysTask);
-        } else {
-            stopTask(sysTask);
-            startTask(sysTask);
-        }
-
-    }
-
-    public void registerTask(SysTask sysTask) {
+    public void registerTask(String cron) {
+        //将任务交给任务调度器执行
+        ScheduledFuture<?> schedule = threadPoolTaskScheduler.schedule(() -> runTask(cron), new CronTrigger(cron));
         // 判断是否有
-        ScheduledFutureHolder scheduledFutureHolder = scheduledFutureMap.get(sysTask.getId());
-        if (scheduledFutureHolder != null) {
-            // 如果表达式和启用状态相同，直接返回
-            if (sysTask.getEnable().equals(scheduledFutureHolder.getSysTask().getEnable()) && sysTask.getCron().equals(scheduledFutureHolder.getSysTask().getCron())) {
-                scheduledFutureHolder.setSysTask(sysTask);
-                return;
-            }
-            updateTask(sysTask);
-        } else if (sysTask.getEnable() == 1) {
-            startTask(sysTask);
+        ScheduledFutureHolder scheduledFutureHolder = scheduledFutureMap.get(cron);
+        if (scheduledFutureHolder == null) {
+            //将任务包装成ScheduledFutureHolder
+            scheduledFutureHolder = new ScheduledFutureHolder();
+            scheduledFutureHolder.setScheduledFuture(schedule);
+            scheduledFutureHolder.setCron(cron);
+            scheduledFutureMap.put(cron, scheduledFutureHolder);
         }
 
     }
@@ -143,30 +123,41 @@ public class DynamicTask implements CommandLineRunner {
     /**
      * 运行任务
      *
-     * @param sysTask 任务便利店
+     * @param cron 任务便利店
      */
-    private void runTask(SysTask sysTask) {
-        sysTask = DB.findById(SysTask.class, sysTask.getId());
-        if (sysTask.getEnable() == 0) {
-            return;
+    private void runTask(String cron) {
+        List<SysTask> cronTasks = sysTaskList.stream().filter(it -> it.getEnable() == 1).filter(it -> fixedCron(it.getCron()).equals(fixedCron(cron))).collect(Collectors.toList());
+        // 如果不存在任务，则自毁
+        if (cronTasks.isEmpty()) {
+            ScheduledFutureHolder scheduledFutureHolder = scheduledFutureMap.get(cron);
+            ScheduledFuture<?> scheduledFuture = scheduledFutureHolder.getScheduledFuture();
+            scheduledFuture.cancel(true);
+            scheduledFutureMap.remove(cron);
         }
-        // 如果不是分布式任务，直接运行
-        if (sysTask.getDistributed() != null && sysTask.getDistributed() == 0) {
-            executeTask(sysTask);
-            return;
-        }
-        if (distributedAuto) {
-            AtomicInteger atomicInteger = new AtomicInteger(0);
-            callTask(sysTask, atomicInteger, "");
+        else {
+            for (SysTask sysTask: cronTasks) {
+                executorService.submit(() -> {
+                    // 如果不是分布式任务，直接运行
+                    if (sysTask.getDistributed() != null && sysTask.getDistributed() == 0) {
+                        executeTask(sysTask);
+                        return;
+                    }
+                    if (distributedAuto) {
+                        AtomicInteger atomicInteger = new AtomicInteger(0);
+                        callTask(sysTask, atomicInteger, "");
+                    } else {
+                        if (distributedRun) {
+                            if (sysTask.getEnable() == 0) {
+                                return;
+                            }
+                            executeTask(sysTask);
+                        }
+                    }
+                });
 
-        } else {
-            if (distributedRun) {
-                if (sysTask.getEnable() == 0) {
-                    return;
-                }
-                executeTask(sysTask);
             }
         }
+
     }
 
     /**
@@ -368,30 +359,22 @@ public class DynamicTask implements CommandLineRunner {
         threadPoolTaskScheduler.schedule(() -> {
 
             try {
-                List<SysTask> tasks = DB.findList(SysTask.class, "select * from sys_task order by when_created asc");
+                List<SysTask> tasks = DB.findList(SysTask.class, "select * from sys_task where enable=1 order by when_created asc");
                 log.info("线程池数量：{}，当前活动：{}， 任务数:{}", threadPoolTaskScheduler.getPoolSize(),  threadPoolTaskScheduler.getActiveCount(),  tasks.size());
-                for (SysTask task : tasks) {
+                // 处理一下表达式
+                for (SysTask task: tasks) {
                     try {
-                        registerTask(task);
-                    } catch (Exception e) {
-                        task.setEnable(0);
-                        task.setLastExecuteMsg("任务注册失败:" + e.getMessage());
-                        DB.update(task);
-                        log.error("定时任务注册失败, 任务名称:{}, 表达式:{}, {}", task.getName(), task.getCron(), e.getMessage());
+                        task.setCron(fixedCron(task.getCron()));
+                        registerTask(task.getCron());
+                    }
+                    catch (Exception e) {
+                        log.warn("任务表达式注册不成功, 任务名称:{}, 表达式{}", task.getName(), task.getCron());
                     }
 
                 }
-                // 删除不存在的任务
-                Set<String> deleteTaskIds = new HashSet<>();
-                scheduledFutureMap.forEach((k, v) -> {
-                    boolean match = tasks.stream().anyMatch(it -> it.getId().equals(v.getSysTask().getId()));
-                    if (!match) {
-                        deleteTaskIds.add(k);
-                    }
-                });
-                for (String tid : deleteTaskIds) {
-                    stopTask(scheduledFutureMap.get(tid).getSysTask());
-                }
+                this.sysTaskList.clear();
+                this.sysTaskList.addAll(tasks);
+
             }
             catch (Exception e) {
                 log.error("error", e);
