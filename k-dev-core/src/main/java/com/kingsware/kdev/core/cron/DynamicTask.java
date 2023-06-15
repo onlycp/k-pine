@@ -364,8 +364,12 @@ public class DynamicTask implements CommandLineRunner {
                 // 处理一下表达式
                 for (SysTask task: tasks) {
                     try {
+                        if (task instanceof KRunner) {
+                            ((KRunner)task).runNow();
+                        }
                         task.setCron(fixedCron(task.getCron()));
                         registerTask(task.getCron());
+
                     }
                     catch (Exception e) {
                         log.warn("任务表达式注册不成功, 任务名称:{}, 表达式{}", task.getName(), task.getCron());
