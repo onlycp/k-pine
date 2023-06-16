@@ -77,7 +77,7 @@ public class LicenseServiceImpl implements LicenseService {
         // license目录
         String licenseDir = SpringContext.getProperties("license.dir", ".");
         // 读取文件
-        String licenseFilePath = licenseDir + "/pine.license";
+        String licenseFilePath = licenseDir + "/" + SpringContext.getProperties("license.file", "pine.license");
         // 保存文件License
         FileUtils.writeToFile(new File(licenseFilePath), licenseActive.getLicense().getBytes(StandardCharsets.UTF_8));
         // 返回license
