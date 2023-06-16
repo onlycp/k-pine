@@ -100,13 +100,17 @@ public class KAuthFilter implements Filter {
         // 获取请求路径
         String url = request.getRequestURI();
         log.info("上下文:{},路径:{} -00", request.getContextPath(), request.getRequestURI()  );
+        if (url.contains("/sys-tool-box")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         // 判断是否静态文件
         if (uiConfig.isStaticsResource(url)) {
             log.info("静态资源:" + url);
             filterChain.doFilter(request, response);
             return;
         }
-        if (url.contains("websocket") || url.contains("eiac")) {
+        if (url.contains("websocket") || url.contains("eiac") ) {
             initContext(request, response);
             filterChain.doFilter(request, response);
             return;
