@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.sql.Timestamp;
+import java.util.Objects;
 
 /**
  * 任务表
@@ -14,7 +15,6 @@ import java.sql.Timestamp;
  * @date 2021-12-27 10:20
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
 @Table
 public class SysTask extends BaseManageModel {
     /** 名称 **/
@@ -58,4 +58,17 @@ public class SysTask extends BaseManageModel {
     /** 应用id **/
     private String appId;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SysTask)) return false;
+        if (!super.equals(o)) return false;
+        SysTask task = (SysTask) o;
+        return Objects.equals(getId(), task.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getId());
+    }
 }
