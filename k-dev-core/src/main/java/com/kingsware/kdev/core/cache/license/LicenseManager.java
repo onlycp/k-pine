@@ -69,7 +69,7 @@ public class LicenseManager {
         // license目录
         String licenseDir = SpringContext.getProperties("license.dir", ".");
         // 读取文件
-        String licenseFilePath = licenseDir + "/pine.license";
+        String licenseFilePath = licenseDir + "/" + SpringContext.getProperties("license.file", "pine.license");
         File licenseFile = new File(licenseFilePath);
         // 如果license文件不存在
         if (!licenseFile.exists()) {
