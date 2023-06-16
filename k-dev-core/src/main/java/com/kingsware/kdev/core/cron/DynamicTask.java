@@ -48,7 +48,7 @@ public class DynamicTask implements CommandLineRunner {
     /**
      * 是否将结果回写到数据库
      **/
-    @Value("${schedule.result-to-db:true}")
+    @Value("${schedule.result-to-db:false}")
     private boolean resultToDb;
     /**
      * 是否自动分布式
@@ -244,16 +244,10 @@ public class DynamicTask implements CommandLineRunner {
             errorMessage = ExceptionUtils.getStackTrace(e);
         } finally {
             long t2 = System.currentTimeMillis();
-            if ((!resultToDb) && myTask.getDistributed() == 0) {
-                log.info("任务执行完成，名称:{}, 执行结果:{}, 用时:{}, 信息:{}", myTask.getName(), executeStatus == 1 ? "成功" : "失败", (t2 - t1), errorMessage);
-            } else {
-                // 如果流程任务，延迟1秒更新日志
-                if (myTask.getTaskType() == 2) {
-                    ThreadUtils.sleep(1000);
-                }
+            log.info("任务执行完成，名称:{}, 执行结果:{}, 用时:{}, 信息:{}", myTask.getName(), executeStatus == 1 ? "成功" : "失败", (t2 - t1), errorMessage);
+            if (resultToDb) {
                 String sql = "update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ?,  last_execute_time=?, next_inst=? where id=?";
                 DB.executeUpdateSql(sql, executeStatus, (t2 - t1), errorMessage, DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME), SystemUtil.getHost().instanceName(), myTask.getId());
-
             }
 
         }
@@ -284,37 +278,29 @@ public class DynamicTask implements CommandLineRunner {
     private void runFlowTask(SysTask sysTask) {
 
         // 先查找一下看流程是否存在
-        KdbFlowQueryArgv flowInfo = new KdbFlowQueryArgv();
-        flowInfo.setFlowId(sysTask.getTaskResourceId());
-        List<FlowInfo> flowInfos = DB.kdbApi().query(flowInfo);
-        if (!flowInfos.isEmpty()) {
-            SysLogicFlow logicFlow = DB.findOne(SysLogicFlow.class, "select in_argv, out_argv from sys_logic_flow where flow_id=?", sysTask.getTaskResourceId());
-            String inArgv = "{}";
-            String outArgv = "{}";
-            if (logicFlow != null) {
-                if (StringUtils.isNotEmpty(logicFlow.getInArgv())) {
-                    inArgv = logicFlow.getInArgv();
-                }
-                if (StringUtils.isNotEmpty(logicFlow.getOutArgv())) {
-                    outArgv = logicFlow.getOutArgv();
-                }
+        SysLogicFlow logicFlow = DB.findOne(SysLogicFlow.class, "select in_argv, out_argv from sys_logic_flow where flow_id=?", sysTask.getTaskResourceId());
+        String inArgv = "{}";
+        String outArgv = "{}";
+        if (logicFlow != null) {
+            if (StringUtils.isNotEmpty(logicFlow.getInArgv())) {
+                inArgv = logicFlow.getInArgv();
             }
-            KFlowContext context = KFlowContext.createBaseContext(inArgv, outArgv);
-            Map<String, Object> params = new HashMap<>();
-            if (StringUtils.isNotEmpty(sysTask.getTaskArgv())) {
-                Map<String, Object> taskArgvMap = JsonUtil.toMap(sysTask.getTaskArgv());
-                if (taskArgvMap != null) {
-                    params = taskArgvMap;
-                }
+            if (StringUtils.isNotEmpty(logicFlow.getOutArgv())) {
+                outArgv = logicFlow.getOutArgv();
             }
-            long t1 = System.currentTimeMillis();
-            KdbFlowResult kdbFlowResult = KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), "", params, context, false, true);
-            long t2 = System.currentTimeMillis();
-//            log.info("流程任务：{}, 结果:{}", sysTask.getName(), JsonUtil.toJson(kdbFlowResult));
-        } else {
-            throw new CronException("流程不存在", 2);
         }
-
+        KFlowContext context = KFlowContext.createBaseContext(inArgv, outArgv);
+        Map<String, Object> params = new HashMap<>();
+        if (StringUtils.isNotEmpty(sysTask.getTaskArgv())) {
+            Map<String, Object> taskArgvMap = JsonUtil.toMap(sysTask.getTaskArgv());
+            if (taskArgvMap != null) {
+                params = taskArgvMap;
+            }
+        }
+        long t1 = System.currentTimeMillis();
+        KdbFlowResult kdbFlowResult = KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), "", params, context, false, true);
+        long t2 = System.currentTimeMillis();
+//            log.info("流程任务：{}, 结果:{}", sysTask.getName(), JsonUtil.toJson(kdbFlowResult));
     }
 
     /**
@@ -428,7 +414,7 @@ public class DynamicTask implements CommandLineRunner {
             // unlockTask(tasks);
 
 
-        }, new CronTrigger("0/5 * * * * ?"));
+        }, new CronTrigger("0/30 * * * * ?"));
 
     }
 }
