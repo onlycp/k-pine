@@ -124,7 +124,6 @@ public class KAuthFilter implements Filter {
         String method = request.getMethod().toLowerCase();
         // 获取上下文路径
         String contextPath = request.getContextPath();
-        log.info("上下文:{},路径:{} -01", contextPath, request.getRequestURI()  );
         String apiCode = "";
         // 接口信息
         ApiInfo api = null;
@@ -147,13 +146,11 @@ public class KAuthFilter implements Filter {
             if (url.contains("//")) {
                 url = url.replaceAll("//", "/");
             }
-            log.info("上下文:{},路径:{} -02", contextPath, request.getRequestURI()  );
             // log.info("Take-{}, {}",1,  (System.currentTimeMillis()-tt0));
             String apiUrlPrefix = request.getContextPath() + "/api";
             // 如果是接口或者url文件
             if (url.startsWith(apiUrlPrefix) || url.startsWith(kPageFlag)) {
 
-                log.info("上下文:{},路径:{} -03", contextPath, request.getRequestURI()  );
                 wrapperRequest = new MyHttpServletRequestWrapper(request);
                 String contentType = request.getContentType();
                 if (contentType == null || !contentType.toLowerCase().contains("multipart/form-data")) {
@@ -165,7 +162,6 @@ public class KAuthFilter implements Filter {
                 if (url.startsWith(apiUrlPrefix)) {
                     contextPath = apiUrlPrefix;
                 }
-                log.info("上下文:{},路径:{} -04", contextPath, request.getRequestURI()  );
                 // log.info("Take-{}, {}",2,  (System.currentTimeMillis()-tt0));
                 // 获取配置的接口信息
                 String path = url.replaceFirst(contextPath, "");
@@ -184,7 +180,6 @@ public class KAuthFilter implements Filter {
                     ServletUtil.responseJson(response, BaseRet.fail("接口不存在", RetEnum.SERVICE_FAIL.getCode()));
                     return;
                 }
-                log.info("上下文:{},路径:{} -05", contextPath, request.getRequestURI()  );
                 // log.info("Take-{}, {}",3,  (System.currentTimeMillis()-tt0));
                 // 流程调用方式
                 if (api != null && api.getCallType() == 2 && kflowProperties.isEnable()) {
@@ -192,22 +187,18 @@ public class KAuthFilter implements Filter {
                     apiCode = api.getApiCode();
                     // 是否允许跳过权限
                     ignore = StringUtils.isNotEmpty(api.getApiCode()) && apiCode.startsWith(ignoreApi);
-                    log.info("上下文:{},路径:{} -06", contextPath, request.getRequestURI()  );
                 } else {
                     if (apiDefine != null) {
                         apiCode = apiDefine.getApiCode();
                         ignore = apiDefine.isIgnore();
                         dev = apiDefine.isDev();
-                        log.info("上下文:{},路径:{} -07", contextPath, request.getRequestURI()  );
                     } else {
-                        log.info("上下文:{},路径:{} -08", contextPath, request.getRequestURI()  );
     //                    log.info("上下文-2:{},路径:{}", contextPath, request.getRequestURI()  );
                         filterChain.doFilter(wrapperRequest, response);
                         return;
                     }
                 }
                 if ((!modeDev) && dev) {
-                    log.info("上下文:{},路径:{} -09", contextPath, request.getRequestURI()  );
                     ServletUtil.responseJson(response, BaseRet.fail("发布模式无权访问此接口", RetEnum.ONLY_DEV.getCode()));
                     return;
                 }
@@ -215,11 +206,9 @@ public class KAuthFilter implements Filter {
                 // 判断是否开放接口
                 isOpenApi = StringUtils.isNotEmpty(apiCode) && apiCode.startsWith(openApiFlag) && api != null;
                 if (isOpenApi) {
-                    log.info("上下文:{},路径:{} -10", contextPath, request.getRequestURI()  );
                     // 处理请求变量
                     this.checkOpenApi(api, argvMap);
                 } else {
-                    log.info("上下文:{},路径:{} -11", contextPath, request.getRequestURI()  );
                     this.checkPermission(request, response, ignore, apiCode);
                 }
 
@@ -248,10 +237,8 @@ public class KAuthFilter implements Filter {
                 if (callType == CallType.CONTROLLER) {
                     apiMock.setGroupName(apiDefine.getModule());
                     apiMock.setName(apiDefine.getName());
-                    log.info("上下文:{},路径:{} -12", contextPath, request.getRequestURI()  );
                     filterChain.doFilter(wrapperRequest, wrapperResponse);
                 } else {
-                    log.info("上下文:{},路径:{} -13", contextPath, request.getRequestURI()  );
                     // log.info("Take-{}, {}",7,  (System.currentTimeMillis()-tt0));
                     apiMock.setName(api.getApiName());
                     apiMock.setUrl(request.getRequestURI());
@@ -271,19 +258,15 @@ public class KAuthFilter implements Filter {
 //                    e.printStackTrace();
 //                }
             } else {
-                log.info("url:{}", url );
-                log.info("上下文:{},路径:{} -14", contextPath, request.getRequestURI()  );
                 filterChain.doFilter(request, response);
             }
         }
         catch (BusinessException e) {
-            log.info("上下文:{},路径:{} -15", contextPath, request.getRequestURI()  );
             errorMessage = e.getMessage();
             responseCode = RetEnum.SERVICE_FAIL.getCode();
             ServletUtil.responseJson(response, BaseRet.failMessage(e.getMessage()));
         }
         catch (OrmDbException e) {
-            log.info("上下文:{},路径:{} -16", contextPath, request.getRequestURI()  );
             errorMessage = e.getMessage();
             responseCode = RetEnum.SERVICE_FAIL.getCode();
             String devMode = SpringContext.getProperties("app.mode.dev", "true");
@@ -296,14 +279,12 @@ public class KAuthFilter implements Filter {
 
         }
         catch (UnauthorizedException e) {
-            log.info("上下文:{},路径:{} -17", contextPath, request.getRequestURI()  );
             errorMessage = e.getMessage();
             responseCode = RetEnum.UNAUTHORIZED.getCode();
             log.error("用户未登录，接口路径:{}, 请求方法:{}， 异常信息:{}", url, method, e.getMessage());
             ServletUtil.responseJson(response, BaseRet.fail(e.getMessage(), RetEnum.UNAUTHORIZED.getCode()));
         }
         catch (LicenseException e) {
-            log.info("上下文:{},路径:{} -18", contextPath, request.getRequestURI()  );
             errorMessage = e.getMessage();
             responseCode = RetEnum.LICENSE_FAIL.getCode();
             ServletUtil.responseJson(response, BaseRet.fail(e.getMessage(), RetEnum.LICENSE_FAIL.getCode()));
@@ -316,11 +297,9 @@ public class KAuthFilter implements Filter {
             ServletUtil.responseJson(response, BaseRet.fail(message, RetEnum.FORBIDDEN.getCode()));
         }
         catch (ServletException e) {
-            log.info("上下文:{},路径:{} -19", contextPath, request.getRequestURI()  );
             //文件下载的不作处理
         }
         catch (Exception e) {
-            log.info("上下文:{},路径:{} -20", contextPath, request.getRequestURI()  );
             errorMessage = e.getMessage();
             responseCode = RetEnum.SERVICE_FAIL.getCode();
             log.error("error", e);
