@@ -246,17 +246,6 @@ public class KAuthFilter implements Filter {
                     // log.info("Take-{}, {}",8,  (System.currentTimeMillis()-tt0));
                 }
 
-//                // 保存api-mock
-//                try {
-//                    // 查找一下是否存在
-//                    SysApiMock old = DB.findOne(SysApiMock.class, "select * from sys_api_mock where mock_md5=?",  apiMock.getMockMd5());
-//                    if (old == null) {
-//                        DB.save(apiMock);
-//                    }
-//                }
-//                catch (Exception e) {
-//                    e.printStackTrace();
-//                }
             } else {
                 filterChain.doFilter(request, response);
             }
