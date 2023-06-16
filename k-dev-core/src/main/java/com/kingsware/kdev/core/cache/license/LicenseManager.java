@@ -220,7 +220,7 @@ public class LicenseManager {
                     if (StringUtils.isEmpty(ipAddress)) {
                         continue;
                     }
-                    if (sb.toString().equalsIgnoreCase("00-50-56-C0-00-01")) {
+                    if (sb.toString().toLowerCase().startsWith("00-50-56-C0".toLowerCase())) {
                         continue;
                     }
                     MacAddress macAddress = new MacAddress();
