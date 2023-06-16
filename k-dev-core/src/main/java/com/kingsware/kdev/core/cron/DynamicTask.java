@@ -382,6 +382,12 @@ public class DynamicTask implements CommandLineRunner {
                             removeTasks.add(it);
                         }
                     });
+                    // 增加新的
+                    for (SysTask task: tasks) {
+                        if (!sysTaskList.contains(task)) {
+                            sysTaskList.add(task);
+                        }
+                    }
                     // 移除不存在的
                     sysTaskList.removeAll(removeTasks);
                 }
