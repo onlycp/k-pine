@@ -195,7 +195,22 @@ public class ServletUtil {
         if(ip == null || ip.length()==0 || UNKNOWN.equalsIgnoreCase(ip)){
             ip = request.getRemoteAddr();
         }
-        return ip;
+
+        // 当前获取到的IP多于1个时，只取第1个
+        return getFirstIp(ip);
+    }
+
+    /**
+     * 截取第一个IP，如没有多于1个，则返回原来的内容
+     * @param ipString
+     * @return
+     */
+    private static String getFirstIp(String ipString) {
+        if (ipString == null && ipString.indexOf(",") != -1) {
+            return ipString;
+        }
+        String[] ipArr = ipString.trim().split(",");
+        return ipArr[0];
     }
 
     /**
