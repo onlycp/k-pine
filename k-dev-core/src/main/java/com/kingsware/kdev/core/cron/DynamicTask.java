@@ -22,6 +22,7 @@ import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
@@ -66,12 +67,12 @@ public class DynamicTask implements CommandLineRunner {
 
     private final Map<String, ScheduledFutureHolder> scheduledFutureMap;
 
-    private CopyOnWriteArrayList<SysTask> sysTaskList = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<SysTask> sysTaskList = new CopyOnWriteArrayList<>();
 
     /**
      * 线程池
      */
-    private static final ExecutorService executorService = Executors.newFixedThreadPool(5);
+    private static final ExecutorService executorService = Executors.newCachedThreadPool();
 
     public DynamicTask() {
         this.scheduledFutureMap = new HashMap<>(1);
@@ -87,6 +88,10 @@ public class DynamicTask implements CommandLineRunner {
      * @return
      */
     private static String fixedCron(String cron) {
+        String trimCron = cron.trim();
+        if (NumberUtils.isInteger(trimCron)) {
+            return cron;
+        }
         String tempCron = cron.trim();
         String[] cronArr = tempCron.split(" ");
         if (cronArr.length == 7) {
@@ -112,7 +117,13 @@ public class DynamicTask implements CommandLineRunner {
         ScheduledFutureHolder scheduledFutureHolder = scheduledFutureMap.get(cron);
         if (scheduledFutureHolder == null) {
             //将任务交给任务调度器执行
-            ScheduledFuture<?> schedule = threadPoolTaskScheduler.schedule(() -> runTask(cron), new CronTrigger(cron));
+            ScheduledFuture<?> schedule = null;
+            if (NumberUtils.isInteger(cron)) {
+                schedule = threadPoolTaskScheduler.scheduleAtFixedRate(()->runTask(cron), Duration.ofSeconds(Integer.parseInt(cron)));
+            }
+            else {
+                schedule = threadPoolTaskScheduler.schedule(() -> runTask(cron), new CronTrigger(cron));
+            }
             //将任务包装成ScheduledFutureHolder
             scheduledFutureHolder = new ScheduledFutureHolder();
             scheduledFutureHolder.setScheduledFuture(schedule);
@@ -298,9 +309,9 @@ public class DynamicTask implements CommandLineRunner {
             }
         }
         long t1 = System.currentTimeMillis();
-        KdbFlowResult kdbFlowResult = KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), "", params, context, false, true);
+        KdbFlowResult kdbFlowResult = KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), "", params, context, false, false);
         long t2 = System.currentTimeMillis();
-//            log.info("流程任务：{}, 结果:{}", sysTask.getName(), JsonUtil.toJson(kdbFlowResult));
+            log.info("流程任务：{}, 结果:{}", sysTask.getName(), JsonUtil.toJson(kdbFlowResult));
     }
 
     /**
@@ -414,7 +425,7 @@ public class DynamicTask implements CommandLineRunner {
             // unlockTask(tasks);
 
 
-        }, new CronTrigger("0/30 * * * * ?"));
+        }, new CronTrigger("0/10 * * * * ?"));
 
     }
 }
