@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.model.SysLogicFlow;
 import com.kingsware.kdev.core.model.SysTask;
 import com.kingsware.kdev.core.orm.kdb.AddFlowInfo;
 import com.kingsware.kdev.core.util.JsonUtil;
+import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.model.*;
 import lombok.Data;
 
@@ -147,7 +148,7 @@ public class CopyProcessData {
             if (obj instanceof SysApi) {
                 SysApi o1 = (SysApi) curObj;
                 SysApi o2 = (SysApi) obj;
-                if (o1.getId().equals(o2.getId()) || (o1.getApiUrl().equals(o2.getApiUrl()) && o1.getApiMethod().equals(o2.getApiMethod()) && o1.getApiFlowId().equals(o2.getApiFlowId()))) {
+                if (o1.getId().equals(o2.getId()) || StringUtils.isEmpty(o1.getApiUrl()) || StringUtils.isEmpty(o1.getApiFlowId()) || StringUtils.isEmpty(o1.getApiMethod())   || (o1.getApiUrl().equals(o2.getApiUrl()) && o1.getApiMethod().equals(o2.getApiMethod()) && o1.getApiFlowId().equals(o2.getApiFlowId()))) {
                     exist = true;
                     break;
                 }
