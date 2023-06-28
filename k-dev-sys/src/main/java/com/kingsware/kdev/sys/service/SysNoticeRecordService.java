@@ -34,4 +34,14 @@ public interface SysNoticeRecordService extends BaseService {
      */
     void delete(MultiIdArgv argv);
 
+    /**
+     * 我的消息
+     * @return
+     */
+    PageDataRet<SysNoticeRecordRet> myUnRead();
+
+    /**
+     * 标志为已读
+     */
+    void willReadAll();
 }

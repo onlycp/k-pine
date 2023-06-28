@@ -2,6 +2,7 @@ package com.kingsware.kdev.sys.web;
 
 import com.kingsware.kdev.core.auth.ApiCode;
 import com.kingsware.kdev.core.auth.ApiIgnore;
+import com.kingsware.kdev.core.auth.ApiKeyResult;
 import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
@@ -12,6 +13,8 @@ import com.kingsware.kdev.core.util.AESUtil;
 import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.core.util.VerifyCodeUtils;
 import com.kingsware.kdev.sys.argv.*;
+import com.kingsware.kdev.sys.ret.SysLoginLogRet;
+import com.kingsware.kdev.sys.ret.SysUserLoginRet;
 import com.kingsware.kdev.sys.ret.SysUserRet;
 import com.kingsware.kdev.sys.ret.VerificationCodeRet;
 import com.kingsware.kdev.sys.service.SysUserService;
@@ -30,6 +33,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -59,6 +64,29 @@ public class SysUserController extends BaseController {
     @PostMapping(value = "login")
     public BaseRet<?> login(@RequestBody Map<String, Object> argv) {
         return BaseRet.success(sysUserService.login(argv));
+    }
+
+    /**
+     *  生成apikey
+     * @return 提示
+     */
+    @ApiOperation(value = "生成apikey" ,notes = "生成apikey")
+    @PostMapping(value = "/createApiKey")
+    public BaseRet<ApiKeyResult> createApiKey(@RequestBody RequestApiKey apiKey) {
+
+        return BaseRet.success(sysUserService.createApiKey(apiKey.getAppId(), apiKey.getHost()));
+    }
+
+    /**
+     *  通过apikey登录
+     * @return 提示
+     */
+    @ApiIgnore
+    @ApiOperation(value = "通过apikey登录" ,notes = "通过apikey登录")
+    @GetMapping(value = "/loginByApiKey")
+    public BaseRet<SysUserLoginRet> loginByApiKey(HttpServletRequest request) throws UnsupportedEncodingException {
+        String apiKey = request.getParameter("apiKey");
+        return BaseRet.success(sysUserService.loginByApiKey(apiKey));
     }
     /**
      *  登录信息

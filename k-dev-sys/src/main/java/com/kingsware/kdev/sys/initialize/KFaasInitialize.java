@@ -100,7 +100,7 @@ public class KFaasInitialize implements SystemInitialize {
                 }
             }
             // 重新初始化baseFlow
-            DB.kdbApi().refreshBaseFlow();
+            //DB.kdbApi().refreshBaseFlow();
         }
 
     }

@@ -38,6 +38,27 @@ public class SysNoticeRecordController {
     }
 
     /**
+     *  查询
+     * @return 分页
+     */
+    @ApiOperation(value = "查询 " ,notes = "查询")
+    @GetMapping("/my-unread")
+    public BaseRet<PageDataRet<SysNoticeRecordRet>> myUnRead() {
+        return BaseRet.success(sysNoticeRecordService.myUnRead());
+    }
+
+    /**
+     *  查询
+     * @return 分页
+     */
+    @ApiOperation(value = "所有标志为已读 " ,notes = "所有标志为已读")
+    @GetMapping("/will-read-all")
+    public BaseRet<?> willReadAll() {
+        sysNoticeRecordService.willReadAll();
+        return BaseRet.success();
+    }
+
+    /**
      * 详细信息
      * @return 详细信息
      */

@@ -89,7 +89,7 @@ public class CopyAppManager {
             // 查找子流程
             SysLogicFlow childLogicFlow = DB.findOne(SysLogicFlow.class, "select * from sys_logic_flow where flow_id=?", childFaasId);
             // 如果是个青松应用，当前是不拷贝基础数据，那就跳过
-            if (pineAppId.equalsIgnoreCase(childLogicFlow.getApplicationId()) && copyContext.getWithSystemData() == 0) {
+            if (childLogicFlow == null ||  pineAppId.equalsIgnoreCase(childLogicFlow.getApplicationId()) && copyContext.getWithSystemData() == 0) {
                 continue;
             }
             // 如果已存在，则跳过

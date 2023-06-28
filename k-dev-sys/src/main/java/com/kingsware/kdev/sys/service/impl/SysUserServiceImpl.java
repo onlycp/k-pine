@@ -1,8 +1,6 @@
 package com.kingsware.kdev.sys.service.impl;
 
-import com.kingsware.kdev.core.auth.AppAuthProperties;
-import com.kingsware.kdev.core.auth.BaseUserInfo;
-import com.kingsware.kdev.core.auth.TokenUtil;
+import com.kingsware.kdev.core.auth.*;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -27,6 +25,7 @@ import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.model.SysCache;
 import com.kingsware.kdev.core.model.SysOnlineUser;
+import com.kingsware.kdev.core.model.SysTask;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
@@ -509,6 +508,32 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             throw e;
         }
 
+    }
+
+    @Override
+    public SysUserLoginRet loginByApiKey(String apiKey) {
+        ApiKey key = TokenUtil.parseApiKey(appAuthProperties.getTokenSecret(),apiKey);
+        // 根据账号查询用户并进行登录
+        SysUser user = DB.findOne(SysUser.class, "select username, password from sys_user where username=?", key.getUsername());
+        SysUserLoginArgv loginArgv = new SysUserLoginArgv();
+        loginArgv.setUsername(user.getUsername());
+        loginArgv.setPassword(user.getPassword());
+        // 调用登录接口
+        if (KClientContext.getContext() != null) {
+            KClientContext.getContext().setValidateCodeFlag(false);
+        }
+        SysUserLoginRet ret = this.login(JsonUtil.beanToMap(loginArgv));
+        return ret;
+    }
+
+    @Override
+    public ApiKeyResult createApiKey(String appId, String host) {
+
+        long expireTime = System.currentTimeMillis() + 7*24*60*60*1000;
+        String apiKey = TokenUtil.createApiKey(appAuthProperties.getTokenSecret(), appId, host, KClientContext.getContext().getUserInfo().getId(), KClientContext.getContext().getUserInfo().getUsername(), expireTime);
+        ApiKeyResult apiKeyResult = new ApiKeyResult();
+        apiKeyResult.setApiKey(apiKey);
+        return apiKeyResult;
     }
 
 

@@ -11,7 +11,9 @@ import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.util.AESUtil;
+import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.StringUtils;
+import io.swagger.annotations.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,6 +80,36 @@ public class TokenUtil {
             logger.warn("生成Token失败, 源串:{}", userInfo);
             return null;
         }
+    }
+
+    /**
+     * 生成api_key
+     * @param appId 应用id
+     * @param userId  用户id
+     * @param username  用户名
+     * @param expireTime
+     * @return
+     */
+    public static String createApiKey(String dataSecret, String appId, String host, String userId, String username, long expireTime) {
+        ApiKey apiKey = new ApiKey();
+        apiKey.setAppId(appId);
+        apiKey.setUserId(userId);
+        apiKey.setHost(host);
+        apiKey.setUsername(username);
+        apiKey.setExpireTime(expireTime);
+        String data = JsonUtil.toJson(apiKey);
+        return AESUtil.encrypt(data, dataSecret);
+    }
+
+    /**
+     * 获取api key
+     * @param dataSecret
+     * @param apiKey
+     * @return
+     */
+    public static ApiKey parseApiKey(String dataSecret, String apiKey) {
+        String content = AESUtil.decrypt(apiKey, dataSecret);
+        return JsonUtil.toBean(content, ApiKey.class);
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.service;
 
+import com.kingsware.kdev.core.auth.ApiKeyResult;
 import com.kingsware.kdev.core.auth.BaseUserInfo;
 import com.kingsware.kdev.core.base.BaseService;
 import com.kingsware.kdev.core.bean.BaseRet;
@@ -56,6 +57,19 @@ public interface SysUserService extends BaseService {
     void delete(MultiIdArgv argv);
 
     SysUserLoginRet login(Map<String, Object> argv);
+
+    /**
+     * 通过api key获取登录令牌
+     * @param apiKey    api令牌
+     * @return
+     */
+    SysUserLoginRet loginByApiKey(String apiKey);
+
+    /**
+     * 生成api key
+     * @return
+     */
+    ApiKeyResult createApiKey(String appId, String host);
 
     void changePassword(SysUserChangePasswordArgv argv, String token, String ip);
 
