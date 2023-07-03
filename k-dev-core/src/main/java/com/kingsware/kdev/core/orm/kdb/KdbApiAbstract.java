@@ -255,6 +255,17 @@ public abstract class KdbApiAbstract implements KdbApi {
 
     @Override
     @SneakyThrows
+    public void downloadStream(String path, String fileName, String userFileName) {
+        String url = chooseServer()[0] + DOWN_URL + "/" + URLEncoder.encode(fileName, "utf-8") + "?path=" + URLEncoder.encode(path, "utf-8");
+        String outFileName = userFileName;
+        if (StringUtils.isEmpty(userFileName)) {
+            outFileName = fileName;
+        }
+        HttpUtil.downloadStream(url, path, outFileName);
+    }
+
+    @Override
+    @SneakyThrows
     public File downloadFile(String path, String fileName, String prefix, String suffix) {
         String url = chooseServer()[0] + DOWN_URL + "/" + URLEncoder.encode(fileName, "utf-8") + "?path=" + URLEncoder.encode(path, "utf-8");
         return HttpUtil.downloadFile(url, path, prefix, suffix);

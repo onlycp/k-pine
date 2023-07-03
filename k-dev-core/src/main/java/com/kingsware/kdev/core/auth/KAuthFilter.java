@@ -430,6 +430,8 @@ public class KAuthFilter implements Filter {
 
         }
 
+        // 加入应用id
+        argvMap.put("_appId", api.getAppId());
         // 调用流程
         KdbFlowResult result = KdbFlowExecutor.getInstance().execute(api.getApiFlowId(), api.getSubFlowIds(), argvMap, context, false, false);
 

@@ -304,6 +304,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         response.setCharacterEncoding("utf-8");
         String fileRealPath = null;
         String fileName = "";
+        String userFileName = request.getParameter("fileName");
         String contentType = "application/octet-stream";
         File tmpFile = null;
         if (file == null) {
@@ -322,18 +323,33 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                 fileName = localFile.getName();
             } else {
                 // 在FAAS找是否存在文件
-                File faasFile = getFaasFile(path);
-                if (faasFile != null && faasFile.exists()) {
-                    fileRealPath = faasFile.getAbsolutePath();
-                    int index = path.lastIndexOf("/");
-                    if(index == -1) {
-                        fileName = path;
+                if (!FileTypeChecker.isAudioFile(path) && !FileTypeChecker.isVideoFile(path)) {
+                    String relativePath = "";
+                    String myFileName =  path;
+                    if (path.contains("/")) {
+                        int index = path.lastIndexOf("/");
+                        relativePath = path.substring(0, index);
+                        myFileName = path.substring(index + 1);
                     }
-                    else {
-                        fileName = path.substring(index + 1);
-                    }
-                    tmpFile = faasFile;
+                    String downloadPath = getBasePath() + "/" + relativePath;
+                    DB.kdbApi().downloadStream(downloadPath, myFileName, userFileName);
+                    return;
                 }
+                else {
+                    File faasFile = getFaasFile(path);
+                    if (faasFile != null && faasFile.exists()) {
+                        fileRealPath = faasFile.getAbsolutePath();
+                        int index = path.lastIndexOf("/");
+                        if(index == -1) {
+                            fileName = path;
+                        }
+                        else {
+                            fileName = path.substring(index + 1);
+                        }
+                        tmpFile = faasFile;
+                    }
+                }
+
             }
         } else {
             fileName = file.getFileName();
@@ -355,11 +371,18 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                 }
             } else if (file.getSaveType() == 2) {
                 // 在FAAS找是否存在文件
-                File faasFile = getFaasFile(file.getFilePath());
-                if (faasFile != null && faasFile.exists()) {
-                    fileRealPath = faasFile.getAbsolutePath();
-                    tmpFile = faasFile;
+                if (!FileTypeChecker.isAudioFile(path) && !FileTypeChecker.isVideoFile(path)) {
+                    DB.kdbApi().downloadStream(file.getFilePath(), file.getFileName(), userFileName);
+                    return;
                 }
+                else {
+                    File faasFile = getFaasFile(file.getFilePath());
+                    if (faasFile != null && faasFile.exists()) {
+                        fileRealPath = faasFile.getAbsolutePath();
+                        tmpFile = faasFile;
+                    }
+                }
+
             }
             else {
                 CdnPlugin cdnPlugin = FileManager.getInstance().getCdn(file.getSaveType());
@@ -370,7 +393,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         }
 
 //        response.reset();
-        String userFileName = request.getParameter("fileName");
+
         if (StringUtils.isNotEmpty(userFileName)) {
             // 获取后缀
             String[] arr = fileName.split("\\.");
@@ -452,11 +475,11 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
     /**
      * 从Faas下载文件
      * @param relativePath  文件路径
-     * @param faasfileName  文件名称
+     * @param faasFileName  文件名称
      */
-    private void downloadFromFaas(String relativePath, String faasfileName, String outFileName) {
+    private void downloadFromFaas(String relativePath, String faasFileName, String outFileName) {
         String path = getBasePath() + File.separator + relativePath;
-        File tempFile = DB.kdbApi().downloadFile(path,faasfileName);
+        File tempFile = DB.kdbApi().downloadFile(path,faasFileName);
         ServletUtil.responseFile(tempFile, outFileName);
         try {
             Files.deleteIfExists(tempFile.toPath());
@@ -465,6 +488,8 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             throw new RuntimeException(e);
         }
     }
+
+
 
     @Override
     public void downloadZip(String ids) {
@@ -564,6 +589,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         } else if (sysFile.getSaveType() == 2) {
             // 在FAAS找是否存在文件
             File faasFile = getFaasFile(sysFile.getFilePath());
+
             if (!faasFile.exists()) {
                 throw BusinessException.serviceThrow("文件不存在，可能被移动或删除！");
             }

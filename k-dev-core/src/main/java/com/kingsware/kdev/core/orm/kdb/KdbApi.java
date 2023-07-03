@@ -127,8 +127,15 @@ public interface KdbApi {
      */
     File downloadFile(String path, String fileName);
 
+    /**
+     * 下载流
+     * @param path      路径
+     * @param fileName  文件名称
+     */
+    void downloadStream(String path, String fileName, String userFileName) ;
 
-    File downloadFile(String path, String fileName, String prefix, String subfix);
+
+    File downloadFile(String path, String fileName, String prefix, String suffix);
 
     /**
      * 事务接口

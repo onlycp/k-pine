@@ -11,14 +11,19 @@ import com.kingsware.kdev.core.orm.FaasFailRecord;
 import com.kingsware.kdev.core.plugins.FaasChannelPlugin;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
+import org.yaml.snakeyaml.util.UriEncoder;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+
+import static org.springframework.util.MimeTypeUtils.APPLICATION_OCTET_STREAM_VALUE;
 
 /**
  * Http工具类
@@ -533,4 +538,41 @@ public class HttpUtil {
         return null;
 
     }
+
+    public static void downloadStream(String downloadUrl, String path, String fileName) {
+
+        HttpURLConnection connection = null;
+        try {
+
+            URL url = new URL(downloadUrl);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestProperty("connection", "Keep-Alive");
+            connection.setRequestProperty("Charset", "UTF-8");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(60000);
+            connection.setDoInput(true);
+
+            @Cleanup InputStream is = connection.getInputStream();
+            String contentLength = connection.getHeaderField("Content-Length");
+            ServletUtil.response().setContentLength(Integer.parseInt(contentLength));
+            ServletUtil.response().setContentType(APPLICATION_OCTET_STREAM_VALUE);
+            ServletUtil.response().setHeader("Content-Disposition", "attachment;filename=" + UriEncoder.encode(fileName));
+            byte[] buf = new byte[2 * 1024];
+            int len;
+            while ((len = is.read(buf)) != -1) {
+                ServletUtil.response().getOutputStream().write(buf, 0, len);
+                ServletUtil.response().getOutputStream().flush();
+            }
+            log.info("流式下载文件:" + fileName);
+            ServletUtil.response().getOutputStream().flush();
+        } catch (Exception e) {
+            log.error("error", e);
+            throw BusinessException.serviceThrow("文件下载失败");
+
+        } finally {
+            if (connection != null)
+                connection.disconnect();
+        }
+    }
+
 }

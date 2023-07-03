@@ -117,6 +117,9 @@ public class FileManager {
             sysFile.setSaveType(saveType);
             // 如果存在方式为数据库，那么这里将文件转为base54
             if(saveType == 0) {
+                if(fileSize > 2*1024*1024) {
+                    throw BusinessException.serviceThrow("文件过大，不允许存储到数据库!");
+                }
                 sysFile.setFileContent(new String(Base64.getEncoder().encode(FileCopyUtils.copyToByteArray(inputStream))));
                 // 文件md5码
                 sysFile.setFileMd5(FileUtils.getMD5(inputStream));
@@ -136,6 +139,7 @@ public class FileManager {
                 }
                 File saveFile = new File(path.getAbsolutePath() + "/" + saveFileName);
                 FileCopyUtils.copy(inputStream, Files.newOutputStream(saveFile.toPath()));
+//                sysFile.setFileMd5(FileUtils.getMD5(inputStream));
                 sysFile.setFileMd5(DigestUtils.md5Hex(Files.newInputStream(saveFile.toPath())));
 
                 // 文件表只存储相对路径
