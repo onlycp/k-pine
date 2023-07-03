@@ -212,6 +212,9 @@ public class DB {
      * @param <T>       泛型
      */
     public static <T> long batchSaveOrUpdate(List<T> entities, Class<T> tClass) {
+        if(entities == null) {
+            return 0;
+        }
         return getDefault().batchSaveOrUpdate(entities, tClass);
     }
 

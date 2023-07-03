@@ -174,7 +174,7 @@ public class KAuthFilter implements Filter {
                 // 是否开发
                 boolean dev = false;
                 callType = CallType.CONTROLLER;
-                argvMap = ServletUtil.getRequestParams(api, path, request, requestBody);
+
                 // 接口定义不存在
                 if (api == null && apiDefine == null) {
                     ServletUtil.responseJson(response, BaseRet.fail("接口不存在", RetEnum.SERVICE_FAIL.getCode()));
@@ -207,6 +207,7 @@ public class KAuthFilter implements Filter {
                 isOpenApi = StringUtils.isNotEmpty(apiCode) && apiCode.startsWith(openApiFlag) && api != null;
                 if (isOpenApi) {
                     // 处理请求变量
+                    argvMap = ServletUtil.getRequestParams(api, path, request, requestBody);
                     this.checkOpenApi(api, argvMap);
                 } else {
                     this.checkPermission(request, response, ignore, apiCode);
@@ -219,29 +220,14 @@ public class KAuthFilter implements Filter {
                 }
                 // log.info("Take-{}, {}",6,  (System.currentTimeMillis()-tt0));
                 // 根据不同的调用类型，进行调用相关处理
-                String name = "";
-                SysApiMock apiMock = new SysApiMock();
-                String mockUrl = request.getRequestURI();
-                if (StringUtils.isNotEmpty(request.getQueryString())) {
-                    mockUrl = mockUrl + "?" + request.getQueryString();
-                }
-                apiMock.setUrl(mockUrl);
-                Map<String, Object> mockMap = new TreeMap<>(argvMap);
-                mockMap.remove("t");
-                mockMap.remove("request");
-                apiMock.setRequestBody(JsonUtil.toJson(mockMap));
-                apiMock.setEnableMock(1);
-                apiMock.setRequestMethod(request.getMethod().toLowerCase());
-                apiMock.setMockMd5(MD5Utils.md5(apiMock.getName() + apiMock.getRequestMethod() + apiMock.getRequestBody()));
 
                 if (callType == CallType.CONTROLLER) {
-                    apiMock.setGroupName(apiDefine.getModule());
-                    apiMock.setName(apiDefine.getName());
                     filterChain.doFilter(wrapperRequest, wrapperResponse);
                 } else {
                     // log.info("Take-{}, {}",7,  (System.currentTimeMillis()-tt0));
-                    apiMock.setName(api.getApiName());
-                    apiMock.setUrl(request.getRequestURI());
+                    if (argvMap.isEmpty()) {
+                        argvMap = ServletUtil.getRequestParams(api, path, request, requestBody);
+                    }
                     callByFlow(request, response, api, path, argvMap);
                     // log.info("Take-{}, {}",8,  (System.currentTimeMillis()-tt0));
                 }

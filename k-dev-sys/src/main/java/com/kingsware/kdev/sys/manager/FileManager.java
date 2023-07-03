@@ -140,7 +140,7 @@ public class FileManager {
                 File saveFile = new File(path.getAbsolutePath() + "/" + saveFileName);
                 FileCopyUtils.copy(inputStream, Files.newOutputStream(saveFile.toPath()));
 //                sysFile.setFileMd5(FileUtils.getMD5(inputStream));
-                sysFile.setFileMd5(DigestUtils.md5Hex(Files.newInputStream(saveFile.toPath())));
+                sysFile.setFileMd5(FileUtils.getMD5(Files.newInputStream(saveFile.toPath())));
 
                 // 文件表只存储相对路径
                 sysFile.setFilePath(relativePath + saveFileName);
