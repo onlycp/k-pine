@@ -554,14 +554,20 @@ public class HttpUtil {
 
             @Cleanup InputStream is = connection.getInputStream();
             String contentLength = connection.getHeaderField("Content-Length");
-            ServletUtil.response().setContentLength(Integer.parseInt(contentLength));
+            try {
+                ServletUtil.response().setContentLengthLong(Long.parseLong(contentLength));
+            }
+            catch (Exception ignored) {
+
+            }
+
             ServletUtil.response().setContentType(APPLICATION_OCTET_STREAM_VALUE);
             ServletUtil.response().setHeader("Content-Disposition", "attachment;filename=" + UriEncoder.encode(fileName));
             byte[] buf = new byte[2 * 1024];
             int len;
             while ((len = is.read(buf)) != -1) {
                 ServletUtil.response().getOutputStream().write(buf, 0, len);
-                ServletUtil.response().getOutputStream().flush();
+                //ServletUtil.response().getOutputStream().flush();
             }
             log.info("流式下载文件:" + fileName);
             ServletUtil.response().getOutputStream().flush();
