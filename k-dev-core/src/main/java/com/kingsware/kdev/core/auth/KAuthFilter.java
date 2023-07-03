@@ -208,7 +208,7 @@ public class KAuthFilter implements Filter {
                 isOpenApi = StringUtils.isNotEmpty(apiCode) && apiCode.startsWith(openApiFlag) && api != null;
                 if (isOpenApi) {
                     // 处理请求变量
-                    argvMap = ServletUtil.getRequestParams(api, path, request, requestBody);
+                    argvMap = ServletUtil.getRequestParams(api, path, request, requestBody, false);
                     this.checkOpenApi(api, argvMap);
                 } else {
                     this.checkPermission(request, response, ignore, apiCode);
@@ -227,7 +227,7 @@ public class KAuthFilter implements Filter {
                 } else {
                     // log.info("Take-{}, {}",7,  (System.currentTimeMillis()-tt0));
                     if (argvMap.isEmpty()) {
-                        argvMap = ServletUtil.getRequestParams(api, path, request, requestBody);
+                        argvMap = ServletUtil.getRequestParams(api, path, request, requestBody, true);
                     }
                     callByFlow(request, response, api, path, argvMap);
                     // log.info("Take-{}, {}",8,  (System.currentTimeMillis()-tt0));
@@ -284,7 +284,7 @@ public class KAuthFilter implements Filter {
         finally {
             int takeTime = (int)(System.currentTimeMillis()-t1);
             if (argvMap.isEmpty()) {
-                argvMap = ServletUtil.getRequestParams(api, path, request, requestBody);
+                argvMap = ServletUtil.getRequestParams(api, path, request, requestBody, false);
             }
             if (isOpenApi) {
                 String accessId = argvMap.getOrDefault("accessId", "").toString();
@@ -339,7 +339,9 @@ public class KAuthFilter implements Filter {
                         operateLog.setRequestMethod(KClientContext.getContext().getRequest().getMethod());
                         operateLog.setAppId(KClientContext.getContext().getRequest().getHeader("appId"));
                         if (wrapperResponse != null) {
-                            operateLog.setResponseBody(StringUtils.retrench(ServletUtil.getResponseBody(wrapperResponse),100));
+                            if (response.getContentType().contains("json")) {
+                                operateLog.setResponseBody(StringUtils.retrench(ServletUtil.getResponseBody(wrapperResponse),100));
+                            }
                         }
                         operateLog.setRequestBody(StringUtils.retrench(requestBody, 1000));
 //                        log.info("操作日志保存:{}, url:{}" , operateLog.getAction(), request.getRequestURI());
