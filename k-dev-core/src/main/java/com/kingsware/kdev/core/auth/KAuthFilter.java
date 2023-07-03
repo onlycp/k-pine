@@ -142,6 +142,7 @@ public class KAuthFilter implements Filter {
         long t1 = System.currentTimeMillis();
         MyHttpServletRequestWrapper wrapperRequest = null;
         ContentCachingResponseWrapper wrapperResponse = null;
+        String path = "";
         try {
             if (url.contains("//")) {
                 url = url.replaceAll("//", "/");
@@ -164,7 +165,7 @@ public class KAuthFilter implements Filter {
                 }
                 // log.info("Take-{}, {}",2,  (System.currentTimeMillis()-tt0));
                 // 获取配置的接口信息
-                String path = url.replaceFirst(contextPath, "");
+                path = url.replaceFirst(contextPath, "");
                 api = ApiManager.getInstance().getApi(method, path);
                 apiDefine = getApiDefine(request, response);
                 // 初始化青松上下文
@@ -282,6 +283,9 @@ public class KAuthFilter implements Filter {
         }
         finally {
             int takeTime = (int)(System.currentTimeMillis()-t1);
+            if (argvMap.isEmpty()) {
+                argvMap = ServletUtil.getRequestParams(api, path, request, requestBody);
+            }
             if (isOpenApi) {
                 String accessId = argvMap.getOrDefault("accessId", "").toString();
                 Map<String, Object> recordMap = new HashMap<>();
@@ -300,6 +304,7 @@ public class KAuthFilter implements Filter {
                 if ((callType == CallType.CONTROLLER && apiDefine != null) || callType == CallType.KFLOW) {
 
                     String opertator = KClientContext.getContext().getUserInfo() != null ? KClientContext.getContext().getUserInfo().getUsername() : "";
+
                     if (apiDefine != null &&"登录".equals(apiDefine.getName())) {
                         opertator = argvMap.get("username").toString();
                     }

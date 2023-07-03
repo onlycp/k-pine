@@ -42,14 +42,7 @@ public class I18n {
 
     }
 
-
-    /**
-     * 获取语言
-     * @return  返回语言
-     */
-    public static String lang() {
-
-        HttpServletRequest request = KClientContext.getContext().getRequest();
+    public static String lang(HttpServletRequest request) {
         // 判断请求参数里有无
         String queryLang = request.getParameter("lang");
         if (StringUtils.isNotEmpty(request.getParameter("lang")) ) {
@@ -79,6 +72,17 @@ public class I18n {
             lang = "en_US";
         }
         return lang;
+    }
+
+    /**
+     * 获取语言
+     * @return  返回语言
+     */
+    public static String lang() {
+
+        HttpServletRequest request = KClientContext.getContext().getRequest();
+        return lang(request);
+
     }
 
 }

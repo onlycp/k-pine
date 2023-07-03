@@ -281,8 +281,8 @@ public class ServletUtil {
             // 将body加到变量中
             Map<String, Object> requestMap = new HashMap<>();
             requestMap.put("body", body);
-            requestMap.put("lang", I18n.lang());
             requestMap.put("ip", ServletUtil.getClientIp(request));
+            requestMap.put("lang", I18n.lang(request));
             requestMap.put("method", request.getMethod());
             requestMap.put("path", path);
             requestMap.put("apiName", api != null ? api.getApiName() : "");

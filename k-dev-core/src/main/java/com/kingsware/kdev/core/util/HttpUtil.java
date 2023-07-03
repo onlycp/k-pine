@@ -566,7 +566,7 @@ public class HttpUtil {
             log.info("流式下载文件:" + fileName);
             ServletUtil.response().getOutputStream().flush();
         } catch (Exception e) {
-            log.error("error", e);
+            //log.error("error", e);
             throw BusinessException.serviceThrow("文件下载失败");
 
         } finally {
