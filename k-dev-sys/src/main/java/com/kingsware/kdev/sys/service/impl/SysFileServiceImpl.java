@@ -1,10 +1,7 @@
 package com.kingsware.kdev.sys.service.impl;
 
 import com.kingsware.kdev.core.base.BaseServiceImpl;
-import com.kingsware.kdev.core.bean.BaseRet;
-import com.kingsware.kdev.core.bean.FileEntry;
-import com.kingsware.kdev.core.bean.MultiIdArgv;
-import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.bean.*;
 import com.kingsware.kdev.core.constants.ContentTypeMap;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
@@ -24,7 +21,6 @@ import com.kingsware.kdev.sys.ret.SysStaticFileRet;
 import com.kingsware.kdev.sys.service.SysFileService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.compress.archivers.zip.ZipUtil;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -370,9 +366,11 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                     fileRealPath = localFile.getAbsolutePath();
                 }
             } else if (file.getSaveType() == 2) {
+
                 // 在FAAS找是否存在文件
-                if (!FileTypeChecker.isAudioFile(path) && !FileTypeChecker.isVideoFile(path)) {
-                    DB.kdbApi().downloadStream(file.getFilePath(), file.getFileName(), userFileName);
+                if (!FileTypeChecker.isAudioFile(file.getFilePath()) && !FileTypeChecker.isVideoFile(file.getFilePath())) {
+                    FaasFileInfo fileInfo = getFaasFileInfo(file.getFilePath());
+                    DB.kdbApi().downloadStream(fileInfo.getPath(), fileInfo.getName(), userFileName);
                     return;
                 }
                 else {
@@ -446,6 +444,17 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
     }
 
     public File getFaasFile(String path) {
+
+        FaasFileInfo fileInfo = getFaasFileInfo(path);
+        File tempFile = DB.kdbApi().downloadFile(fileInfo.getPath(), fileInfo.getName(), "", fileInfo.getFileExt());
+        if (tempFile != null && tempFile.exists()) {
+            tempFile.deleteOnExit();
+//            tempFile.delete();
+        }
+        return tempFile;
+    }
+
+    public FaasFileInfo getFaasFileInfo(String path) {
         String relativePath = "";
         String fileName =  path;
         if (path.contains("/")) {
@@ -455,12 +464,11 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         }
         String fileExt = "." + FileUtils.getFileExt(fileName);
         String downloadPath = getBasePath() + "/" + relativePath;
-        File tempFile = DB.kdbApi().downloadFile(downloadPath, fileName, "", fileExt);
-        if (tempFile != null && tempFile.exists()) {
-            tempFile.deleteOnExit();
-//            tempFile.delete();
-        }
-        return tempFile;
+        FaasFileInfo fileInfo = new FaasFileInfo();
+        fileInfo.setPath(downloadPath);
+        fileInfo.setFileExt(fileExt);
+        fileInfo.setName(fileName);
+        return fileInfo;
     }
 
     private String getContentType(String fileName) {
