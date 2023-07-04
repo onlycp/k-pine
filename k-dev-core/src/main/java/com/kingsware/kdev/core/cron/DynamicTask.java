@@ -49,7 +49,7 @@ public class DynamicTask implements CommandLineRunner {
     /**
      * 是否将结果回写到数据库
      **/
-    @Value("${schedule.result-to-db:false}")
+    @Value("${schedule.result-to-db:true}")
     private boolean resultToDb;
     /**
      * 是否自动分布式
@@ -61,6 +61,18 @@ public class DynamicTask implements CommandLineRunner {
      **/
     @Value("${schedule.distributed-run:true}")
     private boolean distributedRun;
+
+    /**
+     * 是否运行分布式
+     **/
+    @Value("${schedule.share-cron:true}")
+    private boolean shareCron;
+
+    /**
+     * 是否运行分布式
+     **/
+    @Value("${schedule.async-execute:true}")
+    private boolean asyncExecute;
 
 
     private final ThreadPoolTaskScheduler threadPoolTaskScheduler;
@@ -111,23 +123,24 @@ public class DynamicTask implements CommandLineRunner {
 
 
 
-    public void registerTask(String cron) {
+    public void registerTask(String cron, String cronKey) {
 
         // 判断是否有
-        ScheduledFutureHolder scheduledFutureHolder = scheduledFutureMap.get(cron);
+        ScheduledFutureHolder scheduledFutureHolder = scheduledFutureMap.get(cronKey);
         if (scheduledFutureHolder == null) {
             //将任务交给任务调度器执行
             ScheduledFuture<?> schedule = null;
             if (NumberUtils.isInteger(cron)) {
-                schedule = threadPoolTaskScheduler.scheduleAtFixedRate(()->runTask(cron), Duration.ofSeconds(Integer.parseInt(cron)));
+                schedule = threadPoolTaskScheduler.scheduleAtFixedRate(()->runTask(cronKey), Duration.ofSeconds(Integer.parseInt(cron)));
             }
             else {
-                schedule = threadPoolTaskScheduler.schedule(() -> runTask(cron), new CronTrigger(cron));
+                schedule = threadPoolTaskScheduler.schedule(() -> runTask(cronKey), new CronTrigger(cron));
             }
             //将任务包装成ScheduledFutureHolder
             scheduledFutureHolder = new ScheduledFutureHolder();
             scheduledFutureHolder.setScheduledFuture(schedule);
             scheduledFutureHolder.setCron(cron);
+            scheduledFutureHolder.setCron(cronKey);
             scheduledFutureMap.put(cron, scheduledFutureHolder);
         }
 
@@ -136,43 +149,59 @@ public class DynamicTask implements CommandLineRunner {
     /**
      * 运行任务
      *
-     * @param cron 任务便利店
+     * @param cronKey 任务便利店
      */
-    private void runTask(String cron) {
-        List<SysTask> cronTasks = sysTaskList.stream().filter(it -> it.getEnable() == 1).filter(it -> fixedCron(it.getCron()).equals(fixedCron(cron))).collect(Collectors.toList());
+    private void runTask(String cronKey) {
+        // 同时通过cron和任务id去查找
+        List<SysTask> cronTasks = sysTaskList.stream().filter(it -> it.getEnable() == 1).filter(it -> fixedCron(it.getCron()).equals(cronKey) || cronKey.contains("@" + it.getId())).collect(Collectors.toList());
         // 如果不存在任务，则自毁
         if (cronTasks.isEmpty()) {
-            ScheduledFutureHolder scheduledFutureHolder = scheduledFutureMap.get(cron);
+            ScheduledFutureHolder scheduledFutureHolder = scheduledFutureMap.get(cronKey);
             ScheduledFuture<?> scheduledFuture = scheduledFutureHolder.getScheduledFuture();
             scheduledFuture.cancel(true);
-            scheduledFutureMap.remove(cron);
-            log.info("表达式调度器由于没有可执行的任务，已经进行自毁:{}", cron);
+            scheduledFutureMap.remove(cronKey);
+            log.debug("表达式调度器由于没有可执行的任务，已经进行自毁:{}", cronKey);
         }
         else {
-            log.info("表达式调度器:{} 开始执行任务， 任务数:{}", cron, cronTasks.size());
-            for (SysTask sysTask: cronTasks) {
-                executorService.submit(() -> {
-                    // 如果不是分布式任务，直接运行
-                    if (sysTask.getDistributed() != null && sysTask.getDistributed() == 0) {
-                        executeTask(sysTask);
-                        return;
-                    }
-                    if (distributedAuto) {
-                        AtomicInteger atomicInteger = new AtomicInteger(0);
-                        callTask(sysTask, atomicInteger, "");
-                    } else {
-                        if (distributedRun) {
-                            if (sysTask.getEnable() == 0) {
-                                return;
-                            }
-                            executeTask(sysTask);
-                        }
-                    }
-                });
-
+            log.debug("表达式调度器:{} 开始执行任务， 任务数:{}", cronKey, cronTasks.size());
+            // 如果是异步执行
+            if(asyncExecute) {
+                for (SysTask sysTask: cronTasks) {
+                    executorService.submit(() -> {
+                       toTask(sysTask);
+                    });
+                }
             }
+            else {
+                for (SysTask sysTask: cronTasks) {
+                    executorService.submit(() -> {
+                       toTask(sysTask);
+                    });
+
+                }
+            }
+
         }
 
+    }
+
+    private void toTask(SysTask sysTask) {
+        // 如果不是分布式任务，直接运行
+        if (sysTask.getDistributed() != null && sysTask.getDistributed() == 0) {
+            executeTask(sysTask);
+            return;
+        }
+        if (distributedAuto) {
+            AtomicInteger atomicInteger = new AtomicInteger(0);
+            callTask(sysTask, atomicInteger, "");
+        } else {
+            if (distributedRun) {
+                if (sysTask.getEnable() == 0) {
+                    return;
+                }
+                executeTask(sysTask);
+            }
+        }
     }
 
     /**
@@ -255,7 +284,7 @@ public class DynamicTask implements CommandLineRunner {
             errorMessage = ExceptionUtils.getStackTrace(e);
         } finally {
             long t2 = System.currentTimeMillis();
-            log.info("任务执行完成，名称:{}, 执行结果:{}, 用时:{}, 信息:{}", myTask.getName(), executeStatus == 1 ? "成功" : "失败", (t2 - t1), errorMessage);
+            log.debug("任务执行完成，名称:{}, 执行结果:{}, 用时:{}, 信息:{}", myTask.getName(), executeStatus == 1 ? "成功" : "失败", (t2 - t1), errorMessage);
             if (resultToDb) {
                 String sql = "update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ?,  last_execute_time=?, next_inst=? where id=?";
                 DB.executeUpdateSql(sql, executeStatus, (t2 - t1), errorMessage, DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME), SystemUtil.getHost().instanceName(), myTask.getId());
@@ -309,9 +338,9 @@ public class DynamicTask implements CommandLineRunner {
             }
         }
         long t1 = System.currentTimeMillis();
-        KdbFlowResult kdbFlowResult = KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), "", params, context, false, false);
+        KdbFlowResult kdbFlowResult = KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), "", params, context, false, asyncExecute);
         long t2 = System.currentTimeMillis();
-            log.info("流程任务完成：{}", sysTask.getName());
+            log.debug("流程任务完成：{}", sysTask.getName());
     }
 
     /**
@@ -341,7 +370,7 @@ public class DynamicTask implements CommandLineRunner {
                     sysTask.setLastExecuteTake(0L);
                     // 保存
                     DB.save(sysTask);
-                    log.info("发现任务，任务名称:{}, cron:{}, Class: {}", sysTask.getName(), sysTask.getCron(), sysTask.getClassName());
+                    log.debug("发现任务，任务名称:{}, cron:{}, Class: {}", sysTask.getName(), sysTask.getCron(), sysTask.getClassName());
                 }
                 if (task instanceof KRunner) {
                     ((KRunner) task).runNow();
@@ -361,7 +390,7 @@ public class DynamicTask implements CommandLineRunner {
 
             try {
                 List<SysTask> tasks = DB.findList(SysTask.class, "select * from sys_task where enable=1 order by when_created asc");
-                log.info("线程池数量：{}，当前活动：{}， 任务数:{}", threadPoolTaskScheduler.getPoolSize(),  threadPoolTaskScheduler.getActiveCount(),  tasks.size());
+                log.debug("线程池数量：{}，当前活动：{}， 任务数:{}", threadPoolTaskScheduler.getPoolSize(),  threadPoolTaskScheduler.getActiveCount(),  tasks.size());
                 if (sysTaskList.isEmpty()) {
                     sysTaskList.addAll(tasks);
                 }
@@ -391,7 +420,10 @@ public class DynamicTask implements CommandLineRunner {
                 // 处理一下表达式
                 for (SysTask task: tasks) {
                     try {
+
                         String cron = fixedCron(task.getCron());
+                        // 判断是否共享表达式
+                        String cronKey = shareCron ? cron: task.getCron()+ "@" + task.getId();
                         if (!scheduledFutureMap.containsKey(cron)) {
                             if (task instanceof KRunner) {
                                 ((KRunner)task).runNow();
@@ -399,7 +431,7 @@ public class DynamicTask implements CommandLineRunner {
                         }
 
                         task.setCron(cron);
-                        registerTask(cron);
+                        registerTask(cron, cronKey);
 
                     }
                     catch (IllegalArgumentException e) {

@@ -105,7 +105,7 @@ public class KmqMessageCenter {
     public void produce(String topic, List<String> payloads) {
         // 如果没有消费者，直接丢弃
         if (!consumers.containsKey(topic)) {
-            logger.warn("当前生产者没有对应的消费者，消息将被丢弃，topic: {}", topic);
+//            logger.warn("当前生产者没有对应的消费者，消息将被丢弃，topic: {}", topic);
             return;
         }
         // 将消息加入队列中

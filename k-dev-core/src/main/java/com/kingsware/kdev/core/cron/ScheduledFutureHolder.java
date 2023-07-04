@@ -18,4 +18,6 @@ public class ScheduledFutureHolder {
     private ScheduledFuture<?> scheduledFuture;
     /**  任务 **/
     private String cron;
+    /** cron key **/
+    private String cronKey;
 }

@@ -99,7 +99,7 @@ public class KAuthFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         // 获取请求路径
         String url = request.getRequestURI();
-        log.info("上下文:{},路径:{} -00", request.getContextPath(), request.getRequestURI()  );
+//        log.info("上下文:{},路径:{} -00", request.getContextPath(), request.getRequestURI()  );
         if (url.contains("/sys-tool-box")) {
             filterChain.doFilter(request, response);
             return;

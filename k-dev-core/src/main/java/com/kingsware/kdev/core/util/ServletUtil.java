@@ -384,9 +384,9 @@ public class ServletUtil {
             if (buf.length > 0) {
                 String payload;
                 try {
-                    log.info("Response Length:" + buf.length);
+//                    log.info("Response Length:" + buf.length);
                     payload = new String(buf, 0, buf.length, wrapper.getCharacterEncoding());
-                    log.info("Response Length Finish:" + buf.length);
+//                    log.info("Response Length Finish:" + buf.length);
                 } catch (UnsupportedEncodingException e) {
                     payload = "[unknown]";
                 }
