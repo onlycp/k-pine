@@ -239,58 +239,60 @@ public class ServletUtil {
         // 判断是文件还是raw提交
         String contentType = request.getContentType();
         // 获取文件
-        if (needFile)  {
             if (StringUtils.isNotEmpty(contentType) && contentType.toLowerCase().contains("multipart/form-data")) {
-                MultipartResolver resolver = new StandardServletMultipartResolver();
-                MultipartHttpServletRequest multipartHttpServletRequest = resolver.resolveMultipart(request);
-                // 获取所有文件
-                Map<String, MultipartFile> fileMap = multipartHttpServletRequest.getFileMap();
-                for (Map.Entry<String, MultipartFile> multipartFileEntry: fileMap.entrySet()) {
-                    KFlowUploadFile uploadFile = new KFlowUploadFile();
-                    // Base64.getEncoder().encodeToString("1".getBytes());
-                    // 原始文件名
-                    uploadFile.setOriginFileName(multipartFileEntry.getValue().getOriginalFilename());
-                    // 文件大小
-                    uploadFile.setFileSize(multipartFileEntry.getValue().getSize());
-                    // 名称
-                    uploadFile.setName(multipartFileEntry.getValue().getName());
-                    // content type
-                    uploadFile.setContentType(multipartFileEntry.getValue().getContentType());
-                    // 文件内容
-                    try {
-                        uploadFile.setFileContent(Base64Utils.encodeToString(multipartFileEntry.getValue().getBytes()));
+                if (needFile) {
+                    MultipartResolver resolver = new StandardServletMultipartResolver();
+                    MultipartHttpServletRequest multipartHttpServletRequest = resolver.resolveMultipart(request);
+                    // 获取所有文件
+                    Map<String, MultipartFile> fileMap = multipartHttpServletRequest.getFileMap();
+                    for (Map.Entry<String, MultipartFile> multipartFileEntry: fileMap.entrySet()) {
+                        KFlowUploadFile uploadFile = new KFlowUploadFile();
+                        // Base64.getEncoder().encodeToString("1".getBytes());
+                        // 原始文件名
+                        uploadFile.setOriginFileName(multipartFileEntry.getValue().getOriginalFilename());
+                        // 文件大小
+                        uploadFile.setFileSize(multipartFileEntry.getValue().getSize());
+                        // 名称
+                        uploadFile.setName(multipartFileEntry.getValue().getName());
+                        // content type
+                        uploadFile.setContentType(multipartFileEntry.getValue().getContentType());
+                        // 文件内容
+                        try {
+                            uploadFile.setFileContent(Base64Utils.encodeToString(multipartFileEntry.getValue().getBytes()));
+                        }
+                        catch (IOException e) {
+                            log.error("文件转换失败，原始文件名:{}，名称:{}，{}", uploadFile.getOriginFileName(), uploadFile.getName(), e );
+                        }
+                        // 将文件加入到流程变量中
+                        params.put(multipartFileEntry.getKey(), uploadFile);
                     }
-                    catch (IOException e) {
-                        log.error("文件转换失败，原始文件名:{}，名称:{}，{}", uploadFile.getOriginFileName(), uploadFile.getName(), e );
-                    }
-                    // 将文件加入到流程变量中
-                    params.put(multipartFileEntry.getKey(), uploadFile);
                 }
-            }
-        }
 
-        else {
-            // 获取body
-            String body = requestBody;
-            if (StringUtils.isNotEmpty(body)) {
-                try {
-                    Map<String, Object> argv = objectMapper.readValue(body, Map.class);
-                    params.putAll(argv);
-                }
-                catch (Exception e) {
-                    log.error("error", e);
-                }
             }
-            // 将body加到变量中
-            Map<String, Object> requestMap = new HashMap<>();
-            requestMap.put("body", body);
-            requestMap.put("ip", ServletUtil.getClientIp(request));
-            requestMap.put("lang", I18n.lang(request));
-            requestMap.put("method", request.getMethod());
-            requestMap.put("path", path);
-            requestMap.put("apiName", api != null ? api.getApiName() : "");
-            params.put("request", requestMap);
-        }
+            else {
+                // 获取body
+                String body = requestBody;
+                if (StringUtils.isNotEmpty(body)) {
+                    try {
+                        Map<String, Object> argv = objectMapper.readValue(body, Map.class);
+                        params.putAll(argv);
+                    }
+                    catch (Exception e) {
+                        log.error("error", e);
+                    }
+                }
+                // 将body加到变量中
+                Map<String, Object> requestMap = new HashMap<>();
+                requestMap.put("body", body);
+                requestMap.put("ip", ServletUtil.getClientIp(request));
+                requestMap.put("lang", I18n.lang(request));
+                requestMap.put("method", request.getMethod());
+                requestMap.put("path", path);
+                requestMap.put("apiName", api != null ? api.getApiName() : "");
+                params.put("request", requestMap);
+
+            }
+
 
         // 返回
         return params;
