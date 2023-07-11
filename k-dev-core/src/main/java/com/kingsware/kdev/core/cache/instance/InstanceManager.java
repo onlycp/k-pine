@@ -7,6 +7,7 @@ import com.kingsware.kdev.core.model.SysInstance;
 import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.BeanUtils;
+import com.kingsware.kdev.core.util.SystemUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Timestamp;
@@ -71,6 +72,14 @@ public class InstanceManager {
      */
     public SysInstance masterInstance() {
         return this.instances.get(0);
+    }
+
+    /**
+     * 判断是否master
+     * @return
+     */
+    public boolean isMaster() {
+        return SystemUtil.getHost().instanceName().equalsIgnoreCase(this.masterInstance().instanceName());
     }
 
 

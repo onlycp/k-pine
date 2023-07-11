@@ -216,7 +216,7 @@ public class DynamicTask implements CommandLineRunner {
         // 取主实例作为调度器
         SysInstance masterInstance = InstanceManager.getInstance().masterInstance();
         // 只有是调度器才执行
-        if (SystemUtil.getHost().instanceName().equalsIgnoreCase(masterInstance.instanceName())) {
+        if (InstanceManager.getInstance().isMaster()) {
             atomicInteger.incrementAndGet();
             // 随机取一个实例
             SysInstance executeInstance = InstanceManager.getInstance().getToExecuteInstance(sysTask.getId(), excludeInstanceName);
