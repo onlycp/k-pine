@@ -50,7 +50,7 @@ public class InBoxConsumer implements KmqConsumer {
                 if (usernameMap.containsKey(toWhoId)) {
                     SysNoticeRecord sysNoticeRecord = new SysNoticeRecord();
                     sysNoticeRecord.setContent(noticeMessage.getContent());
-                    sysNoticeRecord.setTitle(noticeMessage.getTitle() + "(1)");
+                    sysNoticeRecord.setTitle(noticeMessage.getTitle() );
                     sysNoticeRecord.setFromWho(noticeMessage.getFromWho());
                     sysNoticeRecord.setFromWhoName(usernameMap.get(noticeMessage.getFromWho()));
                     sysNoticeRecord.setToWho(toWhoId);
