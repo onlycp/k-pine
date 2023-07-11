@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
@@ -348,15 +349,43 @@ public class DynamicTask implements CommandLineRunner {
                 params = taskArgvMap;
             }
         }
-        // 获取下次触发时间
-        ScheduledFuture<?> scheduledFuture = createTaskScheduler(sysTask.getCron(), ()->{});
-        long delay = scheduledFuture.getDelay(TimeUnit.MILLISECONDS);
-        params.put("_expireTime",  System.currentTimeMillis() + delay);
+        params.put("_expireTime",  getNextTriggerTime(sysTask.getCron()));
         long t1 = System.currentTimeMillis();
 
         KdbFlowResult kdbFlowResult = KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), "", params, context, false, asyncExecute);
         long t2 = System.currentTimeMillis();
             log.debug("流程任务完成：{}", sysTask.getName());
+    }
+
+    private long getNextTriggerTime(String cron) {
+        if (NumberUtils.isInteger(cron)) {
+            return System.currentTimeMillis() + Long.parseLong(cron)*1000;
+        }
+        else {
+            CronTrigger cronTrigger = new CronTrigger(cron); // 设置与任务的调度时间表达式一致的CronTrigger
+            Date nextExecutionTime = cronTrigger.nextExecutionTime(new TriggerContext() {
+                @Override
+                public Date lastScheduledExecutionTime() {
+                    return null; // 返回上一次任务调度的时间，如果没有则返回null
+                }
+
+                @Override
+                public Date lastActualExecutionTime() {
+                    return null; // 返回上一次任务实际执行的时间，如果没有则返回null
+                }
+
+                @Override
+                public Date lastCompletionTime() {
+                    return null; // 返回上一次任务完成的时间，如果没有则返回null
+                }
+            });
+
+            assert nextExecutionTime != null;
+            ScheduledFuture<?> scheduledFuture = threadPoolTaskScheduler.schedule(() -> {}, nextExecutionTime);
+            long delay = scheduledFuture.getDelay(TimeUnit.MILLISECONDS);
+            scheduledFuture.cancel(true);
+            return System.currentTimeMillis() + delay;
+        }
     }
 
     /**
