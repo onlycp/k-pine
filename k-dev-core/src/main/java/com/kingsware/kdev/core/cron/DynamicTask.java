@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
@@ -24,10 +25,7 @@ import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -129,13 +127,7 @@ public class DynamicTask implements CommandLineRunner {
         ScheduledFutureHolder scheduledFutureHolder = scheduledFutureMap.get(cronKey);
         if (scheduledFutureHolder == null) {
             //将任务交给任务调度器执行
-            ScheduledFuture<?> schedule = null;
-            if (NumberUtils.isInteger(cron)) {
-                schedule = threadPoolTaskScheduler.scheduleAtFixedRate(()->runTask(cronKey), Duration.ofSeconds(Integer.parseInt(cron)));
-            }
-            else {
-                schedule = threadPoolTaskScheduler.schedule(() -> runTask(cronKey), new CronTrigger(cron));
-            }
+            ScheduledFuture<?> schedule = createTaskScheduler( cron, ()-> runTask(cronKey));
             //将任务包装成ScheduledFutureHolder
             scheduledFutureHolder = new ScheduledFutureHolder();
             scheduledFutureHolder.setScheduledFuture(schedule);
@@ -146,6 +138,23 @@ public class DynamicTask implements CommandLineRunner {
 
     }
 
+    /***
+     * 创建定时执行器
+     * @param cron
+     * @param runnable
+     * @return
+     */
+    public ScheduledFuture<?> createTaskScheduler(String cron, Runnable runnable) {
+        ScheduledFuture<?> schedule = null;
+        if (NumberUtils.isInteger(cron)) {
+            schedule = threadPoolTaskScheduler.scheduleAtFixedRate(runnable, Duration.ofSeconds(Integer.parseInt(cron)));
+        }
+        else {
+            schedule = threadPoolTaskScheduler.schedule(runnable, new CronTrigger(cron));
+        }
+        return schedule;
+    }
+
     /**
      * 运行任务
      *
@@ -154,9 +163,10 @@ public class DynamicTask implements CommandLineRunner {
     private void runTask(String cronKey) {
         // 同时通过cron和任务id去查找
         List<SysTask> cronTasks = sysTaskList.stream().filter(it -> it.getEnable() == 1).filter(it -> fixedCron(it.getCron()).equals(cronKey) || cronKey.contains("@" + it.getId())).collect(Collectors.toList());
+        ScheduledFutureHolder scheduledFutureHolder = scheduledFutureMap.get(cronKey);
+
         // 如果不存在任务，则自毁
         if (cronTasks.isEmpty()) {
-            ScheduledFutureHolder scheduledFutureHolder = scheduledFutureMap.get(cronKey);
             ScheduledFuture<?> scheduledFuture = scheduledFutureHolder.getScheduledFuture();
             scheduledFuture.cancel(true);
             scheduledFutureMap.remove(cronKey);
@@ -317,6 +327,7 @@ public class DynamicTask implements CommandLineRunner {
      */
     private void runFlowTask(SysTask sysTask) {
 
+
         // 先查找一下看流程是否存在
         SysLogicFlow logicFlow = DB.findOne(SysLogicFlow.class, "select in_argv, out_argv from sys_logic_flow where flow_id=?", sysTask.getTaskResourceId());
         String inArgv = "{}";
@@ -337,7 +348,12 @@ public class DynamicTask implements CommandLineRunner {
                 params = taskArgvMap;
             }
         }
+        // 获取下次触发时间
+        ScheduledFuture<?> scheduledFuture = createTaskScheduler(sysTask.getCron(), ()->{});
+        long delay = scheduledFuture.getDelay(TimeUnit.MILLISECONDS);
+        params.put("_expireTime",  System.currentTimeMillis() + delay);
         long t1 = System.currentTimeMillis();
+
         KdbFlowResult kdbFlowResult = KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), "", params, context, false, asyncExecute);
         long t2 = System.currentTimeMillis();
             log.debug("流程任务完成：{}", sysTask.getName());

@@ -29,21 +29,7 @@ public class FromWebsocketConsumer implements KmqConsumer {
 
         for (String message: payload) {
             Wm2MqMessage wm2MqMessage = JsonUtil.toBean(message, Wm2MqMessage.class);
-            if ("ping".equals(wm2MqMessage.getWmMessage().getTopic())) {
-                AuthToken authToken = TokenUtil.getAuthToken(wm2MqMessage.getToken());
-                if (authToken != null) {
-                    SessionManager.getInstance().getByToken(authToken.getUserInfo().getId(), wm2MqMessage.getToken()).ping();
-                    // 响应ping
-                    WmMessage replyMessage = new WmMessage("pong", "");
-                    WmMessageArgv wmMessageArgv = new WmMessageArgv();
-                    wmMessageArgv.setMessage(JsonUtil.toJson(replyMessage));
-                    wmMessageArgv.setToken(wm2MqMessage.getToken());
-                    KmqMessageCenter.getInstance().produce(WebsocketConstants.MQ_TO_WEBSOCKET, JsonUtil.toJson(wmMessageArgv));
-//                    log.info("ping响应：{}", wm2MqMessage.getToken() );
-                }
-
-            }
-            else if ("faasDebug".equals(wm2MqMessage.getWmMessage().getTopic())) {
+            if ("faasDebug".equals(wm2MqMessage.getWmMessage().getTopic())) {
                 TcpClientContext.getInstance().write(JsonUtil.toJson(wm2MqMessage.getWmMessage()));
             }
         }

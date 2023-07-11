@@ -2,6 +2,7 @@ package com.kingsware.kdev.core.kmq.websocket;
 
 import com.kingsware.kdev.core.auth.AuthToken;
 import com.kingsware.kdev.core.auth.TokenUtil;
+import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.kmq.KmqMessageCenter;
 import com.kingsware.kdev.core.util.JsonUtil;
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.kingsware.kdev.core.kmq.websocket.WebsocketConstants.MQ_FROM_WEBSOCKET;
 
@@ -105,21 +107,47 @@ public class MessageWebSocket {
             sessionToken.setToken(token);
             sessionToken.setUserId(authToken.getUserInfo().getId());
             sessionToken.setSession(session);
+            sessionToken.setHeartTime(System.currentTimeMillis());
             sessionTokenSet.add(sessionToken);
+
+        }
+        else if ("ping".equalsIgnoreCase(wmMessage.getTopic())) {
+            // 获取令牌
+            SessionToken sessionToken = getSessionToken(session);
+            if (sessionToken != null) {
+                WmMessage replyMessage = new WmMessage("pong", "");
+                this.sendMessage(session, JsonUtil.toJson(replyMessage));
+                sessionToken.setHeartTime(System.currentTimeMillis());
+                // logger.info("websocket心跳：用户id:{}, {}", sessionToken.getUserId(), sessionToken.getHeartTime());
+            }
+            // 移除过时的sessionToken
+            try {
+                Set<SessionToken> removeSessions = sessionTokenSet.stream().filter(it-> ((it.getHeartTime() + 30000) <= System.currentTimeMillis())).collect(Collectors.toSet());
+                sessionTokenSet.removeAll(removeSessions);
+            }
+            catch (Exception ignored) {
+
+            }
+
 
         }
         else {
             // 获取令牌
-            Set<SessionToken> copiedSet = new HashSet<>(sessionTokenSet);
-            Optional<SessionToken> sessionToken = copiedSet.stream().filter(it -> it.getSession().getId().equals(session.getId())).findFirst();
-            if (sessionToken.isPresent()) {
+            SessionToken sessionToken = getSessionToken(session);
+            if (sessionToken != null) {
                 Wm2MqMessage wm2MqMessage = new Wm2MqMessage();
-                wm2MqMessage.setToken(sessionToken.get().getToken());
+                wm2MqMessage.setToken(sessionToken.getToken());
                 wm2MqMessage.setWmMessage(wmMessage);
                 KmqMessageCenter.getInstance().produce(MQ_FROM_WEBSOCKET, JsonUtil.toJson(wm2MqMessage));
             }
 
         }
+    }
+
+    public SessionToken getSessionToken(Session session) {
+        Set<SessionToken> copiedSet = new HashSet<>(sessionTokenSet);
+        Optional<SessionToken> sessionToken = copiedSet.stream().filter(it -> it.getSession().getId().equals(session.getId())).findFirst();
+        return sessionToken.orElse(null);
     }
 
     /**

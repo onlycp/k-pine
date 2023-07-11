@@ -17,6 +17,16 @@ public class SessionToken {
     private String userId;
     /** 令牌 **/
     private String token;
+    /** 心跳时间 **/
+    private long heartTime;
+
+    public long getHeartTime() {
+        return heartTime;
+    }
+
+    public void setHeartTime(long heartTime) {
+        this.heartTime = heartTime;
+    }
 
     public Session getSession() {
         return session;
