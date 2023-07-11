@@ -2,6 +2,7 @@ package com.kingsware.kdev.sys.mq;
 
 import com.kingsware.kdev.core.bean.NoticeMessage;
 import com.kingsware.kdev.core.kmq.KmqConsumer;
+import com.kingsware.kdev.core.kmq.KmqMessageCenter;
 import com.kingsware.kdev.core.model.SysLoginLog;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.DateUtils;
@@ -61,11 +62,17 @@ public class InBoxConsumer implements KmqConsumer {
                     }
                     sysNoticeRecord.setIsRead(0);
                     addRecords.add(sysNoticeRecord);
+
                 }
             }
         }
         if (!addRecords.isEmpty()) {
             DB.saveAll(addRecords);
+            // 发送websocket消息
+            addRecords.forEach(it -> {
+                KmqMessageCenter.getInstance().produceWebsocketMessageToUser(it.getToWho(),"notice-center", JsonUtil.toJson(it));
+            });
+
         }
     }
 
