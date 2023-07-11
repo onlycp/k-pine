@@ -44,5 +44,9 @@ public class ApiInfo{
     private String subFlowIds;
     /** 应用id **/
     private String appId;
+    /** 创建人 **/
+    private String whoCreated;
+    /** 修改人员 **/
+    private String whoModified;
 
 }
