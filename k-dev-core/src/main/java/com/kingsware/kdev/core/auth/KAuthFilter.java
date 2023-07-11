@@ -28,6 +28,7 @@ import com.kingsware.kdev.core.kflow.*;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
 import com.kingsware.kdev.core.kmq.KmqMessageCenter;
+import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.model.*;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
@@ -343,54 +344,58 @@ public class KAuthFilter implements Filter {
                             if (response.getContentType().contains("json")) {
                                 String rBody = ServletUtil.getResponseBody(wrapperResponse);
                                 operateLog.setResponseBody(StringUtils.retrench(rBody,100));
-                                long warnResponseBodySize = Long.parseLong(SpringContext.getProperties("app.warn-response-body-size", "1048576"));
-                                String enableNotice = SpringContext.getProperties("app.warn-response-body-enable", "false");
-                                String receivers = SpringContext.getProperties("app.warn-response-body-receiver", "94123ca363dc4dfaa62a6bb5dcd3bf50,7aed8c297a6940f681c26eb6ab68893d");
-                                // 如果api存在，则发送给创建人和修改人员
-                                if (api != null) {
-                                    Set<String> developers = new HashSet<>();
-                                    if(StringUtils.isNotEmpty(api.getWhoCreated())) {
-                                        developers.add(api.getWhoCreated());
+                                AppModeProperties appModeProperties = SpringContext.getBean(AppModeProperties.class);
+                                if (appModeProperties.getDev()) {
+                                    long warnResponseBodySize = Long.parseLong(SpringContext.getProperties("app.warn-response-body-size", "1048576"));
+                                    String enableNotice = SpringContext.getProperties("app.warn-response-body-enable", "false");
+                                    String receivers = SpringContext.getProperties("app.warn-response-body-receiver", "94123ca363dc4dfaa62a6bb5dcd3bf50,7aed8c297a6940f681c26eb6ab68893d");
+                                    // 如果api存在，则发送给创建人和修改人员
+                                    if (api != null) {
+                                        Set<String> developers = new HashSet<>();
+                                        if(StringUtils.isNotEmpty(api.getWhoCreated())) {
+                                            developers.add(api.getWhoCreated());
+                                        }
+                                        if(StringUtils.isNotEmpty(api.getWhoModified())) {
+                                            developers.add(api.getWhoModified());
+                                        }
+                                        receivers = StringUtils.joinToString(Arrays.asList(developers.toArray()), ",");
                                     }
-                                    if(StringUtils.isNotEmpty(api.getWhoModified())) {
-                                        developers.add(api.getWhoModified());
+                                    String warnResponseIgnores = SpringContext.getProperties("app.warn-response-url-ignores", "/v3/team/,sys-kdb-flow");
+                                    boolean ignoreUrl = false;
+                                    String[] ignores = warnResponseIgnores.split(",");
+                                    for (String ig: ignores) {
+                                        if(url.contains(ig)) {
+                                            ignoreUrl = true;
+                                            break;
+                                        }
                                     }
-                                    receivers = StringUtils.joinToString(Arrays.asList(developers.toArray()), ",");
+                                    if (rBody.length() > warnResponseBodySize) {
+                                        String content = String.format("【响应警告】- 内容 请求地址：%s， 请求方法：%s，请求参数：%s， 响应内容大小:%d", url, request.getMethod(), JsonUtil.toJson(argvMap), rBody.length());
+                                        log.warn(content);
+                                        if ("true".equalsIgnoreCase(enableNotice) && !ignoreUrl && StringUtils.isNotEmpty(receivers)) {
+                                            NoticeMessage noticeMessage = new NoticeMessage();
+                                            noticeMessage.setTitle("API请求响应内容长度预警");
+                                            noticeMessage.setContent(content);
+                                            noticeMessage.setToWhos(receivers);
+                                            noticeMessage.setFromWho("056fb0eeb9a44cb0953534b4c0ca01fa");
+                                            KmqMessageCenter.getInstance().produce("inbox", JsonUtil.toJson(noticeMessage) );
+                                        }
+                                    }
+                                    long warnResponseBodyTime = Long.parseLong(SpringContext.getProperties("app.warn-response-body-time", "10000"));
+                                    if(takeTime > warnResponseBodyTime) {
+                                        String content = String.format("【响应警告】- 用时 请求地址：%s， 请求方法：%s，请求参数：%s， 响应用时:%d", url, request.getMethod(), JsonUtil.toJson(argvMap), takeTime);
+                                        log.warn(content);
+                                        if ("true".equalsIgnoreCase(enableNotice) && !ignoreUrl && StringUtils.isNotEmpty(receivers)) {
+                                            NoticeMessage noticeMessage = new NoticeMessage();
+                                            noticeMessage.setTitle("API请求响应时长预警");
+                                            noticeMessage.setContent(content);
+                                            noticeMessage.setToWhos(receivers);
+                                            noticeMessage.setFromWho("056fb0eeb9a44cb0953534b4c0ca01fa");
+                                            KmqMessageCenter.getInstance().produce("inbox", JsonUtil.toJson(noticeMessage) );
+                                        }
+                                    }
                                 }
-                                String warnResponseIgnores = SpringContext.getProperties("app.warn-response-url-ignores", "/v3/team/,sys-kdb-flow");
-                                boolean ignoreUrl = false;
-                                String[] ignores = warnResponseIgnores.split(",");
-                                for (String ig: ignores) {
-                                    if(url.contains(ig)) {
-                                        ignoreUrl = true;
-                                        break;
-                                    }
-                                }
-                                if (rBody.length() > warnResponseBodySize) {
-                                    String content = String.format("【响应警告】- 内容 请求地址：%s， 请求方法：%s，请求参数：%s， 响应内容大小:%d", url, request.getMethod(), JsonUtil.toJson(argvMap), rBody.length());
-                                    log.warn(content);
-                                    if ("true".equalsIgnoreCase(enableNotice) && !ignoreUrl && StringUtils.isNotEmpty(receivers)) {
-                                        NoticeMessage noticeMessage = new NoticeMessage();
-                                        noticeMessage.setTitle("API请求响应内容长度预警");
-                                        noticeMessage.setContent(content);
-                                        noticeMessage.setToWhos(receivers);
-                                        noticeMessage.setFromWho("056fb0eeb9a44cb0953534b4c0ca01fa");
-                                        KmqMessageCenter.getInstance().produce("inbox", JsonUtil.toJson(noticeMessage) );
-                                    }
-                                }
-                                long warnResponseBodyTime = Long.parseLong(SpringContext.getProperties("app.warn-response-body-time", "10000"));
-                                if(takeTime > warnResponseBodyTime) {
-                                    String content = String.format("【响应警告】- 用时 请求地址：%s， 请求方法：%s，请求参数：%s， 响应用时:%d", url, request.getMethod(), JsonUtil.toJson(argvMap), takeTime);
-                                    log.warn(content);
-                                    if ("true".equalsIgnoreCase(enableNotice) && !ignoreUrl && StringUtils.isNotEmpty(receivers)) {
-                                        NoticeMessage noticeMessage = new NoticeMessage();
-                                        noticeMessage.setTitle("API请求响应时长预警");
-                                        noticeMessage.setContent(content);
-                                        noticeMessage.setToWhos(receivers);
-                                        noticeMessage.setFromWho("056fb0eeb9a44cb0953534b4c0ca01fa");
-                                        KmqMessageCenter.getInstance().produce("inbox", JsonUtil.toJson(noticeMessage) );
-                                    }
-                                }
+
 
                             }
                         }
