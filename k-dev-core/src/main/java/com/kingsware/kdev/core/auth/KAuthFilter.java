@@ -359,10 +359,19 @@ public class KAuthFilter implements Filter {
                                     }
                                 }
                                 long warnResponseBodyTime = Long.parseLong(SpringContext.getProperties("app.warn-response-body-time", "5000"));
+                                String warnResponseIgnores = SpringContext.getProperties("app.warn-response-url-ignores", "/v3/team/");
                                 if(takeTime > warnResponseBodyTime) {
                                     String content = String.format("【响应警告】- 用时 请求地址：%s， 请求方法：%s，请求参数：%s， 响应用时:%d", url, request.getMethod(), JsonUtil.toJson(argvMap), takeTime);
                                     log.warn(content);
-                                    if ("true".equalsIgnoreCase(enableNotice)) {
+                                    String[] ignores = warnResponseIgnores.split(",");
+                                    boolean ignoreUrl = false;
+                                    for (String ig: ignores) {
+                                        if(url.contains(ig)) {
+                                            ignoreUrl = true;
+                                            break;
+                                        }
+                                    }
+                                    if ("true".equalsIgnoreCase(enableNotice) && !ignoreUrl) {
                                         NoticeMessage noticeMessage = new NoticeMessage();
                                         noticeMessage.setTitle("API请求响应时长预警");
                                         noticeMessage.setContent(content);
