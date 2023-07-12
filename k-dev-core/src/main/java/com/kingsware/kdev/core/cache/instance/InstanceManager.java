@@ -129,7 +129,7 @@ public class InstanceManager {
      * @param topic     主题
      * @param message   消息
      */
-    public void sendMessage(SysInstance instance, String topic, String message) {
+    public boolean sendMessage(SysInstance instance, String topic, String message) {
         if (instance.instanceName().equalsIgnoreCase(masterInstance().instanceName())) {
             InstanceService instanceService = SpringContext.getBean(InstanceService.class);
             instanceService.recvMessage(topic, message);
@@ -152,13 +152,16 @@ public class InstanceManager {
                 BaseRet<?> ret = JsonUtil.toBean(res, BaseRet.class);
                 if (ret.getCode() != 200) {
                     log.error("实例：{} 消息发送失败，系统将重试,异常信息:{}", instance.instanceName(), ret.getMessage());
+                    return false;
                 }
 
             } catch (Exception e) {
                 // 如果发生异常，那么就重试
                 log.error("实例：{} 消息发送失败，系统将重试,异常信息:{}", instance.instanceName(), e);
+                return false;
             }
         }
+        return true;
 
     }
 
