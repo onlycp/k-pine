@@ -7,6 +7,7 @@ import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.cache.api.ApiManager;
+import com.kingsware.kdev.core.cache.instance.InstanceManager;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
@@ -89,7 +90,7 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
         String sql = "select t0.*, t1.in_argv, t1.out_argv from sys_api t0 left join sys_logic_flow t1 on t1.flow_id=t0.api_flow_id where t0.api_url is not null and t0.api_method is not null and t0.id=?";
         ApiInfo apiInfo = DB.findOne(ApiInfo.class, sql, id);
         if (apiInfo != null) {
-            ApiManager.getInstance().addOrUpdateApi(apiInfo);
+            InstanceManager.getInstance().broadMessage("api-add-update", JsonUtil.toJson(apiInfo));
         }
 
     }
@@ -150,7 +151,7 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
     public void delete(MultiIdArgv argv) {
         for (String id: argv.getIds()) {
             DB.delete(SysApi.class, id);
-            ApiManager.getInstance().removeApi(id);
+            InstanceManager.getInstance().broadMessage("api-delete", id);
         }
     }
 

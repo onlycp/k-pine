@@ -1,12 +1,15 @@
 package com.kingsware.kdev.core.cache.api;
 
+import com.kingsware.kdev.core.bean.DataModified;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  *
@@ -17,10 +20,11 @@ import java.util.Optional;
 @Slf4j
 public class ApiManager {
 
+    private   DataModified dataModified;
     private static ApiManager instance;
 
     /** 编码api **/
-    private List<ApiInfo> apis = new ArrayList<>();
+    private List<ApiInfo> apis = new CopyOnWriteArrayList<>();
 
     public static ApiManager getInstance() {
         if (instance == null) {
@@ -37,9 +41,35 @@ public class ApiManager {
      * @param apis  api
      */
     public void addApi(List<ApiInfo> apis) {
-        this.apis = apis;
+        synchronized (ApiManager.class) {
+            replaceList(apis);
+            reloadModified();
+        }
     }
 
+    public void reloadModified() {
+        if (this.apis.size() > 0) {
+            DataModified modified = new DataModified();
+            String whenModified = this.apis.stream().max((Comparator.comparing(ApiInfo::getWhenModified))).get().getWhenModified();
+            modified.setWhenModified(whenModified);
+            modified.setCnt(apis.size());
+            this.dataModified = modified;
+        }
+
+    }
+
+    /**
+     * 安全替换list
+     * @param newList
+     */
+    public synchronized void replaceList(List<ApiInfo> newList) {
+        this.apis.clear();
+        this.apis.addAll(newList);
+    }
+
+    public DataModified getDataModified() {
+        return dataModified;
+    }
 
     /**
      * 增加api
@@ -62,6 +92,7 @@ public class ApiManager {
             this.apis.add(apiInfo);
             log.info("接口新增成功, 接口信息:{}", apiInfo);
         }
+        reloadModified();
     }
 
     /**
@@ -76,6 +107,7 @@ public class ApiManager {
                 break;
             }
         }
+        reloadModified();
 
     }
 
