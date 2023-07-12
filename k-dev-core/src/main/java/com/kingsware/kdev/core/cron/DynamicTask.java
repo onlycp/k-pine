@@ -238,7 +238,10 @@ public class DynamicTask implements CommandLineRunner {
             }
             // 通过http调用
             else {
-                InstanceManager.getInstance().sendMessage(executeInstance, "task-execute", JsonUtil.toJson(sysTask));
+                boolean b = InstanceManager.getInstance().sendMessage(executeInstance, "task-execute", JsonUtil.toJson(sysTask));
+                if (!b) {
+                    callTask(sysTask, atomicInteger, excludeInstanceName);
+                }
             }
 
         }
