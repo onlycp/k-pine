@@ -426,7 +426,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         // 查询到FAAS
         FlowInfo flowInfo = api.get(argv.getId());
         EditFlowInfo info = new EditFlowInfo();
-        info.setContent(flowInfo.getContent());
+        info.setContent(StringUtils.isEmpty(argv.getContent()) ? flowInfo.getContent() : argv.getContent());
         info.setName(argv.getName());
         info.setFlowId(argv.getId());
         info.setDescription(argv.getDescription());
