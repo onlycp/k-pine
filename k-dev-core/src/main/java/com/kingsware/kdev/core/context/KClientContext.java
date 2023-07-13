@@ -9,7 +9,7 @@ package com.kingsware.kdev.core.context;
  */
 public class KClientContext {
 
-    private static ThreadLocal<ClientInfo> clientInfoThreadLocal = new ThreadLocal<>();
+    private static final ThreadLocal<ClientInfo> clientInfoThreadLocal = new ThreadLocal<>();
 
     /**
      * 获取客户端信息

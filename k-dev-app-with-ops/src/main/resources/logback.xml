@@ -9,6 +9,9 @@
     <!-- 日志文件输出 -->
     <appender name="logFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/service.log</file>
+<!--        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">-->
+<!--            <level>DEBUG</level>-->
+<!--        </filter>-->
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <FileNamePattern>logs/%d{yyyy-MM, aux}/service.%d{yyyy-MM-dd}-%i.log.gz</FileNamePattern>
             <!-- 如果按天来回滚，则最大保存时间为30天，30天之前的都将被清理掉 -->

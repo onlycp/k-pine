@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class KAppAutoImportTask implements KTask, KRunner {
+
+    private static boolean upgrading = false;
     /**
      * 马上运行
      */
@@ -25,8 +27,22 @@ public class KAppAutoImportTask implements KTask, KRunner {
      **/
     @Override
     public void execute() throws Exception {
-        KAppInitialize kAppInitialize = SpringContext.getBean(KAppInitialize.class);
-        kAppInitialize.execute();
+        try {
+            if (upgrading) {
+                //log.info("当前正在升级，将跳过本次升级");
+                return;
+            }
+            upgrading = true;
+            KAppInitialize kAppInitialize = SpringContext.getBean(KAppInitialize.class);
+            kAppInitialize.execute();
+        }
+        catch (Exception ignored) {
+
+        }
+        finally {
+            upgrading = false;
+        }
+
     }
 
     /**
