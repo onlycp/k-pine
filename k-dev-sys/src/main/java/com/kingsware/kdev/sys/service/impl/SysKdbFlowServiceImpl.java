@@ -503,11 +503,11 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
 
         // 拼装sql
         // 根据条件查询appId、tags和apiUrl数据
-        // 如果不分页，那么只返回id和名称
-        String selectFields = "t0.flow_id as id, t0.name";
-        if (argv.isPageQuery()) {
-            selectFields = "t0.id as db_id, t0.name,t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name, sa.api_url, sa.api_method, t0.when_created, t0.note  as description, t0.app_id as tran_ctrl ";
-        }
+        String selectFields = "t0.id as db_id, t0.name,t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name, sa.api_url, sa.api_method, t0.when_created, t0.note  as description, t0.app_id as tran_ctrl ";
+
+//        if (argv.isPageQuery()) {
+//            selectFields = "t0.id as db_id, t0.name,t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name, sa.api_url, sa.api_method, t0.when_created, t0.note  as description, t0.app_id as tran_ctrl ";
+//        }
         String sql = "select " + selectFields +
                 " from sys_logic_flow t0 " +
                 " left join sys_api sa on sa.api_flow_id = t0.flow_id " +
