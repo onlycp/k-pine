@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.service.impl;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
@@ -16,6 +17,7 @@ import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.PagedList;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Expr;
+import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.orm.kdb.*;
 import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.sys.argv.*;
@@ -27,7 +29,9 @@ import com.kingsware.kdev.sys.bean.ExportRootData;
 import com.kingsware.kdev.sys.manager.CopyAppManager;
 import com.kingsware.kdev.sys.model.DevApplication;
 import com.kingsware.kdev.sys.model.DevFaasNode;
+import com.kingsware.kdev.sys.model.SysDemo;
 import com.kingsware.kdev.sys.model.SysLogicHistory;
+import com.kingsware.kdev.sys.ret.SysDemoRet;
 import com.kingsware.kdev.sys.ret.SysFlowDebugRet;
 import com.kingsware.kdev.sys.ret.SysFlowDefineRet;
 import com.kingsware.kdev.sys.ret.SysKdbFlowRet;
@@ -464,93 +468,68 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
     @SuppressWarnings("")
     public PageDataRet<SysKdbFlowRet> query(SysKdbFlowQueryArgv argv) {
 
+//        /** 流程id **/
+//        private String id;
+//        /** 数据库数据id **/
+//        private String dbId;
+//        /** 流程内容 **/
+//        private String content;
+//        /** 名称 **/
+//        private String name;
+//        /** 描述 **/
+//        private String description = "";
+//        /**  应用名称 **/
+//        private String applicationId;
+//        /**  应用名称 **/
+//        private String applicationName;
+//        /** 标签 **/
+//        private String tags;
+//        /** 输入参数 **/
+//        private String inArgv;
+//        /** 输出参数 **/
+//        private String outArgv;
+//        /** 关联接口URL **/
+//        private String apiUrl;
+//        /** 关联接口请求方式 **/
+//        private String apiMethod;
+//        /** 创建时间 **/
+//        @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
+//        private Timestamp whenCreated;
+//        /** 更新时间 **/
+//        @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
+//        private Timestamp whenModified;
+//        /** 是否开始事务 **/
+//        private String tranCtrl;
 
-        long t0 = System.currentTimeMillis();
-        List<Object> params = new ArrayList<>();
+        // 拼装sql
         // 根据条件查询appId、tags和apiUrl数据
-        String sql = "select t0.id as db_id, t0.name,t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name, sa.api_url, sa.api_method, t0.when_created, t0.note  as description, t0.app_id as tran_ctrl " +
+        // 如果不分页，那么只返回id和名称
+        String selectFields = "t0.flow_id as id, t0.name";
+        if (argv.isPageQuery()) {
+            selectFields = "t0.id as db_id, t0.name,t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name, sa.api_url, sa.api_method, t0.when_created, t0.note  as description, t0.app_id as tran_ctrl ";
+        }
+        String sql = "select " + selectFields +
                 " from sys_logic_flow t0 " +
                 " left join sys_api sa on sa.api_flow_id = t0.flow_id " +
                 " left join dev_application t1 on t1.id=t0.application_id " +
                 " where 1=1";
+        SqlWrapper wrapper = new SqlWrapper(sql);
+
         if (StringUtils.isNotEmpty(argv.getApplicationId())) {
-            sql += " and (t0.application_id = ? or t0.application_id is null)";
-            params.add(argv.getApplicationId());
-            sql += " and (t0.application_id = '" + argv.getApplicationId() + "')";
+            wrapper.addCondition("t0.application_id", Op.EQ,  argv.getApplicationId());
         }
         if (StringUtils.isNotEmpty(argv.getApiUrl())) {
-            sql += " and sa.api_url like concat('%', ?, '%') ";
-            sql += " and sa.api_url is not null ";
-            params.add(argv.getApiUrl());
-            sql += " and sa.api_url like '%" + argv.getApiUrl() + "%' ";
+            wrapper.addCondition("sa.api_url", Op.LIKE, "%" + argv.getApiUrl() + "%");
         }
         if (StringUtils.isNotEmpty(argv.getTags())) {
-            sql += " and t0.tags like '%" + argv.getTags() + "%'";
+            wrapper.addCondition("t0.tags", Op.LIKE, "%" + argv.getTags() + "%");
         }
         if (StringUtils.isNotEmpty(argv.getName())) {
-            sql += " and t0.name like '%" + argv.getName() + "%'";
+            wrapper.addCondition("t0.name", Op.LIKE, "%" + argv.getName() + "%");
         }
-        sql += " order by t0.when_created desc";
+        wrapper.sortBy("t0.when_created desc");
 
-        int total = 0;
-        List<SysKdbFlowRet> logicFlows = null;
-        // 分页
-        if (argv.isPageQuery()) {
-
-            PagedList<SysKdbFlowRet> pagedList = DB.findPagedList(SysKdbFlowRet.class, argv.getPage(), argv.getPageSize(), sql, params.toArray(new Object[0]));
-            total = pagedList.getTotalCount();
-            logicFlows = pagedList.getList();
-            log.info("分页查询: {}, 参数:{}, 总数:{}， 当前页：{}", sql, JsonUtil.toJson(params), total, pagedList.getList().size());
-        }
-        else {
-            logicFlows = DB.findList(SysKdbFlowRet.class, sql,  params.toArray(new Object[0]));
-            total = logicFlows.size();
-        }
-        // 根据flowId批量查询
-        List<String> flowIds = new ArrayList<>();
-        flowIds.add("-1");
-        logicFlows.forEach(logicFlow -> flowIds.add(logicFlow.getId()));
-
-        KdbFlowQueryArgv info = new KdbFlowQueryArgv();
-
-        long t1 = System.currentTimeMillis();
-        // 查询faas流程数据
-        KdbApi api = (KdbApi) (DB.getDefault());
-
-        if (!flowIds.isEmpty()) {
-            info.setFlowIds(flowIds);
-        }
-        info.setPageQuery(false);
-
-        KdbDataRet<FlowInfo> flowDataRet = api.queryFlow(info);
-        long t2 = System.currentTimeMillis();
-        log.info("faas查询用时:{}, {}", (t1-t0), (t2 - t1));
-
-        Map<String, FlowInfo> dbMap = new HashMap<>();
-        flowDataRet.getList().forEach(it -> dbMap.put(it.getFlowId(), it));
-        // 转为ret类
-        List<SysKdbFlowRet> filterList = new ArrayList<>();
-        for (SysKdbFlowRet flowRet: logicFlows) {
-            filterList.add(toRet(dbMap.get(flowRet.getId()), flowRet));
-        }
-
-        PageDataRet<SysKdbFlowRet> pageDataRet;
-        if (argv.isPageQuery()) {
-            pageDataRet = PageUtil.memoryPage(argv, filterList, total);
-        } else {
-            pageDataRet = new PageDataRet<>();
-            pageDataRet.setList(filterList);
-            pageDataRet.setTotal(filterList.size());
-        }
-        if (!modeDev) {
-            filterList.forEach(it -> {
-                it.setContent(null);
-                it.setApiUrl(null);
-                it.setInArgv(null);
-                it.setOutArgv(null);
-            });
-        }
-        return pageDataRet;
+        return (PageDataRet<SysKdbFlowRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysKdbFlowRet.class);
     }
 
     @Override

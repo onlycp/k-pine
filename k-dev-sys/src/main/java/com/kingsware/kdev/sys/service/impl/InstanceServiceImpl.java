@@ -26,7 +26,7 @@ public class InstanceServiceImpl implements InstanceService {
 
     @Override
     public void recvMessage(String topic, String message) {
-        log.info("应用内通讯: topic:{}, 消息:{}", topic, message);
+        log.debug("应用间通讯: topic:{}, 消息:{}", topic, message);
         // 任务执行
         if ("task-execute".equalsIgnoreCase(topic)) {
             SysTask task = JsonUtil.toBean(message, SysTask.class);
