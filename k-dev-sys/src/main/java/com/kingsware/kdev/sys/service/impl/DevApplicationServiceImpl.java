@@ -9,10 +9,12 @@ import com.kingsware.kdev.core.bean.LogStack;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.cache.access.AccessManager;
+import com.kingsware.kdev.core.cache.api.ApiTask;
 import com.kingsware.kdev.core.cache.kcache.KCacheManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
+import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.model.SysFile;
 import com.kingsware.kdev.core.model.SysLogicFlow;
 import com.kingsware.kdev.core.model.SysTask;
@@ -52,6 +54,8 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
 
     @Resource
     private SysFileService sysFileService;
+    @Resource
+    private AppModeProperties appModeProperties;
 
     @Override
     public DevApplicationRet get(String id) {
@@ -183,16 +187,19 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         log.info("完成导入菜单：{}", menuCount);
         // 开发平台角色
         long devRoleCount = 0;
-        if (devPine.getDevRoles() != null && !devPine.getDevRoles().isEmpty()) {
+        if ( appModeProperties.getDev() &&  devPine.getDevRoles() != null && !devPine.getDevRoles().isEmpty()) {
             devRoleCount = DB.batchSaveOrUpdate(devPine.getDevRoles(), SysRole.class);
+            log.info("完成导入开发平台角色：{}", devRoleCount);
         }
-        log.info("完成导入开发平台角色：{}", devRoleCount);
+
         // 开发平台角色菜单
         long devRoleMenuCount = 0;
-        if (devPine.getDevRoleMenus() != null && !devPine.getDevRoleMenus().isEmpty()) {
+
+        if ( appModeProperties.getDev() && devPine.getDevRoleMenus() != null && !devPine.getDevRoleMenus().isEmpty()) {
             devRoleMenuCount = DB.batchSaveOrUpdate(devPine.getDevRoleMenus(), SysRoleMenu.class);
+            log.info("完成导入开发平台角色菜单：{}", devRoleMenuCount);
         }
-        log.info("完成导入开发平台角色菜单：{}", devRoleMenuCount);
+
         // pine逻辑
         long pineFlowCount = DB.batchSaveOrUpdate(devPine.getLogicFlows(), SysLogicFlow.class);
         log.info("完成导入pine逻辑：{}", pineFlowCount);
@@ -269,41 +276,44 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             }
         }
         try {
-            // 插入FAAS扩展节点类型
-            if (devPine.getDevFaasNodeTypes() != null && !devPine.getDevFaasNodeTypes().isEmpty()) {
-                long tCount = DB.batchSaveOrUpdate(devPine.getDevFaasNodeTypes(), DevFaasNodeType.class);
-                log.info("完成导入FAAS扩展节点类型：{}", tCount);
+            if (appModeProperties.getDev()) {
+                // 插入FAAS扩展节点类型
+                if (devPine.getDevFaasNodeTypes() != null && !devPine.getDevFaasNodeTypes().isEmpty()) {
+                    long tCount = DB.batchSaveOrUpdate(devPine.getDevFaasNodeTypes(), DevFaasNodeType.class);
+                    log.info("完成导入FAAS扩展节点类型：{}", tCount);
+                }
+                // 插入FAAS扩展节点
+                if (devPine.getDevFaasNodes() != null && !devPine.getDevFaasNodes().isEmpty()) {
+                    long tCount = DB.batchSaveOrUpdate(devPine.getDevFaasNodes(), DevFaasNode.class);
+                    log.info("完成导入FAAS扩展节点：{}", tCount);
+                }
+                // 能力关联
+                if (devPine.getPowerLinks() != null && !devPine.getPowerLinks().isEmpty()) {
+                    long tCount = DB.batchSaveOrUpdate(devPine.getPowerLinks(), DevPowerLink.class);
+                    log.info("完成导入能力关联：{}", tCount);
+                }
+                // 能力树
+                if (devPine.getDevPowerTrees() != null && !devPine.getDevPowerTrees().isEmpty()) {
+                    long tCount = DB.batchSaveOrUpdate(devPine.getDevPowerTrees(), DevPowerTree.class);
+                    log.info("完成导入能力树：{}", tCount);
+                }
+                // 插件树
+                if (devPine.getExtPluginTrees() != null && !devPine.getExtPluginTrees().isEmpty()) {
+                    long tCount = DB.batchSaveOrUpdate(devPine.getExtPluginTrees(), ExtPluginTree.class);
+                    log.info("完成导入插件树：{}", tCount);
+                }
+                // 插件接口
+                if (devPine.getExtPluginInterfaces() != null && !devPine.getExtPluginInterfaces().isEmpty()) {
+                    long tCount = DB.batchSaveOrUpdate(devPine.getExtPluginInterfaces(), ExtPluginInterface.class);
+                    log.info("完成导入插件接口：{}", tCount);
+                }
+                // 编辑编排模板
+                if (devPine.getSysLogicTemplates() != null && !devPine.getSysLogicTemplates().isEmpty()) {
+                    long tCount = DB.batchSaveOrUpdate(devPine.getSysLogicTemplates(), SysLogicTemplate.class);
+                    log.info("完成导入编辑编排模板：{}", tCount);
+                }
             }
-            // 插入FAAS扩展节点
-            if (devPine.getDevFaasNodes() != null && !devPine.getDevFaasNodes().isEmpty()) {
-                long tCount = DB.batchSaveOrUpdate(devPine.getDevFaasNodes(), DevFaasNode.class);
-                log.info("完成导入FAAS扩展节点：{}", tCount);
-            }
-            // 能力关联
-            if (devPine.getPowerLinks() != null && !devPine.getPowerLinks().isEmpty()) {
-                long tCount = DB.batchSaveOrUpdate(devPine.getPowerLinks(), DevPowerLink.class);
-                log.info("完成导入能力关联：{}", tCount);
-            }
-            // 能力树
-            if (devPine.getDevPowerTrees() != null && !devPine.getDevPowerTrees().isEmpty()) {
-                long tCount = DB.batchSaveOrUpdate(devPine.getDevPowerTrees(), DevPowerTree.class);
-                log.info("完成导入能力树：{}", tCount);
-            }
-            // 插件树
-            if (devPine.getExtPluginTrees() != null && !devPine.getExtPluginTrees().isEmpty()) {
-                long tCount = DB.batchSaveOrUpdate(devPine.getExtPluginTrees(), ExtPluginTree.class);
-                log.info("完成导入插件树：{}", tCount);
-            }
-            // 插件接口
-            if (devPine.getExtPluginInterfaces() != null && !devPine.getExtPluginInterfaces().isEmpty()) {
-                long tCount = DB.batchSaveOrUpdate(devPine.getExtPluginInterfaces(), ExtPluginInterface.class);
-                log.info("完成导入插件接口：{}", tCount);
-            }
-            // 编辑编排模板
-            if (devPine.getSysLogicTemplates() != null && !devPine.getSysLogicTemplates().isEmpty()) {
-                long tCount = DB.batchSaveOrUpdate(devPine.getSysLogicTemplates(), SysLogicTemplate.class);
-                log.info("完成导入编辑编排模板：{}", tCount);
-            }
+
         }
         catch (Exception e) {
             log.warn("导入时发生非关键异常(可忽略)，不影响应用使用：" + e.getMessage());

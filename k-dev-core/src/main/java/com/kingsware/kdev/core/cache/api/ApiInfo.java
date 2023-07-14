@@ -1,6 +1,7 @@
 package com.kingsware.kdev.core.cache.api;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 接口表
@@ -9,6 +10,7 @@ import lombok.Data;
  * @date 2021-12-27 10:20
  */
 @Data
+@EqualsAndHashCode
 public class ApiInfo{
     /** 接口 **/
     private String id;
@@ -16,22 +18,10 @@ public class ApiInfo{
     private String apiName;
     /** 接口路径 */
     private String apiUrl;
-    /** 接口描述 */
-    private String apiNote;
-    /** 接口标签 **/
-    private String apiTags;
     /** 接口方法 */
     private String apiMethod;
-    /** 接口参数方式 */
-    private Integer apiArgvType;
-    /** 接口请求参数 **/
-    private String apiReqArgv;
-    /** 接口响应结果 **/
-    private String apiRspArgv;
     /** 调用方式 **/
     private Integer callType;
-    /** 结果处理类 **/
-    private String apiResultHandler;
     /** 接口流程 **/
     private String apiFlowId;
     /** 接口编码 **/
@@ -48,5 +38,8 @@ public class ApiInfo{
     private String whoCreated;
     /** 修改人员 **/
     private String whoModified;
+    /** 修改时间 **/
+    private String whenModified;
+    private String apiTags;
 
 }

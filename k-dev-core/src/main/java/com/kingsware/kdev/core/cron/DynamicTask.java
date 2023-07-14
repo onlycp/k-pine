@@ -238,31 +238,10 @@ public class DynamicTask implements CommandLineRunner {
             }
             // 通过http调用
             else {
-                String contextPath = SpringContext.getProperties("server.servlet.context-path", "/");
-                if (StringUtils.isEmpty(contextPath)) {
-                    contextPath = "/";
+                boolean b = InstanceManager.getInstance().sendMessage(executeInstance, "task-execute", JsonUtil.toJson(sysTask));
+                if (!b) {
+                    callTask(sysTask, atomicInteger, excludeInstanceName);
                 }
-                if (!contextPath.endsWith("/")) {
-                    contextPath = contextPath + "/";
-                }
-
-                String url = "http://" + executeInstance.getHostName() + ":" + executeInstance.getPort() + contextPath + "api/v1/sys-tasks/executeTask/" + sysTask.getId();
-                try {
-                    String res = HttpUtil.get(url, new HashMap<>());
-                    BaseRet<?> ret = JsonUtil.toBean(res, BaseRet.class);
-                    if (ret.getCode() != 200) {
-                        log.error("实例：{} 执行任务失败，系统将重试,异常信息:{}", executeInstance.instanceName(), ret.getMessage());
-                        callTask(sysTask, atomicInteger, executeInstance.instanceName());
-                    } else {
-//                        log.info("http触发定时任务，任务id:{}，url:{},响应信息:{}", sysTask.getId(), url, ret.getMessage());
-                    }
-
-                } catch (Exception e) {
-                    // 如果发生异常，那么就重试
-                    log.error("实例：{} 执行任务失败，系统将重试,异常信息:{}", executeInstance.instanceName(), e);
-                    callTask(sysTask, atomicInteger, executeInstance.instanceName());
-                }
-
             }
 
         }

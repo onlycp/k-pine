@@ -2,12 +2,13 @@ package com.kingsware.kdev.core.cache.instance;
 
 import com.kingsware.kdev.core.auth.AuthToken;
 import com.kingsware.kdev.core.auth.TokenUtil;
+import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.cache.session.TokenSession;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.model.SysInstance;
 import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.core.orm.DB;
-import com.kingsware.kdev.core.util.BeanUtils;
-import com.kingsware.kdev.core.util.SystemUtil;
+import com.kingsware.kdev.core.util.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Timestamp;
@@ -104,6 +105,64 @@ public class InstanceManager {
         }
         this.lastInstanceNameMap.put(taskId, chooseInstance.instanceName());
         return chooseInstance;
+    }
+
+    /**
+     *  程序之内进行通知
+     * @param topic     主题
+     * @param message   消息内容
+     */
+    public void broadMessage(String topic, String message) {
+        this.instances.forEach(it -> {
+            try {
+                sendMessage(it, topic, message);
+            }
+            catch (Exception e) {
+                log.error("消息发送失败, 实例：{}， Topic:{}, 内容:{}", it.instanceName(), topic, message);
+            }
+        });
+    }
+
+    /**
+     * 发送到指定实例
+     * @param instance  实例
+     * @param topic     主题
+     * @param message   消息
+     */
+    public boolean sendMessage(SysInstance instance, String topic, String message) {
+        if (instance.instanceName().equalsIgnoreCase(masterInstance().instanceName())) {
+            InstanceService instanceService = SpringContext.getBean(InstanceService.class);
+            instanceService.recvMessage(topic, message);
+        }
+        else  {
+            String contextPath = SpringContext.getProperties("server.servlet.context-path", "/");
+            if (StringUtils.isEmpty(contextPath)) {
+                contextPath = "/";
+            }
+            if (!contextPath.endsWith("/")) {
+                contextPath = contextPath + "/";
+            }
+
+            String url = "http://" + instance.getHostName() + ":" + instance.getPort() + contextPath + "api/v1/instances/recvMessage";
+            try {
+                Map<String, String> body = new HashMap<>();
+                body.put("topic", topic);
+                body.put("message", message);
+                String res = HttpUtil.doPost(url, JsonUtil.toJson(body), new HashMap<>());
+                BaseRet<?> ret = JsonUtil.toBean(res, BaseRet.class);
+                if (ret.getCode() != 200) {
+                    log.error("实例：{} 消息发送失败，系统将重试,异常信息:{}", instance.instanceName(), ret.getMessage());
+                    return false;
+                }
+
+            } catch (Exception e) {
+                // 如果发生异常，那么就重试
+                log.error("实例：{} 消息发送失败，系统将重试,异常信息:{}", instance.instanceName(), e);
+                return false;
+            }
+        }
+        return true;
+
     }
 
 }

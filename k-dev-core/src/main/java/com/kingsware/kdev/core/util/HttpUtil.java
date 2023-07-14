@@ -43,13 +43,33 @@ public class HttpUtil {
     private static final String CONTENT_TYPE = "multipart/form-data";     //内容类型
     private static final String LINE_END = "\r\n";
 
+    private static final Map<String, FaasChannelPlugin> faasChannelPluginMap = new HashMap<>();
 
+
+    static {
+        loadPlugins();
+    }
 
     /**
      * 私有构造
      */
     private HttpUtil() {}
 
+
+
+    private static void loadPlugins() {
+        List<Class<?>> classList =  ClassUtils.getClassesByParentClass("com.kingsware.kdev", FaasChannelPlugin.class);
+        for (Class<?> tClass: classList) {
+            // 生成实例
+            try {
+                FaasChannelPlugin plugin = (FaasChannelPlugin) tClass.newInstance();
+                faasChannelPluginMap.put(plugin.name(), plugin);
+            } catch (Exception e) {
+                log.error("定时类扫描初始化失败:{}" , e.getMessage());
+            }
+        }
+
+    }
 
 
 
@@ -259,7 +279,8 @@ public class HttpUtil {
             return callHttpCluster(apiUrl, body, headerMap, anyone);
         }
         else {
-            FaasChannelPlugin faasChannelPlugin = getFaasChannel(faasCallMode);
+            long t1 = System.currentTimeMillis();
+            FaasChannelPlugin faasChannelPlugin = faasChannelPluginMap.get(faasCallMode);
             if (faasChannelPlugin != null)  {
                 return faasChannelPlugin.send(apiUrl, body, headerMap);
             }
@@ -522,7 +543,7 @@ public class HttpUtil {
      */
     public static FaasChannelPlugin getFaasChannel(String name) {
 
-        List<Class<?>> classList =  ClassUtils.getClassesByParentClass("com.kingsware", FaasChannelPlugin.class);
+        List<Class<?>> classList =  ClassUtils.getClassesByParentClass("com.kingsware.kdev", FaasChannelPlugin.class);
         for (Class<?> tClass: classList) {
             // 生成实例
             try {
