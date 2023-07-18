@@ -28,6 +28,8 @@ public class DBInitialize {
     /** 日志打印 **/
     private static final Logger logger  = LoggerFactory.getLogger(DBInitialize.class);
 
+    /** 是否加载完成 **/
+    public static boolean initCompleted = false;
     @Resource
     private DataBaseProperties dataBaseProperties;
 
@@ -43,6 +45,7 @@ public class DBInitialize {
         }
         // 初始化系统
         initSystem();
+        initCompleted = true;
     }
 
     /**

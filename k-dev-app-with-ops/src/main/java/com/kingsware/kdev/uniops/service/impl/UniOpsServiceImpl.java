@@ -76,7 +76,9 @@ public class UniOpsServiceImpl implements UniOpsService {
                     String url = uniopsServer + "/ops/userInfo";
                     Map<String, String> headers = new HashMap<>();
                     headers.put("token", to.getOpsToken());
+                    log.info("开始请求uniops token: {}", url);
                     String body = HttpUtil.callHttp(url, "{}", headers);
+                    log.info("开始请求uniops token, Result: {}", body);
                     BaseUserInfo userInfo = JsonUtil.toBean(body, BaseUserInfo.class);
                     userInfo.setAvatar(null);
                     String pineKey = TokenUtil.createToken(appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), KClientContext.getContext().getIp(), "-1", userInfo);
@@ -173,6 +175,7 @@ public class UniOpsServiceImpl implements UniOpsService {
             // 导入到UniOps
             String uniopsServer = SpringContext.getProperties("uniops.master.url", "http://localhost:8080");
             String url = uniopsServer + "/ops/system/menu/import";
+            log.info("安装菜单url:" + url);
             Map<String, Object> params = new HashMap<>();
             params.put("cover", false);
             // 请求头
