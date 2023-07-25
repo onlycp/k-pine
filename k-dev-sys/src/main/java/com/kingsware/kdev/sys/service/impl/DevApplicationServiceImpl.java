@@ -144,10 +144,16 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         }
     }
 
-
     @Override
     @SuppressWarnings("all")
     public String importApp(String json) {
+        return this.importApp(json, null);
+    }
+
+
+    @Override
+    @SuppressWarnings("all")
+    public String importApp(String json, String teamId) {
 
         int subSize = 3500;
         DevPine devPine = appData2Pine(json);
@@ -156,6 +162,18 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         long appCount = 0;
         if (devPine.getInfo() != null && StringUtils.isNotEmpty(devPine.getInfo().getId())) {
             appCount = DB.saveOrUpdate(devPine.getInfo(), DevApplication.class);
+            // 处理团队关联
+            if(StringUtils.isNotEmpty(devPine.getInfo().getId()) && StringUtils.isNotEmpty(teamId)) {
+                // 查找当前是否已入库
+                long  cnt = DB.findCount("select count(1) cnt from dev_team_app where app_id=? and team_id=?",devPine.getInfo().getId(), teamId);
+                if (cnt  == 0) {
+                    DevTeamApp devTeamApp = new DevTeamApp();
+                    devTeamApp.setAppId(devPine.getInfo().getId());
+                    devTeamApp.setTeamType(0);
+                    devTeamApp.setTeamId(teamId);
+                    DB.save(devTeamApp);
+                }
+            }
         }
         log.info("完成导入应用信息：{}", appCount);
         // 处理页面
@@ -361,7 +379,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                     logStack.addMessage("准备请求远程数据, URL：" + apiUrl);
                     String responseBody = HttpUtil.postBody(apiUrl, JsonUtil.toJson(body), new HashMap<>(), true);
                     logStack.addMessage("完成请求远程数据，准备安装应用.");
-                    String result = importApp(responseBody);
+                    String result = importApp(responseBody, argv.getTeamId());
                     logStack.addMessage("应用安装完成：" + result);
 
                 }
@@ -376,10 +394,12 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                     String json = FileUtils.readFile(file);
                     file.delete();
                     logStack.addMessage("开始安装应用:" + sysFile.getFileOriginalName());
-                    String result = importApp(json);
+                    String result = importApp(json, argv.getTeamId());
                     logStack.addMessage("应用安装完成：" + result);
                 }
             }
+
+
         } catch (Exception e) {
             logStack.addMessage(ExceptionUtils.getStackTrace(e));
         }

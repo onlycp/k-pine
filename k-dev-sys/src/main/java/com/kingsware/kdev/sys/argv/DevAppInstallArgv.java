@@ -11,4 +11,5 @@ public class DevAppInstallArgv {
     private String version;
     private Integer withSysData;
     private String localFileIds;
+    private String teamId;
 }

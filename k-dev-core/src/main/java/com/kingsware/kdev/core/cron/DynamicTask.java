@@ -10,12 +10,14 @@ import com.kingsware.kdev.core.model.SysInstance;
 import com.kingsware.kdev.core.model.SysLogicFlow;
 import com.kingsware.kdev.core.model.SysTask;
 import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.orm.DBInitialize;
 import com.kingsware.kdev.core.orm.kdb.FlowInfo;
 import com.kingsware.kdev.core.orm.kdb.KdbFlowQueryArgv;
 import com.kingsware.kdev.core.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.TriggerContext;
@@ -40,6 +42,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @Order(1)
+@DependsOn("springContext")
 @Slf4j
 public class DynamicTask implements CommandLineRunner {
 
@@ -413,64 +416,67 @@ public class DynamicTask implements CommandLineRunner {
         threadPoolTaskScheduler.schedule(() -> {
 
             try {
-                List<SysTask> tasks = DB.findList(SysTask.class, "select * from sys_task where enable=1 order by when_created asc");
-                log.debug("线程池数量：{}，当前活动：{}， 任务数:{}", threadPoolTaskScheduler.getPoolSize(),  threadPoolTaskScheduler.getActiveCount(),  tasks.size());
-                if (sysTaskList.isEmpty()) {
-                    sysTaskList.addAll(tasks);
-                }
-                else {
-                    // 删除不存在的任务
-                    List<SysTask> removeTasks = new ArrayList<>();
-                    sysTaskList.forEach(it -> {
-                        Optional<SysTask> optional = tasks.stream().filter(task -> task.getId().equals(it.getId())).findFirst();
-                        // 如果找到，就放到替换列表中
-                        if (optional.isPresent()) {
-                            int index = sysTaskList.indexOf(it);
-                            sysTaskList.set(index, optional.get());
-                        }
-                        else {
-                            removeTasks.add(it);
-                        }
-                    });
-                    // 增加新的
-                    for (SysTask task: tasks) {
-                        if (!sysTaskList.contains(task)) {
-                            sysTaskList.add(task);
-                        }
+                if (DBInitialize.initCompleted) {
+                    List<SysTask> tasks = DB.findList(SysTask.class, "select * from sys_task where enable=1 order by when_created asc");
+                    log.debug("线程池数量：{}，当前活动：{}， 任务数:{}", threadPoolTaskScheduler.getPoolSize(),  threadPoolTaskScheduler.getActiveCount(),  tasks.size());
+                    if (sysTaskList.isEmpty()) {
+                        sysTaskList.addAll(tasks);
                     }
-                    // 移除不存在的
-                    sysTaskList.removeAll(removeTasks);
-                }
-                // 处理一下表达式
-                for (SysTask task: tasks) {
-                    try {
-
-                        String cron = fixedCron(task.getCron());
-                        // 判断是否共享表达式
-                        String cronKey = shareCron ? cron: task.getCron()+ "@" + task.getId();
-                        if (!scheduledFutureMap.containsKey(cron)) {
-                            if (task instanceof KRunner) {
-                                ((KRunner)task).runNow();
+                    else {
+                        // 删除不存在的任务
+                        List<SysTask> removeTasks = new ArrayList<>();
+                        sysTaskList.forEach(it -> {
+                            Optional<SysTask> optional = tasks.stream().filter(task -> task.getId().equals(it.getId())).findFirst();
+                            // 如果找到，就放到替换列表中
+                            if (optional.isPresent()) {
+                                int index = sysTaskList.indexOf(it);
+                                sysTaskList.set(index, optional.get());
+                            }
+                            else {
+                                removeTasks.add(it);
+                            }
+                        });
+                        // 增加新的
+                        for (SysTask task: tasks) {
+                            if (!sysTaskList.contains(task)) {
+                                sysTaskList.add(task);
                             }
                         }
-
-                        task.setCron(cron);
-                        registerTask(cron, cronKey);
-
+                        // 移除不存在的
+                        sysTaskList.removeAll(removeTasks);
                     }
-                    catch (IllegalArgumentException e) {
-                        log.warn("任务表达式注册不成功, 任务名称:{}, 表达式{}", task.getName(), task.getCron());
-                        task.setEnable(0);
-                        task.setLastExecuteMsg("cron表达式不合法");
-                        DB.update(task);
-                    }
-                    catch (Exception e) {
-                        log.warn("任务注册失败：{}， {}", task.getName(), task.getCron());
+                    // 处理一下表达式
+                    for (SysTask task: tasks) {
+                        try {
 
+                            String cron = fixedCron(task.getCron());
+                            // 判断是否共享表达式
+                            String cronKey = shareCron ? cron: task.getCron()+ "@" + task.getId();
+                            if (!scheduledFutureMap.containsKey(cron)) {
+                                if (task instanceof KRunner) {
+                                    ((KRunner)task).runNow();
+                                }
+                            }
+
+                            task.setCron(cron);
+                            registerTask(cron, cronKey);
+
+                        }
+                        catch (IllegalArgumentException e) {
+                            log.warn("任务表达式注册不成功, 任务名称:{}, 表达式{}", task.getName(), task.getCron());
+                            task.setEnable(0);
+                            task.setLastExecuteMsg("cron表达式不合法");
+                            DB.update(task);
+                        }
+                        catch (Exception e) {
+                            log.warn("任务注册失败：{}， {}", task.getName(), task.getCron());
+
+                        }
                     }
                 }
-
-
+                else {
+                    log.info("当前系统未初始化完成....");
+                }
 
             }
             catch (Exception e) {

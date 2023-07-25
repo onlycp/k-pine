@@ -55,6 +55,13 @@ public interface DevApplicationService extends BaseService {
     String importApp(String json);
 
     /**
+     * 导入应用
+     * @param json json
+     */
+    String importApp(String json, String teamId);
+
+
+    /**
      * 安装应用
      * @param argv
      */
