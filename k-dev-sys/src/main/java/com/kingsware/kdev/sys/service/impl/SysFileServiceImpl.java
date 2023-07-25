@@ -158,9 +158,9 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                 sFile.setWhenModified(new Timestamp(file.lastModified()));
                 sFile.setSaveType(1);
                 if (file.exists() && file.isFile()) {
-                    try (InputStream inputStream = resource.getInputStream()){
-                        sFile.setFileMd5(FileUtils.getMD5(inputStream));
-                    }
+//                    try (InputStream inputStream = resource.getInputStream()){
+//                        sFile.setFileMd5(FileUtils.getMD5(inputStream));
+//                    }
 
                     sFile.setFileExt(FileUtils.getFileExt(fileName));
                     sFile.setFileSize((int) file.length());
@@ -320,28 +320,14 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             } else {
                 // 在FAAS找是否存在文件
                 if (!FileTypeChecker.isAudioFile(path) && !FileTypeChecker.isVideoFile(path)) {
-                    String relativePath = "";
-                    String myFileName =  path;
-                    if (path.contains("/")) {
-                        int index = path.lastIndexOf("/");
-                        relativePath = path.substring(0, index);
-                        myFileName = path.substring(index + 1);
-                    }
-                    String downloadPath = getBasePath() + "/" + relativePath;
-                    DB.kdbApi().downloadStream(downloadPath, myFileName, userFileName);
+                    FaasFileInfo fileInfo = getFaasFileInfo(path);
+                    DB.kdbApi().downloadStream(fileInfo.getPath(), fileInfo.getName(), userFileName);
                     return;
                 }
                 else {
                     File faasFile = getFaasFile(path);
                     if (faasFile != null && faasFile.exists()) {
                         fileRealPath = faasFile.getAbsolutePath();
-                        int index = path.lastIndexOf("/");
-                        if(index == -1) {
-                            fileName = path;
-                        }
-                        else {
-                            fileName = path.substring(index + 1);
-                        }
                         tmpFile = faasFile;
                     }
                 }
