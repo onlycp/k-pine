@@ -41,5 +41,6 @@ public class ApiInfo{
     /** 修改时间 **/
     private String whenModified;
     private String apiTags;
+    private String apiResultHandler;
 
 }

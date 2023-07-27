@@ -1,5 +1,7 @@
 package com.kingsware.kdev.core.auth;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.kingsware.kdev.core.bean.ApiDefine;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.NoticeMessage;
@@ -488,7 +490,13 @@ public class KAuthFilter implements Filter {
         // 转为api格式
         switch (result.getType()) {
             case KFlowConstant.RESULT_JSON:
-                ServletUtil.responseJson(response, FlowUtils.toJsonResult(result.getData(), result.getLog()));
+
+                if (StringUtils.isNotEmpty(api.getApiResultHandler()) && "user_json".equalsIgnoreCase(api.getApiResultHandler())) {
+                    ServletUtil.responseJson(response, result.getData());
+                }
+                else {
+                    ServletUtil.responseJson(response, FlowUtils.toJsonResult(result.getData(), result.getLog()));
+                }
                 break;
             case KFlowConstant.RESULT_EXCEL:
                 ExcelWorker.getInstance().writeToWeb(response, (KExcel) result.getData());
