@@ -117,4 +117,29 @@ public class ZipUtils {
         }
     }
 
+    public static void zipDirectory(File sourceDir, String parentDir, ZipOutputStream zos) throws IOException {
+        File[] files = sourceDir.listFiles();
+        byte[] buffer = new byte[1024];
+
+        assert files != null;
+        for (File file : files) {
+            if (file.isDirectory()) {
+                zipDirectory(file, parentDir, zos);
+            } else {
+                String entryName = file.getAbsolutePath().replace(parentDir, "");
+                ZipEntry ze = new ZipEntry(entryName);
+                zos.putNextEntry(ze);
+
+                try (FileInputStream fis = new FileInputStream(file)) {
+                    int length;
+                    while ((length = fis.read(buffer)) > 0) {
+                        zos.write(buffer, 0, length);
+                    }
+                }
+                zos.closeEntry();
+            }
+        }
+    }
+
+
 }

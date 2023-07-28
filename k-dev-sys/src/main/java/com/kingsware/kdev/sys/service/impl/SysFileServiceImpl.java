@@ -36,6 +36,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.zip.ZipOutputStream;
 
 /**
  * 文件实现类
@@ -313,8 +314,23 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             File localFile = getLocalFile(path);
             if (isStatic) {
                 localFile = getStaticFile(path);
+                if (localFile.isDirectory()) {
+                    File zipFile = File.createTempFile("temp", "zip");
+                    try (FileOutputStream fos = new FileOutputStream(zipFile); ZipOutputStream zos = new ZipOutputStream(fos);){
+                        ZipUtils.zipDirectory(localFile, localFile.getPath(), zos);
+                        ServletUtil.responseFile(zipFile, localFile.getName() + ".zip");
+
+                    }
+                    catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    finally {
+                        zipFile.delete();
+                    }
+                    return;
+                }
             }
-            if (localFile != null && localFile.exists()) {
+            if (localFile.exists()) {
                 fileRealPath = localFile.getAbsolutePath();
                 fileName = localFile.getName();
             } else {
@@ -426,7 +442,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
     }
 
     private File getStaticFile(String path) {
-        return new File(path);
+       return new File(path);
     }
 
     public File getFaasFile(String path) {

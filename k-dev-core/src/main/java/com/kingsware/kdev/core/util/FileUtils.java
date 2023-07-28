@@ -18,6 +18,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * 文件处理工具类
@@ -352,6 +354,7 @@ public class FileUtils {
         out.close();
         in.close();
     }
+
 
 
 }
