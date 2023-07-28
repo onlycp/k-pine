@@ -415,6 +415,9 @@ public class KAuthFilter implements Filter {
                         loginLog.setIp(KClientContext.getContext().getIp());
                         loginLog.setResponseCode(responseCode);
                         loginLog.setTimes(takeTime);
+                        if (StringUtils.isEmpty(errorMessage) && KClientContext.getContext() != null) {
+                            errorMessage = KClientContext.getContext().getErrorMessage();
+                        }
                         loginLog.setResponseMessage(StringUtils.retrench(errorMessage, 1000));
                         loginLog.setOperateTime(new Timestamp(System.currentTimeMillis()));
                         KmqMessageCenter.getInstance().produce("t_login_log", JsonUtil.toJson(loginLog) );

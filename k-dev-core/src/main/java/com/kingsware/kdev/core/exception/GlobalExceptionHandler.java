@@ -1,6 +1,7 @@
 package com.kingsware.kdev.core.exception;
 
 import com.kingsware.kdev.core.bean.BaseRet;
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.enums.RetEnum;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
@@ -25,6 +26,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = BusinessException.class)
     @ResponseBody
     public BaseRet<?> businessExceptionHandler(HttpServletRequest request, BusinessException e) {
+        KClientContext.getContext().setErrorMessage(e.getMessage());
         return BaseRet.failMessage(e.getMessage());
     }
 

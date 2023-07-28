@@ -32,5 +32,7 @@ public class ClientInfo {
     private HttpServletResponse response;
     // 是否校验图标验证码
     private boolean validateCodeFlag = true;
+    /** 错误信息 **/
+    private String errorMessage;
 
 }
