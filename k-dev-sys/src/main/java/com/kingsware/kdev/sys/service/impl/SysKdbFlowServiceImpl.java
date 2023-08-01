@@ -16,6 +16,7 @@ import com.kingsware.kdev.core.kflow.define.*;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.PagedList;
 import com.kingsware.kdev.core.orm.SqlWrapper;
+import com.kingsware.kdev.core.orm.annotation.Transactional;
 import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.orm.kdb.*;
@@ -27,10 +28,7 @@ import com.kingsware.kdev.sys.bean.CopyProcessData;
 import com.kingsware.kdev.sys.bean.ExportData;
 import com.kingsware.kdev.sys.bean.ExportRootData;
 import com.kingsware.kdev.sys.manager.CopyAppManager;
-import com.kingsware.kdev.sys.model.DevApplication;
-import com.kingsware.kdev.sys.model.DevFaasNode;
-import com.kingsware.kdev.sys.model.SysDemo;
-import com.kingsware.kdev.sys.model.SysLogicHistory;
+import com.kingsware.kdev.sys.model.*;
 import com.kingsware.kdev.sys.ret.SysDemoRet;
 import com.kingsware.kdev.sys.ret.SysFlowDebugRet;
 import com.kingsware.kdev.sys.ret.SysFlowDefineRet;
@@ -355,6 +353,13 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
 
     @Override
     public void add(SysKdbFlowArgv argv) {
+        // 校验接口唯一性
+        if (StringUtils.isNotEmpty(argv.getApiUrl()) && StringUtils.isNotEmpty(argv.getApiMethod())) {
+            SysApi sysApi = new SysApi();
+            sysApi.setApiUrl(argv.getApiUrl());
+            sysApi.setApiMethod(argv.getApiMethod());
+            sysApiService.checkUnique(sysApi);
+        }
 
         AddFlowInfo info = new AddFlowInfo();
         info.setContent(argv.getContent());
@@ -404,6 +409,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             apiArgv.setApiTags(argv.getTags());
             sysApiService.add(apiArgv);
         }
+
     }
 
     @Override
