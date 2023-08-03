@@ -280,7 +280,15 @@ public class LicenseManager {
         //  获取端口
         String port = SpringContext.getBootProperties("server.port", "0");
 //        log.info("license port: {}, server port:{}", lic.getAppPort(), port);
-        if (!macAddresses.contains(lic.getMac()) ) {
+        String[] macs = lic.getMac().trim().split(";");
+        boolean licenseFound = false;
+        for (String mac: macs) {
+            if (macAddresses.contains(mac)) {
+                licenseFound = true;
+                break;
+            }
+        }
+        if (!licenseFound) {
             log.info("mac不一致");
             return -1;
         }
