@@ -163,6 +163,7 @@ ALTER TABLE "sys_logic_history"
     ADD COLUMN "version_tag" varchar(50);
 ALTER TABLE "sys_logic_history"
     ADD COLUMN "version_tag_time" varchar(50);
+ALTER TABLE "dev_faas_node" ALTER COLUMN "config" TYPE text;
 
 ALTER TABLE "dev_faas_node"
     ALTER COLUMN "config" TYPE text COLLATE "pg_catalog"."default" USING "config"::text,
