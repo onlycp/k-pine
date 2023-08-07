@@ -17,7 +17,7 @@ CREATE TABLE dev_faas_node(
                               name VARCHAR(90)    ,
                               code VARCHAR(90)   ,
                               type_id VARCHAR(32)    ,
-                              config VARCHAR(255)   ,
+                              config VARCHAR(1024)   ,
                               template VARCHAR(1024)    ,
                               icon VARCHAR(32)   ,
                               pub_status INT   ,
