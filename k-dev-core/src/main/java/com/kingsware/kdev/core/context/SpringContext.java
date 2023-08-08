@@ -171,7 +171,7 @@ public class SpringContext implements ApplicationContextAware {
             }
         }
         // 加载系统配置
-        Map<String, String> configMap = ConfigManager.getInstance().getAllTextConfig();
+        Map<String, String> configMap = ConfigManager.getInstance().getAllConfig();
         properties.putAll(configMap);
         return properties;
 

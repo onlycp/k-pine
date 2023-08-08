@@ -62,4 +62,17 @@ public class ConfigManager {
 
     }
 
+    /**
+     * 获取所有的文本类型配置
+     * @return 返回
+     */
+    public Map<String, String> getAllConfig() {
+        Map<String, String> params = new HashMap<>();
+        cache.forEach((k, v) -> {
+            params.put(k, v.getValue());
+        });
+        return params;
+
+    }
+
 }

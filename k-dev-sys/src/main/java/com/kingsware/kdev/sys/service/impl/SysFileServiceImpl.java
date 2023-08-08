@@ -315,18 +315,8 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             if (isStatic) {
                 localFile = getStaticFile(path);
                 if (localFile.isDirectory()) {
-                    File zipFile = File.createTempFile("temp", "zip");
-                    try (FileOutputStream fos = new FileOutputStream(zipFile); ZipOutputStream zos = new ZipOutputStream(fos);){
-                        ZipUtils.zipDirectory(localFile, localFile.getPath(), zos);
-                        ServletUtil.responseFile(zipFile, localFile.getName() + ".zip");
-
-                    }
-                    catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    finally {
-                        zipFile.delete();
-                    }
+                    File zipFile = ZipUtils.zipDirectory(localFile, localFile.getAbsolutePath());
+                    ServletUtil.responseFile(zipFile, localFile.getName() + ".zip");
                     return;
                 }
             }
