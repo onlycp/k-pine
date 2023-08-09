@@ -3,6 +3,7 @@ package com.kingsware.kdev.sys.service.impl;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.DataSourceInfo;
 import com.kingsware.kdev.core.orm.kdb.DataSourceQueryArgv;
@@ -79,18 +80,24 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
     @Override
     public void add(SysKdbDataSourceArgv argv) {
 
-        DataSourceInfo info = new DataSourceInfo();
-        info.setSourceName(argv.getId());
-        info.setDriverClass(argv.getDriverClass());
-        instanceToField(info, argv);
-        if (StringUtils.isNotEmpty(argv.getJson())) {
-            info.setJson(argv.getJson());
+        try {
+            DataSourceInfo info = new DataSourceInfo();
+            info.setSourceName(argv.getId());
+            info.setDriverClass(argv.getDriverClass());
+            instanceToField(info, argv);
+            if (StringUtils.isNotEmpty(argv.getJson())) {
+                info.setJson(argv.getJson());
+            }
+            else {
+                info.setJson("{}");
+            }
+            KdbApi api = (KdbApi)(DB.getDefault());
+            api.addDataSource(info);
         }
-        else {
-            info.setJson("{}");
+        catch (Exception e) {
+            throw BusinessException.serviceThrow("数据源新增失败，请检查连接信息！");
         }
-        KdbApi api = (KdbApi)(DB.getDefault());
-        api.addDataSource(info);
+
     }
 
     /**
@@ -114,18 +121,24 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
 
     @Override
     public void edit(SysKdbDataSourceArgv argv) {
-        DataSourceInfo info = new DataSourceInfo();
-        info.setSourceName(argv.getId());
-        info.setDriverClass(argv.getDriverClass());
-        instanceToField(info, argv);
-        KdbApi api = (KdbApi)(DB.getDefault());
-        if (StringUtils.isNotEmpty(argv.getJson())) {
-            info.setJson(argv.getJson());
+        try {
+            DataSourceInfo info = new DataSourceInfo();
+            info.setSourceName(argv.getId());
+            info.setDriverClass(argv.getDriverClass());
+            instanceToField(info, argv);
+            KdbApi api = (KdbApi)(DB.getDefault());
+            if (StringUtils.isNotEmpty(argv.getJson())) {
+                info.setJson(argv.getJson());
+            }
+            else {
+                info.setJson("{}");
+            }
+            api.editDataSource(info);
         }
-        else {
-            info.setJson("{}");
+        catch (Exception e) {
+            throw BusinessException.serviceThrow("数据源编辑失败，请检查连接信息！");
         }
-        api.editDataSource(info);
+
     }
 
     @Override
