@@ -6,7 +6,9 @@ import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.constants.PropertiesConstant;
 import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.KFlowContext;
@@ -140,6 +142,7 @@ public class SysConfigServiceImpl extends BaseServiceImpl implements SysConfigSe
             wrapper.appendSql(" and app_id is null");
         }
         Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("app.loginBySM2", SpringContext.getProperties("app.loginBySM2", PropertiesConstant.FALSE));
         List<SysConfigRet> configList = DB.findList(SysConfigRet.class, wrapper.getSql(), wrapper.getParams().toArray());
         if (configList != null) {
             for (SysConfigRet sysConfigRet : configList) {

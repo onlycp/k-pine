@@ -21,7 +21,8 @@ public class SystemUtil {
     @SneakyThrows
     public static HostInfo getHost() {
         HostInfo hostInfo = new HostInfo();
-        Optional<Inet4Address> inet4Address = IpUtil.getLocalIp4Address();
+        Optional<Inet4Address> inet4Address = IpUtil.
+                getLocalIp4Address();
         String ip = "127.0.0.1";
         if (inet4Address.isPresent()) {
             ip = inet4Address.get().getHostAddress();

@@ -37,6 +37,7 @@ import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.core.util.jWi.JWildcard;
 import lombok.extern.slf4j.Slf4j;
+import net.minidev.json.JSONObject;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -345,6 +346,7 @@ public class KAuthFilter implements Filter {
                         if (wrapperResponse != null) {
                             if (response.getContentType().contains("json")) {
                                 String rBody = ServletUtil.getResponseBody(wrapperResponse);
+                                rBody = changeBodyJson(rBody);
                                 operateLog.setResponseBody(StringUtils.retrench(rBody,100));
                                 AppModeProperties appModeProperties = SpringContext.getBean(AppModeProperties.class);
                                 if (appModeProperties.getDev()) {
@@ -435,6 +437,19 @@ public class KAuthFilter implements Filter {
         }
 
     }
+
+    // 数据脱敏
+    private String changeBodyJson(String json) {
+        if (StringUtils.isEmpty(json)) {
+            return json;
+        }
+        // 判断json里是否包含token
+        if (json.contains("token")) {
+            json = json.replaceAll("\"token\":\"[^\"]*\"", "\"token\":\"******\"");
+        }
+        return json;
+    }
+
     /**
      *  判断是否存在忽略的日志标签
      * @param url   url
