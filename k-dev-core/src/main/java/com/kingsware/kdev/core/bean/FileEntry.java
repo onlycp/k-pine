@@ -2,6 +2,7 @@ package com.kingsware.kdev.core.bean;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.File;
 
@@ -14,6 +15,7 @@ import java.io.File;
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class FileEntry {
     /** 文件 **/
     private File file;

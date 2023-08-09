@@ -8,6 +8,7 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -54,6 +55,7 @@ public class ZipUtils {
                 while ((nRead = bis.read(cache, 0, CACHE_SIZE)) != -1) {
                     zos.write(cache, 0, nRead);
                 }
+                zos.closeEntry();
             }
             return tmpFile.toFile();
         } catch (FileNotFoundException e) {
@@ -63,6 +65,31 @@ public class ZipUtils {
         }
         return null;
 
+    }
+
+    public static void getZipList(File sourceDir, String parentDir, List<FileEntry> entries) {
+        File[] files = sourceDir.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    getZipList(file, parentDir, entries);
+                } else {
+                    FileEntry entry = new FileEntry();
+                    entry.setFile(file);
+                    String entryName = file.getAbsolutePath().replace(parentDir, "");
+                    entryName = entryName.startsWith(File.separator) ? entryName.substring(1) : entryName;
+                    entry.setFileName(entryName);
+                    entries.add(entry);
+                }
+            }
+        }
+    }
+
+
+    public static File zipDirectory(File sourceDir, String parentDir) throws IOException {
+        List<FileEntry> entries = new ArrayList<>();
+        getZipList(sourceDir, parentDir, entries);
+       return zip(entries, "1");
     }
 
     public static void unzip(String destDirPath, String path) throws Exception {
@@ -117,29 +144,6 @@ public class ZipUtils {
         }
     }
 
-    public static void zipDirectory(File sourceDir, String parentDir, ZipOutputStream zos) throws IOException {
-        File[] files = sourceDir.listFiles();
-        byte[] buffer = new byte[1024];
-
-        assert files != null;
-        for (File file : files) {
-            if (file.isDirectory()) {
-                zipDirectory(file, parentDir, zos);
-            } else {
-                String entryName = file.getAbsolutePath().replace(parentDir, "");
-                ZipEntry ze = new ZipEntry(entryName);
-                zos.putNextEntry(ze);
-
-                try (FileInputStream fis = new FileInputStream(file)) {
-                    int length;
-                    while ((length = fis.read(buffer)) > 0) {
-                        zos.write(buffer, 0, length);
-                    }
-                }
-                zos.closeEntry();
-            }
-        }
-    }
 
 
 }

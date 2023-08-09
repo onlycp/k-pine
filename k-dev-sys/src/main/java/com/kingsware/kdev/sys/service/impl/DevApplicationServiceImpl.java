@@ -226,7 +226,6 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             if (flowInfo.getFlowId().equalsIgnoreCase("base_flow")) {
                 continue;
             }
-//            DB.byName("kingDB").executeUpdateSql("delete from flow where flowid=?", flowInfo.getFlowId());
             KdbFlowQueryArgv kdbFlowQueryArgv = new KdbFlowQueryArgv();
             kdbFlowQueryArgv.setFlowId(flowInfo.getFlowId());
             List<FlowInfo> functionInfoList = DB.kdbApi().query(kdbFlowQueryArgv);
@@ -236,18 +235,10 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 try {
                     String sql = "insert into flow (flowid,name,content,description) values (?,?,?,?)";
                     DB.byName("kingDB").executeUpdateSql(sql, flowInfo.getFlowId(), flowInfo.getName(), flowInfo.getContent(), flowInfo.getDescription());
-
-//                    AddFlowInfo addFlowInfo = new AddFlowInfo();
-//                    addFlowInfo.setFlowId(flowInfo.getFlowId());
-//                    addFlowInfo.setContent(flowInfo.getContent());
-//                    addFlowInfo.setName(flowInfo.getName());
-//                    addFlowInfo.setDescription(flowInfo.getDescription());
-//                    DB.kdbApi().addFlow(addFlowInfo);
-
                 } catch (Exception e) {
-
                 }
-            } else {
+            }
+            else {
                 EditFlowInfo editFlowInfo = new EditFlowInfo();
                 editFlowInfo.setFlowId(flowInfo.getFlowId());
                 editFlowInfo.setContent(flowInfo.getContent());
@@ -257,41 +248,31 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 DB.kdbApi().editFlow(editFlowInfo);
                 log.info("更新FAAS逻辑编排:{}", editFlowInfo.getName());
             }
+
         }
-        // faas逻辑
+        // faas函数
         for (Functions functions : devPine.getFunctions()) {
 
             FunctionQueryArgv functionQueryArgv = new FunctionQueryArgv();
             functionQueryArgv.setId(functions.getId());
             List<Functions> functionInfoList = DB.kdbApi().queryFunction(functionQueryArgv);
-            // 如果没有，则新增
+            // 如果没有，则新增，后面之所以再次编辑，就是为了实时生效
             if (functionInfoList.isEmpty()) {
                 try {
-
-//                    AddFunctionInfo addFunctionInfo = new AddFunctionInfo();
-//                    addFunctionInfo.setId(functions.getId());
-//                    addFunctionInfo.setName(functions.getName());
-//                    addFunctionInfo.setDesc(functions.getDesc());
-//                    addFunctionInfo.setScript(functions.getScript());
-//                    addFunctionInfo.setType(functions.getType());
-//                    DB.kdbApi().addFun(addFunctionInfo);
-
                     String sql = "insert into functions (id,name,type,desc,script) values (?,?,?,?,?)";
                     DB.byName("kingDB").executeUpdateSql(sql, functions.getId(), functions.getName(), functions.getType(), functions.getDesc(), functions.getScript());
 
                 } catch (Exception e) {
 
                 }
-
-            } else {
-                EditFunctionInfo editFunctionInfo = new EditFunctionInfo();
-                editFunctionInfo.setId(functions.getId());
-                editFunctionInfo.setName(functions.getName());
-                editFunctionInfo.setDesc(functions.getDesc());
-                editFunctionInfo.setScript(functions.getScript());
-                editFunctionInfo.setType(functions.getType());
-                DB.kdbApi().editFun(editFunctionInfo);
             }
+            EditFunctionInfo editFunctionInfo = new EditFunctionInfo();
+            editFunctionInfo.setId(functions.getId());
+            editFunctionInfo.setName(functions.getName());
+            editFunctionInfo.setDesc(functions.getDesc());
+            editFunctionInfo.setScript(functions.getScript());
+            editFunctionInfo.setType(functions.getType());
+            DB.kdbApi().editFun(editFunctionInfo);
         }
         try {
             if (appModeProperties.getDev()) {
