@@ -356,7 +356,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     }
 
     @Override
-    public SysUserLoginRet login(Map<String, Object> argv) {
+    public SysUserLoginRet login(Map<String, Object> argv) throws Exception {
         try {
             SysUserLoginRet ret = new SysUserLoginRet();
             Map<String, Object> beforeFlowResultMap = new HashMap<>();
@@ -428,8 +428,13 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 throw BusinessException.serviceThrow("当前登录用户不存在！");
             }
             if (useUsernamePassword) {
+                String decryptPassword = decodeBase64(password);
+                String loginBySM2 = SpringContext.getProperties("app.loginBySM2", PropertiesConstant.FALSE);
+                if (PropertiesConstant.TRUE.equals(loginBySM2)) {
+                    decryptPassword = LoginCryptoUtils.loginDecrypt(password);
+                }
                 // 把参数里的加密密码解密出来
-                if (!EncryptWorker.getInstance().validate(decodeBase64(password), model.getPassword())) {
+                if (!EncryptWorker.getInstance().validate(decryptPassword, model.getPassword())) {
                     throw BusinessException.serviceThrow("用户名或密码有误！");
                 }
             }
@@ -511,7 +516,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     }
 
     @Override
-    public SysUserLoginRet loginByApiKey(String apiKey) {
+    public SysUserLoginRet loginByApiKey(String apiKey) throws Exception {
         ApiKey key = TokenUtil.parseApiKey(appAuthProperties.getTokenSecret(),apiKey);
         // 根据账号查询用户并进行登录
         SysUser user = DB.findOne(SysUser.class, "select username, password from sys_user where username=?", key.getUsername());

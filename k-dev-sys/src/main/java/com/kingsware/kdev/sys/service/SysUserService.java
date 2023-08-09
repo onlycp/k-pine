@@ -56,14 +56,14 @@ public interface SysUserService extends BaseService {
      */
     void delete(MultiIdArgv argv);
 
-    SysUserLoginRet login(Map<String, Object> argv);
+    SysUserLoginRet login(Map<String, Object> argv) throws Exception;
 
     /**
      * 通过api key获取登录令牌
      * @param apiKey    api令牌
      * @return
      */
-    SysUserLoginRet loginByApiKey(String apiKey);
+    SysUserLoginRet loginByApiKey(String apiKey) throws Exception;
 
     /**
      * 生成api key

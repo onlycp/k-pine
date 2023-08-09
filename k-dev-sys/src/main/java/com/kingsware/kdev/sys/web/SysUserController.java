@@ -8,7 +8,9 @@ import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.constants.PropertiesConstant;
 import com.kingsware.kdev.core.constants.Version;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.util.AESUtil;
 import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.core.util.VerifyCodeUtils;
@@ -62,8 +64,15 @@ public class SysUserController extends BaseController {
     @ApiIgnore
     @ApiOperation(value = "登录" ,notes = "登录")
     @PostMapping(value = "login")
-    public BaseRet<?> login(@RequestBody Map<String, Object> argv) {
+    public BaseRet<?> login(@RequestBody Map<String, Object> argv) throws Exception {
         return BaseRet.success(sysUserService.login(argv));
+    }
+    @ApiIgnore
+    @ApiOperation(value = "是否加密登录" ,notes = "是否加密登录")
+    @GetMapping(value = "isLoginCrypt")
+    public BaseRet<?> isLoginCrypt() {
+        String loginBySM2 = SpringContext.getProperties("app.loginBySM2", PropertiesConstant.FALSE);
+        return BaseRet.success(PropertiesConstant.TRUE.equals(loginBySM2));
     }
 
     /**
@@ -84,7 +93,7 @@ public class SysUserController extends BaseController {
     @ApiIgnore
     @ApiOperation(value = "通过apikey登录" ,notes = "通过apikey登录")
     @GetMapping(value = "/loginByApiKey")
-    public BaseRet<SysUserLoginRet> loginByApiKey(HttpServletRequest request) throws UnsupportedEncodingException {
+    public BaseRet<SysUserLoginRet> loginByApiKey(HttpServletRequest request) throws Exception {
         String apiKey = request.getParameter("apiKey");
         return BaseRet.success(sysUserService.loginByApiKey(apiKey));
     }

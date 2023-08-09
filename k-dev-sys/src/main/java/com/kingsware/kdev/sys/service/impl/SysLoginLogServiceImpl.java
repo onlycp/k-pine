@@ -44,7 +44,8 @@ public class SysLoginLogServiceImpl extends BaseServiceImpl implements SysLoginL
     @SuppressWarnings("unchecked")
     public PageDataRet<SysLoginLogRet> query(SysLoginLogQueryArgv argv) {
         // 拼装sql
-        SqlWrapper wrapper = new SqlWrapper("select * from sys_login_log where 1=1 ");
+        // 配置列表不显示ip，以免泄漏
+        SqlWrapper wrapper = new SqlWrapper("select id, operate_time, operator, times, response_code, response_message, when_created from sys_login_log where 1=1 ");
         // 拼装查询sql
         if (StringUtils.isNotEmpty(argv.getOperator())) {
             wrapper.addCondition("operator", Op.LIKE, "%" +argv.getOperator() +"%");
