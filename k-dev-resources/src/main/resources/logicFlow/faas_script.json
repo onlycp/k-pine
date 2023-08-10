@@ -1,0 +1,64 @@
+{
+  "name": "faas_script",
+  "node_definition": [
+    {
+      "id": "start",
+      "name": "开始",
+      "auto": true,
+      "state": "completed",
+      "debug": false,
+      "type": "start",
+      "variables": {},
+      "extra": {
+        "position": "200,-140"
+      }
+    },
+    {
+      "id": "end",
+      "name": "结束",
+      "auto": true,
+      "state": "completed",
+      "debug": false,
+      "type": "end",
+      "variables": {},
+      "extra": {
+        "position": "200,290"
+      }
+    },
+    {
+      "id": "973bffe26a2144e1b172f00b45887a52",
+      "name": "执行脚本",
+      "auto": true,
+      "state": "completed",
+      "debug": false,
+      "type": "task",
+      "execute": {
+        "script": {
+          "content": "const script = context.get('script');\nconst res = eval(script);\nsetResult('result', res)",
+          "type": "js",
+          "params": []
+        }
+      },
+      "variables": {},
+      "extra": {
+        "position": "140,20"
+      }
+    }
+  ],
+  "node_link": [
+    {
+      "id": "de498bde5ecf483dab1345033a17a21a",
+      "name": "开始->执行脚本",
+      "from": "start",
+      "to": "973bffe26a2144e1b172f00b45887a52",
+      "catch_exception": "false"
+    },
+    {
+      "id": "32537cda2b5240078ec353d4fdc49193",
+      "name": "执行脚本->结束",
+      "from": "973bffe26a2144e1b172f00b45887a52",
+      "to": "end",
+      "catch_exception": "false"
+    }
+  ]
+}
