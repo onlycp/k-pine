@@ -39,5 +39,6 @@ public class SysLogicFlow extends BaseManageModel {
     /** 是否开始事务控制 **/
     @Column(name = "app_id")
     private String tranCtrl;
+    private String newFlowJson;
 
 }

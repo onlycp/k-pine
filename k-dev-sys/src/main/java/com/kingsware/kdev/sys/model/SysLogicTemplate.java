@@ -22,4 +22,7 @@ public class SysLogicTemplate extends BaseManageModel {
     private String nodes;
     private String links;
     private String appId;
+    private String newFlowJson;
+    private String flowConfig;
+    private String type;
 }
