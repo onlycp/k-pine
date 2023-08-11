@@ -155,4 +155,12 @@ public interface KdbApi {
      * @return
      */
     KdbDataRet<FlowInfo> queryFlow(KdbFlowQueryArgv flowInfo);
+
+
+    /**
+     * 执行faas插件
+     * @param script
+     * @return
+     */
+    KdbRet<String> executeScript(String script);
 }

@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.orm.kdb;
 
+import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.HttpClientException;
@@ -162,6 +163,17 @@ public abstract class KdbApiAbstract implements KdbApi {
     }
 
     @Override
+    public KdbRet<String> executeScript(String script) {
+        KdbArgv argv = new KdbArgv();
+        argv.setFlowID("faas_script");
+        argv.getVariables().put("script", script);
+        argv.setDebugger(new ArrayList<>());
+        KdbRet<String> ret = this.executeFlow(argv, false, false);
+        return ret;
+    }
+
+
+    @Override
     public void addFun(AddFunctionInfo argv) {
         KdbRet ret = post(getServer(), argv, ADD_FUN_URL, String.class, false);
         if (ret.getErrorCode() != 0) {
@@ -270,6 +282,7 @@ public abstract class KdbApiAbstract implements KdbApi {
         String url = chooseServer()[0] + DOWN_URL + "/" + URLEncoder.encode(fileName, "utf-8") + "?path=" + URLEncoder.encode(path, "utf-8");
         return HttpUtil.downloadFile(url, path, prefix, suffix);
     }
+
 
     /**
      * 事务接口
