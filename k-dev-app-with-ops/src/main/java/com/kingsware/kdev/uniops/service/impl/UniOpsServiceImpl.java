@@ -66,6 +66,11 @@ public class UniOpsServiceImpl implements UniOpsService {
         org.springframework.core.io.Resource resource500 = SpringContext.getResource(ResourceUtils.CLASSPATH_URL_PREFIX + "template/500.html");
         String templateContent = getResourceText(resource500);
         String exceptionStack = "";
+        // 模板变量
+        Map<String, String> contextMap = new HashMap<>();
+        contextMap.put("uniops_userid", "");
+        contextMap.put("uniops_username", "");
+        contextMap.put("uniops_realName", "");
         HttpServletRequest request = ServletUtil.request();
         if (StringUtils.isNotEmpty(to.getOpsToken()) ) {
             String token = to.getOpsToken();
@@ -80,9 +85,13 @@ public class UniOpsServiceImpl implements UniOpsService {
                     String body = HttpUtil.callHttp(url, "{}", headers);
                     log.info("开始请求uniops token, Result: {}", body);
                     BaseUserInfo userInfo = JsonUtil.toBean(body, BaseUserInfo.class);
+                    log.info("青松: uniops用户信息:{}" , body);
                     userInfo.setAvatar(null);
                     String pineKey = TokenUtil.createToken(appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), KClientContext.getContext().getIp(), "-1", userInfo);
                     UniOpsTokenStore.getInstance().put(token, pineKey);
+                    contextMap.put("uniopsUserid", userInfo.getId() == null ?"":userInfo.getId() );
+                    contextMap.put("uniopsUsername", userInfo.getUsername() == null?"": userInfo.getUsername());
+                    contextMap.put("uniopsRealName", userInfo.getRealName() == null ?" ": userInfo.getRealName());
                 }
                 pineToken = UniOpsTokenStore.getInstance().get(token);
                 toUrl = to.getTo();
@@ -97,8 +106,7 @@ public class UniOpsServiceImpl implements UniOpsService {
             toUrl = to.getTo();
         }
 
-        // 模板变量
-        Map<String, String> contextMap = new HashMap<>();
+
         contextMap.put("pineToken", pineToken);
         contextMap.put("to", toUrl);
         contextMap.put("exceptionStack", exceptionStack);

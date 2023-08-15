@@ -115,4 +115,10 @@ public class AESUtil {
             return null;
         }
     }
+
+    public static void main(String[] s) {
+        String token = "OY7i7th4Gp6PVOyy7Zx3ervzZ+KlfcFJxvGT9GTnQd+92nI0KaWd3gpA63Ioz76uuEgs3amsmHqI9v+EwJJN5vAhUUI4ud9IdUbYOQFQZVjGDCLw886OkaPgLUfODaZ8TsOa/EfCkwH7ilEB4JXlc38Bt3n4h7kQ8OOO99x7aUdGkggeAQ5Vr5BZMitWioTwNHUv7102JzCuPooaSBuiF7ZhlzKziz3UEQd/jgUTIKROy9ltHDDOl3U3eTrBVxPo3K0+RbB6nKmbjux6Flh9k3eC1Dup1BRVwktQlK8jkkjQii0oat0sQm/K2Hm4ZkgfKV5YzJrFm7Xd/ABCbTSbpVwq03EyoNJ8u7tpcqmlEBExR3DAdors/gEkQpju5L1UOY7SBd151Pfg28zF1qhRdQ==";
+        String s1 = AESUtil.decrypt(token, "3kj0ByucpznafmRd");
+        System.out.println(s1);
+    }
 }

@@ -12,6 +12,7 @@ import com.kingsware.kdev.core.cache.access.AccessManager;
 import com.kingsware.kdev.core.cache.api.ApiTask;
 import com.kingsware.kdev.core.cache.kcache.KCacheManager;
 import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.mode.AppModeProperties;
@@ -155,6 +156,10 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
     @SuppressWarnings("all")
     public String importApp(String json, String teamId) {
 
+        String importEnable = SpringContext.getProperties("app.dev.import-enable", "true");
+        if ("false".equalsIgnoreCase(importEnable)) {
+            throw BusinessException.serviceThrow("当前平台禁止导入pine数据！");
+        }
         int subSize = 3500;
         DevPine devPine = appData2Pine(json);
         log.info("开始导入数据");
