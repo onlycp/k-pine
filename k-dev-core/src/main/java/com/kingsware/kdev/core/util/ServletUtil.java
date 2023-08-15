@@ -272,7 +272,6 @@ public class ServletUtil {
             else {
                 // 获取body
                 String body = requestBody;
-                log.info("青松请求body:{}", body);
                 if (StringUtils.isNotEmpty(body)) {
                     try {
                         Map<String, Object> argv = objectMapper.readValue(body, Map.class);
