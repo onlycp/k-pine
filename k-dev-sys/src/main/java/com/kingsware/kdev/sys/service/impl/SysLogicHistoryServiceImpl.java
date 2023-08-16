@@ -3,9 +3,11 @@ package com.kingsware.kdev.sys.service.impl;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.model.SysLogicFlow;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
+import com.kingsware.kdev.core.orm.kdb.AddFlowInfo;
 import com.kingsware.kdev.core.orm.kdb.EditFlowInfo;
 import com.kingsware.kdev.core.orm.kdb.FlowInfo;
 import com.kingsware.kdev.core.orm.kdb.KdbApi;
@@ -62,10 +64,9 @@ public class SysLogicHistoryServiceImpl extends BaseServiceImpl implements SysLo
     public void rollback(SysLogicHistoryArgv argv) {
         SysKdbFlowRet ret = sysKdbFlowService.get(argv.getFlowId());
 
+        // 保存到kdb
+        KdbApi api = (KdbApi) (DB.getDefault());
         if (ret != null) {
-
-            // 保存到kdb
-            KdbApi api = (KdbApi) (DB.getDefault());
             // 查询到FAAS
             FlowInfo flowInfo = api.get(ret.getId());
             EditFlowInfo info = new EditFlowInfo();
@@ -76,6 +77,15 @@ public class SysLogicHistoryServiceImpl extends BaseServiceImpl implements SysLo
 
             api.editFlow(info);
 
+        }
+        else {
+            String name = DB.findSingleAttribute(String.class, "select name from sys_logic_flow where flow_id=?", argv.getFlowId());
+            AddFlowInfo flowInfo = new AddFlowInfo();
+            flowInfo.setFlowId(argv.getFlowId());
+            flowInfo.setContent(argv.getFlowJson());
+            flowInfo.setName(name);
+            flowInfo.setDescription("");
+            api.addFlow(flowInfo);
         }
     }
 
