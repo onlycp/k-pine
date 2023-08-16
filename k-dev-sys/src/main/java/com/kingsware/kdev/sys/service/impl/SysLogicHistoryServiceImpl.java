@@ -62,17 +62,16 @@ public class SysLogicHistoryServiceImpl extends BaseServiceImpl implements SysLo
 
     @Override
     public void rollback(SysLogicHistoryArgv argv) {
-        SysKdbFlowRet ret = sysKdbFlowService.get(argv.getFlowId());
-
         // 保存到kdb
         KdbApi api = (KdbApi) (DB.getDefault());
+        FlowInfo ret = api.get(argv.getFlowId());
+
         if (ret != null) {
             // 查询到FAAS
-            FlowInfo flowInfo = api.get(ret.getId());
             EditFlowInfo info = new EditFlowInfo();
             info.setContent(argv.getFlowJson());
-            info.setName(flowInfo.getName());
-            info.setFlowId(ret.getId());
+            info.setName(ret.getName());
+            info.setFlowId(argv.getFlowId());
             info.setDescription(ret.getDescription());
 
             api.editFlow(info);
