@@ -130,7 +130,17 @@ public class KdbFlowExecutor {
             }
             if (ret.getErrorCode() != 0) {
                 result.setType(KFlowConstant.RESULT_JSON);
-                result.setData(new ErrorResult(ret.getMessage() == null ? "流程处理失败" : ret.getMessage()));
+                if (StringUtils.isNotEmpty(ret.getStackTrace()) && ret.getStackTrace().contains("#@") && ret.getStackTrace().contains("@#")) {
+                    int startIndex = ret.getStackTrace().indexOf("#@") + 2;
+                    int endIndex = ret.getStackTrace().indexOf("@#");
+                    String businessMessage = ret.getStackTrace().substring(startIndex, endIndex);
+                    result.setData(new ErrorResult(businessMessage));
+
+                }
+                else {
+                    result.setData(new ErrorResult(ret.getMessage() == null ? "流程处理失败" : ret.getMessage()));
+                }
+
             } else if (StringUtils.isNotEmpty(ret.getResponseBody())) {
                 KFlowMessage message = FlowUtils.getHandlerName(ret.getResponseBody());
                 result = KResultHandlers.getInstance().getHandler(message.getHandlerName()).parser(message.getData(), context);

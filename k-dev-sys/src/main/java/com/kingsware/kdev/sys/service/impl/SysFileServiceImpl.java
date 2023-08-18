@@ -427,7 +427,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
     }
 
     private File getLocalFile(String path) {
-        String absFilePath = getBasePath() + path;
+        String absFilePath = getBasePath().endsWith("/") ? getBasePath() : getBasePath() + File.separator + path;
         return new File(absFilePath);
     }
 
