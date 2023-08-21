@@ -3,6 +3,7 @@ package com.kingsware.kdev.core.orm;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.kdb.KDataBase;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,6 +23,9 @@ public class DbContext {
     private final ConcurrentHashMap<String, DataBase> dataBaseConcurrentHashMap = new ConcurrentHashMap();
     /** 默认数据库操作 **/
     private DataBase defaultDataBase;
+    /** 数据源类型映射 **/
+
+
 
     /**
      * 默认构造类
@@ -49,6 +53,14 @@ public class DbContext {
             throw new RuntimeException(I18n.t("db.not-default-database", "当前无默认的数据库连接"));
         }
         return this.defaultDataBase;
+    }
+
+    /**
+     * 获取所有的数据库
+     * @return
+     */
+    public  ConcurrentHashMap<String, DataBase> dataBases() {
+        return dataBaseConcurrentHashMap;
     }
 
 

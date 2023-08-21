@@ -2,12 +2,11 @@ package com.kingsware.kdev.core.orm;
 
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.orm.expression.Expression;
-import com.kingsware.kdev.core.orm.kdb.KDataBase;
-import com.kingsware.kdev.core.orm.kdb.KdbApi;
-import com.kingsware.kdev.core.orm.kdb.KdbRet;
-import com.kingsware.kdev.core.orm.kdb.TransactionInfo;
+import com.kingsware.kdev.core.orm.kdb.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 简易数据库操作类
@@ -37,6 +36,19 @@ public class DB {
      */
     public static DataBase byName(String name) {
         return context.get(name);
+    }
+
+    public static DataBase getBySourceName(String sourceName) {
+        for (Map.Entry<String, DataBase> entry: context.dataBases().entrySet())  {
+            if (entry.getValue() instanceof KDataBase) {
+                KDataBase kDataBase = (KDataBase)entry.getValue();
+                KDBConnectConfig kdbConnectConfig = (KDBConnectConfig) kDataBase.getConfig();
+                if (kdbConnectConfig.getDataSource().equalsIgnoreCase(sourceName)) {
+                    return entry.getValue();
+                }
+            }
+        }
+        return null;
     }
 
     /**

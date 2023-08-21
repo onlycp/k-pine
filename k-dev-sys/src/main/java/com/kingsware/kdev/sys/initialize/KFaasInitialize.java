@@ -7,6 +7,7 @@ import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.kflow.define.FlowDefinition;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBConnectConfig;
+import com.kingsware.kdev.core.orm.DataBase;
 import com.kingsware.kdev.core.orm.DbContext;
 import com.kingsware.kdev.core.orm.kdb.*;
 import com.kingsware.kdev.core.util.*;
@@ -16,9 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * k-faas初始化
@@ -99,9 +98,37 @@ public class KFaasInitialize implements SystemInitialize {
 
                 }
             }
-            // 重新初始化baseFlow
-            //DB.kdbApi().refreshBaseFlow();
         }
+        // 获取faas上的所有数据源，以获取数据库类型
+        List<DataSourceInfo> allDataSources = DB.kdbApi().queryDataSource(new DataSourceQueryArgv());
+        for (DataSourceInfo dataSourceInfo: allDataSources) {
+            DataBase dataBase = DB.getBySourceName(dataSourceInfo.getSourceName());
+            if (dataBase != null) {
+                String tag = dataSourceInfo.getJdbcUrl().split(":")[1].trim();
+                String dbType = "";
+                if (tag.equalsIgnoreCase("mysql")) {
+                    dbType = "MySql";
+                } else if (tag.contains("postgres")) {
+                    dbType = "Postgresql";
+                } else if (tag.contains("h2")) {
+                    dbType = "H2";
+                } else if (tag.contains("dm")) {
+                    dbType = "DM";
+                } else if (tag.contains("oracle")) {
+                    dbType = "Oracle";
+                } else if (tag.contains("sqlserver")) {
+                    dbType = "SQLServer";
+                } else if (tag.contains("kingbase8")) {
+                    dbType = "Kingbase8";
+                } else if (tag.contains("base")) {
+                    dbType = "gbase";
+                } else {
+                    dbType = tag;
+                }
+                dataBase.getConfig().setInnerType(dbType);
+            }
+        }
+
 
     }
 

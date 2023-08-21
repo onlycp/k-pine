@@ -71,7 +71,7 @@ public class DynamicTask implements CommandLineRunner {
     private boolean shareCron;
 
     /**
-     * 是否运行分布式
+     * 是否异步执行
      **/
     @Value("${schedule.async-execute:true}")
     private boolean asyncExecute;
@@ -188,9 +188,7 @@ public class DynamicTask implements CommandLineRunner {
             }
             else {
                 for (SysTask sysTask: cronTasks) {
-                    executorService.submit(() -> {
-                       toTask(sysTask);
-                    });
+                    toTask(sysTask);
 
                 }
             }

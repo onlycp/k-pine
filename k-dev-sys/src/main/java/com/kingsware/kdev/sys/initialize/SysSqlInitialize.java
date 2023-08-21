@@ -8,6 +8,7 @@ import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.orm.kdb.EditFlowInfo;
 import com.kingsware.kdev.core.orm.kdb.FlowInfo;
+import com.kingsware.kdev.core.orm.kdb.KDBConnectConfig;
 import com.kingsware.kdev.core.orm.kdb.KdbFlowQueryArgv;
 import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.util.MD5Utils;
@@ -40,8 +41,8 @@ public class SysSqlInitialize implements SystemInitialize {
     @Value("${database.initDatasourcePath:.}")
     private String initDatasourcePath;
 
-    @Value("${database.sources.db.innerType:Mysql}")
-    private String initDbType;
+//    @Value("${database.sources.db.innerType:Mysql}")
+//    private String initDbType;
     @Override
     public void execute() {
 
@@ -123,8 +124,8 @@ public class SysSqlInitialize implements SystemInitialize {
 
     private List<ExecutionFile> getFileList(int maxVersion) {
         List<ExecutionFile> resultList = new ArrayList<>();
-        List<File> allFileList = new ArrayList<>();
         boolean isCustomInitSqlPath = Boolean.parseBoolean(SpringContext.getProperties("file.is-custom-init-sql-path", "false"));
+        String initDbType = DB.getDefault().getConfig().getInnerType();
         String path = ResourceUtils.CLASSPATH_URL_PREFIX + "initSql/" + initDbType + "/**";
         if (isCustomInitSqlPath) {
             // 在windows环境中，代码版运行./xx会找不到文件，需要改成.\xx
