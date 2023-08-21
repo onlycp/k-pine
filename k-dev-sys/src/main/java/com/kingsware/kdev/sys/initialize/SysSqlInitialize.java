@@ -197,6 +197,13 @@ public class SysSqlInitialize implements SystemInitialize {
                     }
                     log.error("sql执行失败: " + sql + ", error: " + e.getExceptionTrace(), e);
                     throw e;
+                } catch (RuntimeException e) {
+                    if (e.getMessage().toLowerCase().contains("duplicate")
+                            || e.getMessage().toLowerCase().contains("already exists")) {
+                        continue;
+                    }
+                    log.error("sql执行失败: " + sql + ", error: " + e.getMessage(), e);
+                    throw e;
                 }
                 long eachSqlEnd = System.currentTimeMillis();
                 log.info(String.format("SQL版本：%s，执行SQL: %s，用时：%sms", file.getVersion(), sql, (eachSqlEnd - eachSqlStart)));
