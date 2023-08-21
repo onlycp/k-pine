@@ -126,6 +126,7 @@ public class SysSqlInitialize implements SystemInitialize {
         List<ExecutionFile> resultList = new ArrayList<>();
         boolean isCustomInitSqlPath = Boolean.parseBoolean(SpringContext.getProperties("file.is-custom-init-sql-path", "false"));
         String initDbType = DB.getDefault().getConfig().getInnerType();
+
         String path = ResourceUtils.CLASSPATH_URL_PREFIX + "initSql/" + initDbType + "/**";
         if (isCustomInitSqlPath) {
             // 在windows环境中，代码版运行./xx会找不到文件，需要改成.\xx
@@ -133,7 +134,7 @@ public class SysSqlInitialize implements SystemInitialize {
             path = "file:" + initDatasourcePath + File.separator + "initSql" + File.separator + initDbType + "/**";
             log.info("[k-pine:SysSqlInitialize isCustomInitSqlPath]: true");
         }
-        log.info("[k-pine:SysSqlInitialize path]" + path);
+        log.info("数据库脚本准备检查，目录为:" + path);
         Resource[] resources = SpringContext.getResources(path);
 //        log.info("[k-pine:SysSqlInitialize resources]" + resources);
         if (resources != null) {
