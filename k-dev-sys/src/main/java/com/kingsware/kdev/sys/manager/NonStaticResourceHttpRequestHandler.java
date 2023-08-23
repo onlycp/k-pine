@@ -48,6 +48,7 @@ public class NonStaticResourceHttpRequestHandler extends ResourceHttpRequestHand
             try {
                 byte[] fileBytes = FileUtils.readFileToByteArray(file);
                 resource = new ByteArrayResource(fileBytes);
+                request.setAttribute("fileName", file.getName());
                 file.delete();
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -55,6 +56,8 @@ public class NonStaticResourceHttpRequestHandler extends ResourceHttpRequestHand
         } else {
             String path = (String) attrFile;
             Path filePath = Paths.get(path);
+            String fileName = filePath.getFileName().toString();
+            request.setAttribute("fileName", fileName);
             resource = new FileSystemResource(filePath);
         }
         return resource;
@@ -78,6 +81,9 @@ public class NonStaticResourceHttpRequestHandler extends ResourceHttpRequestHand
                 MediaType mediaType = this.getMediaType(request, resource);
                 if (mediaType == null) {
                     String paramFileName = request.getParameter("fileName");
+                    if (paramFileName == null) {
+                        paramFileName = (String) request.getAttribute("fileName");
+                    }
                     if (!StringUtils.isEmpty(paramFileName) && FileTypeChecker.isVideoFile(paramFileName)) {
                         mediaType = MediaType.parseMediaType("video/mp4");
                     }
