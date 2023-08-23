@@ -78,10 +78,10 @@ public class NonStaticResourceHttpRequestHandler extends ResourceHttpRequestHand
                 MediaType mediaType = this.getMediaType(request, resource);
                 if (mediaType == null) {
                     String paramFileName = request.getParameter("fileName");
-                    if (FileTypeChecker.isVideoFile(paramFileName)) {
+                    if (!StringUtils.isEmpty(paramFileName) && FileTypeChecker.isVideoFile(paramFileName)) {
                         mediaType = MediaType.parseMediaType("video/mp4");
                     }
-                    if (FileTypeChecker.isAudioFile(paramFileName)) {
+                    if (!StringUtils.isEmpty(paramFileName) && FileTypeChecker.isAudioFile(paramFileName)) {
                         mediaType = MediaType.parseMediaType("audio/mp4");
                     }
                 }
