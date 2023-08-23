@@ -1,5 +1,7 @@
 package com.kingsware.kdev.sys.manager;
 
+import com.kingsware.kdev.core.util.FileTypeChecker;
+import com.kingsware.kdev.core.util.StringUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -72,7 +74,17 @@ public class NonStaticResourceHttpRequestHandler extends ResourceHttpRequestHand
                 logger.trace("Resource not modified");
             } else {
                 this.prepareResponse(response);
+
                 MediaType mediaType = this.getMediaType(request, resource);
+                if (mediaType == null) {
+                    String paramFileName = request.getParameter("fileName");
+                    if (FileTypeChecker.isVideoFile(paramFileName)) {
+                        mediaType = MediaType.parseMediaType("video/mp4");
+                    }
+                    if (FileTypeChecker.isAudioFile(paramFileName)) {
+                        mediaType = MediaType.parseMediaType("audio/mp4");
+                    }
+                }
                 this.setHeaders(response, resource, mediaType);
                 ServletServerHttpResponse outputMessage = new ServletServerHttpResponse(response);
                 if (request.getHeader("Range") == null) {
