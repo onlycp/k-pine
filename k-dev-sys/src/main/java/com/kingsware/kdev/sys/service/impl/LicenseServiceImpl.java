@@ -36,7 +36,7 @@ public class LicenseServiceImpl implements LicenseService {
 
         LicenseRet ret = new LicenseRet();
         // 读取文件
-        License license = LicenseManager.getInstance().parseLicense();
+        License license = LicenseManager.getInstance().getLicenseData();
         ret.setStatus(LicenseManager.getInstance().getStatus());
         if (license != null) {
             ret.setCustomer(license.getCustomer());
@@ -64,8 +64,7 @@ public class LicenseServiceImpl implements LicenseService {
         if (LicenseManager.getInstance().isUniopsApp()) {
             return getVirtualLicense();
         }
-        License license = LicenseManager.getInstance().parseLicense(licenseActive.getLicense());
-        int status = LicenseManager.getInstance().getStatus(license);
+        int status = LicenseManager.getInstance().getStatus(licenseActive.getLicense());
         if ( status == -1) {
             throw BusinessException.serviceThrow(I18n.t("license.error.-1", "非法授权"));
         }
