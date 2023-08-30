@@ -30,49 +30,61 @@ public class LicenseDllInitialize implements SystemInitialize {
         String osArch = System.getProperty("os.arch").toLowerCase();
         String libName = "";
         String libFileName = "";
+        String targetFileName = "";
+        libName = "k-license";
         log.info("osName:{}, osArch:{}", osName, osArch);
         if (osName.toLowerCase().contains("mac")) {
+            targetFileName = "libk-license.dylib";
             if (osArch.contains("86") || osArch.contains("amd")) {
-                libName = "k-license";
                 libFileName = "libk-license.dylib";
-            }
-            else {
-                libName =  "k-license_arm";
+            } else {
+
                 libFileName = "libk-license_arm.dylib";
             }
-        }
-        else if (osName.toLowerCase().contains("linux")) {
-            if (osArch.contains("86") || osArch.contains("amd") ) {
-                libName = "k-license";
-                libFileName = "libk-license.so";
-            }
-            else {
-                libName =  "k-license_arm";
-                libFileName = "libk-license_arm.so";
-            }
-        }
-        else if (osName.toLowerCase().contains("window")) {
+        } else if (osName.toLowerCase().contains("linux")) {
+            targetFileName = "libk-license.so";
             if (osArch.contains("86") || osArch.contains("amd")) {
-                libName = "k-license_x86";
-                libFileName = "libk-license_x86.dll";
+                libFileName = "libk-license.so";
+            } else {
+                libFileName = "libk-license-arm64.so";
             }
-            else {
-                libName =  "k-license_arm";
+        } else if (osName.toLowerCase().contains("window")) {
+            targetFileName = "libk-license.dll";
+            if (osArch.contains("86") || osArch.contains("amd")) {
+                libFileName = "libk-license.dll";
+            } else {
                 libFileName = "libk-license_arm.dll";
             }
         }
         String path = ResourceUtils.CLASSPATH_URL_PREFIX + "lib/" + libFileName;
         try {
             Resource res = SpringContext.getResource(path);
-            new File("dll").mkdirs();
-            Files.write(new File("dll/" + libFileName).toPath(), StreamUtils.copyToByteArray(res.getInputStream()));
+            if (osName.contains("linux")) {
+                try {
+                    Files.write(new File("/usr/lib64/" + targetFileName).toPath(), StreamUtils.copyToByteArray(res.getInputStream()));
+                } catch (Exception e) {
+                    log.warn("动态库拷贝失败，请手动将动态库拷贝到/usr/lib64/目录");
+                }
+
+            } else if (osName.contains("mac")) {
+                new File("dll").mkdirs();
+                if (!new File("dll/" + targetFileName).exists()) {
+                    Files.write(new File("dll/" + targetFileName).toPath(), StreamUtils.copyToByteArray(res.getInputStream()));
+                }
+                System.load(new File("dll/" + targetFileName).getAbsolutePath());
+
+            } else if (osName.contains("window")) {
+                try {
+                    Files.write(new File("C:\\Windows\\System32\\" + targetFileName).toPath(), StreamUtils.copyToByteArray(res.getInputStream()));
+                } catch (Exception e) {
+                    log.warn("动态库拷贝失败，请手动将动态库拷贝到C:\\Windows\\System32\\/目录");
+                }
+            }
 
             // 加载动态库
-            System.load(new File("dll/" + libFileName).getAbsolutePath());
             KLicenseLibrary kLicenseLibrary = com.sun.jna.Native.load(libName, KLicenseLibrary.class);
             LicenseManager.getInstance().setkLicenseLibrary(kLicenseLibrary);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("当前找不到动态库", e);
         }
 
