@@ -2,6 +2,9 @@ package com.kingsware.kdev.core.cache.license;
 
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.exception.LicenseException;
+import com.kingsware.kdev.core.i18n.I18n;
+import com.kingsware.kdev.core.plugins.CdnPlugin;
 import com.kingsware.kdev.core.util.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,6 +25,7 @@ import java.util.*;
 @Slf4j
 public class LicenseManager {
     private static LicenseManager instance;
+    private static Map<String, LicenseValidate> licenseValidateMap = new HashMap<>();
 
     public void setkLicenseLibrary(KLicenseLibrary kLicenseLibrary) {
         this.kLicenseLibrary = kLicenseLibrary;
@@ -34,12 +38,19 @@ public class LicenseManager {
             synchronized (LicenseManager.class) {
                 if (instance == null) {
                     instance = new LicenseManager();
+                    instance.scanInterfaces();
                 }
             }
         }
         return instance;
     }
 
+    public void scanInterfaces() {
+        List<LicenseValidate> validates = SpringContext.getBeansOfType(LicenseValidate.class);
+        for (LicenseValidate validate: validates) {
+            licenseValidateMap.put(validate.key(), validate);
+        }
+    }
 
 
     /**
@@ -92,14 +103,34 @@ public class LicenseManager {
      * @return 获取状态
      */
     public int getStatus(String lic) {
-//        return 2;
-
         if (lic == null) {
             lic = "";
         }
         //  获取端口
         String port = SpringContext.getBootProperties("server.port", "0") ;
-        return this.kLicenseLibrary.ValidateLicense(lic, port);
+        int status = this.kLicenseLibrary.ValidateLicense(lic, port);
+        if (status != 2) {
+            return status;
+        }
+        List<LicenseOpt> opts = new ArrayList<>();
+        try {
+            License data = getLicenseData();
+            List<LicenseOpt> t = JsonUtil.toListBean(data.getOptions(), LicenseOpt.class);
+            if (t != null) {
+                opts = t;
+            }
+        }
+        catch (Exception ignored) {}
+        for (LicenseOpt opt: opts) {
+            if (licenseValidateMap.containsKey(opt.getKey())) {
+                LicenseValidate validate = licenseValidateMap.get(opt.getKey());
+                if (!validate.execute(opt.getData())) {
+                    throw new LicenseException(I18n.t("license.error.4", validate.errorMessage()));
+                }
+            }
+        }
+        return status;
+
     }
 
     /**
@@ -128,4 +159,6 @@ public class LicenseManager {
         }
         return null;
     }
+
+
 }

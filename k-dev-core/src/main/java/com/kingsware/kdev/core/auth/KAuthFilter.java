@@ -466,6 +466,7 @@ public class KAuthFilter implements Filter {
     }
 
     private void checkLicense() {
+
         int status = LicenseManager.getInstance().getStatus();
         if ( status == -1) {
             throw new LicenseException(I18n.t("license.error.-1", "非法授权"));

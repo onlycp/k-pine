@@ -22,5 +22,7 @@ public class LicenseRet {
     private Integer status = 0;
     /** mac **/
     private String mac;
+    /** 错误信息 **/
+    private String errorMessage;
 
 }

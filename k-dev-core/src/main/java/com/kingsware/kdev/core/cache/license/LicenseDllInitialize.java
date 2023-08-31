@@ -68,9 +68,7 @@ public class LicenseDllInitialize implements SystemInitialize {
 
             } else if (osName.contains("mac")) {
                 new File("dll").mkdirs();
-                if (!new File("dll/" + targetFileName).exists()) {
-                    Files.write(new File("dll/" + targetFileName).toPath(), StreamUtils.copyToByteArray(res.getInputStream()));
-                }
+                Files.write(new File("dll/" + targetFileName).toPath(), StreamUtils.copyToByteArray(res.getInputStream()));
                 System.load(new File("dll/" + targetFileName).getAbsolutePath());
 
             } else if (osName.contains("window")) {
