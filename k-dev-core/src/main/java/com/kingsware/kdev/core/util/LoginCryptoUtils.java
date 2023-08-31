@@ -14,4 +14,10 @@ public class LoginCryptoUtils {
         return ret.getResponseBody();
     }
 
+    public static String loginEncrypt(String data) throws Exception {
+        String script = String.format("kutils.sm2Encode('%s', '%s', '%s');", data, privateKey, publicKey);
+        KdbRet<String> ret = DB.kdbApi().executeScript(script);
+        return ret.getResponseBody();
+    }
+
 }
