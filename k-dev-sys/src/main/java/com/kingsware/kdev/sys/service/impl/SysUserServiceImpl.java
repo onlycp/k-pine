@@ -427,7 +427,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             if (model == null) {
                 throw BusinessException.serviceThrow("当前登录用户不存在！");
             }
-            if (useUsernamePassword) {
+            if (useUsernamePassword && KClientContext.getContext().isValidatePassFlag()) {
                 String decryptPassword = decodeBase64(password);
                 String loginBySM2 = SpringContext.getProperties("app.loginBySM2", PropertiesConstant.FALSE);
                 if (PropertiesConstant.TRUE.equals(loginBySM2)) {
