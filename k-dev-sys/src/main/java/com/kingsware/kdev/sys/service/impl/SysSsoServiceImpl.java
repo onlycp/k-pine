@@ -58,6 +58,7 @@ public class SysSsoServiceImpl implements SysSsoService {
             // 调用登录接口
             if (KClientContext.getContext() != null) {
                 KClientContext.getContext().setValidateCodeFlag(false);
+                KClientContext.getContext().setValidatePassFlag(false);
             }
             SysUserLoginRet ret = sysUserService.login(JsonUtil.beanToMap(loginArgv));
             log.info("自动登录结果:"  + JsonUtil.toJson(ret));
