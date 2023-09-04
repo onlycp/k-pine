@@ -344,7 +344,7 @@ public class KAuthFilter implements Filter {
                         operateLog.setRequestMethod(KClientContext.getContext().getRequest().getMethod());
                         operateLog.setAppId(KClientContext.getContext().getRequest().getHeader("appId"));
                         if (wrapperResponse != null) {
-                            if (response.getContentType().contains("json")) {
+                            if (StringUtils.isNotEmpty(response.getContentType()) && response.getContentType().contains("json")) {
                                 String rBody = ServletUtil.getResponseBody(wrapperResponse);
                                 rBody = changeBodyJson(rBody);
                                 operateLog.setResponseBody(StringUtils.retrench(rBody,100));
@@ -466,6 +466,7 @@ public class KAuthFilter implements Filter {
     }
 
     private void checkLicense() {
+
         int status = LicenseManager.getInstance().getStatus();
         if ( status == -1) {
             throw new LicenseException(I18n.t("license.error.-1", "非法授权"));
