@@ -7,13 +7,14 @@ drop table if exists sys_view_model_flow;
 
 CREATE TABLE if not exists wf_cc_inst
 (
-    inst_Id     varchar(32)     DEFAULT NULL COMMENT '流程实例ID',
-    actor_Id    varchar(50)     DEFAULT NULL COMMENT '参与者ID',
+    inst_Id     varchar(32)     NOT NULL COMMENT '流程实例ID',
+    actor_Id    varchar(50)     NOT NULL COMMENT '参与者ID',
     creator     varchar(50)     DEFAULT NULL COMMENT '发起人',
     create_Time varchar(50)     DEFAULT NULL COMMENT '抄送时间',
     finish_Time varchar(50)     DEFAULT NULL COMMENT '完成时间',
-    status      tinyint(1) NULL DEFAULT NULL COMMENT '状态'
-);
+    status      tinyint(1) NULL DEFAULT NULL COMMENT '状态',
+    PRIMARY KEY (inst_Id, actor_Id)
+    );
 
 
 CREATE TABLE if not exists  wf_hist_inst
@@ -30,7 +31,7 @@ CREATE TABLE if not exists  wf_hist_inst
     inst_No     varchar(50)      DEFAULT NULL COMMENT '流程实例编号',
     variable    text COMMENT '附属变量json存储',
     PRIMARY KEY (id) USING BTREE
-);
+    );
 
 
 CREATE TABLE if not exists wf_hist_task
@@ -50,14 +51,15 @@ CREATE TABLE if not exists wf_hist_task
     parent_Task_Id varchar(32)       DEFAULT NULL COMMENT '父任务ID',
     variable       text COMMENT '附属变量json存储',
     PRIMARY KEY (id) USING BTREE
-);
+    );
 
 
 CREATE TABLE if not exists wf_hist_task_actor
 (
     task_Id  varchar(32)  NOT NULL COMMENT '任务ID',
-    actor_Id varchar(500) NOT NULL COMMENT '参与者ID'
-);
+    actor_Id varchar(500) NOT NULL COMMENT '参与者ID',
+    PRIMARY KEY (task_Id, actor_Id)
+    );
 
 
 CREATE TABLE if not exists wf_inst
@@ -76,7 +78,7 @@ CREATE TABLE if not exists wf_inst
     variable         text COMMENT '附属变量json存储',
     version          int(3)      NULL DEFAULT NULL COMMENT '版本',
     PRIMARY KEY (id) USING BTREE
-);
+    );
 
 
 CREATE TABLE if not exists wf_process
@@ -92,7 +94,7 @@ CREATE TABLE if not exists wf_process
     create_Time  varchar(50)      DEFAULT NULL COMMENT '创建时间',
     creator      varchar(50)      DEFAULT NULL COMMENT '创建人',
     PRIMARY KEY (id) USING BTREE
-);
+    );
 
 
 CREATE TABLE if not exists wf_surrogate
@@ -106,7 +108,7 @@ CREATE TABLE if not exists wf_surrogate
     edate        varchar(64)      DEFAULT NULL COMMENT '结束时间',
     state        tinyint(1)  NULL DEFAULT NULL COMMENT '状态',
     PRIMARY KEY (id) USING BTREE
-);
+    );
 
 
 CREATE TABLE if not exists wf_task
@@ -126,12 +128,13 @@ CREATE TABLE if not exists wf_task
     variable       text COMMENT '附属变量json存储',
     version        tinyint(1)   NULL DEFAULT NULL COMMENT '版本',
     PRIMARY KEY (id) USING BTREE
-);
+    );
 
 
 CREATE TABLE if not exists wf_task_actor
 (
     task_Id  varchar(32)  NOT NULL COMMENT '任务ID',
-    actor_Id varchar(500) NOT NULL COMMENT '参与者ID'
-);
+    actor_Id varchar(500) NOT NULL COMMENT '参与者ID',
+    PRIMARY KEY (task_Id, actor_Id)
+    );
 

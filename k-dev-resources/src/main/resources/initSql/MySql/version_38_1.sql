@@ -1,7 +1,7 @@
 CREATE TABLE dev_page_template (
     id varchar(36)  NOT NULL COMMENT '主键',
-    when_created timestamp COMMENT '创建时间',
-    when_modified timestamp COMMENT '修改时间',
+    when_created varchar(30) COMMENT '创建时间',
+    when_modified varchar(30) COMMENT '修改时间',
     who_created varchar(36)  COMMENT '创建人',
     who_modified varchar(36)  COMMENT '修改人',
     deleted int(4) DEFAULT '0' COMMENT '删除标识',
@@ -12,7 +12,7 @@ CREATE TABLE dev_page_template (
     page_json longtext  COMMENT '页面数据化JSON',
     tags varchar(255)  COMMENT '标签',
     module_id varchar(36)  COMMENT '关联模块',
-    PRIMARY KEY (id) 
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE dev_table  (

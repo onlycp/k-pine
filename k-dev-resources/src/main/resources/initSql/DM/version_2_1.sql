@@ -48,19 +48,6 @@ create table DEV_APPLICATION
     APP_PUBLIC_TYPE NUMBER    default 0
 );
 
-create table DEV_APPLICATION_VERSION_HISTOR
-(
-    ID           VARCHAR2(36 char) not null
-        constraint IND_E4BBE32D6CA201E9
-        primary key,
-    WHEN_CREATED VARCHAR2(20 char),
-    WHO_CREATED  VARCHAR2(36 char),
-    APP_ID       VARCHAR2(36 char),
-    VERSION      VARCHAR2(50 char),
-    FILE_NAME    VARCHAR2(255 char),
-    NOTE         VARCHAR2(255 char),
-    EXPORT_DATA  CLOB
-);
 create table DEV_DOCUMENT
 (
     ID           VARCHAR2(255 char) not null,

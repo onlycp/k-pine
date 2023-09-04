@@ -14,3 +14,12 @@ INSERT INTO sys_dict_item (id, name, group_name, sys_dict_id, code, value, order
 INSERT INTO sys_dict_item (id, name, group_name, sys_dict_id, code, value, order_num, note, who_created, when_created, who_modified, when_modified, app_id) VALUES('98dba411055b460c913ab5454a6718c9', '图片', NULL, '27906b13c5c0484396e284a4368b24b3', 'sys_config_value_type', '1', 2, NULL, '', '2022-01-17 17:37:07', '', '2022-01-17 17:37:07', NULL);
 INSERT INTO sys_dict_item (id, name, group_name, sys_dict_id, code, value, order_num, note, who_created, when_created, who_modified, when_modified, app_id) VALUES('a988ca46b6b445fc8f36d8b9d1243cb8', '颜色', NULL, '27906b13c5c0484396e284a4368b24b3', 'sys_config_value_type', '2', 3, NULL, '', '2022-01-17 17:37:15', '', '2022-01-17 17:37:15', NULL);
 
+INSERT INTO sys_user (id, app_id, avatar, deleted, email, mobile, note, password, post, real_name, sex, status, when_created, when_modified, who_created, who_modified, sys_unit_id, username) VALUES('8116f0bc8222413fb72de98a32960b1a', NULL, NULL, 0, NULL, NULL, NULL, 'MTIzNDU2', NULL, '开发人员', 1, 1, '2022-09-28 14:45:53', '2022-09-28 14:45:53', '056fb0eeb9a44cb0953534b4c0ca01fa', '056fb0eeb9a44cb0953534b4c0ca01fa', NULL, 'dev');
+
+INSERT INTO sys_role
+(id, name, code, note, status, who_created, when_created, who_modified, when_modified, app_id)
+VALUES('3fc43c9c69f44144bd032d9451ba328b', '团队成员', 'team_member', '青松开发者平台-团队成员', 1, '', '2022-03-10 06:13:01', '056fb0eeb9a44cb0953534b4c0ca01fa', '2022-03-29 11:43:59', NULL);
+INSERT INTO sys_role
+(id, name, code, note, status, who_created, when_created, who_modified, when_modified, app_id)
+VALUES('4a30f4d346074b4ba8363944f004c1d9', '团队负责人', 'team_owner', '青松开发者平台-团队负责人', 1, '', '2022-03-10 06:12:31', '056fb0eeb9a44cb0953534b4c0ca01fa', '2022-03-29 11:44:06', NULL);
+INSERT INTO sys_user_role (id, app_id, when_created, who_created, sys_role_id, sys_user_id) VALUES('8d641b3aded845feae88aef3d7e32e33', NULL, '2022-09-28 14:45:53', '056fb0eeb9a44cb0953534b4c0ca01fa', '4a30f4d346074b4ba8363944f004c1d9', '8116f0bc8222413fb72de98a32960b1a');
