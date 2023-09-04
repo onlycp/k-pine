@@ -3,6 +3,7 @@ package com.kingsware.kdev.sys.service.impl;
 import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.exception.LicenseException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.cache.license.License;
@@ -36,16 +37,24 @@ public class LicenseServiceImpl implements LicenseService {
 
         LicenseRet ret = new LicenseRet();
         // 读取文件
-        License license = LicenseManager.getInstance().parseLicense();
-        ret.setStatus(LicenseManager.getInstance().getStatus());
-        if (license != null) {
-            ret.setCustomer(license.getCustomer());
-            ret.setValidDate(license.getValidDate());
-            ret.setInvalidDate(license.getInvalidDate());
+        try {
+            License license = LicenseManager.getInstance().getLicenseData();
+            ret.setStatus(LicenseManager.getInstance().getStatus());
+            if (license != null) {
+                ret.setCustomer(license.getCustomer());
+                ret.setValidDate(license.getValidDate());
+                ret.setInvalidDate(license.getInvalidDate());
+            }
+            if (ret.getStatus() != 2 && ret.getStatus() != 2) {
+                ret.setMac(LicenseManager.getInstance().getMac());
+            }
         }
-        if (ret.getStatus() != 2 && ret.getStatus() != 2) {
+        catch (LicenseException e) {
+            ret.setStatus(4);
             ret.setMac(LicenseManager.getInstance().getMac());
+            ret.setErrorMessage(e.getMessage());
         }
+
         return ret;
     }
 
@@ -64,8 +73,7 @@ public class LicenseServiceImpl implements LicenseService {
         if (LicenseManager.getInstance().isUniopsApp()) {
             return getVirtualLicense();
         }
-        License license = LicenseManager.getInstance().parseLicense(licenseActive.getLicense());
-        int status = LicenseManager.getInstance().getStatus(license);
+        int status = LicenseManager.getInstance().getStatus(licenseActive.getLicense());
         if ( status == -1) {
             throw BusinessException.serviceThrow(I18n.t("license.error.-1", "非法授权"));
         }
