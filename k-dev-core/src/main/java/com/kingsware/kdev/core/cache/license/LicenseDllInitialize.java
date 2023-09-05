@@ -39,7 +39,7 @@ public class LicenseDllInitialize implements SystemInitialize {
                 libFileName = "libk-license.dylib";
             } else {
 
-                libFileName = "libk-license_arm.dylib";
+                libFileName = "libk-license-arm64.dylib";
             }
         } else if (osName.toLowerCase().contains("linux")) {
             targetFileName = "libk-license.so";
@@ -53,7 +53,7 @@ public class LicenseDllInitialize implements SystemInitialize {
             if (osArch.contains("86") || osArch.contains("amd")) {
                 libFileName = "libk-license.dll";
             } else {
-                libFileName = "libk-license_arm.dll";
+                libFileName = "libk-license-arm.dll";
             }
         }
         String path = ResourceUtils.CLASSPATH_URL_PREFIX + "lib/" + libFileName;
@@ -72,11 +72,9 @@ public class LicenseDllInitialize implements SystemInitialize {
                 System.load(new File("dll/" + targetFileName).getAbsolutePath());
 
             } else if (osName.contains("window")) {
-                try {
-                    Files.write(new File("C:\\Windows\\System32\\" + targetFileName).toPath(), StreamUtils.copyToByteArray(res.getInputStream()));
-                } catch (Exception e) {
-                    log.warn("动态库拷贝失败，请手动将动态库拷贝到C:\\Windows\\System32\\/目录");
-                }
+                new File("dll").mkdirs();
+                Files.write(new File("dll/" + targetFileName).toPath(), StreamUtils.copyToByteArray(res.getInputStream()));
+                System.load(new File("dll/" + targetFileName).getAbsolutePath());
             }
 
             // 加载动态库
