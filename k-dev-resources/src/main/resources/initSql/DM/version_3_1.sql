@@ -228,3 +228,13 @@ INSERT INTO SYS_ROLE_MENU (ID, SYS_MENU_ID, SYS_ROLE_ID, WHO_CREATED, WHEN_CREAT
 INSERT INTO SYS_ROLE_MENU (ID, SYS_MENU_ID, SYS_ROLE_ID, WHO_CREATED, WHEN_CREATED, APP_ID) VALUES ('eea8f8b75f6c47ee98f70170c185ebb5', 'c2348bbf343a47b5852f12ee32869b13', '10d26189026a4dba86a8e63a4c717ed6', '056fb0eeb9a44cb0953534b4c0ca01fa', '2022-09-01 09:41:45', null);
 INSERT INTO SYS_USER (ID, USERNAME, PASSWORD, REAL_NAME, MOBILE, EMAIL, SEX, SYS_UNIT_ID, POST, STATUS, NOTE, WHO_CREATED, WHEN_CREATED, WHO_MODIFIED, WHEN_MODIFIED, DELETED, AVATAR, APP_ID) VALUES ('056fb0eeb9a44cb0953534b4c0ca01fa', 'admin', 'MTIzNDU2', '超级管理员', null, null, 1, null, null, 1, null, null, '2021-12-29 16:36:46', '056fb0eeb9a44cb0953534b4c0ca01fa', '2022-04-01 08:58:32', 0, 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif', null);
 INSERT INTO SYS_USER_ROLE (ID, SYS_USER_ID, SYS_ROLE_ID, WHO_CREATED, WHEN_CREATED, APP_ID) VALUES ('b5f79a7cc794423e843a2b1fd9a27007', '056fb0eeb9a44cb0953534b4c0ca01fa', '10d26189026a4dba86a8e63a4c717ed6', ' ', '2022-03-10 06:31:39', null);
+
+INSERT INTO sys_user (id, app_id, avatar, deleted, email, mobile, note, password, post, real_name, sex, status, when_created, when_modified, who_created, who_modified, sys_unit_id, username) VALUES('8116f0bc8222413fb72de98a32960b1a', NULL, NULL, 0, NULL, NULL, NULL, 'MTIzNDU2', NULL, '开发人员', 1, 1, '2022-09-28 14:45:53', '2022-09-28 14:45:53', '056fb0eeb9a44cb0953534b4c0ca01fa', '056fb0eeb9a44cb0953534b4c0ca01fa', NULL, 'dev');
+
+INSERT INTO sys_role
+(id, name, code, note, status, who_created, when_created, who_modified, when_modified, app_id)
+VALUES('3fc43c9c69f44144bd032d9451ba328b', '团队成员', 'team_member', '青松开发者平台-团队成员', 1, '', '2022-03-10 06:13:01', '056fb0eeb9a44cb0953534b4c0ca01fa', '2022-03-29 11:43:59', NULL);
+INSERT INTO sys_role
+(id, name, code, note, status, who_created, when_created, who_modified, when_modified, app_id)
+VALUES('4a30f4d346074b4ba8363944f004c1d9', '团队负责人', 'team_owner', '青松开发者平台-团队负责人', 1, '', '2022-03-10 06:12:31', '056fb0eeb9a44cb0953534b4c0ca01fa', '2022-03-29 11:44:06', NULL);
+INSERT INTO sys_user_role (id, app_id, when_created, who_created, sys_role_id, sys_user_id) VALUES('8d641b3aded845feae88aef3d7e32e33', NULL, '2022-09-28 14:45:53', '056fb0eeb9a44cb0953534b4c0ca01fa', '4a30f4d346074b4ba8363944f004c1d9', '8116f0bc8222413fb72de98a32960b1a');

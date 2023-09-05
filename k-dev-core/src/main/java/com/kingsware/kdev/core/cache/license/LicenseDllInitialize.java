@@ -53,7 +53,7 @@ public class LicenseDllInitialize implements SystemInitialize {
             if (osArch.contains("86") || osArch.contains("amd")) {
                 libFileName = "libk-license.dll";
             } else {
-                libFileName = "libk-license-arm.dll";
+                libFileName = "libk-license-arm64.dll";
             }
         }
         String path = ResourceUtils.CLASSPATH_URL_PREFIX + "lib/" + libFileName;

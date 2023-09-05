@@ -5,7 +5,7 @@ CREATE TABLE sys_data_change(
                                 `table_name` VARCHAR(255)    COMMENT '表名' ,
                                 `object_name` VARCHAR(255)    COMMENT '对象名称' ,
                                 `operator` VARCHAR(255)    COMMENT '操作人员' ,
-                                `oper_time` VARCHAR(255)    COMMENT '操作时间' ,
+                                `oper_type` VARCHAR(255)    COMMENT '操作类型' ,
                                 `oper_time` VARCHAR(255)    COMMENT '操作时间' ,
                                 `content` VARCHAR(255)    COMMENT '变更内容' ,
                                 PRIMARY KEY (id)

@@ -7,9 +7,9 @@ CREATE TABLE if not exists dev_plugin_api (
                                   `notes` text COLLATE utf8mb4_bin COMMENT '描述',
                                   `order_num` varchar(10) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '位置',
                                   `who_created` varchar(36) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建人',
-                                  `when_created` varchar(20) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建时间',
+                                  `when_created` varchar(30) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建时间',
                                   `who_modified` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '修改人',
-                                  `when_modified` varchar(20) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '修改时间',
+                                  `when_modified` varchar(30) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '修改时间',
                                   PRIMARY KEY (`id`)
 ) COMMENT='FAAS接口组';
 
@@ -20,9 +20,9 @@ CREATE TABLE if not exists  dev_plugin_group (
                                     `notes` text COLLATE utf8mb4_bin COMMENT '描述',
                                     `order_num` int(11) DEFAULT NULL COMMENT '排序',
                                     `who_created` varchar(36) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建人',
-                                    `when_created` varchar(20) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建时间',
+                                    `when_created` varchar(30) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建时间',
                                     `who_modified` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '修改人',
-                                    `when_modified` varchar(20) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '修改时间',
+                                    `when_modified` varchar(30) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '修改时间',
                                     PRIMARY KEY (`id`)
 );
 
@@ -38,9 +38,9 @@ CREATE TABLE if not exists `dev_plugin_operation` (
                                         `error_resp` text COLLATE utf8mb4_bin COMMENT '失败示例',
                                         `in_params` text COLLATE utf8mb4_bin COMMENT '请求参数 ',
                                         `who_created` varchar(36) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建人',
-                                        `when_created` varchar(20) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建时间',
+                                        `when_created` varchar(30) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建时间',
                                         `who_modified` varchar(36) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '修改人',
-                                        `when_modified` varchar(20) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '修改时间',
+                                        `when_modified` varchar(30) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '修改时间',
                                         `order_num` int(8) DEFAULT '0' COMMENT '序号',
                                         PRIMARY KEY (`id`)
 ) ;
