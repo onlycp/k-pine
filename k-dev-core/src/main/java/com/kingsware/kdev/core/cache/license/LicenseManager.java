@@ -139,6 +139,9 @@ public class LicenseManager {
      * @return 获取状态
      */
     public int getStatus() {
+        if(isUniopsApp()) {
+            return 2;
+        }
         loadLicense();
         return this.getStatus(this.license);
     }
