@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -57,7 +58,15 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
     // @KCache(onlyForProd = true)
     public DevPageRet getByPath(String path) {
         log.info("请求页面信息:{}", path );
-        return DB.findOne(DevPageRet.class, " select * from dev_page where (path = ? or id = ?) and deleted=0 ", path, path);
+
+        SqlWrapper wrapper = new SqlWrapper();
+        Object[] params = new Object[]{path, path};
+        List<DevPageRet> list = DB.findList(DevPageRet.class, " select * from dev_page where (path = ? or id = ?) and deleted=0 ", params);
+//        return DB.findOne(DevPageRet.class, " select * from dev_page where (path = ? or id = ?) and deleted=0 ", path, path);
+        if (list == null || list.isEmpty()) {
+            throw BusinessException.serviceThrow("找不到页面");
+        }
+        return list.get(0);
     }
 
     @Override
