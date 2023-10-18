@@ -183,7 +183,6 @@ CREATE TABLE IF NOT EXISTS sys_hint_select (
 
 -- sys_logic_history
 ALTER TABLE  sys_logic_history add new_flow_json CLOB null;
-ALTER TABLE  sys_logic_flow add new_flow_json CLOB null;
 
 -- sys_logic_template
 ALTER TABLE sys_logic_template add new_flow_json CLOB null;
