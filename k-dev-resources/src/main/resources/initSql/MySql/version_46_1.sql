@@ -1,0 +1,1 @@
+ALTER TABLE sys_online_user MODIFY COLUMN login_token TEXT;
