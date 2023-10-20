@@ -57,7 +57,15 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
     // @KCache(onlyForProd = true)
     public DevPageRet getByPath(String path) {
         log.info("请求页面信息:{}", path );
-        return DB.findOne(DevPageRet.class, " select * from dev_page where (path = ? or id = ?) and deleted=0 ", path, path);
+        DevPageRet page = DB.findOne(DevPageRet.class, " select * from dev_page where (path = ? or id = ?) and deleted=0 ", path, path);
+        if (page != null) {
+            return page;
+        }
+        // 通过菜单去读取
+        return DB.findOne(DevPageRet.class, " select dp.* from dev_page dp left join sys_menu sm on (dp.id = sm.page_id and sm.menu_type='C' and sm.status=1) where sm.full_path=? and deleted=0 ", path);
+
+
+
     }
 
     @Override
