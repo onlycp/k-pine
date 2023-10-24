@@ -32,6 +32,7 @@ public class FromWebsocketConsumer implements KmqConsumer {
             if ("faasDebug".equals(wm2MqMessage.getWmMessage().getTopic())) {
                 TcpClientContext.getInstance().write(JsonUtil.toJson(wm2MqMessage.getWmMessage()));
             }
+
         }
 
     }

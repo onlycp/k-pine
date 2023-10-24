@@ -3,12 +3,11 @@ package com.kingsware.kdev.sys.mq;
 import com.kingsware.kdev.core.bean.NoticeMessage;
 import com.kingsware.kdev.core.kmq.KmqConsumer;
 import com.kingsware.kdev.core.kmq.KmqMessageCenter;
-import com.kingsware.kdev.core.model.SysLoginLog;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.StringUtils;
-import com.kingsware.kdev.sys.model.SysNoticeRecord;
+import com.kingsware.kdev.core.model.SysNoticeRecord;
 import com.kingsware.kdev.sys.model.SysUser;
 import lombok.extern.slf4j.Slf4j;
 

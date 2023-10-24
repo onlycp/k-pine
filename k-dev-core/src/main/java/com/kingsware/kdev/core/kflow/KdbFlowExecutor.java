@@ -8,6 +8,7 @@ import com.kingsware.kdev.core.kflow.bean.ErrorResult;
 import com.kingsware.kdev.core.kflow.bean.KFlowMessage;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.kflow.handler.KResultHandlers;
+import com.kingsware.kdev.core.kflow.tcp.TcpClientContext;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.orm.exception.TransactionException;
@@ -58,12 +59,28 @@ public class KdbFlowExecutor {
         String statusMessage = "失败";
         KdbFlowResult result = new KdbFlowResult();
         boolean executeResult = true;
+        // 生成会话id
+        String sessionId = null;
+        String sessionArgv = null;
+        // 只有是网页请求发起的才生成
+        if (KClientContext.getContext() != null && StringUtils.isNotEmpty(KClientContext.getContext().getToken())) {
+            String windowId = params.getOrDefault("_logWindowId", "system").toString();
+            String token = KClientContext.getContext().getToken();
+            sessionArgv = token + ";" + windowId;
+            sessionId = StringUtils.getUUID();
+        }
         // 流程参数
         KdbArgv argv = new KdbArgv();
         try {
 
             // 设置流程id
             argv.setFlowID(flowId);
+            // 设置会话id
+            if (StringUtils.isNotEmpty(sessionId)) {
+                argv.setSessionID(sessionId);
+                TcpClientContext.getInstance().putSession(sessionId, sessionArgv);
+            }
+
             // 调试参数
             argv.setDebugger(debugger);
             String saas = SpringContext.getProperties("app.is-saas", "false");
@@ -111,6 +128,7 @@ public class KdbFlowExecutor {
                 TransactionManager.getInstance().begin(60, null, flowId);
                 argv.setTransactionUuid(TransactionManager.getInstance().getTransactionCache().getId());
             }
+
             // 执行流程
             KdbRet<String> ret = DB.kdbApi().executeFlow(argv, debug, sync);
 
@@ -164,6 +182,12 @@ public class KdbFlowExecutor {
             result.setLog(ormDbException.getKlog());
             result.setExceptionStack(ormDbException.getExceptionTrace());
             return result;
+        }
+        finally {
+            if (StringUtils.isNotEmpty(sessionId)) {
+                TcpClientContext.getInstance().removeSession(sessionId);
+            }
+
         }
     }
 

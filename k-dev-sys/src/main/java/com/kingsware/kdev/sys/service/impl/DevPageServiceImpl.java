@@ -46,6 +46,9 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
     @Value("${amis.version:2.4.1}")
     private String amisVersion;
 
+    @Value("${app.menu.search-order:menu}")
+    private String menuSearchOrder;
+
     @Override
     public DevPageRet get(String id) {
         // 查询model
@@ -57,21 +60,40 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
     @Override
     // @KCache(onlyForProd = true)
     public DevPageRet getByPath(String path) {
-        log.info("请求页面信息:{}", path );
-        List<DevPageRet> pages =  DB.findList(DevPageRet.class, " select dp.* from dev_page dp left join sys_menu sm on (dp.id = sm.page_id and sm.menu_type='C' and sm.status=1) where sm.full_path=? and deleted=0 ", path);
+        if ("menu".equalsIgnoreCase(menuSearchOrder)) {
+            log.info("请求页面信息:{}", path );
+            List<DevPageRet> pages =  DB.findList(DevPageRet.class, " select dp.* from dev_page dp left join sys_menu sm on (dp.id = sm.page_id and sm.menu_type='C' and sm.status=1) where sm.full_path=? and deleted=0 ", path);
 
 
-        if (!pages.isEmpty()) {
-            return pages.get(0);
-        }
-        // 通过菜单去读取
-        pages = DB.findList(DevPageRet.class, " select * from dev_page where (path = ? or id = ?) and deleted=0 ", path, path);
-        if (!pages.isEmpty()) {
-            return pages.get(0);
+            if (!pages.isEmpty()) {
+                return pages.get(0);
+            }
+            // 通过菜单去读取
+            pages = DB.findList(DevPageRet.class, " select * from dev_page where (path = ? or id = ?) and deleted=0 ", path, path);
+            if (!pages.isEmpty()) {
+                return pages.get(0);
+            }
+            else {
+                throw BusinessException.serviceThrow("找不到页面");
+            }
         }
         else {
-            throw BusinessException.serviceThrow("找不到页面");
+            log.info("请求页面信息:{}", path );
+            List<DevPageRet> pages =  DB.findList(DevPageRet.class, " select * from dev_page where (path = ? or id = ?) and deleted=0 ", path, path);
+
+            if (!pages.isEmpty()) {
+                return pages.get(0);
+            }
+            // 通过菜单去读取
+            pages =  DB.findList(DevPageRet.class, " select dp.* from dev_page dp left join sys_menu sm on (dp.id = sm.page_id and sm.menu_type='C' and sm.status=1) where sm.full_path=? and deleted=0 ", path);
+            if (!pages.isEmpty()) {
+                return pages.get(0);
+            }
+            else {
+                throw BusinessException.serviceThrow("找不到页面");
+            }
         }
+
 
 
 

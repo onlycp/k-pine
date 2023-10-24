@@ -89,7 +89,23 @@ public class KAuthFilter implements Filter {
     @Value("${app.mode.dev:false}")
     private boolean modeDev;
 
+    @Value("#{'${app.ignore.urls:websocket;/eiac;/sys-tool-box}'.split(';')}")
+    private List<String> ignoreUrls;
 
+
+    /**
+     * 判断url是否包括配置的url标识
+     * @param url url
+     * @return  是否
+     */
+    private boolean containUrl(String url) {
+        for (String item: ignoreUrls) {
+            if (url.contains(item)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     /**
@@ -106,7 +122,8 @@ public class KAuthFilter implements Filter {
         // 获取请求路径
         String url = request.getRequestURI();
 //        log.info("上下文:{},路径:{} -00", request.getContextPath(), request.getRequestURI()  );
-        if (url.contains("/sys-tool-box")) {
+        if (containUrl(url) ) {
+            initContext(request, response);
             filterChain.doFilter(request, response);
             return;
         }
@@ -116,11 +133,7 @@ public class KAuthFilter implements Filter {
             filterChain.doFilter(request, response);
             return;
         }
-        if (url.contains("websocket") || url.contains("eiac") ) {
-            initContext(request, response);
-            filterChain.doFilter(request, response);
-            return;
-        }
+
         String requestBody = "{}";
 
         long tt0 = System.currentTimeMillis();;
@@ -550,6 +563,11 @@ public class KAuthFilter implements Filter {
         clientInfo.setRequest(request);
         clientInfo.setResponse(response);
         clientInfo.setUrl(request.getRequestURI());
+        // 获取用户信息
+        BaseUserInfo userInfo = TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret());
+        if (userInfo != null) {
+            clientInfo.setUserInfo(userInfo);
+        }
         // 写到线程变量
         KClientContext.setContext(clientInfo);
     }

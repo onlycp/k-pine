@@ -5,6 +5,7 @@ import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.constants.Version;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
@@ -101,6 +102,9 @@ public class SysFileController extends BaseController {
     @ResponseBody
     @ApiIgnore
     public BaseRet<List<SysFileRet>> upload(@RequestParam("files") MultipartFile[] files, @PathVariable String fileFrom, @PathVariable Integer saveType) {
+        if (LicenseManager.getInstance().isUniopsApp()) {
+            saveType = 1;
+        }
         return BaseRet.success(sysFileService.upload(files, fileFrom, saveType));
     }
 
@@ -118,6 +122,9 @@ public class SysFileController extends BaseController {
     public BaseRet<List<SysFileRet>> uploadFile(@RequestParam("files") MultipartFile[] files, String fileFrom, Integer saveType) {
 //        fileFrom格式要求：aaa/bbb 前后无斜扛
         if (saveType == null) {
+            saveType = 1;
+        }
+        if (LicenseManager.getInstance().isUniopsApp()) {
             saveType = 1;
         }
         return BaseRet.success(sysFileService.upload(files, fileFrom, saveType));
