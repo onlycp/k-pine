@@ -85,7 +85,7 @@ public class LicenseManager {
      * @return 是/否
      */
     public boolean isUniopsApp() {
-        return ClassUtils.isClassExists("com.kingsware.kdev.uniops.service.impl.UniOpsServiceImpl");
+        return ClassUtils.isClassExists("com.kingsware.kdev.uniops.service.impl.UniOpsServiceImpl") ;
     }
 
 
@@ -161,6 +161,18 @@ public class LicenseManager {
             return ret;
         }
         return null;
+    }
+
+    public static void main(String[] argv) {
+        Date validDate = DateUtils.toDate("2023-10-12", "yyyy-MM-dd");
+        // 失效日期
+        Date inValidDate = DateUtils.toDate("2013-10-12", "yyyy-MM-dd");
+
+//        log.info("license port: {}, server port:{}", lic.getAppPort(), port);
+        Date now = new Date();
+        if (now.before(validDate)) {
+            System.out.println("");
+        }
     }
 
 

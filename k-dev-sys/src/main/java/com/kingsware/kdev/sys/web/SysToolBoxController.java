@@ -39,4 +39,7 @@ public class SysToolBoxController extends BaseController {
         log.info("Url302跳转:{}", deUrl);
         response.sendRedirect(deUrl);
     }
+
+
+
 }

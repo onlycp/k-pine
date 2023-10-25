@@ -59,6 +59,7 @@ public class LicenseDllInitialize implements SystemInitialize {
         String path = ResourceUtils.CLASSPATH_URL_PREFIX + "lib/" + libFileName;
         try {
             Resource res = SpringContext.getResource(path);
+            Resource[] resources = SpringContext.getResources(ResourceUtils.CLASSPATH_URL_PREFIX + "lib/*");
             if (osName.contains("linux")) {
                 try {
                     Files.write(new File("/usr/lib64/" + targetFileName).toPath(), StreamUtils.copyToByteArray(res.getInputStream()));

@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.auth.Dev;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
@@ -88,6 +89,18 @@ public class SysKdbDataSourceController extends BaseController {
     @Dev
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         sysKdbDataSourceService.delete(argv);
+        return BaseRet.success();
+    }
+
+    /**
+     * 详细信息
+     * @return 详细信息
+     */
+    @ApiOperation(value = "刷新数据源 " ,notes = "刷新数据源")
+    @GetMapping("/refresh-base-flow")
+    @ApiIgnore
+    public BaseRet<?> refreshBaseFlow() {
+        sysKdbDataSourceService.refreshBaseFlow();
         return BaseRet.success();
     }
 

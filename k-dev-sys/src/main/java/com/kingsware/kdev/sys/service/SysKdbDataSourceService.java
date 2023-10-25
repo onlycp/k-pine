@@ -46,4 +46,10 @@ public interface SysKdbDataSourceService {
      * @param argv  查询
      */
     void delete(MultiIdArgv argv);
+
+    /**
+     * 刷新基础数据源
+     * @return
+     */
+    void refreshBaseFlow();
 }

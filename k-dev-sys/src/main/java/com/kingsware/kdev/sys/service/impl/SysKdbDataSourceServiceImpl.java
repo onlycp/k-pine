@@ -167,4 +167,14 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
         }
     }
 
+    /**
+     * 刷新基础数据源
+     *
+     * @return
+     */
+    @Override
+    public void refreshBaseFlow() {
+        DB.kdbApi().refreshBaseFlow();
+    }
+
 }

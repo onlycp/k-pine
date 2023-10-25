@@ -27,6 +27,8 @@ public class KdbArgv {
     private String transactionUuid;
     /** 实例id **/
     private String instID;
+    /** 会话id **/
+    private String sessionID;
     /** 节点可变参数 **/
     private Map<String, StepArgv> script = new LinkedHashMap<>();
     /** 上下文变量 **/

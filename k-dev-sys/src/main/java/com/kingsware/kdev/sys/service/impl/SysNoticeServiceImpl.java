@@ -20,7 +20,7 @@ import com.kingsware.kdev.sys.argv.SysNoticeArgv;
 import com.kingsware.kdev.sys.argv.SysNoticeQueryArgv;
 import com.kingsware.kdev.sys.argv.SysNoticeRelationArgv;
 import com.kingsware.kdev.sys.model.SysNotice;
-import com.kingsware.kdev.sys.model.SysNoticeRecord;
+import com.kingsware.kdev.core.model.SysNoticeRecord;
 import com.kingsware.kdev.sys.model.SysUser;
 import com.kingsware.kdev.sys.ret.SysNoticeRet;
 import com.kingsware.kdev.sys.service.SysNoticeService;

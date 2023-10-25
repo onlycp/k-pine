@@ -1,4 +1,4 @@
-package com.kingsware.kdev.sys.model;
+package com.kingsware.kdev.core.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kingsware.kdev.core.bean.BaseModel;

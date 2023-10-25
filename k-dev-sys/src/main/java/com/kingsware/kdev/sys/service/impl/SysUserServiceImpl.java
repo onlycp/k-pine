@@ -21,6 +21,7 @@ import com.kingsware.kdev.core.exception.UnauthorizedException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
+import com.kingsware.kdev.core.kflow.bean.ErrorResult;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.model.SysCache;
@@ -355,41 +356,21 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         }
     }
 
+
+
     @Override
+    @SuppressWarnings("all")
     public SysUserLoginRet login(Map<String, Object> argv) throws Exception {
         try {
             SysUserLoginRet ret = new SysUserLoginRet();
             Map<String, Object> beforeFlowResultMap = new HashMap<>();
             Map<String, Object> afterParams = new HashMap<>();
-            afterParams.put("isLogined", false);
-
-            // 调用前置登录处理
-            if (!KFlowContext.isDevMode()) {
-                SysConfigInfo beforeFlow = ConfigManager.getInstance().getItem("application.customLoginBeforeFlow");
-                if (beforeFlow != null && StringUtils.isNotEmpty(beforeFlow.getValue())) {
-                    KFlowContext beforeIc = KFlowContext.createBaseContext("{}", "{}");
-                    KdbFlowResult beforeFlowResult = KdbFlowExecutor.getInstance().execute(beforeFlow.getValue(), "", argv, beforeIc, false, false);
-                    beforeFlowResultMap = (Map<String, Object>) beforeFlowResult.getData();
-                }
-            }
-
             boolean hasValid = false;
             boolean isValid = false;
             boolean useUsernamePassword = true;
             String message = null;
             String userId = null;
-            if (beforeFlowResultMap != null) {
-                hasValid = (boolean) beforeFlowResultMap.getOrDefault("hasValid", false);
-                isValid = (boolean) beforeFlowResultMap.getOrDefault("isValid", false);
-                useUsernamePassword = (boolean) beforeFlowResultMap.getOrDefault("useUsernamePassword", true);
-                message = (String) beforeFlowResultMap.get("message");
-                userId = (String) beforeFlowResultMap.getOrDefault("userId", null);
-            }
-
-            if (hasValid && !isValid) {
-                throw BusinessException.serviceThrow(message != null ? message : "验证未通过！");
-            }
-
+            // 校验图片验证码
             String openValidationCode = SpringContext.getProperties("application.openValidateCode", PropertiesConstant.FALSE);
             if (KClientContext.getContext() != null &&KClientContext.getContext().isValidateCodeFlag() && PropertiesConstant.TRUE.equals(openValidationCode)) {
                 String encryptCode = (String) argv.get("encryptCode");
@@ -402,23 +383,87 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 }
             }
 
+            // 获取认证模式
+            String authMode = argv.getOrDefault("mode", "pwd").toString();
+            if(StringUtils.isEmpty(authMode)) {
+                authMode = "pwd";
+            }
+            // 遍历处理密码字段
+            for (Map.Entry<String, Object> entry: argv.entrySet()) {
+                String key = entry.getKey();
+                String lowerKey = key.toLowerCase();
+                if(lowerKey.contains("password")) {
+                    Object value = entry.getValue();
+                    if (value != null && StringUtils.isNotEmpty(value.toString())) {
+                        String decryptPassword = decodeBase64(argv.get(key).toString());
+                        String loginBySM2 = SpringContext.getProperties("app.loginBySM2", PropertiesConstant.FALSE);
+                        if (PropertiesConstant.TRUE.equals(loginBySM2)) {
+                            decryptPassword = LoginCryptoUtils.loginDecrypt(decryptPassword);
+                        }
+                        argv.put(key, decryptPassword);
+                    }
 
-            // 非空检查
-            String username = (String) argv.get("username");
-            String password = (String) argv.get("password");
-            if (useUsernamePassword) {
-                if (argv == null
-                        || username == null
-                        || password == null) {
-                    throw BusinessException.serviceThrow("密码或密码不允许为空！");
                 }
             }
+
+            // 查找认证源
+            if (!"pwd".equalsIgnoreCase(authMode)) {
+                SysAuthSource sysAuthSource = DB.findOne(SysAuthSource.class, "select * from sys_auth_source where code=?", authMode);
+                if (sysAuthSource == null) {
+                    throw BusinessException.serviceThrow("认证不支持！");
+                }
+                if (sysAuthSource.getStatus() != 1) {
+                    throw BusinessException.serviceThrow("认证未启用！");
+                }
+                // 获取视图模型
+                KFlowContext context = KFlowContext.createBaseContext( "{}",  "{}");
+                // 加入应用id
+                Map<String, Object> flowArgvMap = new HashMap<>(argv);
+                flowArgvMap.put("authId", sysAuthSource.getId());
+                // 调用流程
+                KdbFlowResult result = KdbFlowExecutor.getInstance().execute(sysAuthSource.getLogicFlowId(), "", flowArgvMap, context, false, false);
+                if (result.getData() instanceof ErrorResult) {
+                    ErrorResult errorResult = (ErrorResult) result.getData();
+                    throw BusinessException.serviceThrow(errorResult.getMessage());
+                }
+                if(!(result.getData() instanceof Map)) {
+                    throw BusinessException.serviceThrow("认证逻辑响应结果不符合预期，应返回json对象字符串！");
+                }
+                Map<String, Object> authRetMap = (Map<String, Object>)result.getData();
+                String username = authRetMap.get("username").toString();
+                argv.put("username", username);
+                // 设置不用用户名和密码
+                useUsernamePassword = false;
+                KClientContext.getContext().setValidatePassFlag(false);
+            }
+            afterParams.put("isLogined", false);
+            // 调用前置登录处理
+            if (!KFlowContext.isDevMode()) {
+                SysConfigInfo beforeFlow = ConfigManager.getInstance().getItem("application.customLoginBeforeFlow");
+                if (beforeFlow != null && StringUtils.isNotEmpty(beforeFlow.getValue())) {
+                    KFlowContext beforeIc = KFlowContext.createBaseContext("{}", "{}");
+                    KdbFlowResult beforeFlowResult = KdbFlowExecutor.getInstance().execute(beforeFlow.getValue(), "", argv, beforeIc, false, false);
+                    beforeFlowResultMap = (Map<String, Object>) beforeFlowResult.getData();
+                }
+
+            }
+            if (beforeFlowResultMap != null) {
+                hasValid = (boolean) beforeFlowResultMap.getOrDefault("hasValid", false);
+                isValid = (boolean) beforeFlowResultMap.getOrDefault("isValid", false);
+                useUsernamePassword = (boolean) beforeFlowResultMap.getOrDefault("useUsernamePassword", true);
+                message = (String) beforeFlowResultMap.get("message");
+                userId = (String) beforeFlowResultMap.getOrDefault("userId", null);
+            }
+            if (hasValid && !isValid) {
+                throw BusinessException.serviceThrow(message != null ? message : "验证未通过！");
+            }
+
 
             // 拼装sql
             final Integer ENABLE_STATUS = 1;
             SqlWrapper wrapper = new SqlWrapper("select * from sys_user where 1=1 ");
             if (useUsernamePassword) {
-                wrapper.addCondition("username", Op.EQ, username);
+                wrapper.addCondition("username", Op.EQ, argv.get("username").toString());
             } else {
                 wrapper.addCondition("id", Op.EQ, userId);
             }
@@ -428,13 +473,9 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 throw BusinessException.serviceThrow("当前登录用户不存在！");
             }
             if (useUsernamePassword && KClientContext.getContext().isValidatePassFlag()) {
-                String decryptPassword = decodeBase64(password);
-                String loginBySM2 = SpringContext.getProperties("app.loginBySM2", PropertiesConstant.FALSE);
-                if (PropertiesConstant.TRUE.equals(loginBySM2)) {
-                    decryptPassword = LoginCryptoUtils.loginDecrypt(password);
-                }
+
                 // 把参数里的加密密码解密出来
-                if (!EncryptWorker.getInstance().validate(decryptPassword, model.getPassword())) {
+                if (!EncryptWorker.getInstance().validate(argv.get("password").toString(), model.getPassword())) {
                     throw BusinessException.serviceThrow("用户名或密码有误！");
                 }
             }
