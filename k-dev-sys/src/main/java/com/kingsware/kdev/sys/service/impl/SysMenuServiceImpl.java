@@ -62,11 +62,11 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
         // 设置path
         model.setPath(generateNodePath(model.getId(), argv.getParentId()));
         // 唯一性校验
-        DBChecker<SysMenu> checker =DBChecker.build(model, SysMenu.class);
+//        DBChecker<SysMenu> checker =DBChecker.build(model, SysMenu.class);
         // 同级下名称唯一
-        checker.uni(new String[]{"name", "parentId"}, I18n.t("SysMenu.name.unique", "同一级别的名称要求唯一"));
+//        checker.uni(new String[]{"name", "parentId"}, I18n.t("SysMenu.name.unique", "同一级别的名称要求唯一"));
         // 执行校验
-        checker.checkUnique();
+//        checker.checkUnique();
         // 保存
         DB.save(model);
     }
@@ -95,11 +95,11 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
         String hisParentPath = model.getPath().replace("/" + model.getId() +"/", "/");
         model.setParentId(argv.getParentId());
         // 唯一性校验
-        DBChecker<SysMenu> checker =DBChecker.build(model, SysMenu.class);
+//        DBChecker<SysMenu> checker =DBChecker.build(model, SysMenu.class);
         // 同级下名称唯一
-        checker.uni(new String[]{"name", "parentId"}, I18n.t("SysMenu.name.unique", "同一级别的名称要求唯一"));
+//        checker.uni(new String[]{"name", "parentId"}, I18n.t("SysMenu.name.unique", "同一级别的名称要求唯一"));
         // 执行校验
-        checker.checkUnique();
+//        checker.checkUnique();
         // 保存
         DB.update(model);
         // 更新path
