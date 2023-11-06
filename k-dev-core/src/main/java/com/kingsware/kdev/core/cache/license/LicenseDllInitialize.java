@@ -70,12 +70,12 @@ public class LicenseDllInitialize implements SystemInitialize {
                         String md51 = FileUtils.getMD5(res.getInputStream());
                         if (StringUtils.isNotEmpty(md5) && md5.equals(md51)) {
                             log.info("动态库已存在，无需拷贝");
-                            return;
                         }
                         else {
                             Files.write(new File("./" + targetFileName).toPath(), StreamUtils.copyToByteArray(res.getInputStream()));
                         }
                     }
+                    System.load(new File("./" + targetFileName).getAbsolutePath());
 
                 } catch (Exception e) {
                     log.warn("动态库拷贝失败，请手动将动态库拷贝到/usr/lib64/目录");
