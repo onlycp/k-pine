@@ -1,8 +1,8 @@
 package com.kingsware.kdev.sys.manager;
 
 import com.kingsware.kdev.core.util.FileTypeChecker;
+import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.util.StringUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.ByteArrayResource;

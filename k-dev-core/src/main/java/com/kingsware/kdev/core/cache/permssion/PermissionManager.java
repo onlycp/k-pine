@@ -4,7 +4,6 @@ import com.kingsware.kdev.core.cache.access.AccessManager;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.compress.utils.Sets;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -92,7 +91,11 @@ public class PermissionManager {
             for (String apiCode: apiCodeList) {
                 if (StringUtils.isNotEmpty(apiCode)) {
                     String[] codes = apiCode.split(",");
-                    permissions.addAll(Sets.newHashSet(codes));
+                    for (String code: codes) {
+                        if (StringUtils.isNotEmpty(code)) {
+                            permissions.add(code.trim());
+                        }
+                    }
                 }
             }
         }

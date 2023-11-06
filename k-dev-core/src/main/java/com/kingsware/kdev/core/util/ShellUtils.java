@@ -1,9 +1,9 @@
 package com.kingsware.kdev.core.util;
 
+import com.kingsware.kdev.core.bean.NullOutputStream;
 import com.kingsware.kdev.core.bean.ShellResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.exec.*;
-import org.apache.commons.io.output.NullOutputStream;
 
 import java.io.*;
 
@@ -58,7 +58,7 @@ public class ShellUtils {
         try {
             CommandLine commandLine = CommandLine.parse(command);
             DefaultExecutor exec = new DefaultExecutor();
-            PumpStreamHandler streamHandler = new PumpStreamHandler(NullOutputStream.NULL_OUTPUT_STREAM, NullOutputStream.NULL_OUTPUT_STREAM);
+            PumpStreamHandler streamHandler = new PumpStreamHandler(new NullOutputStream(), new NullOutputStream());
             exec.setStreamHandler(streamHandler);
             exec.setWorkingDirectory(new File(path));
             exec.execute(commandLine);

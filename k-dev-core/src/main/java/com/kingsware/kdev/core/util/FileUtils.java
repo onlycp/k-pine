@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.MessageDigest;
@@ -356,5 +357,39 @@ public class FileUtils {
     }
 
 
+    public static String readFileToString(File file, Charset utf8) {
+        StringBuilder content = new StringBuilder();
+        try (InputStream stream = Files.newInputStream(file.toPath());
+             BufferedReader reader = new BufferedReader(new InputStreamReader(stream, utf8))) {
 
+            String line;
+            while ((line = reader.readLine()) != null) {
+                content.append(line);
+                content.append('\n');
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return content.toString();
+    }
+
+    public static void writeStringToFile(File file, String replacedFileContent, Charset utf8) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            writer.write(replacedFileContent);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static byte[] readFileToByteArray(File file) {
+        try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")) {
+            long length = randomAccessFile.length();
+            byte[] byteArray = new byte[(int) length];
+            randomAccessFile.readFully(byteArray);
+            return byteArray;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

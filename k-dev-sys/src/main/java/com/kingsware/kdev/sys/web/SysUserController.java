@@ -11,11 +11,8 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.PropertiesConstant;
 import com.kingsware.kdev.core.constants.Version;
 import com.kingsware.kdev.core.context.SpringContext;
-import com.kingsware.kdev.core.util.AESUtil;
 import com.kingsware.kdev.core.util.ServletUtil;
-import com.kingsware.kdev.core.util.VerifyCodeUtils;
 import com.kingsware.kdev.sys.argv.*;
-import com.kingsware.kdev.sys.ret.SysLoginLogRet;
 import com.kingsware.kdev.sys.ret.SysUserLoginRet;
 import com.kingsware.kdev.sys.ret.SysUserRet;
 import com.kingsware.kdev.sys.ret.VerificationCodeRet;
@@ -23,23 +20,12 @@ import com.kingsware.kdev.sys.service.SysUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.Base64;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * 演示控制器

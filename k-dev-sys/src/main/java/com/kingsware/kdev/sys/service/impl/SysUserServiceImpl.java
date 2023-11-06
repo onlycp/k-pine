@@ -901,7 +901,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             outputStream = new ByteArrayOutputStream();
             ImageIO.write(verifyImg, "jpg", outputStream);
             byte[] bytes = outputStream.toByteArray();
-            String base64String = org.apache.commons.codec.binary.Base64.encodeBase64String(bytes);
+            String base64String = Base64.getEncoder().encodeToString(bytes);
             if (outputStream != null) {
                 outputStream.flush();
                 outputStream.close();//关闭流

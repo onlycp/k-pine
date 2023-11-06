@@ -2,8 +2,9 @@ package com.kingsware.kdev.core.excel;
 
 import com.kingsware.kdev.core.context.SpringContext;
 //import com.kingsware.kdev.core.excel.handler.JxlExcelHandler;
+import com.kingsware.kdev.core.excel.handler.FaasExcelHandler;
 import com.kingsware.kdev.core.excel.handler.KExcelHandler;
-import com.kingsware.kdev.core.excel.handler.PoiExcelHandler;
+//import com.kingsware.kdev.core.excel.handler.PoiExcelHandler;
 import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.core.util.StringUtils;
@@ -54,8 +55,8 @@ public class ExcelWorker {
 //                    INSTANCE.excelHandler = new JxlExcelHandler();
 //                }
 //                else
-                if ("poi".equalsIgnoreCase(INSTANCE.properties.getParser())) {
-                    INSTANCE.excelHandler = new PoiExcelHandler();
+                if ("faas".equalsIgnoreCase(INSTANCE.properties.getParser())) {
+                    INSTANCE.excelHandler = new FaasExcelHandler();
                 }
             }
         }

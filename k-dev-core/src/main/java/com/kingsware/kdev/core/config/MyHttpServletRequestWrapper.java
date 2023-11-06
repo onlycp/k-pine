@@ -1,6 +1,6 @@
 package com.kingsware.kdev.core.config;
 
-import org.apache.commons.io.IOUtils;
+import org.springframework.util.StreamUtils;
 
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
@@ -73,7 +73,7 @@ public class MyHttpServletRequestWrapper extends HttpServletRequestWrapper {
          */
         if (null == this.requestBody) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            IOUtils.copy(request.getInputStream(), baos);
+            StreamUtils.copy(request.getInputStream(), baos);
             this.requestBody = baos.toByteArray();
         }
 

@@ -14,7 +14,6 @@ import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.bean.FaasUploadRet;
 import com.kingsware.kdev.core.model.SysFile;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.util.FileCopyUtils;
 
 import java.io.*;

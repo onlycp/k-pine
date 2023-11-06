@@ -61,7 +61,6 @@ public class LicenseDllInitialize implements SystemInitialize {
         String path = ResourceUtils.CLASSPATH_URL_PREFIX + "lib/" + libFileName;
         try {
             Resource res = SpringContext.getResource(path);
-            Resource[] resources = SpringContext.getResources(ResourceUtils.CLASSPATH_URL_PREFIX + "lib/*");
             if (osName.contains("linux")) {
                 try {
                     // 判断文件是否存在以及md5是否一致

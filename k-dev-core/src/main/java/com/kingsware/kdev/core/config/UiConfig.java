@@ -164,11 +164,11 @@ public class UiConfig extends WebMvcConfigurationSupport {
             else {
                 if (file.getName().endsWith(".js") || file.getName().endsWith(".css") || file.getName().endsWith(".html")) {
                     try {
-                        String fileContent = org.apache.commons.io.FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+                        String fileContent = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
                         if (fileContent.contains(text)) {
                             log.info(file.getPath());
                             String replacedFileContent = fileContent.replaceAll(Pattern.quote(text), replaceText);
-                            org.apache.commons.io.FileUtils.writeStringToFile(file, replacedFileContent, StandardCharsets.UTF_8);
+                            FileUtils.writeStringToFile(file, replacedFileContent, StandardCharsets.UTF_8);
                             log.info("文件内容替换:{}，{} -> {}", file.getPath(), text, replaceText);
                         }
                     }
