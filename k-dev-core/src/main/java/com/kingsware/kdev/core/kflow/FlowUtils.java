@@ -15,10 +15,7 @@ import com.kingsware.kdev.core.kflow.bean.ComplexValue;
 import com.kingsware.kdev.core.kflow.bean.ErrorResult;
 import com.kingsware.kdev.core.kflow.bean.KFlowMessage;
 import com.kingsware.kdev.core.kflow.function.Functions;
-import com.kingsware.kdev.core.util.DateUtils;
-import com.kingsware.kdev.core.util.JsonUtil;
-import com.kingsware.kdev.core.util.NumberUtils;
-import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.core.util.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -421,7 +418,7 @@ public class FlowUtils {
      */
     public static BaseRet<?> toJsonResult(Object result, String log) {
         // 返回前端
-        BaseRet<?> ret = new BaseRet<>();
+        BaseRet<?> ret;
         if (result instanceof MessageResult) {
             ret = BaseRet.successMessage(((MessageResult) result).getMessage());
         }
@@ -432,7 +429,30 @@ public class FlowUtils {
             ret = BaseRet.success(result);
         }
         ret.setLog(log);
+
         return ret;
+    }
+
+    /**
+     * 转向api格式
+     * @param result 源名称
+     * @return
+     */
+    public static Object toJsonResult(Object result, String log, String stackException) {
+        // 返回前端
+        BaseRet<?> ret = toJsonResult(result, log);
+        Map<String, Object> map = new HashMap<>();
+        map.put("code", ret.getCode());
+        map.put("message", ret.getMessage());
+        map.put("data", ret.getData());
+        if (StringUtils.isNotEmpty(ret.getLog())) {
+            map.put("log", ret.getLog());
+        }
+        if (StringUtils.isNotEmpty(stackException)) {
+            map.put("exceptionId", MD5Utils.md5(stackException));
+        }
+        return map;
+
     }
 
     /**

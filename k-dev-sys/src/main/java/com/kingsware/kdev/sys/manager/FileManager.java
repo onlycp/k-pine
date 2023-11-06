@@ -2,10 +2,12 @@ package com.kingsware.kdev.sys.manager;
 
 import com.kingsware.kdev.core.constants.PropertiesConstant;
 import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.encrypt.EncryptProperties;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.KdbRet;
 import com.kingsware.kdev.core.plugins.CdnPlugin;
+import com.kingsware.kdev.core.util.AESUtil;
 import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.StringUtils;
@@ -79,6 +81,10 @@ public class FileManager {
     }
 
     public SysFile register(InputStream inputStream, String fileName, int fileSize,  String targetDir, Integer saveType, String basePath, boolean withoutChecking) {
+        return this.register(inputStream, fileName, fileSize, targetDir, saveType, basePath, withoutChecking, false);
+    }
+
+    public SysFile register(InputStream inputStream, String fileName, int fileSize,  String targetDir, Integer saveType, String basePath, boolean withoutChecking, boolean withCrypt) {
         try {
             boolean isCloseReplaceMode = PropertiesConstant.TRUE.equals(SpringContext.getProperties("file.close-replace-mode", PropertiesConstant.FALSE));
             String fileFrom = targetDir.replaceAll("/", Matcher.quoteReplacement(File.separator));
@@ -180,6 +186,12 @@ public class FileManager {
                     // 文件md5码
                     sysFile.setFileMd5(FileUtils.getMD5(inputStream));
                 }
+            }
+            // 判断是否需要加密
+            if (withCrypt) {
+                EncryptProperties encryptProperties = SpringContext.getBean(EncryptProperties.class);
+                String afterPath = AESUtil.encrypt(sysFile.getFilePath(), encryptProperties.getAes().getSecret());
+                sysFile.setFilePath("encrypt:" + afterPath);
             }
             DB.save(sysFile);
             // 返回id

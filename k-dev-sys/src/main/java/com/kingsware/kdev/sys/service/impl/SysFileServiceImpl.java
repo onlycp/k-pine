@@ -6,13 +6,19 @@ import com.kingsware.kdev.core.constants.ContentTypeMap;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.kflow.KFlowContext;
+import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
+import com.kingsware.kdev.core.kflow.bean.ErrorResult;
+import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
+import com.kingsware.kdev.core.orm.kdb.KdbRet;
 import com.kingsware.kdev.core.plugins.CdnPlugin;
 import com.kingsware.kdev.core.plugins.file.FileEncryptPlugin;
 import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.sys.argv.SysFileQueryArgv;
+import com.kingsware.kdev.sys.bean.FileDecryptInfo;
 import com.kingsware.kdev.sys.manager.FileManager;
 import com.kingsware.kdev.sys.manager.NonStaticResourceHttpRequestHandler;
 import com.kingsware.kdev.core.model.SysFile;
@@ -240,6 +246,13 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
 //                throw BusinessException.serviceThrow("参数不合法");
 //            }
 //        }
+        // 判断是否需要加密
+        String widthEncryptString = ServletUtil.request().getParameter("withDecrypt");
+        int widthEncrypt = 0;
+        if (StringUtils.isNotEmpty(widthEncryptString)) {
+            widthEncrypt = Integer.parseInt("widthEncryptString");
+        }
+
         List<SysFileRet> retList = new ArrayList<>();
         // 如果是自动转为faas的，那么新上传的文件也改为faas
         if (!isLocal && isFileLocalToFaas() && saveType == 1) {
@@ -283,6 +296,71 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         downloadByPath(path, true);
     }
 
+
+
+       /**
+     * 验证文件权限
+     * @param id 文件ID
+     * @param path 文件路径
+     * @return 验证结果，true为验证通过，false为验证不通过
+     */
+       @SuppressWarnings("all")
+    private void validateFilePermission(String id, String path) {
+        // 拼接完整的文件路径
+        String basePath = SpringContext.getProperties("file.bash-path", "");
+        if (StringUtils.isNotEmpty(basePath)) {
+            basePath += File.separator;
+        }
+        String fullPath = basePath  + path;
+        // 获取系统路径
+        String systemPath = new File(fullPath).getAbsolutePath();
+        // 创建文件解密信息对象
+        FileDecryptInfo fileDecryptInfo = new FileDecryptInfo();
+        // 设置文件路径
+        fileDecryptInfo.setPath(systemPath);
+        // 设置文件ID
+        fileDecryptInfo.setId(id);
+        // 设置路径（与上面重复）
+        fileDecryptInfo.setPath(systemPath);
+        // 获取文件权限流程ID
+        GroupProperties groupProperties = SpringContext.getGroupProperties("app.file-permission");
+        if (!groupProperties.isEnable()) {
+            return;
+        }
+        // 获取所有路径配置
+        Set<String> paths = new HashSet<>();
+        for (String key: groupProperties.getValues().keySet()) {
+            String subKey = key.substring(key.indexOf("app.file-permission.") + 1);
+            String dir = basePath + subKey;
+            File file = new File(fullPath);
+            File directory = new File(dir);
+            if (file.getAbsolutePath().startsWith(directory.getAbsolutePath())) {
+                String flowId = groupProperties.stringValue(key, "");
+                if (StringUtils.isNotEmpty(flowId)) {
+                    // 获取视图模型
+                    KFlowContext context = KFlowContext.createBaseContext( "{}",  "{}");
+                    Map<String,Object> params = JsonUtil.beanToMap(fileDecryptInfo);
+
+                    if(KClientContext.getContext().getUserInfo() == null) {
+                        throw BusinessException.serviceThrow("此文件需要登录才允许访问");
+                    }
+                    // 执行文件权限流程
+                    KdbFlowResult result = KdbFlowExecutor.getInstance().execute(flowId, "", params, context, false, false);
+                    // 获取结果数据
+                    Map<String, Object> data = (Map<String, Object>)result.getData();
+                    boolean success = data.get("success") == null? false : (boolean)data.get("success");;
+                    if (!success) {
+                        throw BusinessException.serviceThrow("您无权限下载此文件");
+                    }
+                }
+            }
+        }
+
+
+    }
+
+
+
     /**
      * 下载单个文件
      * @param path
@@ -324,7 +402,9 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                 fileRealPath = localFile.getAbsolutePath();
                 fileName = localFile.getName();
             } else {
-                // 在FAAS找是否存在文件
+                // 检测文件权限
+                validateFilePermission(null, path);
+                //
                 if (!FileTypeChecker.isAudioFile(path) && !FileTypeChecker.isVideoFile(path)) {
                     FaasFileInfo fileInfo = getFaasFileInfo(path);
                     DB.kdbApi().downloadStream(fileInfo.getPath(), fileInfo.getName(), userFileName);
@@ -340,6 +420,8 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
 
             }
         } else {
+            // 检测文件权限
+            validateFilePermission(file.getId(),  file.getFilePath());
             fileName = file.getFileName();
             // 通过ID找得到文件，按数据库里的存储类型读文件
             if (file.getSaveType() == 0) {
@@ -426,6 +508,11 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         nonStaticResourceHttpRequestHandler.handleRequest(request, response);
     }
 
+    /**
+     * 根据给定的路径获取本地文件
+     * @param path 文件路径
+     * @return 对应的本地文件对象
+     */
     private File getLocalFile(String path) {
         String absFilePath = getBasePath().endsWith("/") ? getBasePath() : getBasePath() + File.separator + path;
         return new File(absFilePath);

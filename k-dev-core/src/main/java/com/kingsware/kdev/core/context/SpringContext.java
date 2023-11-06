@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.context;
 
+import com.kingsware.kdev.core.bean.GroupProperties;
 import com.kingsware.kdev.core.cache.config.ConfigManager;
 import com.kingsware.kdev.core.cache.config.SysConfigInfo;
 import org.springframework.beans.BeansException;
@@ -81,6 +82,28 @@ public class SpringContext implements ApplicationContextAware {
         }
 
     }
+
+
+    /**
+     * 获取组属性
+     *
+     * @param groupKey 组键
+     * @return 组属性
+     */
+    public static GroupProperties getGroupProperties(String groupKey) {
+        GroupProperties groupProperties = new GroupProperties();
+        String enable = getProperties(groupKey + ".enable", "false");
+        groupProperties.setEnable(Boolean.parseBoolean(enable));
+        groupProperties.setGroup(groupKey);
+        Map<String, String> properties = getProperties();
+        for (Map.Entry<String, String> entry : properties.entrySet()) {
+            if (entry.getKey().startsWith(groupKey + ".") && !entry.getKey().equals(groupKey + ".enable")) {
+                groupProperties.putValue(entry.getKey().substring(groupKey.length() + 1), entry.getValue());
+            }
+        }
+        return groupProperties;
+    }
+
 
     /**
      * 获取配置项

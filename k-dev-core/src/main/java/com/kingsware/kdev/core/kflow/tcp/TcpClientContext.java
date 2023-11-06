@@ -164,7 +164,7 @@ public class TcpClientContext {
                                 String jsonString = null;
                                 jsonString = mapper.writeValueAsString(modelRecord);
                                 System.out.println(jsonString);
-                                KmqMessageCenter.getInstance().produceWebsocketMessageToSession("notice-center", jsonString);
+                                KmqMessageCenter.getInstance().produceWebsocketMessageToUser(tcpNoticeMessage.getToWho(), "notice-center", jsonString);
                             } catch (JsonProcessingException e) {
                                 throw new RuntimeException(e);
                             }

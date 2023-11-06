@@ -122,8 +122,9 @@ public class KAuthFilter implements Filter {
         // 获取请求路径
         String url = request.getRequestURI();
 //        log.info("上下文:{},路径:{} -00", request.getContextPath(), request.getRequestURI()  );
+        initContext(request, response);
         if (containUrl(url) ) {
-            initContext(request, response);
+
             filterChain.doFilter(request, response);
             return;
         }
@@ -527,7 +528,7 @@ public class KAuthFilter implements Filter {
                     ServletUtil.responseJson(response, result.getData());
                 }
                 else {
-                    ServletUtil.responseJson(response, FlowUtils.toJsonResult(result.getData(), result.getLog()));
+                    ServletUtil.responseJson(response, FlowUtils.toJsonResult(result.getData(), result.getLog(), result.getExceptionStack()));
                 }
                 break;
             case KFlowConstant.RESULT_EXCEL:

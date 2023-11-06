@@ -2,6 +2,8 @@ package com.kingsware.kdev.core.cache.license;
 
 import com.kingsware.kdev.core.base.SystemInitialize;
 import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.util.FileUtils;
+import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -9,6 +11,7 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.StreamUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
 
@@ -28,10 +31,9 @@ public class LicenseDllInitialize implements SystemInitialize {
 
         String osName = System.getProperty("os.name").toLowerCase();
         String osArch = System.getProperty("os.arch").toLowerCase();
-        String libName = "";
         String libFileName = "";
         String targetFileName = "";
-        libName = "k-license";
+        String libName = "k-license";
         log.info("osName:{}, osArch:{}", osName, osArch);
         if (osName.toLowerCase().contains("mac")) {
             targetFileName = "libk-license.dylib";
@@ -62,7 +64,19 @@ public class LicenseDllInitialize implements SystemInitialize {
             Resource[] resources = SpringContext.getResources(ResourceUtils.CLASSPATH_URL_PREFIX + "lib/*");
             if (osName.contains("linux")) {
                 try {
-                    Files.write(new File("/usr/lib64/" + targetFileName).toPath(), StreamUtils.copyToByteArray(res.getInputStream()));
+                    // 判断文件是否存在以及md5是否一致
+                    if (new File("./" + targetFileName).exists()) {
+                        String md5 = FileUtils.getMD5(Files.newInputStream(new File("./" + targetFileName).toPath()));
+                        String md51 = FileUtils.getMD5(res.getInputStream());
+                        if (StringUtils.isNotEmpty(md5) && md5.equals(md51)) {
+                            log.info("动态库已存在，无需拷贝");
+                            return;
+                        }
+                        else {
+                            Files.write(new File("./" + targetFileName).toPath(), StreamUtils.copyToByteArray(res.getInputStream()));
+                        }
+                    }
+
                 } catch (Exception e) {
                     log.warn("动态库拷贝失败，请手动将动态库拷贝到/usr/lib64/目录");
                 }
