@@ -87,6 +87,9 @@ public class KAuthFilter implements Filter {
     @Value("#{'${app.ignore.urls:websocket;/eiac;/sys-tool-box}'.split(';')}")
     private List<String> ignoreUrls;
 
+    @Value("${app.login.ip-address-query:false}")
+    private boolean ipAddressQuery;
+
 
     /**
      * 判断url是否包括配置的url标识
@@ -413,7 +416,8 @@ public class KAuthFilter implements Filter {
                             }
                         }
                         operateLog.setRequestBody(StringUtils.retrench(requestBody, 1000));
-//                        log.info("操作日志保存:{}, url:{}" , operateLog.getAction(), request.getRequestURI());
+//                        log.info("操作日志保存:{}, url:{}" , operateLog.getAction(), request.getRequ
+//                        estURI());
                         KmqMessageCenter.getInstance().produce("t_operate_log", JsonUtil.toJson(operateLog) );
 
                     }
@@ -423,7 +427,14 @@ public class KAuthFilter implements Filter {
                         // 获取表单信息
                         SysLoginLog loginLog = new SysLoginLog();
                         loginLog.setOperator(opertator);
-                        loginLog.setIp(KClientContext.getContext().getIp());
+                        if (ipAddressQuery) {
+                            String ip = KClientContext.getContext().getIp();
+                            String address = IpUtils.getAddressByIp(ip);
+                            loginLog.setIp(ip + ":" + address);
+                        }
+                        else {
+                            loginLog.setIp(KClientContext.getContext().getIp());
+                        }
                         loginLog.setResponseCode(responseCode);
                         loginLog.setTimes(takeTime);
                         if (StringUtils.isEmpty(errorMessage) && KClientContext.getContext() != null) {

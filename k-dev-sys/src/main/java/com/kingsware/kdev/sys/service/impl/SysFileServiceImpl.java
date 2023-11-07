@@ -321,7 +321,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         // 设置文件ID
         fileDecryptInfo.setId(id);
         // 设置路径（与上面重复）
-        fileDecryptInfo.setPath(systemPath);
+        fileDecryptInfo.setPath(path);
         // 获取文件权限流程ID
         GroupProperties groupProperties = SpringContext.getGroupProperties("app.file-permission");
         if (!groupProperties.isEnable()) {
