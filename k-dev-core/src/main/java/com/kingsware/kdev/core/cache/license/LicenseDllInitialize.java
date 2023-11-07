@@ -76,10 +76,15 @@ public class LicenseDllInitialize implements SystemInitialize {
                             log.info("动态库已存在，无需拷贝");
                         }
                         else {
+                            log.info("开始拷贝动态库1");
                             Files.write(new File("./" + targetFileName).toPath(), StreamUtils.copyToByteArray(res.getInputStream()));
                         }
                     }
-                    System.load(new File("./" + targetFileName).getAbsolutePath());
+                    else {
+                        log.info("开始拷贝动态库2");
+                        Files.write(new File("./" + targetFileName).toPath(), StreamUtils.copyToByteArray(res.getInputStream()));
+                    }
+                    System.load(new File(targetFileName).getAbsolutePath());
 
 
                 } catch (Exception e) {
