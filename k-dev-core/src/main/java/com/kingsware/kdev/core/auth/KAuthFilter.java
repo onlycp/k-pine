@@ -87,9 +87,6 @@ public class KAuthFilter implements Filter {
     @Value("#{'${app.ignore.urls:websocket;/eiac;/sys-tool-box}'.split(';')}")
     private List<String> ignoreUrls;
 
-    @Value("${app.login.ip-address-query:false}")
-    private boolean ipAddressQuery;
-
 
     /**
      * 判断url是否包括配置的url标识
@@ -427,6 +424,7 @@ public class KAuthFilter implements Filter {
                         // 获取表单信息
                         SysLoginLog loginLog = new SysLoginLog();
                         loginLog.setOperator(opertator);
+                        boolean ipAddressQuery = SpringContext.getProperties("app.login-log-ip-address-query", "true").equals("true");
                         if (ipAddressQuery) {
                             String ip = KClientContext.getContext().getIp();
                             String address = IpUtils.getAddressByIp(ip);
