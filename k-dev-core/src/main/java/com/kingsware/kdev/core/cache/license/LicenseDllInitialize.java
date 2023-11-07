@@ -1,9 +1,12 @@
 package com.kingsware.kdev.core.cache.license;
 
 import com.kingsware.kdev.core.base.SystemInitialize;
+import com.kingsware.kdev.core.bean.ShellResult;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.util.FileUtils;
+import com.kingsware.kdev.core.util.ShellUtils;
 import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.core.util.ThreadUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -14,6 +17,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * License加载
@@ -76,6 +81,7 @@ public class LicenseDllInitialize implements SystemInitialize {
                     }
                     System.load(new File("./" + targetFileName).getAbsolutePath());
 
+
                 } catch (Exception e) {
                     log.warn("动态库拷贝失败，请手动将动态库拷贝到/usr/lib64/目录");
                 }
@@ -94,12 +100,52 @@ public class LicenseDllInitialize implements SystemInitialize {
             // 加载动态库
             KLicenseLibrary kLicenseLibrary = com.sun.jna.Native.load(libName, KLicenseLibrary.class);
             LicenseManager.getInstance().setkLicenseLibrary(kLicenseLibrary);
+
+            if (osName.contains("linux")) {
+                // 如果当前系统没有被授权，并且机器码在黑名单中，那么就调用shell命令重新生成mache-id
+                List<String> blackMacheList = getBlackMacheList();
+                if (LicenseManager.getInstance().getStatus() != 2 && blackMacheList.contains(kLicenseLibrary.GetMachineSN())) {
+                    log.info("开始重新生成机器id");
+                    String oldMacheId = FileUtils.readFileText(new File("/etc/machine-id"));
+                    Files.deleteIfExists(new File("/etc/machine-id").toPath());
+                    Files.deleteIfExists(new File("/var/lib/dbus/machine-id").toPath());
+                    ShellUtils.execute(new File("/usr/bin").getAbsolutePath(), "./systemd-machine-id-setup", true);
+                    ThreadUtils.sleep(1000);
+                    String newMacheId = FileUtils.readFileText(new File("/etc/machine-id"));
+                    log.info("结束重新生成机器id，新id:{}，旧id:{}", newMacheId, oldMacheId);
+                }
+
+            }
         } catch (Exception e) {
             log.error("当前找不到动态库", e);
         }
 
 
     }
+
+    /**
+     * 获取黑名单列表
+     * @return 黑名单列表
+     */
+    private List<String> getBlackMacheList() {
+        List<String> innerBlackList = new ArrayList<>();
+        innerBlackList.add("a99b9078b984187b69096ba1159f141c6b28aee9b364b3c86ede15ba0f8d8adb");
+        // 如果文件不存在，则创建一个black-machine.txt文件，并且将innerBlackList写入到文件中，然后返回innerBlackList（按行写入），如果已存在，则读随之后就返回列表
+        if (!new File("black-machine.txt").exists()) {
+            try {
+                Files.write(new File("./black-machine.txt").toPath(), innerBlackList);
+            } catch (Exception e) {
+                log.error("创建黑名单文件失败", e);
+            }
+        } else {
+            try {
+                innerBlackList = Files.readAllLines(new File("./black-machine.txt").toPath());
+            } catch (Exception e) {
+            }
+        }
+        return innerBlackList;
+    }
+
 
     @Override
     public int sort() {
