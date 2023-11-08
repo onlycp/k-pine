@@ -1,22 +1,16 @@
 package com.kingsware.kdev.core.util;
 
 import com.kingsware.kdev.core.context.SpringContext;
-import com.kingsware.kdev.core.cron.KRunner;
-import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.HttpClientException;
-import com.kingsware.kdev.core.model.SysTask;
-import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.FaasFailRecord;
 import com.kingsware.kdev.core.plugins.FaasChannelPlugin;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.yaml.snakeyaml.util.UriEncoder;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -44,16 +38,37 @@ public class HttpUtil {
     private static final String LINE_END = "\r\n";
 
     private static final Map<String, FaasChannelPlugin> faasChannelPluginMap = new HashMap<>();
-
-
-    static {
-        loadPlugins();
-    }
+//
+//    public static final okhttp3.MediaType JSON = okhttp3.MediaType.get("application/json");
+//
+//    private static  OkHttpClient client = null;
+//    private static final Dns SYSTEM = Dns.SYSTEM;
+//
+//
+//    static {
+//        if (client == null) {
+//            client = new OkHttpClient.Builder()
+//                    .dns(new Dns() {
+//
+//                        @NotNull
+//                        @Override
+//                        public List<InetAddress> lookup(@NotNull String hostname) throws UnknownHostException {
+//                            List<InetAddress> inetAddresses = Arrays.asList(InetAddress.getAllByName(hostname));
+//                            return inetAddresses;
+//                        }
+//                    })
+//
+//                    .followRedirects(true)
+//                   .build();
+//        }
+//        loadPlugins();
+//    }
 
     /**
      * 私有构造
      */
-    private HttpUtil() {}
+    private HttpUtil() {
+    }
 
 
 
@@ -139,6 +154,32 @@ public class HttpUtil {
     }
 
     public static String doPost(String apiUrl, String body, Map<String, String> headerMap) throws IOException {
+        System.setProperty("networkaddress.cache.ttl", "0");
+        System.setProperty("networkaddress.cache.negative.ttl", "0");
+
+//        RequestBody requestBody = RequestBody.create(body, JSON);
+//        Request request = new Request.Builder()
+//                .url(apiUrl)
+//                .post(requestBody)
+//                .build();
+//        try (Response response = client.newCall(request).execute()) {
+//            return response.body().string();
+//        }
+
+//        // 发送POST请求
+//        HttpResponse<String> response = Unirest.post(apiUrl)
+//                .header("Content-Type", "application/json")
+//                .body(body)
+//                .asString();
+//
+//        // 检查响应状态码
+//        int status = response.getStatus();
+//        System.out.println("Response Status Code: " + status);
+//
+//        // 获取响应内容
+//        String responseBody = response.getBody();
+//        return responseBody;
+
         HttpURLConnection connection = null;
         OutputStream outputStream = null;
         InputStream inputStream = null;
@@ -149,6 +190,8 @@ public class HttpUtil {
             URL url = new URL(apiUrl);
             connection = (HttpURLConnection) url.openConnection();
             connection.setDoOutput(true);
+            // 设置高级DNS解析器
+            connection.setUseCaches(false);
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
             if (headerMap!= null && !headerMap.isEmpty()) {
@@ -184,11 +227,13 @@ public class HttpUtil {
             }
             if (connection != null) {
                 connection.disconnect();
+
             }
         }
 
         return responseBody.toString();
     }
+
 
     /**
      * 调用http集群

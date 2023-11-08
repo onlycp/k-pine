@@ -26,7 +26,7 @@ public class DictTask implements KTask, KRunner {
     @Override
     public void execute() {
         // 查找所有字典
-        List<DictItemInfo> dictItemList = DB.findList(DictItemInfo.class, "select * from sys_dict_item");
+        List<DictItemInfo> dictItemList = DB.findList(DictItemInfo.class, "select name,sys_dict_id, value, code, order_num from sys_dict_item");
         for (DictItemInfo dictItem: dictItemList) {
             DictManager.getInstance().addDict(dictItem.getCode(), dictItem.getName(), dictItem.getValue());
         }

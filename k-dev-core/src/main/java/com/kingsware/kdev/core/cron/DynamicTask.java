@@ -410,6 +410,9 @@ public class DynamicTask implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+//        if (1 ==1) {
+//            return;
+//        }
         scanJavaClassTask(scanPackage);
         threadPoolTaskScheduler.schedule(() -> {
 

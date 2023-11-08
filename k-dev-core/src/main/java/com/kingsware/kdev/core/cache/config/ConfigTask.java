@@ -26,7 +26,7 @@ public class ConfigTask implements KTask, KRunner {
     @Override
     public void execute() {
         // 查找所有字典
-        List<SysConfigInfo> list = DB.findList(SysConfigInfo.class, "select * from sys_config");
+        List<SysConfigInfo> list = DB.findList(SysConfigInfo.class, "select name, code, value_type, value, is_sys,app_id from sys_config");
         for (SysConfigInfo data: list) {
             if(data.getCode().contains("t-")) {
                 System.currentTimeMillis();
