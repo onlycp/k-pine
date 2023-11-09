@@ -76,10 +76,16 @@ public class DynamicTask implements CommandLineRunner {
     @Value("${schedule.async-execute:true}")
     private boolean asyncExecute;
 
+    /**
+     * 是否异步执行
+     **/
+    @Value("${schedule.pool-size:50}")
+    private int poolSize;
 
-    private final ThreadPoolTaskScheduler threadPoolTaskScheduler;
 
-    private final Map<String, ScheduledFutureHolder> scheduledFutureMap;
+    private  ThreadPoolTaskScheduler threadPoolTaskScheduler;
+
+    private  Map<String, ScheduledFutureHolder> scheduledFutureMap;
 
     private final CopyOnWriteArrayList<SysTask> sysTaskList = new CopyOnWriteArrayList<>();
 
@@ -89,10 +95,16 @@ public class DynamicTask implements CommandLineRunner {
     private static final ExecutorService executorService = Executors.newCachedThreadPool();
 
     public DynamicTask() {
-        this.scheduledFutureMap = new HashMap<>(1);
-        this.threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
-        this.threadPoolTaskScheduler.setPoolSize(50);
-        this.threadPoolTaskScheduler.initialize();
+
+    }
+
+    private void initThreadPool() {
+        if(threadPoolTaskScheduler == null) {
+            this.scheduledFutureMap = new HashMap<>(1);
+            this.threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
+            this.threadPoolTaskScheduler.setPoolSize(50);
+            this.threadPoolTaskScheduler.initialize();
+        }
     }
 
 
@@ -413,6 +425,7 @@ public class DynamicTask implements CommandLineRunner {
 //        if (1 ==1) {
 //            return;
 //        }
+        initThreadPool();
         scanJavaClassTask(scanPackage);
         threadPoolTaskScheduler.schedule(() -> {
 
