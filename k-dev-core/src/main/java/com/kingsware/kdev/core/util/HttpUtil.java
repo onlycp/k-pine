@@ -157,29 +157,6 @@ public class HttpUtil {
         System.setProperty("networkaddress.cache.ttl", "0");
         System.setProperty("networkaddress.cache.negative.ttl", "0");
 
-//        RequestBody requestBody = RequestBody.create(body, JSON);
-//        Request request = new Request.Builder()
-//                .url(apiUrl)
-//                .post(requestBody)
-//                .build();
-//        try (Response response = client.newCall(request).execute()) {
-//            return response.body().string();
-//        }
-
-//        // 发送POST请求
-//        HttpResponse<String> response = Unirest.post(apiUrl)
-//                .header("Content-Type", "application/json")
-//                .body(body)
-//                .asString();
-//
-//        // 检查响应状态码
-//        int status = response.getStatus();
-//        System.out.println("Response Status Code: " + status);
-//
-//        // 获取响应内容
-//        String responseBody = response.getBody();
-//        return responseBody;
-
         HttpURLConnection connection = null;
         OutputStream outputStream = null;
         InputStream inputStream = null;
@@ -230,7 +207,10 @@ public class HttpUtil {
 
             }
         }
-
+        String response = responseBody.toString();
+        if (response.length() > 1024 * 500) {
+            log.error("请求响应内容过大，请检查接口是否有返回大量数据，接口地址：{}, 长度:{}, 参数:{}", apiUrl, response.length(), body);
+        }
         return responseBody.toString();
     }
 

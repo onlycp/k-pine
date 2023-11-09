@@ -34,7 +34,7 @@ public class LogicCacheTask implements KTask, KRunner {
     @Override
     public void execute() {
 
-        List<LogicCache> logicCaches = DB.findList(LogicCache.class, "select flow_id, app_id as tran_ctrl from sys_logic_flow where flow_id is not null and app_id is not null");
+        List<LogicCache> logicCaches = DB.findList(LogicCache.class, "select flow_id, app_id as tran_ctrl from sys_logic_flow where flow_id is not null and app_id = ?", '1');
         LogicFlowManager.getInstance().setFlowCache(logicCaches);
     }
 
