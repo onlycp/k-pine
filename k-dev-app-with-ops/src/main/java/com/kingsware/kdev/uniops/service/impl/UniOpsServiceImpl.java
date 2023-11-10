@@ -108,6 +108,15 @@ public class UniOpsServiceImpl implements UniOpsService {
 
 
         contextMap.put("pineToken", pineToken);
+        // 智能判断是否是ops/pine
+        if(!toUrl.contains("ops/pine")) {
+            if (toUrl.startsWith("/")) {
+                toUrl = "/ops/pine" + toUrl;
+            }
+            else {
+                toUrl = "/ops/pine/" + toUrl;
+            }
+        }
         contextMap.put("to", toUrl);
         contextMap.put("exceptionStack", exceptionStack);
         // 渲染模板内容
