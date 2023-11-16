@@ -32,7 +32,8 @@ public class FaasExcelHandler implements KExcelHandler{
     public void write(KExcel excel, OutputStream out) {
         try {
             String baseStr = JsonUtil.toJson(excel);
-            String script = String.format("koffices.renderByKExcel('%s');", baseStr);
+            // 创建目录
+            String script = String.format("kutils.fileDirectory('upload/kExcel');koffices.renderByKExcel('%s');", baseStr);
             KdbRet<String> ret = DB.kdbApi().executeScript(script);
             Map<String, Object> map = JsonUtil.toMap(ret.getResponseBody());
             String retBase64 = map.getOrDefault("data", "").toString();
