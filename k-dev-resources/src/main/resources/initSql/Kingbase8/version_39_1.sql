@@ -1,0 +1,1 @@
+ALTER TABLE sys_login_log ALTER COLUMN address VARCHAR(255);

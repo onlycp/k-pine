@@ -32,6 +32,8 @@ public class SysLoginLog extends BaseModel {
     private int times;
     /** 响应码 **/
     private int responseCode;
+
+    private String address;
     /** 响应消息 **/
     private String responseMessage;
     /** 创建时间 **/

@@ -75,7 +75,7 @@ public class TcpClient {
 
 
     public void heart() {
-        if(isConnected()) {
+        if (socket.isConnected()) {
             TReqMessage message = new TReqMessage(SocketHeadType.HEART_REQUEST, "", "");
             send(message);
         }
@@ -85,7 +85,7 @@ public class TcpClient {
         // 创建一个收消息
         working = true;
         new Thread(() -> {
-            while (working) {
+            while (true) {
                 if (socket != null && socket.isConnected()) {
                     try {
                         InputStream is = socket.getInputStream();
@@ -93,6 +93,7 @@ public class TcpClient {
                         int len = 0;
                         while ((len = is.read(buf) ) > 0) {
                             this.heartTime = new Date().getTime();
+                            log.info("tcp <= {}", ProtocolHelper.getPrintString(buf,len) );
                             for (int i = 0; i < len; i++) {
                                 byteBuffer.put(buf[i]);
                                 int pos = byteBuffer.position();
@@ -101,7 +102,7 @@ public class TcpClient {
                                     byte[] dst = new byte[pos-6];
                                     byteBuffer.position(4);
                                     byteBuffer.get(dst, 0, pos-6);
-                                    log.debug("tcp <= {}", ProtocolHelper.getPrintString(dst, dst.length) );
+
                                     // 清理缓冲区
                                     byteBuffer.clear();
                                     //处理消息
@@ -146,13 +147,15 @@ public class TcpClient {
 
                 byte[] bodyBytes = msg.toByteArray();
                 int len = bodyBytes.length;
-                byte[] sendData =  new byte[len];
+                byte[] sendData =  new byte[len+2];
                 System.arraycopy(bodyBytes, 0, sendData, 0, len);
+                sendData[len] = 0x0d;
+                sendData[len+1] = 0x0a;
                 //写消息体
                 this.socket.getOutputStream().write(sendData);
-                log.debug("tcp => {}", ProtocolHelper.getPrintString(sendData, sendData.length) );
+                log.info("tcp => {}", ProtocolHelper.getPrintString(sendData, sendData.length) );
                 // 写入换行
-                this.socket.getOutputStream().write(new byte[] {0x0d, 0x0a});
+//                this.socket.getOutputStream().write(new byte[] {0x0d, 0x0a});
                 this.socket.getOutputStream().flush();
             }
             catch (Exception e) {
@@ -185,7 +188,15 @@ public class TcpClient {
         if (socket == null) {
             return false;
         }
-        return socket.isConnected() && (new Date().getTime() - this.heartTime) < 1000*10;
+//         log.info("socket.isConnected() = {}, heart:{}", socket.isConnected(), (new Date().getTime() - this.heartTime));
+         if (!socket.isConnected()) {
+             return false;
+         }
+         if((new Date().getTime() - this.heartTime) > 1000*10) {
+            disConnect();
+            return false;
+         }
+         return true;
      }
     /**
      * 连接tcp服务端
@@ -200,6 +211,7 @@ public class TcpClient {
             socket.setKeepAlive(true);
             log.info("TCP连接成功, IP:{}, Port:{}, 状态:{}", ip, port, socket.isConnected() ? "已连接": "未连接");
             this.connected = true;
+            this.heartTime = new Date().getTime();
         } catch (Exception e) {
             log.error("服务端连接失败，IP:{}, 端口:{}, 错误信息:{}", ip, port, e.getMessage());
         }

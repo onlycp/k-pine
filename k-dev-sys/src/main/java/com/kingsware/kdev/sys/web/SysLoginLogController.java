@@ -1,6 +1,7 @@
 package com.kingsware.kdev.sys.web;
 
 import com.kingsware.kdev.core.auth.ApiCode;
+import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.PageDataRet;
@@ -16,6 +17,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 /**
  * 演示控制器
@@ -62,5 +68,12 @@ public class SysLoginLogController extends BaseController {
     public void download(SysLoginLogQueryArgv argv) {
         sysLoginLogService.export(argv);
     }
+
+//    @GetMapping("/test-trans")
+//    @ApiIgnore
+//    public BaseRet<?> testTrans(HttpServletRequest request, HttpServletResponse response) throws IOException {
+//        sysLoginLogService.testTran();
+//        return BaseRet.success();
+//    }
 
 }

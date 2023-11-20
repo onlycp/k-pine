@@ -3,6 +3,8 @@ package com.kingsware.kdev.core.util;
 import org.lionsoul.ip2region.xdb.Searcher;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -31,7 +33,20 @@ public class IpUtils {
         // 2、查询
         try {
             long sTime = System.nanoTime();
+
             address = searcher.search(ip);
+            String[] arr = address.split("\\|");
+            List<String> list = new ArrayList<>();
+            if (arr.length > 1) {
+                for (int i = 0; i < arr.length-1; i++) {
+                    String a = arr[i];
+                    if (!NumberUtils.isParsable(a)) {
+                        list.add(a);
+                    }
+                }
+            }
+
+            address = String.join("", list);
             long cost = TimeUnit.NANOSECONDS.toMicros((long) (System.nanoTime() - sTime));
             System.out.printf("{region: %s, ioCount: %d, took: %d μs}\n", address, searcher.getIOCount(), cost);
         } catch (Exception e) {

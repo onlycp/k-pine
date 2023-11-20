@@ -420,19 +420,25 @@ public class KAuthFilter implements Filter {
                     }
 
                     // 保存登录日志
-                    if (callType == CallType.CONTROLLER && "登录".equals(apiDefine.getName())) {
+                    if ((callType == CallType.CONTROLLER && "登录".equals(apiDefine.getName())) || url.contains("login") && argvMap.containsKey("username") && request.getMethod().equalsIgnoreCase("POST")) {
                         // 获取表单信息
                         SysLoginLog loginLog = new SysLoginLog();
+                        if(StringUtils.isEmpty(opertator)) {
+                            Object username = argvMap.get("username");
+                            if (username != null) {
+                                String str = username.toString();
+                                opertator = new String(Base64.getDecoder().decode(str), StandardCharsets.UTF_8);
+                            }
+
+                        }
                         loginLog.setOperator(opertator);
                         boolean ipAddressQuery = SpringContext.getProperties("app.login-log-ip-address-query", "true").equals("true");
                         if (ipAddressQuery) {
                             String ip = KClientContext.getContext().getIp();
                             String address = IpUtils.getAddressByIp(ip);
-                            loginLog.setIp(ip + ":" + address);
+                            loginLog.setAddress(address);
                         }
-                        else {
-                            loginLog.setIp(KClientContext.getContext().getIp());
-                        }
+                        loginLog.setIp(KClientContext.getContext().getIp());
                         loginLog.setResponseCode(responseCode);
                         loginLog.setTimes(takeTime);
                         if (StringUtils.isEmpty(errorMessage) && KClientContext.getContext() != null) {

@@ -33,4 +33,7 @@ public interface SysLoginLogService extends BaseService {
      * @param argv 参数
      */
     void export(SysLoginLogQueryArgv argv);
+
+//
+//    void testTran();
 }

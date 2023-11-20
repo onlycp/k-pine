@@ -26,6 +26,8 @@ public class SysLoginLogRet extends BaseSimpleRet {
     private String operator;
     /** ip **/
     private String ip;
+    /** address **/
+    private String address;
     /**  耗时 **/
     private int times;
     /** 请求内容体 **/

@@ -307,7 +307,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
        @SuppressWarnings("all")
     private void validateFilePermission(String id, String path) {
         // 拼接完整的文件路径
-        String basePath = SpringContext.getProperties("file.bash-path", "");
+        String basePath = SpringContext.getProperties("file.base-path", "");
         if (StringUtils.isNotEmpty(basePath)) {
             basePath += File.separator;
         }
@@ -330,8 +330,10 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         // 获取所有路径配置
         Set<String> paths = new HashSet<>();
         for (String key: groupProperties.getValues().keySet()) {
-            String subKey = key.substring(key.indexOf("app.file-permission.") + 1);
+
+            String subKey = key.replace("app.file-permission.", "");
             String dir = basePath + subKey;
+
             File file = new File(fullPath);
             File directory = new File(dir);
             if (file.getAbsolutePath().startsWith(directory.getAbsolutePath())) {
@@ -340,12 +342,20 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                     // 获取视图模型
                     KFlowContext context = KFlowContext.createBaseContext( "{}",  "{}");
                     Map<String,Object> params = JsonUtil.beanToMap(fileDecryptInfo);
+                    log.info("验证文件权限，文件ID：{}，文件路径：{}，文件权限流程ID：{}", id, path, flowId);
 
-                    if(KClientContext.getContext().getUserInfo() == null) {
-                        throw BusinessException.serviceThrow("此文件需要登录才允许访问");
+                    if (StringUtils.isNotEmpty(subKey)) {
+                        if(KClientContext.getContext().getUserInfo() == null) {
+                            throw BusinessException.serviceThrow("此文件需要登录才允许访问");
+                        }
                     }
+
                     // 执行文件权限流程
                     KdbFlowResult result = KdbFlowExecutor.getInstance().execute(flowId, "", params, context, false, false);
+                    if ( result.getData() instanceof ErrorResult) {
+                        ErrorResult errorResult = (ErrorResult)result.getData();
+                        throw BusinessException.serviceThrow(errorResult.getMessage());
+                    }
                     // 获取结果数据
                     Map<String, Object> data = (Map<String, Object>)result.getData();
                     boolean success = data.get("success") == null? false : (boolean)data.get("success");;

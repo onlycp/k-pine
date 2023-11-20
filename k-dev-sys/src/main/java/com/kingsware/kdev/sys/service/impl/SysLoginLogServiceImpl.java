@@ -7,6 +7,7 @@ import com.kingsware.kdev.core.excel.KExcel;
 import com.kingsware.kdev.core.excel.RegionDefine;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
+import com.kingsware.kdev.core.orm.annotation.Transactional;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysLoginLogQueryArgv;
@@ -45,7 +46,7 @@ public class SysLoginLogServiceImpl extends BaseServiceImpl implements SysLoginL
     public PageDataRet<SysLoginLogRet> query(SysLoginLogQueryArgv argv) {
         // 拼装sql
         // 配置列表不显示ip，以免泄漏
-        SqlWrapper wrapper = new SqlWrapper("select id, operate_time, operator, times, response_code, response_message, when_created from sys_login_log where 1=1 ");
+        SqlWrapper wrapper = new SqlWrapper("select id, operate_time, operator, times, response_code, response_message, when_created, ip, address from sys_login_log where 1=1 ");
         // 拼装查询sql
         if (StringUtils.isNotEmpty(argv.getOperator())) {
             wrapper.addCondition("operator", Op.LIKE, "%" +argv.getOperator() +"%");
@@ -85,5 +86,13 @@ public class SysLoginLogServiceImpl extends BaseServiceImpl implements SysLoginL
         KExcel kExcel = KExcel.fromDataList("登录日志.xls", "登录日志", defineList, pageDataRet.getList());
         ExcelWorker.getInstance().writeToWeb(kExcel);
     }
+
+//    @Override
+//    @Transactional
+//    public void testTran() {
+//        DB.executeUpdateSql("delete from t_t where 1=1");
+//        DB.executeUpdateSql("delete from t_t2222 where 1=1");
+//    }
+//
 
 }

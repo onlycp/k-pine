@@ -421,7 +421,9 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 Map<String, Object> flowArgvMap = new HashMap<>(argv);
                 flowArgvMap.put("authId", sysAuthSource.getId());
                 // 调用流程
+                log.info("流程执行参数:{}", JsonUtil.toJson(flowArgvMap));
                 KdbFlowResult result = KdbFlowExecutor.getInstance().execute(sysAuthSource.getLogicFlowId(), "", flowArgvMap, context, false, false);
+                log.info("流程执行参数:{}, 返回结果:{}", JsonUtil.toJson(flowArgvMap), JsonUtil.toJson(result));
                 if (result.getData() instanceof ErrorResult) {
                     ErrorResult errorResult = (ErrorResult) result.getData();
                     throw BusinessException.serviceThrow(errorResult.getMessage());
