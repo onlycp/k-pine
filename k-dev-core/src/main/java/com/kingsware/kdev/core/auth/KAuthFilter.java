@@ -1,8 +1,6 @@
 package com.kingsware.kdev.core.auth;
 
-import com.kingsware.kdev.core.bean.ApiDefine;
-import com.kingsware.kdev.core.bean.BaseRet;
-import com.kingsware.kdev.core.bean.NoticeMessage;
+import com.kingsware.kdev.core.bean.*;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.cache.api.ApiManager;
 import com.kingsware.kdev.core.cache.controller.ControllerManager;
@@ -31,6 +29,7 @@ import com.kingsware.kdev.core.kmq.KmqMessageCenter;
 import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.model.SysLoginLog;
 import com.kingsware.kdev.core.model.SysOperateLog;
+import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.core.util.jWi.JWildcard;
@@ -69,6 +68,7 @@ public class KAuthFilter implements Filter {
     private ControllerManager controllerManager;
     @Autowired
     private UiConfig uiConfig;
+
     /** 忽略的接口 **/
     private static final String ignoreApi = ":open";
     /** 开放接口 **/
@@ -420,16 +420,13 @@ public class KAuthFilter implements Filter {
                     }
 
                     // 保存登录日志
-                    if ((callType == CallType.CONTROLLER && "登录".equals(apiDefine.getName())) || url.contains("login") && argvMap.containsKey("username") && request.getMethod().equalsIgnoreCase("POST")) {
+                    if ((callType == CallType.CONTROLLER && "登录".equals(apiDefine.getName()))
+                            || (url.contains("login") && argvMap.containsKey("username") && request.getMethod().equalsIgnoreCase("POST"))
+                            || (url.contains("sys-sso") && request.getMethod().equalsIgnoreCase("POST"))) {
                         // 获取表单信息
                         SysLoginLog loginLog = new SysLoginLog();
                         if(StringUtils.isEmpty(opertator)) {
-                            Object username = argvMap.get("username");
-                            if (username != null) {
-                                String str = username.toString();
-                                opertator = new String(Base64.getDecoder().decode(str), StandardCharsets.UTF_8);
-                            }
-
+                            opertator = getLoginUserId(argvMap);
                         }
                         loginLog.setOperator(opertator);
                         boolean ipAddressQuery = SpringContext.getProperties("app.login-log-ip-address-query", "true").equals("true");
@@ -696,6 +693,48 @@ public class KAuthFilter implements Filter {
 
         }
 
+    }
+
+    private String getLoginUserId(Map<String, Object> argvMap) {
+        Object username = argvMap.get("username");
+        if (username != null) {
+            String str = username.toString();
+            return new String(Base64.getDecoder().decode(str), StandardCharsets.UTF_8);
+        }
+        Object uid = argvMap.get("uid");
+        Object type = argvMap.get("type");
+        if (type != null && uid != null) {
+            if (1 == (Integer) type) {
+                String uidStr = uid.toString();
+                if (isBase64(uidStr)) {
+                    return new String(Base64.getDecoder().decode(uidStr), StandardCharsets.UTF_8);
+                }
+                return uid.toString();
+            }
+            if (2 == (Integer) type) {
+                BaseUserInfo userList = DB.findOne(BaseUserInfo.class, "select username from sys_user where id=?", uid);
+                if (userList != null) {
+                    return userList.getUsername();
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * 判断一个字符串是否为base64字符串
+     */
+    private boolean isBase64(String str) {
+        if (str == null || str.trim().length() == 0) {
+            return false;
+        }
+        try {
+            Base64.getDecoder().decode(str);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     /**
