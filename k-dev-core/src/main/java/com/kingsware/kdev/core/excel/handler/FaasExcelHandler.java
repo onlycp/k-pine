@@ -7,6 +7,7 @@ import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.KdbRet;
 import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
+import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONObject;
 
@@ -35,7 +36,7 @@ public class FaasExcelHandler implements KExcelHandler{
             String baseStr = JsonUtil.toJson(excel);
             // 创建目录
 //            log.info("excel文件写入中，文件内容:{}", baseStr);
-            String script = String.format("kutils.fileDirectory('upload/kExcel');koffices.renderByKExcel('%s');", escapeString(baseStr));
+            String script = String.format("kutils.fileDirectory('upload/kExcel');koffices.renderByKExcel('%s');", StringUtils.escapeString(baseStr));
             KdbRet<String> ret = DB.kdbApi().executeScript(script);
             Map<String, Object> map = JsonUtil.toMap(ret.getResponseBody());
             String retBase64 = map.getOrDefault("data", "").toString();
@@ -47,12 +48,6 @@ public class FaasExcelHandler implements KExcelHandler{
             log.info("excel文件写失败，错误原因:{}", e.getMessage());
         }
 
-    }
-
-    // 转义JSON字符串
-    private static String escapeString(String input) {
-        return input.replaceAll("\\\\", "\\\\\\\\")
-                .replaceAll("\"", "\\\\\"");
     }
 
     /**

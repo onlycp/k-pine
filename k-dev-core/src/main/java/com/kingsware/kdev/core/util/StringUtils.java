@@ -103,6 +103,12 @@ public class StringUtils {
         return joinToString(subList, separator);
     }
 
+    // 转义JSON字符串
+    public static String escapeString(String input) {
+        return input.replaceAll("\\\\", "\\\\\\\\")
+                .replaceAll("\"", "\\\\\"");
+    }
+
     /**
      * 获取集合的属性并join
      * @param list
