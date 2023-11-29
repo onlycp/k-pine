@@ -24,7 +24,7 @@ public class DevPine {
     /** 页面信息 **/
     private List<DevPage> pages;
     /** 数据源 **/
-    private List<DataSourceInfo> datasources;
+    private List<DataSourceInfo> sources;
     /** 接口 **/
     private List<SysApi> apis;
     /** 函数 **/
