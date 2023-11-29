@@ -11,6 +11,7 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.cache.access.AccessManager;
 import com.kingsware.kdev.core.cache.api.ApiTask;
 import com.kingsware.kdev.core.cache.kcache.KCacheManager;
+import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
@@ -33,14 +34,18 @@ import com.kingsware.kdev.sys.ret.DevApplicationRet;
 import com.kingsware.kdev.sys.service.DevApplicationService;
 import com.kingsware.kdev.sys.service.SysFileService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cglib.core.ReflectUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 业务实现类
@@ -168,10 +173,10 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         if (devPine.getInfo() != null && StringUtils.isNotEmpty(devPine.getInfo().getId())) {
             appCount = DB.saveOrUpdate(devPine.getInfo(), DevApplication.class);
             // 处理团队关联
-            if(StringUtils.isNotEmpty(devPine.getInfo().getId()) && StringUtils.isNotEmpty(teamId)) {
+            if (StringUtils.isNotEmpty(devPine.getInfo().getId()) && StringUtils.isNotEmpty(teamId)) {
                 // 查找当前是否已入库
-                long  cnt = DB.findCount("select count(1) cnt from dev_team_app where app_id=? and team_id=?",devPine.getInfo().getId(), teamId);
-                if (cnt  == 0) {
+                long cnt = DB.findCount("select count(1) cnt from dev_team_app where app_id=? and team_id=?", devPine.getInfo().getId(), teamId);
+                if (cnt == 0) {
                     DevTeamApp devTeamApp = new DevTeamApp();
                     devTeamApp.setAppId(devPine.getInfo().getId());
                     devTeamApp.setTeamType(0);
@@ -181,6 +186,20 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             }
         }
         log.info("完成导入应用信息：{}", appCount);
+        // 获取所有的数据源
+        List<DataSourceInfo> dataSourceInfos = DB.kdbApi().queryDataSource(new DataSourceQueryArgv());
+        for (DataSourceInfo fileSource : devPine.getSources()) {
+//          // 查看是否已存在
+            try {
+                Optional<DataSourceInfo> optional = dataSourceInfos.stream().filter(it -> it.getSourceName().equals(fileSource.getSourceName())).findFirst();
+                log.info("数据源初始化新增: {}", fileSource);
+                DB.kdbApi().addDataSource(fileSource);
+            } catch (Exception e) {
+
+            }
+
+        }
+
         // 处理页面
         long pageCount = DB.batchSaveOrUpdate(devPine.getPages(), DevPage.class);
         log.info("完成导入页面信息：{}", pageCount);
@@ -210,7 +229,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         log.info("完成导入菜单：{}", menuCount);
         // 开发平台角色
         long devRoleCount = 0;
-        if ( appModeProperties.getDev() &&  devPine.getDevRoles() != null && !devPine.getDevRoles().isEmpty()) {
+        if (appModeProperties.getDev() && devPine.getDevRoles() != null && !devPine.getDevRoles().isEmpty()) {
             devRoleCount = DB.batchSaveOrUpdate(devPine.getDevRoles(), SysRole.class);
             log.info("完成导入开发平台角色：{}", devRoleCount);
         }
@@ -218,7 +237,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         // 开发平台角色菜单
         long devRoleMenuCount = 0;
 
-        if ( appModeProperties.getDev() && devPine.getDevRoleMenus() != null && !devPine.getDevRoleMenus().isEmpty()) {
+        if (appModeProperties.getDev() && devPine.getDevRoleMenus() != null && !devPine.getDevRoleMenus().isEmpty()) {
             devRoleMenuCount = DB.batchSaveOrUpdate(devPine.getDevRoleMenus(), SysRoleMenu.class);
             log.info("完成导入开发平台角色菜单：{}", devRoleMenuCount);
         }
@@ -242,8 +261,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                     DB.byName("kingDB").executeUpdateSql(sql, flowInfo.getFlowId(), flowInfo.getName(), flowInfo.getContent(), flowInfo.getDescription());
                 } catch (Exception e) {
                 }
-            }
-            else {
+            } else {
                 EditFlowInfo editFlowInfo = new EditFlowInfo();
                 editFlowInfo.setFlowId(flowInfo.getFlowId());
                 editFlowInfo.setContent(flowInfo.getContent());
@@ -318,9 +336,18 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 }
             }
 
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.warn("导入时发生非关键异常(可忽略)，不影响应用使用：" + e.getMessage());
+        }
+        // uniops处理
+        try {
+            if (LicenseManager.getInstance().isUniopsApp()) {
+                Object bean = SpringContext.getBean("uniOpsServiceImpl");
+                Method method = ReflectionUtils.findMethod(bean.getClass(), "publishMenu", String.class);
+                ReflectionUtils.invokeMethod(method, bean, json);
+            }
+        } catch (Exception e) {
+            log.warn("uniops导入时发生非关键异常(可忽略)，不影响应用使用：" + e.getMessage());
         }
 
         String result = String.format("导入应用数:%d, 页面数:%d, 接口数:%d, 字典分类数:%d, 字典项数:%d, 任务调度数:%d, 系统配置数:%d， 菜单数:%d, pine逻辑:%d, faas逻辑:%d, 函数数:%d, 开发平台角色:%d, 开发平台角色菜单:%d"
@@ -330,7 +357,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         // 清理缓存
         KCacheManager.getInstance().clear();
         log.info(result);
-        return result;
+        return "";
 
     }
 
@@ -376,9 +403,15 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 String[] ids = argv.getLocalFileIds().split(",");
                 for (String fileId : ids) {
                     SysFile sysFile = DB.findById(SysFile.class, fileId);
-                    File file = sysFileService.getFaasFile(sysFile.getFilePath());
-                    String json = FileUtils.readFile(file);
-                    file.delete();
+                    String json = "";
+                    if(sysFile.getSaveType() == 2) {
+                        File file = sysFileService.getFaasFile(sysFile.getFilePath());
+                        json = FileUtils.readFile(file);
+                        file.delete();
+                    }
+                    else {
+                        json = FileUtils.readFile(new File(SpringContext.getProperties("file.base-path", "/") + sysFile.getFilePath()));
+                    }
                     logStack.addMessage("开始安装应用:" + sysFile.getFileOriginalName());
                     String result = importApp(json, argv.getTeamId());
                     logStack.addMessage("应用安装完成：" + result);

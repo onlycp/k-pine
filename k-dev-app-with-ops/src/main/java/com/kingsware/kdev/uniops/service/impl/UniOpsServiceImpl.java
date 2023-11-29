@@ -166,6 +166,7 @@ public class UniOpsServiceImpl implements UniOpsService {
 
         try {
             // 注册菜单
+            // TODO 发布菜单开关
             String publishMenuEnable = SpringContext.getProperties("uniops.publish.menu", "true");
             if (!"true".equalsIgnoreCase(publishMenuEnable)) {
                 return;
@@ -181,6 +182,7 @@ public class UniOpsServiceImpl implements UniOpsService {
             // 找到一级菜单
             for (SysMenu menu: uniopsMenus) {
                 if (StringUtils.isEmpty(menu.getParentId())) {
+                    menu.setOrderNum(999);
                     UniOpsMenu um = toUniOpsMenu(menu);
                     recurseMenu(um, uniopsMenus);
                     uMenus.add(um);
@@ -188,7 +190,7 @@ public class UniOpsServiceImpl implements UniOpsService {
             }
             // 生成临时文件
             Path jsonPath = Files.createTempFile("uniops-menu", "json");
-            FileUtils.writeToFile(jsonPath.toFile(), JsonUtil.toJson(uMenus).getBytes(StandardCharsets.UTF_8));
+            FileUtils.writeToFile(jsonPath.toFile(), Objects.requireNonNull(JsonUtil.toJson(uMenus)).getBytes(StandardCharsets.UTF_8));
             // 导入到UniOps
             String uniopsServer = SpringContext.getProperties("uniops.master.url", "http://localhost:8080");
             String url = uniopsServer + "/ops/system/menu/import";

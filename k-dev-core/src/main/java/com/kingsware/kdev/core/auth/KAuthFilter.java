@@ -88,12 +88,13 @@ public class KAuthFilter implements Filter {
     private List<String> ignoreUrls;
 
 
+
     /**
      * 判断url是否包括配置的url标识
      * @param url url
      * @return  是否
      */
-    private boolean containUrl(String url) {
+    private boolean containUrl(HttpServletRequest request, String url) {
         for (String item: ignoreUrls) {
             if (url.contains(item)) {
                 return true;
@@ -101,6 +102,7 @@ public class KAuthFilter implements Filter {
         }
         return false;
     }
+
 
     @Override
     /**
@@ -118,7 +120,7 @@ public class KAuthFilter implements Filter {
         String url = request.getRequestURI();
 //        log.info("上下文:{},路径:{} -00", request.getContextPath(), request.getRequestURI()  );
         initContext(request, response);
-        if (containUrl(url) ) {
+        if (containUrl(request, url) ) {
 
             filterChain.doFilter(request, response);
             return;
@@ -202,12 +204,12 @@ public class KAuthFilter implements Filter {
                     callType = CallType.KFLOW;
                     apiCode = api.getApiCode();
                     // 是否允许跳过权限
-                    ignore = StringUtils.isNotEmpty(api.getApiCode()) && apiCode.startsWith(ignoreApi);
+                    ignore = (StringUtils.isNotEmpty(api.getApiCode()) && apiCode.startsWith(ignoreApi)) || ServletUtil.isRefererRule(request);
                 } else {
                     if (apiDefine != null) {
                         apiCode = apiDefine.getApiCode();
-                        ignore = apiDefine.isIgnore();
-                        dev = apiDefine.isDev();
+                        ignore = apiDefine.isIgnore() || ServletUtil.isRefererRule(request);
+                        dev = apiDefine.isDev() && ! ServletUtil.isRefererRule(request);
                     } else {
     //                    log.info("上下文-2:{},路径:{}", contextPath, request.getRequestURI()  );
                         filterChain.doFilter(wrapperRequest, response);
@@ -310,8 +312,8 @@ public class KAuthFilter implements Filter {
                 recordMap.put("requestParams", StringUtils.retrench(JsonUtil.toJson(argvMap), 1000));
                 recordMap.put("requestTime", now);
                 recordMap.put("useTime", System.currentTimeMillis() - t1);
-                recordMap.put("success", StringUtils.isNotEmpty(errorMessage) ? 0: 1);
-                recordMap.put("errorMessage", StringUtils.retrench(errorMessage, 1000));
+                recordMap.put("success", StringUtils.isNotEmpty(KClientContext.getContext().getErrorMessage()) ? 0: 1);
+                recordMap.put("errorMessage", StringUtils.retrench(KClientContext.getContext().getErrorMessage(), 255));
                 recordMap.put("requestIp", ServletUtil.getClientIp(request));
                 KmqMessageCenter.getInstance().produce("openApiQueue",  JsonUtil.toJson(recordMap));
             }
@@ -431,7 +433,7 @@ public class KAuthFilter implements Filter {
                         loginLog.setOperator(opertator);
                         boolean ipAddressQuery = SpringContext.getProperties("app.login-log-ip-address-query", "true").equals("true");
                         if (ipAddressQuery) {
-                            String ip = KClientContext.getContext().getIp();
+                            String ip = getLoginIp(argvMap);
                             String address = IpUtils.getAddressByIp(ip);
                             loginLog.setAddress(address);
                         }
@@ -457,6 +459,13 @@ public class KAuthFilter implements Filter {
             }
         }
 
+    }
+
+    private String getLoginIp(Map<String, Object> argvMap) {
+        if (argvMap.containsKey("ip")) {
+            return (String) argvMap.get("ip");
+        }
+        return KClientContext.getContext().getIp();
     }
 
     // 数据脱敏
@@ -705,10 +714,6 @@ public class KAuthFilter implements Filter {
         Object type = argvMap.get("type");
         if (type != null && uid != null) {
             if (1 == (Integer) type) {
-                String uidStr = uid.toString();
-                if (isBase64(uidStr)) {
-                    return new String(Base64.getDecoder().decode(uidStr), StandardCharsets.UTF_8);
-                }
                 return uid.toString();
             }
             if (2 == (Integer) type) {

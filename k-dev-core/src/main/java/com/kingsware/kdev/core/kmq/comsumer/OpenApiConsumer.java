@@ -21,7 +21,8 @@ public class OpenApiConsumer implements KmqConsumer {
         KFlowContext ic = KFlowContext.createBaseContext("{}", "{}");
         for (String payload: payloads) {
             Map<String, Object> recordMap = JsonUtil.toMap(payload);
-            KdbFlowExecutor.getInstance().execute("72caaa23e3744781b8e5d7565a6e23f7", "", recordMap, ic, false, true);
+            KdbFlowResult rs = KdbFlowExecutor.getInstance().execute("72caaa23e3744781b8e5d7565a6e23f7", "", recordMap, ic, false, true);
+            System.out.println(JsonUtil.toJson(rs));
         }
     }
 

@@ -45,7 +45,7 @@ public class HttpUtil {
 //    private static final Dns SYSTEM = Dns.SYSTEM;
 //
 //
-//    static {
+    static {
 //        if (client == null) {
 //            client = new OkHttpClient.Builder()
 //                    .dns(new Dns() {
@@ -61,8 +61,8 @@ public class HttpUtil {
 //                    .followRedirects(true)
 //                   .build();
 //        }
-//        loadPlugins();
-//    }
+        loadPlugins();
+    }
 
     /**
      * 私有构造
@@ -589,7 +589,8 @@ public class HttpUtil {
 
         HttpURLConnection connection = null;
         try {
-
+//            log.info("流式下载文件开始:" + downloadUrl);
+//            ServletUtil.response().sendRedirect("/download/YeCongOA_784c88fa4c504b9285923a6d9bc9c1c3.zip?path=%2Fusr%2Flocal%2Fkfaas%2Fserver%2Fupload%2Fpackage");
             URL url = new URL(downloadUrl);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestProperty("connection", "Keep-Alive");
@@ -609,10 +610,12 @@ public class HttpUtil {
 
             ServletUtil.response().setContentType(APPLICATION_OCTET_STREAM_VALUE);
             ServletUtil.response().setHeader("Content-Disposition", "attachment;filename=" + UriEncoder.encode(fileName));
-            byte[] buf = new byte[2 * 1024];
+            byte[] buf = new byte[512 * 1024];
             int len;
+            OutputStream out = ServletUtil.response().getOutputStream();
             while ((len = is.read(buf)) != -1) {
-                ServletUtil.response().getOutputStream().write(buf, 0, len);
+                out.write(buf, 0, len);
+                out.flush();
                 //ServletUtil.response().getOutputStream().flush();
             }
             log.info("流式下载文件:" + fileName);

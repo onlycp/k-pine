@@ -9,6 +9,7 @@ import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.cache.config.ConfigManager;
 import com.kingsware.kdev.core.cache.config.SysConfigInfo;
 import com.kingsware.kdev.core.cache.dict.DictManager;
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.kflow.bean.ComplexValue;
@@ -443,6 +444,9 @@ public class FlowUtils {
         BaseRet<?> ret = toJsonResult(result, log);
         Map<String, Object> map = new HashMap<>();
         map.put("code", ret.getCode());
+        if(ret.getCode() != 200 || ret.getCode() != 0) {
+            KClientContext.getContext().setErrorMessage(ret.getMessage());
+        }
         map.put("message", ret.getMessage());
         map.put("data", ret.getData());
         if (StringUtils.isNotEmpty(ret.getLog())) {

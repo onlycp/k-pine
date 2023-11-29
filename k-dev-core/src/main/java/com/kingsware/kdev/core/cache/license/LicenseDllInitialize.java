@@ -17,6 +17,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -84,6 +86,7 @@ public class LicenseDllInitialize implements SystemInitialize {
                         log.info("开始拷贝动态库2");
                         Files.write(new File("./" + targetFileName).toPath(), StreamUtils.copyToByteArray(res.getInputStream()));
                     }
+                    Files.copy(Paths.get(targetFileName), Paths.get("/usr/lib64/" + new File(targetFileName).getName()));
                     System.load(new File(targetFileName).getAbsolutePath());
 
 

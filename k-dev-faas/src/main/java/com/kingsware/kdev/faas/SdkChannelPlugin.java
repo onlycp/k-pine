@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +36,11 @@ public class SdkChannelPlugin implements FaasChannelPlugin {
 
     @Value("${faas.lib-path:../faas/lib}")
     private String libPath;
+
+    @PostConstruct
+    public void init() {
+        initSdk();
+    }
 
 
     /**

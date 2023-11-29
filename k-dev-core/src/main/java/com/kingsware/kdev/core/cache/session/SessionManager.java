@@ -101,8 +101,9 @@ public class SessionManager {
                     return true;
                 }
             }
+            return false;
         }
-        return false;
+        return true;
     }
 
     /**

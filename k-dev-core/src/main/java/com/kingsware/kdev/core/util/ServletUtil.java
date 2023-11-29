@@ -50,6 +50,26 @@ public class ServletUtil {
         return ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
     }
 
+
+    /**
+     * 判断referer是否包含配置的url标识
+     * @return  是否
+     */
+    public static boolean isRefererRule(HttpServletRequest request) {
+        String referer = request.getHeader("referer");
+        if (StringUtils.isEmpty(referer)) {
+            return false;
+        }
+        String refererUrl = SpringContext.getProperties("app.ignore.referer", "");
+        String[] refererUrls = refererUrl.split(";");
+        for (String item: refererUrls) {
+            if (referer.contains(item)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * 获取http请求
      * @return http响应

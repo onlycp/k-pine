@@ -23,7 +23,7 @@ public class DevApiAspect {
 
     @Around("execution(public * com.kingsware..web.*.*(..)) && @annotation(dev)")
     public Object process(ProceedingJoinPoint pjd, Dev dev) throws Throwable {
-        if (modeDev) {
+        if (modeDev || ServletUtil.isRefererRule(ServletUtil.request())) {
             return pjd.proceed();
         }
         else {
