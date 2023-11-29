@@ -290,6 +290,13 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         KdbApi api = (KdbApi) (DB.getDefault());
         api.editFlow(info);
 
+        // 保存到数据库
+        SysLogicFlow sysLogicFlow = DB.findOne(SysLogicFlow.class, Expr.builder().add("flowId", "=", argv.getId()).build());
+        if (sysLogicFlow != null) {
+            // 更新修改时间
+            DB.update(sysLogicFlow);
+        }
+
         // 保存历史记录
         SysLogicHistory flowHistory = new SysLogicHistory();
         flowHistory.setFlowId(argv.getId());
