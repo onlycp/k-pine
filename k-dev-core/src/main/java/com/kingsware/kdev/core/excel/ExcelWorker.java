@@ -6,6 +6,7 @@ import com.kingsware.kdev.core.excel.handler.FaasExcelHandler;
 import com.kingsware.kdev.core.excel.handler.KExcelHandler;
 //import com.kingsware.kdev.core.excel.handler.PoiExcelHandler;
 import com.kingsware.kdev.core.util.BeanUtils;
+import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.SneakyThrows;
@@ -74,6 +75,7 @@ public class ExcelWorker {
             response.setContentType("application/octet-stream");
             response.setCharacterEncoding("utf-8");
             response.setHeader("Content-Disposition", "attachment;filename=" + UriEncoder.encode(excel.getFileNme()));
+            log.info("Length:" +JsonUtil.toJson(excel).length());
             this.excelHandler.write(excel, response.getOutputStream());
         }
         catch (Exception e) {
