@@ -616,9 +616,10 @@ public class HttpUtil {
             while ((len = is.read(buf)) != -1) {
                 out.write(buf, 0, len);
                 out.flush();
+
                 //ServletUtil.response().getOutputStream().flush();
             }
-            log.info("流式下载文件:" + fileName);
+//            log.info("流式下载文件:" + fileName);
             ServletUtil.response().getOutputStream().flush();
         } catch (Exception e) {
             //log.error("error", e);

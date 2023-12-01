@@ -5,6 +5,7 @@ import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.BeanUtils;
+import com.kingsware.kdev.core.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Timestamp;
@@ -41,7 +42,22 @@ public class SessionManager {
         Set<TokenSession> onlineUsers = sessionMapping.computeIfAbsent(onlineUser.getUserId(), key -> new HashSet<>());
         TokenSession tokenSession = BeanUtils.copyObject(onlineUser, TokenSession.class);
         tokenSession.setActiveTime(onlineUser.getLoginTime());
-        onlineUsers.add(tokenSession);
+        boolean isNew = true;
+        for (TokenSession ts: onlineUsers) {
+            if (ts.getLoginToken().equals(tokenSession.getLoginToken())) {
+                isNew = false;
+                break;
+            }
+        }
+        if (isNew) {
+//            log.info("session添加1:" + tokenSession.getId());
+            onlineUsers.add(tokenSession);
+//            log.info("session添加完成1:" + JsonUtil.toJson(sessionMapping.get(onlineUser.getUserId())));
+            sessionMapping.put(onlineUser.getUserId(), onlineUsers);
+//            log.info("session添加完成2:" + JsonUtil.toJson(sessionMapping.get(onlineUser.getUserId())));
+//            log.info("session添加2:" + tokenSession.getId());
+        }
+
     }
 
     /**
@@ -96,14 +112,12 @@ public class SessionManager {
     public boolean checkSession(String userId, String loginToken) {
         if (sessionMapping.containsKey(userId)) {
             Set<TokenSession> onlineUsers = sessionMapping.get(userId);
-            for (TokenSession onlineUser: onlineUsers) {
-                if (onlineUser.getLoginToken().equals(loginToken)) {
-                    return true;
-                }
+            if(onlineUsers.size() > 0) {
+                TokenSession ts = onlineUsers.stream().max(Comparator.comparing(TokenSession::getLoginTime)).get();
+                return ts.getLoginToken().equals(loginToken);
             }
-            return false;
         }
-        return true;
+        return false;
     }
 
     /**

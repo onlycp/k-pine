@@ -53,8 +53,8 @@ public class SdkChannelPlugin implements FaasChannelPlugin {
         inited = true;
         JSONObject config = new JSONObject();
         config.put("mode", "sdk");
-        config.put("ext.path", extPath);
-        config.put("lib.path", libPath);
+//        config.put("ext.path", extPath);
+//        config.put("lib.path", libPath);
         config.put("profiler.open", false);
         FEnv.setConfig(config);
         log.info("插件加载准备:{}",  name());

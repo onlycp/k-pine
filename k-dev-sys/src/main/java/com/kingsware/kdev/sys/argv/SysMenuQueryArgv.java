@@ -35,5 +35,8 @@ public class SysMenuQueryArgv extends BasePageArgv {
     private Integer mainMode;
     /** 是否开发者模式 **/
     private Boolean dev;
+    /** 排除平台  **/
+    private Boolean withoutPlat = false;
+
 
 }

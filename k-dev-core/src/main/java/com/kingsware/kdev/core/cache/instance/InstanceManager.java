@@ -130,11 +130,13 @@ public class InstanceManager {
      * @param message   消息
      */
     public boolean sendMessage(SysInstance instance, String topic, String message) {
-        if (instance.instanceName().equalsIgnoreCase(masterInstance().instanceName())) {
+        if (instance.instanceName().equalsIgnoreCase(SystemUtil.getHost().instanceName())) {
             InstanceService instanceService = SpringContext.getBean(InstanceService.class);
+//            log.info("本机接收信息:{}-{}-{}", instance.instanceName(), topic, message);
             instanceService.recvMessage(topic, message);
         }
         else  {
+//            log.info("其他实例接收信息:{}-{}-{}", instance.instanceName(), topic, message);
             String contextPath = SpringContext.getProperties("server.servlet.context-path", "/");
             if (StringUtils.isEmpty(contextPath)) {
                 contextPath = "/";
@@ -150,6 +152,7 @@ public class InstanceManager {
                 body.put("message", message);
                 String res = HttpUtil.doPost(url, JsonUtil.toJson(body), new HashMap<>());
                 BaseRet<?> ret = JsonUtil.toBean(res, BaseRet.class);
+//                log.info("session-实例：{}, {} 消息发送成功:{},返回信息:{}", instance.instanceName(),url, JsonUtil.toJson(body), JsonUtil.toJson(ret));
                 if (ret.getCode() != 200) {
                     log.error("实例：{} 消息发送失败，系统将重试,异常信息:{}", instance.instanceName(), ret.getMessage());
                     return false;

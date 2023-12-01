@@ -1,5 +1,6 @@
 //package com.kingsware.kdev.core.proxy;
 //
+//import com.kingsware.kdev.core.context.SpringContext;
 //import org.springframework.boot.context.properties.bind.BindResult;
 //import org.springframework.boot.context.properties.bind.Binder;
 //import org.springframework.boot.context.properties.source.ConfigurationPropertySources;
@@ -8,33 +9,33 @@
 //import org.springframework.context.annotation.Bean;
 //import org.springframework.context.annotation.Configuration;
 //import org.springframework.core.env.Environment;
+//import org.springframework.stereotype.Component;
 //
+//import javax.annotation.PostConstruct;
+//import javax.annotation.Resource;
 //import java.util.Properties;
 //
 ///**
 // * @author chenp
 // * @date 2023/11/24
 // */
-//@Configuration
-//public class SolrProxyServletConfiguration implements EnvironmentAware {
+//@Component
+//public class SolrProxyServletConfiguration {
 //
-//    private BindResult bindResult;
+//    @Resource
+//    private ProxyProperties proxyProperties;
 //
-//    @Bean
-//    public ServletRegistrationBean servletRegistrationBean() {
-//        Properties properties= (Properties) bindResult.get();
-//        ServletRegistrationBean servletRegistrationBean = new ServletRegistrationBean(new ProxyServlet(), properties.getProperty("servlet_url"));
-//        servletRegistrationBean.addInitParameter(ProxyServlet.P_TARGET_URI, properties.getProperty("target_url"));
-//        servletRegistrationBean.addInitParameter(ProxyServlet.P_LOG, properties.getProperty("logging_enabled", "false"));
-//        return servletRegistrationBean;
+//    @PostConstruct
+//    public void servletRegistrationBean() {
+//        if(proxyProperties == null || proxyProperties.getProxies() == null || proxyProperties.getProxies().size() == 0) {
+//            return;
+//        }
+//        for (ProxyConfig proxyConfig : proxyProperties.getProxies()) {
+//            ServletRegistrationBean<?> servletRegistrationBean = new ServletRegistrationBean<>(new ProxyServlet(), proxyConfig.getLocation());
+//            servletRegistrationBean.addInitParameter(ProxyServlet.P_TARGET_URI, proxyConfig.getProxyPass());
+//            servletRegistrationBean.addInitParameter(ProxyServlet.P_LOG, "true");
+//            SpringContext.registerBean("servletRegistrationBean", servletRegistrationBean);
+//        }
 //    }
 //
-//
-//    @Override
-//    public void setEnvironment(Environment environment) {
-//        Iterable sources = ConfigurationPropertySources.get(environment);
-//        Binder binder = new Binder(sources);
-//        BindResult bindResult = binder.bind("proxy.solr", Properties.class);
-//        this.bindResult = bindResult;
-//    }
 //}

@@ -8,6 +8,7 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.cache.config.ConfigManager;
 import com.kingsware.kdev.core.cache.config.SysConfigInfo;
 import com.kingsware.kdev.core.cache.core.SysCacheService;
+import com.kingsware.kdev.core.cache.instance.InstanceManager;
 import com.kingsware.kdev.core.cache.permssion.PermissionManager;
 import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.constants.PropertiesConstant;
@@ -512,13 +513,21 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             // 保存登录会话
             // 如果只允许一个登录会话, 那么先将之前的会话删除
             if (appAuthProperties.getLoginSessionOne()) {
+                List<SysOnlineUser> onlineUsers = DB.findList(SysOnlineUser.class, "select * from sys_online_user  where user_id =?", model.getId());
                 DB.executeUpdateSql("delete from sys_online_user where user_id = ?", model.getId());
-                SessionManager.getInstance().removeByUserId(model.getId());
+                for (SysOnlineUser onlineUser : onlineUsers) {
+                    // 发送上线通知
+                    InstanceManager.getInstance().broadMessage("session-remove", JsonUtil.toJson(onlineUser));
+//                    SessionManager.getInstance().removeSession(onlineUser.getUserId(), onlineUser.getLoginToken());
+                }
+
+//                SessionManager.getInstance().removeByUserId(model.getId());
             }
             // 获取用户的角色权限
 
             // 创建在线用户
             SysOnlineUser onlineUser = new SysOnlineUser();
+            onlineUser.setId(StringUtils.getUUID());
             onlineUser.setUserId(model.getId());
             onlineUser.setLoginIp(KClientContext.getContext().getIp());
             onlineUser.setLoginTime(new Timestamp(System.currentTimeMillis()));
@@ -529,9 +538,10 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             } else {
                 onlineUser.setExpireTime(new Timestamp(System.currentTimeMillis() + ((long) appAuthProperties.getMockSessionExpireMinutes() * 60 * 1000)));
             }
+            // 保存
             DB.save(onlineUser);
-            // 保存到缓存
-            SessionManager.getInstance().addSession(onlineUser);
+            // 发送上线通知
+            InstanceManager.getInstance().broadMessage("session-add", JsonUtil.toJson(onlineUser));
             // 加载权限
             PermissionManager.getInstance().refreshPermissions(userInfo.getRoleIds());
             afterParams.put("isLogined", true);
@@ -671,6 +681,8 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         SysOnlineUser onlineUser = DB.findOne(SysOnlineUser.class, Expr.builder().add("loginToken", "=", KClientContext.getContext().getToken()).build());
         if (onlineUser != null) {
             DB.delete(onlineUser);
+            // 发送上线通知
+            InstanceManager.getInstance().broadMessage("session-remove", JsonUtil.toJson(onlineUser));
             SessionManager.getInstance().removeSession(onlineUser.getUserId(), onlineUser.getLoginToken());
         }
     }

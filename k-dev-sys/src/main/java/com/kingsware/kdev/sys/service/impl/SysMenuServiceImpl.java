@@ -175,6 +175,9 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
         if (argv.getStatus() != null) {
             wrapper.addCondition("status", Op.EQ, argv.getStatus());
         }
+        if (argv.getWithoutPlat()) {
+            wrapper.appendSql("and (app_id != null and app_id !=? and app_id!=?)", "064b3b44b85a45fe87fcce88d72b2519", "e27352b192e446fda818c03e79f28e6b");
+        }
 
         // 查询所有相关的部门
         List<SysMenu> menus = DB.findList(SysMenu.class, wrapper.getSql(), wrapper.getParams().toArray());
