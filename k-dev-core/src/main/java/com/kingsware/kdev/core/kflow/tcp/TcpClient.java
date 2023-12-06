@@ -122,7 +122,7 @@ public class TcpClient {
                         try {
                             this.socket.close();
                         } catch (IOException ex) {
-                            throw new RuntimeException(ex);
+                            // throw new RuntimeException(ex);
                         }
                     }
 

@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.util;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
 import com.kingsware.kdev.core.orm.annotation.Column;
@@ -97,6 +98,25 @@ public class JsonUtil {
             return null;
         }
     }
+    /**
+     * 将字符串转为对象
+     * @param bean         源对象
+     * @param <T>          源泛型
+     * @return             json字符串
+     */
+    public static  <T> String toJsonWithoutNull(T bean) {
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_DEFAULT);
+            return objectMapper.writeValueAsString(bean);
+        } catch (JsonProcessingException e) {
+            logger.warn("对象转为字符串失败, 对象:{}", bean);
+            return null;
+        }
+    }
+
+
 
     /**
      * 将map转为对象

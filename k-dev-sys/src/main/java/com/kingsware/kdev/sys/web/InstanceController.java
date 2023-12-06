@@ -7,6 +7,7 @@ import com.kingsware.kdev.sys.argv.InstanceMessage;
 import com.kingsware.kdev.core.cache.instance.InstanceService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +23,7 @@ import javax.annotation.Resource;
  */
 @Api(value = "实例管理", tags = {"实例管理"})
 @RestController
+@Slf4j
 @RequestMapping("/"+ Version.V1 + "/instances")
 public class InstanceController {
 
@@ -32,6 +34,7 @@ public class InstanceController {
     @PostMapping("/recvMessage")
     @ApiIgnore
     public BaseRet<?> recvMessage(@RequestBody InstanceMessage message) {
+//        log.info("应用间通讯: topic:{}, 消息:{}", message.getTopic(), message.getMessage());
         instanceService.recvMessage(message.getTopic(), message.getMessage());
         return BaseRet.success();
     }

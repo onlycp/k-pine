@@ -2,8 +2,10 @@ package com.kingsware.kdev.core.auth;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kingsware.kdev.core.cache.instance.InstanceManager;
 import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.cache.session.TokenSession;
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.UnauthorizedException;
 import com.kingsware.kdev.core.i18n.I18n;
@@ -16,8 +18,11 @@ import com.kingsware.kdev.core.util.StringUtils;
 import io.swagger.annotations.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 令牌工具类，用于生成令牌及令牌验证
@@ -32,6 +37,8 @@ public class TokenUtil {
     public static final String AUTH_HEADER = "Authorization";
     /** 令牌前缀**/
     public static final String AUTH_PREFIX = "Bearer ";
+
+    public static final Set<String> tokenFreshRecords = new HashSet<>();
 
 
     private TokenUtil() {
@@ -171,10 +178,28 @@ public class TokenUtil {
                 SysOnlineUser onlineUser = DB.findOne(SysOnlineUser.class, Expr.builder().add("loginToken", "=", token).build());
                 if (onlineUser != null) {
                     DB.delete(onlineUser);
+                    InstanceManager.getInstance().broadMessage("session-remove", JsonUtil.toJson(onlineUser));
                     SessionManager.getInstance().removeSession(onlineUser.getUserId(), onlineUser.getLoginToken());
                 }
                 logger.info("token: {}", token);
                 throw new UnauthorizedException(I18n.t("auth. unauthorized-e006", "登录已失效"));
+            }
+        }
+        AppAuthProperties appAuthProperties = SpringContext.getBean(AppAuthProperties.class);
+        // 检查是否只有一个会话
+        if (appAuthProperties.getLoginSessionOne()) {
+            if(((authToken.getWhenCreated() + 1000*60) > System.currentTimeMillis())) {
+                if (!tokenFreshRecords.contains(token)) {
+                    SessionManager.getInstance().reloadSessions();
+                    tokenFreshRecords.add(token);
+                }
+                else {
+                    tokenFreshRecords.remove(token);
+                }
+
+            }
+            if (!SessionManager.getInstance().checkSession(authToken.getUserInfo().getId(), token)) {
+                throw new UnauthorizedException(I18n.t("auth. unauthorized-e007", "用户已在别处登录"));
             }
         }
 

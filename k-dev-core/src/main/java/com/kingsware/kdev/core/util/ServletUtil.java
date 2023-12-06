@@ -63,6 +63,9 @@ public class ServletUtil {
         String refererUrl = SpringContext.getProperties("app.ignore.referer", "");
         String[] refererUrls = refererUrl.split(";");
         for (String item: refererUrls) {
+            if (StringUtils.isEmpty(item)) {
+                continue;
+            }
             if (referer.contains(item)) {
                 return true;
             }

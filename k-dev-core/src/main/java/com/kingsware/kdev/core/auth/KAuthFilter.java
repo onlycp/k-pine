@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.bean.*;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.cache.api.ApiManager;
 import com.kingsware.kdev.core.cache.controller.ControllerManager;
+import com.kingsware.kdev.core.cache.instance.InstanceManager;
 import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.cache.open.OpenAccountInfo;
 import com.kingsware.kdev.core.cache.open.OpenApiManager;
@@ -28,9 +29,11 @@ import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
 import com.kingsware.kdev.core.kmq.KmqMessageCenter;
 import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.model.SysLoginLog;
+import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.core.model.SysOperateLog;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
+import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.core.util.jWi.JWildcard;
 import lombok.extern.slf4j.Slf4j;
@@ -127,7 +130,7 @@ public class KAuthFilter implements Filter {
         }
         // 判断是否静态文件
         if (uiConfig.isStaticsResource(url)) {
-            log.info("静态资源:" + url);
+//            log.info("静态资源:" + url);
             filterChain.doFilter(request, response);
             return;
         }
@@ -618,12 +621,7 @@ public class KAuthFilter implements Filter {
         // 保存用户信息
         KClientContext.getContext().setUserInfo(userInfo);
         if (userInfo != null) {
-            // 检查是否只有一个会话
-            if (appAuthProperties.getLoginSessionOne()) {
-                if (!SessionManager.getInstance().checkSession(userInfo.getId(), KClientContext.getContext().getToken())) {
-                    throw new UnauthorizedException(I18n.t("auth. unauthorized-e007", "用户已在别处登录"));
-                }
-            }
+
             // 是否要更新过期时间
             boolean updateExpired = !KClientContext.getContext().getUrl().endsWith("/ping");
             // 更新活动时间

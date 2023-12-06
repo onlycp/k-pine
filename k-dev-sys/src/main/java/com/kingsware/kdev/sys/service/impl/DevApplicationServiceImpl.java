@@ -46,6 +46,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * 业务实现类
@@ -161,6 +162,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
     @SuppressWarnings("all")
     public String importApp(String json, String teamId) {
 
+        String pineAppId = "064b3b44b85a45fe87fcce88d72b2519";
         String importEnable = SpringContext.getProperties("app.dev.import-enable", "true");
         if ("false".equalsIgnoreCase(importEnable)) {
             throw BusinessException.serviceThrow("当前平台禁止导入pine数据！");
@@ -225,7 +227,15 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         long configCount = DB.batchSaveOrUpdate(devPine.getConfigs(), SysConfig.class);
         log.info("完成导入系统配置：{}", configCount);
         // 菜单
-        long menuCount = DB.batchSaveOrUpdate(devPine.getMenus(), SysMenu.class);
+        long menuCount = 0;
+        if (LicenseManager.getInstance().isUniopsApp()) {
+            List<SysMenu> menus = devPine.getMenus().stream().filter(it -> StringUtils.isNotEmpty(it.getAppId()) && !it.getAppId().equals(pineAppId)).collect(Collectors.toList());
+            menuCount = DB.batchSaveOrUpdate(menus, SysMenu.class);
+
+        }
+        else {
+            menuCount = DB.batchSaveOrUpdate(devPine.getMenus(), SysMenu.class);
+        }
         log.info("完成导入菜单：{}", menuCount);
         // 开发平台角色
         long devRoleCount = 0;
@@ -298,7 +308,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             DB.kdbApi().editFun(editFunctionInfo);
         }
         try {
-            if (appModeProperties.getDev()) {
+            if (appModeProperties.getDev() && !LicenseManager.getInstance().isUniopsApp()) {
                 // 插入FAAS扩展节点类型
                 if (devPine.getDevFaasNodeTypes() != null && !devPine.getDevFaasNodeTypes().isEmpty()) {
                     long tCount = DB.batchSaveOrUpdate(devPine.getDevFaasNodeTypes(), DevFaasNodeType.class);
