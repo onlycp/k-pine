@@ -165,7 +165,6 @@ ALTER TABLE "sys_logic_history"
     ADD COLUMN "version_tag_time" varchar(50);
 ALTER TABLE "dev_faas_node" ALTER COLUMN "config" TYPE text;
 
-INSERT INTO sys_config(id, app_id, code, is_sys, name, note, value, value_type, when_created, when_modified, who_created, who_modified) VALUES ('4982e27d84914b559a2a5aed7953b934', NULL, 'app.k-flow.debug-ws-server', 1, 'FAAS调试WS服务器', NULL, '10.11.1.77:9229', 0, '2023-03-31 17:24:55', '2023-03-31 17:24:55', '94123ca363dc4dfaa62a6bb5dcd3bf50', '94123ca363dc4dfaa62a6bb5dcd3bf50');
 ALTER TABLE "dev_page_history"
     ADD COLUMN "version_tag" varchar(50);
 ALTER TABLE "dev_page_history"
