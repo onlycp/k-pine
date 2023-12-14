@@ -633,15 +633,15 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     private Set<String> getMenuPermission(BaseUserInfo userInfo) {
         Set<String> perms = new HashSet<>();
         //管理员拥有所有权限
-        String[] roleCodes = userInfo.getRoleCodes().split(",");
-        if (roleCodes.length > 0) {
-            boolean isAdmin = Arrays.stream(roleCodes).anyMatch(s -> s.equalsIgnoreCase("admin"));
-            if (isAdmin) {
-                perms.add("*:*:*");
-            } else {
-                //多角色菜单权限遍历
-                String[] roleIds = userInfo.getRoleIds().split(",");
-                if (roleIds.length > 0) {
+        if (StringUtils.isNotEmpty(userInfo.getRoleCodes())) {
+            String[] roleCodes = userInfo.getRoleCodes().split(",");
+            if (roleCodes.length > 0) {
+                boolean isAdmin = Arrays.stream(roleCodes).anyMatch(s -> s.equalsIgnoreCase("admin"));
+                if (isAdmin) {
+                    perms.add("*:*:*");
+                } else {
+                    //多角色菜单权限遍历
+                    String[] roleIds = userInfo.getRoleIds().split(",");
                     for (String roleId : roleIds) {
                         String sql = "SELECT u.* FROM sys_role_menu r left JOIN sys_menu u ON r.sys_menu_id = u.id\n" +
                                 "where sys_role_id = ?";
@@ -659,6 +659,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 }
             }
         }
+
         return perms;
     }
 

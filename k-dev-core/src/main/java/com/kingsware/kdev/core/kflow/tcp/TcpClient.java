@@ -102,7 +102,6 @@ public class TcpClient {
                                     byte[] dst = new byte[pos-6];
                                     byteBuffer.position(4);
                                     byteBuffer.get(dst, 0, pos-6);
-
                                     // 清理缓冲区
                                     byteBuffer.clear();
                                     //处理消息
@@ -113,22 +112,18 @@ public class TcpClient {
                                     tMessage.setBody(JsonUtil.toJson(resp));
                                     context.read(tMessage);
                                 }
-
                             }
-
                         }
 
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         try {
                             this.socket.close();
                         } catch (IOException ex) {
                             // throw new RuntimeException(ex);
                         }
                     }
-
                 }
                 ThreadUtils.sleep(500);
-
             }
         }).start();
     }

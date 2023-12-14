@@ -84,14 +84,21 @@ public class UniOpsServiceImpl implements UniOpsService {
                     log.info("开始请求uniops token: {}", url);
                     String body = HttpUtil.callHttp(url, "{}", headers);
                     log.info("开始请求uniops token, Result: {}", body);
-                    BaseUserInfo userInfo = JsonUtil.toBean(body, BaseUserInfo.class);
-                    log.info("青松: uniops用户信息:{}" , body);
-                    userInfo.setAvatar(null);
-                    String pineKey = TokenUtil.createToken(appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), KClientContext.getContext().getIp(), "-1", userInfo);
-                    UniOpsTokenStore.getInstance().put(token, pineKey);
-                    contextMap.put("uniopsUserid", userInfo.getId() == null ?"":userInfo.getId() );
-                    contextMap.put("uniopsUsername", userInfo.getUsername() == null?"": userInfo.getUsername());
-                    contextMap.put("uniopsRealName", userInfo.getRealName() == null ?" ": userInfo.getRealName());
+                    Map<String, Object> map = JsonUtil.toMap(body);
+                    if(map != null && map.containsKey("id")) {
+                        BaseUserInfo userInfo = JsonUtil.toBean(body, BaseUserInfo.class);
+                        log.info("青松: uniops用户信息:{}" , body);
+                        userInfo.setAvatar(null);
+                        String pineKey = TokenUtil.createToken(appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), KClientContext.getContext().getIp(), "-1", userInfo);
+                        UniOpsTokenStore.getInstance().put(token, pineKey);
+                        contextMap.put("uniopsUserid", userInfo.getId() == null ?"":userInfo.getId() );
+                        contextMap.put("uniopsUsername", userInfo.getUsername() == null?"": userInfo.getUsername());
+                        contextMap.put("uniopsRealName", userInfo.getRealName() == null ?" ": userInfo.getRealName());
+                    }
+                    else {
+                        throw BusinessException.serviceThrow("uniops获取用户信息失败:" + body);
+                    }
+
                 }
                 pineToken = UniOpsTokenStore.getInstance().get(token);
                 toUrl = to.getTo();
@@ -184,6 +191,7 @@ public class UniOpsServiceImpl implements UniOpsService {
                 if (StringUtils.isEmpty(menu.getParentId())) {
                     menu.setOrderNum(999);
                     UniOpsMenu um = toUniOpsMenu(menu);
+                    um.setComponent("Home");
                     recurseMenu(um, uniopsMenus);
                     uMenus.add(um);
                 }
@@ -293,7 +301,7 @@ public class UniOpsServiceImpl implements UniOpsService {
         uniOpsMenu.setName(name);
         uniOpsMenu.setTarget("oneTab");
         uniOpsMenu.setSort(menu.getOrderNum());
-        uniOpsMenu.setComponent(menu.getId());
+        // uniOpsMenu.setComponent(menu.getId());
         uniOpsMenu.setPineId(menu.getId());
         uniOpsMenu.setControl(Arrays.asList("hidden", "outernet"));
         if (StringUtils.isNotEmpty(menu.getParentId())) {

@@ -179,28 +179,37 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 // 查找当前是否已入库
                 long cnt = DB.findCount("select count(1) cnt from dev_team_app where app_id=? and team_id=?", devPine.getInfo().getId(), teamId);
                 if (cnt == 0) {
-                    DevTeamApp devTeamApp = new DevTeamApp();
-                    devTeamApp.setAppId(devPine.getInfo().getId());
-                    devTeamApp.setTeamType(0);
-                    devTeamApp.setTeamId(teamId);
-                    DB.save(devTeamApp);
-                }
+                 }
             }
         }
         log.info("完成导入应用信息：{}", appCount);
-        // 获取所有的数据源
-        List<DataSourceInfo> dataSourceInfos = DB.kdbApi().queryDataSource(new DataSourceQueryArgv());
-        for (DataSourceInfo fileSource : devPine.getSources()) {
+         List<DataSourceInfo> dataSourceInfos = DB.kdbApi().queryDataSource(new DataSourceQueryArgv());
+
+        if(devPine.getSources() != null) {
+            for (DataSourceInfo fileSource : devPine.getSources()) {
 //          // 查看是否已存在
-            try {
-                Optional<DataSourceInfo> optional = dataSourceInfos.stream().filter(it -> it.getSourceName().equals(fileSource.getSourceName())).findFirst();
-                log.info("数据源初始化新增: {}", fileSource);
-                DB.kdbApi().addDataSource(fileSource);
-            } catch (Exception e) {
+                try {
+                    Optional<DataSourceInfo> optional = dataSourceInfos.stream().filter(it -> it.getSourceName().equals(fileSource.getSourceName())).findFirst();
+                    log.info("数据源初始化新增: {}", fileSource);
+                    if(!optional.isPresent()) {
+                        try {
+                            DB.kdbApi().addDataSource(fileSource);
+                        }
+                        catch (Exception e) {
+                            log.info("数据源接口新增失败，将直接插入数据库：%s", fileSource.getSourceName());
+                            DB.byName("kingDB").executeUpdateSql("insert into DATA_SOURCE(SOURCENAME, DRIVERCLASS,JDBCURL,USERNAME,PASSWORD, SOURCEID,JSON) VALUES (?,?,?,?,?,?,?)"
+                                           , fileSource.getSourceName(), fileSource.getDriverClass(), fileSource.getJdbcUrl(), fileSource.getUserName(), fileSource.getPassword(), fileSource.getSourceName(), fileSource.getJson());
+                        }
+
+                    }
+
+                } catch (Exception e) {
+                    log.info("error", e);
+                }
 
             }
-
         }
+
 
         // 处理页面
         long pageCount = DB.batchSaveOrUpdate(devPine.getPages(), DevPage.class);
@@ -367,7 +376,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         // 清理缓存
         KCacheManager.getInstance().clear();
         log.info(result);
-        return "";
+        return result;
 
     }
 
