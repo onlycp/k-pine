@@ -1,6 +1,7 @@
 package com.kingsware.kdev.core.auth;
 
 import com.kingsware.kdev.core.bean.*;
+import com.kingsware.kdev.core.cache.TimedCache;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.cache.api.ApiManager;
 import com.kingsware.kdev.core.cache.controller.ControllerManager;
@@ -90,6 +91,9 @@ public class KAuthFilter implements Filter {
     @Value("#{'${app.ignore.urls:websocket;/eiac;/sys-tool-box}'.split(';')}")
     private List<String> ignoreUrls;
 
+    // 噪点缓存
+    private TimedCache<String, Long> noiseCache = new TimedCache<String, Long>();
+
 
 
     /**
@@ -134,11 +138,12 @@ public class KAuthFilter implements Filter {
             filterChain.doFilter(request, response);
             return;
         }
-
+        // 如果是前端路径，则直接返回首页
+        if(uiConfig.isFrontRouter(url, request)) {
+            uiConfig.redirectToIndex(response);
+            return;
+        }
         String requestBody = "{}";
-
-        long tt0 = System.currentTimeMillis();;
-
 
         // 获取请求方式
         String method = request.getMethod().toLowerCase();
@@ -231,6 +236,9 @@ public class KAuthFilter implements Filter {
                     argvMap = ServletUtil.getRequestParams(api, path, request, requestBody, false);
                     this.checkOpenApi(api, argvMap);
                 } else {
+                    // 检验噪点
+                    String noise = request.getHeader("X-Noise");
+                    this.checkNoise(url, noise, TokenUtil.getTokenString(request));
                     this.checkPermission(request, response, ignore, apiCode);
                 }
 
@@ -771,5 +779,79 @@ public class KAuthFilter implements Filter {
         return controllerManager.getApiDefine(method, url);
     }
 
+    /**
+     * 解码噪音字符串
+     * @param noiseString
+     * @return
+     */
+    private String decodeNoiseString(String noiseString) {
+        noiseString = noiseString.replaceAll("KAxBybA", "=");
+        // 将字符数组拆分为交叉替换前的数组
+        char[] charArray = noiseString.toCharArray();
+        for (int i = 0; i < charArray.length - 1; i += 2) {
+            char temp = charArray[i];
+            charArray[i] = charArray[i + 1];
+            charArray[i + 1] = temp;
+        }
 
+        // 将字符数组拼接为字符串
+        String swappedString = new String(charArray);
+
+        // Base64 解码
+        byte[] decodedBytes = Base64.getDecoder().decode(swappedString);
+        return new String(decodedBytes);
+    }
+
+    /**
+     * 校验噪音
+     * @param url
+     * @param noise
+     * @param token
+     */
+    public void checkNoise(String url, String noise, String token) {
+        if(StringUtils.isEmpty(token)) {
+            return;
+        }
+        String enableNoise = SpringContext.getProperties("app.auth.noise.enable", "false");
+        if ("false".equalsIgnoreCase(enableNoise)) {
+            return;
+        }
+        if (StringUtils.isEmpty(noise)) {
+            throw BusinessException.serviceThrow("接口请求不合法，代码:N004");
+        }
+        // 解密噪音
+        String noiseDecrypt = decodeNoiseString(noise);
+        if (StringUtils.isEmpty(noiseDecrypt)) {
+            throw BusinessException.serviceThrow("接口请求不合法，代码:N003");
+        }
+        String[] arr = noiseDecrypt.split("\\|");
+        long createTime = Long.parseLong(arr[0]);
+        long hash = Integer.parseInt(arr[1]);
+        // 计算超时时间（5分钟超时）
+        if (Math.abs(System.currentTimeMillis() - createTime) > 1000*60*5) {
+            throw BusinessException.serviceThrow("接口请求不合法，代码:N002");
+        }
+        // 计算令牌的hash值
+        int tokenHash = calculateHash(token);
+        if (tokenHash!= hash) {
+            throw BusinessException.serviceThrow("接口请求不合法，代码:N001");
+        }
+        if (noiseCache.containsKey(noise)) {
+            throw BusinessException.serviceThrow("接口请求不合法，代码:N005");
+        }
+        noiseCache.put(noise, System.currentTimeMillis(), 1000*60*5);
+
+    }
+
+    private int calculateHash(String input) {
+        input = input.toLowerCase();
+        int hash = 1315423911;
+
+        for (int i = input.length() - 1; i >= 0; i--) {
+            char ch = input.charAt(i);
+            hash ^= ((hash << 5) + ch + (hash >> 2));
+        }
+
+        return hash & 0x7FFFFFFF;
+    }
 }

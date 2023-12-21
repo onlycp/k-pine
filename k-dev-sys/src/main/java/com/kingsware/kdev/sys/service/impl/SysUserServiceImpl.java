@@ -411,6 +411,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             if (!"pwd".equalsIgnoreCase(authMode)) {
                 SysAuthSource sysAuthSource = DB.findOne(SysAuthSource.class, "select * from sys_auth_source where code=?", authMode);
                 if (sysAuthSource == null) {
+
                     throw BusinessException.serviceThrow("认证不支持！");
                 }
                 if (sysAuthSource.getStatus() != 1) {

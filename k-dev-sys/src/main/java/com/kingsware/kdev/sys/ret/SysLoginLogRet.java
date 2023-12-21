@@ -22,6 +22,7 @@ public class SysLoginLogRet extends BaseSimpleRet {
     /** 操作时间 **/
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
     private Timestamp operateTime;
+
     /** 操作人员 **/
     private String operator;
     /** ip **/

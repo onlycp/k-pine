@@ -50,6 +50,17 @@ public class ServletUtil {
         return ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
     }
 
+    /**
+     * 是否Ajax请求
+     * @param request   请求
+     * @return
+     */
+    public static boolean isAjaxRequest(HttpServletRequest request) {
+        String header = request.getHeader("X-Requested-With");
+        return header != null && header.equals("XMLHttpRequest");
+    }
+
+
 
     /**
      * 判断referer是否包含配置的url标识

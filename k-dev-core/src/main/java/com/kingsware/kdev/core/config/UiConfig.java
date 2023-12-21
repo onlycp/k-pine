@@ -14,7 +14,10 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -71,8 +74,47 @@ public class UiConfig extends WebMvcConfigurationSupport {
         String path = ui + url;
         path = path.replace("//", "/");
         return Files.exists(Paths.get(path));
+    }
+
+    /**
+     * 是否前端路由
+     * @param url
+     * @param request
+     * @return
+     */
+
+    public boolean isFrontRouter(String url, HttpServletRequest request) {
+        // 判断是否前端请求，如果是，直接返回index.html
+        if (url.startsWith("/api/")) {
+            return false;
+        }
+        // 只有是get请求才是
+        if(!request.getMethod().equalsIgnoreCase("get")) {
+            return false;
+        }
+        if (ServletUtil.isRefererRule(request)) {
+            return false;
+        }
+        return true;
 
     }
+
+    /**
+     * 向前端重定向到首页
+     * @param response
+     */
+    public void redirectToIndex(HttpServletResponse response) {
+        String indexPageHtmlFile = ui + "index.html";
+        String html = FileUtils.readFileToString(new File(indexPageHtmlFile), StandardCharsets.UTF_8);
+        response.setCharacterEncoding("UTF-8");//编码方式
+        response.setContentType("text/html");//设置为html格式
+        try (PrintWriter writer = response.getWriter()) {
+            writer.write(html);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     /**
      * 解压ui

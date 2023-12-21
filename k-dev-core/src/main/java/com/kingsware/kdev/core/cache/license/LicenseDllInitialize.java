@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * License加载
@@ -102,7 +103,13 @@ public class LicenseDllInitialize implements SystemInitialize {
             } else if (osName.contains("window")) {
                 new File("dll").mkdirs();
                 Files.write(new File("dll/" + targetFileName).toPath(), StreamUtils.copyToByteArray(res.getInputStream()));
-                System.load(new File("dll/" + targetFileName).getAbsolutePath());
+                // 扫描dll目录，加载所有的dll
+                for (File file : Objects.requireNonNull(new File("dll").listFiles())) {
+                    if (file.getName().endsWith(".dll")) {
+                        System.load(file.getAbsolutePath());
+                    }
+                }
+//                System.load(new File("dll/" + targetFileName).getAbsolutePath());
             }
 
             // 加载动态库

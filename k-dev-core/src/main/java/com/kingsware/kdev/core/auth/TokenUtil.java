@@ -131,21 +131,21 @@ public class TokenUtil {
         // 如果令牌为空
         if (StringUtils.isEmpty(token)) {
             logger.info("token: {}", token);
-            throw new UnauthorizedException(I18n.t("auth. unauthorized-e001", "用户未登录，错误码: E001"));
+            throw new UnauthorizedException(I18n.t("auth. unauthorized-e001", "用户未登录，代码: E001"));
         }
         // 解密令牌
         String decryptToken = AESUtil.decrypt(token, dataSecret);
         // 如果令牌无法解密
         if (StringUtils.isEmpty(decryptToken)) {
             logger.info("token: {}", token);
-            throw new UnauthorizedException(I18n.t("auth. unauthorized-e002", "用户未登录，错误码: E002"));
+            throw new UnauthorizedException(I18n.t("auth. unauthorized-e002", "用户未登录，代码: E002"));
         }
         AuthToken authToken;
         try {
             authToken = new ObjectMapper().readValue(decryptToken, AuthToken.class);
         } catch (JsonProcessingException e) {
             // 如果令牌无法转为实体
-            throw new UnauthorizedException(I18n.t("auth. unauthorized-e003", "用户未登录，错误码: E003"));
+            throw new UnauthorizedException(I18n.t("auth. unauthorized-e003", "用户未登录，代码: E003"));
         }
         // 校验发行机构
 //        if (!iss.equals(authToken.getIss())) {

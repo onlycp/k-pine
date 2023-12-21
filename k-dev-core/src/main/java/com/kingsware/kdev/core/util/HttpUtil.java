@@ -326,12 +326,13 @@ public class HttpUtil {
     public static String uploadFile(String apiUrl, String fileName, String formName, InputStream inputStream, Map<String, Object> formMap, Map<String, String> header) {
 
         HttpURLConnection conn = null;
+        long t1 = System.currentTimeMillis();
         try {
             URL url = new URL(apiUrl);
             conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
-            conn.setReadTimeout(TIME_OUT);
-            conn.setConnectTimeout(TIME_OUT);
+            conn.setConnectTimeout(5000);
+            conn.setReadTimeout(600000);
             conn.setDoOutput(true);
             conn.setDoInput(true);
             conn.setUseCaches(false);//Post 请求不能使用缓存
@@ -363,7 +364,7 @@ public class HttpUtil {
                     LINE_END;// 参数头设置完以后需要两个换行，然后才是参数内容
             dos.writeBytes(stringBuilder);
             dos.flush();
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[102400];
             int len = 0;
             while ((len = inputStream.read(buffer)) != -1){
                 dos.write(buffer,0,len);
@@ -388,6 +389,8 @@ public class HttpUtil {
             log.error("error", e);
             throw BusinessException.serviceThrow("Faas文件上传失败");
         }finally {
+            long t2 = System.currentTimeMillis();
+            log.info("文件{},上传用时: {}", fileName , (t2 - t1));
             if (conn!=null){
                 conn.disconnect();
             }
@@ -403,12 +406,13 @@ public class HttpUtil {
     public static String uploadFile(String apiUrl, String fileName, String formName, InputStream inputStream, String path, Map<String, String> headers) {
 
         HttpURLConnection conn = null;
+        long t1 = System.currentTimeMillis();
         try {
             URL url = new URL(apiUrl);
             conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
-            conn.setReadTimeout(TIME_OUT);
-            conn.setConnectTimeout(TIME_OUT);
+            conn.setConnectTimeout(5000);
+            conn.setReadTimeout(600000);
             conn.setDoOutput(true);
             conn.setDoInput(true);
             conn.setUseCaches(false);//Post 请求不能使用缓存
@@ -462,6 +466,8 @@ public class HttpUtil {
             log.error("error", e);
             throw BusinessException.serviceThrow("Faas文件上传失败");
         }finally {
+            long t2 = System.currentTimeMillis();
+            log.info("文件{},上传用时: {}", fileName , (t2 - t1));
             if (conn!=null){
                 conn.disconnect();
             }
