@@ -88,6 +88,10 @@ public class UiConfig extends WebMvcConfigurationSupport {
         if (url.startsWith("/api/")) {
             return false;
         }
+        if (url.startsWith("/res/")) {
+            log.info(url);
+            return false;
+        }
         // 只有是get请求才是
         if(!request.getMethod().equalsIgnoreCase("get")) {
             return false;

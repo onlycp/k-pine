@@ -209,7 +209,7 @@ public class HttpUtil {
         }
         String response = responseBody.toString();
         if (response.length() > 1024 * 500) {
-            log.error("请求响应内容过大，请检查接口是否有返回大量数据，接口地址：{}, 长度:{}, 参数:{}", apiUrl, response.length(), body);
+            // log.error("请求响应内容过大，请检查接口是否有返回大量数据，接口地址：{}, 长度:{}, 参数:{}", apiUrl, response.length(), StringUtils.retrench(body, 500));
         }
         return responseBody.toString();
     }

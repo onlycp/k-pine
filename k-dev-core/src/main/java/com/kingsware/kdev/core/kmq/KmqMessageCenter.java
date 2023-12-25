@@ -109,8 +109,14 @@ public class KmqMessageCenter {
             return;
         }
         // 将消息加入队列中
-        LinkedBlockingQueue<String> queue = blockingQueueMap.computeIfAbsent(topic, key -> new LinkedBlockingQueue<>(QUEUE_MAX_SIZE));
-        queue.addAll(payloads);
+        try {
+            LinkedBlockingQueue<String> queue = blockingQueueMap.computeIfAbsent(topic, key -> new LinkedBlockingQueue<>(QUEUE_MAX_SIZE));
+            queue.addAll(payloads);
+        }
+        catch (Exception e) {
+            logger.error("生产消息失败，topic: {}", topic, e);
+        }
+
     }
 
     /**

@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * // 会话管理 单实例.
@@ -29,12 +31,16 @@ public class InstanceManager {
     /** 上次执行节点 **/
     private Map<String, String> lastInstanceNameMap = new HashMap<>();
 
+
+
     public static InstanceManager getInstance() {
         if (instance == null) {
             instance = new InstanceManager();
         }
         return instance;
     }
+
+    private ExecutorService executorService = Executors.newFixedThreadPool(5);
 
     private InstanceManager() {
     }
@@ -115,10 +121,16 @@ public class InstanceManager {
     public void broadMessage(String topic, String message) {
         this.instances.forEach(it -> {
             try {
-                sendMessage(it, topic, message);
+                String blockList = SpringContext.getProperties("app.instance.black-list", "");
+                String[] blackListArray = blockList.split(",");
+                Set<String> blackListSet = new HashSet<>(Arrays.asList(blackListArray));
+                if (blackListSet.contains(instance.masterInstance().getHostName())) {
+                    return;
+                }
+                executorService.submit(()->sendMessage(it, topic, message));
             }
             catch (Exception e) {
-                log.error("消息发送失败, 实例：{}， Topic:{}, 内容:{}", it.instanceName(), topic, message);
+                log.debug("消息发送失败, 实例：{}， Topic:{}, 内容:{}", it.instanceName(), topic, message);
             }
         });
     }
@@ -154,13 +166,13 @@ public class InstanceManager {
                 BaseRet<?> ret = JsonUtil.toBean(res, BaseRet.class);
 //                log.info("session-实例：{}, {} 消息发送成功:{},返回信息:{}", instance.instanceName(),url, JsonUtil.toJson(body), JsonUtil.toJson(ret));
                 if (ret.getCode() != 200) {
-                    log.error("实例：{} 消息发送失败，系统将重试,异常信息:{}", instance.instanceName(), ret.getMessage());
+                    log.debug("实例：{} 消息发送失败，系统将重试,异常信息:{}", instance.instanceName(), ret.getMessage());
                     return false;
                 }
 
             } catch (Exception e) {
                 // 如果发生异常，那么就重试
-                log.error("实例：{} 消息发送失败，系统将重试,异常信息:{}", instance.instanceName(), e);
+                log.debug("实例：{} 消息发送失败，系统将重试,异常信息:{}", instance.instanceName(), e);
                 return false;
             }
         }

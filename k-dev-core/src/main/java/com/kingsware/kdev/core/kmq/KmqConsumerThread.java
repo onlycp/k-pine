@@ -45,6 +45,7 @@ public class KmqConsumerThread implements Runnable {
 //                String payload = queue.take();
                 List<String> payloads = new ArrayList<>();
                 queue.drainTo(payloads, 50);
+
                 if (!payloads.isEmpty()) {
                     for (KmqConsumer consumer: consumers) {
                         try {
@@ -59,7 +60,11 @@ public class KmqConsumerThread implements Runnable {
                 }
 
 
-            } finally {
+            }
+            catch (Exception e) {
+                logger.error("消息消费线程异常", e);
+            }
+            finally {
                 ThreadUtils.sleep(5);
             }
         }

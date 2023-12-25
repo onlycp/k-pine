@@ -139,7 +139,7 @@ public class KAuthFilter implements Filter {
             return;
         }
         // 如果是前端路径，则直接返回首页
-        if(uiConfig.isFrontRouter(url, request)) {
+        if(uiConfig.isFrontRouter(url, request) && !url.startsWith(kPageFlag)) {
             uiConfig.redirectToIndex(response);
             return;
         }
@@ -396,7 +396,7 @@ public class KAuthFilter implements Filter {
                                         }
                                     }
                                     if (rBody.length() > warnResponseBodySize) {
-                                        String content = String.format("【响应警告】- 内容 请求地址：%s， 请求方法：%s，请求参数：%s， 响应内容大小:%d", url, request.getMethod(), JsonUtil.toJson(argvMap), rBody.length());
+                                        String content = String.format("【响应警告】- 内容 请求地址：%s， 请求方法：%s，请求参数：%s， 响应内容大小:%d", url, request.getMethod(), StringUtils.retrench(JsonUtil.toJson(argvMap),500), rBody.length());
                                         log.warn(content);
                                         if ("true".equalsIgnoreCase(enableNotice) && !ignoreUrl && StringUtils.isNotEmpty(receivers)) {
                                             NoticeMessage noticeMessage = new NoticeMessage();
