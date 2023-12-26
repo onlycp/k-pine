@@ -465,24 +465,69 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
 
             // 拼装sql
             final Integer ENABLE_STATUS = 1;
+            String cacheKey = "";
+            String lockCacheKey = "";
             SqlWrapper wrapper = new SqlWrapper("select * from sys_user where 1=1 ");
             if (useUsernamePassword) {
                 wrapper.addCondition("username", Op.EQ, argv.get("username").toString());
+                cacheKey = "u_lgoin_pwd_fail." +  argv.get("username").toString();
+                lockCacheKey = "u_lgoin_pwd_lock." +  argv.get("username").toString();
             } else {
                 wrapper.addCondition("id", Op.EQ, userId);
+                cacheKey = "u_lgoin_pwd_fail." +  userId;
+                lockCacheKey = "u_lgoin_pwd_lock." +  userId;
             }
+            // 如果是锁定状态，则不允许登录
+            SysCache lockCache = sysCacheService.getCache(lockCacheKey);
+            if (lockCache!= null && StringUtils.isNotEmpty(lockCache.getValue())) {
+                long lockTime = Long.parseLong(lockCache.getValue());
+                long userLockMinutes = Integer.parseInt(SpringContext.getProperties("user.login.lock-minutes", "10")) * 60 * 1000;
+                if((lockTime + userLockMinutes) >= System.currentTimeMillis())  {
+                    // 移除当前登录次数缓存
+                    sysCacheService.removeCache(cacheKey);
+                    throw BusinessException.serviceThrow("用户已被锁定，请稍后再试！");
+                }
+                // 移除
+                sysCacheService.removeCache(lockCacheKey);
+            }
+
             wrapper.addCondition("status", Op.EQ, ENABLE_STATUS);
             SysUser model = DB.findOne(SysUser.class, wrapper.getSql(), wrapper.getParams().toArray());
+            SysCache countCache = sysCacheService.getCache(cacheKey);
+            int userLoginPasswordErrorCount = countCache == null? 0 : Integer.parseInt(countCache.getValue());
+            int allowErrorCount = Integer.parseInt(SpringContext.getProperties("user.login.allow-error-count", "5"));
+            int countOfLeave = allowErrorCount - userLoginPasswordErrorCount;
+
+            String errorMessage = String.format("用户名或密码有误，您还有%s次机会输入，达到次数之后，账户将被锁定10分钟", countOfLeave);
             if (model == null) {
-                throw BusinessException.serviceThrow("当前登录用户不存在！");
+                if(countOfLeave == 0)   {
+                    sysCacheService.setCache(lockCacheKey, System.currentTimeMillis() + "");
+                    // 移除当前登录次数缓存
+                    sysCacheService.removeCache(cacheKey);
+                    throw BusinessException.serviceThrow(String.format("由于密码错误连续次数已达到%s次，用户被锁定10分钟", allowErrorCount));
+
+
+                }
+                throw BusinessException.serviceThrow(errorMessage);
             }
             if (useUsernamePassword && KClientContext.getContext().isValidatePassFlag()) {
 
                 // 把参数里的加密密码解密出来
                 if (!EncryptWorker.getInstance().validate(argv.get("password").toString(), model.getPassword())) {
-                    throw BusinessException.serviceThrow("用户名或密码有误！");
+                    if(countOfLeave == 0)   {
+                        sysCacheService.setCache(lockCacheKey, System.currentTimeMillis() + "");
+                        throw BusinessException.serviceThrow(String.format("密码错误连续次数已达到%s次，用户将被锁定10分钟", allowErrorCount));
+
+                    }
+                    // 记录密码错误
+                    userLoginPasswordErrorCount++;
+                    sysCacheService.setCache(cacheKey, userLoginPasswordErrorCount+"");
+                    throw BusinessException.serviceThrow(errorMessage);
                 }
             }
+            // 移除
+            sysCacheService.removeCache(cacheKey);
+            // 构建返回数据
             BaseUserInfo userInfo = new BaseUserInfo();
             userInfo = BeanUtils.copyObject(model, BaseUserInfo.class);
             // 获取角色信息
@@ -563,7 +608,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             return ret;
         }
         catch (Exception e) {
-            log.error("error");
+            log.error("error",e);
             throw e;
         }
 
