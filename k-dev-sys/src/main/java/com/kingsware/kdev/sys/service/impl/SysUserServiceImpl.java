@@ -478,10 +478,11 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 lockCacheKey = "u_lgoin_pwd_lock." +  userId;
             }
             // 如果是锁定状态，则不允许登录
+            long userLockMinutes = Integer.parseInt(SpringContext.getProperties("user.login.lock-minutes", "10")) * 60 * 1000;
             SysCache lockCache = sysCacheService.getCache(lockCacheKey);
             if (lockCache!= null && StringUtils.isNotEmpty(lockCache.getValue())) {
                 long lockTime = Long.parseLong(lockCache.getValue());
-                long userLockMinutes = Integer.parseInt(SpringContext.getProperties("user.login.lock-minutes", "10")) * 60 * 1000;
+
                 if((lockTime + userLockMinutes) >= System.currentTimeMillis())  {
                     // 移除当前登录次数缓存
                     sysCacheService.removeCache(cacheKey);
@@ -498,13 +499,13 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             int allowErrorCount = Integer.parseInt(SpringContext.getProperties("user.login.allow-error-count", "5"));
             int countOfLeave = allowErrorCount - userLoginPasswordErrorCount;
 
-            String errorMessage = String.format("用户名或密码有误，您还有%s次机会输入，达到次数之后，账户将被锁定10分钟", countOfLeave);
+            String errorMessage = String.format("用户名或密码有误，您还有%s次机会输入，达到次数之后，账户将被锁定%d分钟", countOfLeave, userLockMinutes);
             if (model == null) {
                 if(countOfLeave == 0)   {
                     sysCacheService.setCache(lockCacheKey, System.currentTimeMillis() + "");
                     // 移除当前登录次数缓存
                     sysCacheService.removeCache(cacheKey);
-                    throw BusinessException.serviceThrow(String.format("由于密码错误连续次数已达到%s次，用户被锁定10分钟", allowErrorCount));
+                    throw BusinessException.serviceThrow(String.format("由于密码错误连续次数已达到%s次，用户被锁定%d分钟", allowErrorCount, userLockMinutes));
 
 
                 }
@@ -516,7 +517,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 if (!EncryptWorker.getInstance().validate(argv.get("password").toString(), model.getPassword())) {
                     if(countOfLeave == 0)   {
                         sysCacheService.setCache(lockCacheKey, System.currentTimeMillis() + "");
-                        throw BusinessException.serviceThrow(String.format("密码错误连续次数已达到%s次，用户将被锁定10分钟", allowErrorCount));
+                        throw BusinessException.serviceThrow(String.format("密码错误连续次数已达到%s次，用户将被锁定%d分钟", allowErrorCount, userLockMinutes));
 
                     }
                     // 记录密码错误
