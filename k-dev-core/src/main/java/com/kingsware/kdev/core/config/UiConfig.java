@@ -84,7 +84,7 @@ public class UiConfig extends WebMvcConfigurationSupport {
      */
 
     public boolean isFrontRouter(String url, HttpServletRequest request) {
-        // 判断是否前端请求，如果是，直接返回index.html
+
         if (url.startsWith("/api/")) {
             return false;
         }
@@ -96,7 +96,7 @@ public class UiConfig extends WebMvcConfigurationSupport {
         if(!request.getMethod().equalsIgnoreCase("get")) {
             return false;
         }
-        if (ServletUtil.isRefererRule(request)) {
+        if (ServletUtil.isAjaxRequest(request)) {
             return false;
         }
         return true;
