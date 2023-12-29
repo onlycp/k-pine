@@ -478,12 +478,13 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 lockCacheKey = "u_lgoin_pwd_lock." +  userId;
             }
             // 如果是锁定状态，则不允许登录
-            long userLockMinutes = Integer.parseInt(SpringContext.getProperties("user.login.lock-minutes", "10")) * 60 * 1000;
+            long userLockMinutes = Integer.parseInt(SpringContext.getProperties("user.login.lock-minutes", "10"));
+            long userLockMs = userLockMinutes *  60 * 1000;
             SysCache lockCache = sysCacheService.getCache(lockCacheKey);
             if (lockCache!= null && StringUtils.isNotEmpty(lockCache.getValue())) {
                 long lockTime = Long.parseLong(lockCache.getValue());
 
-                if((lockTime + userLockMinutes) >= System.currentTimeMillis())  {
+                if((lockTime + userLockMs) >= System.currentTimeMillis())  {
                     // 移除当前登录次数缓存
                     sysCacheService.removeCache(cacheKey);
                     throw BusinessException.serviceThrow("用户已被锁定，请稍后再试！");

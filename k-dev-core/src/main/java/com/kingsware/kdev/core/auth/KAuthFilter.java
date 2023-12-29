@@ -128,18 +128,21 @@ public class KAuthFilter implements Filter {
 //        log.info("上下文:{},路径:{} -00", request.getContextPath(), request.getRequestURI()  );
         initContext(request, response);
         if (containUrl(request, url) ) {
-
             filterChain.doFilter(request, response);
             return;
         }
         // 判断是否静态文件
-        if (uiConfig.isStaticsResource(url)) {
-//            log.info("静态资源:" + url);
+        String url2 = url;
+        if (url.startsWith(request.getContextPath())) {
+            url2 = url.substring(request.getContextPath().length());
+        }
+        if (uiConfig.isStaticsResource(url2)) {
+            log.info("静态资源:" + url2);
             filterChain.doFilter(request, response);
             return;
         }
-        // 如果是前端路径，则直接返回首页
-        if(uiConfig.isFrontRouter(url, request) && !url.startsWith(kPageFlag)) {
+        // 如果是前端路由，则直接返回首页
+        if(uiConfig.isFrontRouter(url2, request) && !url.startsWith(kPageFlag)) {
             uiConfig.redirectToIndex(response);
             return;
         }
