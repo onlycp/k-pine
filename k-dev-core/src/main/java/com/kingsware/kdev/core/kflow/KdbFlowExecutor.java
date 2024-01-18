@@ -3,6 +3,7 @@ package com.kingsware.kdev.core.kflow;
 import com.kingsware.kdev.core.cache.logic.LogicFlowManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.kflow.bean.DebugNode;
 import com.kingsware.kdev.core.kflow.bean.ErrorResult;
 import com.kingsware.kdev.core.kflow.bean.KFlowMessage;
@@ -91,12 +92,18 @@ public class KdbFlowExecutor {
             }
             // 设备流程参数
             if (params.containsKey("page") && (params.containsKey("pageSize") || params.containsKey("perPage"))) {
-                int page = Integer.parseInt(params.getOrDefault("page", "1").toString());
-                int pageSize = Integer.parseInt(params.getOrDefault("pageSize", params.getOrDefault("perPage", "10")).toString());
-                params.put("start", (page - 1) * pageSize + "");
-                params.put("limit", pageSize + "");
-                params.put("end", page * pageSize);
-                params.put("pageSize", pageSize);
+                try {
+                    int page = Integer.parseInt(params.getOrDefault("page", "1").toString());
+                    int pageSize = Integer.parseInt(params.getOrDefault("pageSize", params.getOrDefault("perPage", "10")).toString());
+                    params.put("start", (page - 1) * pageSize + "");
+                    params.put("limit", pageSize + "");
+                    params.put("end", page * pageSize);
+                    params.put("pageSize", pageSize);
+                }
+                catch (Exception e) {
+                    throw BusinessException.serviceThrow("查询参数输入不合法");
+                }
+
             }
             if (params.containsKey("pageQuery")) {
                 params.put("pageQuery", params.getOrDefault("pageQuery", false).toString());

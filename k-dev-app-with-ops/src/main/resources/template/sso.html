@@ -8,6 +8,15 @@
 </body>
 <script>
 
+function urlDecode(encodedString) {
+    try {
+        return decodeURIComponent(encodedString.replace(/\+/g, ' '));
+    } catch (error) {
+        console.error('Error decoding URL:', error);
+        return encodedString;
+    }
+}
+
 function doLogin() {
     // const pineToken = localStorage.getItem('vue_admin_template_token');
     // 如果青松没有登录，那么就先登录青松
@@ -15,7 +24,7 @@ function doLogin() {
     // alert('pineToken:' + pineToken)
     if (pineToken !== '') {
         localStorage.setItem('vue_admin_template_token', pineToken);
-        location.href = '${to}';
+        location.href = urlDecode('${to}');
     }
     else {
         const opsToken = localStorage.getItem("ACCESS_TOKEN");

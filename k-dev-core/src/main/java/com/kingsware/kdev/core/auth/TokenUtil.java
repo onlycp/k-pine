@@ -253,6 +253,7 @@ public class TokenUtil {
 
         }
         // 获取当前令牌
-        return auth.replace(AUTH_PREFIX, "");
+        return auth.replace(AUTH_PREFIX, "").replaceAll(" ", "+");
     }
+
 }

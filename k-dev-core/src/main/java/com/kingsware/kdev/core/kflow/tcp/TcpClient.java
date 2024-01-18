@@ -93,7 +93,7 @@ public class TcpClient {
                         int len = 0;
                         while ((len = is.read(buf) ) > 0) {
                             this.heartTime = new Date().getTime();
-                            log.info("tcp <= {}", ProtocolHelper.getPrintString(buf,len) );
+                            log.debug("tcp <= {}", ProtocolHelper.getPrintString(buf,len) );
                             for (int i = 0; i < len; i++) {
                                 byteBuffer.put(buf[i]);
                                 int pos = byteBuffer.position();
@@ -148,7 +148,7 @@ public class TcpClient {
                 sendData[len+1] = 0x0a;
                 //写消息体
                 this.socket.getOutputStream().write(sendData);
-                log.info("tcp => {}", ProtocolHelper.getPrintString(sendData, sendData.length) );
+                log.debug("tcp => {}", ProtocolHelper.getPrintString(sendData, sendData.length) );
                 // 写入换行
 //                this.socket.getOutputStream().write(new byte[] {0x0d, 0x0a});
                 this.socket.getOutputStream().flush();

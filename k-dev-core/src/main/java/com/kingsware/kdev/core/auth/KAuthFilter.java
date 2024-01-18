@@ -335,9 +335,9 @@ public class KAuthFilter implements Filter {
                 if ((callType == CallType.CONTROLLER && apiDefine != null) || callType == CallType.KFLOW) {
 
                     String opertator = KClientContext.getContext().getUserInfo() != null ? KClientContext.getContext().getUserInfo().getUsername() : "";
-                    if (apiDefine != null &&"登录".equals(apiDefine.getName())) {
-                        opertator = argvMap.get("username").toString();
-                    }
+//                    if (apiDefine != null &&"登录".equals(apiDefine.getName())) {
+//                        opertator = argvMap.get("username").toString();
+//                    }
                     // 获取日志过滤配置
                     String operateFilter = SpringContext.getBootProperties("app.operate.log-filter","");
                     boolean saveLoginOn = false;
@@ -714,11 +714,30 @@ public class KAuthFilter implements Filter {
     }
 
     private String getLoginUserId(Map<String, Object> argvMap) {
-        Object username = argvMap.get("username");
-        if (username != null) {
-            String str = username.toString();
-            return new String(Base64.getDecoder().decode(str), StandardCharsets.UTF_8);
+        String mode = argvMap.getOrDefault("mode", "pwd").toString();
+        if (mode.equals("pwd")) {
+            Object username = argvMap.get("username");
+            if (username != null && StringUtils.isNotEmpty(username.toString())) {
+                String str = username.toString();
+                return new String(Base64.getDecoder().decode(str), StandardCharsets.UTF_8);
+            }
         }
+        else if (mode.equals("ldap")) {
+            Object ldapUsername = argvMap.get("ldapUsername");
+            if (ldapUsername != null && StringUtils.isNotEmpty(ldapUsername.toString())) {
+                String str = ldapUsername.toString();
+                return str;
+            }
+        }
+        else if (mode.equals("sms")) {
+            Object phoneNumber = argvMap.get("phoneNumber");
+            if (phoneNumber != null && StringUtils.isNotEmpty(phoneNumber.toString())) {
+                String str = phoneNumber.toString();
+                String uname = DB.findSingleAttribute(String.class, "select username from sys_user where mobile=?", str);
+                return uname;
+            }
+        }
+
         Object uid = argvMap.get("uid");
         Object type = argvMap.get("type");
         if (type != null && uid != null) {

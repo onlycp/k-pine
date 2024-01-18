@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.service.impl;
 
+import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.*;
 import com.kingsware.kdev.core.constants.ContentTypeMap;
@@ -342,7 +343,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                     // 获取视图模型
                     KFlowContext context = KFlowContext.createBaseContext( "{}",  "{}");
                     Map<String,Object> params = JsonUtil.beanToMap(fileDecryptInfo);
-                    log.info("验证文件权限，文件ID：{}，文件路径：{}，文件权限流程ID：{}", id, path, flowId);
+                    log.info("验证文件权限，文件ID：{}，文件路径：{}，文件权限流程ID：{}， token:{}", id, path, flowId, TokenUtil.getTokenString(ServletUtil.request()));
 
                     if (StringUtils.isNotEmpty(subKey)) {
                         if(KClientContext.getContext().getUserInfo() == null) {

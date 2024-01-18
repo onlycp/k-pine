@@ -114,7 +114,7 @@ public class TcpClientContext {
             while (true) {
                 try {
                     TMessage tMessage = recvBlockQueue.take();
-                    log.info("接收数据:" + JsonUtil.toJson(tMessage));
+//                    log.info("接收数据:" + JsonUtil.toJson(tMessage));
                     TRspMessage tRspMessage = JsonUtil.toBean(tMessage.getBody(), TRspMessage.class);
                     // klog响应
                     if (tRspMessage.getType() == (short)KLOG_RESPONSE.getNumber()) {

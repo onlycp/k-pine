@@ -28,6 +28,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.PrintWriter;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -124,14 +125,14 @@ public class UniOpsServiceImpl implements UniOpsService {
                 toUrl = "/ops/pine/" + toUrl;
             }
         }
-        contextMap.put("to", toUrl);
-        contextMap.put("exceptionStack", exceptionStack);
-        // 渲染模板内容
-        String html = TemplateUtil.render(templateContent, contextMap);
-        ServletUtil.response().setCharacterEncoding("UTF-8");//编码方式
-        ServletUtil.response().setContentType("text/html");//设置为html格式
-        try (PrintWriter writer = ServletUtil.response().getWriter()) {
 
+        try (PrintWriter writer = ServletUtil.response().getWriter()) {
+            ServletUtil.response().setCharacterEncoding("UTF-8");//编码方式
+            ServletUtil.response().setContentType("text/html");//设置为html格式
+            contextMap.put("to",  URLEncoder.encode(toUrl, StandardCharsets.UTF_8.name()));
+            contextMap.put("exceptionStack", exceptionStack);
+            // 渲染模板内容
+            String html = TemplateUtil.render(templateContent, contextMap);
             writer.write(html);
         } catch (Exception e) {
             throw new RuntimeException(e);
