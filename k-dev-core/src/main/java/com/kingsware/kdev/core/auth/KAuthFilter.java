@@ -5,7 +5,6 @@ import com.kingsware.kdev.core.cache.TimedCache;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.cache.api.ApiManager;
 import com.kingsware.kdev.core.cache.controller.ControllerManager;
-import com.kingsware.kdev.core.cache.instance.InstanceManager;
 import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.cache.open.OpenAccountInfo;
 import com.kingsware.kdev.core.cache.open.OpenApiManager;
@@ -30,11 +29,9 @@ import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
 import com.kingsware.kdev.core.kmq.KmqMessageCenter;
 import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.model.SysLoginLog;
-import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.core.model.SysOperateLog;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
-import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.core.util.jWi.JWildcard;
 import lombok.extern.slf4j.Slf4j;
@@ -186,8 +183,9 @@ public class KAuthFilter implements Filter {
                     wrapperRequest.getInputStream();
                     requestBody = new String(wrapperRequest.getRequestBody(), StandardCharsets.UTF_8);
                 }
-
-                wrapperResponse = new ContentCachingResponseWrapper(response);
+                if (ServletUtil.isAjaxRequest(request)) {
+                    wrapperResponse = new ContentCachingResponseWrapper(response);
+                }
                 if (url.startsWith(apiUrlPrefix)) {
                     contextPath = apiUrlPrefix;
                 }
@@ -254,7 +252,12 @@ public class KAuthFilter implements Filter {
                 // 根据不同的调用类型，进行调用相关处理
 
                 if (callType == CallType.CONTROLLER) {
-                    filterChain.doFilter(wrapperRequest, wrapperResponse);
+                    if (wrapperResponse != null) {
+                        filterChain.doFilter(wrapperRequest, wrapperResponse);
+                    }
+                    else {
+                        filterChain.doFilter(request, response);
+                    }
                 } else {
                     // log.info("Take-{}, {}",7,  (System.currentTimeMillis()-tt0));
                     if (argvMap.isEmpty()) {
@@ -318,26 +321,10 @@ public class KAuthFilter implements Filter {
                 argvMap = ServletUtil.getRequestParams(api, path, request, requestBody, false);
             }
             if (isOpenApi) {
-                String accessId = argvMap.getOrDefault("accessId", "").toString();
-                Map<String, Object> recordMap = new HashMap<>();
-                recordMap.put("id", StringUtils.getUUID());
-                recordMap.put("apiName", api.getApiName());
-                recordMap.put("accessId", accessId);
-                recordMap.put("requestParams", StringUtils.retrench(JsonUtil.toJson(argvMap), 1000));
-                recordMap.put("requestTime", now);
-                recordMap.put("useTime", System.currentTimeMillis() - t1);
-                recordMap.put("success", StringUtils.isNotEmpty(KClientContext.getContext().getErrorMessage()) ? 0: 1);
-                recordMap.put("errorMessage", StringUtils.retrench(KClientContext.getContext().getErrorMessage(), 255));
-                recordMap.put("requestIp", ServletUtil.getClientIp(request));
-                KmqMessageCenter.getInstance().produce("openApiQueue",  JsonUtil.toJson(recordMap));
+                this.saveOpenApiLog(api, argvMap, takeTime);
             }
             if (callType != null && !hasIgnoreTag(url)) {
                 if ((callType == CallType.CONTROLLER && apiDefine != null) || callType == CallType.KFLOW) {
-
-                    String opertator = KClientContext.getContext().getUserInfo() != null ? KClientContext.getContext().getUserInfo().getUsername() : "";
-//                    if (apiDefine != null &&"登录".equals(apiDefine.getName())) {
-//                        opertator = argvMap.get("username").toString();
-//                    }
                     // 获取日志过滤配置
                     String operateFilter = SpringContext.getBootProperties("app.operate.log-filter","");
                     boolean saveLoginOn = false;
@@ -355,112 +342,11 @@ public class KAuthFilter implements Filter {
                     }
                     if (saveLoginOn) {
                         // 保存操作日志
-                        SysOperateLog operateLog = new SysOperateLog();
-                        operateLog.setOperator(opertator);
-                        operateLog.setAction(callType == CallType.CONTROLLER ? apiDefine.getName(): api.getApiName());
-                        operateLog.setModule(callType == CallType.CONTROLLER ? apiDefine.getModule(): api.getApiTags());
-                        operateLog.setIp(KClientContext.getContext().getIp());
-                        operateLog.setTimes(takeTime);
-                        operateLog.setUrl(KClientContext.getContext().getUrl());
-                        operateLog.setResponseCode(responseCode);
-                        operateLog.setResponseMessage(StringUtils.retrench(errorMessage, 1000));
-                        operateLog.setOperateTime(new Timestamp(System.currentTimeMillis()));
-                        operateLog.setMethod(callType == CallType.CONTROLLER ? apiDefine.getCallMethod() + "()": api.getApiName());
-                        operateLog.setRequestMethod(KClientContext.getContext().getRequest().getMethod());
-                        operateLog.setAppId(KClientContext.getContext().getRequest().getHeader("appId"));
-                        if (wrapperResponse != null) {
-                            if (StringUtils.isNotEmpty(response.getContentType()) && response.getContentType().contains("json")) {
-                                String rBody = ServletUtil.getResponseBody(wrapperResponse);
-                                rBody = changeBodyJson(rBody);
-                                operateLog.setResponseBody(StringUtils.retrench(rBody,100));
-                                AppModeProperties appModeProperties = SpringContext.getBean(AppModeProperties.class);
-                                if (appModeProperties.getDev()) {
-                                    long warnResponseBodySize = Long.parseLong(SpringContext.getProperties("app.warn-response-body-size", "1048576"));
-                                    String enableNotice = SpringContext.getProperties("app.warn-response-body-enable", "false");
-                                    String receivers = SpringContext.getProperties("app.warn-response-body-receiver", "94123ca363dc4dfaa62a6bb5dcd3bf50,7aed8c297a6940f681c26eb6ab68893d");
-                                    // 如果api存在，则发送给创建人和修改人员
-                                    if (api != null) {
-                                        Set<String> developers = new HashSet<>();
-                                        if(StringUtils.isNotEmpty(api.getWhoCreated())) {
-                                            developers.add(api.getWhoCreated());
-                                        }
-                                        if(StringUtils.isNotEmpty(api.getWhoModified())) {
-                                            developers.add(api.getWhoModified());
-                                        }
-                                        receivers = StringUtils.joinToString(Arrays.asList(developers.toArray()), ",");
-                                    }
-                                    String warnResponseIgnores = SpringContext.getProperties("app.warn-response-url-ignores", "/v3/team/,sys-kdb-flow");
-                                    boolean ignoreUrl = false;
-                                    String[] ignores = warnResponseIgnores.split(",");
-                                    for (String ig: ignores) {
-                                        if(url.contains(ig)) {
-                                            ignoreUrl = true;
-                                            break;
-                                        }
-                                    }
-                                    if (rBody.length() > warnResponseBodySize) {
-                                        String content = String.format("【响应警告】- 内容 请求地址：%s， 请求方法：%s，请求参数：%s， 响应内容大小:%d", url, request.getMethod(), StringUtils.retrench(JsonUtil.toJson(argvMap),500), rBody.length());
-                                        log.warn(content);
-                                        if ("true".equalsIgnoreCase(enableNotice) && !ignoreUrl && StringUtils.isNotEmpty(receivers)) {
-                                            NoticeMessage noticeMessage = new NoticeMessage();
-                                            noticeMessage.setTitle("API请求响应内容长度预警");
-                                            noticeMessage.setContent(content);
-                                            noticeMessage.setToWhos(receivers);
-                                            noticeMessage.setFromWho("056fb0eeb9a44cb0953534b4c0ca01fa");
-                                            KmqMessageCenter.getInstance().produce("inbox", JsonUtil.toJson(noticeMessage) );
-                                        }
-                                    }
-                                    long warnResponseBodyTime = Long.parseLong(SpringContext.getProperties("app.warn-response-body-time", "10000"));
-                                    if(takeTime > warnResponseBodyTime) {
-                                        String content = String.format("【响应警告】- 用时 请求地址：%s， 请求方法：%s，请求参数：%s， 响应用时:%d", url, request.getMethod(), JsonUtil.toJson(argvMap), takeTime);
-                                        log.warn(content);
-                                        if ("true".equalsIgnoreCase(enableNotice) && !ignoreUrl && StringUtils.isNotEmpty(receivers)) {
-                                            NoticeMessage noticeMessage = new NoticeMessage();
-                                            noticeMessage.setTitle("API请求响应时长预警");
-                                            noticeMessage.setContent(content);
-                                            noticeMessage.setToWhos(receivers);
-                                            noticeMessage.setFromWho("056fb0eeb9a44cb0953534b4c0ca01fa");
-                                            KmqMessageCenter.getInstance().produce("inbox", JsonUtil.toJson(noticeMessage) );
-                                        }
-                                    }
-                                }
-
-
-                            }
-                        }
-                        operateLog.setRequestBody(StringUtils.retrench(requestBody, 1000));
-//                        log.info("操作日志保存:{}, url:{}" , operateLog.getAction(), request.getRequ
-//                        estURI());
-                        KmqMessageCenter.getInstance().produce("t_operate_log", JsonUtil.toJson(operateLog) );
-
+                        String responseBody = wrapperResponse == null ? "" : ServletUtil.getResponseBody(wrapperResponse);
+                        this.saveOperateLog(url, request.getMethod(), responseCode, errorMessage, takeTime, JsonUtil.toJson(argvMap), responseBody, callType, api, apiDefine, request);
                     }
-
                     // 保存登录日志
-                    if ((callType == CallType.CONTROLLER && "登录".equals(apiDefine.getName()))
-                            || (url.contains("login") && argvMap.containsKey("username") && request.getMethod().equalsIgnoreCase("POST"))
-                            || (url.contains("sys-sso") && request.getMethod().equalsIgnoreCase("POST"))) {
-                        // 获取表单信息
-                        SysLoginLog loginLog = new SysLoginLog();
-                        if(StringUtils.isEmpty(opertator)) {
-                            opertator = getLoginUserId(argvMap);
-                        }
-                        loginLog.setOperator(opertator);
-                        boolean ipAddressQuery = SpringContext.getProperties("app.login-log-ip-address-query", "true").equals("true");
-                        if (ipAddressQuery) {
-                            String ip = getLoginIp(argvMap);
-                            String address = IpUtils.getAddressByIp(ip);
-                            loginLog.setAddress(address);
-                        }
-                        loginLog.setIp(KClientContext.getContext().getIp());
-                        loginLog.setResponseCode(responseCode);
-                        loginLog.setTimes(takeTime);
-                        if (StringUtils.isEmpty(errorMessage) && KClientContext.getContext() != null) {
-                            errorMessage = KClientContext.getContext().getErrorMessage();
-                        }
-                        loginLog.setResponseMessage(StringUtils.retrench(errorMessage, 1000));
-                        loginLog.setOperateTime(new Timestamp(System.currentTimeMillis()));
-                        KmqMessageCenter.getInstance().produce("t_login_log", JsonUtil.toJson(loginLog) );
-                    }
+                    this.saveLoginLog(argvMap, apiDefine, callType, url, responseCode, errorMessage, takeTime);
                 }
 
             }
@@ -470,8 +356,137 @@ public class KAuthFilter implements Filter {
                 }
             }
             catch (Exception ignored) {
+                ignored.printStackTrace();
             }
         }
+
+    }
+
+
+    private void saveLoginLog(Map<String, Object> argvMap, ApiDefine apiDefine, CallType callType, String url, int responseCode,  String errorMessage, int takeTime) {
+        String opertator = KClientContext.getContext().getUserInfo() != null ? KClientContext.getContext().getUserInfo().getUsername() : "";
+        // 保存登录日志
+        if ((callType == CallType.CONTROLLER && "登录".equals(apiDefine.getName()))
+                || (url.contains("login") && argvMap.containsKey("username") && ServletUtil.request().getMethod().equalsIgnoreCase("POST"))
+                || (url.contains("sys-sso") && ServletUtil.request().getMethod().equalsIgnoreCase("POST"))) {
+            // 获取表单信息
+            SysLoginLog loginLog = new SysLoginLog();
+            if(StringUtils.isEmpty(opertator)) {
+                opertator = getLoginUserId(argvMap);
+            }
+            loginLog.setOperator(opertator);
+            boolean ipAddressQuery = SpringContext.getProperties("app.login-log-ip-address-query", "true").equals("true");
+            if (ipAddressQuery) {
+                String ip = getLoginIp(argvMap);
+                String address = IpUtils.getAddressByIp(ip);
+                loginLog.setAddress(address);
+            }
+            loginLog.setIp(KClientContext.getContext().getIp());
+            loginLog.setResponseCode(responseCode);
+            loginLog.setTimes(takeTime);
+            if (StringUtils.isEmpty(errorMessage) && KClientContext.getContext() != null) {
+                errorMessage = KClientContext.getContext().getErrorMessage();
+            }
+            loginLog.setResponseMessage(StringUtils.retrench(errorMessage, 1000));
+            loginLog.setOperateTime(new Timestamp(System.currentTimeMillis()));
+            KmqMessageCenter.getInstance().produce("t_login_log", JsonUtil.toJson(loginLog) );
+        }
+    }
+
+    private void saveOpenApiLog(ApiInfo api, Map<String, Object> argvMap, int takeTime) {
+        String accessId = argvMap.getOrDefault("accessId", "").toString();
+        Map<String, Object> recordMap = new HashMap<>();
+        recordMap.put("id", StringUtils.getUUID());
+        recordMap.put("apiName", api.getApiName());
+        recordMap.put("accessId", accessId);
+        recordMap.put("requestParams", StringUtils.retrench(JsonUtil.toJson(argvMap), 1000));
+        recordMap.put("requestTime", DateUtils.getNow());
+        recordMap.put("useTime", takeTime);
+        recordMap.put("success", StringUtils.isNotEmpty(KClientContext.getContext().getErrorMessage()) ? 0: 1);
+        recordMap.put("errorMessage", StringUtils.retrench(KClientContext.getContext().getErrorMessage(), 255));
+        recordMap.put("requestIp", ServletUtil.getClientIp(ServletUtil.request()));
+        KmqMessageCenter.getInstance().produce("openApiQueue",  JsonUtil.toJson(recordMap));
+    }
+
+    private void saveOperateLog(String url, String requestMethod, int responseCode,  String errorMessage, int takeTime, String requestBody, String responseBody, CallType callType, ApiInfo api, ApiDefine apiDefine, HttpServletRequest request) {
+        String opertator = KClientContext.getContext().getUserInfo() != null ? KClientContext.getContext().getUserInfo().getUsername() : "";
+        // 保存操作日志
+        SysOperateLog operateLog = new SysOperateLog();
+        operateLog.setOperator(opertator);
+        operateLog.setAction(callType == CallType.CONTROLLER ? apiDefine.getName(): api.getApiName());
+        operateLog.setModule(callType == CallType.CONTROLLER ? apiDefine.getModule(): api.getApiTags());
+        operateLog.setIp(KClientContext.getContext().getIp());
+        operateLog.setTimes(takeTime);
+        operateLog.setUrl(KClientContext.getContext().getUrl());
+        operateLog.setResponseCode(responseCode);
+        operateLog.setResponseMessage(StringUtils.retrench(errorMessage, 1000));
+        operateLog.setOperateTime(new Timestamp(System.currentTimeMillis()));
+        operateLog.setMethod(callType == CallType.CONTROLLER ? apiDefine.getCallMethod() + "()": api.getApiName());
+        operateLog.setRequestMethod(KClientContext.getContext().getRequest().getMethod());
+        operateLog.setAppId(KClientContext.getContext().getRequest().getHeader("appId"));
+        if (ServletUtil.isAjaxRequest(request)) {
+            String rBody = responseBody;
+            rBody = changeBodyJson(rBody);
+            operateLog.setResponseBody(StringUtils.retrench(rBody,100));
+            AppModeProperties appModeProperties = SpringContext.getBean(AppModeProperties.class);
+            if (appModeProperties.getDev()) {
+                long warnResponseBodySize = Long.parseLong(SpringContext.getProperties("app.warn-response-body-size", "1048576"));
+                String enableNotice = SpringContext.getProperties("app.warn-response-body-enable", "false");
+                String receivers = SpringContext.getProperties("app.warn-response-body-receiver", "94123ca363dc4dfaa62a6bb5dcd3bf50,7aed8c297a6940f681c26eb6ab68893d");
+                // 如果api存在，则发送给创建人和修改人员
+                if (api != null) {
+                    Set<String> developers = new HashSet<>();
+                    if(StringUtils.isNotEmpty(api.getWhoCreated())) {
+                        developers.add(api.getWhoCreated());
+                    }
+                    if(StringUtils.isNotEmpty(api.getWhoModified())) {
+                        developers.add(api.getWhoModified());
+                    }
+                    receivers = StringUtils.joinToString(Arrays.asList(developers.toArray()), ",");
+                }
+                String warnResponseIgnores = SpringContext.getProperties("app.warn-response-url-ignores", "/v3/team/,sys-kdb-flow");
+                boolean ignoreUrl = false;
+                String[] ignores = warnResponseIgnores.split(",");
+                for (String ig: ignores) {
+                    if(url.contains(ig)) {
+                        ignoreUrl = true;
+                        break;
+                    }
+                }
+                if (rBody.length() > warnResponseBodySize) {
+                    String content = String.format("【响应警告】- 内容 请求地址：%s， 请求方法：%s，请求参数：%s， 响应内容大小:%d", url, requestMethod, StringUtils.retrench(responseBody,500), rBody.length());
+                    log.warn(content);
+                    if ("true".equalsIgnoreCase(enableNotice) && !ignoreUrl && StringUtils.isNotEmpty(receivers)) {
+                        NoticeMessage noticeMessage = new NoticeMessage();
+                        noticeMessage.setTitle("API请求响应内容长度预警");
+                        noticeMessage.setContent(content);
+                        noticeMessage.setToWhos(receivers);
+                        noticeMessage.setFromWho("056fb0eeb9a44cb0953534b4c0ca01fa");
+                        KmqMessageCenter.getInstance().produce("inbox", JsonUtil.toJson(noticeMessage) );
+                    }
+                }
+                long warnResponseBodyTime = Long.parseLong(SpringContext.getProperties("app.warn-response-body-time", "10000"));
+                if(takeTime > warnResponseBodyTime) {
+                    String content = String.format("【响应警告】- 用时 请求地址：%s， 请求方法：%s，请求参数：%s， 响应用时:%d", url, requestMethod, StringUtils.retrench(responseBody,500), takeTime);
+                    log.warn(content);
+                    if ("true".equalsIgnoreCase(enableNotice) && !ignoreUrl && StringUtils.isNotEmpty(receivers)) {
+                        NoticeMessage noticeMessage = new NoticeMessage();
+                        noticeMessage.setTitle("API请求响应时长预警");
+                        noticeMessage.setContent(content);
+                        noticeMessage.setToWhos(receivers);
+                        noticeMessage.setFromWho("056fb0eeb9a44cb0953534b4c0ca01fa");
+                        KmqMessageCenter.getInstance().produce("inbox", JsonUtil.toJson(noticeMessage) );
+                    }
+                }
+            }
+
+
+        }
+        operateLog.setRequestBody(StringUtils.retrench(requestBody, 1000));
+//                        log.info("操作日志保存:{}, url:{}" , operateLog.getAction(), request.getRequ
+//                        estURI());
+        KmqMessageCenter.getInstance().produce("t_operate_log", JsonUtil.toJson(operateLog) );
+
 
     }
 
@@ -719,7 +734,13 @@ public class KAuthFilter implements Filter {
             Object username = argvMap.get("username");
             if (username != null && StringUtils.isNotEmpty(username.toString())) {
                 String str = username.toString();
-                return new String(Base64.getDecoder().decode(str), StandardCharsets.UTF_8);
+                try {
+                    return new String(Base64.getDecoder().decode(str), StandardCharsets.UTF_8);
+                }
+                catch (Exception e) {
+                    return username.toString();
+                }
+
             }
         }
         else if (mode.equals("ldap")) {

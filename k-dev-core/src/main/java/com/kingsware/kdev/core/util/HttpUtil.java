@@ -530,10 +530,11 @@ public class HttpUtil {
             assert tempFile != null;
 
             @Cleanup FileOutputStream outputStream = new FileOutputStream(tempFile);
-            byte[] buf = new byte[2 * 1024];
+            byte[] buf = new byte[100 * 1024];
             int len;
             while ((len = is.read(buf)) != -1) {
                 outputStream.write(buf, 0, len);
+                ThreadUtils.sleep(0);
             }
             outputStream.flush();
             outputStream.close();

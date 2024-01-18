@@ -56,6 +56,9 @@ public class ServletUtil {
      * @return
      */
     public static boolean isAjaxRequest(HttpServletRequest request) {
+        if (request.getHeader("content-type") != null && request.getHeader("content-type").contains("application/json")) {
+            return true;
+        }
         String header = request.getHeader("X-Requested-With");
         return header != null && header.equals("XMLHttpRequest");
     }
