@@ -3,8 +3,11 @@ package com.kingsware.kdev.core.cache.dict;
 import com.kingsware.kdev.core.cron.KRunner;
 import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.util.DateUtils;
+import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -17,6 +20,8 @@ import java.util.List;
 @Slf4j
 public class DictTask implements KTask, KRunner {
 
+    private static String lastQueryTime = null;
+
     public DictTask() {
     }
 
@@ -26,10 +31,19 @@ public class DictTask implements KTask, KRunner {
     @Override
     public void execute() {
         // 查找所有字典
-        List<DictItemInfo> dictItemList = DB.findList(DictItemInfo.class, "select name,sys_dict_id, value, code, order_num from sys_dict_item");
+        // 查询5分钟之前的
+        Date fiveMinuteAgoDate = new Date(new Date().getTime() - 5 * 60 * 1000) ;
+        String fiveMinuteAgo = DateUtils.formatDate(fiveMinuteAgoDate, DateUtils.DATE_TIME);
+        String querySql = "select name,sys_dict_id, value, code, order_num from sys_dict_item";
+        if (StringUtils.isNotEmpty(lastQueryTime)) {
+            querySql = "select name,sys_dict_id, value, code, order_num from sys_dict_item where when_modified > '" + lastQueryTime + "'";
+        }
+
+        List<DictItemInfo> dictItemList = DB.findList(DictItemInfo.class, querySql);
         for (DictItemInfo dictItem: dictItemList) {
             DictManager.getInstance().addDict(dictItem.getCode(), dictItem.getName(), dictItem.getValue());
         }
+        lastQueryTime = fiveMinuteAgo;
     }
 
     @Override

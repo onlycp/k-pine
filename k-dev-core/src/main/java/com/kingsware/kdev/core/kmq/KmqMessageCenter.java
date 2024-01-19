@@ -27,7 +27,7 @@ public class KmqMessageCenter {
     /** 日志打印 **/
     private static final Logger logger  = LoggerFactory.getLogger(KmqMessageCenter.class);
     /** 消息队列最大数 **/
-    private static final int QUEUE_MAX_SIZE = 10000;
+    private static final int QUEUE_MAX_SIZE = 1000;
     /** 私有实例 **/
     private static KmqMessageCenter messageCenter;
     /**  消息队列所有存放的地方 **/
@@ -111,7 +111,10 @@ public class KmqMessageCenter {
         // 将消息加入队列中
         try {
             LinkedBlockingQueue<String> queue = blockingQueueMap.computeIfAbsent(topic, key -> new LinkedBlockingQueue<>(QUEUE_MAX_SIZE));
-            queue.addAll(payloads);
+            if (queue.remainingCapacity() < payloads.size()) {
+                queue.addAll(payloads);
+            }
+
         }
         catch (Exception e) {
             logger.error("生产消息失败，topic: {}", topic, e);

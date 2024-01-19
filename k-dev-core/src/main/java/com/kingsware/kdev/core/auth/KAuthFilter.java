@@ -376,12 +376,15 @@ public class KAuthFilter implements Filter {
             }
             loginLog.setOperator(opertator);
             boolean ipAddressQuery = SpringContext.getProperties("app.login-log-ip-address-query", "true").equals("true");
+            String ip = getLoginIp(argvMap);
+            if(StringUtils.isEmpty(ip)) {
+                ip = KClientContext.getContext().getIp();
+            }
             if (ipAddressQuery) {
-                String ip = getLoginIp(argvMap);
                 String address = IpUtils.getAddressByIp(ip);
                 loginLog.setAddress(address);
             }
-            loginLog.setIp(KClientContext.getContext().getIp());
+            loginLog.setIp(ip);
             loginLog.setResponseCode(responseCode);
             loginLog.setTimes(takeTime);
             if (StringUtils.isEmpty(errorMessage) && KClientContext.getContext() != null) {

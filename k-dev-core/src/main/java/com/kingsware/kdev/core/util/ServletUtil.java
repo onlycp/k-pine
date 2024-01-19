@@ -47,7 +47,8 @@ public class ServletUtil {
      * @return http请求
      */
     public static HttpServletRequest request() {
-        return ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
+        return KClientContext.getContext().getRequest();
+//        return ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
     }
 
     /**

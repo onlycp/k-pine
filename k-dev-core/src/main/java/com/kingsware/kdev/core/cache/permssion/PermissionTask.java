@@ -30,7 +30,7 @@ public class PermissionTask implements KTask, KRunner {
 
     @Override
     public String cron() {
-        return "0/30 * * * * ?";
+        return "0 0/2 * * * ?";
     }
 
     @Override

@@ -39,23 +39,24 @@ public class KmqConsumerThread implements Runnable {
 
     @Override
     public void run() {
+        // 在任务内部可以使用 taskId 或其他信息设置线程的具体名称
+        String threadName = String.format("K-Queue-Thread-[%s]-C[%d]", topic, consumers.size()) ;
+        Thread.currentThread().setName(threadName);
         // 循环处理消息
         while (true) {
             try {
-//                String payload = queue.take();
+                String payload = queue.take();
+//                ThreadUtils.sleep(5);
                 List<String> payloads = new ArrayList<>();
-                queue.drainTo(payloads, 50);
+                payloads.add(payload);
 
-                if (!payloads.isEmpty()) {
-                    for (KmqConsumer consumer: consumers) {
-                        try {
-                            consumer.onMessage(payloads);
-                        }
-                        catch (Exception e) {
+                for (KmqConsumer consumer : consumers) {
+                    try {
+                        consumer.onMessage(payloads);
+                    } catch (Exception e) {
 //                            e.printStackTrace();
 //                            logger.warn("消费者: {} 消费失败，消息内容:{}, 异常信息:{}", consumer.topic(), payloads, e.getMessage());
 //                        queue.add(payload);
-                        }
                     }
                 }
 
@@ -63,9 +64,6 @@ public class KmqConsumerThread implements Runnable {
             }
             catch (Exception e) {
                 logger.error("消息消费线程异常", e);
-            }
-            finally {
-                ThreadUtils.sleep(5);
             }
         }
     }
