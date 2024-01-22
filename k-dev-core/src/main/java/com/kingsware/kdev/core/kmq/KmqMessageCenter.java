@@ -111,7 +111,7 @@ public class KmqMessageCenter {
         // 将消息加入队列中
         try {
             LinkedBlockingQueue<String> queue = blockingQueueMap.computeIfAbsent(topic, key -> new LinkedBlockingQueue<>(QUEUE_MAX_SIZE));
-            if (queue.remainingCapacity() < payloads.size()) {
+            if (queue.remainingCapacity() > payloads.size()) {
                 queue.addAll(payloads);
             }
 
