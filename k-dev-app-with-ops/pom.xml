@@ -15,6 +15,7 @@
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+        <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
 
     <dependencies>
@@ -59,6 +60,21 @@
                     <mainClass>
                         com.kingsware.kdev.App
                     </mainClass>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Build-Time>${maven.build.timestamp}</Build-Time>
+                            <Author>${user.name}</Author>
+                            <Os-Name>${os.name}</Os-Name>
+                            <Os-Arch>${os.arch}</Os-Arch>
+                            <Os-Version>${os.version}</Os-Version>
+                        </manifestEntries>
+                    </archive>
                 </configuration>
             </plugin>
         </plugins>
