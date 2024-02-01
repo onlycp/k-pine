@@ -238,24 +238,25 @@ public class DynamicTask implements CommandLineRunner {
             log.warn("任务:{}执行失败次数为:{}, 调度器将终止任务执行", sysTask.getName(), atomicInteger.intValue());
         }
         // 取主实例作为调度器
-        SysInstance masterInstance = InstanceManager.getInstance().masterInstance();
+//        SysInstance masterInstance = InstanceManager.getInstance().masterInstance();
         // 只有是调度器才执行
         if (InstanceManager.getInstance().isMaster()) {
             atomicInteger.incrementAndGet();
             // 随机取一个实例
-            SysInstance executeInstance = InstanceManager.getInstance().getToExecuteInstance(sysTask.getId(), excludeInstanceName);
-            // 如果是当前实例，直接调用即可，不通过http调用
-            if (executeInstance.instanceName().equalsIgnoreCase(masterInstance.instanceName())) {
-//                log.info("本机触发定时任务，任务id:{}", sysTask.getId());
-                executeTask(sysTask);
-            }
-            // 通过http调用
-            else {
-                boolean b = InstanceManager.getInstance().sendMessage(executeInstance, "task-execute", JsonUtil.toJson(sysTask));
-                if (!b) {
-                    callTask(sysTask, atomicInteger, excludeInstanceName);
-                }
-            }
+//            SysInstance executeInstance = InstanceManager.getInstance().getToExecuteInstance(sysTask.getId(), excludeInstanceName);
+            executeTask(sysTask);
+//            // 如果是当前实例，直接调用即可，不通过http调用
+//            if (executeInstance.instanceName().equalsIgnoreCase(masterInstance.instanceName())) {
+////                log.info("本机触发定时任务，任务id:{}", sysTask.getId());
+//
+//            }
+//            // 通过http调用
+//            else {
+//                boolean b = InstanceManager.getInstance().sendMessage(executeInstance, "task-execute", JsonUtil.toJson(sysTask));
+//                if (!b) {
+//                    callTask(sysTask, atomicInteger, excludeInstanceName);
+//                }
+//            }
 
         }
     }
