@@ -85,6 +85,9 @@ public abstract class KdbApiAbstract implements KdbApi {
 
     @Override
     public FlowInfo get(String flowId) {
+        if (StringUtils.isEmpty(flowId)) {
+            return null;
+        }
         // 参数
         KdbFlowQueryArgv argv = new KdbFlowQueryArgv();
         argv.setFlowId(flowId);

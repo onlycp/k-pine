@@ -220,10 +220,13 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             if (node.getType().equalsIgnoreCase(NodeTypeEnum.SUB.getValue())) {
                 nodeDefinition.setFlowId(node.getFlowId());
                 String subFlowName = "";
-                FlowInfo subFlowInfo = DB.kdbApi().get(nodeDefinition.getFlowId());
-                if (subFlowInfo != null) {
-                    subFlowName = subFlowInfo.getName();
+                if (StringUtils.isNotEmpty(node.getFlowId())) {
+                    FlowInfo subFlowInfo = DB.kdbApi().get(nodeDefinition.getFlowId());
+                    if (subFlowInfo != null) {
+                        subFlowName = subFlowInfo.getName();
+                    }
                 }
+
                 extra.put("subFlowName", subFlowName);
             }
             // 只有任务节点是任务时，才会这些脚本信息
