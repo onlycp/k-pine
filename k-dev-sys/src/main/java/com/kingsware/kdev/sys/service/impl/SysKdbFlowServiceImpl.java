@@ -609,6 +609,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         // 将请求的body加进去
         Map<String, Object> requestMap = new HashMap<>();
         requestMap.put("body", json);
+        requestMap.put("headers", ServletUtil.getHeaders(ServletUtil.request()));
         argvMap.put("request", requestMap);
         argvMap.put("_appId", logicFlow.getApplicationId());
         // 调用流程
