@@ -418,6 +418,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             apiArgv.setCallType(2);
             apiArgv.setApiNote(argv.getDescription());
             apiArgv.setApiTags(argv.getTags());
+            apiArgv.setApiCode(argv.getApiCode());
             sysApiService.add(apiArgv);
         }
 
