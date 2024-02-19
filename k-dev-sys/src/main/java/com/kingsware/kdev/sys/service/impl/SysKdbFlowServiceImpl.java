@@ -368,7 +368,6 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             SysApi sysApi = new SysApi();
             sysApi.setApiUrl(argv.getApiUrl());
             sysApi.setApiMethod(argv.getApiMethod());
-            sysApi.setApiCode(argv.getApiCode());
             sysApiService.checkUnique(sysApi);
         }
 
