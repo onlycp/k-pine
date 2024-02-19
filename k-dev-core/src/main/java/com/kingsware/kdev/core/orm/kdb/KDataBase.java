@@ -199,7 +199,11 @@ public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
 
     @Override
     public <T> long saveAll(List<T> list) {
-        int batchNum =  getBatchAddUpdateCount() == 0 ? list.size(): getBatchAddUpdateCount();
+        int defaultBatchNum = 20;
+        if (list.size() < defaultBatchNum) {
+            defaultBatchNum = list.size();
+        }
+        int batchNum =  getBatchAddUpdateCount() == 0 ? defaultBatchNum: getBatchAddUpdateCount();
         List<List<T>> listList = CollectUtils.splitList(list, batchNum);
         for (List<T> subList: listList) {
             SqlWrapper sqlWrapper = SqlGenerator.insertListSql(subList , this.getConfig().getInnerType());

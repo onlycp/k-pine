@@ -327,6 +327,13 @@ public class ServletUtil {
                 requestMap.put("method", request.getMethod());
                 requestMap.put("path", path);
                 requestMap.put("apiName", api != null ? api.getApiName() : "");
+                Enumeration<String> headerNames = request.getHeaderNames();
+                Map<String, Object> headers = new HashMap<>();
+                while (headerNames.hasMoreElements()) {
+                    String headerName = headerNames.nextElement();
+                    headers.put(headerName, request.getHeader(headerName));
+                }
+                requestMap.put("headers", headers);
                 params.put("request", requestMap);
 
             }

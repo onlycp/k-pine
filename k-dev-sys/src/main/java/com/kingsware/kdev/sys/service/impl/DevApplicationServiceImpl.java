@@ -218,7 +218,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         long apiCount = DB.batchSaveOrUpdate(devPine.getApis(), SysApi.class);
         log.info("完成导入接口信息：{}", apiCount);
         // 字典分类
-        long dictCount = DB.batchSaveOrUpdate(devPine.getDict(), SysDict.class);
+         long dictCount = DB.batchSaveOrUpdate(devPine.getDict(), SysDict.class);
         log.info("完成导入字典信息：{}", dictCount);
         // 字典项
         // 先删除已有字典项
