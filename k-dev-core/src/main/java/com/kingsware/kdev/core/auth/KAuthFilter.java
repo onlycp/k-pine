@@ -741,7 +741,11 @@ public class KAuthFilter implements Filter {
             if (username != null && StringUtils.isNotEmpty(username.toString())) {
                 String str = username.toString();
                 try {
-                    return new String(Base64.getDecoder().decode(str), StandardCharsets.UTF_8);
+                    if (Base64Utils.isBase64(str)) {
+                        return new String(Base64.getDecoder().decode(str), StandardCharsets.UTF_8);
+                    }
+                    return str;
+
                 }
                 catch (Exception e) {
                     return username.toString();
