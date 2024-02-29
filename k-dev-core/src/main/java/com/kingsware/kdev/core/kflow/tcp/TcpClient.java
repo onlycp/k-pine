@@ -164,14 +164,11 @@ public class TcpClient {
      * 断开连接
      */
     public void disConnect() {
-        if (this.socket.isConnected()) {
-            try {
-                this.working = false;
-                this.socket.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
+        try {
+            this.working = false;
+            this.socket.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
      }
 
