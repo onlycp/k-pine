@@ -5,6 +5,8 @@ import com.kingsware.kdev.core.kmq.websocket.WmMessage;
 import com.kingsware.kdev.core.kmq.websocket.WmMessageArgv;
 import com.kingsware.kdev.core.util.ClassUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
+import com.kingsware.kdev.core.util.StringUtils;
+import com.lmax.disruptor.dsl.Disruptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,14 +28,10 @@ public class KmqMessageCenter {
 
     /** 日志打印 **/
     private static final Logger logger  = LoggerFactory.getLogger(KmqMessageCenter.class);
-    /** 消息队列最大数 **/
-    private static final int QUEUE_MAX_SIZE = 50000;
     /** 私有实例 **/
     private static KmqMessageCenter messageCenter;
-    /**  消息队列所有存放的地方 **/
-    private final Map<String, KmqConsumerThread> kmqConsumerThreadHashMap = new HashMap<>();
-    /**  所有消息实例 **/
-    private final Map<String, Set<KmqConsumer>> consumers = new HashMap<>();
+
+    private Map<String, PacketEventProducerWithTranslator> packetEventProducerWithTranslatorMap = new HashMap<>();
 
     /**
      * 私有构造
@@ -49,16 +47,15 @@ public class KmqMessageCenter {
         if (Objects.isNull(messageCenter)) {
             synchronized (KmqMessageCenter.class) {
                 messageCenter = new KmqMessageCenter();
-                messageCenter.initConsumer();
+                messageCenter.initDisruptor();
             }
         }
         return messageCenter;
     }
 
-    /**
-     * 加载所有的处理器
-     */
-    private void initConsumer() {
+    public void initDisruptor() {
+
+        Map<String, Set<KmqConsumer>> consumers = new HashMap<>();
         // 查找所有消费类
         List<Class<?>> classList =  ClassUtils.getClassesByParentClass("com.kingsware.kdev", KmqConsumer.class);
         // 实例化消费实例并放到消费者的map
@@ -75,18 +72,26 @@ public class KmqMessageCenter {
                 logger.warn("实例化消费者失败，类名: {}", clazz.getName());
             }
         }
-//        // 创建线程池
-//        ExecutorService executorService = Executors.newFixedThreadPool(consumers.size());
+
         // 启动线程
         for (Map.Entry<String, Set<KmqConsumer>> entry: consumers.entrySet()) {
-            // 首先初始化队列
-            LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<>(QUEUE_MAX_SIZE);
-            // 加入map
-            KmqConsumerThread thread = new KmqConsumerThread(entry.getKey(), queue, entry.getValue());
-            kmqConsumerThreadHashMap.put(entry.getKey(), thread);
-            // 启动线程
-            new Thread(thread).start();
+            // 创建线程池
+            ExecutorService executorService = Executors.newCachedThreadPool();
+            //创建事件工厂
+            PacketEventFactory eventFactory = new PacketEventFactory();
+            // RingBuffer 大小，必须是 2 的 N 次方
+            int ringBufferSize = 1024 * 1024;
+            // Construct the Disruptor
+            Disruptor<PacketEvent> disruptor  = new Disruptor<>(eventFactory, ringBufferSize, executorService);
+            disruptor.handleEventsWith(new PacketEventHandler(entry.getKey(), entry.getValue()));
+            //启动disruptor，启动所有线程
+            disruptor.start();
+            PacketEventProducerWithTranslator packetEventProducerWithTranslator = new PacketEventProducerWithTranslator(disruptor.getRingBuffer());
+            packetEventProducerWithTranslatorMap.put(entry.getKey(), packetEventProducerWithTranslator);
         }
+
+
+
     }
 
     /**
@@ -105,19 +110,21 @@ public class KmqMessageCenter {
      */
     public void produce(String topic, List<String> payloads) {
         // 如果没有消费者，直接丢弃
-        if (!consumers.containsKey(topic)) {
-//            logger.warn("当前生产者没有对应的消费者，消息将被丢弃，topic: {}", topic);
+        if (!packetEventProducerWithTranslatorMap.containsKey(topic)) {
             return;
         }
         // 将消息加入队列中
         try {
-            KmqConsumerThread thread = kmqConsumerThreadHashMap.get(topic);
-            logger.info("消息入列，Topic:{}, 队列空闲数:{}, 待入列数:{}", topic, thread.getQueue().remainingCapacity(), payloads.size());
-            if (thread.getQueue().remainingCapacity() > payloads.size()) {
-                for (String payload: payloads) {
-                    thread.getQueue().put(payload);
-                }
+            PacketEventProducerWithTranslator withTranslator = packetEventProducerWithTranslatorMap.get(topic);
+            for(String payload: payloads) {
+                PacketEvent event = new PacketEvent();
+                event.setMessage(payload);
+                event.setTimestamp(System.currentTimeMillis());
+                withTranslator.send(event);
+                logger.info("Produce，topic:{},  message:{}", topic, StringUtils.retrench(payload, 100));
             }
+
+
         }
         catch (Exception e) {
             logger.error("生产消息失败，topic: {}", topic, e);

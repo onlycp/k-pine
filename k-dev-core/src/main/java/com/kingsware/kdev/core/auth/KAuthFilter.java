@@ -393,7 +393,7 @@ public class KAuthFilter implements Filter {
             }
             loginLog.setResponseMessage(StringUtils.retrench(errorMessage, 1000));
             loginLog.setOperateTime(new Timestamp(System.currentTimeMillis()));
-            log.info("保存登录日志:{}, 请求参数:{}", JsonUtil.toJson(loginLog), JsonUtil.toJson(argvMap));
+//            log.info("保存登录日志:{}, 请求参数:{}", JsonUtil.toJson(loginLog), JsonUtil.toJson(argvMap));
 
             KmqMessageCenter.getInstance().produce("t_login_log", JsonUtil.toJson(loginLog) );
         }

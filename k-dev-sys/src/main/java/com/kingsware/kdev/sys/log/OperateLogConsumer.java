@@ -21,7 +21,7 @@ import java.util.List;
 public class OperateLogConsumer implements KmqConsumer {
     @Override
     public void onMessage(List<String> payloads) throws Exception {
-        long t1 = System.currentTimeMillis();
+//        long t1 = System.currentTimeMillis();
         List<SysOperateLog> sysOperateLogs = new ArrayList<>();
         for (String payload: payloads) {
             SysOperateLog sysOperateLog = JsonUtil.toBean(payload, SysOperateLog.class);
@@ -32,8 +32,8 @@ public class OperateLogConsumer implements KmqConsumer {
             sysOperateLogs.add(sysOperateLog);
         }
         DB.saveAll(sysOperateLogs);
-        long t2 = System.currentTimeMillis();
-        log.info("consumer: {}, consume {} records, consume time: {} ms",topic(), payloads.size(), t2 - t1);
+//        long t2 = System.currentTimeMillis();
+//        log.info("consumer: {}, consume {} records, consume time: {} ms",topic(), payloads.size(), t2 - t1);
 
 
     }
