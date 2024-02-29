@@ -49,11 +49,9 @@ public class KmqConsumerThread implements Runnable {
         // 循环处理消息
         while (true) {
             try {
-//                ThreadUtils.sleep(5);
-                List<String> payloads = new ArrayList<>();
-                queue.drainTo(payloads, 20);
+                List<String> payloads = drainQueue(20);
                 if (payloads.size() > 0) {
-                    log.info("消息出列, Topic:{}, 队列剩余数:{}", topic, queue.size());
+                    log.info("消息出列, Topic:{}, 队列可用余量:{}", topic, queue.remainingCapacity());
 
                     for (KmqConsumer consumer : consumers) {
                         try {
@@ -64,15 +62,23 @@ public class KmqConsumerThread implements Runnable {
                         }
                     }
                 }
-                else {
-                    //log.info("无消息休眠");
-                    ThreadUtils.sleep(200);
-                }
-
+                ThreadUtils.sleep(5);
             }
             catch (Exception e) {
                 log.error("消息消费线程异常", e);
             }
         }
+    }
+
+    public List<String> drainQueue(int batchSize) throws InterruptedException {
+        List<String> payloads = new ArrayList<>();
+        for (int i = 0; i < batchSize; i++) {
+            String payload = queue.take();
+            payloads.add(payload);
+            if (queue.isEmpty()) {
+                break;
+            }
+        }
+        return payloads;
     }
 }
