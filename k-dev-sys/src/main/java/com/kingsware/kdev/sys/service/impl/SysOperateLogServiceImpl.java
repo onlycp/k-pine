@@ -57,7 +57,7 @@ public class SysOperateLogServiceImpl extends BaseServiceImpl implements SysOper
             wrapper.addCondition("operator", Op.LIKE, "%" +argv.getOperator() +"%");
         }
         if (StringUtils.isNotEmpty(argv.getOperateTimes())) {
-            wrapper.between("operate_time", argv.getOperateTimes().split(",")[0], argv.getOperateTimes().split(",")[1]);
+            wrapper.between("operate_time", argv.getOperateTimes().replace("+", " ").split(",")[0], argv.getOperateTimes().replace("+", " ").split(",")[1]);
         }
         if (argv.getResponseCode() != null) {
             //筛选成功或者失败的日志(200和非200)

@@ -27,11 +27,11 @@ public class KmqMessageCenter {
     /** 日志打印 **/
     private static final Logger logger  = LoggerFactory.getLogger(KmqMessageCenter.class);
     /** 消息队列最大数 **/
-    private static final int QUEUE_MAX_SIZE = 1000;
+    private static final int QUEUE_MAX_SIZE = 50000;
     /** 私有实例 **/
     private static KmqMessageCenter messageCenter;
     /**  消息队列所有存放的地方 **/
-    private final Map<String, LinkedBlockingQueue<String>> blockingQueueMap = new HashMap<>();
+    private final Map<String, KmqConsumerThread> kmqConsumerThreadHashMap = new HashMap<>();
     /**  所有消息实例 **/
     private final Map<String, Set<KmqConsumer>> consumers = new HashMap<>();
 
@@ -75,16 +75,17 @@ public class KmqMessageCenter {
                 logger.warn("实例化消费者失败，类名: {}", clazz.getName());
             }
         }
-        // 创建线程池
-        ExecutorService executorService = Executors.newFixedThreadPool(consumers.size());
+//        // 创建线程池
+//        ExecutorService executorService = Executors.newFixedThreadPool(consumers.size());
         // 启动线程
         for (Map.Entry<String, Set<KmqConsumer>> entry: consumers.entrySet()) {
             // 首先初始化队列
             LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<>(QUEUE_MAX_SIZE);
             // 加入map
-            blockingQueueMap.put(entry.getKey(), queue);
+            KmqConsumerThread thread = new KmqConsumerThread(entry.getKey(), queue, entry.getValue());
+            kmqConsumerThreadHashMap.put(entry.getKey(), thread);
             // 启动线程
-            executorService.submit(new KmqConsumerThread(entry.getKey(), queue, entry.getValue()));
+            new Thread(thread).start();
         }
     }
 
@@ -110,11 +111,13 @@ public class KmqMessageCenter {
         }
         // 将消息加入队列中
         try {
-            LinkedBlockingQueue<String> queue = blockingQueueMap.computeIfAbsent(topic, key -> new LinkedBlockingQueue<>(QUEUE_MAX_SIZE));
-            if (queue.remainingCapacity() > payloads.size()) {
-                queue.addAll(payloads);
+            KmqConsumerThread thread = kmqConsumerThreadHashMap.get(topic);
+            logger.info("消息入列，Topic:{}, 队列空闲数:{}, 待入列数:{}", topic, thread.getQueue().remainingCapacity(), payloads.size());
+            if (thread.getQueue().remainingCapacity() > payloads.size()) {
+                for (String payload: payloads) {
+                    thread.getQueue().put(payload);
+                }
             }
-
         }
         catch (Exception e) {
             logger.error("生产消息失败，topic: {}", topic, e);

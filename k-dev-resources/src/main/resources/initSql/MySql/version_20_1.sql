@@ -452,7 +452,7 @@ CREATE TABLE IF NOT EXISTS `sys_api`  (
                                           `api_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '接口编码',
                                           `api_flow_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '流程ID',
                                           `api_method` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT 'get' COMMENT '请求方式',
-                                          `api_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '接口名称',
+                                          `api_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '接口名称',
                                           `api_note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL COMMENT '接口描述',
                                           `api_req_argv` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL COMMENT '请求参数',
                                           `api_result_handler` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '结果处理类',
