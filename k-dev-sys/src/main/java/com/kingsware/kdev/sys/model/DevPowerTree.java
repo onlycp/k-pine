@@ -19,4 +19,5 @@ public class DevPowerTree extends BaseManageModel {
     private String parentId;
     private String note;
     private String path;
+    private String name;
 }

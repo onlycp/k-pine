@@ -25,4 +25,6 @@ public class SysLogicTemplate extends BaseManageModel {
     private String newFlowJson;
     private String flowConfig;
     private String type;
+    private Integer sysSuggested;
+    private Integer publishStatus;
 }
