@@ -192,7 +192,10 @@ public class FileManager {
                 String afterPath = AESUtil.encrypt(sysFile.getFilePath(), encryptProperties.getAes().getSecret());
                 sysFile.setFilePath("encrypt:" + afterPath);
             }
-            DB.save(sysFile);
+            // 静态资源不存储到数据库
+            if (!"res".equals(basePath)) {
+                DB.save(sysFile);
+            }
             // 返回id
             return sysFile;
         }
