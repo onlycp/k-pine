@@ -171,6 +171,16 @@ public class HttpUtil {
             connection.setUseCaches(false);
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+            // 设置超时时间
+            connection.setConnectTimeout(5 * 1000);
+            if (apiUrl.contains("/api/async/execute")) {
+                connection.setReadTimeout(5 * 1000);
+            }
+            else {
+                String httpReadTimeout = SpringContext.getProperties("app.http-read-timeout", (5 * 60 * 1000)+"");
+                connection.setReadTimeout(Integer.parseInt(httpReadTimeout));
+            }
+
             if (headerMap!= null && !headerMap.isEmpty()) {
                 headerMap.forEach(connection::setRequestProperty);
             }
