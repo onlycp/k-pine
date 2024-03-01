@@ -14,6 +14,7 @@ import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.util.AESUtil;
 import com.kingsware.kdev.core.util.JsonUtil;
+import com.kingsware.kdev.core.util.MD5Utils;
 import com.kingsware.kdev.core.util.StringUtils;
 import io.swagger.annotations.Api;
 import org.slf4j.Logger;
@@ -48,18 +49,6 @@ public class TokenUtil {
     /** 日志打印 **/
     private static final Logger logger  = LoggerFactory.getLogger(TokenUtil.class);
 
-    /**
-     * 生成令牌
-     * @param dataSecret    数据密钥(AES)
-     * @param iss           发行机构
-     * @param userInfo      用户信息
-     * @param ip            客户端ip
-     * @return              生成后的令牌
-     */
-    public static String createToken(String dataSecret, String iss, String ip, BaseUserInfo userInfo) {
-        // 实例一个令牌对象
-        return createToken(dataSecret, iss, ip, "", userInfo);
-    }
 
 
     /**
@@ -70,7 +59,7 @@ public class TokenUtil {
      * @param ip            客户端ip
      * @return              生成后的令牌
      */
-    public static String createToken(String dataSecret, String iss, String ip, String sessionId,  BaseUserInfo userInfo) {
+    public static TokenPair createToken(String dataSecret, String iss, String ip, String sessionId,  BaseUserInfo userInfo) {
         // 实例一个令牌对象
         AuthToken authToken = new AuthToken();
         authToken.setIp(ip);
@@ -80,9 +69,12 @@ public class TokenUtil {
         authToken.setKSessionId(sessionId);
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            String token = objectMapper.writeValueAsString(authToken);
+            String str = objectMapper.writeValueAsString(authToken);
             // 将令牌字符串使用AES加密（128位)
-            return AESUtil.encrypt(token, dataSecret);
+            String token = AESUtil.encrypt(str, dataSecret);
+            String md5 = MD5Utils.md5(token);
+            return new TokenPair(token, md5);
+
         } catch (JsonProcessingException e) {
             logger.warn("生成Token失败, 源串:{}", userInfo);
             return null;
@@ -133,6 +125,7 @@ public class TokenUtil {
             logger.info("token: {}", token);
             throw new UnauthorizedException(I18n.t("auth. unauthorized-e001", "用户未登录，代码: E001"));
         }
+        token = autoGetToken(token);
         // 解密令牌
         String decryptToken = AESUtil.decrypt(token, dataSecret);
         // 如果令牌无法解密
@@ -211,7 +204,7 @@ public class TokenUtil {
     public static BaseUserInfo getUserInfoByToken(String token, String dataSecret) {
         try {
             // 解密令牌
-            String decryptToken = AESUtil.decrypt(token, dataSecret);
+            String decryptToken = AESUtil.decrypt(autoGetToken(token), dataSecret);
             AuthToken authToken = new ObjectMapper().readValue(decryptToken, AuthToken.class);
             return authToken.getUserInfo();
         }
@@ -229,11 +222,23 @@ public class TokenUtil {
         try {
             AppAuthProperties appAuthProperties = SpringContext.getBean(AppAuthProperties.class);
             // 解密令牌
-            String decryptToken = AESUtil.decrypt(token, appAuthProperties.getTokenSecret());
+            String decryptToken = AESUtil.decrypt(autoGetToken(token), appAuthProperties.getTokenSecret());
             return new ObjectMapper().readValue(decryptToken, AuthToken.class);
         }
         catch (Exception e) {
             return null;
+        }
+    }
+
+    public static String autoGetToken(String token) {
+        if (StringUtils.isEmpty(token)){
+            return token;
+        }
+        if (token.length() == 32) {
+            return SessionManager.getInstance().getTokenByMd5(token);
+        }
+        else {
+            return token;
         }
     }
 

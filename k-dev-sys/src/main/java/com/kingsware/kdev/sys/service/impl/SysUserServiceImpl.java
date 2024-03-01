@@ -537,7 +537,6 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             userInfo.setRoleIds(roleMap.get("roleIds"));
             userInfo.setRoleNames(roleMap.get("roleNames"));
             userInfo.setRoleCodes(roleMap.get("roleCodes"));
-            userInfo.setApiSystem(ApiSystemEnum.ADMIN);
             // 获取部门信息
             Map<String, String> unitMap = getUnitIds(getUnitsByUserId(model.getId()));
             userInfo.setSysUnitIds(unitMap.get("unitIds"));
@@ -568,7 +567,8 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             if (existOnlineUser == null) {
                 // 获取会话id
                 String kSessionId = ServletUtil.getCookie("k_session_id", "");
-                String token = TokenUtil.createToken(appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), KClientContext.getContext().getIp(), kSessionId, userInfo);
+                TokenPair tokenPair = TokenUtil.createToken(appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), KClientContext.getContext().getIp(), kSessionId, userInfo);
+                String token = tokenPair.getToken();
                 if (StringUtils.isEmpty(token)) {
                     throw BusinessException.serviceThrow(message != null ? message : "登录失败，请检查登录信息是否有误！");
                 }
@@ -598,7 +598,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 DB.update(existOnlineUser);
             }
 
-            ret.setToken(existOnlineUser.getLoginToken());
+            ret.setToken(MD5Utils.md5(existOnlineUser.getLoginToken()));
             // 发送上线通知
             InstanceManager.getInstance().broadMessage("session-add", JsonUtil.toJson(existOnlineUser));
             // 加载权限
@@ -682,8 +682,9 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
 //        userInfo.setAvatar("https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif");
         //获取角色拥有的权限
         Set<String> permissions = getMenuPermission(userInfo);
-        userInfo.setPermissions(permissions);
-        return userInfo;
+        BaseUserInfoExt userInfoExt = BeanUtils.copyObject(userInfo, BaseUserInfoExt.class);
+        userInfoExt.setPermissions(permissions);
+        return userInfoExt;
     }
 
     /**

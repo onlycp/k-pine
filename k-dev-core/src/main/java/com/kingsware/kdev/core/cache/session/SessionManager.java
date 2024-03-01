@@ -6,6 +6,7 @@ import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
+import com.kingsware.kdev.core.util.MD5Utils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Timestamp;
@@ -23,6 +24,7 @@ public class SessionManager {
     private static SessionManager instance;
     /** 字典缓存 **/
     private Map<String, Set<TokenSession>> sessionMapping = new HashMap<>();
+    private Map<String, String> tokenHashMap = new HashMap<>();
 
     public static SessionManager getInstance() {
         if (instance == null) {
@@ -61,6 +63,18 @@ public class SessionManager {
     }
 
     /**
+     * 通过md5获取token
+     * @param md5 md5
+     * @return token
+     */
+    public String getTokenByMd5(String md5) {
+        if (!tokenHashMap.containsKey(md5)) {
+            reloadSessions();
+        }
+        return tokenHashMap.get(md5);
+    }
+
+    /**
      * 重置所有会话
      */
     public void reloadSessions() {
@@ -79,6 +93,14 @@ public class SessionManager {
 
         }
         this.sessionMapping = map;
+        // 计算所有的hash
+        sessionMapping.forEach((userId, onlineUsers) -> {
+            onlineUsers.forEach(tokenSession -> {
+                String md5Value = MD5Utils.md5(tokenSession.getLoginToken());
+                tokenHashMap.put(md5Value, tokenSession.getLoginToken());
+            });
+        });
+
     }
 
     /**

@@ -3,11 +3,14 @@ package com.kingsware.kdev.uniops.service.impl;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.kingsware.kdev.core.auth.AppAuthProperties;
 import com.kingsware.kdev.core.auth.BaseUserInfo;
+import com.kingsware.kdev.core.auth.TokenPair;
 import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.kflow.FlowUtils;
+import com.kingsware.kdev.core.model.SysOnlineUser;
+import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.sys.argv.DevPine;
 import com.kingsware.kdev.sys.manager.UniOpsTokenStore;
@@ -32,6 +35,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -90,8 +94,17 @@ public class UniOpsServiceImpl implements UniOpsService {
                         BaseUserInfo userInfo = JsonUtil.toBean(body, BaseUserInfo.class);
                         log.info("青松: uniops用户信息:{}" , body);
                         userInfo.setAvatar(null);
-                        String pineKey = TokenUtil.createToken(appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), KClientContext.getContext().getIp(), "-1", userInfo);
-                        UniOpsTokenStore.getInstance().put(token, pineKey);
+                        TokenPair pineKey = TokenUtil.createToken(appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), KClientContext.getContext().getIp(), "-1", userInfo);
+                        // 保存sessionUser
+                        SysOnlineUser existOnlineUser = new SysOnlineUser();
+                        existOnlineUser.setId(StringUtils.getUUID());
+                        existOnlineUser.setUserId(userInfo.getId());
+                        existOnlineUser.setLoginIp(KClientContext.getContext().getIp());
+                        existOnlineUser.setLoginTime(new Timestamp(System.currentTimeMillis()));
+                        existOnlineUser.setLoginToken(token);
+                        DB.save(existOnlineUser);
+
+                        UniOpsTokenStore.getInstance().put(token, pineKey.getMd5());
                         contextMap.put("uniopsUserid", userInfo.getId() == null ?"":userInfo.getId() );
                         contextMap.put("uniopsUsername", userInfo.getUsername() == null?"": userInfo.getUsername());
                         contextMap.put("uniopsRealName", userInfo.getRealName() == null ?" ": userInfo.getRealName());
