@@ -25,12 +25,11 @@ public class OperateLogConsumer implements KmqConsumer {
     public void onMessage(List<String> payloads) throws Exception {
         long t1 = System.currentTimeMillis();
         String md5 = MD5Utils.md5(JsonUtil.toJson(payloads));
-        log.info("[{}]-Operate Log  Save", md5);
+        log.info("[{}]- consumer: Operate Log  Save", md5);
         List<SysOperateLog> sysOperateLogs = new ArrayList<>();
         for (String payload: payloads) {
             SysOperateLog sysOperateLog = JsonUtil.toBean(payload, SysOperateLog.class);
             if (StringUtils.isNotEmpty(sysOperateLog.getResponseBody()) && sysOperateLog.getResponseBody().length() > 1000) {
-
                 sysOperateLog.setResponseBody(sysOperateLog.getResponseBody().substring(0,1000));
             }
             sysOperateLogs.add(sysOperateLog);
