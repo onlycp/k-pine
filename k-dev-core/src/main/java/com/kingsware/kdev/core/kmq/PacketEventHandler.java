@@ -50,6 +50,7 @@ public class PacketEventHandler implements EventHandler<PacketEvent> {
 
         }
         catch (Exception e) {
+            log.error("error", e);
             log.error("T-消费者: {} 消费失败，消息内容:{}, 异常信息:{}", topic, packetEvent.getMessage(), e.getMessage());
         }
 

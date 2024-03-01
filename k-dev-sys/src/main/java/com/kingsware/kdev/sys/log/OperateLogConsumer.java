@@ -4,6 +4,8 @@ import com.kingsware.kdev.core.kmq.KmqConsumer;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.model.SysOperateLog;
+import com.kingsware.kdev.core.util.MD5Utils;
+import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,7 +23,9 @@ import java.util.List;
 public class OperateLogConsumer implements KmqConsumer {
     @Override
     public void onMessage(List<String> payloads) throws Exception {
-//        long t1 = System.currentTimeMillis();
+        long t1 = System.currentTimeMillis();
+        String md5 = MD5Utils.md5(JsonUtil.toJson(payloads));
+        log.info("[{}]-Operate Log  Save", md5);
         List<SysOperateLog> sysOperateLogs = new ArrayList<>();
         for (String payload: payloads) {
             SysOperateLog sysOperateLog = JsonUtil.toBean(payload, SysOperateLog.class);
@@ -32,8 +36,8 @@ public class OperateLogConsumer implements KmqConsumer {
             sysOperateLogs.add(sysOperateLog);
         }
         DB.saveAll(sysOperateLogs);
-//        long t2 = System.currentTimeMillis();
-//        log.info("consumer: {}, consume {} records, consume time: {} ms",topic(), payloads.size(), t2 - t1);
+        long t2 = System.currentTimeMillis();
+        log.info("[{}]- consumer: {}, consume {} records, consume time: {} ms",md5, topic(), payloads.size(), t2 - t1);
 
 
     }
