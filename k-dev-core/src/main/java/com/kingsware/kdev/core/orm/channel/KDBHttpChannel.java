@@ -164,13 +164,29 @@ public class KDBHttpChannel implements DbChannel{
             // 拼接请求
             List<String> urls = new ArrayList<>();
             String[] arr = kdbConnectConfig.getServer().split(";");
+            String syncValue = SyncValueManager.getInstance().getSyncValue();
+            boolean isAsync = syncValue != null;
+            if (isAsync) {
+                SyncValueManager.getInstance().clearSyncValue();
+            }
             for (String a: arr) {
-                urls.add(a +  "/api/execute");
+                if (!isAsync) {
+                    urls.add(a +  "/api/execute");
+                }
+                else {
+                    urls.add(a +  "/api/async/execute");
+                }
+
             }
             String url = StringUtils.joinToString(urls, ";");
             long t1 = System.currentTimeMillis();
             // 发起请求
             String  responseBody = HttpUtil.postBody(url, requestBody, Collections.emptyMap(), true);
+            if (isAsync) {
+                responseBody = syncValue;
+            }
+            //logger.info("ResponseBody:{}", responseBody);
+
             long takeTime = System.currentTimeMillis() - t1;
 //            if (takeTime < 3000) {
 //                logger.debug("url:{} , Take: {} ,请求体: {}", url, takeTime ,requestBody);

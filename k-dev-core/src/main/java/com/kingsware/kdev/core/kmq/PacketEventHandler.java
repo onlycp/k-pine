@@ -1,6 +1,7 @@
 package com.kingsware.kdev.core.kmq;
 
 
+import com.kingsware.kdev.core.orm.kdb.CustomThreadFactory;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.lmax.disruptor.EventHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,8 @@ public class PacketEventHandler implements EventHandler<PacketEvent> {
 
     private final Set<KmqConsumer> consumers;
 
-    private final static ExecutorService executor = Executors.newFixedThreadPool(10);
+    private final static ExecutorService executor = Executors.newFixedThreadPool(10, new CustomThreadFactory("PacketEventHandler"));
+
 
     public PacketEventHandler(String topic, Set<KmqConsumer> consumers) {
         this.consumers = consumers;
