@@ -507,9 +507,10 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                     // 移除当前登录次数缓存
                     sysCacheService.removeCache(cacheKey);
                     throw BusinessException.serviceThrow(String.format("由于密码错误连续次数已达到%s次，用户被锁定%d分钟", allowErrorCount, userLockMinutes));
-
-
                 }
+                // 记录密码错误
+                userLoginPasswordErrorCount++;
+                sysCacheService.setCache(cacheKey, userLoginPasswordErrorCount+"");
                 throw BusinessException.serviceThrow(errorMessage);
             }
             if (useUsernamePassword && KClientContext.getContext().isValidatePassFlag()) {
