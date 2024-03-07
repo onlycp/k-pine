@@ -75,10 +75,11 @@ public class TcpClient {
 
 
     public void heart() {
-        if (socket.isConnected()) {
+        if (isConnected()) {
             TReqMessage message = new TReqMessage(SocketHeadType.HEART_REQUEST, "", "");
             send(message);
         }
+
     }
 
     public void register() {
@@ -116,11 +117,11 @@ public class TcpClient {
                         }
 
                     } catch (Exception e) {
-                        try {
-                            this.socket.close();
-                        } catch (IOException ex) {
-                            // throw new RuntimeException(ex);
-                        }
+//                        try {
+//                            //this.socket.close();
+//                        } catch (IOException ex) {
+//                            // throw new RuntimeException(ex);
+//                        }
                     }
                 }
                 ThreadUtils.sleep(500);
@@ -137,7 +138,7 @@ public class TcpClient {
      * @param msg 消息内容
      */
     public void send(TReqMessage msg) {
-        if (this.socket.isConnected()) {
+        if (isConnected()) {
             try {
 
                 byte[] bodyBytes = msg.toByteArray();
