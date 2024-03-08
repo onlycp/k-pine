@@ -43,7 +43,7 @@ public class MessageWebSocket {
      * 连接建立成功调用的方法 */
     @OnOpen
     public void onOpen(Session session) {
-        logger.info("WebSocket连接成功, sessionId:{}", session.getId());
+//        logger.info("WebSocket连接成功, sessionId:{}", session.getId());
         sendMessage(session, JsonUtil.toJson(new WmMessage("welcome", "Hello world!")));
     }
 
