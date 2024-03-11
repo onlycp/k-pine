@@ -48,7 +48,7 @@ public class PacketEventHandler implements EventHandler<PacketEvent> {
             };
             Future<String> future = executor.submit(task);
             future.get(10, TimeUnit.SECONDS);
-            log.info("Consumer Topic: {}, Sequence: {}, Message:{}", topic, sequence, StringUtils.retrench(packetEvent.getMessage(), 100));
+            log.debug("Consumer Topic: {}, Sequence: {}, Message:{}", topic, sequence, StringUtils.retrench(packetEvent.getMessage(), 100));
 
         }
         catch (Exception e) {

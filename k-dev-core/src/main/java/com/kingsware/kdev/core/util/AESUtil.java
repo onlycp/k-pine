@@ -110,7 +110,7 @@ public class AESUtil {
             byte[] original = cipher.doFinal(encrypted1);
             return new String(original, StandardCharsets.UTF_8);
         } catch (Exception ex) {
-//            logger.error("error", ex);
+            logger.error("error", ex);
             logger.warn("AES解密失败，原因：{}" , ex.getMessage());
             return null;
         }

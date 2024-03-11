@@ -121,7 +121,7 @@ public class KmqMessageCenter {
                 event.setMessage(payload);
                 event.setTimestamp(System.currentTimeMillis());
                 withTranslator.send(event);
-                logger.info("Produce，topic:{},  message:{}", topic, StringUtils.retrench(payload, 100));
+                //logger.info("Produce，topic:{},  message:{}", topic, StringUtils.retrench(payload, 100));
             }
 
 

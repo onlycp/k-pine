@@ -26,7 +26,6 @@ public class OperateLogConsumer implements KmqConsumer {
     public void onMessage(List<String> payloads) throws Exception {
         long t1 = System.currentTimeMillis();
         String md5 = MD5Utils.md5(JsonUtil.toJson(payloads));
-        log.info("[{}]- consumer: Operate Log  Save", md5);
         String enableLog = SpringContext.getProperties("app.log.enable", "true");
         if ("true".equalsIgnoreCase(enableLog)) {
             List<SysOperateLog> sysOperateLogs = new ArrayList<>();
@@ -48,11 +47,11 @@ public class OperateLogConsumer implements KmqConsumer {
             finally {
                 SyncValueManager.getInstance().clearSyncValue();
             }
-
+            long t2 = System.currentTimeMillis();
+            log.info("[{}]- consumer: {}, consume {} records, consume time: {} ms",md5, topic(), payloads.size(), t2 - t1);
         }
 
-        long t2 = System.currentTimeMillis();
-        log.info("[{}]- consumer: {}, consume {} records, consume time: {} ms",md5, topic(), payloads.size(), t2 - t1);
+
 
 
     }
