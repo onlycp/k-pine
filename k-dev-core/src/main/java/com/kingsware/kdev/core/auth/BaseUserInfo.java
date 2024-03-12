@@ -36,12 +36,8 @@ public class BaseUserInfo {
     private String accessIds;
     /** 角色名,多个用逗号分隔 **/
     private String roleNames;
-    /** 权限体系 **/
-    private ApiSystemEnum apiSystem;
     /** 归属单位id **/
     private String sysUnitIds;
     /** 归属单位名称 **/
     private String sysUnitNames;
-    /** 角色拥有的菜单权限 **/
-    private Set<String> permissions;
 }

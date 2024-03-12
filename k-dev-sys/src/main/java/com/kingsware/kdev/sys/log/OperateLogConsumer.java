@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.log;
 
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.kmq.KmqConsumer;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.SyncValueManager;
@@ -25,29 +26,32 @@ public class OperateLogConsumer implements KmqConsumer {
     public void onMessage(List<String> payloads) throws Exception {
         long t1 = System.currentTimeMillis();
         String md5 = MD5Utils.md5(JsonUtil.toJson(payloads));
-        log.info("[{}]- consumer: Operate Log  Save", md5);
-        List<SysOperateLog> sysOperateLogs = new ArrayList<>();
-        for (String payload: payloads) {
-            SysOperateLog sysOperateLog = JsonUtil.toBean(payload, SysOperateLog.class);
-            if (StringUtils.isNotEmpty(sysOperateLog.getResponseBody()) && sysOperateLog.getResponseBody().length() > 1000) {
-                sysOperateLog.setResponseBody(sysOperateLog.getResponseBody().substring(0,1000));
+        String enableLog = SpringContext.getProperties("app.log.enable", "true");
+        if ("true".equalsIgnoreCase(enableLog)) {
+            List<SysOperateLog> sysOperateLogs = new ArrayList<>();
+            for (String payload: payloads) {
+                SysOperateLog sysOperateLog = JsonUtil.toBean(payload, SysOperateLog.class);
+                if (StringUtils.isNotEmpty(sysOperateLog.getResponseBody()) && sysOperateLog.getResponseBody().length() > 1000) {
+                    sysOperateLog.setResponseBody(sysOperateLog.getResponseBody().substring(0,1000));
+                }
+                sysOperateLogs.add(sysOperateLog);
             }
-            sysOperateLogs.add(sysOperateLog);
-        }
-        try {
-            String resultValue = String.format("{\"errorCode\":0,\"message\":\"成功\",\"responseBody\":\"%d\",\"time\":1709277360835,\"total\":0}", sysOperateLogs.size());
-            SyncValueManager.getInstance().setSyncValue(resultValue);
-            DB.saveAll(sysOperateLogs);
-        }
-        catch (Exception e) {
-            log.error("error", e);
-        }
-        finally {
-            SyncValueManager.getInstance().clearSyncValue();
+            try {
+                String resultValue = String.format("{\"errorCode\":0,\"message\":\"成功\",\"responseBody\":\"%d\",\"time\":1709277360835,\"total\":0}", sysOperateLogs.size());
+                SyncValueManager.getInstance().setSyncValue(resultValue);
+                DB.saveAll(sysOperateLogs);
+            }
+            catch (Exception e) {
+                log.error("error", e);
+            }
+            finally {
+                SyncValueManager.getInstance().clearSyncValue();
+            }
+            long t2 = System.currentTimeMillis();
+            log.info("[{}]- consumer: {}, consume {} records, consume time: {} ms",md5, topic(), payloads.size(), t2 - t1);
         }
 
-        long t2 = System.currentTimeMillis();
-        log.info("[{}]- consumer: {}, consume {} records, consume time: {} ms",md5, topic(), payloads.size(), t2 - t1);
+
 
 
     }

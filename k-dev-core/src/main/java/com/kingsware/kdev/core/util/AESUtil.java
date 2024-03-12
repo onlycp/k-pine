@@ -97,6 +97,9 @@ public class AESUtil {
             if (StringUtils.isEmpty(secret)) {
                 return null;
             }
+            if (StringUtils.isEmpty(src)) {
+                return null;
+            }
             // 判断Key是否为16位
             if (secret.length() != 16) {
                 logger.warn("解密失败，原因：密钥长度必须为：16");
@@ -110,7 +113,7 @@ public class AESUtil {
             byte[] original = cipher.doFinal(encrypted1);
             return new String(original, StandardCharsets.UTF_8);
         } catch (Exception ex) {
-//            logger.error("error", ex);
+            logger.error("error", ex);
             logger.warn("AES解密失败，原因：{}" , ex.getMessage());
             return null;
         }

@@ -43,7 +43,7 @@ public class MessageWebSocket {
      * 连接建立成功调用的方法 */
     @OnOpen
     public void onOpen(Session session) {
-        //logger.info("WebSocket连接成功, sessionId:{}", session.getId());
+//        logger.info("WebSocket连接成功, sessionId:{}", session.getId());
         sendMessage(session, JsonUtil.toJson(new WmMessage("welcome", "Hello world!")));
     }
 
@@ -101,6 +101,15 @@ public class MessageWebSocket {
             String token = wmMessage.getBody();
             AuthToken authToken = TokenUtil.getAuthToken(token);
             if (authToken == null) {
+                WmMessage replyMessage = new WmMessage("error", "token不存在或已过时");
+                this.sendMessage(session, JsonUtil.toJson(replyMessage));
+                try {
+                    session.close();
+                }
+                catch (Exception e) {
+                    logger.error("关闭连接失败", e);
+                }
+
                 return;
             }
             SessionToken sessionToken = new SessionToken();
@@ -109,6 +118,7 @@ public class MessageWebSocket {
             sessionToken.setSession(session);
             sessionToken.setHeartTime(System.currentTimeMillis());
             sessionTokenSet.add(sessionToken);
+            logger.info("用户:【userId={}, sessionId={}】上线，当前在线人数为:{} ", authToken.getUserInfo().getId(), session.getId(), sessionTokenSet.size());
 
         }
         else if ("ping".equalsIgnoreCase(wmMessage.getTopic())) {
@@ -123,10 +133,22 @@ public class MessageWebSocket {
             // 移除过时的sessionToken
             try {
                 Set<SessionToken> removeSessions = sessionTokenSet.stream().filter(it-> ((it.getHeartTime() + 30000) <= System.currentTimeMillis())).collect(Collectors.toSet());
+                removeSessions.forEach(it -> {
+                    try {
+                        logger.info("移除过时的session: {}", it.getSession().getId());
+                        sessionTokenSet.remove(it);
+                        it.getSession().close();
+                    }
+                    catch (Exception e) {
+                        logger.error("移除过时的sessionToken失败", e);
+                    }
+
+
+                });
                 sessionTokenSet.removeAll(removeSessions);
             }
             catch (Exception ignored) {
-
+                ignored.printStackTrace();
             }
 
 
