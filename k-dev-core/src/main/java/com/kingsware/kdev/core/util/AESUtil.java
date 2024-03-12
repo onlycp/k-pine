@@ -97,6 +97,9 @@ public class AESUtil {
             if (StringUtils.isEmpty(secret)) {
                 return null;
             }
+            if (StringUtils.isEmpty(src)) {
+                return null;
+            }
             // 判断Key是否为16位
             if (secret.length() != 16) {
                 logger.warn("解密失败，原因：密钥长度必须为：16");
