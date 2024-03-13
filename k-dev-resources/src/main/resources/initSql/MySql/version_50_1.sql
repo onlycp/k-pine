@@ -18,30 +18,6 @@ ALTER TABLE dev_page_template ADD page_type VARCHAR(32) NULL COMMENT '模板页�
 ALTER TABLE dev_page_template ADD use_num INT DEFAULT 0 NULL COMMENT '模板使用人数';
 ALTER TABLE dev_page_template ADD extra LONGTEXT NULL COMMENT '用于配置页面参数示例数据JSON';
 
-CREATE TABLE dev_page_template (
-    id varchar(36) NOT NULL COMMENT '主键',
-    when_created varchar(50) NULL DEFAULT NULL COMMENT '创建时间',
-    when_modified varchar(50) NULL DEFAULT NULL COMMENT '修改时间',
-    who_created varchar(36) DEFAULT NULL COMMENT '创建人',
-    who_modified varchar(36) DEFAULT NULL COMMENT '修改人',
-    deleted tinyint(4) DEFAULT '0' COMMENT '删除标识',
-    app_id varchar(36) DEFAULT NULL COMMENT '应用ID',
-    name varchar(255) DEFAULT NULL COMMENT '页面名称',
-    description text COMMENT '页面介绍',
-    app_type varchar(100) DEFAULT NULL COMMENT '应用类型：可多个，逗号分隔，0: PC Web应用，1：移动端Web应用，2： 小程序，3： APP',
-    page_json longtext COMMENT '页面数据化JSON',
-    tags varchar(255) DEFAULT NULL COMMENT '标签',
-    module_id varchar(36) DEFAULT NULL COMMENT '关联模块',
-    snapshot_img_id varchar(32) DEFAULT NULL COMMENT '模板快照图片id，模板快照图片在保存模板时前端保存',
-    order_num int(11) DEFAULT NULL COMMENT '排序',
-    bg_colors varchar(64) DEFAULT NULL COMMENT '模板展示的背景色',
-    page_type varchar(32) DEFAULT NULL COMMENT '模板页面类型：page;form;flow;report;',
-    use_num int(11) DEFAULT '0' COMMENT '模板使用人数',
-    extra longtext COMMENT '用于配置页面参数示例数据JSON',
-    PRIMARY KEY (id)
-) COMMENT='开发表-页面模板表';
-
-
 CREATE TABLE dev_page_template_history (
     id varchar(36) NOT NULL COMMENT 'ID',
     tpl_id varchar(36) DEFAULT NULL COMMENT '页面模板ID',

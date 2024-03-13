@@ -10,7 +10,7 @@
   </parent>
   <groupId>com.kingsware.dev</groupId>
   <artifactId>k-dev-parent</artifactId>
-  <version>3.1.0</version>
+  <version>3.2.0-20240311-01</version>
   <packaging>pom</packaging>
   <name>k-dev-cli-api</name>
   <description>金智维青松平台</description>
@@ -25,8 +25,8 @@
     <module>k-dev-sys</module>
     <module>k-dev-app</module>
     <module>k-dev-resources</module>
-    <module>k-dev-app-with-faas</module>
     <module>k-dev-faas</module>
+    <module>k-dev-app-with-faas</module>
     <module>k-dev-app-with-ops</module>
   </modules>
   <distributionManagement>
@@ -42,12 +42,10 @@
     </snapshotRepository>
   </distributionManagement>
   <properties>
-    <jxl.version>2.6.12</jxl.version>
+    <kdev.version>3.2.0-20240311-01</kdev.version>
+    <maven.compiler.target>8</maven.compiler.target>
     <java.version>1.8</java.version>
     <maven.compiler.source>8</maven.compiler.source>
-    <kdev.version>3.1.0</kdev.version>
-    <maven.compiler.target>8</maven.compiler.target>
-    <poi.version>5.2.2</poi.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -109,22 +107,28 @@
       <version>2.7.0</version>
     </dependency>
     <dependency>
+      <groupId>com.lmax</groupId>
+      <artifactId>disruptor</artifactId>
+      <version>3.4.2</version>
+    </dependency>
+    <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <optional>true</optional>
     </dependency>
-    <dependency>
-      <groupId>org.apache.poi</groupId>
-      <artifactId>poi-ooxml</artifactId>
-      <version>${poi.version}</version>
-      <exclusions>
-        <exclusion>
-          <artifactId>log4j-api</artifactId>
-          <groupId>org.apache.logging.log4j</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
   </dependencies>
+  <repositories>
+    <repository>
+      <id>snapshots</id>
+      <name>Internal snapshots</name>
+      <url>http://192.168.2.69:83/repository/maven-third-snapshots/</url>
+    </repository>
+    <repository>
+      <id>releases</id>
+      <name>Internal Releases</name>
+      <url>http://192.168.2.69:83/repository/maven-third/</url>
+    </repository>
+  </repositories>
   <build>
     <plugins>
       <plugin>
