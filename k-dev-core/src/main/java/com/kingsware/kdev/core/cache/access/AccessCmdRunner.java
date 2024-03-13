@@ -27,6 +27,14 @@ public class AccessCmdRunner implements CommandLineRunner {
         List<DataResourceInfo> tables = DB.findList(DataResourceInfo.class, "select table_name, extra_sql, value_field from sys_data_resource where status = ?", 1);
         Map<String, DataResourceInfo>  map = new HashMap<>();
         for (DataResourceInfo resource: tables) {
+            String[] arr = resource.getTableName().trim().split("\\.");
+            if (arr.length == 1) {
+                resource.setSourceName("db");
+            }
+            else {
+                resource.setSourceName(arr[0]);
+                resource.setTableName(arr[1]);
+            }
             map.put(resource.getTableName(), resource);
         }
         AccessManager.getInstance().setAccessTables(map);

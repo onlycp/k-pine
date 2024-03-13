@@ -32,6 +32,7 @@ public class ApiTask implements KTask, KRunner {
      */
     @Override
     public void execute() {
+
         KflowProperties kFlowProperties = SpringContext.getBean(KflowProperties.class);
         if (!kFlowProperties.isEnable()) {
             return;

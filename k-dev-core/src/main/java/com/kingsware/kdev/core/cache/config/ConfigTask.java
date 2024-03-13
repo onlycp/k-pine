@@ -1,9 +1,12 @@
 package com.kingsware.kdev.core.cache.config;
 
+import com.kingsware.kdev.core.cache.access.AccessCmdRunner;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.cron.KRunner;
 import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
@@ -14,6 +17,7 @@ import java.util.List;
  * @version 1.0.0
  * @date 2022/1/6 9:41 上午
  */
+@Slf4j
 public class ConfigTask implements KTask, KRunner {
 
     public ConfigTask() {
@@ -35,6 +39,15 @@ public class ConfigTask implements KTask, KRunner {
             if (StringUtils.isNotEmpty(data.getAppId())) {
                 ConfigManager.getInstance().addItem(data.getAppId() + "." + data.getCode(), data);
             }
+        }
+        // 加载数据权限
+
+        try {
+            AccessCmdRunner accessCmdRunner = SpringContext.getBean(AccessCmdRunner.class);
+            accessCmdRunner.run();
+        }
+        catch (Exception e) {
+            log.info("加载数据权限配置失败:" + e);
         }
     }
 

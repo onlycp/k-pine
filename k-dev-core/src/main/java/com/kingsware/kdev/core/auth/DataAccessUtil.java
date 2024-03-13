@@ -98,7 +98,7 @@ public class DataAccessUtil {
                 while (startIndex >=0 && endIndex >=0) {
                     String dbSql = extraSql.substring(startIndex+1, endIndex);
                     // 查找数据
-                    List<String> ids = DB.findSingleAttributeList(String.class, dbSql );
+                    List<String> ids = DB.byName(dataSourceInfo.getSourceName()).findSingleAttributeList(String.class, dbSql );
                     if (ids.isEmpty()) {
                         ids.add("-1");
                     }

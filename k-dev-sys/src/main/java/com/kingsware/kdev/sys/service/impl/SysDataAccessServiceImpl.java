@@ -159,8 +159,15 @@ public class SysDataAccessServiceImpl extends BaseServiceImpl implements SysData
     public List<TreeDataRet<?>> queryCategoryData(String resourceId) {
         // 获取数据配置定义
         SysDataResource resource = DB.findById(SysDataResource.class, resourceId);
+        String[] arr = resource.getTableName().trim().split("\\.");
+        String dbName = "db";
+        String tableName = resource.getTableName();
+        if (arr.length > 1) {
+            dbName = arr[0];
+            tableName = arr[1];
+        }
         // 查询数据
-        List<CategoryData> categoryDataList = DB.findList(CategoryData.class, resource.getQuerySql());
+        List<CategoryData> categoryDataList = DB.byName(dbName).findList(CategoryData.class, resource.getQuerySql());
         // 转为树形结构
         List<TreeDataRet<?>> retList = new ArrayList<>();
         for (CategoryData categoryData: categoryDataList) {

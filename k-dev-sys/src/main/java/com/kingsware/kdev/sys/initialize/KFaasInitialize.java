@@ -33,19 +33,27 @@ public class KFaasInitialize implements SystemInitialize {
     @Value("${database.initDatasourcePath:.}")
     private String initDatasourcePath;
 
-    /** faas目录  **/
+    /**
+     * faas目录
+     **/
     @Value("${database.faas-folder:}")
     private String faasFolder;
 
-    /** faas命令  **/
+    /**
+     * faas命令
+     **/
     @Value("${database.faas-start-cmd:}")
     private String faasStartCmd;
 
-    /** faas命令  **/
+    /**
+     * faas命令
+     **/
     @Value("${database.faas-stop-cmd:}")
     private String faasStopCmd;
 
-    /** faas命令  **/
+    /**
+     * faas命令
+     **/
     @Value("${database.faas-port:10081}")
     private int faasPort;
 
@@ -80,18 +88,17 @@ public class KFaasInitialize implements SystemInitialize {
                     });
                     // 获取所有的数据源
                     List<DataSourceInfo> dataSourceInfos = DB.kdbApi().queryDataSource(new DataSourceQueryArgv());
-                    for (DataSourceInfo fileSource: targetSources) {
+                    for (DataSourceInfo fileSource : targetSources) {
                         // 创建数据库
                         createInitDb(fileSource);
 //                        // 查看是否已存在
                         Optional<DataSourceInfo> optional = dataSourceInfos.stream().filter(it -> it.getSourceName().equals(fileSource.getSourceName())).findFirst();
                         // 如果已存储，则修改
                         if (optional.isPresent()) {
-                            log.info("数据源初始化修改: {}" , fileSource);
+                            log.info("数据源初始化修改: {}", fileSource);
                             DB.kdbApi().editDataSource(fileSource);
-                        }
-                        else {
-                            log.info("数据源初始化新增: {}" , fileSource);
+                        } else {
+                            log.info("数据源初始化新增: {}", fileSource);
                             DB.kdbApi().addDataSource(fileSource);
                         }
                     }
@@ -99,43 +106,68 @@ public class KFaasInitialize implements SystemInitialize {
                 }
             }
         }
+
         // 获取faas上的所有数据源，以获取数据库类型
         List<DataSourceInfo> allDataSources = DB.kdbApi().queryDataSource(new DataSourceQueryArgv());
-        for (DataSourceInfo dataSourceInfo: allDataSources) {
+        // 将所有的数据源，在青松中注册
+        for (DataSourceInfo dataSourceInfo : allDataSources) {
+            if (DB.getBySourceName(dataSourceInfo.getSourceName()) == null) {
+                // 创建数据库
+                KDBConnectConfig m = JsonUtil.toBean(JsonUtil.toJson(DB.getDefault().getConfig()), KDBConnectConfig.class);
+                m.setDataSource(dataSourceInfo.getSourceName());
+                m.setDbName(dataSourceInfo.getSourceName());
+                m.setInnerType(getDbTyeName(dataSourceInfo.getJdbcUrl()));
+                DbContext.getInstance().createDataBase(dataSourceInfo.getSourceName(), m);
+                log.info("自动注册数据源：{}", dataSourceInfo.getSourceName());
+            }
+        }
+
+        for (DataSourceInfo dataSourceInfo : allDataSources) {
             DataBase dataBase = DB.getBySourceName(dataSourceInfo.getSourceName());
             if (dataBase != null) {
-                String tag = dataSourceInfo.getJdbcUrl().split(":")[1].trim();
-                String dbType = "";
-                if (tag.equalsIgnoreCase("mysql")) {
-                    dbType = "MySql";
-                } else if (tag.contains("postgres")) {
-                    dbType = "Postgresql";
-                } else if (tag.contains("h2")) {
-                    dbType = "H2";
-                } else if (tag.contains("dm")) {
-                    dbType = "DM";
-                } else if (tag.contains("oracle")) {
-                    dbType = "Oracle";
-                } else if (tag.contains("sqlserver")) {
-                    dbType = "SQLServer";
-                } else if (tag.contains("kingbase8")) {
-                    dbType = "Kingbase8";
-                } else if (tag.contains("base")) {
-                    dbType = "gbase";
-                } else {
-                    dbType = tag;
-                }
+                String dbType = getDbTyeName(dataSourceInfo.getJdbcUrl());
                 dataBase.getConfig().setInnerType(dbType);
             }
         }
 
+    }
 
+    /**
+     * 获取数据库类型
+     *
+     * @param jdbcUrl
+     * @return
+     */
+    public String getDbTyeName(String jdbcUrl) {
+        String tag = jdbcUrl.split(":")[1].trim();
+        String dbType = "";
+        if (tag.equalsIgnoreCase("mysql")) {
+            dbType = "MySql";
+        } else if (tag.contains("postgres")) {
+            dbType = "Postgresql";
+        } else if (tag.contains("h2")) {
+            dbType = "H2";
+        } else if (tag.contains("dm")) {
+            dbType = "DM";
+        } else if (tag.contains("oracle")) {
+            dbType = "Oracle";
+        } else if (tag.contains("sqlserver")) {
+            dbType = "SQLServer";
+        } else if (tag.contains("kingbase8")) {
+            dbType = "Kingbase8";
+        } else if (tag.contains("base")) {
+            dbType = "gbase";
+        } else {
+            dbType = tag;
+        }
+        return dbType;
     }
 
 
     /**
      * 创建的数据库初始化
-     * @param dataSourceInfo   数据源信息
+     *
+     * @param dataSourceInfo 数据源信息
      */
     private void createInitDb(final DataSourceInfo dataSourceInfo) {
         // 解析url
@@ -150,8 +182,8 @@ public class KFaasInitialize implements SystemInitialize {
         try {
             // 创建数据源
             DB.kdbApi().deleteDataSource(sourceName);
+        } catch (Exception ignored) {
         }
-        catch (Exception ignored) {}
         try {
             if ("mysql".equalsIgnoreCase(jdbcUrl.getDbType())) {
                 // 创建数据库
@@ -173,14 +205,12 @@ public class KFaasInitialize implements SystemInitialize {
                     DbContext.getInstance().createDataBase(sourceName, config);
                     // 需要先初始化数据源
                     DB.kdbApi().refreshBaseFlow();
-                    String createSchemaSql = String.format("CREATE DATABASE IF NOT EXISTS `%s` DEFAULT CHARSET utf8 COLLATE utf8_general_ci;",  dbName);
+                    String createSchemaSql = String.format("CREATE DATABASE IF NOT EXISTS `%s` DEFAULT CHARSET utf8 COLLATE utf8_general_ci;", dbName);
                     DB.byName(initDs.getSourceName()).executeUpdateSql(createSchemaSql);
-                }
-                catch (Exception ignored) {
+                } catch (Exception ignored) {
                 }
 
-            }
-            else if ("postgresql".equalsIgnoreCase(jdbcUrl.getDbType())) {
+            } else if ("postgresql".equalsIgnoreCase(jdbcUrl.getDbType())) {
                 // 创建数据库
                 try {
                     jdbcUrl.setDbName("postgres");
@@ -204,20 +234,18 @@ public class KFaasInitialize implements SystemInitialize {
                     // 先判断数据库是否存在在
                     long count = DB.byName(initDs.getSourceName()).findCount(String.format("select count(1) from pg_database where datname = '%s'", dbName));
                     if (count == 0) {
-                        String createSchemaSql = String.format("CREATE DATABASE \"%s\";",  dbName);
+                        String createSchemaSql = String.format("CREATE DATABASE \"%s\";", dbName);
                         DB.byName(initDs.getSourceName()).executeUpdateSql(createSchemaSql);
                     }
-                }
-                catch (Exception ignored) {
+                } catch (Exception ignored) {
                 }
             }
-        }
-        finally {
+        } finally {
             try {
                 DbContext.getInstance().removeDataBase(sourceName);
                 DB.kdbApi().deleteDataSource(sourceName);
+            } catch (Exception ignored) {
             }
-            catch (Exception ignored) {}
 
         }
 
@@ -247,10 +275,9 @@ public class KFaasInitialize implements SystemInitialize {
     }
 
     private boolean portOpened(String ip, int port) {
-        try (Socket ignored = new Socket(ip , port)) {
+        try (Socket ignored = new Socket(ip, port)) {
             return true;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return false;
         }
     }
