@@ -53,6 +53,10 @@ public class DataAccessUtil {
 
         // 获取附加sql
         DataResourceInfo dataSourceInfo = AccessManager.getInstance().getAccessTables().get(table.toLowerCase());
+        String tableValue = table;
+        if (!"db".equalsIgnoreCase(dataSourceInfo.getSourceName())) {
+            tableValue = dataSourceInfo.getSourceName() + "." + table;
+        }
         String queryColumn = StringUtils.isEmpty(dataSourceInfo.getValueField()) ? "id" : dataSourceInfo.getValueField();
         // 如果用户的数据id为空， 返回永远不可能成真的条件
         String extraSql = dataSourceInfo.getExtraSql();
@@ -88,7 +92,7 @@ public class DataAccessUtil {
             return s;
         }
         else if (sqlLink == SqlLink.IN) {
-            return MessageFormat.format("{0}.{1} in (select ar.data_id from sys_data_access_resource ar where (ar.table_name=''{2}'' and  ar.access_id in ({3})) {4})", alias, queryColumn, table, StringUtils.joinToString(inSet, ","), extraSql);
+            return MessageFormat.format("{0}.{1} in (select ar.data_id from sys_data_access_resource ar where (ar.table_name=''{2}'' and  ar.access_id in ({3})) {4})", alias, queryColumn, tableValue, StringUtils.joinToString(inSet, ","), extraSql);
         }
         else if (sqlLink == SqlLink.DATA_IN) {
             // 判断有无[]，如果有，那就是涉及到跨库查询，当前
@@ -111,7 +115,8 @@ public class DataAccessUtil {
 
             }
             // 拼接权限sql(由于id是uuid，这里忽略table_name)
-            String sql = MessageFormat.format("select ar.data_id from sys_data_access_resource ar where (ar.table_name=''{0}'' and  ar.access_id in ({1}))", table, StringUtils.joinToString(inSet, ","));            List<String> accessIds = DB.findSingleAttributeList(String.class, sql);
+            String sql = MessageFormat.format("select ar.data_id from sys_data_access_resource ar where (ar.table_name=''{0}'' and  ar.access_id in ({1}))", tableValue, StringUtils.joinToString(inSet, ","));
+            List<String> accessIds = DB.findSingleAttributeList(String.class, sql);
             List<String> accessSet = new ArrayList<>();
             if (accessIds.isEmpty()) {
                 accessSet.add("'-1'");
