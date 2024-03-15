@@ -179,6 +179,11 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 // 查找当前是否已入库
                 long cnt = DB.findCount("select count(1) cnt from dev_team_app where app_id=? and team_id=?", devPine.getInfo().getId(), teamId);
                 if (cnt == 0) {
+                    DevTeamApp devTeamApp = new DevTeamApp();
+                    devTeamApp.setAppId(devPine.getInfo().getId());
+                    devTeamApp.setTeamType(0);
+                    devTeamApp.setTeamId(teamId);
+                    DB.save(devTeamApp);
                  }
             }
         }
