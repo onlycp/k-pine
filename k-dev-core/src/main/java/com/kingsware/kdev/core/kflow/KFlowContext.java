@@ -3,6 +3,7 @@ package com.kingsware.kdev.core.kflow;
 import com.kingsware.kdev.core.auth.BaseUserInfo;
 import com.kingsware.kdev.core.cache.access.AccessManager;
 import com.kingsware.kdev.core.cache.instance.HostInfo;
+import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.mode.AppModeProperties;
@@ -53,6 +54,8 @@ public class KFlowContext {
         sysMap.put("sysUnitIds",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getSysUnitIds() : "");
         sysMap.put("sysUnitNames",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getSysUnitNames() : "");
         sysMap.put("isAdmin",  isAdmin());
+        // 是否uniops
+        sysMap.put("isUniops", LicenseManager.getInstance().isUniopsApp());
         HostInfo hostInfo = SystemUtil.getHost();
         String baseUrl = "http://" + hostInfo.getHostName() + ":" + hostInfo.getPort() + ServletUtil.getContextPath();
         if (baseUrl.endsWith("/")) {
