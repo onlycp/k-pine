@@ -123,7 +123,12 @@ public class KubboServiceImpl implements KubboService {
             ApiRequestRet apiRequestRet = new ApiRequestRet();
             apiRequestRet.setId(apiInfo.getId());
             apiRequestRet.setApiName(apiInfo.getApiName());
-            apiRequestRet.setApiUrl("/api/"+ apiInfo.getApiUrl());
+            if (apiInfo.getApiUrl().startsWith("/")) {
+                apiRequestRet.setApiUrl("/api"+ apiInfo.getApiUrl());
+            }
+            else {
+                apiRequestRet.setApiUrl("/api/"+ apiInfo.getApiUrl());
+            }
             apiRequestRet.setApiMethod(apiInfo.getApiMethod());
             apiRequestRet.setAppId(apiInfo.getAppId());
             apiRequestRet.setWhenModified(apiInfo.getWhenModified());
