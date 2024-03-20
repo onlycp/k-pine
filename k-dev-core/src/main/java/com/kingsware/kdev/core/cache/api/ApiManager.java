@@ -36,6 +36,15 @@ public class ApiManager {
     private ApiManager() {
     }
 
+
+    /**
+     * 获取所有api
+     * @return
+     */
+    public List<ApiInfo> getAllApis() {
+        return apis;
+    }
+
     /**
      * 增加api
      * @param apis  api

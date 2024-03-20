@@ -35,6 +35,12 @@ public class KFlowContext {
     /** 输出参数定义 **/
     private String outArgv;
 
+    /**
+     * 创建基本上下文
+     * @param inArgv 输入参数
+     * @param outArgv 输出参数
+     * @return KFlowContext 返回流程上下文对象
+     */
     public static KFlowContext createBaseContext(String inArgv, String outArgv) {
 
         KFlowContext context = new KFlowContext();

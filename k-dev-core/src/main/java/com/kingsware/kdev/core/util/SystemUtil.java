@@ -37,4 +37,20 @@ public class SystemUtil {
         return hostInfo;
 
     }
+
+    /**
+     * 获取当前主机的名称。
+     * 该方法首先尝试从环境变量"COMPUTERNAME"中获取主机名，这是Windows系统的标准环境变量。
+     * 如果在Windows环境中未找到该变量，方法将尝试从"HOSTNAME"环境变量中获取主机名，这是Linux/Unix系统的标准环境变量。
+     *
+     * @return 返回当前主机的名称。如果无法获取主机名，则返回null。
+     */
+    public static String getHostName() {
+        String machineName = System.getenv("COMPUTERNAME"); // 尝试获取Windows系统的主机名
+        if (machineName == null) {
+            machineName = System.getenv("HOSTNAME"); // 如果是Linux/Unix系统，尝试获取主机名
+        }
+        return machineName;
+    }
+
 }
