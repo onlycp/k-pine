@@ -272,8 +272,8 @@ public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
                         // 拼接sql
                         StringBuilder builder = new StringBuilder();
                         builder.append("delete from ").append(tableName).append(" ");
-                        builder.append("where id=?");
-                        DB.executeUpdateSql(builder.toString(), id);
+                        builder.append("where id=? and ").append(logicDelete.column()).append(" = ?");
+                        DB.executeUpdateSql(builder.toString(), id, logicDelete.defDeleteValue());
                     }
                     addList.add(entity);
                 }
