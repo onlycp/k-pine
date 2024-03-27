@@ -674,7 +674,7 @@ CREATE TABLE IF NOT EXISTS `sys_i18n`  (
 
 CREATE TABLE IF NOT EXISTS `sys_logic_flow`  (
                                                  `id` varchar(36) NOT NULL,
-                                                 `app_id` varchar(36) NULL DEFAULT NULL COMMENT '关联应用',
+                                                 `app_id` varchar(36) NULL DEFAULT NULL COMMENT '事务开关（开：1，关：0）；早期用于保存’关联应用‘，是application_id的冗余。',
                                                  `application_id` varchar(36) NULL DEFAULT NULL COMMENT '应用ID',
                                                  `default_source_name` varchar(100) NULL DEFAULT NULL COMMENT '默认数据源',
                                                  `flow_id` varchar(36) NULL DEFAULT NULL COMMENT '流程ID',

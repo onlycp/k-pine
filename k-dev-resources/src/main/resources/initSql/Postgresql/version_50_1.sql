@@ -46,3 +46,12 @@ CREATE TABLE dev_page_template_history (
 ALTER TABLE dev_faas_node ALTER COLUMN config type text;
 ALTER TABLE dev_faas_node ALTER COLUMN template type varchar(10240);
 
+CREATE TABLE IF NOT EXISTS dev_chat_history (
+    id varchar(36)  NOT NULL,
+    question text  NOT NULL,
+    answer text ,
+    args text,
+    when_created varchar(50)  DEFAULT NULL,
+    who_created varchar(36)  DEFAULT NULL,
+    PRIMARY KEY (id)
+    );

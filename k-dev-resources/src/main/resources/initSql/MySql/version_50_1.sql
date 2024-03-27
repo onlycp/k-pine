@@ -18,7 +18,7 @@ ALTER TABLE dev_page_template ADD page_type VARCHAR(32) NULL COMMENT '模板页�
 ALTER TABLE dev_page_template ADD use_num INT DEFAULT 0 NULL COMMENT '模板使用人数';
 ALTER TABLE dev_page_template ADD extra LONGTEXT NULL COMMENT '用于配置页面参数示例数据JSON';
 
-CREATE TABLE dev_page_template_history (
+CREATE TABLE IF NOT EXISTS dev_page_template_history (
     id varchar(36) NOT NULL COMMENT 'ID',
     tpl_id varchar(36) DEFAULT NULL COMMENT '页面模板ID',
     page_json longtext COMMENT '页面模板JSON',
@@ -33,3 +33,13 @@ CREATE TABLE dev_page_template_history (
 
 ALTER TABLE dev_faas_node MODIFY COLUMN config text NULL COMMENT '配置文件';
 ALTER TABLE dev_faas_node MODIFY COLUMN template varchar(10240) NULL COMMENT '脚本模板';
+
+CREATE TABLE IF NOT EXISTS dev_chat_history (
+    id varchar(36)  NOT NULL,
+    question text  NOT NULL,
+    answer text ,
+    args text,
+    when_created varchar(50)  DEFAULT NULL,
+    who_created varchar(36)  DEFAULT NULL,
+    PRIMARY KEY (id)
+    );

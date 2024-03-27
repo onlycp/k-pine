@@ -544,7 +544,7 @@ create table SYS_FILE
     WHEN_CREATED       VARCHAR2(20 char),
     WHO_MODIFIED       VARCHAR2(36 char),
     WHEN_MODIFIED      VARCHAR2(20 char),
-    APP_ID             VARCHAR2(36 char)
+    APP_ID             VARCHARpom2(36 char)
 );
 create table SYS_I18N
 (
