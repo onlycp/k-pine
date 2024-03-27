@@ -3,6 +3,7 @@ package com.kingsware.kdev.core.orm.kdb;
 import com.kingsware.kdev.core.bean.BaseModel;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.orm.*;
+import com.kingsware.kdev.core.orm.annotation.LogicDelete;
 import com.kingsware.kdev.core.orm.channel.DbChannel;
 import com.kingsware.kdev.core.orm.channel.KDBHttpChannel;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
@@ -265,6 +266,15 @@ public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
                 // 判断表里是否已存在
                 long count = this.findCount(tClass, Expr.builder().add("id", "=", id).build());
                 if (count == 0) {
+                    String tableName = ModelUtil.getTableName(tClass);
+                    LogicDelete logicDelete = LogicDeleteTables.getInstance().getTable(tableName);
+                    if (logicDelete != null) {
+                        // 拼接sql
+                        StringBuilder builder = new StringBuilder();
+                        builder.append("delete from ").append(tableName).append(" ");
+                        builder.append("where id=?");
+                        DB.executeUpdateSql(builder.toString(), id);
+                    }
                     addList.add(entity);
                 }
                 else {
