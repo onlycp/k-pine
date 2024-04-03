@@ -751,6 +751,10 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
 
     @Override
     public Long onlineCount(String username) {
+        // 空用户判断
+        if (StringUtils.isEmpty(username)) {
+            return 0L;
+        }
         // 如果不启用检验，那么直接返回0
         if (!appAuthProperties.getLoginSessionOne()) {
             return 0L;
