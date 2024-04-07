@@ -1,13 +1,11 @@
 -- 修改 use_time 字段的数据类型为 int
-ALTER TABLE open_api_log
-ALTER COLUMN use_time TYPE integer;
+ALTER TABLE open_api_log ALTER COLUMN use_time TYPE integer;
 
 -- 添加对 use_time 字段的注释
 COMMENT ON COLUMN open_api_log.use_time IS '响应时间(秒)';
 
 -- 将 error_message 字段的数据类型修改为 text
-ALTER TABLE open_api_log
-ALTER COLUMN error_message TYPE text;
+ALTER TABLE open_api_log ALTER COLUMN error_message TYPE text;
 
 -- 添加对 error_message 字段的注释
 COMMENT ON COLUMN open_api_log.error_message IS '错误信息';

@@ -377,7 +377,7 @@ create table SYS_API
     ID                 VARCHAR2(36 char) default '' not null
         constraint SYS_API_PK_OPEN_API_LOG
         primary key,
-    API_NAME           VARCHAR2(50 char),
+    API_NAME           VARCHAR2(255 char),
     API_URL            VARCHAR2(128 char),
     API_NOTE           CLOB,
     API_TAGS           VARCHAR2(128 char),
@@ -496,8 +496,8 @@ create table SYS_DICT
     ID            VARCHAR2(36 char) not null
         constraint SYS_DICT_PK_SYS_DATA_RESOURCE
         primary key,
-    NAME          VARCHAR2(50 char),
-    CODE          VARCHAR2(50 char),
+    NAME          VARCHAR2(255 char),
+    CODE          VARCHAR2(255 char),
     NOTE          CLOB,
     WHO_CREATED   VARCHAR2(36 char),
     WHEN_CREATED  VARCHAR2(20 char),
@@ -511,10 +511,10 @@ create table SYS_DICT_ITEM
     ID            VARCHAR2(36 char) not null
         constraint SYS_DICT_ITEM_PK_SYS_DICT
         primary key,
-    NAME          VARCHAR2(50 char),
-    GROUP_NAME    VARCHAR2(50 char),
+    NAME          VARCHAR2(255 char),
+    GROUP_NAME    VARCHAR2(255 char),
     SYS_DICT_ID   VARCHAR2(36 char),
-    CODE          VARCHAR2(50 char),
+    CODE          VARCHAR2(255 char),
     VALUE         VARCHAR2(20 char),
     ORDER_NUM     NUMBER,
     NOTE          CLOB,
@@ -544,7 +544,7 @@ create table SYS_FILE
     WHEN_CREATED       VARCHAR2(20 char),
     WHO_MODIFIED       VARCHAR2(36 char),
     WHEN_MODIFIED      VARCHAR2(20 char),
-    APP_ID             VARCHARpom2(36 char)
+    APP_ID             VARCHAR2(36 char)
 );
 create table SYS_I18N
 (
@@ -628,7 +628,7 @@ create table SYS_MENU
     ID               VARCHAR2(36 char)        not null
         constraint SYS_MENU_PK_SYS_LOGIN_LOG
         primary key,
-    NAME             VARCHAR2(50 char)        not null,
+    NAME             VARCHAR2(255 char)        not null,
     PARENT_ID        VARCHAR2(36 char),
     ICON             VARCHAR2(50 char),
     CODE             VARCHAR2(50 char),
@@ -732,8 +732,8 @@ create table SYS_ROLE
     ID            VARCHAR2(36 char) not null
         constraint SYS_ROLE_PK_SYS_OPERATE_LOG
         primary key,
-    NAME          VARCHAR2(50 char) not null,
-    CODE          VARCHAR2(50 char) not null,
+    NAME          VARCHAR2(255 char) not null,
+    CODE          VARCHAR2(255 char) not null,
     NOTE          CLOB,
     STATUS        NUMBER(3),
     WHO_CREATED   VARCHAR2(36 char) not null,
@@ -790,7 +790,7 @@ create table SYS_UNIT
     ID            VARCHAR2(36 char)   not null
         constraint SYS_UNIT_PK_SYS_TASK
         primary key,
-    NAME          VARCHAR2(50 char)   not null,
+    NAME          VARCHAR2(255 char)   not null,
     PARENT_ID     VARCHAR2(36 char),
     PATH          CLOB                not null,
     LEADER        VARCHAR2(255 char),
@@ -811,9 +811,9 @@ create table SYS_USER
     ID            VARCHAR2(36 char) not null
         constraint SYS_USER_PK_SYS_UNIT
         primary key,
-    USERNAME      VARCHAR2(50 char) not null,
+    USERNAME      VARCHAR2(255 char) not null,
     PASSWORD      VARCHAR2(256 char),
-    REAL_NAME     VARCHAR2(50 char) not null,
+    REAL_NAME     VARCHAR2(255 char) not null,
     MOBILE        VARCHAR2(20 char),
     EMAIL         VARCHAR2(50 char),
     SEX           NUMBER(3),

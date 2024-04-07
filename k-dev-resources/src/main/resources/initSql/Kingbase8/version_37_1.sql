@@ -1,1 +1,1 @@
-ALTER TABLE sys_online_user ALTER COLUMN login_token CLOB;
+ALTER TABLE sys_online_user ADD COLUMN login_token TYPE CLOB;
