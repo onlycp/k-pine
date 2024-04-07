@@ -358,6 +358,11 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                     long tCount = DB.batchSaveOrUpdate(devPine.getSysLogicTemplates(), SysLogicTemplate.class);
                     log.info("完成导入编辑编排模板：{}", tCount);
                 }
+                // 页面模板
+                if (devPine.getDevPageTemplates() != null && !devPine.getDevPageTemplates().isEmpty()) {
+                    long tCount = DB.batchSaveOrUpdate(devPine.getDevPageTemplates(), DevPageTemplate.class);
+                    log.info("完成导入页面模板：{}", tCount);
+                }
             }
 
         } catch (Exception e) {

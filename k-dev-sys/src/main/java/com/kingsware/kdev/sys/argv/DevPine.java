@@ -61,5 +61,7 @@ public class DevPine {
     private List<SysRole> devRoles;
     /** 开发平台角色菜单 **/
     private List<SysRoleMenu> devRoleMenus;
+    /** 页面模板 **/
+    private List<DevPageTemplate> devPageTemplates;
 
 }
