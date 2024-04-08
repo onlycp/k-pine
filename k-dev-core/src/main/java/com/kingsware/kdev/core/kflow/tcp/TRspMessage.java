@@ -75,12 +75,17 @@ public class TRspMessage {
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         DataInputStream dis = new DataInputStream(bais);
         try {
+            dis.readInt();
             // 读取消息头
             short type = dis.readShort();
-            int length = dis.readInt();
-            // 读取消息体
-            String data = dis.readUTF();
-            return new TRspMessage(SocketHeadType.valueOf(type), data);
+            if (type != 5) {
+                int length = dis.readInt();
+                // 读取消息体
+                String data = dis.readUTF();
+                return new TRspMessage(SocketHeadType.valueOf(type), data);
+            }
+            return null;
+
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         } finally {

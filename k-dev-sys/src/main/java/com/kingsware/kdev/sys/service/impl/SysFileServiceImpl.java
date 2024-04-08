@@ -434,6 +434,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             // 检测文件权限
             validateFilePermission(file.getId(),  file.getFilePath());
             fileName = file.getFileName();
+
             // 通过ID找得到文件，按数据库里的存储类型读文件
             if (file.getSaveType() == 0) {
                 try {

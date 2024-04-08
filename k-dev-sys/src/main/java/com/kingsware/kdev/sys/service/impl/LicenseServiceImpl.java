@@ -31,7 +31,7 @@ public class LicenseServiceImpl implements LicenseService {
     @Override
     public LicenseRet getLicense() {
 
-        if (LicenseManager.getInstance().isUniopsApp()) {
+        if (LicenseManager.getInstance().isUniopsApp() || LicenseManager.getInstance().whoSYourDaddy()) {
             return getVirtualLicense();
         }
 
@@ -71,7 +71,7 @@ public class LicenseServiceImpl implements LicenseService {
 
     @Override
     public LicenseRet active(SysLicenseActive licenseActive) {
-        if (LicenseManager.getInstance().isUniopsApp()) {
+        if (LicenseManager.getInstance().isUniopsApp() || LicenseManager.getInstance().whoSYourDaddy()) {
             return getVirtualLicense();
         }
         int status = LicenseManager.getInstance().getStatus(licenseActive.getLicense());

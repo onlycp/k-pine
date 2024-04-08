@@ -33,22 +33,16 @@ public class PacketEventHandler implements EventHandler<PacketEvent> {
     @Override
     public void onEvent(PacketEvent packetEvent, long sequence, boolean b) throws Exception {
         try {
-            Callable<String> task = () -> {
-                for (KmqConsumer consumer : consumers) {
-                    try {
-                        List<String> payloads = new ArrayList<>();
-                        payloads.add(packetEvent.getMessage());
-                        consumer.onMessage(payloads);
-                    }
-                    catch (Exception e) {
-                        log.warn("消费者: {} 消费失败，消息内容:{}, 异常信息:{}", consumer.topic(), packetEvent.getMessage(), e.getMessage());
-                    }
+            for (KmqConsumer consumer : consumers) {
+                try {
+                    List<String> payloads = new ArrayList<>();
+                    payloads.add(packetEvent.getMessage());
+                    consumer.onMessage(payloads);
                 }
-                return "Task completed";
-            };
-            Future<String> future = executor.submit(task);
-            future.get(10, TimeUnit.SECONDS);
-            log.debug("Consumer Topic: {}, Sequence: {}, Message:{}", topic, sequence, StringUtils.retrench(packetEvent.getMessage(), 100));
+                catch (Exception e) {
+                    log.warn("消费者: {} 消费失败，消息内容:{}, 异常信息:{}", consumer.topic(), packetEvent.getMessage(), e.getMessage());
+                }
+            }
 
         }
         catch (Exception e) {
