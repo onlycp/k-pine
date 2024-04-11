@@ -316,7 +316,7 @@ public class ServletUtil {
                         params.putAll(argv);
                     }
                     catch (Exception e) {
-                        log.error("error", e);
+                        //log.error("error", e);
                     }
                 }
                 // 将body加到变量中

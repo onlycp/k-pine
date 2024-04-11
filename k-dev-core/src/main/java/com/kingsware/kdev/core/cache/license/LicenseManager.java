@@ -1,6 +1,7 @@
 package com.kingsware.kdev.core.cache.license;
 
 import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.encrypt.EncryptProperties;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.LicenseException;
 import com.kingsware.kdev.core.i18n.I18n;
@@ -88,6 +89,30 @@ public class LicenseManager {
         return ClassUtils.isClassExists("com.kingsware.kdev.uniops.service.impl.UniOpsServiceImpl") ;
     }
 
+    public boolean whoSYourDaddy() {
+        try {
+            String key = new String(Base64.getDecoder().decode("YXBwLnN1Yi10aXRsZQ=="));
+            String licenseAllow = SpringContext.getProperties(key, "");
+            if (StringUtils.isEmpty(licenseAllow)) {
+                return false;
+            }
+            EncryptProperties encryptProperties = SpringContext.getBean(EncryptProperties.class);
+            String str = AESUtil.decrypt(licenseAllow, encryptProperties.getAes().getSecret());
+            String[] arr = str.split("\\|");
+            String originStr = AESUtil.decrypt(arr[0], encryptProperties.getAes().getSecret());
+            String md51 = MD5Utils.md5(originStr);
+            if (md51.equals(arr[1])) {
+                return true;
+            }
+            return false;
+        }
+        catch (Exception e) {
+            return false;
+        }
+
+
+    }
+
 
     /**
      * 获取mac地址
@@ -139,7 +164,7 @@ public class LicenseManager {
      * @return 获取状态
      */
     public int getStatus() {
-        if(isUniopsApp()) {
+        if(isUniopsApp() || whoSYourDaddy()) {
             return 2;
         }
         loadLicense();

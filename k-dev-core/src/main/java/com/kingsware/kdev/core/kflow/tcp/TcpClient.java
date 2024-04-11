@@ -1,15 +1,22 @@
 package com.kingsware.kdev.core.kflow.tcp;
 
-import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.StringUtils;
-import com.kingsware.kdev.core.util.ThreadUtils;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.DelimiterBasedFrameDecoder;
+import io.netty.handler.codec.Delimiters;
+import io.netty.util.concurrent.GenericFutureListener;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.Socket;
-import java.nio.ByteBuffer;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * tcp客户端
@@ -20,57 +27,89 @@ public class TcpClient {
     /** 缓冲池大小 **/
     private static final int MAX_MSG_LEN = 1024 * 1024 * 255 + 100;
 
-    /** ip **/
-    private final String ip;
-    /** 端口 **/
-    private final int port;
-    /** socket **/
-    private Socket socket;
     /** 客户端id **/
     private final TcpClientContext context;
-    /** 输出线程 **/
-    private boolean working;
     /** 客户端id **/
     private final String id;
+    private String ip;
+    private int port;
     /** 接收字节 **/
-    private final ByteBuffer byteBuffer = ByteBuffer.allocate(MAX_MSG_LEN);
-    /** 连接状态  **/
-    private boolean connected = false;
-    /** 心跳时间 **/
     private long heartTime = new Date().getTime();
 
+    private NioEventLoopGroup workerGroup = new NioEventLoopGroup();
+    private ChannelHandlerContext channelHandlerContext;
+    private SocketHeadType socketHeadType;
+    private Bootstrap b = new Bootstrap();
+
+    private static final AtomicInteger CONNECT_COUNT = new AtomicInteger(0);
+
+
     public TcpClient(String ip, int port, boolean autoConnect, TcpClientContext context, SocketHeadType socketHeadType) {
-        this.id = StringUtils.getUUID();
+        this.id = CONNECT_COUNT.getAndIncrement() + "";
+        /** ip **/
         this.ip = ip;
+        /** 端口 **/
         this.port = port;
         this.context = context;
-        if (autoConnect) {
-            new Thread(() -> {
-                while (true) {
-                    try {
-                        if (!isConnected())  {
-                            this.connect();
-                            // 清理缓冲区
-                            byteBuffer.clear();
-                            // 发送注册
-                            TReqMessage message = new TReqMessage(socketHeadType, "", "");
-                            send(message);
-                        }
-                    }
-                    catch (Exception ignored) {
-                    }
-                    finally {
-                        try {
-                            ThreadUtils.sleep(500);
-                        }
-                        catch (Exception ignored) {
-                        }
-                    }
+        this.socketHeadType = socketHeadType;
+        final TcpClient myThis = this;
+        new Thread(() -> {
+            try {
 
+                b.group(workerGroup);
+                b.channel(NioSocketChannel.class);
+                b.option(ChannelOption.SO_KEEPALIVE, true);
+                b.handler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    public void initChannel(SocketChannel ch) throws Exception {
+                        ch.pipeline().addLast(new DelimiterBasedFrameDecoder(1024, Delimiters.lineDelimiter())); // 设置分隔符
+                        ch.pipeline().addLast(new SimpleClientHandler(myThis));
+                    }
+                });
+                // 等待连接关闭
+                ChannelFuture f = connect(b);
+                if (f.isSuccess()) {
+                    log.info("客户端启动成功");
                 }
-            }).start();
-        }
-        register();
+            }
+            catch (Exception e) {
+                log.error("客户端启动失败", e);
+            }
+            finally {
+                //workerGroup.shutdownGracefully();
+            }
+        }).start();
+    }
+
+    private ChannelFuture connect(Bootstrap b) throws InterruptedException {
+        ChannelFuture f = b.connect(ip, port).addListener((GenericFutureListener<ChannelFuture>) future -> {
+            if (!future.isSuccess()) {
+                log.warn("连接失败，进行重连操作...");
+                System.err.println("连接失败，进行重连操作...");
+                future.channel().eventLoop().schedule(() -> connect(b), 5, TimeUnit.SECONDS);
+            }
+            else {
+                log.info("TCP连接成功，ip:{}, port:{}", ip, port);
+            }
+        }).sync();
+        f.channel().closeFuture().sync();
+        return f;
+    }
+
+    public void iActive() {
+        this.heartTime = new Date().getTime();
+    }
+
+    public TcpClientContext getContext() {
+        return this.context;
+    }
+
+    public void setChannelHandlerContext(ChannelHandlerContext channelHandlerContext) {
+        this.channelHandlerContext = channelHandlerContext;
+        this.heartTime = new Date().getTime();
+        // 发送注册
+        TReqMessage message = new TReqMessage(socketHeadType, "", "");
+        send(message);
     }
 
 
@@ -79,55 +118,21 @@ public class TcpClient {
             TReqMessage message = new TReqMessage(SocketHeadType.HEART_REQUEST, "", "");
             send(message);
         }
-
-    }
-
-    public void register() {
-        // 创建一个收消息
-        working = true;
-        new Thread(() -> {
-            while (true) {
-                if (socket != null && socket.isConnected()) {
-                    try {
-                        InputStream is = socket.getInputStream();
-                        byte[] buf =new byte[4096];
-                        int len = 0;
-                        while ((len = is.read(buf) ) > 0) {
-                            this.heartTime = new Date().getTime();
-                            log.debug("tcp <= {}", ProtocolHelper.getPrintString(buf,len) );
-                            for (int i = 0; i < len; i++) {
-                                byteBuffer.put(buf[i]);
-                                int pos = byteBuffer.position();
-                                if(pos > 2 && byteBuffer.get(pos -2) == 0x0d && buf[i] == 0x0a ) {
-                                    // 截取消息内容
-                                    byte[] dst = new byte[pos-6];
-                                    byteBuffer.position(4);
-                                    byteBuffer.get(dst, 0, pos-6);
-                                    // 清理缓冲区
-                                    byteBuffer.clear();
-                                    //处理消息
-                                    TRspMessage resp = TRspMessage.parseFrom(dst);
-                                    // 响应数据
-                                    TMessage tMessage = new TMessage();
-                                    tMessage.setClientId(id);
-                                    tMessage.setBody(JsonUtil.toJson(resp));
-                                    context.read(tMessage);
-                                }
-                            }
-                        }
-
-                    } catch (Exception e) {
-//                        try {
-//                            //this.socket.close();
-//                        } catch (IOException ex) {
-//                            // throw new RuntimeException(ex);
-//                        }
-                    }
-                }
-                ThreadUtils.sleep(500);
+        else {
+            try {
+                connect(b);
             }
-        }).start();
+            catch (InterruptedException ignored) {
+            }
+        }
+
     }
+
+    public void read(TMessage msg) {
+//        this.heartTime = new Date().getTime();
+        this.context.read(msg);
+    }
+
 
     public String getId() {
         return id;
@@ -138,26 +143,19 @@ public class TcpClient {
      * @param msg 消息内容
      */
     public void send(TReqMessage msg) {
-        if (isConnected()) {
-            try {
+        try {
 
-                byte[] bodyBytes = msg.toByteArray();
-                int len = bodyBytes.length;
-                byte[] sendData =  new byte[len+2];
-                System.arraycopy(bodyBytes, 0, sendData, 0, len);
-                sendData[len] = 0x0d;
-                sendData[len+1] = 0x0a;
-                //写消息体
-                this.socket.getOutputStream().write(sendData);
-                log.debug("tcp => {}", ProtocolHelper.getPrintString(sendData, sendData.length) );
-                // 写入换行
-//                this.socket.getOutputStream().write(new byte[] {0x0d, 0x0a});
-                this.socket.getOutputStream().flush();
-            }
-            catch (Exception e) {
-                log.error("消息发送失败:" + e.getMessage());
-            }
-
+            byte[] bodyBytes = msg.toByteArray();
+            int len = bodyBytes.length;
+            byte[] sendData = new byte[len + 2];
+            System.arraycopy(bodyBytes, 0, sendData, 0, len);
+            sendData[len] = 0x0d;
+            sendData[len + 1] = 0x0a;
+            this.channelHandlerContext.writeAndFlush(channelHandlerContext.alloc().buffer().writeBytes(sendData));
+            //log.info("tcp => {}", ProtocolHelper.getPrintString(sendData, sendData.length));
+        }
+        catch (Exception e) {
+            log.error("消息发送失败:" + e.getMessage());
         }
     }
 
@@ -165,11 +163,9 @@ public class TcpClient {
      * 断开连接
      */
     public void disConnect() {
-        try {
-            this.working = false;
-            this.socket.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (this.channelHandlerContext != null) {
+            this.channelHandlerContext.close();
+            //this.channelHandlerContext = null;
         }
      }
 
@@ -178,43 +174,16 @@ public class TcpClient {
      * @return
      */
      public boolean isConnected() {
-        if (socket == null) {
+        if (channelHandlerContext == null) {
             return false;
         }
-//         log.info("socket.isConnected() = {}, heart:{}", socket.isConnected(), (new Date().getTime() - this.heartTime));
-         if (!socket.isConnected()) {
-             return false;
-         }
-         if((new Date().getTime() - this.heartTime) > 1000*10) {
-            disConnect();
+        if (channelHandlerContext.isRemoved()) {
             return false;
-         }
+        }
+        if((new Date().getTime() - this.heartTime) > 1000*10) {
+            log.info("心跳超时，连接自动断开:{}", this.id);
+            return false;
+        }
          return true;
      }
-    /**
-     * 连接tcp服务端
-     */
-    public void connect()  {
-        try {
-            if(socket != null && socket.isConnected()) {
-                disConnect();
-            }
-            working = true;
-            socket = new Socket(ip, port);
-            socket.setKeepAlive(true);
-            log.info("TCP连接成功, IP:{}, Port:{}, 状态:{}", ip, port, socket.isConnected() ? "已连接": "未连接");
-            this.connected = true;
-            this.heartTime = new Date().getTime();
-        } catch (Exception e) {
-            log.error("服务端连接失败，IP:{}, 端口:{}, 错误信息:{}", ip, port, e.getMessage());
-        }
-
-
-    }
-
-
-
-
-
-
 }

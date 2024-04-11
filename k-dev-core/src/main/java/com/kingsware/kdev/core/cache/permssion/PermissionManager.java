@@ -113,7 +113,7 @@ public class PermissionManager {
             refreshPermissions(key);
         }
         long t2 = System.currentTimeMillis();
-        log.info("刷新权限耗时: {} ms", (t2-t1));
+        //log.info("刷新权限耗时: {} ms", (t2-t1));
 
     }
 

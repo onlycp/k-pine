@@ -39,6 +39,7 @@ public class SysKdbFlowController extends BaseController {
      *  查询
      * @return 分页
      */
+    @Dev
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
     @ResponseBody

@@ -48,7 +48,7 @@ public class OperateLogConsumer implements KmqConsumer {
                 SyncValueManager.getInstance().clearSyncValue();
             }
             long t2 = System.currentTimeMillis();
-            log.info("[{}]- consumer: {}, consume {} records, consume time: {} ms",md5, topic(), payloads.size(), t2 - t1);
+            //log.info("[{}]- consumer: {}, consume {} records, consume time: {} ms",md5, topic(), payloads.size(), t2 - t1);
         }
 
 

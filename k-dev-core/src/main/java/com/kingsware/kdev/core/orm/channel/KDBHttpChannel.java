@@ -95,6 +95,7 @@ public class KDBHttpChannel implements DbChannel{
     public <T> List<T> queryForList(String sql, Class<T> tClass, List<Object> objects) {
         // 从kdb请求数据
         String executeResponse =  send(makePassThrough(sql, objects));
+//        logger.info("sql:{}, result:{}", sql, executeResponse);
         return JsonUtil.transformJson2List(executeResponse, tClass);
     }
 

@@ -400,6 +400,20 @@ public class SqlGenerator {
         return head + "count(1)"  + tail;
     }
 
+    public static void main(String[] argc) {
+        String sql = "SELECT * from kw_water kw \n" +
+                "LEFT JOIN kw_bank_account kba on kw.account = kba.account and kba.deleted = 0 \n" +
+                "LEFT JOIN kw_bank_account_expand kbae on kba.relation_id = kbae.id \n" +
+                "LEFT JOIN kw_edition ke on kba.edition_id = ke.id and ke.deleted = 0 \n" +
+                "LEFT JOIN kw_edition_account kea on kea.id = kba.edition_account_id and kea.deleted = 0 \n" +
+                "LEFT JOIN kw_mechanism km on ke.mechanism_id = km.id and km.deleted = 0 \n" +
+                "WHERE kw.deleted = 0 AND kw.transaction_date >= '2024-03-01 00:00:00' AND kw.transaction_date <= '2024-03-31 23:59:59'\n" +
+                "AND kba.id IN (SELECT ar.data_id FROM sys_data_access_resource ar WHERE ar.access_id in ('-1','b77dbf5887524bbfb7e7e274c360c11f')) \n" +
+                "or kba.id in (select kbattt.id from kw_bank_account kbattt left join kw_bank_account_expand kbaett on kbattt.account= kbaett.account where kbaett.pro_pm_account='chengzhuo' or kbaett.trust_accounting_account='chengzhuo')";
+        String str = getListSql2CountSql(sql);
+        System.out.println(str);
+    }
+
     public static SqlWrapper deleteSql(BaseModel model) {
         // id列名
         Field idField = getIdField(model.getClass());
