@@ -89,6 +89,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             defineRet.setTags(logicFlow.getTags());
             defineRet.setDefaultSourceName(logicFlow.getDefaultSourceName());
             defineRet.setTranCtrl(logicFlow.getTranCtrl());
+            defineRet.setNewFlowJson(logicFlow.getNewFlowJson());
             // 定义mock的merge map
             List<Map<String, Object>> mockMapList = new ArrayList<>();
             Map<String, Object> mockMap = JsonschemaMock.getInstance().mockMap(logicFlow.getInArgv());
@@ -297,6 +298,9 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         SysLogicFlow sysLogicFlow = DB.findOne(SysLogicFlow.class, Expr.builder().add("flowId", "=", argv.getId()).build());
         if (sysLogicFlow != null) {
             // 更新修改时间
+            if (!argv.isV3()) {
+                sysLogicFlow.setNewFlowJson("");
+            }
             DB.update(sysLogicFlow);
         }
 

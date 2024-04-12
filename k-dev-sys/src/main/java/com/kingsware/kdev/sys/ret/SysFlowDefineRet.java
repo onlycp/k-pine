@@ -93,6 +93,8 @@ public class SysFlowDefineRet extends BaseSimpleRet {
     private String tranCtrl;
     /** 默认数据源 **/
     private String defaultSourceName;
+    /** v3以上版本逻辑编排流程图 **/
+    private String newFlowJson;
     /** 节点列表 **/
     private List<Node> nodes = new ArrayList<>();
     /** 连续 **/

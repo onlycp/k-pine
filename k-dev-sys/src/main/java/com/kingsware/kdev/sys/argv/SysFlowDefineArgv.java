@@ -96,5 +96,7 @@ public class SysFlowDefineArgv extends BasePageArgv {
     private List<Link> links = new ArrayList<>();
     /** 是否开始事务 **/
     private String tranCtrl;
+    /** 是否V3或以上版本 **/
+    private boolean v3;
 
 }
