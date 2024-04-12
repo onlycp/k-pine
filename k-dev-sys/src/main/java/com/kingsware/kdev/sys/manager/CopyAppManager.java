@@ -510,12 +510,15 @@ public class CopyAppManager {
                         SysApi checkObj = BeanUtils.copyObject(sysApi, SysApi.class);
                         checkObj.setId(null);
                         SysApiService sysApiService = SpringContext.getBean(SysApiService.class);
+//                        sysApiService.checkUnique(checkObj);
+//                        DB.save(sysApi);
                         try {
                             sysApiService.checkUnique(checkObj);
                             DB.save(sysApi);
                         }
                         catch (BusinessException e) {
-                            log.warn("接口保存失败，将跳过，原因:{}", e.getMessage());
+                            throw new BusinessException("接口保存异常，拷贝失败:" + checkObj.getApiName());
+//                            log.warn("接口保存失败，rf", e.getMessage());
                         }
 
 
