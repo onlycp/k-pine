@@ -5,6 +5,7 @@ import lombok.Data;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 /**
  * 客户端信息
@@ -36,5 +37,7 @@ public class ClientInfo {
     private boolean validatePassFlag = true;
     /** 错误信息 **/
     private String errorMessage;
+    // 请求参数
+    private Map<String, Object> argv;
 
 }
