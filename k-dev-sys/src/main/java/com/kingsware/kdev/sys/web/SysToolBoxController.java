@@ -5,6 +5,7 @@ import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.ExceptionLog;
 import com.kingsware.kdev.core.constants.Version;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.ExceptionLogManager;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
@@ -47,13 +48,20 @@ public class SysToolBoxController extends BaseController {
     @GetMapping("/exception")
     @ApiIgnore
     public BaseRet<?> getExceptionDetail(String id) throws UnsupportedEncodingException {
-        ExceptionLog exceptionLog = ExceptionLogManager.getInstance().read(id);
-        if (exceptionLog == null) {
-            return BaseRet.failMessage("未找到异常日志");
+        String enableException = SpringContext.getProperties("app.exception.enable", "false");
+        if ("true".equalsIgnoreCase(enableException)) {
+            ExceptionLog exceptionLog = ExceptionLogManager.getInstance().read(id);
+            if (exceptionLog == null) {
+                return BaseRet.failMessage("未找到异常日志");
+            }
+            else {
+                return BaseRet.success(exceptionLog);
+            }
         }
         else {
-            return BaseRet.success(exceptionLog);
+            return BaseRet.failMessage("未开启异常日志");
         }
+
     }
 
 
