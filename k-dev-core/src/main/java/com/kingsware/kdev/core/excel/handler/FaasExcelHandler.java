@@ -26,29 +26,6 @@ import java.util.zip.*;
 @Slf4j
 public class FaasExcelHandler implements KExcelHandler{
 
-    private static byte[] compressJSON(String jsonString) {
-        try {
-            // 将JSON字符串转为字节数组
-            byte[] jsonBytes = jsonString.getBytes("UTF-8");
-
-            // 创建 Deflater 对象
-            Deflater deflater = new Deflater(Deflater.BEST_COMPRESSION);
-            deflater.setInput(jsonBytes);
-            deflater.finish();
-
-            // 创建输出流
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            try (DeflaterOutputStream deflaterOutputStream = new DeflaterOutputStream(outputStream, deflater)) {
-                // 将数据写入输出流
-                deflaterOutputStream.write(jsonBytes);
-            }
-
-            return outputStream.toByteArray();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
 
     /**
@@ -61,7 +38,7 @@ public class FaasExcelHandler implements KExcelHandler{
     public void write(KExcel excel, OutputStream out) {
         try {
             String nextStr = JsonUtil.toJsonWithoutNull(excel);
-            String base64Content = Base64.getEncoder().encodeToString(compressJSON(nextStr));
+            String base64Content = Base64.getEncoder().encodeToString(JsonUtil.compressJSON(nextStr));
             // 创建目录
 //            log.info("excel文件写入中，文件内容:{}", baseStr);
             String script = String.format("kutils.fileDirectory('upload/kExcel');const str = decompressJSON('%s');koffices.renderByKExcel(str);", base64Content);

@@ -6,9 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.kingsware.kdev.core.bean.BaseRet;
+import com.kingsware.kdev.core.bean.ExceptionLog;
 import com.kingsware.kdev.core.cache.config.ConfigManager;
 import com.kingsware.kdev.core.cache.config.SysConfigInfo;
 import com.kingsware.kdev.core.cache.dict.DictManager;
+import com.kingsware.kdev.core.cache.instance.InstanceManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
@@ -453,7 +455,17 @@ public class FlowUtils {
             map.put("log", ret.getLog());
         }
         if (StringUtils.isNotEmpty(stackException)) {
-            map.put("exceptionId", MD5Utils.md5(stackException));
+            ExceptionLog exceptionLog = new ExceptionLog();
+            exceptionLog.setKlog(ret.getLog());
+            exceptionLog.setStackTrace(stackException);
+            if (KClientContext.getContext() != null) {
+                exceptionLog.setArgv(KClientContext.getContext().getArgv());
+            }
+            exceptionLog.setId(DateUtils.formatDate(new Date(), "yyyyMMdd")+ "_" + MD5Utils.md5(stackException));
+            map.put("exceptionId", exceptionLog.getId());
+            InstanceManager.getInstance().broadMessage("exception-write-log", JsonUtil.toJson(exceptionLog));
+
+
         }
         return map;
 

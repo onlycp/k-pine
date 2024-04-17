@@ -7,11 +7,16 @@ import com.kingsware.kdev.core.orm.annotation.Column;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.*;
 
 /**
  * Json操作类
@@ -292,6 +297,67 @@ public class JsonUtil {
             return null;
         }
     }
+
+    /**
+     * 压缩JSON字符串。
+     *
+     * @param jsonString 待压缩的JSON字符串。
+     * @return 压缩后的字节数组。如果出现异常，则返回null。
+     */
+    public static byte[] compressJSON(String jsonString) {
+        try {
+            // 将JSON字符串转为字节数组
+            byte[] jsonBytes = jsonString.getBytes(StandardCharsets.UTF_8);
+
+            // 创建 Deflater 对象并设置为最佳压缩级别
+            Deflater deflater = new Deflater(Deflater.BEST_COMPRESSION);
+            deflater.setInput(jsonBytes);
+            deflater.finish();
+
+            // 使用 Deflater 对象压缩数据，并将结果存入 ByteArrayOutputStream 中
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            try (DeflaterOutputStream deflaterOutputStream = new DeflaterOutputStream(outputStream, deflater)) {
+                // 将数据写入压缩输出流
+                deflaterOutputStream.write(jsonBytes);
+            }
+
+            return outputStream.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * 解压缩字节数组为JSON字符串。
+     *
+     * @param compressedData 待解压缩的字节数组。
+     * @return 解压缩后的JSON字符串。如果出现异常，则返回null。
+     */
+    public static String decompressJSON(byte[] compressedData) {
+        try {
+            // 创建 Inflater 对象用于解压缩
+            Inflater inflater = new Inflater();
+            inflater.setInput(compressedData);
+
+            // 使用 Inflater 对象解压缩数据，并将结果存入 ByteArrayOutputStream 中
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(compressedData);
+            try (InflaterInputStream inflaterInputStream = new InflaterInputStream(inputStream, inflater)) {
+                // 读取并解压缩数据到输出流中
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                byte[] buffer = new byte[1024];
+                int len;
+                while ((len = inflaterInputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, len);
+                }
+                return outputStream.toString(StandardCharsets.UTF_8.name());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
 
 

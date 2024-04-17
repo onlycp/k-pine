@@ -2,10 +2,14 @@ package com.kingsware.kdev.sys.web;
 
 import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.base.BaseController;
+import com.kingsware.kdev.core.bean.BaseRet;
+import com.kingsware.kdev.core.bean.ExceptionLog;
 import com.kingsware.kdev.core.constants.Version;
+import com.kingsware.kdev.core.exception.ExceptionLogManager;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,6 +42,18 @@ public class SysToolBoxController extends BaseController {
         String deUrl = URLDecoder.decode(url, StandardCharsets.UTF_8.toString());
         log.info("Url302跳转:{}", deUrl);
         response.sendRedirect(deUrl);
+    }
+
+    @GetMapping("/exception")
+    @ApiIgnore
+    public BaseRet<?> getExceptionDetail(String id) throws UnsupportedEncodingException {
+        ExceptionLog exceptionLog = ExceptionLogManager.getInstance().read(id);
+        if (exceptionLog == null) {
+            return BaseRet.failMessage("未找到异常日志");
+        }
+        else {
+            return BaseRet.success(exceptionLog);
+        }
     }
 
 

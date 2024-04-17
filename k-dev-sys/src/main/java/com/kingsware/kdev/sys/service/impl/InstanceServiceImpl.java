@@ -1,9 +1,11 @@
 package com.kingsware.kdev.sys.service.impl;
 
+import com.kingsware.kdev.core.bean.ExceptionLog;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.cache.api.ApiManager;
 import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.cron.DynamicTask;
+import com.kingsware.kdev.core.exception.ExceptionLogManager;
 import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.core.model.SysTask;
 import com.kingsware.kdev.core.util.JsonUtil;
@@ -52,6 +54,11 @@ public class InstanceServiceImpl implements InstanceService {
         else if ("session-remove".equalsIgnoreCase(topic)) {
             SysOnlineUser onlineUser = JsonUtil.toBean(message, SysOnlineUser.class);
             SessionManager.getInstance().removeSession(onlineUser.getUserId(), onlineUser.getLoginToken());
+        }
+        // 写入异常日志
+        else if ("exception-write-log".equalsIgnoreCase(topic)) {
+            ExceptionLog exceptionLog = JsonUtil.toBean(message, ExceptionLog.class);
+            ExceptionLogManager.getInstance().write(exceptionLog);
         }
 
 

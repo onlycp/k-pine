@@ -46,6 +46,7 @@ public class KAppInitialize {
         if (files == null) {
             return;
         }
+        Arrays.sort(files, Comparator.comparing(File::getName));
         // 创建历史目录
         String hisPathString = initPsiPath +"/AppHistory/";
         File hisPath  = new File(hisPathString);

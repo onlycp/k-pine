@@ -148,6 +148,32 @@ public class FileUtils {
 
     }
 
+
+    public static void deleteFileOrDirectory(String path) {
+        File fileOrDirectory = new File(path);
+        if (!fileOrDirectory.exists()) {
+            System.out.println("File or directory does not exist.");
+            return;
+        }
+
+        if (fileOrDirectory.isDirectory()) {
+            // 递归删除目录中的所有内容
+            File[] files = fileOrDirectory.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    deleteFileOrDirectory(file.getAbsolutePath());
+                }
+            }
+        }
+
+        // 删除文件或空目录
+        if (fileOrDirectory.delete()) {
+            System.out.println("File or directory deleted successfully: " + fileOrDirectory.getAbsolutePath());
+        } else {
+            System.out.println("Failed to delete file or directory: " + fileOrDirectory.getAbsolutePath());
+        }
+    }
+
     /**
      * 从输入流中读取文本内容
      * @param stream 输入流

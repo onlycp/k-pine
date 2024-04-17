@@ -178,7 +178,7 @@ public class DynamicTask implements CommandLineRunner {
      */
     private void runTask(String cronKey) {
         // 同时通过cron和任务id去查找
-        List<SysTask> cronTasks = sysTaskList.stream().filter(it -> it.getEnable() == 1).filter(it -> fixedCron(it.getCron()).equals(cronKey) || cronKey.contains("@" + it.getId())).collect(Collectors.toList());
+        List<SysTask> cronTasks = sysTaskList.stream().filter(it -> it.getEnable() == 1 && StringUtils.isNotEmpty(it.getCron())).filter(it -> fixedCron(it.getCron()).equals(cronKey) || cronKey.contains("@" + it.getId())).collect(Collectors.toList());
         ScheduledFutureHolder scheduledFutureHolder = scheduledFutureMap.get(cronKey);
 
         // 如果不存在任务，则自毁

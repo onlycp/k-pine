@@ -281,12 +281,17 @@ public class KAuthFilter implements Filter {
             errorMessage = e.getMessage();
             responseCode = RetEnum.SERVICE_FAIL.getCode();
             String devMode = SpringContext.getProperties("app.mode.dev", "true");
-            if ("true".equals(devMode)) {
-                ServletUtil.responseJson(response, BaseRet.failMessage(e.getMessage(), e.getKlog(), e.getExceptionTrace()));
+//            if ("true".equals(devMode)) {
+//                ServletUtil.responseJson(response, BaseRet.failMessage(e.getMessage(), e.getKlog(), e.getExceptionTrace()));
+//            }
+//            else {
+//                ServletUtil.responseJson(response, BaseRet.failMessage(e.getMessage()));
+//            }
+            if (argvMap.isEmpty()) {
+                argvMap = ServletUtil.getRequestParams(api, path, request, requestBody, false);
             }
-            else {
-                ServletUtil.responseJson(response, BaseRet.failMessage(e.getMessage()));
-            }
+            KClientContext.getContext().setArgv(argvMap);
+            ServletUtil.responseJson(response, BaseRet.failMessage(e.getMessage(), e.getKlog(), e.getExceptionTrace()));
 
         }
         catch (UnauthorizedException e) {
@@ -571,6 +576,7 @@ public class KAuthFilter implements Filter {
         KdbFlowResult result = KdbFlowExecutor.getInstance().execute(api.getApiFlowId(), api.getSubFlowIds(), argvMap, context, false, false);
 
         KdbRetFile kdbRetFile = null;
+        KClientContext.getContext().setArgv(argvMap);
         // 转为api格式
         switch (result.getType()) {
             case KFlowConstant.RESULT_JSON:
