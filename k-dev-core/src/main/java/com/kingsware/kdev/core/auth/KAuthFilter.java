@@ -123,7 +123,7 @@ public class KAuthFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         // 获取请求路径
         String url = request.getRequestURI();
-//        log.info("上下文:{},路径:{} -00", request.getContextPath(), request.getRequestURI()  );
+        log.info("上下文:{},路径:{} -00", request.getContextPath(), request.getRequestURI()  );
         initContext(request, response);
         if (containUrl(request, url) ) {
             filterChain.doFilter(request, response);
@@ -769,8 +769,7 @@ public class KAuthFilter implements Filter {
         else if (mode.equals("sms")) {
             Object phoneNumber = argvMap.get("phoneNumber");
             if (phoneNumber != null && StringUtils.isNotEmpty(phoneNumber.toString())) {
-                String str = phoneNumber.toString();
-                String uname = DB.findSingleAttribute(String.class, "select username from sys_user where mobile=?", str);
+                String uname = KClientContext.getContext().getUsername();
                 return uname;
             }
         }
