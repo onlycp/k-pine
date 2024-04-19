@@ -15,4 +15,5 @@ public class CategoryData {
     private String id;
     private String name;
     private String parentId;
+    private Integer isData;
 }

@@ -172,7 +172,7 @@ public class InstanceManager {
 
             } catch (Exception e) {
                 // 如果发生异常，那么就重试
-                log.debug("实例：{} 消息发送失败，系统将重试,异常信息:{}", instance.instanceName(), e);
+                log.debug("实例：{} 消息发送失败，系统将重试,异常信息:{}", instance.instanceName(), e.getMessage());
                 return false;
             }
         }

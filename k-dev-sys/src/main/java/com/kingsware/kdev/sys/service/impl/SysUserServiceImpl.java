@@ -406,7 +406,10 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
 
                 }
             }
-
+            String username = "";
+            if(argv.containsKey("username") || argv.get("username") != null) {
+                username = argv.get("username").toString();
+            }
             // 查找认证源
             if (!"pwd".equalsIgnoreCase(authMode)) {
                 SysAuthSource sysAuthSource = DB.findOne(SysAuthSource.class, "select * from sys_auth_source where code=?", authMode);
@@ -434,7 +437,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                     throw BusinessException.serviceThrow("认证逻辑响应结果不符合预期，应返回json对象字符串！");
                 }
                 Map<String, Object> authRetMap = (Map<String, Object>)result.getData();
-                String username = authRetMap.get("username").toString();
+                username = authRetMap.get("username").toString();
                 argv.put("username", username);
                 // 设置不用用户名和密码
                 useUsernamePassword = false;

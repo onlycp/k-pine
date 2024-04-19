@@ -39,5 +39,7 @@ public class ClientInfo {
     private String errorMessage;
     // 请求参数
     private Map<String, Object> argv;
+    /** 当前用户名 **/
+    private String username;
 
 }
