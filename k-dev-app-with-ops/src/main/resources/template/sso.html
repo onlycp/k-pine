@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="cn">
 <head>
     <meta charset="UTF-8">
@@ -23,19 +23,30 @@ function doLogin() {
     const pineToken = "${pineToken}";
     // alert('pineToken:' + pineToken)
     if (pineToken !== '') {
+        console.log('pineToken:' + pineToken)
         localStorage.setItem('vue_admin_template_token', pineToken);
-        location.href = urlDecode('${to}');
+        let href = urlDecode('${to}');
+        if (href.indexOf("?") > -1) {
+            href += (`&mtt=${new Date().valueOf()}`)
+        }
+        else {
+            href += (`?mtt=${new Date().valueOf()}`)
+        }
+
+        location.href = href;
     }
     else {
         const opsToken = localStorage.getItem("ACCESS_TOKEN");
+        console.log('opsToken:' + opsToken)
         // alert('opsToken:' + opsToken)
         let href = location.href;
         if (href.indexOf("?") > -1) {
             href += ("&opsToken=" + opsToken);
         }
         else {
-            href += ("opsToken=" + opsToken);
+            href += ("?opsToken=" + opsToken);
         }
+        href += (`&mtt=${new Date().valueOf()}`)
         location.href = href;
 
     }

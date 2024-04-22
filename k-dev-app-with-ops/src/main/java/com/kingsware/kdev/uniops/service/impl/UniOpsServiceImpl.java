@@ -76,11 +76,15 @@ public class UniOpsServiceImpl implements UniOpsService {
         contextMap.put("uniops_userid", "");
         contextMap.put("uniops_username", "");
         contextMap.put("uniops_realName", "");
+        log.info("iisuper：1" );
         HttpServletRequest request = ServletUtil.request();
         if (StringUtils.isNotEmpty(to.getOpsToken()) ) {
+            log.info("iisuper：2" );
             String token = to.getOpsToken();
             if (StringUtils.isNotEmpty(token)) {
+                log.info("iisuper：3" );
                 if (!UniOpsTokenStore.getInstance().containKey(token)) {
+                    log.info("iisuper：4" );
                     // 发起http请求
                     String uniopsServer = SpringContext.getProperties("uniops.master.url", "http://localhost:8080");
                     String url = uniopsServer + "/ops/userInfo";
@@ -91,6 +95,7 @@ public class UniOpsServiceImpl implements UniOpsService {
                     log.info("开始请求uniops token, Result: {}", body);
                     Map<String, Object> map = JsonUtil.toMap(body);
                     if(map != null && map.containsKey("id")) {
+                        log.info("iisuper：5" );
                         BaseUserInfo userInfo = JsonUtil.toBean(body, BaseUserInfo.class);
                         log.info("青松: uniops用户信息:{}" , body);
                         userInfo.setAvatar(null);
@@ -101,7 +106,7 @@ public class UniOpsServiceImpl implements UniOpsService {
                         existOnlineUser.setUserId(userInfo.getId());
                         existOnlineUser.setLoginIp(KClientContext.getContext().getIp());
                         existOnlineUser.setLoginTime(new Timestamp(System.currentTimeMillis()));
-                        existOnlineUser.setLoginToken(token);
+                        existOnlineUser.setLoginToken(pineKey.getToken());
                         DB.save(existOnlineUser);
 
                         UniOpsTokenStore.getInstance().put(token, pineKey.getMd5());
@@ -110,10 +115,12 @@ public class UniOpsServiceImpl implements UniOpsService {
                         contextMap.put("uniopsRealName", userInfo.getRealName() == null ?" ": userInfo.getRealName());
                     }
                     else {
+                        log.info("iisuper：6" );
                         throw BusinessException.serviceThrow("uniops获取用户信息失败:" + body);
                     }
 
                 }
+                log.info("iisuper：7" );
                 pineToken = UniOpsTokenStore.getInstance().get(token);
                 toUrl = to.getTo();
                 // 模板数据变量
@@ -122,6 +129,7 @@ public class UniOpsServiceImpl implements UniOpsService {
             }
         }
         else {
+            log.info("iisuper：8" );
             org.springframework.core.io.Resource resource = SpringContext.getResource(ResourceUtils.CLASSPATH_URL_PREFIX + "template/sso.html");
             templateContent = getResourceText(resource);
             toUrl = to.getTo();
@@ -131,15 +139,19 @@ public class UniOpsServiceImpl implements UniOpsService {
         contextMap.put("pineToken", pineToken);
         // 智能判断是否是ops/pine
         if(!toUrl.contains("ops/pine")) {
+            log.info("iisuper：9" );
             if (toUrl.startsWith("/")) {
+                log.info("iisuper：10" );
                 toUrl = "/ops/pine" + toUrl;
             }
             else {
+                log.info("iisuper：10" );
                 toUrl = "/ops/pine/" + toUrl;
             }
         }
 
         try (PrintWriter writer = ServletUtil.response().getWriter()) {
+            log.info("iisuper：11" );
             ServletUtil.response().setCharacterEncoding("UTF-8");//编码方式
             ServletUtil.response().setContentType("text/html");//设置为html格式
             contextMap.put("to",  URLEncoder.encode(toUrl, StandardCharsets.UTF_8.name()));
