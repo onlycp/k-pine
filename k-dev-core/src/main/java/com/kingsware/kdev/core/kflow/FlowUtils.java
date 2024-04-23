@@ -18,6 +18,8 @@ import com.kingsware.kdev.core.kflow.bean.ComplexValue;
 import com.kingsware.kdev.core.kflow.bean.ErrorResult;
 import com.kingsware.kdev.core.kflow.bean.KFlowMessage;
 import com.kingsware.kdev.core.kflow.function.Functions;
+import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.orm.kdb.KdbRet;
 import com.kingsware.kdev.core.util.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -456,24 +458,26 @@ public class FlowUtils {
         map.put("data", ret.getData());
         // 处理结果适配器
         if (StringUtils.isNotEmpty(KClientContext.getContext().getApiRspAdapter())) {
-            // 创建JavaScript引擎
-            ScriptEngineManager manager = new ScriptEngineManager();
-            ScriptEngine engine = manager.getEngineByName("js");
             try {
-                engine.createBindings().put("payload", map);
                 // 执行JavaScript代码
                 StringBuilder scripts = new StringBuilder();
-                scripts.append("var payBody = JSON.parse(payloadString)\n");
+                scripts.append("var payBody = " + JsonUtil.toJson(map));
+                scripts.append("\n");
                 scripts.append("function responseAdapter(payload) { \n");
                 scripts.append(KClientContext.getContext().getApiRspAdapter());
                 scripts.append("\n");
                 scripts.append("}\n");
-                scripts.append("responseAdapter(payBody)");
-                engine.put("payloadString", JsonUtil.toJson(map));
-                Object obj = engine.eval(scripts.toString());
-                String json1 = JsonUtil.toJson(obj);
-                map = JsonUtil.toMap(json1);
-            } catch (ScriptException e) {
+                scripts.append("JSON.stringify(responseAdapter(payBody));\n");
+                KdbRet<String> retBody = DB.kdbApi().executeScript(scripts.toString());
+                if (retBody.getErrorCode() == 0) {
+                    map = JsonUtil.toMap(retBody.getResponseBody());
+                }
+                else {
+                    map.put("code", 600);
+                    map.put("message", "执行结果适配器异常:" + retBody.getMessage());
+                    map.put("data", null);
+                }
+            } catch (Exception e) {
                 map.put("code", 600);
                 map.put("message", "执行结果适配器异常:" + e.getMessage());
                 map.put("data", null);
