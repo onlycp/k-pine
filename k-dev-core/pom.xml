@@ -30,6 +30,11 @@
             <artifactId>netty-all</artifactId>
             <version>4.1.108.Final</version>
         </dependency>
+        <dependency>
+            <groupId>org.openjdk.nashorn</groupId>
+            <artifactId>nashorn-core</artifactId>
+            <version>15.3</version> <!-- 使用你需要的版本 -->
+        </dependency>
 <!--        <dependency>-->
 <!--            <groupId>io.netty</groupId>-->
 <!--            <artifactId>netty-transport</artifactId>-->

@@ -29,7 +29,7 @@ public class SysApiArgv {
     private Integer apiArgvType;
     /** 接口请求参数 **/
     private String apiReqArgv;
-    /** 接口响应结果 **/
+    /** 响应适配器 **/
     private String apiRspArgv;
     /** 结果处理类 **/
     private String apiResultHandler;

@@ -577,6 +577,7 @@ public class KAuthFilter implements Filter {
 
         KdbRetFile kdbRetFile = null;
         KClientContext.getContext().setArgv(argvMap);
+        KClientContext.getContext().setApiRspAdapter(api.getApiRspArgv());
         // 转为api格式
         switch (result.getType()) {
             case KFlowConstant.RESULT_JSON:

@@ -42,5 +42,7 @@ public class ApiInfo{
     private String whenModified;
     private String apiTags;
     private String apiResultHandler;
+    // 响应结果适配器
+    private String apiRspArgv;
 
 }
