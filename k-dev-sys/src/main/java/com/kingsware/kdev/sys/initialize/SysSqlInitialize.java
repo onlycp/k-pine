@@ -193,7 +193,9 @@ public class SysSqlInitialize implements SystemInitialize {
                     DB.executeUpdateSql(FlowUtils.buildCDATASql(sql));
                 } catch (OrmDbException e) {
                     if (e.getExceptionTrace().toLowerCase().contains("duplicate") || e.getMessage().toLowerCase().contains("duplicate")
-                        || e.getExceptionTrace().toLowerCase().contains("already exists") || e.getMessage().toLowerCase().contains("already exists")) {
+                        || e.getExceptionTrace().toLowerCase().contains("already exists") || e.getMessage().toLowerCase().contains("already exists")
+                            || e.getExceptionTrace().toLowerCase().contains("重复") || e.getMessage().toLowerCase().contains("重复")
+                            || e.getExceptionTrace().toLowerCase().contains("存在") || e.getMessage().toLowerCase().contains("存在")) {
                         continue;
                     }
                     log.error("sql执行失败: " + sql + ", error: " + e.getExceptionTrace(), e);

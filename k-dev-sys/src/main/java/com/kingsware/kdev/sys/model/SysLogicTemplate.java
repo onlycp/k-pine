@@ -27,4 +27,5 @@ public class SysLogicTemplate extends BaseManageModel {
     private String type;
     private Integer sysSuggested;
     private Integer publishStatus;
+    private Integer orderNum;
 }

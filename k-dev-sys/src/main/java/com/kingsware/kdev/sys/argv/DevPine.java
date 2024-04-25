@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.argv;
 
+import com.kingsware.kdev.core.model.SysFile;
 import com.kingsware.kdev.core.model.SysLogicFlow;
 import com.kingsware.kdev.core.model.SysTask;
 import com.kingsware.kdev.core.orm.kdb.DataSourceInfo;
@@ -19,6 +20,13 @@ import java.util.List;
  */
 @Data
 public class DevPine {
+
+    public static final String[] systemImportVars = new String[]
+            {"configs", "pages", "sources", "apis", "functions",
+            "dictItems", "dict", "kdbFlows", "logicFlows", "menus",
+            "tasks", "info", "powerLinks", "devPowerTrees", "extPluginInterfaces",
+            "extPluginTrees", "sysLogicTemplates", "devFaasNodeTypes", "devFaasNodes", "extPluginInterfaces",
+            "devRoles", "devRoleMenus", "devPageTemplates"};
     /** 系统配置 **/
     private List<SysConfig> configs;
     /** 页面信息 **/
@@ -63,5 +71,30 @@ public class DevPine {
     private List<SysRoleMenu> devRoleMenus;
     /** 页面模板 **/
     private List<DevPageTemplate> devPageTemplates;
+    /**
+     * 如果是应用导出的，变量名要带s，如果是对应表的一般没有。
+     */
+    private List<DevModule> devModule;
 
+    private List<DevPinePlugin> devPinePlugin;
+
+    private List<DevPluginApi> devPluginApi;
+
+    private List<DevPluginGroup> devPluginGroup;
+
+    private List<DevPluginOperation> devPluginOperation;
+
+    private List<DevTeam> devTeam;
+
+    private List<DevTeamApp> devTeamApp;
+
+    private List<DevTeamMember> devTeamMember;
+
+    private List<SysAuthSource> sysAuthSource;
+
+    private List<SysAutoSerial> sysAutoSerial;
+
+    private List<SysFile> sysFile;
+
+    private List<SysI18n> sysI18n;
 }
