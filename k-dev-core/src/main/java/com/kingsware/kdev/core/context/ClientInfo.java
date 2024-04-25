@@ -41,5 +41,7 @@ public class ClientInfo {
     private Map<String, Object> argv;
     /** 当前用户名 **/
     private String username;
+    /** api响应适配器 **/
+    private String apiRspAdapter;
 
 }

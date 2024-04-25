@@ -18,9 +18,14 @@ import com.kingsware.kdev.core.kflow.bean.ComplexValue;
 import com.kingsware.kdev.core.kflow.bean.ErrorResult;
 import com.kingsware.kdev.core.kflow.bean.KFlowMessage;
 import com.kingsware.kdev.core.kflow.function.Functions;
+import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.orm.kdb.KdbRet;
 import com.kingsware.kdev.core.util.*;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import java.util.*;
 
 /**
@@ -451,6 +456,34 @@ public class FlowUtils {
         }
         map.put("message", ret.getMessage());
         map.put("data", ret.getData());
+        // 处理结果适配器
+        if (StringUtils.isNotEmpty(KClientContext.getContext().getApiRspAdapter())) {
+            try {
+                // 执行JavaScript代码
+                StringBuilder scripts = new StringBuilder();
+                scripts.append("var payBody = " + JsonUtil.toJson(map));
+                scripts.append("\n");
+                scripts.append("function responseAdapter(payload) { \n");
+                scripts.append(KClientContext.getContext().getApiRspAdapter());
+                scripts.append("\n");
+                scripts.append("}\n");
+                scripts.append("JSON.stringify(responseAdapter(payBody));\n");
+                KdbRet<String> retBody = DB.kdbApi().executeScript(scripts.toString());
+                if (retBody.getErrorCode() == 0) {
+                    map = JsonUtil.toMap(retBody.getResponseBody());
+                }
+                else {
+                    map.put("code", 600);
+                    map.put("message", "执行结果适配器异常:" + retBody.getMessage());
+                    map.put("data", null);
+                }
+            } catch (Exception e) {
+                map.put("code", 600);
+                map.put("message", "执行结果适配器异常:" + e.getMessage());
+                map.put("data", null);
+            }
+        }
+
         if (StringUtils.isNotEmpty(ret.getLog())) {
             map.put("log", ret.getLog());
         }
@@ -464,9 +497,10 @@ public class FlowUtils {
             exceptionLog.setId(DateUtils.formatDate(new Date(), "yyyyMMdd")+ "_" + MD5Utils.md5(stackException));
             map.put("exceptionId", exceptionLog.getId());
             InstanceManager.getInstance().broadMessage("exception-write-log", JsonUtil.toJson(exceptionLog));
-
-
         }
+
+
+
         return map;
 
     }
