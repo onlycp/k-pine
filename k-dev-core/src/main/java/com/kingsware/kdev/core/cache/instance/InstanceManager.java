@@ -119,20 +119,27 @@ public class InstanceManager {
      * @param message   消息内容
      */
     public void broadMessage(String topic, String message) {
-        this.instances.forEach(it -> {
-            try {
-                String blockList = SpringContext.getProperties("app.instance.black-list", "");
-                String[] blackListArray = blockList.split(",");
-                Set<String> blackListSet = new HashSet<>(Arrays.asList(blackListArray));
-                if (blackListSet.contains(instance.masterInstance().getHostName())) {
-                    return;
+        String mqChannel = SpringContext.getProperties("app.mq-channel", "http");
+        if ("tcp".equalsIgnoreCase(mqChannel)) {
+            MessageQueueManager.getInstance().broadMessage(topic, message);
+        }
+        else {
+            this.instances.forEach(it -> {
+                try {
+                    String blockList = SpringContext.getProperties("app.instance.black-list", "");
+                    String[] blackListArray = blockList.split(",");
+                    Set<String> blackListSet = new HashSet<>(Arrays.asList(blackListArray));
+                    if (blackListSet.contains(instance.masterInstance().getHostName())) {
+                        return;
+                    }
+                    executorService.submit(() -> sendMessage(it, topic, message));
                 }
-                executorService.submit(()->sendMessage(it, topic, message));
-            }
-            catch (Exception e) {
-                log.debug("消息发送失败, 实例：{}， Topic:{}, 内容:{}", it.instanceName(), topic, message);
-            }
-        });
+                catch (Exception e) {
+                    log.debug("消息发送失败, 实例：{}， Topic:{}, 内容:{}", it.instanceName(), topic, message);
+                }
+            });
+        }
+
     }
 
     /**

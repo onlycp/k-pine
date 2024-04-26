@@ -43,7 +43,7 @@ public class UiConfig extends WebMvcConfigurationSupport {
         registry.addResourceHandler("/html/**").addResourceLocations("classpath:/static/html/");
         registry.addResourceHandler("/res/**").addResourceLocations("file:./res/");
         log.info("前端目录:{}", ui);
-        unzipUi();
+        // unzipUi();
         if (new File(ui).exists()) {
             // 替换内容
             String contextPath = SpringContext.getProperties("app.ui.prefix", SpringContext.getBootProperties("server.servlet.context-path", "") );

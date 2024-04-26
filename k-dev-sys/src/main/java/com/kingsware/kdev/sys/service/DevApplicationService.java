@@ -80,4 +80,12 @@ public interface DevApplicationService extends BaseService {
      * @param copyData  拷贝参数
      */
     void copyData(String id, CopyAppArgv copyData);
+
+    /**
+     * 备份
+     * @param pineBody
+     * @param fileName
+     */
+    void backupPine(String pineBody, String fileName);
+
 }
