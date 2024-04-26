@@ -67,3 +67,10 @@ alter table sys_logic_history add new_flow_json CLOB null;
 alter table sys_logic_template add flow_config CLOB null;
 alter table sys_logic_template add type INT null;
 alter table sys_logic_template add new_flow_json CLOB null;
+
+-- 修改 dev_power_tree 表
+ALTER TABLE dev_power_tree ADD order_num integer NULL;
+
+-- 修改 sys_logic_template 表
+ALTER TABLE sys_logic_template ADD order_num integer NULL;
+ALTER TABLE sys_logic_template ADD enable_status integer NULL default 1;

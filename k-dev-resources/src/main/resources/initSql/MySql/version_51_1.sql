@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS dev_curd (
     PRIMARY KEY (id)
     );
 
-CREATE TABLE sys_logic_template_user (
+CREATE TABLE IF NOT EXISTS sys_logic_template_user (
                                          id varchar(36) NOT NULL,
                                          app_id varchar(36) DEFAULT NULL,
                                          when_created varchar(50) DEFAULT NULL,
@@ -28,3 +28,17 @@ CREATE TABLE sys_logic_template_user (
                                          template_id varchar(36) DEFAULT NULL,
                                          PRIMARY KEY (id)
 );
+
+create index idx_sys_operate_log_app_id on sys_operate_log (app_id);
+create index idx_sys_operate_log_module on sys_operate_log (module);
+create index idx_sys_operate_log_operate_time on sys_operate_log (operate_time);
+create index sys_operate_log_action_IDX on sys_operate_log (action);
+
+create index dev_team_app_app_id on dev_team_app (app_id);
+create index dev_team_app_team_id on dev_team_app (team_id);
+create index idx_username_uindex on sys_user (username);
+
+ALTER TABLE dev_power_tree ADD order_num int NULL COMMENT '排序';
+ALTER TABLE sys_logic_template ADD order_num int NULL COMMENT '排序';
+ALTER TABLE sys_logic_template ADD enable_status int NULL default 1 COMMENT '可用状态';
+

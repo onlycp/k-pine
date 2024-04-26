@@ -20,4 +20,5 @@ public class DevPowerTree extends BaseManageModel {
     private String note;
     private String path;
     private String name;
+    private Integer orderNum;
 }

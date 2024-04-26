@@ -41,12 +41,17 @@ import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -396,6 +401,31 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 }
             }
 
+            List<Method> list = getDevPineTableDataMethods(devPine);
+            for (Method method : list) {
+                try {
+                    // 数据不为空才继续处理
+                    if (method.invoke(devPine) == null) {
+                        continue;
+                    }
+                    String typeName = method.getGenericReturnType().toString();
+                    String regex = "List<(.+?)>";
+                    Pattern pattern = Pattern.compile(regex);
+                    Matcher matcher = pattern.matcher(typeName);
+                    if (matcher.find()) {
+                        String devModuleType = matcher.group(1);
+                        long importCount = DB.batchSaveOrUpdate((List)method.invoke(devPine), Class.forName(devModuleType));
+                        String varName = method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4);
+                        log.info("完成导入{}：{}", varName, importCount);
+                        importMessageMap.put(varName, importCount);
+                    }
+                } catch (Exception e) {
+                    log.error(String.format("导入：{}失败",method.getName()), e);
+                } finally {
+                    continue;
+                }
+            }
+
         } catch (Exception e) {
             log.warn("导入时发生非关键异常(可忽略)，不影响应用使用：" + e.getMessage());
         }
@@ -413,13 +443,70 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         // 删除原来的导入汇总信息，因为原来的存在NullPointException问题，且不兼容开发平台的数据量显示，改为用map
         String result = String.format("导入应用数:%d", appCount);
         for(Map.Entry entry : importMessageMap.entrySet()) {
-            result += (", " + entry.getKey() + ": " + entry);
+            result += (", " + entry.getKey() + ": " + entry.getValue());
         }
         // 清理缓存
         KCacheManager.getInstance().clear();
         log.info(result);
         return result;
 
+    }
+
+//    public static void main(String[] args) {
+//        DevPine devPine = new DevPine();
+//        List<DevModule> moduleList = new ArrayList();
+//        DevModule devModule = new DevModule();
+//        devModule.setId("x");
+//        devModule.setName("xx");
+//        moduleList.add(devModule);
+//        devPine.setDevModule(moduleList);
+//        List<Method> list = getDevPineTableDataMethods(devPine);
+//        for (Method method : list) {
+//            try {
+////                System.out.println(method.getName());
+////                System.out.println(method.invoke(devPine));
+//                String typeName = method.getGenericReturnType().toString();
+////                System.out.println(typeName);
+//                String regex = "List<(.+?)>";
+//                Pattern pattern = Pattern.compile(regex);
+//                Matcher matcher = pattern.matcher(typeName);
+//                if (matcher.find()) {
+//                    String devModuleType = matcher.group(1);
+////                    System.out.println("DevModule Type: " + devModuleType);
+//                    DB.batchSaveOrUpdate((List)method.invoke(devPine), Class.forName(devModuleType).getClass());
+//                }
+//
+//            } catch (IllegalAccessException e) {
+//                throw new RuntimeException(e);
+//            } catch (InvocationTargetException e) {
+//                throw new RuntimeException(e);
+//            } catch (ClassNotFoundException e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
+//    }
+
+    private List<Method> getDevPineTableDataMethods(DevPine devPine) {
+        Class<?> devPineClazz = DevPine.class;
+        List<Method> resultMethods = new ArrayList();
+        Method[] methods = devPineClazz.getDeclaredMethods();
+        for (Method method : methods) {
+            if (method.getName().startsWith("get") && method.getParameterCount() == 0
+                && !isSystemImportVars(method.getName())) {
+                resultMethods.add(method);
+            }
+        }
+        return resultMethods;
+    }
+
+    private boolean isSystemImportVars(String name) {
+        for (String sysVarName : DevPine.systemImportVars) {
+            String sysMethodName = "get" + sysVarName.substring(0, 1).toUpperCase() + sysVarName.substring(1);
+            if (sysMethodName.equals(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
