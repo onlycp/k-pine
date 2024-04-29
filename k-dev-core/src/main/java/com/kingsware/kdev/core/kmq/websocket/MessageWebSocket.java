@@ -2,22 +2,18 @@ package com.kingsware.kdev.core.kmq.websocket;
 
 import com.kingsware.kdev.core.auth.AuthToken;
 import com.kingsware.kdev.core.auth.TokenUtil;
-import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.kmq.KmqMessageCenter;
 import com.kingsware.kdev.core.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.config.annotation.EnableWebSocket;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.kingsware.kdev.core.kmq.websocket.WebsocketConstants.MQ_FROM_WEBSOCKET;
@@ -37,6 +33,13 @@ public class MessageWebSocket {
     private static final Logger logger = LoggerFactory.getLogger(MessageWebSocket.class);
     /** 存储当前所有的session **/
     private static final Set<SessionToken> sessionTokenSet = Collections.synchronizedSet(new HashSet<>());
+    private static final Map<Session, Long> allSessionSet = new HashMap<>();
+
+    private static final ScheduledExecutorService expirationScheduler = Executors.newScheduledThreadPool(1);
+
+    public MessageWebSocket() {
+        expirationScheduler.scheduleAtFixedRate(this::clearExpireSessions, 0, 5, TimeUnit.SECONDS);
+    }
 
 
     /**
@@ -45,6 +48,7 @@ public class MessageWebSocket {
     public void onOpen(Session session) {
 //        logger.info("WebSocket连接成功, sessionId:{}", session.getId());
         sendMessage(session, JsonUtil.toJson(new WmMessage("welcome", "Hello world!")));
+        allSessionSet.put(session, System.currentTimeMillis());
     }
 
     /**
@@ -71,6 +75,8 @@ public class MessageWebSocket {
     private void removeSession(Session session) {
         // 查找session
         try {
+            // 从所有会话中移移
+            allSessionSet.remove(session);
             Set<SessionToken> copiedSet = new HashSet<>(sessionTokenSet);
             Optional<SessionToken> optional = copiedSet.stream().filter(it -> it.getSession().getId().equalsIgnoreCase(session.getId())).findFirst();
             // logger.info("用户:【userId={}, token={}】退出，当前在线人数为:{} ", optional.get().getUserId(), optional.get().getToken(), sessionTokenSet.size());
@@ -122,35 +128,38 @@ public class MessageWebSocket {
 
         }
         else if ("ping".equalsIgnoreCase(wmMessage.getTopic())) {
+            WmMessage replyMessage = new WmMessage("pong", "");
+            this.sendMessage(session, JsonUtil.toJson(replyMessage));
             // 获取令牌
             SessionToken sessionToken = getSessionToken(session);
             if (sessionToken != null) {
-                WmMessage replyMessage = new WmMessage("pong", "");
-                this.sendMessage(session, JsonUtil.toJson(replyMessage));
                 sessionToken.setHeartTime(System.currentTimeMillis());
                 // logger.info("websocket心跳：用户id:{}, {}", sessionToken.getUserId(), sessionToken.getHeartTime());
             }
-            // 移除过时的sessionToken
+            // 更新心跳时间
+            allSessionSet.put(session, System.currentTimeMillis());
+            // 清除过期的会话
+            // clearExpireSessions();
+        }
+        // 如果是广播
+        else if ("broadcast".equalsIgnoreCase(wmMessage.getTopic())) {
             try {
-                Set<SessionToken> removeSessions = sessionTokenSet.stream().filter(it-> ((it.getHeartTime() + 30000) <= System.currentTimeMillis())).collect(Collectors.toSet());
-                removeSessions.forEach(it -> {
+                allSessionSet.forEach((ss, time) -> {
                     try {
-                        logger.info("移除过时的session: {}", it.getSession().getId());
-                        sessionTokenSet.remove(it);
-                        it.getSession().close();
+                        if (!ss.equals(session)) {
+                            ss.getBasicRemote().sendText(wmMessage.getBody());
+                        }
+
                     }
                     catch (Exception e) {
-                        logger.error("移除过时的sessionToken失败", e);
+                        logger.error("发送消息失败", e);
                     }
 
-
                 });
-                sessionTokenSet.removeAll(removeSessions);
             }
-            catch (Exception ignored) {
-                ignored.printStackTrace();
+            catch (Exception e) {
+                logger.error("广播失败", e);
             }
-
 
         }
         else {
@@ -162,6 +171,50 @@ public class MessageWebSocket {
                 wm2MqMessage.setWmMessage(wmMessage);
                 KmqMessageCenter.getInstance().produce(MQ_FROM_WEBSOCKET, JsonUtil.toJson(wm2MqMessage));
             }
+
+        }
+    }
+
+
+    public void clearExpireSessions() {
+
+        // 移除过时的sessionToken
+        try {
+            Set<SessionToken> removeSessions = sessionTokenSet.stream().filter(it-> ((it.getHeartTime() + 30000) <= System.currentTimeMillis())).collect(Collectors.toSet());
+            removeSessions.forEach(it -> {
+                try {
+                    logger.info("移除过时的session: {}", it.getSession().getId());
+                    sessionTokenSet.remove(it);
+                    it.getSession().close();
+                }
+                catch (Exception e) {
+                    logger.error("移除过时的sessionToken失败", e);
+                }
+
+
+            });
+            sessionTokenSet.removeAll(removeSessions);
+        }
+        catch (Exception ignored) {
+            ignored.printStackTrace();
+        }
+        //  移除过时的session
+        try {
+          List<Session> removeSessions = allSessionSet.entrySet().stream().filter(it -> ((it.getValue() + 30000) <= System.currentTimeMillis())).map(Map.Entry::getKey).collect(Collectors.toList());
+          removeSessions.forEach(it -> {
+              try {
+                  WmMessage exitMessage = new WmMessage("exit", "心跳超时，会话将被关闭");
+                  it.getBasicRemote().sendText(JsonUtil.toJson(exitMessage));
+                  logger.info("移除过时的session: {}", it.getId());
+                  it.close();
+              }
+              catch (Exception e) {
+                  logger.error("移除过时的session失败", e);
+              }
+
+          });
+        }
+        catch (Exception ignored) {
 
         }
     }
