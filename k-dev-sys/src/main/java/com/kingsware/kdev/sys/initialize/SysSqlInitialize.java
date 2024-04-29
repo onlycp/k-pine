@@ -202,7 +202,9 @@ public class SysSqlInitialize implements SystemInitialize {
                     throw e;
                 } catch (RuntimeException e) {
                     if (e.getMessage().toLowerCase().contains("duplicate")
-                            || e.getMessage().toLowerCase().contains("already exists")) {
+                            || e.getMessage().toLowerCase().contains("already exists")
+                            || e.getMessage().toLowerCase().contains("重复")
+                            || e.getMessage().toLowerCase().contains("存在")) {
                         continue;
                     }
                     log.error("sql执行失败: " + sql + ", error: " + e.getMessage(), e);
