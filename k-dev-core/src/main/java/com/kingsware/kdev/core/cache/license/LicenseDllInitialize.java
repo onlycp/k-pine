@@ -92,7 +92,16 @@ public class LicenseDllInitialize implements SystemInitialize {
 
 
                 } catch (Exception e) {
-                    log.warn("动态库拷贝失败，请手动将动态库拷贝到/usr/lib64/目录");
+                    // 判断../jre目录是否存在，如果存在，则拷贝到../jre/lib目录
+                    if (new File("../jre").exists()) {
+                        try {
+                            Files.write(new File("../jre/lib/" + new File(targetFileName).getName()).toPath(), StreamUtils.copyToByteArray(res.getInputStream()));
+                            System.load(new File("../jre/lib/" + new File(targetFileName).getName()).getAbsolutePath());
+                        } catch (Exception e1) {
+                            log.warn("动态库拷贝失败，请手动将动态库拷贝到/usr/lib64/目录");
+                        }
+                    }
+
                 }
 
             } else if (osName.contains("mac")) {

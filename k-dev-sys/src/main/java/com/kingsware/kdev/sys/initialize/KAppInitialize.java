@@ -47,12 +47,7 @@ public class KAppInitialize {
             return;
         }
         Arrays.sort(files, Comparator.comparing(File::getName));
-        // 创建历史目录
-        String hisPathString = initPsiPath +"/AppHistory/";
-        File hisPath  = new File(hisPathString);
-        if (!hisPath.exists()) {
-            hisPath.mkdirs();
-        }
+
         // 遍历安装
         for (File file: files) {
             try {
@@ -64,10 +59,13 @@ public class KAppInitialize {
                     stringBuffer.append(line);
                 }
                 devApplicationService.importApp(stringBuffer.toString());
-                // 如果导入成功，
+                // 如果导入成功，备份文件
+                devApplicationService.backupPine(stringBuffer.toString(), file.getName());
+                // 移除当前文件
+                Files.delete(file.toPath());
                 long t2 = System.currentTimeMillis();
                 log.info("应用安装成功，应用包名称:{}, 用时:{} ms", file.getName(),  (t2 -t1));
-                Files.move(file.toPath(), new File(hisPathString+ file.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING);
+
 
             }
             catch (Exception e) {

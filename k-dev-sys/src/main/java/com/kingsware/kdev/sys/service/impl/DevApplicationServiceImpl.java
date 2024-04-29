@@ -34,6 +34,7 @@ import com.kingsware.kdev.sys.ret.DevApplicationRet;
 import com.kingsware.kdev.sys.service.DevApplicationService;
 import com.kingsware.kdev.sys.service.SysFileService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cglib.core.ReflectUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
@@ -42,8 +43,12 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -64,6 +69,9 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
     private SysFileService sysFileService;
     @Resource
     private AppModeProperties appModeProperties;
+
+    @Value("${app.init-psi-path:.}")
+    private String initPsiPath;
 
     @Override
     public DevApplicationRet get(String id) {
@@ -512,6 +520,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         try {
             DevApplication application = DB.findById(DevApplication.class, argv.getAppId());
             logStack.addMessage("启动...");
+            String backupName = String.format("%s_%s", StringUtils.isEmpty(application.getShortName())? "untitle": application.getShortName(), (application.getVersion() == null? "v1": application.getVersion()));
             // 在线升级
             if (argv.getMode() == 1) {
                 // 获取通道信息
@@ -533,6 +542,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                     String responseBody = HttpUtil.postBody(apiUrl, JsonUtil.toJson(body), new HashMap<>(), true);
                     logStack.addMessage("完成请求远程数据，准备安装应用.");
                     String result = importApp(responseBody, argv.getTeamId());
+                    this.backupPine(responseBody, backupName);
                     logStack.addMessage("应用安装完成：" + result);
 
                 }
@@ -554,6 +564,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                     }
                     logStack.addMessage("开始安装应用:" + sysFile.getFileOriginalName());
                     String result = importApp(json, argv.getTeamId());
+                    this.backupPine(json, backupName);
                     logStack.addMessage("应用安装完成：" + result);
                 }
             }
@@ -660,6 +671,37 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             DB.save(teamApp);
         }
 
+
+    }
+
+    /**
+     * 备份
+     *
+     * @param pineBody
+     * @param fileName
+     */
+    @Override
+    public void backupPine(String pineBody, String fileName) {
+        // 创建历史目录
+        String hisPathString = initPsiPath +"/AppHistory/";
+        File hisPath  = new File(hisPathString);
+        if (!hisPath.exists()) {
+            hisPath.mkdirs();
+        }
+        String newFileName = fileName;
+        if(fileName.endsWith(".pine")) {
+            newFileName = fileName.substring(0, fileName.lastIndexOf("."));
+        }
+        if (newFileName.length()>30) {
+            newFileName = newFileName.substring(0, 30);
+        }
+        newFileName = newFileName + "_" + DateUtils.formatDate(new Date(), "yyyyMMddHHmmss") + ".pine";
+        try {
+            Files.write(new File(hisPathString + newFileName).toPath(), pineBody.getBytes(StandardCharsets.UTF_8));
+        }
+        catch (Exception e) {
+            log.info("文件备份失败:{}", e.getMessage());
+        }
 
     }
 

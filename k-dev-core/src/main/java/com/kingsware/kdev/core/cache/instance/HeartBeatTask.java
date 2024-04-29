@@ -62,10 +62,16 @@ public class HeartBeatTask implements KTask, KRunner {
         // 查找所有会话
         List<SysInstance> instanceList = DB.findList(SysInstance.class, "select * from sys_instance where online = 1 order by reg_time asc ");
         InstanceManager.getInstance().setInstances(instanceList);
+        String mqChannel = SpringContext.getProperties("app.mq-channel", "http");
+        if ("tcp".equalsIgnoreCase(mqChannel)) {
+            // 刷新消息队列
+            MessageQueueManager.getInstance().doCheck();
+        }
+        // 设置超时
         long instTimeoutSecond = Long.parseLong(SpringContext.getProperties("app.inst-time-out-second", "30"));
         Date date = new Date(new Date().getTime() - (1000*instTimeoutSecond));
-        // 设置超时
         DB.executeUpdateSql("update sys_instance set  online = 0 where heart_beat_time < ?", DateUtils.formatDate(date, DateUtils.DATE_TIME));
+
     }
 
     @Override

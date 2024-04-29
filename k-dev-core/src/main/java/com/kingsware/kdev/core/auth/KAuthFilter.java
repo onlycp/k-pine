@@ -123,7 +123,10 @@ public class KAuthFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         // 获取请求路径
         String url = request.getRequestURI();
-        log.info("上下文:{},路径:{} -00", request.getContextPath(), request.getRequestURI()  );
+//        if(!url.contains("websocket")) {
+//            log.info("上下文:{},路径:{}", request.getContextPath(), request.getRequestURI()  );
+//        }
+
         initContext(request, response);
         if (containUrl(request, url) ) {
             filterChain.doFilter(request, response);
@@ -135,8 +138,8 @@ public class KAuthFilter implements Filter {
             url2 = url.substring(request.getContextPath().length());
         }
         if (uiConfig.isStaticsResource(url2)) {
-            log.info("静态资源:" + url2);
             filterChain.doFilter(request, response);
+            ServletUtil.printResponseHeaders(request, response);
             return;
         }
         // 如果是前端路由，则直接返回首页
