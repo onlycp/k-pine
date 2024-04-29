@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
+import org.springframework.http.CacheControl;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -40,8 +41,8 @@ public class UiConfig extends WebMvcConfigurationSupport {
     @Override
     protected void addResourceHandlers(ResourceHandlerRegistry registry) {
         // 判断只有目录真实存在的时候才生效
-        registry.addResourceHandler("/html/**").addResourceLocations("classpath:/static/html/");
-        registry.addResourceHandler("/res/**").addResourceLocations("file:./res/");
+        registry.addResourceHandler("/html/**").addResourceLocations("classpath:/static/html/").setCacheControl(CacheControl.noStore());
+        registry.addResourceHandler("/res/**").addResourceLocations("file:./res/").setCacheControl(CacheControl.noStore());
         log.info("前端目录:{}", ui);
         // unzipUi();
         if (new File(ui).exists()) {
@@ -59,7 +60,7 @@ public class UiConfig extends WebMvcConfigurationSupport {
             }
             log.info("加载前端资源:{}", ui);
             //
-            registry.addResourceHandler("/**").addResourceLocations("file:" +  ui);
+            registry.addResourceHandler("/**").addResourceLocations("file:" +  ui).setCacheControl(CacheControl.noStore());;
         }
         super.addResourceHandlers(registry);
 
