@@ -35,6 +35,10 @@ import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.core.util.jWi.JWildcard;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -144,7 +148,7 @@ public class KAuthFilter implements Filter {
         }
         // 如果是前端路由，则直接返回首页
         if(uiConfig.isFrontRouter(url2, request) && !url.startsWith(kPageFlag)) {
-            uiConfig.redirectToIndex(response);
+            uiConfig.redirectToIndex(request, response);
             return;
         }
         String requestBody = "{}";

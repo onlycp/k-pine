@@ -7,7 +7,6 @@ import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
-import com.kingsware.kdev.core.orm.PagedList;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
@@ -15,7 +14,7 @@ import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysDictArgv;
 import com.kingsware.kdev.sys.argv.SysDictQueryArgv;
 import com.kingsware.kdev.sys.model.SysDict;
-import com.kingsware.kdev.sys.ret.SysDictRet;
+import com.kingsware.kdev.core.bean.SysDictRet;
 import com.kingsware.kdev.sys.service.SysDictService;
 import org.springframework.stereotype.Service;
 

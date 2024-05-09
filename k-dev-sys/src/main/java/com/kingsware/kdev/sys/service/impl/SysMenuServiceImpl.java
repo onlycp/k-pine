@@ -6,6 +6,7 @@ import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.bean.TreeDataRet;
 import com.kingsware.kdev.core.cache.access.AccessManager;
+import com.kingsware.kdev.core.cache.kcache.KCache;
 import com.kingsware.kdev.core.constants.PropertiesConstant;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
@@ -208,6 +209,7 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
     }
 
     @Override
+    @KCache(expire = 60)
     public List<TreeDataRet<Object>> treeOptions(String excludeId, String roleIds, boolean isMobile) {
         // 查找所有
         String[] splits = null;

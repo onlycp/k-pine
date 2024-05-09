@@ -8,7 +8,7 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
 import com.kingsware.kdev.sys.argv.SysDictArgv;
 import com.kingsware.kdev.sys.argv.SysDictQueryArgv;
-import com.kingsware.kdev.sys.ret.SysDictRet;
+import com.kingsware.kdev.core.bean.SysDictRet;
 import com.kingsware.kdev.sys.service.SysDictService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

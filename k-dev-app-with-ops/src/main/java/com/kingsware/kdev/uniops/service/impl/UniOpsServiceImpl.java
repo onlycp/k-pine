@@ -5,6 +5,7 @@ import com.kingsware.kdev.core.auth.AppAuthProperties;
 import com.kingsware.kdev.core.auth.BaseUserInfo;
 import com.kingsware.kdev.core.auth.TokenPair;
 import com.kingsware.kdev.core.auth.TokenUtil;
+import com.kingsware.kdev.core.config.UiConfig;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
@@ -30,6 +31,7 @@ import org.springframework.util.StreamUtils;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -149,19 +151,34 @@ public class UniOpsServiceImpl implements UniOpsService {
                 toUrl = "/ops/pine/" + toUrl;
             }
         }
-
-        try (PrintWriter writer = ServletUtil.response().getWriter()) {
-            log.info("iisuper：11" );
+        if (StringUtils.isNotEmpty(pineToken)) {
+            String[] arr = toUrl.replace("/ops/pine", "").split("\\?");
+            String hrefUrl = arr[0];
+            UiConfig uiConfig = SpringContext.getBean(UiConfig.class);
+            String html =  uiConfig.getRouterPageHtml(hrefUrl, pineToken);
             ServletUtil.response().setCharacterEncoding("UTF-8");//编码方式
             ServletUtil.response().setContentType("text/html");//设置为html格式
-            contextMap.put("to",  URLEncoder.encode(toUrl, StandardCharsets.UTF_8.name()));
-            contextMap.put("exceptionStack", exceptionStack);
-            // 渲染模板内容
-            String html = TemplateUtil.render(templateContent, contextMap);
-            writer.write(html);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            try (PrintWriter writer = ServletUtil.response().getWriter()) {
+                writer.write(html);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
+        else {
+            try (PrintWriter writer = ServletUtil.response().getWriter()) {
+                log.info("iisuper：11" );
+                ServletUtil.response().setCharacterEncoding("UTF-8");//编码方式
+                ServletUtil.response().setContentType("text/html");//设置为html格式
+                contextMap.put("to",  URLEncoder.encode(toUrl, StandardCharsets.UTF_8.name()));
+                contextMap.put("exceptionStack", exceptionStack);
+                // 渲染模板内容
+                String html = TemplateUtil.render(templateContent, contextMap);
+                writer.write(html);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
     }
 
     /**

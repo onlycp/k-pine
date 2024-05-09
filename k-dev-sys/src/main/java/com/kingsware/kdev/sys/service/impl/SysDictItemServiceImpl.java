@@ -3,24 +3,22 @@ package com.kingsware.kdev.sys.service.impl;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.cache.dict.DictManager;
 import com.kingsware.kdev.core.exception.BusinessException;
-import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
-import com.kingsware.kdev.core.orm.DBChecker;
-import com.kingsware.kdev.core.orm.PagedList;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysDictItemArgv;
 import com.kingsware.kdev.sys.argv.SysDictItemQueryArgv;
-import com.kingsware.kdev.sys.argv.SysDictQueryArgv;
 import com.kingsware.kdev.sys.model.SysDict;
 import com.kingsware.kdev.sys.model.SysDictItem;
-import com.kingsware.kdev.sys.ret.SysDictItemRet;
-import com.kingsware.kdev.sys.ret.SysDictRet;
+import com.kingsware.kdev.core.bean.SysDictItemRet;
+import com.kingsware.kdev.core.bean.SysDictRet;
 import com.kingsware.kdev.sys.service.SysDictItemService;
 import com.kingsware.kdev.sys.service.SysDictService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -36,6 +34,7 @@ import java.util.Map;
  * @version 1.0.0
  * @date 2021/12/27 9:36 上午
  */
+@Slf4j
 @Service
 public class SysDictItemServiceImpl extends BaseServiceImpl implements SysDictItemService {
 
@@ -122,19 +121,7 @@ public class SysDictItemServiceImpl extends BaseServiceImpl implements SysDictIt
 
     @Override
     public Map<String, Object> getAllDict() {
-        Map<String, Object> resultMap = new HashMap<>();
-        // getAllDict
-        List<SysDictRet> dictList = sysDictService.query(new SysDictQueryArgv()).getList();
-
-        // getAllDetail
-        List<SysDictItemRet> dictItemList = this.query(new SysDictItemQueryArgv()).getList();
-
-        // setMap
-        resultMap.put("KEY", getKeyMap(dictList, dictItemList));
-        resultMap.put("VALUE", getValueMap(dictList, dictItemList));
-        resultMap.put("LIST", getListMap(dictList, dictItemList));
-
-        return resultMap;
+        return DictManager.getInstance().getAllDict();
     }
 
     private List<Map<String, String>> getDetailByDictId(List<SysDictItemRet> sysDictItemList, String dictId) {
@@ -170,46 +157,4 @@ public class SysDictItemServiceImpl extends BaseServiceImpl implements SysDictIt
         return map;
     }
 
-    private Map<String, String> getDetailNameMapByDictId(List<SysDictItemRet> sysDictItemList, String dictId) {
-        Map<String, String> map = new HashMap<>();
-        for (SysDictItemRet detail : sysDictItemList) {
-            if (detail.getSysDictId().equals(dictId) && StringUtils.isNotEmpty(detail.getName())) {
-                map.put(detail.getName(), detail.getValue());
-            }
-        }
-        return map;
-    }
-
-    private Map<String, Map<String, String>> getKeyMap(List<SysDictRet> dictList, List<SysDictItemRet> sysDictItemList) {
-        Map<String, Map<String, String>> resultMap = new HashMap<>();
-        for (SysDictRet dict : dictList) {
-            Map<String, String> keyMap = getDetailKeyMapByDictId(sysDictItemList, dict.getId());
-            if (StringUtils.isNotEmpty(dict.getCode())) {
-                resultMap.put(dict.getCode(), keyMap);
-            }
-        }
-        return resultMap;
-    }
-
-    private Map<String, Map<String, String>> getValueMap(List<SysDictRet> dictList, List<SysDictItemRet> sysDictItemList) {
-        Map<String, Map<String, String>> resultMap = new HashMap<>();
-        for (SysDictRet dict : dictList) {
-            Map<String, String> valueMap = getDetailValueMapByDictId(sysDictItemList, dict.getId());
-            if (StringUtils.isNotEmpty(dict.getCode())) {
-                resultMap.put(dict.getCode(), valueMap);
-            }
-        }
-        return resultMap;
-    }
-
-    private Map<String, List<Map<String, String>>> getListMap(List<SysDictRet> dictList, List<SysDictItemRet> sysDictItemList) {
-        Map<String, List<Map<String, String>>> map = new HashMap<>();
-        for (SysDictRet dict : dictList) {
-            List<Map<String, String>> detailList = getDetailByDictId(sysDictItemList, dict.getId());
-            if (StringUtils.isNotEmpty(dict.getCode())) {
-                map.put(dict.getCode(), detailList);
-            }
-        }
-        return map;
-    }
 }

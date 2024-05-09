@@ -1,5 +1,7 @@
 package com.kingsware.kdev.core.cache.dict;
 
+import com.kingsware.kdev.core.bean.SysDictItemRet;
+import com.kingsware.kdev.core.bean.SysDictRet;
 import com.kingsware.kdev.core.cron.KRunner;
 import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.core.orm.DB;
@@ -34,16 +36,22 @@ public class DictTask implements KTask, KRunner {
         // 查询5分钟之前的
         Date fiveMinuteAgoDate = new Date(new Date().getTime() - 5 * 60 * 1000) ;
         String fiveMinuteAgo = DateUtils.formatDate(fiveMinuteAgoDate, DateUtils.DATE_TIME);
-        String querySql = "select name,sys_dict_id, value, code, order_num from sys_dict_item";
-        if (StringUtils.isNotEmpty(lastQueryTime)) {
-            querySql = "select name,sys_dict_id, value, code, order_num from sys_dict_item where when_modified > '" + lastQueryTime + "'";
-        }
-
-        List<DictItemInfo> dictItemList = DB.findList(DictItemInfo.class, querySql);
-        for (DictItemInfo dictItem: dictItemList) {
+//        String querySql = "select name,sys_dict_id, value, code, order_num from sys_dict_item";
+//        if (StringUtils.isNotEmpty(lastQueryTime)) {
+//            querySql = "select name,sys_dict_id, value, code, order_num from sys_dict_item where when_modified > '" + lastQueryTime + "'";
+//        }
+//        List<DictItemInfo> dictItemList = DB.findList(DictItemInfo.class, querySql);
+        List<SysDictItemRet> dictItemRetList = DB.findList(SysDictItemRet.class, "select id, name, sys_dict_id, value, code,  order_num  from sys_dict_item");
+        for (SysDictItemRet dictItem: dictItemRetList) {
             DictManager.getInstance().addDict(dictItem.getCode(), dictItem.getName(), dictItem.getValue());
         }
         lastQueryTime = fiveMinuteAgo;
+        List<SysDictRet> dictList = DB.findList(SysDictRet.class, "select id, name, code from sys_dict");
+        DictManager.getInstance().setDictList(dictList);
+        DictManager.getInstance().setDictItemList(dictItemRetList);
+
+
+
     }
 
     @Override

@@ -5,7 +5,7 @@ import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.sys.argv.SysDictArgv;
 import com.kingsware.kdev.sys.argv.SysDictQueryArgv;
-import com.kingsware.kdev.sys.ret.SysDictRet;
+import com.kingsware.kdev.core.bean.SysDictRet;
 
 /**
  * 字典类型接口

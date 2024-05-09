@@ -1,11 +1,25 @@
 package com.kingsware.kdev.core.config;
 
+import com.kingsware.kdev.core.bean.BaseRet;
+import com.kingsware.kdev.core.bean.SysDictItemRet;
+import com.kingsware.kdev.core.bean.SysDictRet;
+import com.kingsware.kdev.core.cache.dict.DictManager;
+import com.kingsware.kdev.core.cache.kcache.LruCache;
+import com.kingsware.kdev.core.cache.page.PageManager;
 import com.kingsware.kdev.core.context.SpringContext;
-import com.kingsware.kdev.core.util.FileUtils;
-import com.kingsware.kdev.core.util.MD5Utils;
-import com.kingsware.kdev.core.util.ServletUtil;
-import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.core.kflow.KFlowContext;
+import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
+import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
+import com.kingsware.kdev.core.model.DevPage;
+import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.util.*;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Attribute;
+import org.jsoup.nodes.Attributes;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
@@ -23,6 +37,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -37,6 +55,8 @@ public class UiConfig extends WebMvcConfigurationSupport {
 
     @Value("${app.ui:./ui/}")
     private String ui;
+
+    private LruCache cache = new LruCache(100);
 
     @Override
     protected void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -59,8 +79,9 @@ public class UiConfig extends WebMvcConfigurationSupport {
                 replaceText(new File(ui), text, replaceText);
             }
             log.info("加载前端资源:{}", ui);
-            //
-            registry.addResourceHandler("/**").addResourceLocations("file:" +  ui).setCacheControl(CacheControl.noStore());;
+            registry.addResourceHandler("/**").addResourceLocations("file:" +  ui);
+//            registry.addResourceHandler("/**").addResourceLocations("file:" +  ui).setCacheControl(CacheControl.noCache());
+            //registry.addResourceHandler("/**").addResourceLocations("file:" +  ui).setCacheControl(CacheControl.noStore());;
         }
         super.addResourceHandlers(registry);
 
@@ -104,13 +125,86 @@ public class UiConfig extends WebMvcConfigurationSupport {
 
     }
 
+    public String getRouterPageHtml(String path, String token) {
+        String indexPageHtmlFile = ui + "index.html";
+        String html = FileUtils.readFileToString(new File(indexPageHtmlFile), StandardCharsets.UTF_8);
+        boolean enableSSR = SpringContext.getProperties("app.ui.enableSSR", "true").equalsIgnoreCase("true");
+        if (enableSSR) {
+            Document doc = Jsoup.parse(html);
+            // 选择所有的 <script> 标签
+            Elements scripts = doc.select("script");
+            // 遍历每个 <script> 标签，并将其内容替换为新的 JavaScript 代码
+            for (Element script : scripts) {
+                if (!script.hasAttr("src")) {
+                    continue;
+                }
+                String src = script.attr("src");
+                if (src.startsWith("http") || src.startsWith("//")) {
+                    continue;
+                }
+                String srcPath = (ui + src).replace("//", "/");
+                //log.info("path:" + srcPath);
+                if (!Files.exists(Paths.get(srcPath))) {
+                    continue;
+                }
+                File srcFile = new File(srcPath);
+//                try {
+//                    if (Files.size(srcFile.toPath()) > 1024*1000) {
+//                        continue;
+//                    }
+//                }
+//                catch (Exception e) {
+//                    continue;
+//                }
+//
+//                if ( srcFile.getName().contains("exceljs") || srcFile.getName().contains("amis-editor")) {
+//                    // 移除所有的属性
+//                    Attributes attributes = script.attributes();
+//                    for (Attribute attribute: attributes.asList()) {
+//                        script.removeAttr(attribute.getKey());
+//                    }
+//                    script.text("");
+//                }
+//                else {
+//                    String scriptText = FileUtils.readFileToString(new File(srcPath), StandardCharsets.UTF_8);
+//                    continue;
+//                    //script.text(scriptText);
+//                }
+            }
+//            String path = request.getServletPath();
+            // 寻找id=ssr的script
+            for (Element script : scripts) {
+                if (script.attr("id").equals("ssr")) {
+                    Element ssrScript = script;
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("\n");
+                    if (StringUtils.isNotEmpty(token)) {
+                        builder.append(String.format("localStorage.setItem('vue_admin_template_token', '%s');\n", token));
+                    }
+                    if (path.startsWith("/open/")) {
+                        builder.append("window.ssrOpen=true;\n");
+                    }
+                    else {
+                        builder.append("window.ssrOpen=false;\n");
+                    }
+                    builder.append("window.ssr=true;\n");
+                    builder.append("window.ssrConfig = ").append(getSysConfig()).append(";\n");
+                    builder.append("window.ssrPage = ").append(getPageJson(path)).append(";\n");
+                    builder.append("window.ssrDict = ").append(getDict()).append(";\n");
+                    ssrScript.append(builder.toString());
+                }
+            }
+            html = doc.html();
+        }
+        return html;
+    }
+
     /**
      * 向前端重定向到首页
      * @param response
      */
-    public void redirectToIndex(HttpServletResponse response) {
-        String indexPageHtmlFile = ui + "index.html";
-        String html = FileUtils.readFileToString(new File(indexPageHtmlFile), StandardCharsets.UTF_8);
+    public void redirectToIndex(HttpServletRequest request ,HttpServletResponse response) {
+        String html = getRouterPageHtml(request.getServletPath(), null);
         response.setCharacterEncoding("UTF-8");//编码方式
         response.setContentType("text/html");//设置为html格式
         try (PrintWriter writer = response.getWriter()) {
@@ -118,6 +212,30 @@ public class UiConfig extends WebMvcConfigurationSupport {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String getSysConfig() {
+        KFlowContext context = KFlowContext.createBaseContext( "{}",  "{}");
+        // 加入应用id
+        Map<String, Object> flowArgvMap = new HashMap<>();
+        long t1 = System.currentTimeMillis();
+        KdbFlowResult result = KdbFlowExecutor.getInstance().execute("f09c30463acc44e58a8562b79312fbae", "", flowArgvMap, context, false, false);
+        long t2 = System.currentTimeMillis();
+        log.info("getSysConfig time:" + (t2 - t1));
+        return JsonUtil.toJson(BaseRet.success(result.getData()));
+//        return FileUtils.readFileToString(new File("data/config.json"), StandardCharsets.UTF_8);
+    }
+
+    private String getPageJson(String path) {
+        DevPage page = PageManager.getInstance().getByPath(path);
+        return JsonUtil.toJson(BaseRet.success(page));
+//        return FileUtils.readFileToString(new File("data/page.json"), StandardCharsets.UTF_8);
+    }
+
+    private String getDict() {
+        Map<String, Object> allDict = DictManager.getInstance().getAllDict();
+        return JsonUtil.toJson(BaseRet.success(allDict));
+        // return FileUtils.readFileToString(new File("data/dict.json"), StandardCharsets.UTF_8);
     }
 
 
