@@ -33,6 +33,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -151,20 +153,46 @@ public class UniOpsServiceImpl implements UniOpsService {
                 toUrl = "/ops/pine/" + toUrl;
             }
         }
-        if (StringUtils.isNotEmpty(pineToken)) {
-            String[] arr = toUrl.replace("/ops/pine", "").split("\\?");
-            String hrefUrl = arr[0];
-            UiConfig uiConfig = SpringContext.getBean(UiConfig.class);
-            String html =  uiConfig.getRouterPageHtml(hrefUrl, pineToken);
-            ServletUtil.response().setCharacterEncoding("UTF-8");//编码方式
-            ServletUtil.response().setContentType("text/html");//设置为html格式
-            try (PrintWriter writer = ServletUtil.response().getWriter()) {
-                writer.write(html);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-        else {
+//        if (StringUtils.isNotEmpty(pineToken)) {
+//            // 解析参数
+//            Map<String, Object> params = new HashMap<>();
+//            try {
+//                String decodeArgs1 = URLDecoder.decode(to.getTo(), StandardCharsets.UTF_8.name());
+//                String[] arr = decodeArgs1.split("\\?");
+//                if (arr.length>1) {
+//                    String decodeArgs = URLDecoder.decode(arr[1], StandardCharsets.UTF_8.name());
+//                    if (StringUtils.isNotEmpty(decodeArgs)) {
+//                        String[] args = decodeArgs.split("&");
+//                        for (String arg : args) {
+//                            String[] kv = arg.split("=");
+//                            if (kv.length == 2) {
+//                                params.put(kv[0], kv[1]);
+//                            }
+//                            else {
+//                                params.put(kv[0], "");
+//                            }
+//                        }
+//                    }
+//                }
+//
+//            }
+//            catch (UnsupportedEncodingException e) {
+//
+//            }
+//
+//            String[] arr = toUrl.replace("/ops/pine", "").split("\\?");
+//            String hrefUrl = arr[0];
+//            UiConfig uiConfig = SpringContext.getBean(UiConfig.class);
+//            String html =  uiConfig.getRouterPageHtml(hrefUrl, pineToken, params);
+//            ServletUtil.response().setCharacterEncoding("UTF-8");//编码方式
+//            ServletUtil.response().setContentType("text/html");//设置为html格式
+//            try (PrintWriter writer = ServletUtil.response().getWriter()) {
+//                writer.write(html);
+//            } catch (Exception e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
+//        else {
             try (PrintWriter writer = ServletUtil.response().getWriter()) {
                 log.info("iisuper：11" );
                 ServletUtil.response().setCharacterEncoding("UTF-8");//编码方式
@@ -177,9 +205,35 @@ public class UniOpsServiceImpl implements UniOpsService {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-        }
+//        }
 
     }
+
+//    public static void main(String[] argv) {
+//        String to = "%2Fopen%2FnewMonitorList%2Fdetail%3Fgetip%3D192.168.12.219%26region%3Drg_proxy_mq%26application%3D%26pic%3D%2522null%2522%26monitorId%3D253d3a262c6b4d628c3e5a6f6cc4b02e%26instanceName%3D%25E6%25B5%258B%25E8%25AF%2595%25E5%2588%2586%25E5%258F%25913%26templateList%3D%255B%257B%2522templateName%2522%253A%2522lzh-%25E6%25B5%258B%25E8%25AF%2595%25E7%25BA%25B3%25E7%25AE%25A1%25E6%25A8%25A1%25E6%259D%25BF11%2522,%2522templateId%2522%253A%2522645d0177a11344be8d769cec12362ab7%2522,%2522templateAlias%2522%253A%2522%2522%257D%255D%26name%3D%25E6%25B5%258B%25E8%25AF%2595%25E5%2588%2586%25E5%258F%25913&opsToken=9abe9e66ba1f4a39a4ff7e9b20606c55&mtt=1715243971764";
+//        Map<String, Object> params = new HashMap<>();
+//        try {
+//            String decodeArgs1 = URLDecoder.decode(to, StandardCharsets.UTF_8.name());
+//            String[] arr = decodeArgs1.split("\\?");
+//            String decodeArgs = URLDecoder.decode(arr[1], StandardCharsets.UTF_8.name());
+//            if (StringUtils.isNotEmpty(decodeArgs)) {
+//                String[] args = decodeArgs.split("&");
+//                for (String arg : args) {
+//                    String[] kv = arg.split("=");
+//                    if (kv.length == 2) {
+//                        params.put(kv[0], kv[1]);
+//                    }
+//                    else {
+//                        params.put(kv[0], "");
+//                    }
+//                }
+//            }
+//        }
+//        catch (UnsupportedEncodingException e) {
+//
+//        }
+//        System.out.println("");
+//    }
 
     /**
      * 发布appId

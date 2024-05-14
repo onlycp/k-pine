@@ -52,6 +52,13 @@ public class LruCache {
     }
 
     /**
+     * 清空缓存
+     */
+    public void clean() {
+        this.caches.clear();
+    }
+
+    /**
      * 写入缓存
      * @param key
      * @param value

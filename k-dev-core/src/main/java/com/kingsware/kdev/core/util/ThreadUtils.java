@@ -23,7 +23,7 @@ public class ThreadUtils {
     public static void sleep(long t) {
         try {
             Thread.sleep(t);
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
         }
     }
 }

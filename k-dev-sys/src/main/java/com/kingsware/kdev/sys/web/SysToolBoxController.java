@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.ExceptionLog;
+import com.kingsware.kdev.core.cache.page.PageCacheManager;
 import com.kingsware.kdev.core.constants.Version;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.ExceptionLogManager;
@@ -62,6 +63,13 @@ public class SysToolBoxController extends BaseController {
             return BaseRet.failMessage("未开启异常日志");
         }
 
+    }
+
+    @GetMapping("/clear-page")
+    @ApiIgnore
+    public BaseRet<?> clearPageCache() {
+        PageCacheManager.getInstance().clear();
+        return BaseRet.success();
     }
 
 

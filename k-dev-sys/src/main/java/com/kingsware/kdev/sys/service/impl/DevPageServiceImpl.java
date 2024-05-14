@@ -59,7 +59,7 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
     // @KCache(onlyForProd = true)
     public DevPageRet getByPath(String path) {
         if ("menu".equalsIgnoreCase(menuSearchOrder)) {
-            log.info("请求页面信息:{}", path );
+//            log.info("请求页面信息:{}", path );
             List<DevPageRet> pages =  DB.findList(DevPageRet.class, " select dp.* from dev_page dp left join sys_menu sm on (dp.id = sm.page_id and sm.menu_type='C' and sm.status=1) where sm.full_path=? and deleted=0 ", path);
 
 
@@ -76,7 +76,7 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
             }
         }
         else {
-            log.info("请求页面信息:{}", path );
+//            log.info("请求页面信息:{}", path );
             List<DevPageRet> pages =  DB.findList(DevPageRet.class, " select * from dev_page where (path = ? or id = ?) and deleted=0 ", path, path);
 
             if (!pages.isEmpty()) {

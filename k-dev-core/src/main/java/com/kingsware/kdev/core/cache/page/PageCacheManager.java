@@ -14,18 +14,41 @@ import java.util.List;
  * @date 2024/5/8
  */
 @Slf4j
-public class PageManager {
-    private static PageManager instance = new PageManager();
+public class PageCacheManager {
+    private static PageCacheManager instance = new PageCacheManager();
 
     private LruCache cache = new LruCache(100);
-    public static PageManager getInstance() {
+    public static PageCacheManager getInstance() {
         if (instance == null) {
-            instance = new PageManager();
+            instance = new PageCacheManager();
         }
         return instance;
     }
 
-    private PageManager() {
+    private PageCacheManager() {
+    }
+
+    /**
+     * 检查给定的路径是否存在于系统中。
+     *
+     * @param path 要检查的路径字符串。
+     * @return 如果路径存在，则返回true；如果不存在或发生异常，则返回false。
+     */
+    public boolean contains(String path) {
+        try {
+            // 通过路径获取对应的DevPage对象
+            DevPage page = getByPath(path);
+            // 如果获取对象不为null，表示路径存在
+            return page != null;
+        }
+        catch (Exception e) {
+            // 发生异常，认为路径不存在或有其他错误
+            return false;
+        }
+    }
+
+    public void clear() {
+        cache.clean();
     }
 
 
@@ -42,7 +65,7 @@ public class PageManager {
             return (DevPage) cacheObj;
         }
         if ("menu".equalsIgnoreCase(menuSearchOrder)) {
-            log.info("请求页面信息:{}", path );
+//            log.info("请求页面信息:{}", path );
             List<DevPage> pages =  DB.findList(DevPage.class, " select dp.* from dev_page dp left join sys_menu sm on (dp.id = sm.page_id and sm.menu_type='C' and sm.status=1) where sm.full_path=? and deleted=0 ", path);
             if (!pages.isEmpty()) {
                 DevPage page = pages.get(0);
@@ -61,7 +84,7 @@ public class PageManager {
             }
         }
         else {
-            log.info("请求页面信息:{}", path );
+//            log.info("请求页面信息:{}", path );
             List<DevPage> pages =  DB.findList(DevPage.class, " select * from dev_page where (path = ? or id = ?) and deleted=0 ", path, path);
 
             if (!pages.isEmpty()) {

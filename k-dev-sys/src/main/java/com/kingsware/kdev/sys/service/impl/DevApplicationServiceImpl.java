@@ -11,6 +11,7 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.cache.access.AccessManager;
 import com.kingsware.kdev.core.cache.kcache.KCacheManager;
 import com.kingsware.kdev.core.cache.license.LicenseManager;
+import com.kingsware.kdev.core.cache.page.PageCacheManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
@@ -513,6 +514,12 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
     public Map<String, Object> install(DevAppInstallArgv argv) {
         LogStack logStack = new LogStack();
         try {
+            PageCacheManager.getInstance().clear();
+            String appid = argv.getAppId();
+            if (StringUtils.isEmpty(appid)) {
+                appid = "064b3b44b85a45fe87fcce88d72b2519";
+                argv.setAppId(appid);
+            }
             DevApplication application = DB.findById(DevApplication.class, argv.getAppId());
             logStack.addMessage("启动...");
             String backupName = String.format("%s_%s", StringUtils.isEmpty(application.getShortName())? "untitle": application.getShortName(), (application.getVersion() == null? "v1": application.getVersion()));

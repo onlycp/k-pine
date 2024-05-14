@@ -1,22 +1,17 @@
 package com.kingsware.kdev.core.config;
 
 import com.kingsware.kdev.core.bean.BaseRet;
-import com.kingsware.kdev.core.bean.SysDictItemRet;
-import com.kingsware.kdev.core.bean.SysDictRet;
 import com.kingsware.kdev.core.cache.dict.DictManager;
 import com.kingsware.kdev.core.cache.kcache.LruCache;
-import com.kingsware.kdev.core.cache.page.PageManager;
+import com.kingsware.kdev.core.cache.page.PageCacheManager;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.model.DevPage;
-import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Attribute;
-import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -37,9 +32,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -111,7 +104,7 @@ public class UiConfig extends WebMvcConfigurationSupport {
             return false;
         }
         if (url.startsWith("/res/")) {
-            log.info(url);
+//            log.info(url);
             return false;
         }
         // 只有是get请求才是
@@ -125,7 +118,7 @@ public class UiConfig extends WebMvcConfigurationSupport {
 
     }
 
-    public String getRouterPageHtml(String path, String token) {
+    public String getRouterPageHtml(String path, String token, Map<String, Object> extraData) {
         String indexPageHtmlFile = ui + "index.html";
         String html = FileUtils.readFileToString(new File(indexPageHtmlFile), StandardCharsets.UTF_8);
         boolean enableSSR = SpringContext.getProperties("app.ui.enableSSR", "true").equalsIgnoreCase("true");
@@ -172,28 +165,31 @@ public class UiConfig extends WebMvcConfigurationSupport {
 //                }
             }
 //            String path = request.getServletPath();
-            // 寻找id=ssr的script
-            for (Element script : scripts) {
-                if (script.attr("id").equals("ssr")) {
-                    Element ssrScript = script;
-                    StringBuilder builder = new StringBuilder();
-                    builder.append("\n");
-                    if (StringUtils.isNotEmpty(token)) {
-                        builder.append(String.format("localStorage.setItem('vue_admin_template_token', '%s');\n", token));
+            if (PageCacheManager.getInstance().contains(path)) {
+                // 寻找id=ssr的script
+                for (Element script : scripts) {
+                    if (script.attr("id").equals("ssr")) {
+                        Element ssrScript = script;
+                        StringBuilder builder = new StringBuilder();
+                        builder.append("\n");
+                        if (StringUtils.isNotEmpty(token)) {
+                            builder.append(String.format("localStorage.setItem('vue_admin_template_token', '%s');\n", token));
+                        }
+                        if (path.startsWith("/open/")) {
+                            builder.append("window.ssrOpen=true;\n");
+                        }
+                        else {
+                            builder.append("window.ssrOpen=false;\n");
+                        }
+                        builder.append("window.ssr=true;\n");
+                        builder.append("window.ssrConfig = ").append(getSysConfig()).append(";\n");
+                        builder.append("window.ssrPage = ").append(getPageJson(path, extraData)).append(";\n");
+                        builder.append("window.ssrDict = ").append(getDict()).append(";\n");
+                        ssrScript.append(builder.toString());
                     }
-                    if (path.startsWith("/open/")) {
-                        builder.append("window.ssrOpen=true;\n");
-                    }
-                    else {
-                        builder.append("window.ssrOpen=false;\n");
-                    }
-                    builder.append("window.ssr=true;\n");
-                    builder.append("window.ssrConfig = ").append(getSysConfig()).append(";\n");
-                    builder.append("window.ssrPage = ").append(getPageJson(path)).append(";\n");
-                    builder.append("window.ssrDict = ").append(getDict()).append(";\n");
-                    ssrScript.append(builder.toString());
                 }
             }
+
             html = doc.html();
         }
         return html;
@@ -204,7 +200,7 @@ public class UiConfig extends WebMvcConfigurationSupport {
      * @param response
      */
     public void redirectToIndex(HttpServletRequest request ,HttpServletResponse response) {
-        String html = getRouterPageHtml(request.getServletPath(), null);
+        String html = getRouterPageHtml(request.getServletPath(), null, null);
         response.setCharacterEncoding("UTF-8");//编码方式
         response.setContentType("text/html");//设置为html格式
         try (PrintWriter writer = response.getWriter()) {
@@ -226,8 +222,25 @@ public class UiConfig extends WebMvcConfigurationSupport {
 //        return FileUtils.readFileToString(new File("data/config.json"), StandardCharsets.UTF_8);
     }
 
-    private String getPageJson(String path) {
-        DevPage page = PageManager.getInstance().getByPath(path);
+    private String getPageJson(String path, Map<String, Object> extraData) {
+        DevPage backPage = PageCacheManager.getInstance().getByPath(path);
+        DevPage page = BeanUtils.copyObject(backPage, DevPage.class);
+        if (extraData != null && !extraData.isEmpty()) {
+            Map<String, Object> pageJson = JsonUtil.toMap(page.getPageJson());
+            if (pageJson != null) {
+                if (pageJson.containsKey("data")) {
+                    Map<String, Object> currentData = (Map<String, Object>) pageJson.get("data");
+                    boolean hasChanged = false;
+                    for (String key : extraData.keySet()) {
+                        hasChanged = true;
+                        currentData.put(key, extraData.get(key));
+                    }
+                    if (hasChanged) {
+                        page.setPageJson(JsonUtil.toJson(pageJson));
+                    }
+                }
+            }
+        }
         return JsonUtil.toJson(BaseRet.success(page));
 //        return FileUtils.readFileToString(new File("data/page.json"), StandardCharsets.UTF_8);
     }
