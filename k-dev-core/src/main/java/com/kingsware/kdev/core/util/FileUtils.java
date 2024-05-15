@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.util;
 
+import ch.qos.logback.core.util.FileUtil;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.encrypt.EncryptProperties;
 import com.kingsware.kdev.core.properties.FileProperties;
@@ -8,6 +9,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.FileSystemUtils;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -417,5 +419,34 @@ public class FileUtils {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * 追加行
+     * @param fileName
+     * @param tring fileName,
+     */
+    public static void appendLine(String fileName, String lineToAppend) {
+        try {
+            File file = new File(fileName);
+            if (!file.getParentFile().exists()) {
+                file.getParentFile().mkdirs();
+            }
+            if(!file.exists()) {
+                Files.createFile(file.toPath());
+            }
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
+                writer.newLine(); // 添加新行
+                writer.write(lineToAppend);
+                writer.flush(); // 确保内容被写入磁盘
+            } catch (IOException e) {
+                System.err.println("Error appending to file: " + e.getMessage());
+            }
+        }
+        catch (Exception e) {
+            log.error("error", e);
+        }
+
+
     }
 }

@@ -1,4 +1,4 @@
-package com.kingsware.kdev.sys.model;
+package com.kingsware.kdev.core.model;
 
 import com.kingsware.kdev.core.bean.BaseManageModel;
 import com.kingsware.kdev.core.orm.annotation.LogicDelete;

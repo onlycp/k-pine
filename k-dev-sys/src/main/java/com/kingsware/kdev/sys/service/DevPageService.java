@@ -6,7 +6,7 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.sys.argv.CopyContextArgv;
 import com.kingsware.kdev.sys.argv.DevPageArgv;
 import com.kingsware.kdev.sys.argv.DevPageQueryArgv;
-import com.kingsware.kdev.sys.model.DevPage;
+import com.kingsware.kdev.core.model.DevPage;
 import com.kingsware.kdev.sys.ret.DevPageRet;
 
 /**

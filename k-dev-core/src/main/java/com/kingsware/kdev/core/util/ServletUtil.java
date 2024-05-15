@@ -64,6 +64,17 @@ public class ServletUtil {
         return header != null && header.equals("XMLHttpRequest");
     }
 
+    public static boolean isPage(HttpServletRequest request) {
+        boolean isAjax = isAjaxRequest(request);
+        if(isAjax) {
+            return false;
+        }
+        if (request.getRequestURI().endsWith("js") || request.getRequestURI().endsWith("css") || request.getRequestURI().endsWith("png") || request.getRequestURI().endsWith("jpg") || request.getRequestURI().endsWith("gif") || request.getRequestURI().endsWith("ico") || request.getRequestURI().endsWith("svg") || request.getRequestURI().endsWith("woff")) {
+            return false;
+        }
+        return true;
+    }
+
 
 
     /**
@@ -468,6 +479,7 @@ public class ServletUtil {
         return "{}";
     }
 
+
     /**
      * 获取上下文路径
      * @return 上下文路径
@@ -479,20 +491,20 @@ public class ServletUtil {
     }
 
     public static void printResponseHeaders(HttpServletRequest request, HttpServletResponse response) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("【ui-access】资源访问：" +request.getRequestURI()).append("\n");
-        sb.append("【ui-access】================================================================================================================================================================================").append("\n");
-        Enumeration<String> headerNames = request.getHeaderNames();
-        while (headerNames.hasMoreElements()) {
-            String headerName = headerNames.nextElement();
-            sb.append(String.format("【ui-access】[request-header] %s: %s", headerName, request.getHeader(headerName))).append("\n");
-        }
-        sb.append("【ui-access】########################################################################################").append("\n");
-        for (String headerName : response.getHeaderNames()) {
-            sb.append(String.format("【ui-access】[response-header] %s: %s", headerName, response.getHeader(headerName))).append("\n");
-        }
-        sb.append("【ui-access】================================================================================================================================================================================").append("\n");
-        log.info(sb.toString());
+//        StringBuilder sb = new StringBuilder();
+//        sb.append("【ui-access】资源访问：" +request.getRequestURI()).append("\n");
+//        sb.append("【ui-access】================================================================================================================================================================================").append("\n");
+//        Enumeration<String> headerNames = request.getHeaderNames();
+//        while (headerNames.hasMoreElements()) {
+//            String headerName = headerNames.nextElement();
+//            sb.append(String.format("【ui-access】[request-header] %s: %s", headerName, request.getHeader(headerName))).append("\n");
+//        }
+//        sb.append("【ui-access】########################################################################################").append("\n");
+//        for (String headerName : response.getHeaderNames()) {
+//            sb.append(String.format("【ui-access】[response-header] %s: %s", headerName, response.getHeader(headerName))).append("\n");
+//        }
+//        sb.append("【ui-access】================================================================================================================================================================================").append("\n");
+//        log.info(sb.toString());
     }
 
 

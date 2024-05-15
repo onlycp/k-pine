@@ -213,6 +213,7 @@ public class MessageWebSocket {
               }
 
           });
+          allSessionSet.keySet().removeAll(removeSessions);
         }
         catch (Exception ignored) {
 

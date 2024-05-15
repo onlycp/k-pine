@@ -1,6 +1,13 @@
 package com.kingsware.kdev.core.cache.dict;
 
+import com.kingsware.kdev.core.bean.SysDictItemRet;
+import com.kingsware.kdev.core.bean.SysDictRet;
+import com.kingsware.kdev.core.util.StringUtils;
+import lombok.Data;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -9,6 +16,7 @@ import java.util.Map;
  * @version 1.0.0
  * @date 2022/1/6 9:25 上午
  */
+@Data
 public class DictManager {
     /** 实例 **/
     private static DictManager instance;
@@ -16,6 +24,10 @@ public class DictManager {
     private Map<String, String> cache = new HashMap<>();
     /** 通过名称作为key **/
     private Map<String, String> nameCache = new HashMap<>();
+
+    private List<SysDictRet> dictList = new ArrayList<>();
+
+    private List<SysDictItemRet> dictItemList = new ArrayList<>();
 
     public static DictManager getInstance() {
         if (instance == null) {
@@ -30,6 +42,7 @@ public class DictManager {
 
     private DictManager() {
     }
+
 
     /**
      * 增加字典项
@@ -67,5 +80,119 @@ public class DictManager {
         String nameKey = code + "." + name;
         return nameCache.getOrDefault(nameKey, null);
     }
+
+    public Map<String, Object> getAllDict() {
+        Map<String, Object> resultMap = new HashMap<>();
+        // getAllDict
+        long t1 = System.currentTimeMillis();
+//        List<SysDictRet> dictList = sysDictService.query(new SysDictQueryArgv()).getList();
+        //     /** 字典名 */
+        //    private String name;
+        //    /** 字典代码 */
+        //    private String code;
+        //    /** 备注 */
+        //    private String note;
+        //    /** 所属应用ID **/
+        //    private String appId;
+//        List<SysDictRet> dictList = DB.findList(SysDictRet.class, "select id, name, code from sys_dict");
+        List<SysDictRet> dictList = DictManager.getInstance().getDictList();
+        long t2 = System.currentTimeMillis();
+        // getAllDetail
+        //     /** 字典名 */
+        //    private String name;
+        //    /** 字典组名 */
+        //    private String groupName;
+        //    /** 字典类型ID */
+        //    private String sysDictId;
+        //    /** 字典类型名称 */
+        //    private String sysDictName;
+        //    /** 字典值 */
+        //    private String value;
+        //    /** 字典代码 */
+        //    private String code;
+        //    /** 备注 */
+        //    private String note;
+        //    /** 排序序号 */
+        //    private Integer orderNum;
+        //    /** 所属应用ID **/
+        //    private String appId;
+//        List<SysDictItemRet> dictItemList = DB.findList(SysDictItemRet.class, "select id, name, group_name, sys_dict_id, value, code,  order_num  from sys_dict_item");
+        List<SysDictItemRet> dictItemList = DictManager.getInstance().getDictItemList();
+        long t3 = System.currentTimeMillis();
+
+        // setMap
+        resultMap.put("KEY", getKeyMap(dictList, dictItemList));
+        resultMap.put("VALUE", getValueMap(dictList, dictItemList));
+        resultMap.put("LIST", getListMap(dictList, dictItemList));
+
+        return resultMap;
+    }
+
+    private List<Map<String, String>> getDetailByDictId(List<SysDictItemRet> sysDictItemList, String dictId) {
+        List<Map<String, String>> list = new ArrayList<>();
+        for (SysDictItemRet detail : sysDictItemList) {
+            if (detail.getSysDictId().equals(dictId)) {
+                Map<String, String> map = new HashMap();
+                map.put("KEY", detail.getValue());
+                map.put("VALUE", detail.getName());
+                list.add(map);
+            }
+        }
+        return list;
+    }
+
+    private Map<String, Map<String, String>> getKeyMap(List<SysDictRet> dictList, List<SysDictItemRet> sysDictItemList) {
+        Map<String, Map<String, String>> resultMap = new HashMap<>();
+        for (SysDictRet dict : dictList) {
+            Map<String, String> keyMap = getDetailKeyMapByDictId(sysDictItemList, dict.getId());
+            if (StringUtils.isNotEmpty(dict.getCode())) {
+                resultMap.put(dict.getCode(), keyMap);
+            }
+        }
+        return resultMap;
+    }
+
+    private Map<String, Map<String, String>> getValueMap(List<SysDictRet> dictList, List<SysDictItemRet> sysDictItemList) {
+        Map<String, Map<String, String>> resultMap = new HashMap<>();
+        for (SysDictRet dict : dictList) {
+            Map<String, String> valueMap = getDetailValueMapByDictId(sysDictItemList, dict.getId());
+            if (StringUtils.isNotEmpty(dict.getCode())) {
+                resultMap.put(dict.getCode(), valueMap);
+            }
+        }
+        return resultMap;
+    }
+
+    private Map<String, List<Map<String, String>>> getListMap(List<SysDictRet> dictList, List<SysDictItemRet> sysDictItemList) {
+        Map<String, List<Map<String, String>>> map = new HashMap<>();
+        for (SysDictRet dict : dictList) {
+            List<Map<String, String>> detailList = getDetailByDictId(sysDictItemList, dict.getId());
+            if (StringUtils.isNotEmpty(dict.getCode())) {
+                map.put(dict.getCode(), detailList);
+            }
+        }
+        return map;
+    }
+
+    private Map<String, String> getDetailKeyMapByDictId(List<SysDictItemRet> sysDictItemList, String dictId) {
+        Map<String, String> map = new HashMap<>();
+        for (SysDictItemRet detail : sysDictItemList) {
+            if (detail.getSysDictId().equals(dictId) && StringUtils.isNotEmpty(detail.getValue())) {
+                map.put(detail.getValue(), detail.getValue());
+            }
+        }
+        return map;
+    }
+
+    private Map<String, String> getDetailValueMapByDictId(List<SysDictItemRet> sysDictItemList, String dictId) {
+        Map<String, String> map = new HashMap<>();
+        for (SysDictItemRet detail : sysDictItemList) {
+            if (detail.getSysDictId().equals(dictId) && StringUtils.isNotEmpty(detail.getValue())) {
+                map.put(detail.getValue(), detail.getName());
+            }
+        }
+        return map;
+    }
+
 
 }

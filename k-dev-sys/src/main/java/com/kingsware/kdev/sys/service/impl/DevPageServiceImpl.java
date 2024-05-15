@@ -3,7 +3,6 @@ package com.kingsware.kdev.sys.service.impl;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
-import com.kingsware.kdev.core.cache.kcache.KCache;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
@@ -17,8 +16,7 @@ import com.kingsware.kdev.sys.argv.DevPageArgv;
 import com.kingsware.kdev.sys.argv.DevPageQueryArgv;
 import com.kingsware.kdev.sys.bean.CopyProcessData;
 import com.kingsware.kdev.sys.manager.CopyAppManager;
-import com.kingsware.kdev.sys.model.DevApplication;
-import com.kingsware.kdev.sys.model.DevPage;
+import com.kingsware.kdev.core.model.DevPage;
 import com.kingsware.kdev.sys.ret.DevPageRet;
 import com.kingsware.kdev.sys.service.DevPageService;
 import lombok.extern.slf4j.Slf4j;
@@ -61,7 +59,7 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
     // @KCache(onlyForProd = true)
     public DevPageRet getByPath(String path) {
         if ("menu".equalsIgnoreCase(menuSearchOrder)) {
-            log.info("请求页面信息:{}", path );
+//            log.info("请求页面信息:{}", path );
             List<DevPageRet> pages =  DB.findList(DevPageRet.class, " select dp.* from dev_page dp left join sys_menu sm on (dp.id = sm.page_id and sm.menu_type='C' and sm.status=1) where sm.full_path=? and deleted=0 ", path);
 
 
@@ -78,7 +76,7 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
             }
         }
         else {
-            log.info("请求页面信息:{}", path );
+//            log.info("请求页面信息:{}", path );
             List<DevPageRet> pages =  DB.findList(DevPageRet.class, " select * from dev_page where (path = ? or id = ?) and deleted=0 ", path, path);
 
             if (!pages.isEmpty()) {
