@@ -41,7 +41,7 @@ public class DictTask implements KTask, KRunner {
 //            querySql = "select name,sys_dict_id, value, code, order_num from sys_dict_item where when_modified > '" + lastQueryTime + "'";
 //        }
 //        List<DictItemInfo> dictItemList = DB.findList(DictItemInfo.class, querySql);
-        List<SysDictItemRet> dictItemRetList = DB.findList(SysDictItemRet.class, "select id, name, sys_dict_id, value, code,  order_num  from sys_dict_item");
+        List<SysDictItemRet> dictItemRetList = DB.findList(SysDictItemRet.class, "select id, name, sys_dict_id, value, code,  order_num  from sys_dict_item order by sys_dict_id, order_num");
         for (SysDictItemRet dictItem: dictItemRetList) {
             DictManager.getInstance().addDict(dictItem.getCode(), dictItem.getName(), dictItem.getValue());
         }
