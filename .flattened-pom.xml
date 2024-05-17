@@ -28,6 +28,7 @@
     <module>k-dev-faas</module>
     <module>k-dev-app-with-faas</module>
     <module>k-dev-app-with-ops</module>
+    <module>k-dev-app-tongweb</module>
   </modules>
   <distributionManagement>
     <repository>
@@ -62,6 +63,11 @@
       <dependency>
         <groupId>com.kingsware.dev</groupId>
         <artifactId>k-dev-resources</artifactId>
+        <version>${kdev.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.kingsware.dev</groupId>
+        <artifactId>k-dev-app</artifactId>
         <version>${kdev.version}</version>
       </dependency>
     </dependencies>

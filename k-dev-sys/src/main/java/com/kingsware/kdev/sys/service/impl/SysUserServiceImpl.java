@@ -928,7 +928,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         final Integer ENABLE_STATUS = 1;
         SqlWrapper wrapper = new SqlWrapper("select sr.* from sys_user_role sur left join sys_role sr on sr.id = sur.sys_role_id where 1=1 ");
         wrapper.addCondition("sys_user_id", Op.EQ, userId);
-//        wrapper.addCondition("sr.status", Op.EQ, ENABLE_STATUS);
+        wrapper.addCondition("sr.status", Op.EQ, ENABLE_STATUS);
         return DB.findList(SysRole.class, wrapper.getSql(), wrapper.getParams().toArray());
     }
 

@@ -1,21 +1,12 @@
 package com.kingsware.kdev.sys.service.impl;
 
-import com.kingsware.kdev.core.auth.BaseUserInfo;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.bean.TreeDataRet;
-import com.kingsware.kdev.core.cache.access.AccessManager;
-import com.kingsware.kdev.core.cache.kcache.KCache;
-import com.kingsware.kdev.core.constants.PropertiesConstant;
-import com.kingsware.kdev.core.context.KClientContext;
-import com.kingsware.kdev.core.context.SpringContext;
-import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.orm.DB;
-import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
-import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.PageUtil;
@@ -211,7 +202,6 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
     }
 
     @Override
-    @KCache(expire = 60)
     public List<TreeDataRet<Object>> treeOptions(String excludeId, String roleIds, boolean isMobile) {
         // 查找所有
         String[] splits = null;
