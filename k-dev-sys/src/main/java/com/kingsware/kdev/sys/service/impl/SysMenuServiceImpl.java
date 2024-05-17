@@ -91,6 +91,7 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
         model.setMainMode(argv.getMainMode());
         model.setSidebarNavMode(argv.getSidebarNavMode());
         model.setTopNavMode(argv.getTopNavMode());
+        model.setPageId(argv.getPageId());
         // 处理path， 如果单位有变动时，才需要处理
         boolean parentChanged = !Objects.equals(model.getParentId(), argv.getParentId());
         String hisParentPath = model.getPath().replace("/" + model.getId() +"/", "/");

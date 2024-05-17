@@ -91,6 +91,10 @@ public class SysMenuArgv {
      **/
     private Integer pageType;
     /**
+     * 页面ID
+     **/
+    private String pageId;
+    /**
      * 侧边菜单显示模式：0 不显示，1 从一级菜单开始显示，2 从二级菜单开始显示
      **/
     private Integer sidebarNavMode;
