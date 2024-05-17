@@ -9,7 +9,6 @@ import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
-import net.minidev.json.JSONObject;
 
 import java.io.*;
 import java.lang.reflect.Type;

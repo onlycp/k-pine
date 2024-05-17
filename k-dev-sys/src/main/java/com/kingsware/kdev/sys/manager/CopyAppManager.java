@@ -764,6 +764,7 @@ public class CopyAppManager {
         devMap.put("devFaasNodeTypes", Collections.emptyList());
         devMap.put("menus", Collections.emptyList());
         devMap.put("tasks", Collections.emptyList());
+        devMap.put("sources", Collections.emptyList());
         devMap.put("configs", Collections.emptyList());
         devMap.put("sysLogicTemplates", Collections.emptyList());
         kdbRetFile.setData(JsonUtil.toJson(devMap).getBytes(StandardCharsets.UTF_8));

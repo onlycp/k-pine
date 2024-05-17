@@ -17,5 +17,9 @@ public class SysKdbDataSourceQueryArgv extends BasePageArgv {
     private String name = "";
     /** 所属应用ID **/
     private String appId;
+    /** 驱动类 **/
+    private String driverClass;
+    /** jdbc url **/
+    private String jdbcUrl;
 
 }

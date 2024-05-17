@@ -22,12 +22,14 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 import org.springframework.web.util.WebUtils;
 import org.yaml.snakeyaml.util.UriEncoder;
 
+import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * servlet工具类
@@ -455,6 +457,80 @@ public class ServletUtil {
         return "{}";
     }
 
+
+    /**
+     * 生成请求的唯一标识符。
+     * 该标识符基于请求的URI、查询字符串、请求体以及用户信息（如果可用）计算得出。
+     * 首先，将URI、查询参数和请求体信息（如果提供）放入一个TreeMap中，
+     * 然后从TreeMap中构建一个字符串，该字符串不包含空格、换行符、单引号和双引号，
+     * 最后对该字符串进行MD5哈希计算，生成请求的唯一标识符。
+     *
+     * @param uri 请求的URI
+     * @param queryString 查询字符串，如果有的话
+     * @param requestBody 请求体，如果有的话
+     * @return 请求的唯一标识符，为MD5哈希值的字符串表示
+     */
+    public static String getRequestUuid(String uri, String queryString, String requestBody, HttpServletRequest request) {
+        String requestUuid = request.getHeader("_request_uuid");
+        if (StringUtils.isNotEmpty(requestUuid)) {
+            return requestUuid;
+        }
+        TreeMap<String, Object> stringObjectTreeMap = new TreeMap<>();
+        stringObjectTreeMap.put("request_uri", uri);
+        stringObjectTreeMap.put("request_method", request);
+        // 处理查询字符串，将其解析并添加到map中
+        if (StringUtils.isNotEmpty(queryString)) {
+            String[] arr = queryString.split("&");
+            for (String str : arr) {
+                String[] arr2 = str.split("=");
+                // 将查询参数添加到map中
+                if (arr2.length == 2) {
+                    stringObjectTreeMap.put(arr2[0], arr2[1]);
+                } else {
+                    stringObjectTreeMap.put(arr2[0], arr2[1]);
+                }
+            }
+        }
+
+        // 处理请求体，如果是一个JSON字符串，则将其解析并添加到map中
+        if (StringUtils.isNotEmpty(requestBody)) {
+            try {
+                Map<String, Object> map = JsonUtil.toMap(requestBody);
+                stringObjectTreeMap.putAll(map);
+            } catch (Exception e) {
+                log.error("error", e);
+            }
+        }
+
+        // 如果存在用户信息，则将用户ID添加到map中
+        if (KClientContext.getContext() != null && KClientContext.getContext().getUserInfo() != null && StringUtils.isNotEmpty(KClientContext.getContext().getUserInfo().getId())) {
+            stringObjectTreeMap.put("request_userId", KClientContext.getContext().getUserInfo().getId());
+        }
+
+        // 从map中移除特定的键
+        stringObjectTreeMap.remove("t");
+        stringObjectTreeMap.remove("uniopsToken");
+
+        // 构建map到字符串的表示，键值对之间使用"&"分隔
+        StringBuffer stringBuffer = new StringBuffer();
+        for (Map.Entry<String, Object> entry : stringObjectTreeMap.entrySet()) {
+            if (entry.getValue() != null) {
+                if (entry.getValue() instanceof Map) {
+                    stringBuffer.append(entry.getKey()).append("=").append(JsonUtil.toJson(entry.getValue()));
+                } else {
+                    stringBuffer.append(entry.getKey()).append("=").append(entry.getValue());
+                }
+                stringBuffer.append("&");
+            }
+        }
+
+        // 移除字符串中的空格、换行、单引号、双引号，为计算哈希做准备
+        String regex = "[\\s\\n\\t\'\"]+";
+        String str1 = Pattern.compile(regex).matcher(stringBuffer.toString()).replaceAll("");
+
+        // 对处理后的字符串计算MD5哈希值，返回结果
+        return MD5Utils.md5(str1);
+    }
 
 
     /**

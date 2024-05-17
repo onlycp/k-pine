@@ -44,5 +44,11 @@ public class ApiInfo{
     private String apiResultHandler;
     // 响应结果适配器
     private String apiRspArgv;
+    // 是否启用接口缓存
+    private Integer cacheEnable;
+    // 缓存刷新表达式
+    private String cacheCron;
+    // 缓存过期时长（毫秒）
+    private Integer cacheExpireTime;
 
 }

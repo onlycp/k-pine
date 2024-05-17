@@ -4,6 +4,8 @@ import com.kingsware.kdev.core.bean.*;
 import com.kingsware.kdev.core.cache.TimedCache;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.cache.api.ApiManager;
+import com.kingsware.kdev.core.cache.api.ApiResultCache;
+import com.kingsware.kdev.core.cache.api.ApiResultCacheManager;
 import com.kingsware.kdev.core.cache.controller.ControllerManager;
 import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.cache.open.OpenAccountInfo;
@@ -16,6 +18,7 @@ import com.kingsware.kdev.core.config.UiConfig;
 import com.kingsware.kdev.core.context.ClientInfo;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.cron.DynamicTask;
 import com.kingsware.kdev.core.enums.RetEnum;
 import com.kingsware.kdev.core.excel.ExcelWorker;
 import com.kingsware.kdev.core.excel.KExcel;
@@ -25,13 +28,13 @@ import com.kingsware.kdev.core.exception.LicenseException;
 import com.kingsware.kdev.core.exception.UnauthorizedException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.*;
-import com.kingsware.kdev.core.kflow.bean.ErrorResult;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
 import com.kingsware.kdev.core.kmq.KmqMessageCenter;
 import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.model.SysLoginLog;
 import com.kingsware.kdev.core.model.SysOperateLog;
+import com.kingsware.kdev.core.model.SysTask;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.util.*;
@@ -45,7 +48,6 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
@@ -310,7 +312,7 @@ public class KAuthFilter implements Filter {
                         if (argvMap.isEmpty()) {
                             argvMap = ServletUtil.getRequestParams(api, path, request, requestBody, true);
                         }
-                        callByFlow(request, response, api, path, argvMap);
+                        callByFlow(request, response, api, path, argvMap, requestBody);
                         // log.info("Take-{}, {}",8,  (System.currentTimeMillis()-tt0));
                     }
 
@@ -611,7 +613,7 @@ public class KAuthFilter implements Filter {
 
 
     @SuppressWarnings("all")
-    private void  callByFlow(HttpServletRequest request, HttpServletResponse response, ApiInfo api, String path, Map<String, Object> argvMap) {
+    private void  callByFlow(HttpServletRequest request, HttpServletResponse response, ApiInfo api, String path, Map<String, Object> argvMap, String requestBody) {
         // 获取视图模型
         KFlowContext context = KFlowContext.createBaseContext(StringUtils.isNotEmpty(api.getInArgv()) ? api.getInArgv() : "{}", StringUtils.isNotEmpty(api.getOutArgv()) ? api.getOutArgv() : "{}");
         // 用于接口测试，指定id
@@ -628,20 +630,65 @@ public class KAuthFilter implements Filter {
 
         // 加入应用id
         argvMap.put("_appId", api.getAppId());
-        String key = MD5Utils.md5(request.getRequestURI()) ;
+//        String key = MD5Utils.md5(request.getRequestURI()) ;
         KdbFlowResult result = null;
-        if (isCacheUrl(request.getRequestURI()) && apiCache.containsKey(key)) {
-            result = apiCache.get(key);
-            log.info("URL：{} 命中缓存!", request.getRequestURI());
-        }
-        else {
-            result = KdbFlowExecutor.getInstance().execute(api.getApiFlowId(), api.getSubFlowIds(), argvMap, context, false, false);
-            if (isCacheUrl(request.getRequestURI()) && result.getType() == KFlowConstant.RESULT_JSON && !(result.getData() instanceof ErrorResult)) {
-                apiCache.put(key, result, 1000 * 60 * 5);
+        if (api.getCacheEnable() != null && api.getCacheEnable() == 1) {
+            String md5Key = ServletUtil.getRequestUuid(request.getRequestURI(), request.getQueryString(), requestBody, request);
+            ApiResultCache res = ApiResultCacheManager.getInstance().get(md5Key);
+            DynamicTask dynamicTask = SpringContext.getBean(DynamicTask.class);
+            SysTask virtualTask = dynamicTask.getVirtualTask(md5Key);
+            if (res != null && virtualTask != null) {
+                dynamicTask.virtualHeart(md5Key);
+                if (StringUtils.isNotEmpty(KClientContext.getContext().getToken())) {
+                    res.getTokens().add(KClientContext.getContext().getToken());
+                }
+                result = res.getResult();
+                // 同时发送通知
+                dynamicTask.sendDataChange(virtualTask, res, true, res.getResult().getData());
+                log.info("接口：{}, 参数:{} 命中缓存!", api.getApiName(), JsonUtil.toJson(argvMap));
+
+            }
+            else {
+
+                if (!dynamicTask.hasVirtualTask(md5Key)) {
+                    // 创建虚拟任务
+                    SysTask task = new SysTask();
+                    task.setId(md5Key);
+                    task.setName("virtual-api-cache-" + api.getApiName());
+                    task.setEnable(1);
+                    task.setDistributed(0);
+                    task.setWhenCreated(new Timestamp(System.currentTimeMillis()));
+                    task.setWhenModified(new Timestamp(System.currentTimeMillis()));
+                    task.setTaskType(2);
+                    task.setCron(api.getCacheCron());
+                    task.setTaskResourceId(api.getApiFlowId());
+                    task.setNote(JsonUtil.toJson(context));
+                    task.setLockStatus(api.getCacheExpireTime());
+                    task.setTaskArgv(JsonUtil.toJson(argvMap));
+                    task.setWhoCreated(KClientContext.getContext().getToken());
+                    log.info("创建虚拟任务：{}, 参数:{}", task.getName(), JsonUtil.toJson(task));
+                    dynamicTask.addVirtualTask(task);
+                }
+                else {
+                    SysTask task = dynamicTask.getVirtualTask(md5Key);
+                    if (task != null) {
+                        task.setWhenModified(new Timestamp(System.currentTimeMillis()));
+                    }
+                }
+                long t1 = System.currentTimeMillis();
+                result = KdbFlowExecutor.getInstance().execute(api.getApiFlowId(), api.getSubFlowIds(), argvMap, context, false, false);
+                long t2 = System.currentTimeMillis();
+                ApiResultCache cache = ApiResultCache.create(result, (t2 - t1));
+                if (StringUtils.isNotEmpty(KClientContext.getContext().getToken())) {
+                    cache.getTokens().add(KClientContext.getContext().getToken());
+                }
+                ApiResultCacheManager.getInstance().put(md5Key, cache, (long)( api.getCacheExpireTime() * 1000));
             }
 
         }
-
+        else {
+            result = KdbFlowExecutor.getInstance().execute(api.getApiFlowId(), api.getSubFlowIds(), argvMap, context, false, false);
+        }
 
         KdbRetFile kdbRetFile = null;
         KClientContext.getContext().setArgv(argvMap);
