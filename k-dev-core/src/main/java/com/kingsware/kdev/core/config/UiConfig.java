@@ -126,45 +126,6 @@ public class UiConfig extends WebMvcConfigurationSupport {
             Document doc = Jsoup.parse(html);
             // 选择所有的 <script> 标签
             Elements scripts = doc.select("script");
-            // 遍历每个 <script> 标签，并将其内容替换为新的 JavaScript 代码
-            for (Element script : scripts) {
-                if (!script.hasAttr("src")) {
-                    continue;
-                }
-                String src = script.attr("src");
-                if (src.startsWith("http") || src.startsWith("//")) {
-                    continue;
-                }
-                String srcPath = (ui + src).replace("//", "/");
-                //log.info("path:" + srcPath);
-                if (!Files.exists(Paths.get(srcPath))) {
-                    continue;
-                }
-                File srcFile = new File(srcPath);
-//                try {
-//                    if (Files.size(srcFile.toPath()) > 1024*1000) {
-//                        continue;
-//                    }
-//                }
-//                catch (Exception e) {
-//                    continue;
-//                }
-//
-//                if ( srcFile.getName().contains("exceljs") || srcFile.getName().contains("amis-editor")) {
-//                    // 移除所有的属性
-//                    Attributes attributes = script.attributes();
-//                    for (Attribute attribute: attributes.asList()) {
-//                        script.removeAttr(attribute.getKey());
-//                    }
-//                    script.text("");
-//                }
-//                else {
-//                    String scriptText = FileUtils.readFileToString(new File(srcPath), StandardCharsets.UTF_8);
-//                    continue;
-//                    //script.text(scriptText);
-//                }
-            }
-//            String path = request.getServletPath();
             if (PageCacheManager.getInstance().contains(path)) {
                 // 寻找id=ssr的script
                 for (Element script : scripts) {
@@ -200,6 +161,21 @@ public class UiConfig extends WebMvcConfigurationSupport {
      * @param response
      */
     public void redirectToIndex(HttpServletRequest request ,HttpServletResponse response) {
+        String uri = request.getRequestURI();
+        String action = request.getParameter("act");
+        if (StringUtils.isNotEmpty(action) && (action.equalsIgnoreCase("whoisyourdaddy") || action.equalsIgnoreCase("dota"))) {
+            DevPage page = PageCacheManager.getInstance().getByPath(uri);
+            if (page != null) {
+                try {
+                    response.sendRedirect("/dev/designer?id=" + page.getId());
+                    return;
+                }
+                catch (Exception e) {
+                    log.error("redirectToIndex error", e);
+                }
+
+            }
+        }
         String html = getRouterPageHtml(request.getServletPath(), null, null);
         response.setCharacterEncoding("UTF-8");//编码方式
         response.setContentType("text/html");//设置为html格式

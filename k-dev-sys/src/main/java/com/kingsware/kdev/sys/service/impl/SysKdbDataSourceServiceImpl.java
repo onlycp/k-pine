@@ -154,6 +154,14 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
         for (DataSourceInfo infoL: list) {
             retList.add(toRet(infoL));
         }
+        // 按driverClass过滤
+        if (StringUtils.isNotEmpty(argv.getDriverClass())) {
+            retList.removeIf(ret -> !ret.getDriverClass().contains(argv.getDriverClass()));
+        }
+        // 按jdbc url过滤
+        if (StringUtils.isNotEmpty(argv.getJdbcUrl())) {
+            retList.removeIf(ret -> !ret.getJdbcUrl().contains(argv.getJdbcUrl()));
+        }
         // 排序
         retList.sort(Comparator.comparing(SysKdbDataSourceRet::getId));
         return PageUtil.memoryPage(argv, retList, SysKdbDataSourceRet.class);

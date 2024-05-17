@@ -1,11 +1,16 @@
 package com.kingsware.kdev.core.cache;
 
+import com.kingsware.kdev.core.util.JsonUtil;
+import com.kingsware.kdev.core.util.StringUtils;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class TimedCache<K, V> {
 
     private final Map<K, V> cache = new ConcurrentHashMap<>();
@@ -32,6 +37,11 @@ public class TimedCache<K, V> {
         return cache.containsKey(key);
     }
 
+    public void remove(K key) {
+        cache.remove(key);
+        expirationTimes.remove(key);
+    }
+
     private void cleanupExpiredEntries() {
         long currentTime = System.currentTimeMillis();
         for (Map.Entry<K, Long> entry : expirationTimes.entrySet()) {
@@ -39,6 +49,7 @@ public class TimedCache<K, V> {
             long expirationTime = entry.getValue();
 
             if (currentTime > expirationTime) {
+                log.info("移除TimeCache:{}, 值:{}", key, StringUtils.retrench(JsonUtil.toJson(cache.get(key)), 200) );
                 cache.remove(key);
                 expirationTimes.remove(key);
             }

@@ -2,6 +2,8 @@ package com.kingsware.kdev.core.kmq.websocket;
 
 import com.kingsware.kdev.core.auth.AuthToken;
 import com.kingsware.kdev.core.auth.TokenUtil;
+import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.cron.DynamicTask;
 import com.kingsware.kdev.core.kmq.KmqMessageCenter;
 import com.kingsware.kdev.core.util.JsonUtil;
 import org.slf4j.Logger;
@@ -161,6 +163,10 @@ public class MessageWebSocket {
                 logger.error("广播失败", e);
             }
 
+        }
+        else if ("refresh-api-data".equalsIgnoreCase(wmMessage.getTopic())) {
+            DynamicTask dynamicTask = SpringContext.getBean(DynamicTask.class);
+            dynamicTask.virtualHeart(wmMessage.getBody());
         }
         else {
             // 获取令牌

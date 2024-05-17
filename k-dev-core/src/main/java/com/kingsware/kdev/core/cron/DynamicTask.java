@@ -1,25 +1,29 @@
 package com.kingsware.kdev.core.cron;
 
-import com.kingsware.kdev.core.bean.BaseRet;
+import com.kingsware.kdev.core.cache.api.ApiResultCache;
+import com.kingsware.kdev.core.cache.api.ApiResultCacheManager;
 import com.kingsware.kdev.core.cache.instance.InstanceManager;
-import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.kflow.KFlowConstant;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
+import com.kingsware.kdev.core.kflow.bean.ErrorResult;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
-import com.kingsware.kdev.core.model.SysInstance;
+import com.kingsware.kdev.core.kflow.tcp.TcpWmMessage;
+import com.kingsware.kdev.core.kmq.KmqMessageCenter;
+import com.kingsware.kdev.core.kmq.websocket.WebsocketConstants;
+import com.kingsware.kdev.core.kmq.websocket.WmMessage;
+import com.kingsware.kdev.core.kmq.websocket.WmMessageArgv;
 import com.kingsware.kdev.core.model.SysLogicFlow;
 import com.kingsware.kdev.core.model.SysTask;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBInitialize;
-import com.kingsware.kdev.core.orm.kdb.FlowInfo;
-import com.kingsware.kdev.core.orm.kdb.KdbFlowQueryArgv;
 import com.kingsware.kdev.core.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.annotation.Order;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
@@ -30,7 +34,6 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 /**
@@ -88,6 +91,7 @@ public class DynamicTask implements CommandLineRunner {
     private  Map<String, ScheduledFutureHolder> scheduledFutureMap;
 
     private final CopyOnWriteArrayList<SysTask> sysTaskList = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<SysTask> virtualTaskList = new CopyOnWriteArrayList<>();
 
     /**
      * 线程池
@@ -344,10 +348,71 @@ public class DynamicTask implements CommandLineRunner {
         }
         params.put("_expireTime",  getNextTriggerTime(sysTask.getCron()));
         long t1 = System.currentTimeMillis();
+        // 如果是虚拟任务，将改为同步任务
+        if (sysTask.getName().startsWith("virtual-api-cache") && hasVirtualTask(sysTask.getId())) {
+            context = JsonUtil.toBean(sysTask.getNote(), KFlowContext.class);
+            params = JsonUtil.toMap(sysTask.getTaskArgv());
+            long ts01 = System.currentTimeMillis();
+            KdbFlowResult result = KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), "", params, context, false, false);
+            long ts02 = System.currentTimeMillis();
+            if (Objects.equals(result.getType(), KFlowConstant.RESULT_JSON) && !(result.getData() instanceof ErrorResult)) {
+                ApiResultCache apiResultCache = ApiResultCacheManager.getInstance().get(sysTask.getId());
+                boolean changed = true;
+                if (apiResultCache != null) {
+                    changed = apiResultCache.update(result, (ts02 - ts01));
+                }
+                else {
+                    apiResultCache = ApiResultCache.create(result,  (ts02 - ts01));
+                    if (StringUtils.isNotEmpty(sysTask.getWhoCreated())) {
+                        apiResultCache.getTokens().add(sysTask.getWhoCreated());
+                    }
+                    ApiResultCacheManager.getInstance().put(sysTask.getId(), apiResultCache, (long)( sysTask.getLockStatus() * 1000));
+                }
+                log.info("虚拟任务:{}, 查询用时:{}, 响应结果:{}", sysTask.getName(), (ts02 - ts01), StringUtils.retrench(JsonUtil.toJson(result.getData()), 200) );
+                this.sendDataChange(sysTask, apiResultCache, changed, result.getData());
 
-        KdbFlowResult kdbFlowResult = KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), "", params, context, false, asyncExecute);
+            }
+        }
+       else {
+            KdbFlowResult kdbFlowResult = KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), "", params, context, false, asyncExecute);
+        }
         long t2 = System.currentTimeMillis();
             log.debug("流程任务完成：{}", sysTask.getName());
+    }
+
+    public void sendDataChange(SysTask task, ApiResultCache apiResultCache, boolean changed, Object data) {
+        // 同时推送到websocket
+        WmMessage toC = new WmMessage();
+        toC.setTopic("api-data");
+        Map<String, Object> body = new HashMap<>();
+        body.put("md5", task.getId());
+        body.put("changed", changed);
+        if (changed) {
+            body.put("data", data);
+        }
+        body.put("expire", (Integer.parseInt(task.getCron()) + 10) * 1000);
+        toC.setBody(JsonUtil.toJson(body));
+        for (String token : apiResultCache.getTokens()) {
+            WmMessageArgv wmMessageArgv = new WmMessageArgv();
+            wmMessageArgv.setMessage(JsonUtil.toJson(toC));
+            wmMessageArgv.setToken(token);
+            KmqMessageCenter.getInstance().produce(WebsocketConstants.MQ_TO_WEBSOCKET, JsonUtil.toJson(wmMessageArgv));
+        }
+    }
+
+    public void sendDataRemove(SysTask task, ApiResultCache apiResultCache) {
+        WmMessage toC = new WmMessage();
+        toC.setTopic("api-data-remove");
+        Map<String, Object> body = new HashMap<>();
+        body.put("md5", task.getId());
+        toC.setBody(JsonUtil.toJson(body));
+        for (String token : apiResultCache.getTokens()) {
+            WmMessageArgv wmMessageArgv = new WmMessageArgv();
+            wmMessageArgv.setMessage(JsonUtil.toJson(toC));
+            wmMessageArgv.setToken(token);
+            KmqMessageCenter.getInstance().produce(WebsocketConstants.MQ_TO_WEBSOCKET, JsonUtil.toJson(wmMessageArgv));
+        }
+
     }
 
     private long getNextTriggerTime(String cron) {
@@ -433,6 +498,23 @@ public class DynamicTask implements CommandLineRunner {
             try {
                 if (DBInitialize.initCompleted) {
                     List<SysTask> tasks = DB.findList(SysTask.class, "select * from sys_task where enable=1 order by when_created asc");
+                    // 移除超时的虚拟任务
+                    List<SysTask> expireTasks = new ArrayList<>();
+                    for (SysTask task: virtualTaskList) {
+                        if ((System.currentTimeMillis() - task.getWhenModified().getTime()) > 1000*60 ) {
+                            expireTasks.add(task);
+                            ApiResultCache apiResultCache = ApiResultCacheManager.getInstance().get(task.getId());
+                            if (apiResultCache != null) {
+                                this.sendDataRemove(task, apiResultCache);
+                            }
+                            ApiResultCacheManager.getInstance().remove(task.getId());
+                            log.info("移除超时虚拟任务:{}", task.getName());
+                        }
+                    }
+                    virtualTaskList.removeAll(expireTasks);
+                    // 加入虚拟任务
+                    tasks.addAll(virtualTaskList);
+//                    List<SysTask> apiCacheTasks =
                     log.debug("线程池数量：{}，当前活动：{}， 任务数:{}", threadPoolTaskScheduler.getPoolSize(),  threadPoolTaskScheduler.getActiveCount(),  tasks.size());
                     if (sysTaskList.isEmpty()) {
                         sysTaskList.addAll(tasks);
@@ -504,5 +586,59 @@ public class DynamicTask implements CommandLineRunner {
 
         }, new CronTrigger("0/10 * * * * ?"));
 
+    }
+
+    /**
+     * 添加一个虚拟任务到虚拟任务列表中。
+     * @param task 要添加的任务，不应为null。
+     */
+    public void addVirtualTask(SysTask task) {
+        virtualTaskList.add(task);
+    }
+
+    /**
+     * 从虚拟任务列表中移除指定ID的任务。
+     * @param taskId 要移除的任务的ID，不应为null或空字符串。
+     */
+    public void removeVirtualTask(String taskId) {
+        // 使用lambda表达式遍历虚拟任务列表，移除与指定ID匹配的任务
+        virtualTaskList.removeIf(task -> task.getId().equals(taskId));
+    }
+
+    /**
+     * 根据任务ID获取虚拟任务。
+     *
+     * @param taskId 任务的唯一标识符。
+     * @return 如果找到匹配的虚拟任务，则返回该任务；如果没有找到，则返回null。
+     */
+    public SysTask getVirtualTask(String taskId) {
+        // 通过流遍历虚拟任务列表，筛选出与给定任务ID匹配的任务，如果存在则返回，否则返回null
+        return virtualTaskList.stream().filter(task -> task.getId().equals(taskId)).findFirst().orElse(null);
+    }
+
+    /**
+     * 检查是否存在指定的虚拟任务。
+     *
+     * @param taskId 任务的唯一标识符。
+     * @return 如果存在匹配的虚拟任务，则返回true；否则返回false。
+     */
+    public boolean hasVirtualTask(String taskId) {
+        // 通过流遍历虚拟任务列表，检查是否存在与给定任务ID匹配的任务
+        return virtualTaskList.stream().anyMatch(task -> task.getId().equals(taskId));
+    }
+
+    /**
+     * 为指定的虚拟任务更新修改时间。
+     *
+     * @param taskId 任务的唯一标识符。
+     * 更新任务的修改时间为当前时间。
+     */
+    public void virtualHeart(String taskId) {
+        // 获取具有指定ID的虚拟任务，如果存在，则更新其修改时间
+        SysTask task = getVirtualTask(taskId);
+        if (task != null) {
+            log.info("虚拟任务心跳：{}", task.getName());
+            task.setWhenModified(new Timestamp(System.currentTimeMillis()));
+        }
     }
 }

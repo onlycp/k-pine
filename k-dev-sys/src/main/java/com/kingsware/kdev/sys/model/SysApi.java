@@ -43,5 +43,11 @@ public class SysApi extends BaseManageModel {
     private String apiCode;
     /** 所属应用ID **/
     private String appId;
+    /** 缓存开关 **/
+    private Integer cacheEnable;
+    /** 缓存过期时间 **/
+    private Integer cacheExpireTime;
+    /** 缓存刷新时间 **/
+    private Integer cacheCron;
 
 }
