@@ -108,4 +108,6 @@ public class SysMenuArgv {
     private Integer mainMode;
     /** 是否开发者模式 **/
     private Boolean dev;
+    /** 是否固定页签 **/
+    private Integer affix;
 }

@@ -42,6 +42,8 @@ public class SysMenu extends BaseManageModel {
     private String path;
     /** 排序 **/
     private Integer orderNum;
+    /** 是否固定页签 **/
+    private Integer affix;
     /** 可用状态 **/
     private Boolean status;
     /** 所属应用ID **/

@@ -1,0 +1,1 @@
+ALTER TABLE sys_menu ADD affix int NULL DEFAULT '0' COMMENT '是否固定页签';
