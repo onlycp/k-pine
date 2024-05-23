@@ -125,8 +125,6 @@ public class KAuthFilter implements Filter {
         }
         return false;
     }
-
-
     @Override
     /**
      * A filter function, which is used to intercept all requests.
@@ -136,6 +134,11 @@ public class KAuthFilter implements Filter {
      * @param filterChain The filter chain object, which is used to call the next filter in the chain.
      */
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+        this.doMyFilter(servletRequest, servletResponse, filterChain);
+    }
+
+
+    public void doMyFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         String url = request.getRequestURI();
