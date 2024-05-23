@@ -43,11 +43,11 @@
 <!--				<enabled>false</enabled>-->
 <!--			</snapshots>-->
 <!--		</repository>-->
-		<repository>
-			<id>snapshots</id>
-			<name>Internal snapshots</name>
-			<url>http://192.168.2.69:83/repository/maven-third-snapshots/</url>
-		</repository>
+<!--		<repository>-->
+<!--			<id>snapshots</id>-->
+<!--			<name>Internal snapshots</name>-->
+<!--			<url>http://192.168.2.69:83/repository/maven-third-snapshots/</url>-->
+<!--		</repository>-->
 		<repository>
 			<id>releases</id>
 			<name>Internal Releases</name>

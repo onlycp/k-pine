@@ -16,21 +16,8 @@
         <docker.registry.name>k-pine</docker.registry.name>
         <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
         <docker.maven.plugin.version>1.4.10</docker.maven.plugin.version>
-        <tongweb.version>7.0.E.5</tongweb.version>
+        <tongweb.version>7.0.E.6_P7</tongweb.version>
     </properties>
-    <repositories>
-        <repository>
-            <id>xcmid</id>
-            <name>XCMID Maven Repository</name>
-            <url>https://repo.essence.com.cn/artifactory/xcmid-maven-release/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
     <dependencies>
         <dependency>
             <artifactId>k-dev-app</artifactId>
@@ -54,6 +41,39 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
+        <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.tongweb.springboot</groupId>
+            <artifactId>tongweb-spring-boot-websocket-2.x</artifactId>
+            <version>7.0.E.6_P7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.tongweb.springboot</groupId>
+            <artifactId>tongweb-spring-boot-starter-2.x</artifactId>
+            <version>${tongweb.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.tongweb.springboot</groupId>
+            <artifactId>tongweb-spring-boot-monitor-starter-2.x</artifactId>
+            <version>${tongweb.version}</version>
+        </dependency>
+        <!--prometheus-->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
 <!--        <dependency>-->
 <!--            <artifactId>k-dev-sys</artifactId>-->
 <!--            <groupId>com.kingsware.dev</groupId>-->
@@ -76,7 +96,7 @@
     </dependencies>
 
     <build>
-        <finalName>kpine-tongweb</finalName>
+        <finalName>kpine</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
