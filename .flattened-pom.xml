@@ -10,7 +10,7 @@
   </parent>
   <groupId>com.kingsware.dev</groupId>
   <artifactId>k-dev-parent</artifactId>
-  <version>3.2.0-20240311-01</version>
+  <version>3.2.1-20240517-01</version>
   <packaging>pom</packaging>
   <name>k-dev-cli-api</name>
   <description>金智维青松平台</description>
@@ -28,6 +28,7 @@
     <module>k-dev-faas</module>
     <module>k-dev-app-with-faas</module>
     <module>k-dev-app-with-ops</module>
+    <module>k-dev-app-tongweb</module>
   </modules>
   <distributionManagement>
     <repository>
@@ -42,7 +43,7 @@
     </snapshotRepository>
   </distributionManagement>
   <properties>
-    <kdev.version>3.2.0-20240311-01</kdev.version>
+    <kdev.version>3.2.1-20240517-01</kdev.version>
     <maven.compiler.target>8</maven.compiler.target>
     <java.version>1.8</java.version>
     <maven.compiler.source>8</maven.compiler.source>
@@ -62,6 +63,11 @@
       <dependency>
         <groupId>com.kingsware.dev</groupId>
         <artifactId>k-dev-resources</artifactId>
+        <version>${kdev.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.kingsware.dev</groupId>
+        <artifactId>k-dev-app</artifactId>
         <version>${kdev.version}</version>
       </dependency>
     </dependencies>

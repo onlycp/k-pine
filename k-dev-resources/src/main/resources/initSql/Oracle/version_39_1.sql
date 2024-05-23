@@ -1,0 +1,2 @@
+
+alter table sys_menu add affix integer null default 0;

@@ -65,4 +65,6 @@ public class SysMenuRet extends BaseManageRet {
     private List<SysMenuRet> children = new ArrayList<>();
     /** 是否开发者模式 **/
     private Boolean dev;
+    /** 是否固定页签 **/
+    private Integer affix;
 }

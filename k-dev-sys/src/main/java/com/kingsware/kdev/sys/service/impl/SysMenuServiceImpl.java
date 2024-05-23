@@ -1,21 +1,12 @@
 package com.kingsware.kdev.sys.service.impl;
 
-import com.kingsware.kdev.core.auth.BaseUserInfo;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.bean.TreeDataRet;
-import com.kingsware.kdev.core.cache.access.AccessManager;
-import com.kingsware.kdev.core.cache.kcache.KCache;
-import com.kingsware.kdev.core.constants.PropertiesConstant;
-import com.kingsware.kdev.core.context.KClientContext;
-import com.kingsware.kdev.core.context.SpringContext;
-import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.orm.DB;
-import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
-import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.PageUtil;
@@ -92,6 +83,7 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
         model.setSidebarNavMode(argv.getSidebarNavMode());
         model.setTopNavMode(argv.getTopNavMode());
         model.setPageId(argv.getPageId());
+        model.setAffix(argv.getAffix());
         // 处理path， 如果单位有变动时，才需要处理
         boolean parentChanged = !Objects.equals(model.getParentId(), argv.getParentId());
         String hisParentPath = model.getPath().replace("/" + model.getId() +"/", "/");
@@ -210,7 +202,6 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
     }
 
     @Override
-    @KCache(expire = 60)
     public List<TreeDataRet<Object>> treeOptions(String excludeId, String roleIds, boolean isMobile) {
         // 查找所有
         String[] splits = null;
@@ -224,7 +215,7 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
             isSuperAdmin = isSuperAdmin(ids);
         }
         StringBuilder sql = new StringBuilder();
-        sql.append(" select sm.id, sm.name, sm.parent_id, sm.icon, sm.code, sm.router_path, sm.component_path, sm.is_hidden, sm.menu_type, sm.api_codes, sm.open_mode, sm.keep_alive, sm.order_num, sm.status,  sm.data_type, sm.theme, sm.page_type, sm.sidebar_nav_mode, sm.top_nav_mode, sm.main_mode, sm.page_id, sm.full_path, sm.is_dev ");
+        sql.append(" select sm.id, sm.name, sm.parent_id, sm.icon, sm.code, sm.router_path, sm.component_path, sm.is_hidden, sm.menu_type, sm.api_codes, sm.open_mode, sm.keep_alive, sm.order_num, sm.status,  sm.data_type, sm.theme, sm.page_type, sm.sidebar_nav_mode, sm.top_nav_mode, sm.main_mode, sm.page_id, sm.full_path, sm.is_dev, sm.affix ");
         sql.append(" from sys_menu sm ");
 //        if (!isSuperAdmin && ids != null) {
 //            sql.append(" right join sys_role_menu srm on srm.sys_menu_id = sm.id ");
