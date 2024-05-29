@@ -166,7 +166,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
     @Override
     @SuppressWarnings("all")
     public String importApp(String json, String teamId) {
-
+        PageCacheManager.getInstance().clear();
         String pineAppId = "064b3b44b85a45fe87fcce88d72b2519";
         String importEnable = SpringContext.getProperties("app.dev.import-enable", "true");
         if ("false".equalsIgnoreCase(importEnable)) {

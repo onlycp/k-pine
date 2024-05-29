@@ -565,10 +565,13 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             }
             // 查找当前会话是否已经有令牌，如果有，就用已有的
             List<SysOnlineUser> onlineUsers = DB.findList(SysOnlineUser.class, "select * from sys_online_user  where user_id =? and login_ip =? order by when_created desc", userInfo.getId(), KClientContext.getContext().getIp());
-            // 只取生成时间小于1分钟的
-            onlineUsers = onlineUsers.stream().filter(it-> it.getWhenCreated().getTime() > (System.currentTimeMillis() - 1000*60)).collect(Collectors.toList());
+            // 只取生成时间小于1分钟的- 1000*60
+            onlineUsers = onlineUsers.stream().filter(it-> it.getWhenCreated().getTime() > (System.currentTimeMillis() )).collect(Collectors.toList());
             SysOnlineUser existOnlineUser = (onlineUsers != null && onlineUsers.size() > 0) ? onlineUsers.get(0) : null;
-            if (existOnlineUser == null) {
+            // 当前用户在前端自己清空浏览器缓存或使用无痕模式时，请求
+            boolean hasToken = KClientContext.getContext().getToken() != null;
+            // 当前用户在前端自己清空浏览器缓存或使用无痕模式时，认为用户不想使用缓存里的onlineUser数据，重新取出
+            if (!hasToken || existOnlineUser == null) {
                 // 获取会话id
                 String kSessionId = ServletUtil.getCookie("k_session_id", "");
                 TokenPair tokenPair = TokenUtil.createToken(appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), KClientContext.getContext().getIp(), kSessionId, userInfo);
