@@ -70,7 +70,9 @@ public class SysConfigServiceImpl extends BaseServiceImpl implements SysConfigSe
         SysConfig model = DB.findById(SysConfig.class, argv.getId());
         model.setName(argv.getName());
         model.setCode(argv.getCode());
-        model.setValue(argv.getValue());
+        if (!"******".equalsIgnoreCase(argv.getValue())) {
+            model.setValue(argv.getValue());
+        }
         model.setIsSys(argv.getIsSys());
         model.setNote(argv.getNote());
         // 校验
@@ -109,7 +111,8 @@ public class SysConfigServiceImpl extends BaseServiceImpl implements SysConfigSe
             wrapper.appendSql(" and (app_id = ?)", argv.getAppId());
         }
         wrapper.sortBy("when_created desc");
-        return (PageDataRet<SysConfigRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysConfig.class, SysConfigRet.class);
+        PageDataRet<SysConfigRet> pd =  (PageDataRet<SysConfigRet>)query(wrapper.getSql(), wrapper.getParams(), argv, SysConfig.class, SysConfigRet.class);
+        return pd;
     }
 
     @Override
