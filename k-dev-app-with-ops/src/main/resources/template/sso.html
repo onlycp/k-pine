@@ -17,6 +17,22 @@ function urlDecode(encodedString) {
     }
 }
 
+function setCookie(name, value, days) {
+     // 将天数转换为毫秒
+    let expires;
+// 如果days未定义或为负数，cookie将在浏览器会话结束时删除
+    if (days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString(); // 设置过期时间
+    } else {
+        expires = "";
+    }
+
+    // 创建cookie字符串，包括名称、值和过期时间
+    document.cookie = name + "=" + encodeURIComponent(value) + expires + "; path=/"; // path=/ 表示整个域名下有效
+}
+
 function doLogin() {
     // const pineToken = localStorage.getItem('vue_admin_template_token');
     // 如果青松没有登录，那么就先登录青松
@@ -25,6 +41,8 @@ function doLogin() {
     if (pineToken !== '') {
         console.log('pineToken:' + pineToken)
         localStorage.setItem('vue_admin_template_token', pineToken);
+        setCookie('pineToken', pineToken)
+
         let href = urlDecode('${to}');
         if (href.indexOf("?") > -1) {
             href += (`&mtt=${new Date().valueOf()}`)

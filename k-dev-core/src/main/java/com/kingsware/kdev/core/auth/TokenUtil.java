@@ -12,10 +12,7 @@ import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.expression.Expr;
-import com.kingsware.kdev.core.util.AESUtil;
-import com.kingsware.kdev.core.util.JsonUtil;
-import com.kingsware.kdev.core.util.MD5Utils;
-import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.core.util.*;
 import io.swagger.annotations.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -253,7 +250,8 @@ public class TokenUtil {
         if (StringUtils.isEmpty(auth)) {
             auth = request.getParameter("token");
             if (StringUtils.isEmpty(auth)) {
-                return "";
+                // 从cookie中获取
+                auth = ServletUtil.getCookie("pineToken", "");
             }
 
         }

@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.config;
 
+import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.cache.dict.DictManager;
 import com.kingsware.kdev.core.cache.kcache.LruCache;
@@ -176,7 +177,7 @@ public class UiConfig extends WebMvcConfigurationSupport {
 
             }
         }
-        String html = getRouterPageHtml(request.getServletPath(), null, null);
+        String html = getRouterPageHtml(request.getServletPath(), TokenUtil.getTokenString(request), null);
         response.setCharacterEncoding("UTF-8");//编码方式
         response.setContentType("text/html");//设置为html格式
         try (PrintWriter writer = response.getWriter()) {
