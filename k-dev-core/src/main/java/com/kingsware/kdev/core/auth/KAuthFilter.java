@@ -740,13 +740,14 @@ public class KAuthFilter implements Filter {
         clientInfo.setRequest(request);
         clientInfo.setResponse(response);
         clientInfo.setUrl(request.getRequestURI());
+        // 写到线程变量
+        KClientContext.setContext(clientInfo);
         // 获取用户信息
         BaseUserInfo userInfo = TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret());
         if (userInfo != null) {
-            clientInfo.setUserInfo(userInfo);
+            KClientContext.getContext().setUserInfo(userInfo);
         }
-        // 写到线程变量
-        KClientContext.setContext(clientInfo);
+
     }
 
     /**

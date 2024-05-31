@@ -228,6 +228,29 @@ public class ServletUtil {
     }
 
     /**
+     * 获取cookie值
+     * @param name              名称
+     * @param defaultValue      默认值
+     * @return         cookie值
+     */
+    public static String getCookie(HttpServletRequest request, String name, String defaultValue) {
+        try {
+            // 获取http请求
+            Cookie[] cookies = request.getCookies();
+            for (Cookie cookie: cookies) {
+                if (cookie.getName().equalsIgnoreCase(name)) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        catch (Exception ignored) {
+
+        }
+
+        return defaultValue;
+    }
+
+    /**
      * 获取访问者IP
      * @return  ip
      */

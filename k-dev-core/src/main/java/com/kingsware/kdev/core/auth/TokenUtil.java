@@ -251,7 +251,7 @@ public class TokenUtil {
             auth = request.getParameter("token");
             if (StringUtils.isEmpty(auth)) {
                 // 从cookie中获取
-                auth = ServletUtil.getCookie("pineToken", "");
+                auth = ServletUtil.getCookie(request,"pineToken", "");
             }
 
         }
