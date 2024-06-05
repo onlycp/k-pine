@@ -20,6 +20,7 @@ public class WebSocketMessageConsumer implements KmqConsumer {
     @Override
     public void onMessage(List<String> payload) throws Exception {
 
+        log.info("websocket message consumer: {}", JsonUtil.toJson(payload));
         MessageWebSocket messageWebSocket = SpringContext.getBean(MessageWebSocket.class);
         for (String message: payload) {
             WmMessageArgv wmMessageArgv = JsonUtil.toBean(message, WmMessageArgv.class);

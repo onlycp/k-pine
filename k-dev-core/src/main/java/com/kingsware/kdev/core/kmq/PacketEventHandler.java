@@ -33,6 +33,7 @@ public class PacketEventHandler implements EventHandler<PacketEvent> {
     @Override
     public void onEvent(PacketEvent packetEvent, long sequence, boolean b) throws Exception {
         try {
+//            log.info("T-消费者: {} 消费成功，消息内容:{}", topic, packetEvent.getMessage());
             for (KmqConsumer consumer : consumers) {
                 try {
                     List<String> payloads = new ArrayList<>();

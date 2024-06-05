@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.kmq;
 
+import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.kmq.websocket.WmMessage;
 import com.kingsware.kdev.core.kmq.websocket.WmMessageArgv;
@@ -32,6 +33,7 @@ public class KmqMessageCenter {
     private static KmqMessageCenter messageCenter;
 
     private Map<String, PacketEventProducerWithTranslator> packetEventProducerWithTranslatorMap = new HashMap<>();
+    private Map<String, Disruptor> disruptorMap = new HashMap<>();
 
     /**
      * 私有构造
@@ -80,14 +82,16 @@ public class KmqMessageCenter {
             //创建事件工厂
             PacketEventFactory eventFactory = new PacketEventFactory();
             // RingBuffer 大小，必须是 2 的 N 次方
-            int ringBufferSize = 1024 * 1024;
+            int ringBufferSize = 1024;
             // Construct the Disruptor
             Disruptor<PacketEvent> disruptor  = new Disruptor<>(eventFactory, ringBufferSize, executorService);
+
             disruptor.handleEventsWith(new PacketEventHandler(entry.getKey(), entry.getValue()));
             //启动disruptor，启动所有线程
             disruptor.start();
             PacketEventProducerWithTranslator packetEventProducerWithTranslator = new PacketEventProducerWithTranslator(disruptor.getRingBuffer());
             packetEventProducerWithTranslatorMap.put(entry.getKey(), packetEventProducerWithTranslator);
+            disruptorMap.put(entry.getKey(), disruptor);
         }
 
 
@@ -100,7 +104,10 @@ public class KmqMessageCenter {
      * @param payload   消息体
      */
     public void produce(String topic, String payload) {
-        produce(topic, Collections.singletonList(payload));
+//        if (!LicenseManager.getInstance().isUniopsApp()) {
+            produce(topic, Collections.singletonList(payload));
+//        }
+
     }
 
     /**
@@ -109,26 +116,29 @@ public class KmqMessageCenter {
      * @param payloads   消息体列表
      */
     public void produce(String topic, List<String> payloads) {
-        // 如果没有消费者，直接丢弃
-        if (!packetEventProducerWithTranslatorMap.containsKey(topic)) {
-            return;
-        }
-        // 将消息加入队列中
-        try {
-            PacketEventProducerWithTranslator withTranslator = packetEventProducerWithTranslatorMap.get(topic);
-            for(String payload: payloads) {
-                PacketEvent event = new PacketEvent();
-                event.setMessage(payload);
-                event.setTimestamp(System.currentTimeMillis());
-                withTranslator.send(event);
-                //logger.info("Produce，topic:{},  message:{}", topic, StringUtils.retrench(payload, 100));
+//        if (!LicenseManager.getInstance().isUniopsApp()) {
+            // 如果没有消费者，直接丢弃
+            if (!packetEventProducerWithTranslatorMap.containsKey(topic)) {
+                return;
             }
+            // 将消息加入队列中
+            try {
+                PacketEventProducerWithTranslator withTranslator = packetEventProducerWithTranslatorMap.get(topic);
+                Disruptor disruptor = disruptorMap.get(topic);
+//                logger.info("Disruptor {}  Buffer Size:{}",topic,  disruptor.getRingBuffer().());
+                for (String payload : payloads) {
+                    PacketEvent event = new PacketEvent();
+                    event.setMessage(payload);
+                    event.setTimestamp(System.currentTimeMillis());
+                    withTranslator.send(event);
+                    //logger.info("Produce，topic:{},  message:{}", topic, StringUtils.retrench(payload, 100));
+                }
 
 
-        }
-        catch (Exception e) {
-            logger.error("生产消息失败，topic: {}", topic, e);
-        }
+            } catch (Exception e) {
+                logger.error("生产消息失败，topic: {}", topic, e);
+            }
+//        }
 
     }
 

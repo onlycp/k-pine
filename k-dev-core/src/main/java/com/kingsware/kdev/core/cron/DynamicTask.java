@@ -11,6 +11,7 @@ import com.kingsware.kdev.core.kflow.bean.ErrorResult;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.kflow.tcp.TcpWmMessage;
 import com.kingsware.kdev.core.kmq.KmqMessageCenter;
+import com.kingsware.kdev.core.kmq.websocket.MessageWebSocket;
 import com.kingsware.kdev.core.kmq.websocket.WebsocketConstants;
 import com.kingsware.kdev.core.kmq.websocket.WmMessage;
 import com.kingsware.kdev.core.kmq.websocket.WmMessageArgv;
@@ -29,6 +30,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.*;
@@ -92,6 +94,9 @@ public class DynamicTask implements CommandLineRunner {
 
     private final CopyOnWriteArrayList<SysTask> sysTaskList = new CopyOnWriteArrayList<>();
     private final CopyOnWriteArrayList<SysTask> virtualTaskList = new CopyOnWriteArrayList<>();
+
+    @Resource
+    private MessageWebSocket messageWebSocket;
 
     /**
      * 线程池
@@ -392,11 +397,14 @@ public class DynamicTask implements CommandLineRunner {
         }
         body.put("expire", (Integer.parseInt(task.getCron()) + 10) * 1000);
         toC.setBody(JsonUtil.toJson(body));
-        for (String token : apiResultCache.getTokens()) {
-            WmMessageArgv wmMessageArgv = new WmMessageArgv();
-            wmMessageArgv.setMessage(JsonUtil.toJson(toC));
-            wmMessageArgv.setToken(token);
-            KmqMessageCenter.getInstance().produce(WebsocketConstants.MQ_TO_WEBSOCKET, JsonUtil.toJson(wmMessageArgv));
+        for (String token : apiResultCache.getTokens() ) {
+            if (messageWebSocket.hasSessionByToken(token)) {
+                WmMessageArgv wmMessageArgv = new WmMessageArgv();
+                wmMessageArgv.setMessage(JsonUtil.toJson(toC));
+                wmMessageArgv.setToken(token);
+                KmqMessageCenter.getInstance().produce(WebsocketConstants.MQ_TO_WEBSOCKET, JsonUtil.toJson(wmMessageArgv));
+            }
+
         }
     }
 
@@ -407,10 +415,12 @@ public class DynamicTask implements CommandLineRunner {
         body.put("md5", task.getId());
         toC.setBody(JsonUtil.toJson(body));
         for (String token : apiResultCache.getTokens()) {
-            WmMessageArgv wmMessageArgv = new WmMessageArgv();
-            wmMessageArgv.setMessage(JsonUtil.toJson(toC));
-            wmMessageArgv.setToken(token);
-            KmqMessageCenter.getInstance().produce(WebsocketConstants.MQ_TO_WEBSOCKET, JsonUtil.toJson(wmMessageArgv));
+            if (messageWebSocket.hasSessionByToken(token)) {
+                WmMessageArgv wmMessageArgv = new WmMessageArgv();
+                wmMessageArgv.setMessage(JsonUtil.toJson(toC));
+                wmMessageArgv.setToken(token);
+                KmqMessageCenter.getInstance().produce(WebsocketConstants.MQ_TO_WEBSOCKET, JsonUtil.toJson(wmMessageArgv));
+            }
         }
 
     }

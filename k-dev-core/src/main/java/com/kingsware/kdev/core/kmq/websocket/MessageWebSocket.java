@@ -271,4 +271,13 @@ public class MessageWebSocket {
     public void sendMessageByUserId(String userId, String message) {
         sessionTokenSet.stream().filter(it -> it.getUserId().equals(userId)).forEach(it -> sendMessage(it.getSession(), message));
     }
+
+    /**
+     * 判断是否存在会话
+     * @param token
+     * @return
+     */
+    public boolean hasSessionByToken(String token) {
+        return sessionTokenSet.stream().anyMatch(it -> it.getToken().equals(token));
+    }
 }
