@@ -191,7 +191,7 @@ public class KAuthFilter implements Filter {
                 return;
             }
             // 如果是前端路由，则直接返回首页
-            if(uiConfig.isFrontRouter(url2, request) && !url.startsWith(kPageFlag)) {
+            if(uiConfig.isFrontRouter(url2, request) && !url.contains(kPageFlag)) {
                 uiConfig.redirectToIndex(request, response);
                 return;
             }
@@ -227,7 +227,7 @@ public class KAuthFilter implements Filter {
                 // log.info("Take-{}, {}",1,  (System.currentTimeMillis()-tt0));
                 String apiUrlPrefix = request.getContextPath() + "/api";
                 // 如果是接口或者url文件
-                if (url.startsWith(apiUrlPrefix) || url.startsWith(kPageFlag)) {
+                if (url.startsWith(apiUrlPrefix) || url.contains(kPageFlag)) {
 
                     wrapperRequest = new MyHttpServletRequestWrapper(request);
                     String contentType = request.getContentType();

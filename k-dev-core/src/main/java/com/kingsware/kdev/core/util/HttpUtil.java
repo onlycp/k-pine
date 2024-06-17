@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.util;
 
+import com.kingsware.kdev.core.context.NonStaticResourceHttpRequestHandler;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.HttpClientException;
@@ -7,8 +8,10 @@ import com.kingsware.kdev.core.orm.FaasFailRecord;
 import com.kingsware.kdev.core.plugins.FaasChannelPlugin;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.connector.ClientAbortException;
 import org.yaml.snakeyaml.util.UriEncoder;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -17,6 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
+import static com.kingsware.kdev.core.context.NonStaticResourceHttpRequestHandler.URL_PATH;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_OCTET_STREAM_VALUE;
 
 /**
@@ -606,7 +610,7 @@ public class HttpUtil {
 
         HttpURLConnection connection = null;
         try {
-//            log.info("流式下载文件开始:" + downloadUrl);
+            log.info("流式下载文件开始:" + downloadUrl);
 //            ServletUtil.response().sendRedirect("/download/YeCongOA_784c88fa4c504b9285923a6d9bc9c1c3.zip?path=%2Fusr%2Flocal%2Fkfaas%2Fserver%2Fupload%2Fpackage");
             URL url = new URL(downloadUrl);
             connection = (HttpURLConnection) url.openConnection();
@@ -615,31 +619,92 @@ public class HttpUtil {
             connection.setConnectTimeout(5000);
             connection.setReadTimeout(60000);
             connection.setDoInput(true);
-
             @Cleanup InputStream is = connection.getInputStream();
-            String contentLength = connection.getHeaderField("Content-Length");
-            try {
-                ServletUtil.response().setContentLengthLong(Long.parseLong(contentLength));
-            }
-            catch (Exception ignored) {
+            if ((!FileTypeChecker.isAudioFile(path) && !FileTypeChecker.isVideoFile(fileName)) || ServletUtil.request().getHeader("Range") == null) {
 
-            }
+                String contentLength = connection.getHeaderField("Content-Length");
+                    try {
+                        ServletUtil.response().setContentLengthLong(Long.parseLong(contentLength));
+                    }
+                    catch (Exception ignored) {
 
-            ServletUtil.response().setContentType(APPLICATION_OCTET_STREAM_VALUE);
-            ServletUtil.response().setHeader("Content-Disposition", "attachment;filename=" + UriEncoder.encode(fileName));
-            byte[] buf = new byte[512 * 1024];
-            int len;
-            OutputStream out = ServletUtil.response().getOutputStream();
-            while ((len = is.read(buf)) != -1) {
-                out.write(buf, 0, len);
-                out.flush();
+                    }
 
-                //ServletUtil.response().getOutputStream().flush();
-            }
+                    ServletUtil.response().setContentType(APPLICATION_OCTET_STREAM_VALUE);
+                    ServletUtil.response().setHeader("Content-Disposition", "attachment;filename=" + UriEncoder.encode(fileName));
+                    byte[] buf = new byte[512 * 1024];
+                    int len;
+                    OutputStream out = ServletUtil.response().getOutputStream();
+                    while ((len = is.read(buf)) != -1) {
+                        out.write(buf, 0, len);
+                        out.flush();
+
+                        //ServletUtil.response().getOutputStream().flush();
+                    }
 //            log.info("流式下载文件:" + fileName);
-            ServletUtil.response().getOutputStream().flush();
+                 ServletUtil.response().getOutputStream().flush();
+            }
+            else {
+//
+//                // 多线程下载文件至
+                // 创建一个空流
+//
+                log.info("正在下载视频: {}, {}", path, fileName);
+                NonStaticResourceHttpRequestHandler nonStaticResourceHttpRequestHandler = SpringContext.getBean(NonStaticResourceHttpRequestHandler.class);
+                log.info("视频大小:{}-{}", connection.getContentLength(), is.available());
+                ServletUtil.request().setAttribute(NonStaticResourceHttpRequestHandler.ATTR_FILE, is);
+                ServletUtil.request().setAttribute(NonStaticResourceHttpRequestHandler.URL_CONNECTION, connection);
+                ServletUtil.request().setAttribute(URL_PATH, downloadUrl );
+                nonStaticResourceHttpRequestHandler.handleRequest(ServletUtil.request(), ServletUtil.response());
+//                videoHttpRequestHandler.handleRequest(ServletUtil.request(), ServletUtil.response());
+//                HttpServletResponse response = ServletUtil.response();
+//                String rangeHeader = ServletUtil.request().getHeader("Range");
+//                // 设置 Range 请求头
+//                if (rangeHeader != null) {
+//                    connection.setRequestProperty("Range", rangeHeader);
+//                }
+//
+//                int responseCode = connection.getResponseCode();
+//                if (responseCode == HttpURLConnection.HTTP_PARTIAL || responseCode == HttpURLConnection.HTTP_OK) {
+//                    String contentType = connection.getContentType();
+//                    // 设置响应头
+//                    response.setStatus(responseCode);
+//                    response.setContentType(contentType != null ? contentType : "application/octet-stream");
+//                    String contentLength = connection.getHeaderField("Content-Length");
+//                    if (responseCode == HttpURLConnection.HTTP_PARTIAL) {
+//                        String contentRange = connection.getHeaderField("Content-Range");
+//                        response.setHeader("Content-Range", contentRange);
+//                        response.setHeader("Accept-Ranges", "bytes");
+//                        response.setHeader("Content-Length", String.valueOf(contentLength));
+//                    }
+//
+//                    // 写入响应
+//                    try (InputStream inputStream = connection.getInputStream()) {
+//                        byte[] buffer = new byte[8192];  // 8KB 缓冲区
+//                        int bytesRead;
+//                        try {
+//                            while ((bytesRead = inputStream.read(buffer)) != -1) {
+//                                response.getOutputStream().write(buffer, 0, bytesRead);
+//                            }
+//                            response.flushBuffer();  // 确保所有数据都被发送
+//                        } catch (ClientAbortException e) {
+//                            // 客户端中止异常，记录日志
+//                            System.err.println("Client aborted the connection: " + e.getMessage());
+//                        } catch (IOException e) {
+//                            // 其他IO异常，记录日志并重新抛出
+//                            System.err.println("Error while reading/writing video stream: " + e.getMessage());
+//                            throw e;
+//                        }
+//                    }
+//                } else {
+//                    response.sendError(responseCode, connection.getResponseMessage());
+//                }
+            }
+
+
+
         } catch (Exception e) {
-            //log.error("error", e);
+            log.error("error", e);
             throw BusinessException.serviceThrow("文件下载失败");
 
         } finally {
@@ -647,5 +712,29 @@ public class HttpUtil {
                 connection.disconnect();
         }
     }
+
+    /**
+     * 下载文件的指定范围的部分，并返回输入流
+     *
+     * @param fileUrl 文件的URL地址
+     * @param rangeStart 范围的起始字节位置（包括）
+     * @param rangeEnd 范围的结束字节位置（包括）
+     * @return InputStream 文件指定范围的输入流
+     * @throws IOException 下载过程中可能抛出的IO异常
+     */
+    public static InputStream downloadPartialFile(String fileUrl, long rangeStart, long rangeEnd) throws IOException {
+        URL url = new URL(fileUrl);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+        connection.setRequestProperty("Range", "bytes=" + rangeStart + "-" + rangeEnd);
+
+        int responseCode = connection.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_PARTIAL || responseCode == HttpURLConnection.HTTP_OK) {
+            return new BufferedInputStream(connection.getInputStream());
+        } else {
+            throw new IOException("Server returned HTTP response code: " + responseCode);
+        }
+    }
+
 
 }

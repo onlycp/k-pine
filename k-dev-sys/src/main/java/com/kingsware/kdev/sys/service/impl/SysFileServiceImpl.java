@@ -14,14 +14,13 @@ import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
-import com.kingsware.kdev.core.orm.kdb.KdbRet;
 import com.kingsware.kdev.core.plugins.CdnPlugin;
 import com.kingsware.kdev.core.plugins.file.FileEncryptPlugin;
 import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.sys.argv.SysFileQueryArgv;
 import com.kingsware.kdev.sys.bean.FileDecryptInfo;
 import com.kingsware.kdev.sys.manager.FileManager;
-import com.kingsware.kdev.sys.manager.NonStaticResourceHttpRequestHandler;
+import com.kingsware.kdev.core.context.NonStaticResourceHttpRequestHandler;
 import com.kingsware.kdev.core.model.SysFile;
 import com.kingsware.kdev.sys.ret.SysFileRet;
 import com.kingsware.kdev.sys.ret.SysStaticFileRet;
@@ -43,7 +42,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.zip.ZipOutputStream;
 
 /**
  * 文件实现类
@@ -416,18 +414,21 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                 // 检测文件权限
                 validateFilePermission(null, path);
                 //
-                if (!FileTypeChecker.isAudioFile(path) && !FileTypeChecker.isVideoFile(path)) {
-                    FaasFileInfo fileInfo = getFaasFileInfo(path);
-                    DB.kdbApi().downloadStream(fileInfo.getPath(), fileInfo.getName(), userFileName);
-                    return;
-                }
-                else {
-                    File faasFile = getFaasFile(path);
-                    if (faasFile != null && faasFile.exists()) {
-                        fileRealPath = faasFile.getAbsolutePath();
-                        tmpFile = faasFile;
-                    }
-                }
+                FaasFileInfo fileInfo = getFaasFileInfo(path);
+                DB.kdbApi().downloadStream(fileInfo.getPath(), fileInfo.getName(), userFileName);
+                return;
+//                if (!FileTypeChecker.isAudioFile(path) && !FileTypeChecker.isVideoFile(path)) {
+//                    FaasFileInfo fileInfo = getFaasFileInfo(path);
+//                    DB.kdbApi().downloadStream(fileInfo.getPath(), fileInfo.getName(), userFileName);
+//                    return;
+//                }
+//                else {
+//                    File faasFile = getFaasFile(path);
+//                    if (faasFile != null && faasFile.exists()) {
+//                        fileRealPath = faasFile.getAbsolutePath();
+//                        tmpFile = faasFile;
+//                    }
+//                }
 
             }
         } else {
@@ -489,7 +490,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             }
 
         }
-        response.setHeader("Content-Disposition", "attachment;filename=" + UriEncoder.encode(fileName));
+         response.setHeader("Content-Disposition", "attachment;filename=" + UriEncoder.encode(fileName));
         if (fileRealPath == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             response.setCharacterEncoding(StandardCharsets.UTF_8.toString());

@@ -45,6 +45,7 @@ public class LicenseServiceImpl implements LicenseService {
                 ret.setCustomer(license.getCustomer());
                 ret.setValidDate(license.getValidDate());
                 ret.setInvalidDate(license.getInvalidDate());
+                ret.setMac(LicenseManager.getInstance().getMac());
             }
             if (ret.getStatus() != 2 && ret.getStatus() != 2) {
                 ret.setMac(LicenseManager.getInstance().getMac());

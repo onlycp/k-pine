@@ -288,6 +288,8 @@ public abstract class KdbApiAbstract implements KdbApi {
     }
 
 
+
+
     /**
      * 事务接口
      *
