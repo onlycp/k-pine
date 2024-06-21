@@ -85,7 +85,8 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
      * 同步api到缓存
      * @param id id
      */
-    private void cacheApi(String id) {
+    @Override
+    public void cacheApi(String id) {
         // 同步到缓存中
         String sql = "select t0.*, t1.in_argv, t1.out_argv from sys_api t0 left join sys_logic_flow t1 on t1.flow_id=t0.api_flow_id where t0.api_url is not null and t0.api_method is not null and t0.id=?";
         ApiInfo apiInfo = DB.findOne(ApiInfo.class, sql, id);

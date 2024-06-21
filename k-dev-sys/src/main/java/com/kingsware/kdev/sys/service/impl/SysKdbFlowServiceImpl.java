@@ -456,7 +456,11 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         info.setFlowId(argv.getId());
         info.setDescription(argv.getDescription());
         // 保存到kdb
-
+        // 查找关联接口
+        List<String> apiIds = DB.findSingleAttributeList(String.class, "select id from sys_api where api_flow_id=?", argv.getId());
+        for (String apiId : apiIds) {
+            sysApiService.cacheApi(apiId);
+        }
         api.editFlow(info);
 
     }

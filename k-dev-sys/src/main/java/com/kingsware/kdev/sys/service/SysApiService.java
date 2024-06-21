@@ -41,6 +41,12 @@ public interface SysApiService extends BaseService {
     void edit(SysApiArgv argv);
 
     /**
+     * 缓存api
+     * @param id
+     */
+    void cacheApi(String id);
+
+    /**
      * 编辑
      * @param argv 编辑
      * @return 查询结果
