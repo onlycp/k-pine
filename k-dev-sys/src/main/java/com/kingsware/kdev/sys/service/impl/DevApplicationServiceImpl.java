@@ -317,6 +317,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 }
 
             }
+            // 刷新
         }
         // faas函数
         if (devPine.getFunctions() != null) {
@@ -424,6 +425,17 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
 
         } catch (Exception e) {
             log.warn("导入时发生非关键异常(可忽略)，不影响应用使用：" + e.getMessage());
+        }
+        finally {
+            if (devPine.getKdbFlows() != null && !devPine.getKdbFlows().isEmpty()) {
+                try {
+                    DB.byName("kingDB").executeUpdateSql("CHECKPOINT");
+                    log.info("FAAS CHECKPOINT SUCCESS");
+                }
+                catch (Exception e) {
+                    log.warn("CHECKPOINT失败：" + e.getMessage());
+                }
+            }
         }
         // uniops处理
         try {

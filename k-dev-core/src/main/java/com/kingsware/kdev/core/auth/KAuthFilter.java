@@ -53,6 +53,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 /**
@@ -74,6 +75,7 @@ public class KAuthFilter implements Filter {
     private ControllerManager controllerManager;
     @Autowired
     private UiConfig uiConfig;
+
 
     /** 忽略的接口 **/
     private static final String ignoreApi = ":open";
@@ -100,6 +102,11 @@ public class KAuthFilter implements Filter {
     private TimedCache<String, Long> noiseCache = new TimedCache<String, Long>();
 
     private TimedCache<String, KdbFlowResult> apiCache = new TimedCache<String, KdbFlowResult>();
+
+    private RateLimiter rateLimiter = new RateLimiter();
+
+    private final AtomicInteger currentInQueueCount = new AtomicInteger(0);
+
 
 
 
@@ -143,17 +150,6 @@ public class KAuthFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         String url = request.getRequestURI();
         try {
-            // 获取请求路径
-
-//        if(!url.contains("websocket")) {
-//            log.info("上下文:{},路径:{}", request.getContextPath(), request.getRequestURI()  );
-//        }
-//            if (isCacheUrl(url) && apiCache.containsKey(request.getRequestURI())) {
-//                String reponse = apiCache.get(request.getRequestURI());
-//                ServletUtil.responseJson(response, apiCache.get(request.getRequestURI()));
-//                log.info("URL：{} 命中缓存!", request.getRequestURI());
-//                return;
-//            }
 
 
             initContext(request, response);
@@ -161,24 +157,6 @@ public class KAuthFilter implements Filter {
                 filterChain.doFilter(request, response);
                 return;
             }
-//            if (url.contains("queryAlertListStatistics")) {
-//                String data = FileUtils.readFileText(new File("data/queryAlertListStatistics.json"));
-//                Object x = JsonUtil.toMap(data);
-//                ServletUtil.responseJson(response, x);
-//                return;
-//            }
-//            else if (url.contains("queryAlertStatistics")) {
-//                String data = FileUtils.readFileText(new File("data/queryAlertStatistics.json"));
-//                Object x = JsonUtil.toMap(data);
-//                ServletUtil.responseJson(response, x);
-//                return;
-//            }
-//            else if (url.contains("queryCurrentAlert")) {
-//                String data = FileUtils.readFileText(new File("data/queryCurrentAlert.json"));
-//                Object x = JsonUtil.toMap(data);
-//                ServletUtil.responseJson(response, x);
-//                return;
-//            }
             PageLoadManager.getInstance().startCalculate(request, response);
             // 判断是否静态文件
             String url2 = url;
@@ -220,7 +198,22 @@ public class KAuthFilter implements Filter {
             MyHttpServletRequestWrapper wrapperRequest = null;
             ContentCachingResponseWrapper wrapperResponse = null;
             String path = "";
+            // 处理限流
+            int limit = SpringContext.getInt("app.rate-limit.max", 300);
+            if (!rateLimiter.tryAcquire(limit)) {
+                log.info("Too many requests at the moment. Please try again later. {} > {} ",  rateLimiter.getCount(), limit);
+                ServletUtil.responseJson((HttpServletResponse)servletResponse, BaseRet.failMessage("Too many requests at the moment. Please try again later."));
+                return;
+            }
             try {
+                // 计数器
+                int requestInQueueMax = SpringContext.getInt("app.request-in-queue.max", 80);
+                if (currentInQueueCount.incrementAndGet() > requestInQueueMax) {
+                    log.info("The current request queue is too long. Please try again later. {} > {} ", currentInQueueCount.get(), requestInQueueMax);
+                    ServletUtil.responseJson((HttpServletResponse)servletResponse, BaseRet.failMessage("The current request queue is too long. Please try again later."));
+                    return;
+                }
+
                 if (url.contains("//")) {
                     url = url.replaceAll("//", "/");
                 }
@@ -373,6 +366,8 @@ public class KAuthFilter implements Filter {
                 ServletUtil.responseJson(response, BaseRet.failMessage(ExceptionUtils.getStackTrace(e)));
             }
             finally {
+                // 减数
+                currentInQueueCount.decrementAndGet();
                 int takeTime = (int)(System.currentTimeMillis()-t1);
                 if (argvMap.isEmpty()) {
                     argvMap = ServletUtil.getRequestParams(api, path, request, requestBody, false);

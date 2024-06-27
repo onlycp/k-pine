@@ -175,7 +175,7 @@ public class PageLoadManager {
         removeKeys.forEach((k) -> {
             PageLoadTime v = referTimes.get(k);
             // log.info("referer, k:{}", k);
-            log.info(v.formatResult());
+//            log.info(v.formatResult());
 //            FileUtils.appendLine("res/PageLoad.log", JsonUtil.toJson(v));
 //            log.info("页面加载结束【{}】:{}, 用时:{}", v.getRefer(), k, (v.getLastEnd() - v.getStart()));
             referTimes.remove(k);

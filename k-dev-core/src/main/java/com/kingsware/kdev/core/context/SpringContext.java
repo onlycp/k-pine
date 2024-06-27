@@ -84,6 +84,16 @@ public class SpringContext implements ApplicationContextAware {
 
     }
 
+    /**
+     * 获取配置项
+     * @param key
+     * @param defaultValue
+     * @return
+     */
+    public static Integer getInt(String key, Integer defaultValue) {
+        return Integer.parseInt(getProperties(key, defaultValue.toString()));
+    }
+
 
     /**
      * 获取组属性
