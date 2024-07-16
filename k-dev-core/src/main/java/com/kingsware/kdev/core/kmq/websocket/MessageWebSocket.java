@@ -2,6 +2,7 @@ package com.kingsware.kdev.core.kmq.websocket;
 
 import com.kingsware.kdev.core.auth.AuthToken;
 import com.kingsware.kdev.core.auth.TokenUtil;
+import com.kingsware.kdev.core.cache.instance.InstanceManager;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.cron.DynamicTask;
 import com.kingsware.kdev.core.kmq.KmqMessageCenter;
@@ -146,18 +147,20 @@ public class MessageWebSocket {
         // 如果是广播
         else if ("broadcast".equalsIgnoreCase(wmMessage.getTopic())) {
             try {
-                allSessionSet.forEach((ss, time) -> {
-                    try {
-                        if (!ss.equals(session)) {
-                            ss.getBasicRemote().sendText(wmMessage.getBody());
-                        }
-
-                    }
-                    catch (Exception e) {
-                        logger.error("发送消息失败", e);
-                    }
-
-                });
+                InstanceManager.getInstance().broadMessage("broadcast", message);
+                // 由于broadMessage会广播所有节点，所以当前节点不需要单独消费了
+//                allSessionSet.forEach((ss, time) -> {
+//                    try {
+//                        if (!ss.equals(session)) {
+//                            ss.getBasicRemote().sendText(wmMessage.getBody());
+//                        }
+//
+//                    }
+//                    catch (Exception e) {
+//                        logger.error("发送消息失败", e);
+//                    }
+//
+//                });
             }
             catch (Exception e) {
                 logger.error("广播失败", e);
