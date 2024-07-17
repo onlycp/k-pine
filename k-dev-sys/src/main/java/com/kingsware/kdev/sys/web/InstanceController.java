@@ -2,6 +2,7 @@ package com.kingsware.kdev.sys.web;
 
 import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.bean.BaseRet;
+import com.kingsware.kdev.core.cache.instance.InstanceManager;
 import com.kingsware.kdev.core.constants.Version;
 import com.kingsware.kdev.sys.argv.InstanceMessage;
 import com.kingsware.kdev.core.cache.instance.InstanceService;
@@ -36,6 +37,14 @@ public class InstanceController {
     public BaseRet<?> recvMessage(@RequestBody InstanceMessage message) {
 //        log.info("应用间通讯: topic:{}, 消息:{}", message.getTopic(), message.getMessage());
         instanceService.recvMessage(message.getTopic(), message.getMessage());
+        return BaseRet.success();
+    }
+
+    @ApiOperation(value = "广播消息" ,notes = "广播消息")
+    @PostMapping("/broadcastMessage")
+    @ApiIgnore
+    public BaseRet<?> broadcastMessage(@RequestBody InstanceMessage message) {
+        InstanceManager.getInstance().broadMessage(message.getTopic(), message.getMessage());
         return BaseRet.success();
     }
 }
