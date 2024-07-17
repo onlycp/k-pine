@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.bean.ExceptionLog;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.cache.api.ApiManager;
 import com.kingsware.kdev.core.cache.session.SessionManager;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.cron.DynamicTask;
 import com.kingsware.kdev.core.exception.ExceptionLogManager;
 import com.kingsware.kdev.core.kmq.websocket.MessageWebSocket;
@@ -80,6 +81,12 @@ public class InstanceServiceImpl implements InstanceService {
         else if("send-by-user-token".equalsIgnoreCase(topic)){
             WmMessageArgv wmMessageArgv = JsonUtil.toBean(message, WmMessageArgv.class);
             messageWebSocket.sendMessageByToken(wmMessageArgv.getToken(), wmMessageArgv.getMessage());
+        }
+        // 刷新api数据
+        else if("refresh-api-data".equalsIgnoreCase(topic)){
+            WmMessage wmMessage = JsonUtil.toBean(message, WmMessage.class);
+            DynamicTask dynamicTask = SpringContext.getBean(DynamicTask.class);
+            dynamicTask.virtualHeart(wmMessage.getBody());
         }
     }
 }

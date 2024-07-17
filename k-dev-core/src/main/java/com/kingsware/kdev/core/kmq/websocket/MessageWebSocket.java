@@ -168,8 +168,10 @@ public class MessageWebSocket {
 
         }
         else if ("refresh-api-data".equalsIgnoreCase(wmMessage.getTopic())) {
-            DynamicTask dynamicTask = SpringContext.getBean(DynamicTask.class);
-            dynamicTask.virtualHeart(wmMessage.getBody());
+//            DynamicTask dynamicTask = SpringContext.getBean(DynamicTask.class);
+//            dynamicTask.virtualHeart(wmMessage.getBody());
+            // 需要广播所有节点进行修改时间的刷新
+            InstanceManager.getInstance().broadMessage("refresh-api-data", message);
         }
         else {
             // 获取令牌
