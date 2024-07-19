@@ -48,6 +48,7 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
@@ -308,7 +309,15 @@ public class KAuthFilter implements Filter {
                         if (argvMap.isEmpty()) {
                             argvMap = ServletUtil.getRequestParams(api, path, request, requestBody, true);
                         }
-                        callByFlow(request, response, api, path, argvMap, requestBody);
+                        long my1 = System.currentTimeMillis();
+                        long my2 = System.currentTimeMillis();
+                        if (api.getApiFlowId().equalsIgnoreCase("a20fd82c126947f9ab3b599001df6126")) {
+                            log.info("用时：1");
+                        }
+                        callByFlow(request, response, api, path, argvMap, requestBody);     if (api.getApiFlowId().equalsIgnoreCase("a20fd82c126947f9ab3b599001df6126")) {
+                            log.info("用时：2");
+                        }
+
                         // log.info("Take-{}, {}",8,  (System.currentTimeMillis()-tt0));
                     }
 
@@ -694,12 +703,17 @@ public class KAuthFilter implements Filter {
         // 转为api格式
         switch (result.getType()) {
             case KFlowConstant.RESULT_JSON:
-
+                if (api.getApiFlowId().equalsIgnoreCase("a20fd82c126947f9ab3b599001df6126")) {
+                    log.info("用时：3");
+                }
                 if (StringUtils.isNotEmpty(api.getApiResultHandler()) && "user_json".equalsIgnoreCase(api.getApiResultHandler())) {
                     ServletUtil.responseJson(response, result.getData());
                 }
                 else {
                     ServletUtil.responseJson(response, FlowUtils.toJsonResult(result.getData(), result.getLog(), result.getExceptionStack()));
+                }
+                if (api.getApiFlowId().equalsIgnoreCase("a20fd82c126947f9ab3b599001df6126")) {
+                    log.info("用时：4");
                 }
                 break;
             case KFlowConstant.RESULT_EXCEL:
@@ -765,6 +779,13 @@ public class KAuthFilter implements Filter {
                     throw new ForbiddenException(I18n.t("permission.api-forbidden", "接口无权限"));
                 }
             }
+            if (userInfo != null) {
+                // 是否要更新过期时间
+                boolean updateExpired = !KClientContext.getContext().getUrl().endsWith("/ping");
+                // 更新活动时间
+                SessionManager.getInstance().updateActiveTime(userInfo.getId(), KClientContext.getContext().getToken(), appAuthProperties.getMockSessionExpireMinutes(), updateExpired);
+
+            }
 
 
         }
@@ -773,14 +794,7 @@ public class KAuthFilter implements Filter {
         }
         // 保存用户信息
         KClientContext.getContext().setUserInfo(userInfo);
-        if (userInfo != null) {
 
-            // 是否要更新过期时间
-            boolean updateExpired = !KClientContext.getContext().getUrl().endsWith("/ping");
-            // 更新活动时间
-            SessionManager.getInstance().updateActiveTime(userInfo.getId(), KClientContext.getContext().getToken(), appAuthProperties.getMockSessionExpireMinutes(), updateExpired);
-
-        }
 
     }
 

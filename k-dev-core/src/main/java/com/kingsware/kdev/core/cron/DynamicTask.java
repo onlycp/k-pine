@@ -332,7 +332,7 @@ public class DynamicTask implements CommandLineRunner {
 
 
         // 先查找一下看流程是否存在
-        SysLogicFlow logicFlow = DB.findOne(SysLogicFlow.class, "select in_argv, out_argv from sys_logic_flow where flow_id=?", sysTask.getTaskResourceId());
+        SysLogicFlow logicFlow = DB.findOne(SysLogicFlow.class, "select in_argv, application_id, out_argv from sys_logic_flow where flow_id=?", sysTask.getTaskResourceId());
         String inArgv = "{}";
         String outArgv = "{}";
         if (logicFlow != null) {
@@ -352,6 +352,7 @@ public class DynamicTask implements CommandLineRunner {
             }
         }
         params.put("_expireTime",  getNextTriggerTime(sysTask.getCron()));
+        params.put("_appId", sysTask.getApplicationId());
         long t1 = System.currentTimeMillis();
         // 如果是虚拟任务，将改为同步任务
         if (sysTask.getName().startsWith("virtual-api-cache") && hasVirtualTask(sysTask.getId())) {

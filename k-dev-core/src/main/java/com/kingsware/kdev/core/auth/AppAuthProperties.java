@@ -23,6 +23,8 @@ public class AppAuthProperties {
     private int tokenExpireMinutes = 120;
     /** 模拟session会话有效时长 **/
     private int mockSessionExpireMinutes = 30;
+    /** 心跳是否更新会话过期时间 **/
+    private Boolean sessionUpdateByPing = false;
     /** 加密密钥 **/
     private String tokenSecret;
     /** 是否只允许一个会话 **/

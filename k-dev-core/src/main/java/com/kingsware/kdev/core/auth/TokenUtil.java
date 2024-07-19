@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -163,6 +164,7 @@ public class TokenUtil {
                 throw new UnauthorizedException(I18n.t("auth. unauthorized-e007", "登录会话不存在，请重新登录"));
             }
             long expireTime = ts.getActiveTime().getTime() + ((long) mockSessionExpireMinutes * 60 * 1000);
+            logger.info("session过期时间:{}", DateUtils.formatDate(new Date(expireTime), "yyyy-MM-dd HH:mm:ss"));
             if (expireTime < System.currentTimeMillis()) {
                 // 删除登录会话
                 SysOnlineUser onlineUser = DB.findOne(SysOnlineUser.class, Expr.builder().add("loginToken", "=", token).build());

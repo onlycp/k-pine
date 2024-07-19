@@ -444,6 +444,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                     response.setContentLength(content.length);
                     response.getOutputStream().write(content);
                     response.getOutputStream().flush();
+                    return;
                 } catch (IOException e) {
                     throw BusinessException.serviceThrow("文件读取失败");
                 }

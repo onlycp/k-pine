@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.bean.ExceptionLog;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.cache.api.ApiManager;
 import com.kingsware.kdev.core.cache.session.SessionManager;
+import com.kingsware.kdev.core.cache.session.TokenSession;
 import com.kingsware.kdev.core.cron.DynamicTask;
 import com.kingsware.kdev.core.exception.ExceptionLogManager;
 import com.kingsware.kdev.core.model.SysOnlineUser;
@@ -49,6 +50,11 @@ public class InstanceServiceImpl implements InstanceService {
         else if ("session-add".equalsIgnoreCase(topic)) {
             SysOnlineUser onlineUser = JsonUtil.toBean(message, SysOnlineUser.class);
             SessionManager.getInstance().addSession(onlineUser);
+        }
+        // 更新会话
+        else if ("session-update".equalsIgnoreCase(topic)) {
+            TokenSession tokenSession = JsonUtil.toBean(message, TokenSession.class);
+            SessionManager.getInstance().updateSession(tokenSession);
         }
         // 删除会话
         else if ("session-remove".equalsIgnoreCase(topic)) {
