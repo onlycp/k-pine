@@ -41,7 +41,7 @@ public class WebSocketMessageConsumer implements KmqConsumer {
                 WmMessage wmMessage = new WmMessage();
                 wmMessage.setTopic("broadcast");
                 wmMessage.setBody(wmMessageArgv.getMessage());
-                InstanceManager.getInstance().broadMessage("broadcast", JsonUtil.toJson(wmMessage));
+                InstanceManager.getInstance().broadMessage("node-ws-broadcast", JsonUtil.toJson(wmMessage));
             }
         }
 
