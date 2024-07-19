@@ -158,42 +158,14 @@ public class MessageWebSocket {
                 // broadcast代表广播所有节点，是由消息发起方明确指定的
                 // 而node-ws-broadcast仅仅只是一个内部标识，表示broadcast消息传播到每个节点后，在当前节点的消息表示
                 InstanceManager.getInstance().broadMessage("node-ws-broadcast", message);
-                // 由于broadMessage会广播所有节点，所以当前节点不需要单独消费了
-//                allSessionSet.forEach((ss, time) -> {
-//                    try {
-//                        if (!ss.equals(session)) {
-//                            ss.getBasicRemote().sendText(wmMessage.getBody());
-//                        }
-//
-//                    }
-//                    catch (Exception e) {
-//                        logger.error("发送消息失败", e);
-//                    }
-//
-//                });
+
             }
             catch (Exception e) {
                 logger.error("广播失败", e);
             }
 
-            }
-            else if ("refresh-api-data".equalsIgnoreCase(wmMessage.getTopic())) {
-                DynamicTask dynamicTask = SpringContext.getBean(DynamicTask.class);
-                dynamicTask.virtualHeart(wmMessage.getBody());
-            }
-            else {
-                // 获取令牌
-                SessionToken sessionToken = getSessionToken(session);
-                if (sessionToken != null) {
-                    Wm2MqMessage wm2MqMessage = new Wm2MqMessage();
-                    wm2MqMessage.setToken(sessionToken.getToken());
-                    wm2MqMessage.setWmMessage(wmMessage);
-                    KmqMessageCenter.getInstance().produce(MQ_FROM_WEBSOCKET, JsonUtil.toJson(wm2MqMessage));
-                }
         }
         else if ("refresh-api-data".equalsIgnoreCase(wmMessage.getTopic())) {
-//            DynamicTask dynamicTask = SpringContext.getBean(DynamicTask.class);
-//            dynamicTask.virtualHeart(wmMessage.getBody());
             // 需要广播所有节点进行修改时间的刷新
             InstanceManager.getInstance().broadMessage("refresh-api-data", message);
         }
