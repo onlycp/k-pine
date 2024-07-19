@@ -147,7 +147,9 @@ public class MessageWebSocket {
         // 如果是广播
         else if ("broadcast".equalsIgnoreCase(wmMessage.getTopic())) {
             try {
-                InstanceManager.getInstance().broadMessage("broadcast", message);
+                // broadcast代表广播所有节点，是由消息发起方明确指定的
+                // 而node-ws-broadcast仅仅只是一个内部标识，表示broadcast消息传播到每个节点后，在当前节点的消息表示
+                InstanceManager.getInstance().broadMessage("node-ws-broadcast", message);
                 // 由于broadMessage会广播所有节点，所以当前节点不需要单独消费了
 //                allSessionSet.forEach((ss, time) -> {
 //                    try {

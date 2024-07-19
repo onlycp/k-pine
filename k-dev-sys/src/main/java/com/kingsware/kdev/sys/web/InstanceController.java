@@ -39,12 +39,4 @@ public class InstanceController {
         instanceService.recvMessage(message.getTopic(), message.getMessage());
         return BaseRet.success();
     }
-
-    @ApiOperation(value = "广播消息" ,notes = "广播消息")
-    @PostMapping("/broadcastMessage")
-    @ApiIgnore
-    public BaseRet<?> broadcastMessage(@RequestBody InstanceMessage message) {
-        InstanceManager.getInstance().broadMessage(message.getTopic(), message.getMessage());
-        return BaseRet.success();
-    }
 }

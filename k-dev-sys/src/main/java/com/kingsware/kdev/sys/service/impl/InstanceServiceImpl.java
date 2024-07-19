@@ -68,7 +68,7 @@ public class InstanceServiceImpl implements InstanceService {
             ExceptionLogManager.getInstance().write(exceptionLog);
         }
         // 广播消息
-        else if("broadcast".equalsIgnoreCase(topic)){
+        else if("ws-node-broadcast".equalsIgnoreCase(topic)){
             WmMessage wmMessage = JsonUtil.toBean(message, WmMessage.class);
             messageWebSocket.broadMessage(wmMessage.getBody());
         }
