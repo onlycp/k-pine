@@ -54,6 +54,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public BaseRet<?> exceptionHandler(HttpServletRequest request, Exception e) {
         String devMode = SpringContext.getProperties("app.mode.dev", "true");
+        log.error("系统内部异常:", e);
         String message = String.format("系统内部异常:%s", e.getMessage());
         if ("true".equals(devMode)) {
             return BaseRet.failMessage(message, null, ExceptionUtils.getStackTrace(e));

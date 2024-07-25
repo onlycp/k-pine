@@ -1,10 +1,12 @@
 package com.kingsware.kdev.core.orm.kdb;
 
 import com.kingsware.kdev.core.bean.BaseRet;
+import com.kingsware.kdev.core.config.SysConst;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.HttpClientException;
 import com.kingsware.kdev.core.kflow.define.FlowDefinition;
+import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.orm.exception.TransactionException;
@@ -163,7 +165,33 @@ public abstract class KdbApiAbstract implements KdbApi {
         if (sync) {
             executeFlowUrl = "/api/async/execute";
         }
-        return post(getServer(), argv, executeFlowUrl, String.class, true);
+        String[] servers = getServer();
+        List<String> newServers = new ArrayList<>();
+        // 如果是系统应用
+        String currentAppId = "";
+        if (argv.getVariables().containsKey("_appId")) {
+            currentAppId = argv.getVariables().get("_appId") == null ? "" : argv.getVariables().get("_appId").toString();
+        }
+        AppModeProperties appModeProperties = SpringContext.getBean(AppModeProperties.class);
+        if (appModeProperties.getDev()) {
+            if (SysConst.pineAppId.equalsIgnoreCase(currentAppId) || servers.length == 1) {
+                log.info("系统应用流程：{}", argv.getFlowID());
+                newServers.addAll(Arrays.asList(servers));
+            }
+            else {
+                // 从第二个服务器开始
+                List<String> toSelectServers = Arrays.asList(servers).subList(1, servers.length);
+                // hashcode 应用id，然后取模数
+                int index = Math.abs(currentAppId.hashCode()) % toSelectServers.size();
+                // 加入到队列中
+                newServers.add(toSelectServers.get(index));
+                log.info("开发应用流程：{}， 选择：{}, 服务器:{}", argv.getFlowID(), index+1, toSelectServers.get(index) );
+            }
+        }
+        else {
+            newServers.addAll(Arrays.asList(servers));
+        }
+        return post(newServers.toArray(new String[0]), argv, executeFlowUrl, String.class, true);
     }
 
     @Override

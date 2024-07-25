@@ -456,6 +456,20 @@ public class ServletUtil {
     }
 
     /**
+     * 输出json
+     * @param content    对象
+     */
+    public static void responseJsonString(HttpServletResponse response, String content) {
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json; charset=utf-8");
+        try (PrintWriter out = response.getWriter()) {
+            out.append(content);
+        } catch (IOException e) {
+            log.error("error", e);
+        }
+    }
+
+    /**
      * 打印返回参数
      *
      * @param response 响应

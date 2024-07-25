@@ -2,11 +2,14 @@ package com.kingsware.kdev.core.cache.session;
 
 import com.kingsware.kdev.core.auth.AuthToken;
 import com.kingsware.kdev.core.auth.TokenUtil;
+import com.kingsware.kdev.core.cache.instance.InstanceManager;
 import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.BeanUtils;
+import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.MD5Utils;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Timestamp;
@@ -46,7 +49,7 @@ public class SessionManager {
         tokenSession.setActiveTime(onlineUser.getLoginTime());
         boolean isNew = true;
         for (TokenSession ts: onlineUsers) {
-            if (ts.getLoginToken().equals(tokenSession.getLoginToken())) {
+            if (ts.isMe(tokenSession.getLoginToken())) {
                 isNew = false;
                 break;
             }
@@ -113,7 +116,7 @@ public class SessionManager {
         if (sessionMapping.containsKey(userId)) {
             Set<TokenSession> tokenSessions = sessionMapping.get(userId);
             for (TokenSession ts: tokenSessions) {
-                if (ts.getLoginToken().equals(token)) {
+                if (ts.isMe(token)) {
                     return ts;
                 }
             }
@@ -136,7 +139,7 @@ public class SessionManager {
             Set<TokenSession> onlineUsers = sessionMapping.get(userId);
             if(onlineUsers.size() > 0) {
                 TokenSession ts = onlineUsers.stream().max(Comparator.comparing(TokenSession::getLoginTime)).get();
-                return ts.getLoginToken().equals(loginToken);
+                return ts.isMe(loginToken);
             }
         }
         return false;
@@ -151,12 +154,30 @@ public class SessionManager {
       if (sessionMapping.containsKey(userId)) {
           Set<TokenSession> onlineUsers = sessionMapping.get(userId);
           for (TokenSession onlineUser: onlineUsers) {
-              if (onlineUser.getLoginToken().equals(loginToken)) {
+              if (onlineUser.isMe(loginToken)) {
                   onlineUsers.remove(onlineUser);
                   return;
               }
           }
       }
+    }
+
+    public void updateSession(TokenSession session) {
+        if (session == null) {
+            return;
+        }
+        for (Set<TokenSession> ts: sessionMapping.values()) {
+           for (TokenSession onlineUser: ts) {
+               if (onlineUser.isMe(session.getLoginToken())) {
+                   onlineUser.setActiveTime(session.getActiveTime());
+                   onlineUser.setExpireTime(session.getExpireTime());
+                   onlineUser.setPingTime(session.getPingTime());
+                   onlineUser.setLoginTime(session.getLoginTime());
+//                   onlineUser.setHasChanged(session.isHasChanged());
+               }
+           }
+        }
+
     }
 
     /**
@@ -168,7 +189,7 @@ public class SessionManager {
         if (sessionMapping.containsKey(userId)) {
             Set<TokenSession> onlineUsers = sessionMapping.get(userId);
             for (TokenSession onlineUser: onlineUsers) {
-                if (onlineUser.getLoginToken().equals(loginToken)) {
+                if (onlineUser.isMe(loginToken)) {
                     if (onlineUser.isActive()) {
                         log.info("用户名：{} 失活，原因是心跳超时", userId);
                     }
@@ -211,11 +232,13 @@ public class SessionManager {
         if (sessionMapping.containsKey(userId)) {
             Set<TokenSession> onlineUsers = sessionMapping.get(userId);
             for (TokenSession onlineUser: onlineUsers) {
-                if (onlineUser.getLoginToken().equals(loginToken)) {
-                    onlineUser.setActiveTime(new Timestamp(System.currentTimeMillis()));
-                    onlineUser.setHasChanged(true);
-                    if (mockSessionExpireTime > 0 && updateExpired) {
+                if (onlineUser.isMe(loginToken)) {
+                    if (updateExpired) {
+                        onlineUser.setActiveTime(new Timestamp(System.currentTimeMillis()));
+                        log.info("更新活动时间:{}", DateUtils.formatDate(onlineUser.getActiveTime(), DateUtils.DATE_TIME));
+                        onlineUser.setHasChanged(true);
                         onlineUser.setExpireTime(new Timestamp(onlineUser.getActiveTime().getTime() + (long) mockSessionExpireTime * 1000 * 60));
+                        InstanceManager.getInstance().broadMessage("session-update", JsonUtil.toJson(onlineUser));
                     }
                 }
             }

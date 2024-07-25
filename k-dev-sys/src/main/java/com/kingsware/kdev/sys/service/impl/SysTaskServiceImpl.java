@@ -4,15 +4,13 @@ import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.cron.DynamicTask;
+import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
-import com.kingsware.kdev.core.util.AESUtil;
-import com.kingsware.kdev.core.util.BeanUtils;
-import com.kingsware.kdev.core.util.JsonUtil;
-import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.sys.argv.SysTaskArgv;
 import com.kingsware.kdev.sys.argv.SysTaskQueryArgv;
 import com.kingsware.kdev.core.model.SysTask;
@@ -20,6 +18,7 @@ import com.kingsware.kdev.sys.ret.SysTaskRet;
 import com.kingsware.kdev.sys.service.SysTaskService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.support.CronSequenceGenerator;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -55,10 +54,27 @@ public class SysTaskServiceImpl extends BaseServiceImpl implements SysTaskServic
         SysTask model = BeanUtils.copyObject(argv, SysTask.class);
         // 校验
         checkUnique(model);
+        this.checkCron(argv.getCron());
         // 保存
         DB.save(model);
         // 注册任务
 //        dynamicTask.startTask(model);
+    }
+
+    public void checkCron(String cron) {
+        if (StringUtils.isEmpty(cron)) {
+            throw BusinessException.serviceThrow(I18n.t("SysTask.cron.empty", "cron表达式不能为空"));
+        }
+        if (NumberUtils.isInteger(cron)) {
+            return;
+        }
+        try {
+            new CronSequenceGenerator(cron);
+        }
+        catch (Exception e) {
+            throw BusinessException.serviceThrow(I18n.t("SysTask.cron.error", "cron表达式错误"));
+        }
+
     }
 
     @Override
@@ -73,6 +89,7 @@ public class SysTaskServiceImpl extends BaseServiceImpl implements SysTaskServic
         model.setDistributed(argv.getDistributed());
         model.setNote(argv.getNote());
         model.setTaskArgv(argv.getTaskArgv());
+        this.checkCron(argv.getCron());
         // 校验
         checkUnique(model);
         // 保存

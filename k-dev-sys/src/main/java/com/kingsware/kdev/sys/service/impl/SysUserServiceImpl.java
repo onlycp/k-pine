@@ -16,7 +16,6 @@ import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.encrypt.EncryptProperties;
 import com.kingsware.kdev.core.encrypt.EncryptWorker;
-import com.kingsware.kdev.core.enums.ApiSystemEnum;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.UnauthorizedException;
 import com.kingsware.kdev.core.i18n.I18n;
@@ -27,11 +26,9 @@ import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.model.SysCache;
 import com.kingsware.kdev.core.model.SysOnlineUser;
-import com.kingsware.kdev.core.model.SysTask;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
-import com.kingsware.kdev.core.orm.annotation.Transactional;
 import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.*;
@@ -399,7 +396,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                         String decryptPassword = decodeBase64(argv.get(key).toString());
                         String loginBySM2 = SpringContext.getProperties("app.loginBySM2", PropertiesConstant.FALSE);
                         if (PropertiesConstant.TRUE.equals(loginBySM2)) {
-                            decryptPassword = LoginCryptoUtils.loginDecrypt(decryptPassword);
+                            decryptPassword = FaasInvoke.loginDecrypt(decryptPassword);
                         }
                         argv.put(key, decryptPassword);
                     }
@@ -483,9 +480,9 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             // 如果是锁定状态，则不允许登录
             long userLockMinutes = Integer.parseInt(SpringContext.getProperties("user.login.lock-minutes", "10"));
             long userLockMs = userLockMinutes *  60 * 1000;
-            SysCache lockCache = sysCacheService.getCache(lockCacheKey);
-            if (lockCache!= null && StringUtils.isNotEmpty(lockCache.getValue())) {
-                long lockTime = Long.parseLong(lockCache.getValue());
+            String lockCache = sysCacheService.getCache(lockCacheKey);
+            if (StringUtils.isNotEmpty(lockCache)) {
+                long lockTime = Long.parseLong(lockCache);
 
                 if((lockTime + userLockMs) >= System.currentTimeMillis())  {
                     // 移除当前登录次数缓存
@@ -498,8 +495,8 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
 
             wrapper.addCondition("status", Op.EQ, ENABLE_STATUS);
             SysUser model = DB.findOne(SysUser.class, wrapper.getSql(), wrapper.getParams().toArray());
-            SysCache countCache = sysCacheService.getCache(cacheKey);
-            int userLoginPasswordErrorCount = countCache == null? 0 : Integer.parseInt(countCache.getValue());
+            String countCache = sysCacheService.getCache(cacheKey);
+            int userLoginPasswordErrorCount = countCache == null? 0 : Integer.parseInt(countCache);
             int allowErrorCount = Integer.parseInt(SpringContext.getProperties("user.login.allow-error-count", "5"));
             int countOfLeave = allowErrorCount - userLoginPasswordErrorCount;
 
@@ -1019,10 +1016,8 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         String userIds = argv.getSysUserIds();
         if (StringUtils.isNotEmpty(userIds)) {
             String[] userIdArr = userIds.trim().split(",");
-            if (userIdArr != null && userIdArr.length > 0) {
-                for (String userId : userIdArr) {
-                    saveUserRoles(userId, argv.getSysRoleIds());
-                }
+            for (String userId : userIdArr) {
+                saveUserRoles(userId, argv.getSysRoleIds());
             }
         }
     }
@@ -1031,9 +1026,8 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
 //        String decodedCode = AESUtil.decrypt(encryptCode, aesSecret);
 //        boolean valid = decodedCode.equalsIgnoreCase(code);
         String cacheCode = VALIDATION_CODE_CACHE_KEY + uuid;
-        SysCache sysCache = sysCacheService.getCache(cacheCode);
-        boolean valid = sysCache != null && StringUtils.isNotEmpty(code)
-                    && code.equalsIgnoreCase(sysCache.getValue());
+        String sysCache = sysCacheService.getCache(cacheCode);
+        boolean valid = StringUtils.isNotEmpty(code) && code.equalsIgnoreCase(sysCache);
         sysCacheService.removeCache(cacheCode);
         return valid;
     }

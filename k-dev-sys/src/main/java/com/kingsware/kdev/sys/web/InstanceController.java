@@ -2,6 +2,7 @@ package com.kingsware.kdev.sys.web;
 
 import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.bean.BaseRet;
+import com.kingsware.kdev.core.cache.instance.InstanceManager;
 import com.kingsware.kdev.core.constants.Version;
 import com.kingsware.kdev.sys.argv.InstanceMessage;
 import com.kingsware.kdev.core.cache.instance.InstanceService;

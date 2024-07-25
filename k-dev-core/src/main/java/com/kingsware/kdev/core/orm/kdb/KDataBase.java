@@ -1,7 +1,9 @@
 package com.kingsware.kdev.core.orm.kdb;
 
 import com.kingsware.kdev.core.bean.BaseModel;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.orm.*;
 import com.kingsware.kdev.core.orm.annotation.LogicDelete;
 import com.kingsware.kdev.core.orm.channel.DbChannel;
@@ -322,6 +324,7 @@ public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
 
     @Override
     String[] getServer() {
-        return this.dbConnectConfig.getServer().split(";");
+        String[] servers = this.dbConnectConfig.getServer().split(";");
+        return servers;
     }
 }

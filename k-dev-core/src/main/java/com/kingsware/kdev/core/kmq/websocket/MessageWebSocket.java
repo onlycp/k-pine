@@ -1,7 +1,11 @@
 package com.kingsware.kdev.core.kmq.websocket;
 
+import com.kingsware.kdev.core.auth.AppAuthProperties;
 import com.kingsware.kdev.core.auth.AuthToken;
 import com.kingsware.kdev.core.auth.TokenUtil;
+import com.kingsware.kdev.core.cache.session.SessionManager;
+import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.cache.instance.InstanceManager;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.cron.DynamicTask;
 import com.kingsware.kdev.core.kmq.KmqMessageCenter;
@@ -77,6 +81,7 @@ public class MessageWebSocket {
     private void removeSession(Session session) {
         // 查找session
         try {
+            logger.info("用户:【sessionId={}】下线，当前在线人数为:{} ",  session.getId(), sessionTokenSet.size());
             // 从所有会话中移移
             allSessionSet.remove(session);
             Set<SessionToken> copiedSet = new HashSet<>(sessionTokenSet);
@@ -98,66 +103,62 @@ public class MessageWebSocket {
     @OnMessage
     public void onMessage(String message, Session session) {
 
-//        logger.info("接收websocket消息: {}", message);
-        WmMessage wmMessage = JsonUtil.toBean(message, WmMessage.class);
-        if (wmMessage == null) {
-            logger.info("websocket不合法，无法解析: {}", message);
-            return;
-        }
-        if ("whoami".equalsIgnoreCase(wmMessage.getTopic())) {
-            // 将会话信息保存起来
-            String token = wmMessage.getBody();
-            AuthToken authToken = TokenUtil.getAuthToken(token);
-            if (authToken == null) {
-                WmMessage replyMessage = new WmMessage("error", "token不存在或已过时");
-                this.sendMessage(session, JsonUtil.toJson(replyMessage));
-                try {
-                    session.close();
-                }
-                catch (Exception e) {
-                    logger.error("关闭连接失败", e);
-                }
-
+        try {
+            WmMessage wmMessage = JsonUtil.toBean(message, WmMessage.class);
+            if (wmMessage == null) {
+                logger.info("websocket不合法，无法解析: {}", message);
                 return;
             }
-            SessionToken sessionToken = new SessionToken();
-            sessionToken.setToken(token);
-            sessionToken.setUserId(authToken.getUserInfo().getId());
-            sessionToken.setSession(session);
-            sessionToken.setHeartTime(System.currentTimeMillis());
-            sessionTokenSet.add(sessionToken);
-            logger.info("用户:【userId={}, sessionId={}】上线，当前在线人数为:{} ", authToken.getUserInfo().getId(), session.getId(), sessionTokenSet.size());
+            if ("whoami".equalsIgnoreCase(wmMessage.getTopic())) {
+                // 将会话信息保存起来
+                String token = wmMessage.getBody();
+                AuthToken authToken = TokenUtil.getAuthToken(token);
+                if (authToken == null) {
+                    WmMessage replyMessage = new WmMessage("error", "token不存在或已过时");
+                    this.sendMessage(session, JsonUtil.toJson(replyMessage));
+                    try {
+                        session.close();
+                    }
+                    catch (Exception e) {
+                        logger.error("关闭连接失败", e);
+                    }
 
-        }
-        else if ("ping".equalsIgnoreCase(wmMessage.getTopic())) {
-            WmMessage replyMessage = new WmMessage("pong", "");
-            this.sendMessage(session, JsonUtil.toJson(replyMessage));
-            // 获取令牌
-            SessionToken sessionToken = getSessionToken(session);
-            if (sessionToken != null) {
+                    return;
+                }
+                SessionToken sessionToken = new SessionToken();
+                sessionToken.setToken(token);
+                sessionToken.setUserId(authToken.getUserInfo().getId());
+                sessionToken.setSession(session);
                 sessionToken.setHeartTime(System.currentTimeMillis());
-                // logger.info("websocket心跳：用户id:{}, {}", sessionToken.getUserId(), sessionToken.getHeartTime());
+                sessionTokenSet.add(sessionToken);
+                logger.info("用户:【userId={}, sessionId={}】上线，当前在线人数为:{} ", authToken.getUserInfo().getId(), session.getId(), sessionTokenSet.size());
+
             }
-            // 更新心跳时间
-            allSessionSet.put(session, System.currentTimeMillis());
-            // 清除过期的会话
-            // clearExpireSessions();
-        }
+            else if ("ping".equalsIgnoreCase(wmMessage.getTopic())) {
+                WmMessage replyMessage = new WmMessage("pong", "");
+                this.sendMessage(session, JsonUtil.toJson(replyMessage));
+                // 获取令牌
+                SessionToken sessionToken = getSessionToken(session);
+                if (sessionToken != null) {
+                    sessionToken.setHeartTime(System.currentTimeMillis());
+                    // 更新活动时间
+                    AppAuthProperties appAuthProperties = SpringContext.getBean(AppAuthProperties.class);
+                    // logger.info("更新活动时间");
+                    SessionManager.getInstance().updateActiveTime(sessionToken.getUserId(), sessionToken.getToken(), appAuthProperties.getMockSessionExpireMinutes(), appAuthProperties.getSessionUpdateByPing());
+                }
+                // 更新心跳时间
+                allSessionSet.put(session, System.currentTimeMillis());
+                // 更新缓存
+
+            }
+
         // 如果是广播
         else if ("broadcast".equalsIgnoreCase(wmMessage.getTopic())) {
             try {
-                allSessionSet.forEach((ss, time) -> {
-                    try {
-                        if (!ss.equals(session)) {
-                            ss.getBasicRemote().sendText(wmMessage.getBody());
-                        }
+                // broadcast代表广播所有节点，是由消息发起方明确指定的
+                // 而node-ws-broadcast仅仅只是一个内部标识，表示broadcast消息传播到每个节点后，在当前节点的消息表示
+                InstanceManager.getInstance().broadMessage("node-ws-broadcast", message);
 
-                    }
-                    catch (Exception e) {
-                        logger.error("发送消息失败", e);
-                    }
-
-                });
             }
             catch (Exception e) {
                 logger.error("广播失败", e);
@@ -165,8 +166,8 @@ public class MessageWebSocket {
 
         }
         else if ("refresh-api-data".equalsIgnoreCase(wmMessage.getTopic())) {
-            DynamicTask dynamicTask = SpringContext.getBean(DynamicTask.class);
-            dynamicTask.virtualHeart(wmMessage.getBody());
+            // 需要广播所有节点进行修改时间的刷新
+            InstanceManager.getInstance().broadMessage("refresh-api-data", message);
         }
         else {
             // 获取令牌
@@ -178,7 +179,12 @@ public class MessageWebSocket {
                 KmqMessageCenter.getInstance().produce(MQ_FROM_WEBSOCKET, JsonUtil.toJson(wm2MqMessage));
             }
 
+            }
         }
+        catch (Exception e) {
+            logger.error("接收websocket消息失败", e);
+        }
+
     }
 
 

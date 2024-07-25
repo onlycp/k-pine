@@ -136,7 +136,14 @@ public class KdbFlowExecutor {
             }
 
             // 执行流程
+            if (argv.getFlowID().equalsIgnoreCase("a20fd82c126947f9ab3b599001df6126")) {
+                log.info("用时：5");
+            }
             KdbRet<String> ret = DB.kdbApi().executeFlow(argv, debug, sync);
+            if (argv.getFlowID().equalsIgnoreCase("a20fd82c126947f9ab3b599001df6126")) {
+                log.info("用时：6");
+            }
+
 
             if (LogicFlowManager.getInstance().isTranCtrl(argv.getFlowID())) {
                 if (ret.getErrorCode() == 0) {
@@ -166,8 +173,14 @@ public class KdbFlowExecutor {
                 }
 
             } else if (StringUtils.isNotEmpty(ret.getResponseBody())) {
+                if (argv.getFlowID().equalsIgnoreCase("a20fd82c126947f9ab3b599001df6126")) {
+                    log.info("用时：7");
+                }
                 KFlowMessage message = FlowUtils.getHandlerName(ret.getResponseBody());
                 result = KResultHandlers.getInstance().getHandler(message.getHandlerName()).parser(message.getData(), context);
+                if (argv.getFlowID().equalsIgnoreCase("a20fd82c126947f9ab3b599001df6126")) {
+                    log.info("用时：8");
+                }
             } else {
                 result.setType(KFlowConstant.RESULT_JSON);
                 result.setData(null);

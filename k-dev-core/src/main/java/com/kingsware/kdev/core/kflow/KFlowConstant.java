@@ -48,6 +48,10 @@ public class KFlowConstant {
     public final static String EXTERN_TYPE_DICT = "dict";
     /** 扩展类型-timestamp **/
     public final static String EXTERN_TYPE_TIMESTAMP= "timestamp";
+    /**
+     *  json压缩
+     */
+    public final static String JSON_COMPRESS = "jsonCompress|";
 
 
 }

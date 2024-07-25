@@ -365,6 +365,20 @@ public class FlowUtils {
             message.setData(text);
 
         }
+        else if (responseBody.startsWith(KFlowConstant.JSON_COMPRESS)) {
+            String text = responseBody.substring(KFlowConstant.JSON_COMPRESS.length());
+            // 解压
+            String origin = JsonUtil.decompressJSON(Base64Utils.encode(text.getBytes()));
+            if (origin.startsWith(KFlowConstant.ARRAY_START)) {
+                message.setHandlerName("list2object");
+                message.setData(origin);
+            }
+            else {
+                message.setHandlerName("object");
+                message.setData(origin);
+            }
+
+        }
         else if (responseBody.startsWith(KFlowConstant.OBJECT_FLAG)) {
             String text = responseBody.substring(KFlowConstant.OBJECT_FLAG.length());
             // 如果是数组，则调用数组转对象

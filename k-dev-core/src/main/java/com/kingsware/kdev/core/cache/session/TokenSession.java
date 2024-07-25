@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.cache.session;
 
+import com.kingsware.kdev.core.util.MD5Utils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,5 +39,9 @@ public class TokenSession {
             log.info("会话:{} 由失活重新转为激活状态", this.loginToken);
         }
         this.isActive = true;
+    }
+
+    public boolean isMe(String token) {
+        return this.loginToken.equals(token) || MD5Utils.md5(this.loginToken).equals(token);
     }
 }

@@ -36,6 +36,9 @@ public class LicenseDllInitialize implements SystemInitialize {
 
     @Override
     public void execute() throws FileNotFoundException {
+        if (LicenseManager.getInstance().isUniopsApp() || LicenseManager.getInstance().whoSYourDaddy()) {
+            return;
+        }
 
         String osName = System.getProperty("os.name").toLowerCase();
         String osArch = System.getProperty("os.arch").toLowerCase();

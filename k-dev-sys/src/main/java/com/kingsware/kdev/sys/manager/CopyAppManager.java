@@ -36,6 +36,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.kingsware.kdev.core.config.SysConst;
+
+import static com.kingsware.kdev.core.config.SysConst.pineAppId;
+
 /**
  * 应用拷贝统一管理类
  *
@@ -44,7 +48,6 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 @Slf4j
 public class CopyAppManager {
-    public static String pineAppId = "064b3b44b85a45fe87fcce88d72b2519";
 
     private static CopyAppManager instance;
 
@@ -718,7 +721,7 @@ public class CopyAppManager {
         rootData.setDownloadSys(false);
         // 初始化应用数据, 这里直接使用青松开发平台，因为可能存在导多个不同应用的数据
         {
-            DevApplication application = DB.findById(DevApplication.class, CopyAppManager.pineAppId);
+            DevApplication application = DB.findById(DevApplication.class, pineAppId);
             ApplicationConfig config = new ApplicationConfig();
             config.setName(application.getName());
             config.setId(application.getId());
