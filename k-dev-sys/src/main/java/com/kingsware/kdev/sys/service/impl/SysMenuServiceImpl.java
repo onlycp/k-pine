@@ -88,6 +88,21 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
         boolean parentChanged = !Objects.equals(model.getParentId(), argv.getParentId());
         String hisParentPath = model.getPath().replace("/" + model.getId() +"/", "/");
         model.setParentId(argv.getParentId());
+        String fullPath = "/" + argv.getRouterPath();
+
+        SysMenu newParent = DB.findById(SysMenu.class, model.getParentId());
+        if (newParent != null && newParent.getPath() != null) {
+            String [] pathArr = newParent.getPath().split("/");
+            if (pathArr.length > 3) {
+                model.setParentId(pathArr[1]);
+                for (int i = pathArr.length - 3; i > 0; i--) {
+                    SysMenu fatherMenu = DB.findById(SysMenu.class, pathArr[i]);
+                    fullPath = fatherMenu.getRouterPath() + fullPath;
+                }
+            }
+            fullPath = newParent.getRouterPath() + fullPath;
+        }
+        model.setFullPath(fullPath);
         // 唯一性校验
 //        DBChecker<SysMenu> checker =DBChecker.build(model, SysMenu.class);
         // 同级下名称唯一
@@ -98,7 +113,6 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
         DB.update(model);
         // 更新path
         if (parentChanged) {
-            SysMenu newParent = DB.findById(SysMenu.class, model.getParentId());
             String newParentPath = "/";
             if (newParent != null) {
                 newParentPath = newParent.getPath();
