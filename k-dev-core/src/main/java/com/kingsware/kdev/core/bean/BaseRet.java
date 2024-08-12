@@ -97,6 +97,17 @@ public class BaseRet<T> implements Serializable {
         return ret;
     }
 
+    /**
+     * 业务异常时返回结果体
+     * @param message  提示信息
+     * @param <T>   泛型
+     * @return      返回成功结果
+     */
+    public static <T> BaseRet<T> failData(String message, Object data) {
+        BaseRet ret = new BaseRet<>(RetEnum.SERVICE_FAIL.getCode(), message, data);
+        return ret;
+    }
+
     public static <T> BaseRet<T> failMessage(String message, String klog) {
         BaseRet ret = new BaseRet<>(RetEnum.SERVICE_FAIL.getCode(), message, null);
         ret.setLog(klog);

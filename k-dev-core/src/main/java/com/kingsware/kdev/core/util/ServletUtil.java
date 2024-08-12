@@ -358,18 +358,29 @@ public class ServletUtil {
                 // 将body加到变量中
                 Map<String, Object> requestMap = new HashMap<>();
                 requestMap.put("body", body);
-                requestMap.put("ip", ServletUtil.getClientIp(request));
-                requestMap.put("lang", I18n.lang(request));
-                requestMap.put("method", request.getMethod());
                 requestMap.put("path", path);
                 requestMap.put("apiName", api != null ? api.getApiName() : "");
-                requestMap.put("headers", getHeaders(request));
+                requestMap.putAll(getRequestData());
                 params.put("request", requestMap);
 
             }
 
         // 返回
         return params;
+    }
+
+    public static Map<String, Object> getRequestData() {
+        if (KClientContext.getContext() != null && KClientContext.getContext().getRequest() != null) {
+            // 将body加到变量中
+            Map<String, Object> requestMap = new HashMap<>();
+            requestMap.put("ip", ServletUtil.getClientIp(KClientContext.getContext().getRequest()));
+            requestMap.put("lang", I18n.lang(KClientContext.getContext().getRequest()));
+            requestMap.put("method", KClientContext.getContext().getRequest().getMethod());
+            requestMap.put("headers", getHeaders(KClientContext.getContext().getRequest()));
+            return requestMap;
+        }
+        return new HashMap<>();
+
     }
 
     public static Map<String, Object> getHeaders(HttpServletRequest request) {

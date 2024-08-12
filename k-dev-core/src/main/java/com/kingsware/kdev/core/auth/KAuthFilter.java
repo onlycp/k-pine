@@ -328,7 +328,7 @@ public class KAuthFilter implements Filter {
             catch (BusinessException e) {
                 errorMessage = e.getMessage();
                 responseCode = RetEnum.SERVICE_FAIL.getCode();
-                ServletUtil.responseJson(response, BaseRet.failMessage(e.getMessage()));
+                ServletUtil.responseJson(response, BaseRet.failData(e.getMessage(), e.getData()));
             }
             catch (OrmDbException e) {
                 errorMessage = e.getMessage();

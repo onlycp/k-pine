@@ -172,7 +172,7 @@ public class SysSqlInitialize implements SystemInitialize {
         if (file == null) {
             return;
         }
-        log.info("运行数据库脚本:" + file.getName());
+        log.info("运行数据库脚本:{}", file.getName());
         long start = System.currentTimeMillis();
         boolean success = false;
         StringBuilder sqlSumary = new StringBuilder();

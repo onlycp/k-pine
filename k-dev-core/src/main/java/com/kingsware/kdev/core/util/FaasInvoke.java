@@ -1,7 +1,12 @@
 package com.kingsware.kdev.core.util;
 
+import com.kingsware.kdev.core.kflow.KFlowContext;
+import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
+import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.KdbRet;
+
+import java.util.Map;
 
 public class FaasInvoke {
 
@@ -72,6 +77,15 @@ public class FaasInvoke {
         String script = String.format("kutils.removeCache('k-pine-app','%s');", key);
         // 执行脚本
         DB.kdbApi().executeScript(script);
+    }
+
+
+    public static KdbFlowResult callFlow(String id, Map<String, Object> variables) {
+        KFlowContext context = KFlowContext.createBaseContext("{}", "{}");
+        variables.put("request", ServletUtil.getRequestData());
+        String s = JsonUtil.toJson(variables);
+        KdbFlowResult kdbFlowResult = KdbFlowExecutor.getInstance().execute(id, "", variables, context, false, false);
+        return kdbFlowResult;
     }
 
 }

@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public BaseRet<?> businessExceptionHandler(HttpServletRequest request, BusinessException e) {
         KClientContext.getContext().setErrorMessage(e.getMessage());
-        return BaseRet.failMessage(e.getMessage());
+        return BaseRet.failData(e.getMessage(), e.getData());
     }
 
     /**

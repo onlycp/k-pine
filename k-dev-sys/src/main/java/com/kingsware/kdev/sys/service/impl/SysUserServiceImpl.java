@@ -24,7 +24,6 @@ import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.kflow.bean.ErrorResult;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.mode.AppModeProperties;
-import com.kingsware.kdev.core.model.SysCache;
 import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
@@ -33,6 +32,7 @@ import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.sys.argv.*;
+import com.kingsware.kdev.sys.bean.PasswordRuleResult;
 import com.kingsware.kdev.sys.model.*;
 import com.kingsware.kdev.sys.ret.*;
 import com.kingsware.kdev.sys.service.SysUserService;
@@ -360,6 +360,8 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     @SuppressWarnings("all")
     public SysUserLoginRet login(Map<String, Object> argv) throws Exception {
         try {
+            Integer codeShowWhenErrorCount = SpringContext.getInt("app.auth.login-rule.password-error-show-count", 0);
+
             SysUserLoginRet ret = new SysUserLoginRet();
             Map<String, Object> beforeFlowResultMap = new HashMap<>();
             Map<String, Object> afterParams = new HashMap<>();
@@ -368,18 +370,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             boolean useUsernamePassword = true;
             String message = null;
             String userId = null;
-            // 校验图片验证码
-            String openValidationCode = SpringContext.getProperties("application.openValidateCode", PropertiesConstant.FALSE);
-            if (KClientContext.getContext() != null &&KClientContext.getContext().isValidateCodeFlag() && PropertiesConstant.TRUE.equals(openValidationCode)) {
-                String encryptCode = (String) argv.get("encryptCode");
-                String verifyUuid = (String) argv.get("verifyUuid");
-                String code = (String) argv.get("code");
-                boolean codeValid = checkVerifyCode(verifyUuid, code, encryptCode);
-                // 默认校验验证码的是为真
-                if (!codeValid) {
-                    throw BusinessException.serviceThrow("验证码有误！");
-                }
-            }
+
 
             // 获取认证模式
             String authMode = argv.getOrDefault("mode", "pwd").toString();
@@ -500,8 +491,23 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             int allowErrorCount = Integer.parseInt(SpringContext.getProperties("user.login.allow-error-count", "5"));
             int countOfLeave = allowErrorCount - userLoginPasswordErrorCount;
 
+            // 校验图片验证码
+            String openValidationCode = SpringContext.getProperties("application.openValidateCode", PropertiesConstant.FALSE);
+            if (KClientContext.getContext() != null &&KClientContext.getContext().isValidateCodeFlag() && PropertiesConstant.TRUE.equals(openValidationCode)
+                    || (codeShowWhenErrorCount > 0 && userLoginPasswordErrorCount > codeShowWhenErrorCount) || (argv.get("code") != null &&  StringUtils.isNotEmpty(argv.get("code").toString()))) {
+                String encryptCode = (String) argv.get("encryptCode");
+                String verifyUuid = (String) argv.get("verifyUuid");
+                String code = (String) argv.get("code");
+                boolean codeValid = checkVerifyCode(verifyUuid, code, encryptCode);
+                // 默认校验验证码的是为真
+                if (!codeValid) {
+                    throw BusinessException.serviceThrow("验证码有误！", true);
+                }
+            }
+
             String errorMessage = String.format("用户名或密码有误，您还有%s次机会输入，达到次数之后，账户将被锁定%d分钟", countOfLeave, userLockMinutes);
             if (model == null) {
+                Boolean showCode = false;
                 if(countOfLeave == 0)   {
                     sysCacheService.setCache(lockCacheKey, System.currentTimeMillis() + "");
                     // 移除当前登录次数缓存
@@ -510,22 +516,27 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 }
                 // 记录密码错误
                 userLoginPasswordErrorCount++;
+                if (codeShowWhenErrorCount > 0 && userLoginPasswordErrorCount > codeShowWhenErrorCount ) {
+                    showCode = true;
+                }
                 sysCacheService.setCache(cacheKey, userLoginPasswordErrorCount+"");
-                throw BusinessException.serviceThrow(errorMessage);
+                throw BusinessException.serviceThrow(errorMessage, showCode);
             }
             if (useUsernamePassword && KClientContext.getContext().isValidatePassFlag()) {
-
+                Boolean showCode = false;
                 // 把参数里的加密密码解密出来
                 if (!EncryptWorker.getInstance().validate(argv.get("password").toString(), model.getPassword())) {
                     if(countOfLeave == 0)   {
                         sysCacheService.setCache(lockCacheKey, System.currentTimeMillis() + "");
                         throw BusinessException.serviceThrow(String.format("密码错误连续次数已达到%s次，用户将被锁定%d分钟", allowErrorCount, userLockMinutes));
-
                     }
                     // 记录密码错误
                     userLoginPasswordErrorCount++;
+                    if (codeShowWhenErrorCount > 0 && userLoginPasswordErrorCount > codeShowWhenErrorCount ) {
+                        showCode = true;
+                    }
                     sysCacheService.setCache(cacheKey, userLoginPasswordErrorCount+"");
-                    throw BusinessException.serviceThrow(errorMessage);
+                    throw BusinessException.serviceThrow(errorMessage, showCode);
                 }
             }
             // 移除
@@ -622,6 +633,19 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                     ret.setOtherParams(afterFlowResultMap);
                 }
             }
+            // 处理登录策略
+            String passwordCheckVersion = SpringContext.getProperties("app.auth.password-check-version", "v1");
+            if ("v2".equals(passwordCheckVersion)) {
+                try {
+                    Map<String, Object> map = checkLoginRule(userInfo.getId(), userInfo.getUsername());
+                    ret.setAction(Integer.parseInt(map.get("code").toString()));
+                    ret.setActionMessage(map.get("tip").toString());
+                }
+                catch (Exception e) {
+                    log.warn("warn", e);
+                }
+            }
+
             return ret;
         }
         catch (Exception e) {
@@ -629,6 +653,26 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             throw e;
         }
 
+    }
+
+    /**
+     * 校验密码
+     * @param userId
+     * @param username
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> checkLoginRule(String userId, String username) {
+        String checkFlowId = "8319fd0d136044a68253978bab24c48a";
+        // 判断流程是否存在，兼容旧版本
+        Map<String, Object> params = new HashMap<>();
+        params.put("userId", userId);
+        params.put("username", username);
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("variables", JsonUtil.toJson(params));
+
+        KdbFlowResult result = FaasInvoke.callFlow(checkFlowId, variables);
+        return (Map<String, Object>) result.getData();
     }
 
     @Override
@@ -678,6 +722,16 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         model.setPassword(EncryptWorker.getInstance().encrypt(argv.getNewPassword()));
         // 保存
         DB.update(model);
+        // 保存到密码日志
+        this.savePasswordLog(model.getId());
+    }
+
+    private void savePasswordLog(String userId) {
+        try {
+            DB.executeUpdateSql("insert into sys_password_log(id, user_id, when_created) values(?,?,?)", StringUtils.getUUID(), userId, DateUtils.getNow());
+        }
+        catch (Exception ignored) {
+        }
     }
 
     @Override
@@ -836,6 +890,8 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         model.setPassword(EncryptWorker.getInstance().encrypt(argv.getPassword()));
         // 保存
         DB.update(model);
+        // 保存密码日志
+        this.savePasswordLog(model.getId());
     }
 
     @Override
@@ -857,26 +913,62 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
      */
     @Override
     public Map<String, Object> passwordValidate(String password, String appId) {
-        final String passwordValidateKey = "application.user.passwordValidate";
-        final String passwordValidateMessageKey = "application.user.passwordValidateMessage";
-        SysConfigInfo passwordValidate = ConfigManager.getInstance().getItem(passwordValidateKey);
-        SysConfigInfo passwordValidateMessage = ConfigManager.getInstance().getItem(passwordValidateMessageKey);
-        String validate = "^(?![a-zA-Z]+$)(?![A-Z0-9]+$)(?![A-Z\\W_-]+$)(?![a-z0-9]+$)(?![a-z\\W_-]+$)(?![0-9\\W_-]+$)[a-zA-Z0-9\\W_-]";
-        String validateMessage = "必须包含大写字母，小写字母，数字，特殊符号'_-'中任意3项";
-        AppModeProperties appModeProperties = SpringContext.getBean("appModeProperties");
+        String passwordCheckVersion = SpringContext.getProperties("app.auth.password-check-version", "v1");
+        // 判断流程是否存在，兼容旧版本
+        if("v1".equals(passwordCheckVersion)) {
+            final String passwordValidateKey = "application.user.passwordValidate";
+            final String passwordValidateMessageKey = "application.user.passwordValidateMessage";
+            SysConfigInfo passwordValidate = ConfigManager.getInstance().getItem(passwordValidateKey);
+            SysConfigInfo passwordValidateMessage = ConfigManager.getInstance().getItem(passwordValidateMessageKey);
+            String validate = "^(?![a-zA-Z]+$)(?![A-Z0-9]+$)(?![A-Z\\W_-]+$)(?![a-z0-9]+$)(?![a-z\\W_-]+$)(?![0-9\\W_-]+$)[a-zA-Z0-9\\W_-]";
+            String validateMessage = "必须包含大写字母，小写字母，数字，特殊符号'_-'中任意3项";
+            AppModeProperties appModeProperties = SpringContext.getBean(AppModeProperties.class);
+            // 仅非开发模式可用自定义密码校验
+            if (!appModeProperties.getDev() && passwordValidate != null) {
+                validate = passwordValidate.getValue();
+            }
+            if (!appModeProperties.getDev() && passwordValidateMessage != null) {
+                validateMessage = passwordValidateMessage.getValue();
+            }
+            Map<String, Object> resultMap = new HashMap<>();
+            Pattern p = Pattern.compile(validate);
+            resultMap.put("success", p.matcher(password).find());
+            resultMap.put("message", validateMessage);
 
-        // 仅非开发模式可用自定义密码校验
-        if (!appModeProperties.getDev() && passwordValidate != null) {
-            validate = passwordValidate.getValue();
+            return resultMap;
         }
-        if (!appModeProperties.getDev() && passwordValidateMessage != null) {
-            validateMessage = passwordValidateMessage.getValue();
+        else {
+            PasswordRuleResult result = this.checkPasswordRule(KClientContext.getContext().getUserInfo().getId(), password);
+            Map<String, Object> resultMap = new HashMap<>();
+            resultMap.put("success", result.isSuccess());
+            if (!result.isSuccess()) {
+                resultMap.put("message", result.getErrorMessages().get(0));
+            }
+            return resultMap;
+
         }
-        Map<String, Object> resultMap = new HashMap<>();
-        Pattern p = Pattern.compile(validate);
-        resultMap.put("success", p.matcher(password).find());
-        resultMap.put("message", validateMessage);
-        return resultMap;
+
+    }
+
+    /**
+     * 校验密码
+     * @param userId
+     * @param password
+     * @return
+     */
+    private PasswordRuleResult checkPasswordRule(String userId, String password) {
+        String checkFlowId = "6eb9934cff5d4af581920096a49a423e";
+        // 判断流程是否存在，兼容旧版本
+        Map<String, Object> params = new HashMap<>();
+        params.put("userId", userId);
+        params.put("password", password);
+        params.put("username", KClientContext.getContext().getUserInfo().getUsername());
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("variables", JsonUtil.toJson(params));
+
+        KdbFlowResult result = FaasInvoke.callFlow(checkFlowId, variables);
+        PasswordRuleResult passwordRuleResult = JsonUtil.mapToBean((Map)result.getData(), PasswordRuleResult.class);
+        return passwordRuleResult;
     }
 
     @Override

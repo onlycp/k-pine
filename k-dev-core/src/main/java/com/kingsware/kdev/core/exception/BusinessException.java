@@ -1,5 +1,7 @@
 package com.kingsware.kdev.core.exception;
 
+import java.util.Map;
+
 /**
  * 用户未授权异常
  * @author chen peng
@@ -15,6 +17,23 @@ public class BusinessException extends RuntimeException{
         super(message);
     }
 
+    public BusinessException(String message, Object data) {
+        super(message);
+        this.data = data;
+    }
+
+
+    private Object data;
+
+    /**
+     * 获取数据
+     * @return
+     */
+    public Object getData() {
+        return data;
+    }
+
+
     /**
      * 业务异常
      * @param message 提示消息
@@ -23,4 +42,9 @@ public class BusinessException extends RuntimeException{
     public static BusinessException serviceThrow(String message) {
         return new BusinessException(message);
     }
+
+    public static BusinessException serviceThrow(String message, Object data) {
+        return new BusinessException(message, data);
+    }
+
 }
