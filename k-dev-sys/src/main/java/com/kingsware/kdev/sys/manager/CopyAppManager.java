@@ -390,6 +390,11 @@ public class CopyAppManager {
             for (String apiId: apiIds) {
                 this.copyApiData(apiId, copyContext, copyProcessData);
             }
+            List<String> logicIds = DB.findSingleAttributeList(String.class, "SELECT lf.id FROM sys_logic_flow lf LEFT JOIN sys_api sa ON sa.api_flow_id = lf.flow_id WHERE lf.application_id = ? and sa.id is null", id);
+            for (String logicId: logicIds) {
+                this.copyFlowData(logicId, copyContext, copyProcessData);
+            }
+
             // 拷贝所有字典
             List<String> dictIds = DB.findSingleAttributeList(String.class, "select id from sys_dict where app_id=?", id);
             for (String dictId: dictIds) {
