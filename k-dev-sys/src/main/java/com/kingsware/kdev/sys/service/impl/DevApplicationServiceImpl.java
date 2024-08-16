@@ -625,6 +625,12 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 map.put("hidden", map.get("isHidden"));
             }
         }
+        if ( pineMap.containsKey("logicFlows")) {
+            List<Map<String, Object>> list = (List<Map<String, Object>>) pineMap.get("logicFlows");
+            for (Map<String, Object> map : list) {
+                map.put("tranCtrl", map.get("appId"));
+            }
+        }
         if (pineMap.containsKey("kdbFlows")) {
             List<Map<String, Object>> list = (List<Map<String, Object>>) pineMap.get("kdbFlows");
             for (Map<String, Object> map : list) {
