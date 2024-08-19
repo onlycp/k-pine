@@ -71,7 +71,12 @@ public class OpenApiTask implements KTask, KRunner {
 
     @Override
     public String name() {
-        return "OpenApiTask";
+        return "系统开放接口配置任务";
+    }
+
+    @Override
+    public String note() {
+        return "定时从数据库加载系统开放接口配置";
     }
 
     @Override

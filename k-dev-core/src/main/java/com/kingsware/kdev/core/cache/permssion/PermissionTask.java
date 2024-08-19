@@ -35,7 +35,12 @@ public class PermissionTask implements KTask, KRunner {
 
     @Override
     public String name() {
-        return "PermissionTask";
+        return "系统用户权限任务";
+    }
+
+    @Override
+    public String note() {
+        return "定时刷新用户权限";
     }
 
     @Override

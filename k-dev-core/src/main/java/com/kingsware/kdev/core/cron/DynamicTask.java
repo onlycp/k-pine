@@ -468,10 +468,10 @@ public class DynamicTask implements CommandLineRunner {
             try {
                 KTask task = (KTask) tClass.newInstance();
                 // 查找平台已经是否存在此任务
-                long count = DB.findCount("select count(1) from sys_task where task_type=1 and name=?", task.name());
+                SysTask sysTask = DB.findOne(SysTask.class, "select * from sys_task where task_type=1 and class_name=?", tClass.getName());
                 // 如果已存在就不处理
-                if (count == 0) {
-                    SysTask sysTask = new SysTask();
+                if (sysTask == null) {
+                    sysTask = new SysTask();
                     sysTask.setName(task.name());
                     sysTask.setTaskType(1);
                     sysTask.setCron(task.cron());
@@ -482,9 +482,17 @@ public class DynamicTask implements CommandLineRunner {
                     sysTask.setLockForMost(30);
                     sysTask.setLastExecuteStatus(0);
                     sysTask.setLastExecuteTake(0L);
+                    sysTask.setNote(task.note());
                     // 保存
                     DB.save(sysTask);
                     log.debug("发现任务，任务名称:{}, cron:{}, Class: {}", sysTask.getName(), sysTask.getCron(), sysTask.getClassName());
+                }
+                else {
+//                    sysTask.setName(task.name());
+                    sysTask.setNote(task.note());
+                    DB.update(sysTask);
+                    log.debug("发现任务，更新任务:{}, cron:{}, Class: {}", sysTask.getName(), sysTask.getCron(), sysTask.getClassName());
+
                 }
                 if (task instanceof KRunner) {
                     ((KRunner) task).runNow();

@@ -144,4 +144,9 @@ public class KDataAccessAutoLinkTask implements KTask, KRunner {
     public String name() {
         return "数据权限组数据同步";
     }
+
+    @Override
+    public String note() {
+        return "数据权限组数据同步, 从数据库中加载数据权限组的配置";
+    }
 }

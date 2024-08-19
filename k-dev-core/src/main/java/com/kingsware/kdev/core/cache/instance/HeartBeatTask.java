@@ -81,7 +81,12 @@ public class HeartBeatTask implements KTask, KRunner {
 
     @Override
     public String name() {
-        return this.getClass().getSimpleName();
+        return "系统心跳任务";
+    }
+
+    @Override
+    public String note() {
+        return "系统心跳任务，定时更新应用实例的活动时间";
     }
 
 

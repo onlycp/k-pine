@@ -58,6 +58,11 @@ public class KAppAutoImportTask implements KTask, KRunner {
      **/
     @Override
     public String name() {
-        return this.getClass().getSimpleName();
+        return "系统自动安装Pine包任务";
+    }
+
+    @Override
+    public String note() {
+        return "系统自动安装Pine包任务，自动扫描api目录下的pine包进行安装";
     }
 }

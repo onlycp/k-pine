@@ -76,7 +76,12 @@ public class ApiTask implements KTask, KRunner {
 
     @Override
     public String name() {
-        return "ApiTask";
+        return "系统接口定时任务";
+    }
+
+    @Override
+    public String note() {
+        return "定时同步系统的接口定义";
     }
 
     @Override

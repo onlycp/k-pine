@@ -61,9 +61,13 @@ public class DictTask implements KTask, KRunner {
 
     @Override
     public String name() {
-        return "DictTask";
+        return "系统字典定时任务";
     }
 
+    @Override
+    public String note() {
+        return "系统字典定时任务，定时从数据库中拉取系统配置";
+    }
     @Override
     public void runNow() {
         this.execute();

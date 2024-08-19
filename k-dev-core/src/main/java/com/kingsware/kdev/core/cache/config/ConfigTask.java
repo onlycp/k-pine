@@ -58,7 +58,12 @@ public class ConfigTask implements KTask, KRunner {
 
     @Override
     public String name() {
-        return "ConfigTask";
+        return "系统参数配置定时任务";
+    }
+
+    @Override
+    public String note() {
+        return "系统参数配置定时任务，从数据库定时加载";
     }
 
     @Override

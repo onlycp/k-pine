@@ -45,7 +45,12 @@ public class LogicCacheTask implements KTask, KRunner {
 
     @Override
     public String name() {
-        return "LogicCacheTask";
+        return "系统事务缓存任务";
+    }
+
+    @Override
+    public String note() {
+        return "系统事务缓存任务，定时拉取逻辑编排的事务配置";
     }
 
     @Override

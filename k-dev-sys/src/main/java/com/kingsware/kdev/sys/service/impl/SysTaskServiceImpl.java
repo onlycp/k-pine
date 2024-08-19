@@ -3,6 +3,7 @@ package com.kingsware.kdev.sys.service.impl;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.config.SysConst;
 import com.kingsware.kdev.core.cron.DynamicTask;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
@@ -80,6 +81,12 @@ public class SysTaskServiceImpl extends BaseServiceImpl implements SysTaskServic
     @Override
     public void edit(SysTaskArgv argv) {
         SysTask model = DB.findById(SysTask.class, argv.getId());
+        if (isSystemTask(model)) {
+            if (argv.getEnable() == 0 && model.getEnable() == 1) {
+                throw BusinessException.serviceThrow(I18n.t("SysTask.cron.system-task-disenable", "该任务为系统内置，不允许禁用"));
+            }
+        }
+
         model.setName(argv.getName());
         model.setCron(argv.getCron());
         model.setTaskType(argv.getTaskType());
@@ -97,6 +104,23 @@ public class SysTaskServiceImpl extends BaseServiceImpl implements SysTaskServic
         // 更新动态任务
 //        dynamicTask.updateTask(model);
     }
+
+    /**
+     * 是否为系统任务
+     * @param task
+     * @return
+     */
+    private boolean isSystemTask(SysTask task) {
+        String appId = task.getAppId();
+        if (StringUtils.isEmpty(task.getApplicationId())) {
+            appId = task.getApplicationId();
+        }
+        if (StringUtils.isEmpty(appId)) {
+            return false;
+        }
+        return appId.equals(SysConst.pineAppId);
+    }
+
 
     private void checkUnique(SysTask model) {
         // 唯一性校验

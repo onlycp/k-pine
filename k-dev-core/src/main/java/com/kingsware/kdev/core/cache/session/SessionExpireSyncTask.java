@@ -45,6 +45,11 @@ public class SessionExpireSyncTask implements KTask {
 
     @Override
     public String name() {
-        return "SessionExpireSyncTask";
+        return "系统用户会话过期时间更新任务";
+    }
+
+    @Override
+    public String note() {
+        return "系统用户会话过期时间更新任务，用于更新用户的会话过期时间，在session方案中使用";
     }
 }

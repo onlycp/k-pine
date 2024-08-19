@@ -72,7 +72,12 @@ public class SessionTask implements KTask, KRunner {
 
     @Override
     public String name() {
-        return "SessionTask";
+        return "系统用户会话任务";
+    }
+
+    @Override
+    public String note() {
+        return "定时从数据库中同步用户会话记录";
     }
 
     @Override

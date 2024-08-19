@@ -15,4 +15,6 @@ public interface KTask {
     String cron();
     /** 名称 **/
     String name();
+    /** 描述, 默认值为空字符串 **/
+    default String note() { return "";}
 }

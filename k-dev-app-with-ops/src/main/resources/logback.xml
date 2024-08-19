@@ -40,10 +40,13 @@
         </layout>
     </appender>
 
-    <logger name="root" level="DEBUG">
+    <logger name="root" level="info">
         <appender-ref ref="stdout"/>
         <appender-ref ref="logFile"/>
         <appender-ref ref="errorFile"/>
     </logger>
-<!--    <logger name ="com.kingsware.flow.mem.MemDFlowEngine" level="warn"/>-->
+    <logger name="com.kingsware.flow" level="info" />
+    <logger name="com.kingsware.tools" level="info" />
+    <logger name ="com.kingsware.flow.mem.MemDFlowEngine" level="warn"/>
+
 </configuration>

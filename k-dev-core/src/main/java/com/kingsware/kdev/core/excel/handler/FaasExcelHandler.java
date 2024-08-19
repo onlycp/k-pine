@@ -38,6 +38,8 @@ public class FaasExcelHandler implements KExcelHandler{
         try {
             String nextStr = JsonUtil.toJsonWithoutNull(excel);
             String base64Content = Base64.getEncoder().encodeToString(JsonUtil.compressJSON(nextStr));
+            // 实现一个压缩算法
+
             // 创建目录
 //            log.info("excel文件写入中，文件内容:{}", baseStr);
             String script = String.format("kutils.fileDirectory('upload/kExcel');const str = decompressJSON('%s');koffices.renderByKExcel(str);", base64Content);
@@ -52,6 +54,18 @@ public class FaasExcelHandler implements KExcelHandler{
             log.info("excel文件写失败，错误原因:{}", e.getMessage());
         }
 
+    }
+    // 实现一个冒泡算法
+    public static void main(String[] args) {
+        int[] arr = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        for (int i = 0; i < arr.length - 1; i++) {
+            for (int j = 0; j < arr.length - 1 - i; j++) {
+                if (arr[j] > arr[j + 1]) {
+                    int temp = arr[j];
+                    arr[j] = arr[j + 1];
+                }
+            }
+        }
     }
 
     /**

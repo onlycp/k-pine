@@ -85,7 +85,12 @@ public class FaasFailTask implements KTask, KRunner {
 
     @Override
     public String name() {
-        return "FaasFailTask";
+        return "系统FAAS失败重试任务";
+    }
+
+    @Override
+    public String note() {
+        return "Faas失败日志失败重试";
     }
 
     @Override
