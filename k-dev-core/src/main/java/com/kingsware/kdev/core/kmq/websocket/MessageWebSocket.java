@@ -168,6 +168,18 @@ public class MessageWebSocket {
         else if ("refresh-api-data".equalsIgnoreCase(wmMessage.getTopic())) {
             // 需要广播所有节点进行修改时间的刷新
             InstanceManager.getInstance().broadMessage("refresh-api-data", message);
+
+            // 获取令牌
+            SessionToken sessionToken = getSessionToken(session);
+            if (sessionToken != null) {
+                sessionToken.setHeartTime(System.currentTimeMillis());
+                // 更新活动时间
+                AppAuthProperties appAuthProperties = SpringContext.getBean(AppAuthProperties.class);
+                // logger.info("更新活动时间");
+                SessionManager.getInstance().updateActiveTime(sessionToken.getUserId(), sessionToken.getToken(), appAuthProperties.getMockSessionExpireMinutes(), true);
+            }
+            // 更新心跳时间
+            allSessionSet.put(session, System.currentTimeMillis());
         }
         else {
             // 获取令牌
