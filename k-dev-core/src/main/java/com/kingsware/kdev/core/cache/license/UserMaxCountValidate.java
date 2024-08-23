@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.cache.license;
 
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.StringUtils;
 import org.springframework.stereotype.Component;
@@ -19,7 +20,7 @@ public class UserMaxCountValidate implements LicenseValidate{
 
     @Override
     public String errorMessage() {
-        return "用户数超过限制";
+        return I18n.t("UserMaxCountValidate.message", "用户数超过限制") ;
     }
 
     @Override

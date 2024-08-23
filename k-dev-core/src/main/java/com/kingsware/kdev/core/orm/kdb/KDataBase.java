@@ -3,6 +3,7 @@ package com.kingsware.kdev.core.orm.kdb;
 import com.kingsware.kdev.core.bean.BaseModel;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.orm.*;
 import com.kingsware.kdev.core.orm.annotation.LogicDelete;
@@ -86,7 +87,7 @@ public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
             return list.get(0);
         }
         else {
-            throw new OrmDbException("查询数量时，应保持只有一条记录");
+            throw new OrmDbException(I18n.t("KDBHttpChannel.error2", "查询数量时，应保持只有一条记录"));
         }
     }
 
@@ -94,7 +95,7 @@ public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
     public <T> T findSingleAttribute(Class<T> tClass, String sql, Object... params) {
         List<T> result = this.findSingleAttributeList(tClass, sql, params);
         if (result.size() > 1) {
-            throw new OrmDbException("查询数量时，应保持只有一条记录");
+            throw new OrmDbException(I18n.t("KDBHttpChannel.error2", "查询数量时，应保持只有一条记录"));
         }
         return result.isEmpty() ? null : result.get(0);
     }

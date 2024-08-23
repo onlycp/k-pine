@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.cache.logic.LogicFlowManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.bean.DebugNode;
 import com.kingsware.kdev.core.kflow.bean.ErrorResult;
 import com.kingsware.kdev.core.kflow.bean.KFlowMessage;
@@ -56,7 +57,7 @@ public class KdbFlowExecutor {
      */
     public KdbFlowResult execute(String flowId, String subFlowIds, Map<String, Object> params, KFlowContext context, boolean debug, boolean sync, List<DebugNode> debugger) {
         long t1 = System.currentTimeMillis();
-        String statusMessage = "失败";
+        String statusMessage = I18n.t("common.fail", "失败") ;
         KdbFlowResult result = new KdbFlowResult();
         boolean executeResult = true;
         // 生成会话id
@@ -101,7 +102,7 @@ public class KdbFlowExecutor {
                     params.put("pageSize", pageSize);
                 }
                 catch (Exception e) {
-                    throw BusinessException.serviceThrow("查询参数输入不合法");
+                    throw BusinessException.serviceThrow(I18n.t("KdbFlowExecutor.params.fail", "查询参数输入不合法"));
                 }
 
             }
@@ -169,7 +170,7 @@ public class KdbFlowExecutor {
 
                 }
                 else {
-                    result.setData(new ErrorResult(ret.getMessage() == null ? "流程处理失败" : ret.getMessage()));
+                    result.setData(new ErrorResult(ret.getMessage() == null ? I18n.t("KdbFlowExecutor.execute.fail", "流程处理失败")  : ret.getMessage()));
                 }
 
             } else if (StringUtils.isNotEmpty(ret.getResponseBody())) {
@@ -197,7 +198,7 @@ public class KdbFlowExecutor {
                 }
             }
             result.setType(KFlowConstant.RESULT_JSON);
-            result.setData(new ErrorResult(ormDbException.getMessage() == null ? "流程处理失败" : ormDbException.getMessage()));
+            result.setData(new ErrorResult(ormDbException.getMessage() == null ? I18n.t("KdbFlowExecutor.execute.fail", "流程处理失败")  : ormDbException.getMessage()));
             result.setLog(ormDbException.getKlog());
             result.setExceptionStack(ormDbException.getExceptionTrace());
             return result;

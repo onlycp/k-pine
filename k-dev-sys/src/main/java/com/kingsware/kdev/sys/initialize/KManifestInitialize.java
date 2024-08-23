@@ -1,6 +1,7 @@
 package com.kingsware.kdev.sys.initialize;
 
 import com.kingsware.kdev.core.base.SystemInitialize;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.orm.expression.Expression;
@@ -61,10 +62,10 @@ public class KManifestInitialize implements SystemInitialize {
             else {
                 sysConfig = new SysConfig();
                 sysConfig.setIsSys(1);
-                sysConfig.setName("平台版本号");
+                sysConfig.setName(I18n.t("platform.version", "平台版本号"));
                 sysConfig.setCode(key);
                 sysConfig.setValueType(0);
-                sysConfig.setNote("平台版本号");
+                sysConfig.setNote(I18n.t("platform.version", "平台版本号"));
                 DB.save(sysConfig);
             }
 

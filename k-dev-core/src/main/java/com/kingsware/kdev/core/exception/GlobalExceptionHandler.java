@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.enums.RetEnum;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.orm.exception.TransactionException;
 import com.kingsware.kdev.core.util.ExceptionUtils;
@@ -37,7 +38,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public BaseRet<?> ormExceptionHandler(HttpServletRequest request, OrmDbException e) {
         String devMode = SpringContext.getProperties("app.mode.dev", "true");
-        String message = String.format("数据库操作异常:%s", e.getMessage());
+        String message = I18n.t("GlobalExceptionHandler.error1","数据库操作异常:{0}", e.getMessage());
         if ("true".equals(devMode)) {
             return BaseRet.failMessage(message, e.getKlog(), e.getExceptionTrace());
         }
@@ -55,7 +56,7 @@ public class GlobalExceptionHandler {
     public BaseRet<?> exceptionHandler(HttpServletRequest request, Exception e) {
         String devMode = SpringContext.getProperties("app.mode.dev", "true");
         log.error("系统内部异常:", e);
-        String message = String.format("系统内部异常:%s", e.getMessage());
+        String message = I18n.t("GlobalExceptionHandler.error2","系统内部异常:{0}", e.getMessage());
         if ("true".equals(devMode)) {
             return BaseRet.failMessage(message, null, ExceptionUtils.getStackTrace(e));
         }

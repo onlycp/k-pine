@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.orm.kdb;
 
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.exception.TransactionException;
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +58,7 @@ public class TransactionManager {
         }
         catch (Exception e) {
             log.warn("事务启动异常: {}", e);
-            throw new TransactionException("事务启动异常");
+            throw new TransactionException(I18n.t("TransactionManager.error1", "事务启动异常"));
         }
 
 
@@ -84,7 +85,7 @@ public class TransactionManager {
         }
         catch (Exception e) {
             log.warn("事务提交异常: {}", e);
-            throw new TransactionException("事务提交异常");
+            throw new TransactionException(I18n.t("TransactionManager.error2", "事务提交异常"));
         }
   ;
     }
@@ -108,7 +109,7 @@ public class TransactionManager {
         }
         catch (Exception e) {
             log.warn("事务回滚异常: {}", e);
-            throw new TransactionException("事务回滚异常");
+            throw new TransactionException(I18n.t("TransactionManager.error3", "事务回滚异常"));
         }
 
     }

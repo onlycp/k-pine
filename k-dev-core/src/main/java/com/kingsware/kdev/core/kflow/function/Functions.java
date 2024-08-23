@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.auth.DataAccessUtil;
 import com.kingsware.kdev.core.auth.SqlLink;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.util.ExceptionUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.StringUtils;
@@ -85,13 +86,13 @@ public class Functions {
             }
         }
         if (invokeMethod == null) {
-            throw BusinessException.serviceThrow("函数不存在或输入参数不符：" + methodName);
+            throw BusinessException.serviceThrow(I18n.t("Functions.method.notFound","函数不存在或输入参数不符：{0}" ,methodName));
         }
         try {
             return invokeMethod.invoke(null, params.toArray(new Object[0]));
         }
         catch (IllegalAccessException | InvocationTargetException e) {
-            throw BusinessException.serviceThrow("函数调用异常：" + methodName + ", 异常信息:" + ExceptionUtils.getStackTrace(e));
+            throw BusinessException.serviceThrow(I18n.t("Functions.method.callException", "函数调用异常：{0} 异常信息: {1}", methodName,  ExceptionUtils.getStackTrace(e)));
         }
     }
 }

@@ -122,7 +122,7 @@ public class ServletUtil {
         response.setHeader("Content-Disposition", "attachment;filename=" + UriEncoder.encode(fileName));
 
         if (!localFile.exists()) {
-            throw BusinessException.serviceThrow("文件不存在，可能被移动或删除！");
+            throw BusinessException.serviceThrow(I18n.t("ServletUtil.error1", "文件不存在，可能被移动或删除！"));
         }
         FileInputStream ins = null;
         BufferedInputStream bis = null;
@@ -141,10 +141,10 @@ public class ServletUtil {
 
         }
         catch (FileNotFoundException e) {
-            throw BusinessException.serviceThrow("文件不存在");
+            throw BusinessException.serviceThrow(I18n.t("ServletUtil.error1", "文件不存在，可能被移动或删除！"));
         }
         catch (IOException e) {
-            throw BusinessException.serviceThrow("文件读取失败");
+            throw BusinessException.serviceThrow(I18n.t("ServletUtil.fileReadFail", "文件读取失败"));
         }
         finally {
             try {
@@ -177,7 +177,7 @@ public class ServletUtil {
                 response.getOutputStream().write(data);
                 response.getOutputStream().flush();
             } catch (IOException e) {
-                throw BusinessException.serviceThrow("文件写入失败");
+                throw BusinessException.serviceThrow(I18n.t("ServletUtil.fileWriteFail", "文件写入失败"));
             }
         }
         catch (Exception e) {
@@ -605,7 +605,7 @@ public class ServletUtil {
 
 
     /**
-     * 获取上下文路径
+     * 获取上下文路径records.get(0).
      * @return 上下文路径
      */
     public static String getContextPath() {

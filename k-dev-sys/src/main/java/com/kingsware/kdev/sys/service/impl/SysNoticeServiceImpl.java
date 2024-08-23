@@ -9,6 +9,7 @@ import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kmq.KmqMessageCenter;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
@@ -103,7 +104,7 @@ public class SysNoticeServiceImpl extends BaseServiceImpl implements SysNoticeSe
         BaseUserInfo userInfo = TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), ip, appAuthProperties.getTokenExpireMinutes(), appAuthProperties.getMockSessionExpireMinutes());
         SysUser model = DB.findById(SysUser.class, userInfo.getId());
         if (model == null) {
-            throw BusinessException.serviceThrow("登录凭证已失效，请重新登录！");
+            throw BusinessException.serviceThrow(I18n.t("common.not-logon", "登录凭证已失效，请重新登录！"));
         }
         SysNotice modelNotice = DB.findById(SysNotice.class, argv.getNoticeId());
         Set<String> relationIds = argv.getRelationIds();

@@ -3,6 +3,7 @@ package com.kingsware.kdev.sys.service.impl;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
@@ -56,7 +57,7 @@ public class CommonSqlExecutorServiceImpl extends BaseServiceImpl implements Com
     private void editFlow(CommonSqlExecutorArgv argv, String contentJson) {
         SysKdbFlowRet sysKdbFlowRet = sysKdbFlowService.get(FLOW_ID);
         if (sysKdbFlowRet == null) {
-            BusinessException.serviceThrow("专用动态查询流程找不到");
+            BusinessException.serviceThrow(I18n.t("CommonSql.tip.notFoundLogic", "专用动态查询流程找不到"));
             return;
         }
 

@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.DataSourceInfo;
 import com.kingsware.kdev.core.orm.kdb.DataSourceQueryArgv;
@@ -95,7 +96,7 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
             api.addDataSource(info);
         }
         catch (Exception e) {
-            throw BusinessException.serviceThrow("数据源新增失败，请检查连接信息！");
+            throw BusinessException.serviceThrow(I18n.t("SysKdbDataSource.tip.addFail", "数据源新增失败，请检查连接信息！"));
         }
 
     }
@@ -136,7 +137,7 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
             api.editDataSource(info);
         }
         catch (Exception e) {
-            throw BusinessException.serviceThrow("数据源编辑失败，请检查连接信息！");
+            throw BusinessException.serviceThrow(I18n.t("SysKdbDataSource.tip.addFail", "数据源新增失败，请检查连接信息！"));
         }
 
     }

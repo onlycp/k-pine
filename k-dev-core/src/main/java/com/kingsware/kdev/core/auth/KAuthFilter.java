@@ -250,7 +250,7 @@ public class KAuthFilter implements Filter {
 
                     // 接口定义不存在
                     if (api == null && apiDefine == null) {
-                        ServletUtil.responseJson(response, BaseRet.fail("接口不存在", RetEnum.SERVICE_FAIL.getCode()));
+                        ServletUtil.responseJson(response, BaseRet.fail(I18n.t("KAuthFilter.apiNotFound", "接口不存在"), RetEnum.SERVICE_FAIL.getCode()));
                         return;
                     }
                     // log.info("Take-{}, {}",3,  (System.currentTimeMillis()-tt0));
@@ -272,7 +272,7 @@ public class KAuthFilter implements Filter {
                         }
                     }
                     if ((!modeDev) && dev) {
-                        ServletUtil.responseJson(response, BaseRet.fail("发布模式无权访问此接口", RetEnum.ONLY_DEV.getCode()));
+                        ServletUtil.responseJson(response, BaseRet.fail(I18n.t("DevApiAspect.error1", "发布模式无权访问此接口"), RetEnum.ONLY_DEV.getCode()));
                         return;
                     }
                     // log.info("Take-{}, {}",4,  (System.currentTimeMillis()-tt0));
@@ -362,7 +362,7 @@ public class KAuthFilter implements Filter {
                 errorMessage = e.getMessage();
                 responseCode = RetEnum.FORBIDDEN.getCode();
                 log.error("接口无权限，接口路径:{}, 请求方法:{}", url, method);
-                String message = MessageFormat.format("很抱歉，您没有此接口的访问权限! 接口地址： {0}, 接口编码:{1}", url, apiCode);
+                String message = I18n.t("KAuthFilter.cannotAccess","很抱歉，您没有此接口的访问权限! 接口地址： {0}, 接口编码:{1}", url, apiCode);
                 ServletUtil.responseJson(response, BaseRet.fail(message, RetEnum.FORBIDDEN.getCode()));
             }
             catch (ServletException e) {
@@ -810,13 +810,13 @@ public class KAuthFilter implements Filter {
         // 获取接入商id
         String accessId = params.getOrDefault("accessId", "").toString();
         if (StringUtils.isEmpty(accessId)) {
-            throw BusinessException.serviceThrow("接入商ID为空！");
+            throw BusinessException.serviceThrow(I18n.t("KAuthFilter.openApi.empty", "接入商ID为空！"));
         }
         if (!OpenApiManager.getInstance().hasAccess(accessId)) {
-            throw BusinessException.serviceThrow("接入商不存在！");
+            throw BusinessException.serviceThrow(I18n.t("KAuthFilter.openApi.hasnot", "接入商不存在！"));
         }
         if (!OpenApiManager.getInstance().hasOpenApi(accessId, apiInfo.getApiCode())) {
-            throw BusinessException.serviceThrow("接口未授权");
+            throw BusinessException.serviceThrow(I18n.t("KAuthFilter.openApi.authFail","接口未授权"));
         }
         // 验签，如果需要验签，传输参数必须包括 timestamp(精确到毫秒)、sign(签名值 )、signNonce(签名噪音)
         // 签名算法
@@ -833,23 +833,23 @@ public class KAuthFilter implements Filter {
         if (openAccountInfo.getValidateSign() == 1) {
             // 获取时间
             if (!params.containsKey("timestamp")) {
-                throw BusinessException.serviceThrow("缺少时间戳参数: timestamp");
+                throw BusinessException.serviceThrow(I18n.t("KAuthFilter.openApi.timestamp","缺少时间戳参数: timestamp"));
             }
             if (!params.containsKey("sign")) {
-                throw BusinessException.serviceThrow("缺少签名值: sign");
+                throw BusinessException.serviceThrow(I18n.t("KAuthFilter.openApi.sign", "缺少签名值: sign"));
             }
             if (!params.containsKey("signNonce")) {
-                throw BusinessException.serviceThrow("缺少签名噪音: signNonce");
+                throw BusinessException.serviceThrow(I18n.t("KAuthFilter.openApi.signNonce", "缺少签名噪音: signNonce"));
             }
             long timestamp = Long.parseLong(params.get("timestamp").toString());
             // 校验时间，超过5分钟的认为无效
             if (Math.abs(timestamp - System.currentTimeMillis()) > 1000*60*5)  {
-                throw BusinessException.serviceThrow("请求时间已过期");
+                throw BusinessException.serviceThrow(I18n.t("KAuthFilter.openApi.timeout", "请求时间已过期"));
             }
             // 签名噪音
             String signNonce = params.get("signNonce").toString();
             if (signNonces.contains(signNonce)) {
-                throw BusinessException.serviceThrow("签名噪音不能重复使用");
+                throw BusinessException.serviceThrow(I18n.t("KAuthFilter.openApi.repeat", "签名噪音不能重复使用"));
             }
             addSignNonce(signNonce);
 
@@ -866,7 +866,7 @@ public class KAuthFilter implements Filter {
             String calcSign = SignUtil.getSign(toSignMap, openAccountInfo.getSignKey());
             // 对比签名
             if (!calcSign.equalsIgnoreCase(sign)) {
-                throw BusinessException.serviceThrow("签名值不正确，传输的签名值:" + sign +", 计算值:" + calcSign);
+                throw BusinessException.serviceThrow(I18n.t("KAuthFilter.openApi.signError", "签名值不正确，传输的签名值:{0}, 计算值: {1}" , sign, calcSign));
             }
 
         }
@@ -1008,27 +1008,27 @@ public class KAuthFilter implements Filter {
             return;
         }
         if (StringUtils.isEmpty(noise)) {
-            throw BusinessException.serviceThrow("接口请求不合法，代码:N004");
+            throw BusinessException.serviceThrow(I18n.t("KAuthFilter.N004", "接口请求不合法，代码:N004"));
         }
         // 解密噪音
         String noiseDecrypt = decodeNoiseString(noise);
         if (StringUtils.isEmpty(noiseDecrypt)) {
-            throw BusinessException.serviceThrow("接口请求不合法，代码:N003");
+            throw BusinessException.serviceThrow(I18n.t("KAuthFilter.N003", "接口请求不合法，代码:N003"));
         }
         String[] arr = noiseDecrypt.split("\\|");
         long createTime = Long.parseLong(arr[0]);
         long hash = Integer.parseInt(arr[1]);
         // 计算超时时间（5分钟超时）
         if (Math.abs(System.currentTimeMillis() - createTime) > 1000*60*5) {
-            throw BusinessException.serviceThrow("接口请求不合法，代码:N002");
+            throw BusinessException.serviceThrow(I18n.t("KAuthFilter.N002", "接口请求不合法，代码:N002"));
         }
         // 计算令牌的hash值
         int tokenHash = calculateHash(token);
         if (tokenHash!= hash) {
-            throw BusinessException.serviceThrow("接口请求不合法，代码:N001");
+            throw BusinessException.serviceThrow(I18n.t("KAuthFilter.N001", "接口请求不合法，代码:N001"));
         }
         if (noiseCache.containsKey(noise)) {
-            throw BusinessException.serviceThrow("接口请求不合法，代码:N005");
+            throw BusinessException.serviceThrow(I18n.t("KAuthFilter.N005", "接口请求不合法，代码:N005"));
         }
         noiseCache.put(noise, System.currentTimeMillis(), 1000*60*5);
 

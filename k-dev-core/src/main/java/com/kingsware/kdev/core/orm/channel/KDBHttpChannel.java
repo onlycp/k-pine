@@ -3,6 +3,7 @@ package com.kingsware.kdev.core.orm.channel;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kingsware.kdev.core.exception.HttpClientException;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DBConnectConfig;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.orm.kdb.*;
@@ -61,7 +62,7 @@ public class KDBHttpChannel implements DbChannel{
             return null;
         }
         else if (list.size() > 1){
-            throw new OrmDbException(String.format("期望查询的结果数量为%d，但发现了%d条数据, sql:%s, 参数:%s", 1, list.size(), sql, JsonUtil.toJson(objects)));
+            throw new OrmDbException(I18n.t("KDBHttpChannel.error1","期望查询的结果数量为{0}，但发现了{1}条数据, sql:{2}, 参数:{3}", 1, list.size(), sql, JsonUtil.toJson(objects)));
         }
         return list.get(0);
     }
@@ -73,7 +74,7 @@ public class KDBHttpChannel implements DbChannel{
         List<Map> list = JsonUtil.snakeCaseToListBean(executeResponse, Map.class);
         // 返回结果
         if (list == null || list.size() != 1) {
-            throw new OrmDbException("查询数量时，应保持只有一条记录");
+            throw new OrmDbException(I18n.t("KDBHttpChannel.error2", "查询数量时，应保持只有一条记录"));
         }
         Map<Object, Object> firstMap = (Map<Object, Object>)list.get(0);
         long count = 0L;
@@ -112,7 +113,7 @@ public class KDBHttpChannel implements DbChannel{
                 return new ArrayList<>();
             }
             else if (map.size() > 1) {
-                throw new OrmDbException("查询单个属性，但返回不等于1的结果" );
+                throw new OrmDbException(I18n.t("KDBHttpChannel.error3", "查询单个属性，但返回不等于1的结果") );
             }
             map.forEach((key, value) -> {
                 result.add((T)value);
@@ -197,7 +198,7 @@ public class KDBHttpChannel implements DbChannel{
 //            }
             KdbRet<String> ret = JsonUtil.toBean(responseBody, KdbRet.class, String.class);
             if (ret == null) {
-                throw new OrmDbException("kdb响应数据不合法，响应内容:" + responseBody);
+                throw new OrmDbException(I18n.t("KDBHttpChannel.error4", "kdb响应数据不合法，响应内容:{0}", responseBody) );
             }
             if (ret.getErrorCode() != 0) {
                 logger.error(responseBody);

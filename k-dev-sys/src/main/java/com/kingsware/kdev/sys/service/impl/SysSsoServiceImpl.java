@@ -4,6 +4,7 @@ package com.kingsware.kdev.sys.service.impl;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.ServletUtil;
@@ -41,7 +42,7 @@ public class SysSsoServiceImpl implements SysSsoService {
             // 查询安全令牌
             String secretKey = SpringContext.getProperties("sso.key", "ZiKaPsJkw9AFjztH");
             if (!secretKey.equals(ssoArgv.getSecretKey())) {
-                throw new BusinessException("认证不合法！");
+                throw new BusinessException(I18n.t("SysSsoServiceImpl.authFail", "认证不合法！"));
             }
             log.info("用户自动登录:{}", JsonUtil.toJson(ssoArgv));
             // 根据账号查询用户并进行登录
@@ -69,7 +70,7 @@ public class SysSsoServiceImpl implements SysSsoService {
         }
         catch (Exception e) {
             log.error("error", e);
-            throw BusinessException.serviceThrow("自动登录失败:" + e.getMessage());
+            throw BusinessException.serviceThrow(I18n.t("SysSsoServiceImpl.autoLoginFail", "自动登录失败") +  ":" + e.getMessage());
         }
     }
 

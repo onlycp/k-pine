@@ -1,0 +1,178 @@
+Key,zh_CN,zh_HK,en_US
+UniopsSSoController.publishSuccess,发布成功,發佈成功,Published successfully
+UniopsSSoController.publishFail,卸载成功,卸載成功,Uninstalled successfully
+UniOpsServiceImpl.GetUniopsUserFail,uniops获取用户信息失败,uniops獲取用戶信息失敗,Failed to get user information from uniops
+UniOpsServiceImpl.fileParseFail,应用包数据解析异常,應用包數據解析異常,Application package data parsing exception
+platform.version,平台版本号,平台版本號,Platform version number
+CopyAppManager.cpApiFail,接口保存异常，拷贝失败,接口保存異常，複製失敗,"Interface saving exception, copy failed"
+FileManager.nameFailTip,文件名命名不符合规范，请重新命名后再上传!,文件名命名不符合規範，請重新命名後再上傳!,File name does not conform to standards. Please rename and upload again!
+FileManager.dirCheckFailTip,文件目录命名不符合规范!,文件目錄命名不符合規範!,File directory naming does not conform to standards!
+FileManager.suffixCheckFail,文件后缀名不在上传文件白名单中!,文件後綴名不在上傳文件白名單中!,File extension is not in the upload whitelist!
+FileManager.failSaveToDBTip,文件过大，不允许存储到数据库!,文件過大，不允許存儲到數據庫!,File is too large to be stored in the database!
+SysKdbFlowServiceImpl.linkEmptyTip,连线的开始和结束节点均不能为空！,連線的開始和結束節點均不能為空！,Both start and end nodes of the connection cannot be empty!
+SysKdbFlowServiceImpl.allInOneTip,连线开始和结束节点不能是同一个！,連線開始和結束節點不能是同一個！,Start and end nodes of the connection cannot be the same!
+common.copied,副本,副本,Copy
+SysKdbFlowServiceImpl.nameDuplicate,存在多个名称相同的流程,存在多個名稱相同的流程,Multiple processes with the same name exist
+SysKdbFlowServiceImpl.defaultNote,这个人很懒，什么都没有留下,這個人很懶，什麼都沒有留下,This person is lazy and left nothing
+SysKdbFlowServiceImpl.logicEmptyCopyFail,当前逻辑编排流程定义为空，不允许拷贝！,當前邏輯編排流程定義為空，不允許複製！,"Current logic arrangement process definition is empty, copying is not allowed!"
+LoginLog.username,用户名,用戶名,Username
+LoginLog.loginTime,登录时间,登錄時間,Login time
+LoginLog.address,地址,地址,Address
+LoginLog.takeTime,耗时,耗時,Time taken
+LoginLog.responseCode,响应码,響應碼,Response code
+LoginLog.responseMessage,响应消息,響應消息,Response message
+LoginLog.title,登录日志,登錄日誌,Login log
+SysDict.name.unique,字典名称必须唯一,字典名稱必須唯一,Dictionary name must be unique
+SysDict.code.unique,字典代码必须唯一,字典代碼必須唯一,Dictionary code must be unique
+SysDictServiceImpl.typeNotFound,找不到字典类型,找不到字典類型,Dictionary type not found
+license.error.-1,非法授权,非法授權,Illegal authorization
+license.error.3,许可证已过期,許可證已過期,License has expired
+SysApiServiceImpl.urlEmptyTip,缺少url参数,缺少url參數,Missing url parameter
+SysApiServiceImpl.onlyGetPostTip,当前仅支持get和post请求!,當前僅支持get和post請求!,Currently only GET and POST requests are supported!
+SysApiServiceImpl.uniopsCallFail,uniops接口调用失败,uniops接口調用失敗,Uniops interface call failed
+common.success,成功,成功,Success
+SysConfig.name.unique,参数名称必须唯一,參數名稱必須唯一,Parameter name must be unique
+SysConfig.code.unique,参数键名必须唯一,參數鍵名必須唯一,Parameter key must be unique
+SysRole.name.unique,名称必须唯一,名稱必須唯一,Name must be unique
+SysRole.code.unique,编码必须唯一,編碼必須唯一,Code must be unique
+SysSsoServiceImpl.authFail,认证不合法！,認證不合法！,Authentication is invalid!
+SysSsoServiceImpl.autoLoginFail,自动登录失败,自動登錄失敗,Automatic login failed
+SysSearchConfigServiceImpl.queryFlowNotFound,专用动态查询流程找不到,專用動態查詢流程找不到,Dedicated dynamic query process not found
+SysUnit.name.unique,同一级别的名称要求唯一,同一級別的名稱要求唯一,Names at the same level must be unique
+SysFileServiceImpl.saveFail,文件保存失败,文件保存失敗,File saving failed
+SysFileServiceImpl.accessBeforeAuth,此文件需要登录才允许访问,此文件需要登錄才允許訪問,This file requires login to access
+SysFileServiceImpl.downloadBeforeAuth,您无权限下载此文件,您無權限下載此文件,You do not have permission to download this file
+common.paramInvalid,参数不合法,參數不合法,Invalid parameter
+SysFileServiceImpl.fileDeleted,文件已被删除！,文件已被刪除！,File has been deleted!
+SysFileServiceImpl.fileReadFail,文件读取失败,文件讀取失敗,File reading failed
+SysFileServiceImpl.fileCompressFail,文件压缩失败,文件壓縮失敗,File compression failed
+SysFileServiceImpl.fileNotFound,文件不存在，文件标识,文件不存在，文件標識,"File does not exist,file identifier"
+SysFileServiceImpl.fileTempCreateFail,临时文件创建失败,臨時文件創建失敗,Temporary file creation failed
+SysFileServiceImpl.fileNotFound1,文件不存在，可能被移动或删除！,文件不存在，可能被移動或刪除！,"File does not exist, it may have been moved or deleted!"
+SysMenu.name.unique,同一级别的名称要求唯一,同一級別的名稱要求唯一,Names at the same level must be unique
+SysTask.cron.empty,cron表达式不能为空,cron表達式不能為空,Cron expression cannot be empty
+SysTask.cron.error,cron表达式错误,cron表達式錯誤,Cron expression error
+SysTask.cron.system-task-disenable,该任务为系统内置，不允许禁用,該任務為系統內置，不允許禁用,This task is built-in to the system and cannot be disabled
+SysTask.name.unique,同一应用下名称必须唯一,同一應用下名稱必須唯一,Name must be unique within the same application
+common.not-logon,登录凭证已失效，请重新登录！,登錄憑證已失效，請重新登錄！,"Login credentials have expired, please log in again!"
+DevPageServiceImpl.pageNotFound,找不到页面,找不到頁面,Page not found
+DevPageServiceImpl.pageRenderFail,页面渲染失败,頁面渲染失敗,Page rendering failed
+DevApplication.shortName.unique,应用短英文名必须唯一,應用短英文名必須唯一,Application short English name must be unique
+DevApplicationServiceImpl.pineNotAllowInstall,当前平台禁止导入pine数据！,當前平台禁止導入pine數據！,The current platform prohibits importing pine data!
+DevApplicationServiceImpl.datasource,数据源,數據源,Data source
+DevApplicationServiceImpl.page,页面信息,頁面信息,Page information
+DevApplicationServiceImpl.api,接口信息,接口信息,API information
+DevApplicationServiceImpl.dict,字典信息,字典信息,Dictionary information
+DevApplicationServiceImpl.dictItem,字典项信息,字典項信息,Dictionary item information
+DevApplicationServiceImpl.task,任务调度信息,任務調度信息,Task scheduling information
+DevApplicationServiceImpl.config,系统配置,系統配置,System configuration
+DevApplicationServiceImpl.menu,菜单,菜單,Menu
+DevApplicationServiceImpl.devRole,开发平台角色,開發平台角色,Development platform role
+DevApplicationServiceImpl.roleMenu,开发平台角色菜单,開發平台角色菜單,Development platform role menu
+DevApplicationServiceImpl.logic,逻辑编排,邏輯編排,Logic arrangement
+DevApplicationServiceImpl.function,函数库,函數庫,Function library
+DevApplicationServiceImpl.faasExtNodeType,FAAS扩展节点类型,FAAS擴展節點類型,FAAS extension node type
+DevApplicationServiceImpl.faasExtNode,FAAS扩展节点,FAAS擴展節點,FAAS extension node
+DevApplicationServiceImpl.power,能力关联,能力關聯,Capability association
+DevApplicationServiceImpl.powerTree,能力树,能力樹,Capability tree
+DevApplicationServiceImpl.pluginTree,插件树,插件樹,Plugin tree
+DevApplicationServiceImpl.pluginApi,插件接口,插件接口,Plugin interface
+DevApplicationServiceImpl.logicTemplate,编辑编排模板,編輯編排模板,Edit arrangement template
+DevApplicationServiceImpl.pageTemplate,页面模板,頁面模板,Page template
+DevApplicationServiceImpl.app,导入应用数,導入應用數,Number of imported applications
+DevApplicationServiceImpl.startTip,启动...,啟動...,Starting...
+DevApplicationServiceImpl.completeReqData,完成请求远程数据，准备安装应用.,完成請求遠程數據，準備安裝應用.,"Completed requesting remote data, preparing to install the application."
+DevApplicationServiceImpl.installComplete,应用安装完成：,應用安裝完成：,Application installation completed:
+DevApplicationServiceImpl.startInstall,开始安装应用:,開始安裝應用:,Start installing application:
+DevApplicationServiceImpl.completeInstall,应用安装完成：,應用安裝完成：,Application installation completed:
+DevApplicationServiceImpl.dataParseFail,应用包数据解析异常,應用包數據解析異常,Application package data parsing exception
+SysUser.username.unique,用户账户必须唯一,用戶賬戶必須唯一,User account must be unique
+SysUser.tip.modeNotSupport,认证不支持！,認證不支持！,Authentication not supported!
+SysUser.tip.modeNotEnable,认证未启用！,認證未啟用！,Authentication not enabled!
+SysUser.tip.resultCheckFail,认证逻辑响应结果不符合预期，应返回json对象字符串！,認證邏輯響應結果不符合預期，應返回json對象字符串！,"Authentication logic response result does not meet expectations, should return a json object string!"
+SysUser.tip.authFail,验证未通过！,驗證未通過！,Verification failed!
+SysUser.tip.userLocked,用户已被锁定，请稍后再试！,用戶已被鎖定，請稍後再試！,"User has been locked, please try again later!"
+SysUser.tip.codeFail,验证码有误！,驗證碼有誤！,Verification code is incorrect!
+SysUser.tip.notRoles,你当前没有权限访问系统功能，请联系业务部门授权后，再访问系统。,你當前沒有權限訪問系統功能，請聯繫業務部門授權後，再訪問系統。,You currently do not have permission to access system functions. Please contact the business department for authorization before accessing the system.
+SysUser.tip.loginFail,登录失败，请检查登录信息是否有误！,登錄失敗，請檢查登錄信息是否有誤！,"Login failed, please check if the login information is correct!"
+SysUser.tip.loginExpire,登录凭证已失效，请重新登录！,登錄憑證已失效，請重新登錄！,"Login credentials have expired, please log in again!"
+SysUser.tip.oldPasswordFail,旧密码有误！,舊密碼有誤！,Old password is incorrect!
+SysUser.tip.passwordSame,重置的密码不可以与旧密码一样！,重置的密碼不可以與舊密碼一樣！,The reset password cannot be the same as the old password!
+SysUser.tip.aesPasswordEmpty,AES密码不能为空,AES密碼不能為空,AES password cannot be empty
+SysUser.tip.sourceMethodEmpty,源加密方法不能为空,源加密方法不能為空,Source encryption method cannot be empty
+SysUser.tip.dstMethodEmpty,目标加密方法不能为空,目標加密方法不能為空,Target encryption method cannot be empty
+SysUser.tip.aesSecretyFail,AES密钥不正确,AES密鑰不正確,AES key is incorrect
+SysUser.tip.aesbase64,当前只支持aes和base64加解密方式,當前只支持aes和base64加解密方式,Currently only supports aes and base64 encryption and decryption methods
+SysUser.tip.encryptFail1,解密之后的字符串不可读，请重新确认加解密方法,解密之後的字符串不可讀，請重新確認加解密方法,The decrypted string is unreadable
+SysUser.tip.encryptFail2,存在密码无法解密，请重新确认加解密方法,存在密碼無法解密，請重新確認加解密方法,There are passwords that cannot be decrypted
+SysUser.tip.encryptFail3,存在密码无法加密，请重新确认加解密方法,存在密碼無法加密，請重新確認加解密方法,There are passwords that cannot be encrypted
+"SysUser.tip.userNotFound","用户不存在！","用戶不存在！","User does not exist!"
+"SysUser.tip.passwordRule1","必须包含大写字母，小写字母，数字，特殊符号'_-'中任意3项","必須包含大寫字母，小寫字母，數字，特殊符號'_-'中任意3項","Must include any 3 items from uppercase letters, lowercase letters, numbers, or special symbols '_-'"
+"SysUser.tip.codeFail1","生成验证码有误","生成驗證碼有誤","Error generating verification code"
+"SysUser.tip.codeFail2","验证码有误！","驗證碼有誤！","Verification code is incorrect!"
+"SysUser.tip.fail1","用户名或密码有误，您还有{0}次机会输入，达到次数之后，账户将被锁定{1}分钟","用戶名或密碼有誤，您還有{0}次機會輸入，達到次數之後，賬戶將被鎖定{1}分鐘","Username or password is incorrect. You have {0} more attempts. After reaching this number, your account will be locked for {1} minutes"
+"SysUser.tip.fail2","由于密码错误连续次数已达到{0}次，用户被锁定{1}分钟","由於密碼錯誤連續次數已達到{0}次，用戶被鎖定{1}分鐘","Due to {0} consecutive incorrect password attempts, the user has been locked for {1} minutes"
+"SysUser.tip.fail3","密码错误连续次数已达到{0}次，用户将被锁定{1}分钟","密碼錯誤連續次數已達到{0}次，用戶將被鎖定{1}分鐘","The number of consecutive incorrect password attempts has reached {0}, the user will be locked for {1} minutes"
+"SysDataAccess.name.unique","名称必须唯一","名稱必須唯一","Name must be unique"
+"SysOperate.field.module","模块","模塊","Module"
+"SysOperate.field.action","动作","動作","Action"
+"SysOperate.field.url","路径","路徑","Path"
+"SysOperate.field.ip","IP地址","IP地址","IP Address"
+"SysOperate.field.times","耗时","耗時","Duration"
+"SysOperate.field.requestBody","请求内容体","請求內容體","Request Body"
+"SysOperate.field.responseCode","响应码","響應碼","Response Code"
+"SysOperate.field.responseMessage","响应消息","響應消息","Response Message"
+"SysOperate.field.method","方法名称","方法名稱","Method Name"
+"SysOperate.field.requestMethod","请求方式","請求方式","Request Method"
+"SysOperate.field.responseBody","响应内容体","響應內容體","Response Body"
+"SysOperate.field.operator","用户名","用戶名","Username"
+"SysOperate.field.operateTime","操作时间","操作時間","Operation Time"
+"SysDataResource.name.unique","名称必须唯一","名稱必須唯一","Name must be unique"
+"SysDataResource.tableName.unique","表名必须唯一","表名必須唯一","Table name must be unique"
+"CommonSql.tip.notFoundLogic","专用动态查询流程找不到","專用動態查詢流程找不到","Specific dynamic query process not found"
+"SysKdbDataSource.tip.addFail","数据源新增失败，请检查连接信息！","數據源新增失敗，請檢查連接信息！","Failed to add data source, please check connection information!"
+"SysDemo.name.unique","名称必须唯一","名稱必須唯一","Name must be unique"
+"UserMaxCountValidate.message","用户数超过限制","用戶數超過限制","Number of users exceeds the limit"
+"ServletUtil.error1","文件不存在，可能被移动或删除！","文件不存在，可能被移動或刪除！","File does not exist, may have been moved or deleted!"
+"ServletUtil.fileReadFail","文件读取失败","文件讀取失敗","File read failed"
+"ServletUtil.fileWriteFail","文件写入失败","文件寫入失敗","File write failed"
+"HttpUtil.fileDownloadFail","文件下载失败","文件下載失敗","File download failed"
+"IpUtils.unknown","未知","未知","Unknown"
+"BeanUtils.copyObjectFail","对象拷贝失败","對象拷貝失敗","Failed to copy object"
+"auth.unauthorized-e001","用户未登录，代码: E001","用戶未登錄，代碼: E001","User not logged in, code: E001"
+"auth.unauthorized-e002","用户未登录，代码: E002","用戶未登錄，代碼: E002","User not logged in, code: E002"
+"auth.unauthorized-e003","用户未登录，代码: E003","用戶未登錄，代碼: E003","User not logged in, code: E003"
+"auth.unauthorized-e004","用户未登录，错误码: E004","用戶未登錄，錯誤碼: E004","User not logged in, error code: E004"
+"auth.unauthorized-e005","用户未登录，错误码: E005","用戶未登錄，錯誤碼: E005","User not logged in, error code: E005"
+"auth.unauthorized-e006","登录已失效","登錄已失效","Login has expired"
+"auth.unauthorized-e007","登录会话不存在，请重新登录","登錄會話不存在，請重新登錄","Login session does not exist, please log in again"
+"DevApiAspect.error1","发布模式无权访问此接口","發布模式無權訪問此接口","No permission to access this interface in release mode"
+"KAuthFilter.apiNotFound","接口不存在","接口不存在","API does not exist"
+"license.error.0","许可证非授权","許可證非授權","License not authorized"
+"license.error.1","许可证未生效","許可證未生效","License not effective"
+"permission.api-forbidden","接口无权限","接口無權限","No permission to access the API"
+"KAuthFilter.openApi.empty","接入商ID为空！","接入商ID為空！","Partner ID is empty!"
+"KAuthFilter.openApi.hasnot","接入商不存在！","接入商不存在！","Partner does not exist!"
+"KAuthFilter.openApi.authFail","接口未授权","接口未授權","API not authorized"
+"KAuthFilter.openApi.timestamp","缺少时间戳参数: timestamp","缺少時間戳參數: timestamp","Missing timestamp parameter: timestamp"
+"KAuthFilter.openApi.sign","缺少签名值: sign","缺少簽名值: sign","Missing signature value: sign"
+"KAuthFilter.openApi.signNonce","缺少签名噪音: signNonce","缺少簽名噪音: signNonce","Missing signature noise: signNonce"
+"KAuthFilter.openApi.timeout","请求时间已过期","請求時間已過期","Request time has expired"
+"KAuthFilter.openApi.repeat","签名噪音不能重复使用","簽名噪音不能重複使用","Signature noise cannot be reused"
+"KAuthFilter.N004","接口请求不合法，代码:N004","接口請求不合法，代碼:N004","Illegal API request, code: N004"
+"KAuthFilter.N003","接口请求不合法，代码:N003","接口請求不合法，代碼:N003","Illegal API request, code: N003"
+"KAuthFilter.N002","接口请求不合法，代码:N002","接口請求不合法，代碼:N002","Illegal API request, code: N002"
+"KAuthFilter.N001","接口请求不合法，代码:N001","接口請求不合法，代碼:N001","Illegal API request, code: N001"
+"KAuthFilter.N005","接口请求不合法，代码:N005","接口請求不合法，代碼:N005","Illegal API request, code: N005"
+"common.ok","OK","OK","OK"
+"common.fail","失败","失敗","Failure"
+"KdbFlowExecutor.params.fail","查询参数输入不合法","查詢參數輸入不合法","Query parameter input is invalid"
+"KdbFlowExecutor.execute.fail","流程处理失败","流程處理失敗","Process execution failed"
+"db.not-default-database","当前无默认的数据库连接","當前無默認的數據庫連接","No default database connection currently"
+"db.not-database","找不到对应的数据库连接","找不到對應的數據庫連接","Cannot find corresponding database connection"
+"KDBHttpChannel.error2","查询数量时，应保持只有一条记录","查詢數量時，應保持只有一條記錄","When querying the number, there should be only one record"
+"KDBHttpChannel.error3","查询单个属性，但返回不等于1的结果","查詢單個屬性，但返回不等於1的結果","Query a single attribute, but the return result is not equal to 1"
+"TransactionManager.error1","事务启动异常","事務啟動異常","Transaction start exception"
+"TransactionManager.error2","事务提交异常","事務提交異常","Transaction commit exception"
+"TransactionManager.error3","事务回滚异常","事務回滾異常","Transaction rollback exception"
+"KdbApiAbstract.kdb","kdb响应数据不合法，响应内容:","kdb響應數據不合法，響應內容:","kdb response data is invalid, response content:"

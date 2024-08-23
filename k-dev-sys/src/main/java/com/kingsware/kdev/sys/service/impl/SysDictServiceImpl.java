@@ -55,7 +55,7 @@ public class SysDictServiceImpl extends BaseServiceImpl implements SysDictServic
     public void edit(SysDictArgv argv) {
         SysDict model = DB.findById(SysDict.class, argv.getId());
         if (model == null) {
-            throw new BusinessException("找不到字典类型");
+            throw new BusinessException(I18n.t("SysDictServiceImpl.typeNotFound", "找不到字典类型") );
         }
         String oldCode = model.getCode();
         // 修改

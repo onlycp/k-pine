@@ -7,6 +7,7 @@ import com.kingsware.kdev.core.constants.ContentTypeMap;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.kflow.bean.ErrorResult;
@@ -208,7 +209,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         for (String id: argv.getIds()) {
             String rootPath = "file:" + id;
             if (!FileUtils.checkFileFrom(id)) {
-                throw BusinessException.serviceThrow("文件目录命名不符合规范!");
+                throw BusinessException.serviceThrow(I18n.t("FileManager.dirCheckFailTip", "文件目录命名不符合规范!"));
             }
             Resource[] rootResources = SpringContext.getResources(rootPath);
             if (rootResources == null && rootResources.length == 0) {
@@ -260,19 +261,19 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         // 遍历处理文件
         for (MultipartFile file: files) {
             if (!FileUtils.checkFileNaming(file.getOriginalFilename())) {
-                throw BusinessException.serviceThrow("文件名命名不符合规范，请重新命名后再上传!");
+                throw BusinessException.serviceThrow( I18n.t("FileManager.nameFailTip", "文件名命名不符合规范，请重新命名后再上传!"));
             }
             if (!FileUtils.checkFileFrom(fileFrom)) {
-                throw BusinessException.serviceThrow("文件目录命名不符合规范!");
+                throw BusinessException.serviceThrow(I18n.t("FileManager.dirCheckFailTip", "文件目录命名不符合规范!"));
             }
             String fileExt = FileUtils.getFileExt(file.getOriginalFilename());
             if (!FileUtils.checkFileExt(fileExt)) {
-                throw BusinessException.serviceThrow(FileUtils.getFileExt(file.getOriginalFilename()) + "文件后缀名不在上传文件白名单中!");
+                throw BusinessException.serviceThrow(FileUtils.getFileExt(file.getOriginalFilename()) + I18n.t("FileManager.suffixCheckFail", "文件后缀名不在上传文件白名单中!") );
             }
             try (InputStream inputStream = file.getInputStream()){
                 SysFile sysFile = FileManager.getInstance().register(inputStream, file.getOriginalFilename(), (int)file.getSize(), fileFrom, saveType, isLocal ? STATIC_FILE_FOLD : getBasePath(), isLocal);
                 if (sysFile == null) {
-                    throw BusinessException.serviceThrow("文件保存失败");
+                    throw BusinessException.serviceThrow(I18n.t("SysFileServiceImpl.saveFail", "文件保存失败") );
                 }
                 if (unzip && fileExt.equalsIgnoreCase("zip")) {
                     ZipUtils.unzip(STATIC_FILE_FOLD, STATIC_FILE_FOLD + sysFile.getFilePath());
@@ -345,7 +346,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
 
                     if (StringUtils.isNotEmpty(subKey)) {
                         if(KClientContext.getContext().getUserInfo() == null) {
-                            throw BusinessException.serviceThrow("此文件需要登录才允许访问");
+                            throw BusinessException.serviceThrow(I18n.t("SysFileServiceImpl.accessBeforeAuth", "此文件需要登录才允许访问"));
                         }
                     }
 
@@ -359,7 +360,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                     Map<String, Object> data = (Map<String, Object>)result.getData();
                     boolean success = data.get("success") == null? false : (boolean)data.get("success");;
                     if (!success) {
-                        throw BusinessException.serviceThrow("您无权限下载此文件");
+                        throw BusinessException.serviceThrow(I18n.t("SysFileServiceImpl.downloadBeforeAuth", "您无权限下载此文件"));
                     }
                 }
             }
@@ -378,7 +379,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
      */
     private void downloadByPath(String path, boolean isStatic) throws ServletException, IOException {
         if (path.contains("..")) {
-            throw BusinessException.serviceThrow("参数不合法");
+            throw BusinessException.serviceThrow(I18n.t("common.paramInvalid", "参数不合法"));
         }
         // 进行url编码
         path = UriEncoder.decode(path);
@@ -394,7 +395,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         if (file == null) {
             // 如果是ID格式，不是路径格式，则文件已不存在
             if (StringUtils.isUuid(path)) {
-                throw BusinessException.serviceThrow("文件已被删除！");
+                throw BusinessException.serviceThrow(I18n.t("SysFileServiceImpl.fileDeleted", "文件已被删除！") );
             }
             // 通过ID找不到文件，按路径处理，共有2处方式，1种是本地文件，2种是FAAS文件
             // 在本地找是否存在文件
@@ -446,7 +447,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                     response.getOutputStream().flush();
                     return;
                 } catch (IOException e) {
-                    throw BusinessException.serviceThrow("文件读取失败");
+                    throw BusinessException.serviceThrow(I18n.t("SysFileServiceImpl.fileReadFail", "文件读取失败"));
                 }
             } else if (file.getSaveType() == 1) {
                 File localFile = getLocalFile(file.getFilePath());
@@ -607,7 +608,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         String fileName = DateUtils.formatDate(new Date(), DateUtils.DATE_TIME_1)+ ".zip";
         File zipFile = ZipUtils.zip(fileList, fileName);
         if (zipFile == null) {
-            throw BusinessException.serviceThrow("文件压缩失败");
+            throw BusinessException.serviceThrow(I18n.t("SysFileServiceImpl.fileCompressFail", "文件压缩失败") );
         }
         String userFileName = ServletUtil.request().getParameter("fileName");
         if (StringUtils.isNotEmpty(userFileName)) {
@@ -668,14 +669,14 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         SysFile sysFile = DB.findById(SysFile.class, id);
         // 如果文件不存在，直接异常
         if (sysFile == null) {
-            throw BusinessException.serviceThrow(String.format("文件不存在，文件标识:%s", id));
+            throw BusinessException.serviceThrow(String.format(I18n.t("SysFileServiceImpl.fileNotFound", "文件不存在，文件标识") + ":%s", id));
         }
         // 如果是直接存数据库， 则需要创建文件
         if (sysFile.getSaveType() == 0) {
             byte[] content = Base64.getDecoder().decode(sysFile.getFileContent());
             File tempFile = FileUtils.createTempFile(sysFile.getFileName());
             if (tempFile == null) {
-                throw BusinessException.serviceThrow(String.format("临时文件创建失败:%s", sysFile.getFileName()));
+                throw BusinessException.serviceThrow(String.format(I18n.t("SysFileServiceImpl.fileTempCreateFail", "临时文件创建失败") + ":%s", sysFile.getFileName()));
             }
             FileUtils.writeToFile(tempFile, content);
             return new FileEntry(tempFile, sysFile.getFileName());
@@ -684,7 +685,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             String absFilePath = getBasePath() + sysFile.getFilePath();
             File localFile = new File(absFilePath);
             if (!localFile.exists()) {
-                throw BusinessException.serviceThrow("文件不存在，可能被移动或删除！");
+                throw BusinessException.serviceThrow(I18n.t("SysFileServiceImpl.fileNotFound1", "文件不存在，可能被移动或删除！") );
             }
             return new FileEntry(localFile, sysFile.getFileName());
         } else if (sysFile.getSaveType() == 2) {
@@ -692,11 +693,11 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             File faasFile = getFaasFile(sysFile.getFilePath());
 
             if (!faasFile.exists()) {
-                throw BusinessException.serviceThrow("文件不存在，可能被移动或删除！");
+                throw BusinessException.serviceThrow(I18n.t("SysFileServiceImpl.fileNotFound1", "文件不存在，可能被移动或删除！") );
             }
             return new FileEntry(faasFile, sysFile.getFileName());
         }
-        throw BusinessException.serviceThrow("文件不存在，可能被移动或删除！");
+        throw BusinessException.serviceThrow(I18n.t("SysFileServiceImpl.fileNotFound1", "文件不存在，可能被移动或删除！") );
     }
 
     /**

@@ -180,7 +180,7 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
         }
         // 获取uniops地址
         if (!params.containsKey("url")) {
-            throw BusinessException.serviceThrow("缺少url参数");
+            throw BusinessException.serviceThrow(I18n.t("SysApiServiceImpl.urlEmptyTip", "缺少url参数"));
         }
         // 获取请求路径和方法
         String url = params.get("url").toString();
@@ -207,18 +207,18 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
             responseBody = HttpUtil.postBody(apiUrl, JsonUtil.toJson(bodyMap), headers, true);
         }
         else {
-            throw BusinessException.serviceThrow("当前仅支持get和post请求!");
+            throw BusinessException.serviceThrow(I18n.t("SysApiServiceImpl.onlyGetPostTip", "当前仅支持get和post请求!"));
         }
         Map<String, Object> retMap = JsonUtil.toMap(responseBody);
         int errorCode = (int)retMap.get("errorCode");
         if (errorCode != 0) {
-            Object msg = retMap.getOrDefault("message", "uniops接口调用失败");
-            throw BusinessException.serviceThrow(msg == null ? "uniops接口调用失败": msg.toString());
+            Object msg = retMap.getOrDefault("message", I18n.t("SysApiServiceImpl.uniopsCallFail", "uniops接口调用失败"));
+            throw BusinessException.serviceThrow(msg == null ? I18n.t("SysApiServiceImpl.uniopsCallFail", "uniops接口调用失败"): msg.toString());
         }
         else {
-            Object msg = retMap.getOrDefault("message", "成功");
+            Object msg = retMap.getOrDefault("message", I18n.t("common.success", "成功"));
             if (msg == null) {
-                msg = "成功";
+                msg = I18n.t("common.success", "成功");
             }
             if (retMap.containsKey("responseBody")) {
                 return BaseRet.success(retMap.get("responseBody"), msg.toString());

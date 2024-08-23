@@ -170,7 +170,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         String pineAppId = "064b3b44b85a45fe87fcce88d72b2519";
         String importEnable = SpringContext.getProperties("app.dev.import-enable", "true");
         if ("false".equalsIgnoreCase(importEnable)) {
-            throw BusinessException.serviceThrow("当前平台禁止导入pine数据！");
+            throw BusinessException.serviceThrow(I18n.t("DevApplicationServiceImpl.pineNotAllowInstall", "当前平台禁止导入pine数据！"));
         }
         int subSize = 3500;
         DevPine devPine = appData2Pine(json);
@@ -221,22 +221,22 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 }
 
             }
-            importMessageMap.put("数据源", sourceCount);
+            importMessageMap.put(I18n.t("DevApplicationServiceImpl.datasource","数据源"), sourceCount);
         }
 
 
         // 处理页面
         long pageCount = DB.batchSaveOrUpdate(devPine.getPages(), DevPage.class);
         log.info("完成导入页面信息：{}", pageCount);
-        importMessageMap.put("页面信息", pageCount);
+        importMessageMap.put(I18n.t("DevApplicationServiceImpl.page", "页面信息") , pageCount);
         // 接口
         long apiCount = DB.batchSaveOrUpdate(devPine.getApis(), SysApi.class);
         log.info("完成导入接口信息：{}", apiCount);
-        importMessageMap.put("接口信息", apiCount);
+        importMessageMap.put(I18n.t("DevApplicationServiceImpl.api", "接口信息"), apiCount);
         // 字典分类
          long dictCount = DB.batchSaveOrUpdate(devPine.getDict(), SysDict.class);
         log.info("完成导入字典信息：{}", dictCount);
-        importMessageMap.put("字典信息", dictCount);
+        importMessageMap.put(I18n.t("DevApplicationServiceImpl.dict",  "字典信息"), dictCount);
         // 字典项
         // 先删除已有字典项
         if (devPine.getDictItems() != null && !devPine.getDictItems().isEmpty()) {
@@ -246,15 +246,15 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         }
         long dictItemCount = DB.batchSaveOrUpdate(devPine.getDictItems(), SysDictItem.class);
         log.info("完成导入字典项信息：{}", dictItemCount);
-        importMessageMap.put("字典项信息", dictItemCount);
+        importMessageMap.put(I18n.t("DevApplicationServiceImpl.dictItem", "字典项信息") , dictItemCount);
         // 任务调度
         long taskCount = DB.batchSaveOrUpdate(devPine.getTasks(), SysTask.class);
         log.info("完成导入任务调度信息：{}", taskCount);
-        importMessageMap.put("任务调度信息", taskCount);
+        importMessageMap.put(I18n.t("DevApplicationServiceImpl.task", "任务调度信息") , taskCount);
         // 系度配置
         long configCount = DB.batchSaveOrUpdate(devPine.getConfigs(), SysConfig.class);
         log.info("完成导入系统配置：{}", configCount);
-        importMessageMap.put("系统配置", configCount);
+        importMessageMap.put(I18n.t("DevApplicationServiceImpl.config", "系统配置") , configCount);
         // 菜单
         long menuCount = 0;
         if (LicenseManager.getInstance().isUniopsApp()) {
@@ -266,13 +266,13 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             menuCount = DB.batchSaveOrUpdate(devPine.getMenus(), SysMenu.class);
         }
         log.info("完成导入菜单：{}", menuCount);
-        importMessageMap.put("菜单", menuCount);
+        importMessageMap.put(I18n.t("DevApplicationServiceImpl.menu", "菜单") , menuCount);
         // 开发平台角色
         long devRoleCount = 0;
         if (appModeProperties.getDev() && devPine.getDevRoles() != null && !devPine.getDevRoles().isEmpty()) {
             devRoleCount = DB.batchSaveOrUpdate(devPine.getDevRoles(), SysRole.class);
             log.info("完成导入开发平台角色：{}", devRoleCount);
-            importMessageMap.put("开发平台角色", devRoleCount);
+            importMessageMap.put(I18n.t("DevApplicationServiceImpl.devRole", "开发平台角色") , devRoleCount);
         }
 
         // 开发平台角色菜单
@@ -281,13 +281,13 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         if (appModeProperties.getDev() && devPine.getDevRoleMenus() != null && !devPine.getDevRoleMenus().isEmpty()) {
             devRoleMenuCount = DB.batchSaveOrUpdate(devPine.getDevRoleMenus(), SysRoleMenu.class);
             log.info("完成导入开发平台角色菜单：{}", devRoleMenuCount);
-            importMessageMap.put("开发平台角色菜单", devRoleMenuCount);
+            importMessageMap.put(I18n.t("DevApplicationServiceImpl.roleMenu", "开发平台角色菜单"), devRoleMenuCount);
         }
 
         // pine逻辑
         long pineFlowCount = DB.batchSaveOrUpdate(devPine.getLogicFlows(), SysLogicFlow.class);
         log.info("完成导入pine逻辑：{}", pineFlowCount);
-        importMessageMap.put("逻辑编排", pineFlowCount);
+        importMessageMap.put(I18n.t("DevApplicationServiceImpl.logic", "逻辑编排"), pineFlowCount);
         // faas逻辑
         if (devPine.getKdbFlows() != null) {
             for (FlowInfo flowInfo : devPine.getKdbFlows()) {
@@ -344,7 +344,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 editFunctionInfo.setType(functions.getType());
                 DB.kdbApi().editFun(editFunctionInfo);
             }
-            importMessageMap.put("函数库", (long)devPine.getFunctions().size());
+            importMessageMap.put(I18n.t("DevApplicationServiceImpl.function", "函数库") , (long)devPine.getFunctions().size());
         }
         try {
             if (appModeProperties.getDev() && !LicenseManager.getInstance().isUniopsApp()) {
@@ -352,49 +352,49 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 if (devPine.getDevFaasNodeTypes() != null && !devPine.getDevFaasNodeTypes().isEmpty()) {
                     long tCount = DB.batchSaveOrUpdate(devPine.getDevFaasNodeTypes(), DevFaasNodeType.class);
                     log.info("完成导入FAAS扩展节点类型：{}", tCount);
-                    importMessageMap.put("FAAS扩展节点类型", tCount);
+                    importMessageMap.put(I18n.t("DevApplicationServiceImpl.faasExtNodeType", "FAAS扩展节点类型"), tCount);
                 }
                 // 插入FAAS扩展节点
                 if (devPine.getDevFaasNodes() != null && !devPine.getDevFaasNodes().isEmpty()) {
                     long tCount = DB.batchSaveOrUpdate(devPine.getDevFaasNodes(), DevFaasNode.class);
                     log.info("完成导入FAAS扩展节点：{}", tCount);
-                    importMessageMap.put("FAAS扩展节点", tCount);
+                    importMessageMap.put(I18n.t("DevApplicationServiceImpl.faasExtNode", "FAAS扩展节点") , tCount);
                 }
                 // 能力关联
                 if (devPine.getPowerLinks() != null && !devPine.getPowerLinks().isEmpty()) {
                     long tCount = DB.batchSaveOrUpdate(devPine.getPowerLinks(), DevPowerLink.class);
                     log.info("完成导入能力关联：{}", tCount);
-                    importMessageMap.put("能力关联", tCount);
+                    importMessageMap.put(I18n.t("DevApplicationServiceImpl.power", "能力关联"), tCount);
                 }
                 // 能力树
                 if (devPine.getDevPowerTrees() != null && !devPine.getDevPowerTrees().isEmpty()) {
                     long tCount = DB.batchSaveOrUpdate(devPine.getDevPowerTrees(), DevPowerTree.class);
                     log.info("完成导入能力树：{}", tCount);
-                    importMessageMap.put("能力树", tCount);
+                    importMessageMap.put(I18n.t("DevApplicationServiceImpl.powerTree", "能力树"), tCount);
                 }
                 // 插件树
                 if (devPine.getExtPluginTrees() != null && !devPine.getExtPluginTrees().isEmpty()) {
                     long tCount = DB.batchSaveOrUpdate(devPine.getExtPluginTrees(), ExtPluginTree.class);
                     log.info("完成导入插件树：{}", tCount);
-                    importMessageMap.put("插件树", tCount);
+                    importMessageMap.put(I18n.t("DevApplicationServiceImpl.pluginTree", "插件树") , tCount);
                 }
                 // 插件接口
                 if (devPine.getExtPluginInterfaces() != null && !devPine.getExtPluginInterfaces().isEmpty()) {
                     long tCount = DB.batchSaveOrUpdate(devPine.getExtPluginInterfaces(), ExtPluginInterface.class);
                     log.info("完成导入插件接口：{}", tCount);
-                    importMessageMap.put("插件接口", tCount);
+                    importMessageMap.put(I18n.t("DevApplicationServiceImpl.pluginApi", "插件接口"), tCount);
                 }
                 // 编辑编排模板
                 if (devPine.getSysLogicTemplates() != null && !devPine.getSysLogicTemplates().isEmpty()) {
                     long tCount = DB.batchSaveOrUpdate(devPine.getSysLogicTemplates(), SysLogicTemplate.class);
                     log.info("完成导入编辑编排模板：{}", tCount);
-                    importMessageMap.put("编辑编排模板", tCount);
+                    importMessageMap.put(I18n.t("DevApplicationServiceImpl.logicTemplate", "编辑编排模板"),  tCount);
                 }
                 // 页面模板
                 if (devPine.getDevPageTemplates() != null && !devPine.getDevPageTemplates().isEmpty()) {
                     long tCount = DB.batchSaveOrUpdate(devPine.getDevPageTemplates(), DevPageTemplate.class);
                     log.info("完成导入页面模板：{}", tCount);
-                    importMessageMap.put("页面模板", tCount);
+                    importMessageMap.put(I18n.t("DevApplicationServiceImpl.pageTemplate", "页面模板") , tCount);
                 }
             }
 
@@ -449,7 +449,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         }
 
         // 删除原来的导入汇总信息，因为原来的存在NullPointException问题，且不兼容开发平台的数据量显示，改为用map
-        String result = String.format("导入应用数:%d", appCount);
+        String result = String.format(I18n.t("DevApplicationServiceImpl.app", "导入应用数") + ":%d", appCount);
         for(Map.Entry entry : importMessageMap.entrySet()) {
             result += (", " + entry.getKey() + ": " + entry.getValue());
         }
@@ -533,7 +533,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 argv.setAppId(appid);
             }
             DevApplication application = DB.findById(DevApplication.class, argv.getAppId());
-            logStack.addMessage("启动...");
+            logStack.addMessage(I18n.t("DevApplicationServiceImpl.startTip", "启动...") );
             String backupName = String.format("%s_%s", StringUtils.isEmpty(application.getShortName())? "untitle": application.getShortName(), (application.getVersion() == null? "v1": application.getVersion()));
             // 在线升级
             if (argv.getMode() == 1) {
@@ -552,12 +552,12 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                     // 获取签名值
                     String sign = SignUtil.getSign(body, channel.getSignSecret());
                     body.put("sign", sign);
-                    logStack.addMessage("准备请求远程数据, URL：" + apiUrl);
+                    logStack.addMessage(I18n.t("DevApplicationServiceImpl.readyReqData", "准备请求远程数据, URL：" )+ apiUrl);
                     String responseBody = HttpUtil.postBody(apiUrl, JsonUtil.toJson(body), new HashMap<>(), true);
-                    logStack.addMessage("完成请求远程数据，准备安装应用.");
+                    logStack.addMessage(I18n.t("DevApplicationServiceImpl.completeReqData", "完成请求远程数据，准备安装应用."));
                     String result = importApp(responseBody, argv.getTeamId());
                     this.backupPine(responseBody, backupName);
-                    logStack.addMessage("应用安装完成：" + result);
+                    logStack.addMessage(I18n.t("DevApplicationServiceImpl.installComplete", "应用安装完成：") + result);
 
                 }
             }
@@ -576,10 +576,10 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                     else {
                         json = FileUtils.readFile(new File(SpringContext.getProperties("file.base-path", "/") + sysFile.getFilePath()));
                     }
-                    logStack.addMessage("开始安装应用:" + sysFile.getFileOriginalName());
+                    logStack.addMessage(I18n.t("DevApplicationServiceImpl.startInstall", "开始安装应用:") + sysFile.getFileOriginalName());
                     String result = importApp(json, argv.getTeamId());
                     this.backupPine(json, backupName);
-                    logStack.addMessage("应用安装完成：" + result);
+                    logStack.addMessage(I18n.t("DevApplicationServiceImpl.completeInstall", "应用安装完成：")  + result);
                 }
             }
 
@@ -655,7 +655,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         try {
             devPine = objectMapper.readValue(JsonUtil.toJson(pineMap), DevPine.class);
         } catch (JsonProcessingException e) {
-            throw BusinessException.serviceThrow("应用包数据解析异常");
+            throw BusinessException.serviceThrow(I18n.t("DevApplicationServiceImpl.dataParseFail", "应用包数据解析异常"));
         }
         // 处理menu
         if (devPine.getMenus() != null) {

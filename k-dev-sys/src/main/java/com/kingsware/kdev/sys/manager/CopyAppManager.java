@@ -7,6 +7,7 @@ import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.cache.api.ApiManager;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
@@ -524,7 +525,7 @@ public class CopyAppManager {
                             DB.save(sysApi);
                         }
                         catch (BusinessException e) {
-                            throw new BusinessException("接口保存异常，拷贝失败:" + checkObj.getApiName());
+                            throw new BusinessException(I18n.t("CopyAppManager.cpApiFail", "接口保存异常，拷贝失败") + ":"+ checkObj.getApiName());
 //                            log.warn("接口保存失败，rf", e.getMessage());
                         }
 

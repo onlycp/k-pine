@@ -6,6 +6,7 @@ import com.kingsware.kdev.core.enums.RetEnum;
 import com.kingsware.kdev.core.excel.ExcelWorker;
 import com.kingsware.kdev.core.excel.KExcel;
 import com.kingsware.kdev.core.excel.RegionDefine;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
@@ -82,21 +83,21 @@ public class SysOperateLogServiceImpl extends BaseServiceImpl implements SysOper
         // 定义标题
         List<RegionDefine> defineList = new ArrayList<>();
         defineList.add(RegionDefine.builder().propName("id").labelName("ID").build());
-        defineList.add(RegionDefine.builder().propName("module").labelName("模块").build());
-        defineList.add(RegionDefine.builder().propName("action").labelName("动作").build());
-        defineList.add(RegionDefine.builder().propName("url").labelName("路径").build());
-        defineList.add(RegionDefine.builder().propName("ip").labelName("IP地址").build());
-        defineList.add(RegionDefine.builder().propName("times").labelName("耗时").build());
-        defineList.add(RegionDefine.builder().propName("requestBody").labelName("请求内容体").build());
-        defineList.add(RegionDefine.builder().propName("responseCode").labelName("响应码").build());
-        defineList.add(RegionDefine.builder().propName("responseMessage").labelName("响应消息").build());
-        defineList.add(RegionDefine.builder().propName("method").labelName("方法名称").build());
-        defineList.add(RegionDefine.builder().propName("requestMethod").labelName("请求方式").build());
-        defineList.add(RegionDefine.builder().propName("responseBody").labelName("响应内容体").build());
-        defineList.add(RegionDefine.builder().propName("operator").labelName("用户名").build());
-        defineList.add(RegionDefine.builder().propName("operateTime").labelName("操作时间").build());
+        defineList.add(RegionDefine.builder().propName("module").labelName(I18n.t("SysOperate.field.module", "模块")).build());
+        defineList.add(RegionDefine.builder().propName("action").labelName(I18n.t("SysOperate.field.action", "动作")).build());
+        defineList.add(RegionDefine.builder().propName("url").labelName(I18n.t("SysOperate.field.url", "路径")).build());
+        defineList.add(RegionDefine.builder().propName("ip").labelName(I18n.t("SysOperate.field.ip", "IP地址")).build());
+        defineList.add(RegionDefine.builder().propName("times").labelName(I18n.t("SysOperate.field.times", "耗时")).build());
+        defineList.add(RegionDefine.builder().propName("requestBody").labelName(I18n.t("SysOperate.field.requestBody", "请求内容体")).build());
+        defineList.add(RegionDefine.builder().propName("responseCode").labelName(I18n.t("SysOperate.field.responseCode", "响应码")).build());
+        defineList.add(RegionDefine.builder().propName("responseMessage").labelName(I18n.t("SysOperate.field.responseMessage", "响应消息")).build());
+        defineList.add(RegionDefine.builder().propName("method").labelName(I18n.t("SysOperate.field.method", "方法名称")).build());
+        defineList.add(RegionDefine.builder().propName("requestMethod").labelName(I18n.t("SysOperate.field.requestMethod", "请求方式")).build());
+        defineList.add(RegionDefine.builder().propName("responseBody").labelName(I18n.t("SysOperate.field.responseBody", "响应内容体")).build());
+        defineList.add(RegionDefine.builder().propName("operator").labelName(I18n.t("SysOperate.field.operator", "用户名")).build());
+        defineList.add(RegionDefine.builder().propName("operateTime").labelName(I18n.t("SysOperate.field.operateTime", "操作时间")).build());
         // 导出
-        KExcel kExcel = KExcel.fromDataList("服务日志.xls", "服务日志", defineList, pageDataRet.getList());
+        KExcel kExcel = KExcel.fromDataList(I18n.t("SysOperate.title", "服务日志" ) +".xls", I18n.t("SysOperate.title", "服务日志" ), defineList, pageDataRet.getList());
         ExcelWorker.getInstance().writeToWeb(kExcel);
     }
 

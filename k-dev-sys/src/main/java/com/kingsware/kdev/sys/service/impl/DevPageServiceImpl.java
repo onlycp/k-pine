@@ -72,7 +72,7 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
                 return pages.get(0);
             }
             else {
-                throw BusinessException.serviceThrow("找不到页面");
+                throw BusinessException.serviceThrow(I18n.t("DevPageServiceImpl.pageNotFound", "找不到页面"));
             }
         }
         else {
@@ -88,7 +88,7 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
                 return pages.get(0);
             }
             else {
-                throw BusinessException.serviceThrow("找不到页面");
+                throw BusinessException.serviceThrow(I18n.t("DevPageServiceImpl.pageNotFound", "找不到页面"));
             }
         }
 
@@ -174,7 +174,7 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
             writer.write(renderHtml);
         }
         catch (Exception e) {
-            throw BusinessException.serviceThrow("页面渲染失败");
+            throw BusinessException.serviceThrow(I18n.t("DevPageServiceImpl.pageRenderFail", "页面渲染失败") );
         }
 
     }

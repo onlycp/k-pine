@@ -3,6 +3,7 @@ package com.kingsware.kdev.core.cache.page;
 import com.kingsware.kdev.core.cache.kcache.LruCache;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.model.DevPage;
 import com.kingsware.kdev.core.orm.DB;
 import lombok.extern.slf4j.Slf4j;
@@ -80,7 +81,7 @@ public class PageCacheManager {
                 return pages.get(0);
             }
             else {
-                throw BusinessException.serviceThrow("找不到页面");
+                throw BusinessException.serviceThrow(I18n.t("DevPageServiceImpl.pageNotFound", "找不到页面"));
             }
         }
         else {
@@ -100,7 +101,7 @@ public class PageCacheManager {
                 return pages.get(0);
             }
             else {
-                throw BusinessException.serviceThrow("找不到页面");
+                throw BusinessException.serviceThrow(I18n.t("DevPageServiceImpl.pageNotFound", "找不到页面"));
             }
         }
 

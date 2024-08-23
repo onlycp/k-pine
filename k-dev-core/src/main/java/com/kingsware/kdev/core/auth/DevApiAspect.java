@@ -3,6 +3,7 @@ package com.kingsware.kdev.core.auth;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.enums.RetEnum;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.util.ServletUtil;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +28,7 @@ public class DevApiAspect {
             return pjd.proceed();
         }
         else {
-            throw BusinessException.serviceThrow("发布模式无权访问此接口");
+            throw BusinessException.serviceThrow(I18n.t("DevApiAspect.error1", "发布模式无权访问此接口"));
         }
     }
 }

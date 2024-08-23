@@ -5,6 +5,7 @@ import com.kingsware.kdev.core.config.SysConst;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.HttpClientException;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.define.FlowDefinition;
 import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.orm.DB;
@@ -81,7 +82,7 @@ public abstract class KdbApiAbstract implements KdbApi {
         KdbRet ret = post(getServer(), flowInfo, EDIT_FLOW_URL, String.class, false);
 //        log.info("编辑逻辑编排响应:{}", JsonUtil.toJson(ret));
         if (ret.getErrorCode() != 0) {
-            throw BusinessException.serviceThrow("保存失败,错误信息:" + ret.getMessage());
+            throw BusinessException.serviceThrow(I18n.t("KdbApiAbstract.error1","保存失败,错误信息:{0}", ret.getMessage()) );
         }
     }
 
@@ -263,7 +264,7 @@ public abstract class KdbApiAbstract implements KdbApi {
             String responseBody = HttpUtil.postBody(url, requestBody, Collections.emptyMap(), anyone);
             KdbRet<T> ret = JsonUtil.toBean(responseBody, KdbRet.class, tClass);
             if (ret == null) {
-                throw new OrmDbException("响应数据不合法" + responseBody);
+                throw new OrmDbException(I18n.t("KdbApiAbstract.error2", "响应数据不合法" )+ responseBody);
             }
             return ret;
         } catch (HttpClientException e) {
@@ -281,7 +282,7 @@ public abstract class KdbApiAbstract implements KdbApi {
             String responseBody = HttpUtil.uploadFile(url, fileName, "file", inputStream, path);
             KdbRet<String> ret = JsonUtil.toBean(responseBody, KdbRet.class, String.class);
             if (ret == null) {
-                throw new OrmDbException("kdb响应数据不合法，响应内容:" + responseBody);
+                throw new OrmDbException(I18n.t("KdbApiAbstract.kdb", "kdb响应数据不合法，响应内容:") + responseBody);
             }
             return ret;
         } catch (HttpClientException e) {

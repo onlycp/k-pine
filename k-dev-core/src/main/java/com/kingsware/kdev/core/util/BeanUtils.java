@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.util;
 
+import com.kingsware.kdev.core.i18n.I18n;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -199,7 +200,7 @@ public class BeanUtils {
             org.springframework.beans.BeanUtils.copyProperties(src, dst);
             return dst;
         } catch (InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException("对象拷贝失败");
+            throw new RuntimeException(I18n.t("BeanUtils.copyObjectFail", "对象拷贝失败"));
         }
     }
 
@@ -218,7 +219,7 @@ public class BeanUtils {
                 org.springframework.beans.BeanUtils.copyProperties(obj, dst);
                 tList.add(dst);
             } catch (InstantiationException | IllegalAccessException e) {
-                throw new RuntimeException("对象拷贝失败");
+                throw new RuntimeException(I18n.t("BeanUtils.copyObjectFail", "对象拷贝失败"));
             }
         }
         return tList;

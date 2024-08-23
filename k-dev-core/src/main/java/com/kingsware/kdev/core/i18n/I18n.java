@@ -6,9 +6,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * 国际化工具类
@@ -18,6 +16,30 @@ import java.util.Locale;
  * @date 2021/12/20 10:26 上午
  */
 public class I18n {
+
+    /**
+     * 国际化数据
+     */
+    private static Map<String, Map<String, String>> i18nData = new HashMap<>();
+
+
+    /**
+     * 添加国际化数据
+     * @param key
+     * @param lang
+     * @param message
+     */
+    public static void putI18n(String key, String lang, String message) {
+        if (i18nData.containsKey(key)) {
+            i18nData.get(key).put(lang, message);
+        }
+        else {
+            Map<String, String> map = new HashMap<>();
+            map.put(lang, message);
+            i18nData.put(key, map);
+        }
+    }
+
 
     /**
      * 获取国际化消息
@@ -33,13 +55,33 @@ public class I18n {
      * @return      国际化消息
      */
     public static String t(String key, String defaultMessage, Object... params) {
-        if (params.length == 0) {
-            return defaultMessage;
+        try {
+            // 初始化消息为默认值
+            String message = defaultMessage;
+            // 如果国际化数据中包含给定的键
+            if (i18nData.containsKey(key)) {
+                // 尝试用特定语言获取消息
+                String str = i18nData.get(key).get(lang());
+                // 如果获取的消息为空或仅含空格，则回退到默认消息
+                if (StringUtils.isEmpty(str)) {
+                    message = defaultMessage;
+                }
+                else {
+                    // 否则，使用获取到的消息
+                    message = str;
+                }
+            }
+            // 作为额外的检查，如果此时消息仍然为空或仅含空格，则设置为默认消息
+            if (StringUtils.isEmpty(message)) {
+                message = defaultMessage;
+            }
+            // 使用参数格式化最终的消息，并返回
+            return MessageFormat.format(message, params);
         }
-        else {
-            return MessageFormat.format(defaultMessage, params);
+        // 捕获并处理任何发生的异常，简单返回键作为后备计划
+        catch (Exception e) {
+            return key;
         }
-
     }
 
     public static String lang(HttpServletRequest request) {
@@ -80,8 +122,19 @@ public class I18n {
      */
     public static String lang() {
 
-        HttpServletRequest request = KClientContext.getContext().getRequest();
-        return lang(request);
+        try {
+            HttpServletRequest request = KClientContext.getContext().getRequest();
+            String lang =  lang(request);
+            if (StringUtils.isNotEmpty(lang)) {
+                return lang;
+            }
+            else {
+                return "zh_CN";
+            }
+        }
+        catch (Exception e) {
+            return "zh_CN";
+        }
 
     }
 

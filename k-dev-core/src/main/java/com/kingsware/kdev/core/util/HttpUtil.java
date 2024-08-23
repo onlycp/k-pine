@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.context.NonStaticResourceHttpRequestHandler;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.HttpClientException;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.FaasFailRecord;
 import com.kingsware.kdev.core.plugins.FaasChannelPlugin;
 import lombok.Cleanup;
@@ -140,7 +141,7 @@ public class HttpUtil {
                 return responseBody;
             }
             else {
-                throw new HttpClientException("Get请求失败", connection.getResponseCode(), apiUrl, "");
+                throw new HttpClientException("Get Request Failed", connection.getResponseCode(), apiUrl, "");
             }
         } catch (IOException e) {
             throw new HttpClientException(e.getLocalizedMessage(), -1, apiUrl, "");
@@ -325,7 +326,7 @@ public class HttpUtil {
             }
             else {
                 log.info("当前模式:{}, 找不到插件", faasCallMode);
-                throw new HttpClientException("faas插件找不到", -1, apiUrl, "");
+                throw new HttpClientException("Faas plugin Not Found!", -1, apiUrl, "");
             }
 
         }
@@ -401,7 +402,7 @@ public class HttpUtil {
 
         } catch (Exception e) {
             log.error("error", e);
-            throw BusinessException.serviceThrow("Faas文件上传失败");
+            throw BusinessException.serviceThrow("Faas upload failed");
         }finally {
             long t2 = System.currentTimeMillis();
             log.info("文件{},上传用时: {}", fileName , (t2 - t1));
@@ -478,7 +479,7 @@ public class HttpUtil {
 
         } catch (Exception e) {
             log.error("error", e);
-            throw BusinessException.serviceThrow("Faas文件上传失败");
+            throw BusinessException.serviceThrow("Faas upload failed");
         }finally {
             long t2 = System.currentTimeMillis();
             log.info("文件{},上传用时: {}", fileName , (t2 - t1));
@@ -555,7 +556,7 @@ public class HttpUtil {
             return tempFile;
         } catch (Exception e) {
             log.error("error", e);
-            throw BusinessException.serviceThrow("文件下载失败");
+            throw BusinessException.serviceThrow(I18n.t("HttpUtil.fileDownloadFail", "文件下载失败"));
 
         } finally {
             if (connection != null)
@@ -705,7 +706,7 @@ public class HttpUtil {
 
         } catch (Exception e) {
             log.error("error", e);
-            throw BusinessException.serviceThrow("文件下载失败");
+            throw BusinessException.serviceThrow(I18n.t("HttpUtil.fileDownloadFail", "文件下载失败"));
 
         } finally {
             if (connection != null)

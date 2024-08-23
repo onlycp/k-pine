@@ -14,6 +14,7 @@ import com.kingsware.kdev.core.cache.instance.InstanceManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.bean.ComplexValue;
 import com.kingsware.kdev.core.kflow.bean.ErrorResult;
 import com.kingsware.kdev.core.kflow.bean.KFlowMessage;
@@ -186,7 +187,7 @@ public class FlowUtils {
                                 }
                             }
                             catch (Exception e) {
-                                throw new BusinessException("输入参数不合法，定义的类型为:" + pType +", 传入值为:" + strValue);
+                                throw new BusinessException(I18n.t("FlowUtils.error1","输入参数不合法，定义的类型为:{0}, 传入值为: {1}" , pType, strValue));
                             }
 
                         }
@@ -281,7 +282,7 @@ public class FlowUtils {
                             params = new ObjectMapper().readValue(body, List.class);
                         }
                         catch (JsonProcessingException e) {
-                            throw new BusinessException("函数参数解析异常，函数名:" + methodName +", 参数:" + body);
+                            throw new BusinessException(I18n.t("FlowUtils.error2","函数参数解析异常，函数名: {0}, 参数: {1}", methodName, body)) ;
                         }
                     }
                     retValue = Functions.call(methodName, params);
@@ -488,12 +489,12 @@ public class FlowUtils {
                 }
                 else {
                     map.put("code", 600);
-                    map.put("message", "执行结果适配器异常:" + retBody.getMessage());
+                    map.put("message", I18n.t("FlowUtils.error3", "执行结果适配器异常:{0}",  retBody.getMessage()));
                     map.put("data", null);
                 }
             } catch (Exception e) {
                 map.put("code", 600);
-                map.put("message", "执行结果适配器异常:" + e.getMessage());
+                map.put("message", I18n.t("FlowUtils.error3", "执行结果适配器异常:{0}",  e.getMessage()));
                 map.put("data", null);
             }
         }

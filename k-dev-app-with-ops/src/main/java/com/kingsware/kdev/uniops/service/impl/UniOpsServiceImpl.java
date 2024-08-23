@@ -9,6 +9,7 @@ import com.kingsware.kdev.core.config.UiConfig;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.FlowUtils;
 import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.core.orm.DB;
@@ -120,7 +121,7 @@ public class UniOpsServiceImpl implements UniOpsService {
                     }
                     else {
                         log.info("iisuper：6" );
-                        throw BusinessException.serviceThrow("uniops获取用户信息失败:" + body);
+                        throw BusinessException.serviceThrow(I18n.t("UniOpsServiceImpl.GetUniopsUserFail","uniops获取用户信息失败")  + ":"+ body);
                     }
 
                 }
@@ -256,7 +257,7 @@ public class UniOpsServiceImpl implements UniOpsService {
         }
         catch (Exception e) {
             log.error("error:{}" ,e);
-            throw BusinessException.serviceThrow("应用包数据解析异常");
+            throw BusinessException.serviceThrow(I18n.t("UniOpsServiceImpl.fileParseFail", "应用包数据解析异常"));
         }
     }
 
@@ -312,7 +313,7 @@ public class UniOpsServiceImpl implements UniOpsService {
             log.info("发布成功");
         } catch (Exception e) {
             log.error("error:{}",e);
-            throw BusinessException.serviceThrow("应用包数据解析异常");
+            throw BusinessException.serviceThrow(I18n.t("UniOpsServiceImpl.fileParseFail", "应用包数据解析异常"));
         }
     }
 

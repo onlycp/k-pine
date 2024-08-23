@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.util;
 
+import com.kingsware.kdev.core.i18n.I18n;
 import org.lionsoul.ip2region.xdb.Searcher;
 
 import java.io.IOException;
@@ -19,7 +20,7 @@ public class IpUtils {
      * @return 地址
      */
     public static String getAddressByIp(String ip) {
-        String address = "未知";
+        String address = I18n.t("IpUtils.unknown", "未知") ;
         // 1、创建 searcher 对象
         String dbPath = "ip2region.xdb";
         Searcher searcher = null;

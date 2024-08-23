@@ -403,10 +403,10 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 SysAuthSource sysAuthSource = DB.findOne(SysAuthSource.class, "select * from sys_auth_source where code=?", authMode);
                 if (sysAuthSource == null) {
 
-                    throw BusinessException.serviceThrow("认证不支持！");
+                    throw BusinessException.serviceThrow(I18n.t("SysUser.tip.modeNotSupport", "认证不支持！") );
                 }
                 if (sysAuthSource.getStatus() != 1) {
-                    throw BusinessException.serviceThrow("认证未启用！");
+                    throw BusinessException.serviceThrow(I18n.t("SysUser.tip.modeNotEnable","认证未启用！"));
                 }
                 // 获取视图模型
                 KFlowContext context = KFlowContext.createBaseContext( "{}",  "{}");
@@ -422,7 +422,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                     throw BusinessException.serviceThrow(errorResult.getMessage());
                 }
                 if(!(result.getData() instanceof Map)) {
-                    throw BusinessException.serviceThrow("认证逻辑响应结果不符合预期，应返回json对象字符串！");
+                    throw BusinessException.serviceThrow(I18n.t("SysUser.tip.resultCheckFail", "认证逻辑响应结果不符合预期，应返回json对象字符串！"));
                 }
                 Map<String, Object> authRetMap = (Map<String, Object>)result.getData();
                 username = authRetMap.get("username").toString();
@@ -450,7 +450,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 userId = (String) beforeFlowResultMap.getOrDefault("userId", null);
             }
             if (hasValid && !isValid) {
-                throw BusinessException.serviceThrow(message != null ? message : "验证未通过！");
+                throw BusinessException.serviceThrow(message != null ? message : I18n.t("SysUser.tip.authFail", "验证未通过！") );
             }
 
 
@@ -478,7 +478,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 if((lockTime + userLockMs) >= System.currentTimeMillis())  {
                     // 移除当前登录次数缓存
                     sysCacheService.removeCache(cacheKey);
-                    throw BusinessException.serviceThrow("用户已被锁定，请稍后再试！");
+                    throw BusinessException.serviceThrow(I18n.t("SysUser.tip.userLocked", "用户已被锁定，请稍后再试！") );
                 }
                 // 移除
                 sysCacheService.removeCache(lockCacheKey);
@@ -501,18 +501,18 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 boolean codeValid = checkVerifyCode(verifyUuid, code, encryptCode);
                 // 默认校验验证码的是为真
                 if (!codeValid) {
-                    throw BusinessException.serviceThrow("验证码有误！", true);
+                    throw BusinessException.serviceThrow(I18n.t("SysUser.tip.codeFail", "验证码有误！"), true);
                 }
             }
 
-            String errorMessage = String.format("用户名或密码有误，您还有%s次机会输入，达到次数之后，账户将被锁定%d分钟", countOfLeave, userLockMinutes);
+            String errorMessage = I18n.t("SysUser.tip.fail1","用户名或密码有误，您还有{0}次机会输入，达到次数之后，账户将被锁定{1}分钟", countOfLeave, userLockMinutes);
             if (model == null) {
                 Boolean showCode = false;
                 if(countOfLeave == 0)   {
                     sysCacheService.setCache(lockCacheKey, System.currentTimeMillis() + "");
                     // 移除当前登录次数缓存
                     sysCacheService.removeCache(cacheKey);
-                    throw BusinessException.serviceThrow(String.format("由于密码错误连续次数已达到%s次，用户被锁定%d分钟", allowErrorCount, userLockMinutes));
+                    throw BusinessException.serviceThrow(I18n.t("SysUser.tip.fail2","由于密码错误连续次数已达到{0}次，用户被锁定{1}分钟", allowErrorCount, userLockMinutes));
                 }
                 // 记录密码错误
                 userLoginPasswordErrorCount++;
@@ -528,7 +528,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 if (!EncryptWorker.getInstance().validate(argv.get("password").toString(), model.getPassword())) {
                     if(countOfLeave == 0)   {
                         sysCacheService.setCache(lockCacheKey, System.currentTimeMillis() + "");
-                        throw BusinessException.serviceThrow(String.format("密码错误连续次数已达到%s次，用户将被锁定%d分钟", allowErrorCount, userLockMinutes));
+                        throw BusinessException.serviceThrow(I18n.t("SysUser.tip.fail3","密码错误连续次数已达到{0}次，用户将被锁定{1}分钟", allowErrorCount, userLockMinutes));
                     }
                     // 记录密码错误
                     userLoginPasswordErrorCount++;
@@ -558,7 +558,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             List<String> accessIds = DB.findSingleAttributeList(String.class, accessSql, model.getId(), model.getId());
 
             if (userInfo.getRoleIds() == null || userInfo.getRoleIds().isEmpty()) {
-                throw new UnauthorizedException("你当前没有权限访问系统功能，请联系业务部门授权后，再访问系统。");
+                throw new UnauthorizedException(I18n.t("SysUser.tip.notRoles", "你当前没有权限访问系统功能，请联系业务部门授权后，再访问系统。"));
             }
             userInfo.setAccessIds(StringUtils.joinToString(accessIds, ","));
             // 保存登录会话
@@ -585,7 +585,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 TokenPair tokenPair = TokenUtil.createToken(appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), KClientContext.getContext().getIp(), kSessionId, userInfo);
                 String token = tokenPair.getToken();
                 if (StringUtils.isEmpty(token)) {
-                    throw BusinessException.serviceThrow(message != null ? message : "登录失败，请检查登录信息是否有误！");
+                    throw BusinessException.serviceThrow(message != null ? message : I18n.t("SysUser.tip.loginFail", "登录失败，请检查登录信息是否有误！"));
                 }
                 // 创建在线用户
                 existOnlineUser = new SysOnlineUser();
@@ -707,17 +707,17 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         BaseUserInfo userInfo = TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), ip, appAuthProperties.getTokenExpireMinutes(), appAuthProperties.getMockSessionExpireMinutes());
         SysUser model = DB.findById(SysUser.class, userInfo.getId());
         if (model == null) {
-            throw BusinessException.serviceThrow("登录凭证已失效，请重新登录！");
+            throw BusinessException.serviceThrow(I18n.t("SysUser.tip.loginExpire", "登录凭证已失效，请重新登录！"));
         }
         // 把参数里的加密密码解密出来
         argv.setOldPassword(decodeBase64(argv.getOldPassword()));
         argv.setNewPassword(decodeBase64(argv.getNewPassword()));
 
         if (!EncryptWorker.getInstance().validate(argv.getOldPassword(), model.getPassword())) {
-            throw BusinessException.serviceThrow("旧密码有误！");
+            throw BusinessException.serviceThrow(I18n.t("SysUser.tip.oldPasswordFail", "旧密码有误！") );
         }
         if (EncryptWorker.getInstance().validate(argv.getNewPassword(), model.getPassword())) {
-            throw BusinessException.serviceThrow("重置的密码不可以与旧密码一样！");
+            throw BusinessException.serviceThrow(I18n.t("SysUser.tip.passwordSame", "重置的密码不可以与旧密码一样！") );
         }
         model.setPassword(EncryptWorker.getInstance().encrypt(argv.getNewPassword()));
         // 保存
@@ -829,22 +829,22 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     @Override
     public void encryptChange(String from, String to, String secret) {
         if (StringUtils.isEmpty(secret)) {
-            throw BusinessException.serviceThrow("AES密码不能为空");
+            throw BusinessException.serviceThrow(I18n.t("SysUser.tip.aesPasswordEmpty", "AES密码不能为空"));
         }
         if (StringUtils.isEmpty(from)) {
-            throw BusinessException.serviceThrow("源加密方法不能为空");
+            throw BusinessException.serviceThrow(I18n.t("SysUser.tip.sourceMethodEmpty", "源加密方法不能为空") );
         }
         if (StringUtils.isEmpty(from)) {
-            throw BusinessException.serviceThrow("目标加密方法不能为空");
+            throw BusinessException.serviceThrow(I18n.t("SysUser.tip.dstMethodEmpty", "目标加密方法不能为空"));
         }
         if (!secret.equals(encryptProperties.getAes().getSecret())) {
-            throw BusinessException.serviceThrow("AES密钥不正确");
+            throw BusinessException.serviceThrow(I18n.t("SysUser.tip.aesSecretyFail", "AES密钥不正确"));
         }
         Set<String> supportEncrypts = new HashSet<>();
         supportEncrypts.add("aes");
         supportEncrypts.add("base64");
         if (!supportEncrypts.contains(from) || !supportEncrypts.contains(to)) {
-            throw BusinessException.serviceThrow("当前只支持aes和base64加解密方式");
+            throw BusinessException.serviceThrow(I18n.t("SysUser.tip.aesbase64", "当前只支持aes和base64加解密方式"));
         }
         // 读取所有的用户
         List<SysUser> users = DB.findList(SysUser.class, Collections.emptyList());
@@ -856,10 +856,10 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 originPassword = AESUtil.decrypt(user.getPassword(), encryptProperties.getAes().getSecret());
             }
             if (!StringUtils.isAsciiPrintable(originPassword)) {
-                throw BusinessException.serviceThrow("解密之后的字符串不可读，请重新确认加解密方法");
+                throw BusinessException.serviceThrow(I18n.t("SysUser.tip.encryptFail1","解密之后的字符串不可读，请重新确认加解密方法"));
             }
             if (StringUtils.isEmpty(originPassword)) {
-                throw BusinessException.serviceThrow("存在密码无法解密，请重新确认加解密方法");
+                throw BusinessException.serviceThrow(I18n.t("SysUser.tip.encryptFail2", "存在密码无法解密，请重新确认加解密方法"));
             }
 
             String afterPassword = null;
@@ -869,7 +869,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 afterPassword = AESUtil.encrypt(originPassword, encryptProperties.getAes().getSecret());
             }
             if (StringUtils.isEmpty(afterPassword)) {
-                throw BusinessException.serviceThrow("存在密码无法加密，请重新确认加解密方法");
+                throw BusinessException.serviceThrow(I18n.t("SysUser.tip.encryptFail3", "存在密码无法加密，请重新确认加解密方法"));
             }
             user.setPassword(afterPassword);
         }
@@ -880,12 +880,12 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     public void resetPassword(SysUserResetPasswordArgv argv) {
         SysUser model = DB.findById(SysUser.class, argv.getUserId());
         if (model == null) {
-            throw BusinessException.serviceThrow("用户不存在！");
+            throw BusinessException.serviceThrow(I18n.t("SysUser.tip.userNotFound", "用户不存在！"));
         }
         // 把参数里的加密密码解密出来
         argv.setPassword(decodeBase64(argv.getPassword()));
         if (EncryptWorker.getInstance().validate(argv.getPassword(), model.getPassword())) {
-            throw BusinessException.serviceThrow("重置的密码不可以与旧密码一样！");
+            throw BusinessException.serviceThrow(I18n.t("SysUser.tip.passwordSame", "重置的密码不可以与旧密码一样！"));
         }
         model.setPassword(EncryptWorker.getInstance().encrypt(argv.getPassword()));
         // 保存
@@ -921,7 +921,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             SysConfigInfo passwordValidate = ConfigManager.getInstance().getItem(passwordValidateKey);
             SysConfigInfo passwordValidateMessage = ConfigManager.getInstance().getItem(passwordValidateMessageKey);
             String validate = "^(?![a-zA-Z]+$)(?![A-Z0-9]+$)(?![A-Z\\W_-]+$)(?![a-z0-9]+$)(?![a-z\\W_-]+$)(?![0-9\\W_-]+$)[a-zA-Z0-9\\W_-]";
-            String validateMessage = "必须包含大写字母，小写字母，数字，特殊符号'_-'中任意3项";
+            String validateMessage = I18n.t("SysUser.tip.passwordRule1", "必须包含大写字母，小写字母，数字，特殊符号'_-'中任意3项");
             AppModeProperties appModeProperties = SpringContext.getBean(AppModeProperties.class);
             // 仅非开发模式可用自定义密码校验
             if (!appModeProperties.getDev() && passwordValidate != null) {
@@ -1095,12 +1095,12 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             }
             log.error("生成验证码有误： ", e);
         }
-        return BaseRet.failMessage("生成验证码有误");
+        return BaseRet.failMessage(I18n.t("SysUser.tip.codeFail1", "生成验证码有误") );
     }
 
     @Override
     public BaseRet<?> validVerificationCode(String uuid, String code, String encryptCode) {
-        return checkVerifyCode(uuid, code, encryptCode) ? BaseRet.success(true) : BaseRet.failMessage("验证码有误！");
+        return checkVerifyCode(uuid, code, encryptCode) ? BaseRet.success(true) : BaseRet.failMessage(I18n.t("SysUser.tip.codeFail2", "验证码有误！"));
     }
 
     @Override

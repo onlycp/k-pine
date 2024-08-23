@@ -3,6 +3,7 @@ package com.kingsware.kdev.core.util;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.annotation.Column;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +52,7 @@ public class JsonUtil {
         try {
             return objectMapper.readValue(jsonString, tClass);
         } catch (JsonProcessingException e) {
-            throw  new RuntimeException(String.format("字符串转为对象失败, 源串:%s", jsonString));
+            throw  new RuntimeException(I18n.t("JsonUtil.error1", "字符串转为对象失败, 源串:{0}", jsonString));
         }
     }
 

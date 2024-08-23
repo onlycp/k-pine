@@ -3,6 +3,7 @@ package com.kingsware.kdev.uniops.web;
 import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.constants.Version;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.sys.model.SysMenu;
 import com.kingsware.kdev.uniops.argv.DevPublishArgv;
 import com.kingsware.kdev.uniops.argv.ToPageArgv;
@@ -45,7 +46,7 @@ public class UniopsSSoController {
     @ApiIgnore
     public BaseRet<?> publish(@RequestBody DevPublishArgv argv) {
         this.uniOpsService.publish(argv);
-        return BaseRet.successMessage("发布成功");
+        return BaseRet.successMessage(I18n.t("UniopsSSoController.publishSuccess", "发布成功"));
     }
 
     @ApiOperation(value = "卸载 " ,notes = "卸载")
@@ -54,7 +55,7 @@ public class UniopsSSoController {
     @ApiIgnore
     public BaseRet<?> uninstall(@RequestBody List<SysMenu> menus) {
         this.uniOpsService.uninstall(menus);
-        return BaseRet.successMessage("卸载成功");
+        return BaseRet.successMessage(I18n.t("UniopsSSoController.publishFail", "卸载成功"));
     }
 
     @ApiOperation(value = "卸载 " ,notes = "卸载")

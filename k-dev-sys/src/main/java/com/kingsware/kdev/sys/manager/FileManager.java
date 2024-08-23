@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.constants.PropertiesConstant;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.encrypt.EncryptProperties;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.KdbRet;
 import com.kingsware.kdev.core.plugins.CdnPlugin;
@@ -96,13 +97,13 @@ public class FileManager {
 
             if (!withoutChecking) {
                 if (!FileUtils.checkFileNaming(fileName)) {
-                    throw BusinessException.serviceThrow("文件名命名不符合规范，请重新命名后再上传!");
+                    throw BusinessException.serviceThrow(I18n.t("FileManager.nameFailTip", "文件名命名不符合规范，请重新命名后再上传!"));
                 }
                 if (!FileUtils.checkFileFrom(fileFrom)) {
-                    throw BusinessException.serviceThrow("文件目录命名不符合规范!");
+                    throw BusinessException.serviceThrow(I18n.t("FileManager.dirCheckFailTip", "文件目录命名不符合规范!") );
                 }
                 if (!FileUtils.checkFileExt(fileExt)) {
-                    throw BusinessException.serviceThrow(fileExt + "文件后缀名不在上传文件白名单中!");
+                    throw BusinessException.serviceThrow(fileExt + I18n.t("FileManager.suffixCheckFail", "文件后缀名不在上传文件白名单中!"));
                 }
             }
 
@@ -123,7 +124,7 @@ public class FileManager {
             // 如果存在方式为数据库，那么这里将文件转为base54
             if(saveType == 0) {
                 if(fileSize > 2*1024*1024) {
-                    throw BusinessException.serviceThrow("文件过大，不允许存储到数据库!");
+                    throw BusinessException.serviceThrow(I18n.t("FileManager.failSaveToDBTip", "文件过大，不允许存储到数据库!")) ;
                 }
                 sysFile.setFileContent(new String(Base64.getEncoder().encode(FileCopyUtils.copyToByteArray(inputStream))));
                 // 文件md5码
@@ -162,7 +163,7 @@ public class FileManager {
                 }
                 KdbRet<String> kdbRet =  DB.kdbApi().uploadFile(inputStream, saveFileName, filePath);
                 if (!"成功".equals(kdbRet.getMessage())) {
-                    throw BusinessException.serviceThrow("文件存储失败,错误信息:" + kdbRet.getMessage());
+                    throw BusinessException.serviceThrow(I18n.t("FileManager.saveToFaasFail", "文件存储失败,错误信息:{0}", kdbRet.getMessage()));
                 }
                 FaasUploadRet faasUploadRet = JsonUtil.toBean(kdbRet.getResponseBody(), FaasUploadRet.class);
                 sysFile.setFilePath(fileFrom + "/" + faasUploadRet.getFileName());
@@ -200,7 +201,7 @@ public class FileManager {
             return sysFile;
         }
         catch (IOException e) {
-            throw BusinessException.serviceThrow("源文件路径不存在, IO异常:" + e.getMessage());
+            throw BusinessException.serviceThrow(I18n.t("FileManager.pathNoExistTip", "源文件路径不存在, IO异常:{0}", e.getMessage()));
         }
     }
 

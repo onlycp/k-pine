@@ -1,6 +1,7 @@
 package com.kingsware.kdev.core.util;
 
 import com.kingsware.kdev.core.bean.FileEntry;
+import com.kingsware.kdev.core.i18n.I18n;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 
@@ -95,7 +96,7 @@ public class ZipUtils {
     public static void unzip(String destDirPath, String path) throws Exception {
         File file = new File(path);
         if (!file.exists()) {
-            throw new Exception("源目标路径：[" + path + "] 不存在...");
+            throw new Exception(I18n.t("ZipUtils.pathNotFound", "源目标路径：[{0}] 不存在...", path));
         }
         // 开始解压
         ZipFile zipFile = null;

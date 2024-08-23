@@ -121,7 +121,7 @@ public class TokenUtil {
         // 如果令牌为空
         if (StringUtils.isEmpty(token)) {
             logger.info("token: {}", token);
-            throw new UnauthorizedException(I18n.t("auth. unauthorized-e001", "用户未登录，代码: E001"));
+            throw new UnauthorizedException(I18n.t("auth.unauthorized-e001", "用户未登录，代码: E001"));
         }
         token = autoGetToken(token);
         // 解密令牌
@@ -129,14 +129,14 @@ public class TokenUtil {
         // 如果令牌无法解密
         if (StringUtils.isEmpty(decryptToken)) {
             logger.info("token: {}", token);
-            throw new UnauthorizedException(I18n.t("auth. unauthorized-e002", "用户未登录，代码: E002"));
+            throw new UnauthorizedException(I18n.t("auth.unauthorized-e002", "用户未登录，代码: E002"));
         }
         AuthToken authToken;
         try {
             authToken = new ObjectMapper().readValue(decryptToken, AuthToken.class);
         } catch (JsonProcessingException e) {
             // 如果令牌无法转为实体
-            throw new UnauthorizedException(I18n.t("auth. unauthorized-e003", "用户未登录，代码: E003"));
+            throw new UnauthorizedException(I18n.t("auth.unauthorized-e003", "用户未登录，代码: E003"));
         }
         // 校验发行机构
 //        if (!iss.equals(authToken.getIss())) {
@@ -153,7 +153,7 @@ public class TokenUtil {
             long expireTime = authToken.getWhenCreated() + ((long) tokenExpireMinutes * 60 * 1000);
             if (expireTime < System.currentTimeMillis()) {
                 logger.info("token: {}", token);
-                throw new UnauthorizedException(I18n.t("auth. unauthorized-e006", "登录已失效"));
+                throw new UnauthorizedException(I18n.t("auth.unauthorized-e006", "登录已失效"));
             }
         }
         // 否则，走传统的session方案
@@ -161,7 +161,7 @@ public class TokenUtil {
             TokenSession ts = SessionManager.getInstance().getByToken(authToken.getUserInfo().getId(), token);
             if (ts == null) {
                 logger.info("token: {}", token);
-                throw new UnauthorizedException(I18n.t("auth. unauthorized-e007", "登录会话不存在，请重新登录"));
+                throw new UnauthorizedException(I18n.t("auth.unauthorized-e007", "登录会话不存在，请重新登录"));
             }
             long expireTime = ts.getActiveTime().getTime() + ((long) mockSessionExpireMinutes * 60 * 1000);
             logger.info("session过期时间:{}", DateUtils.formatDate(new Date(expireTime), "yyyy-MM-dd HH:mm:ss"));
@@ -174,7 +174,7 @@ public class TokenUtil {
                     SessionManager.getInstance().removeSession(onlineUser.getUserId(), onlineUser.getLoginToken());
                 }
                 logger.info("token: {}", token);
-                throw new UnauthorizedException(I18n.t("auth. unauthorized-e006", "登录已失效"));
+                throw new UnauthorizedException(I18n.t("auth.unauthorized-e006", "登录已失效"));
             }
         }
         AppAuthProperties appAuthProperties = SpringContext.getBean(AppAuthProperties.class);
@@ -191,7 +191,7 @@ public class TokenUtil {
 
             }
             if (!SessionManager.getInstance().checkSession(authToken.getUserInfo().getId(), token)) {
-                throw new UnauthorizedException(I18n.t("auth. unauthorized-e007", "用户已在别处登录"));
+                throw new UnauthorizedException(I18n.t("auth.unauthorized-e007", "用户已在别处登录"));
             }
         }
 

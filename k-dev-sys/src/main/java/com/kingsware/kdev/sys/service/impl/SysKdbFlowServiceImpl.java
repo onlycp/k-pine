@@ -7,6 +7,7 @@ import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.jsonschema.JsonschemaMock;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
@@ -264,10 +265,10 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         for (SysFlowDefineArgv.Link link : argv.getLinks()) {
             // 先校验
             if (StringUtils.isEmpty(link.getSource()) || StringUtils.isEmpty(link.getTarget())) {
-                throw BusinessException.serviceThrow(String.format("连线:%s的开始和结束节点均不能为空！", link.getLabel()));
+                throw BusinessException.serviceThrow(I18n.t("SysKdbFlowServiceImpl.linkEmptyTip","连线的开始和结束节点均不能为空！"));
             }
             if (link.getTarget().equals(link.getSource())) {
-                throw BusinessException.serviceThrow(String.format("连线:%s的开始和结束节点不能是同一个！", link.getLabel()));
+                throw BusinessException.serviceThrow(I18n.t("SysKdbFlowServiceImpl.allInOneTip","连线开始和结束节点不能是同一个！"));
             }
             NodeLink nodeLink = new NodeLink();
             nodeLink.setId(link.getId());
@@ -483,7 +484,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             kdbFlowArgv.setTags(logicFlow.getTags());
         }
         kdbFlowArgv.setContent(kdbFlow.getContent());
-        kdbFlowArgv.setName(kdbFlow.getName() + "副本");
+        kdbFlowArgv.setName(kdbFlow.getName() + I18n.t("common.copied", "副本") );
         kdbFlowArgv.setDescription(kdbFlow.getDescription());
         // 直接调用新增接口
         add(kdbFlowArgv);
@@ -578,13 +579,13 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         KdbApi api = DB.kdbApi();
         List<FlowInfo> list = api.query(argvName);
         if (list.size() > 1) {
-            throw BusinessException.serviceThrow("存在多个名称相同的流程");
+            throw BusinessException.serviceThrow(I18n.t("SysKdbFlowServiceImpl.nameDuplicate", "存在多个名称相同的流程"));
         }
         // 如果是空，则是新增
         SysKdbFlowArgv argv = new SysKdbFlowArgv();
         argv.setName(name);
         argv.setContent(content);
-        argv.setDescription("这个人很懒，什么都没有留下");
+        argv.setDescription(I18n.t("SysKdbFlowServiceImpl.defaultNote", "这个人很懒，什么都没有留下"));
         if (list.isEmpty()) {
             add(argv);
         } else {
@@ -640,7 +641,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         // 拷贝逻辑编排数据
         CopyAppManager.getInstance().copyFlowData(id, context, copyProcessData);
         if (copyProcessData.getToCopySet().size() <= 1) {
-            throw BusinessException.serviceThrow("当前逻辑编排流程定义为空，不允许拷贝！");
+            throw BusinessException.serviceThrow(I18n.t("SysKdbFlowServiceImpl.logicEmptyCopyFail", "当前逻辑编排流程定义为空，不允许拷贝！"));
         }
         // 开始替换
         CopyAppManager.getInstance().action(copyProcessData, context);

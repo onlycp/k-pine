@@ -5,6 +5,7 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.excel.ExcelWorker;
 import com.kingsware.kdev.core.excel.KExcel;
 import com.kingsware.kdev.core.excel.RegionDefine;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.annotation.Transactional;
@@ -76,17 +77,17 @@ public class SysLoginLogServiceImpl extends BaseServiceImpl implements SysLoginL
         // 定义标题
         List<RegionDefine> defineList = new ArrayList<>();
         defineList.add(RegionDefine.builder().propName("id").labelName("ID").build());
-        defineList.add(RegionDefine.builder().propName("operator").labelName("用户名").build());
-        defineList.add(RegionDefine.dateTimeDefine("operateTime", "登录时间"));
+        defineList.add(RegionDefine.builder().propName("operator").labelName(I18n.t("LoginLog.username", "用户名")).build());
+        defineList.add(RegionDefine.dateTimeDefine("operateTime", I18n.t("LoginLog.loginTime", "登录时间")));
         defineList.add(RegionDefine.builder().propName("ip").labelName("IP").build());
-        defineList.add(RegionDefine.builder().propName("address").labelName("地址").build());
-        defineList.add(RegionDefine.builder().propName("times").labelName("耗时").build());
-        defineList.add(RegionDefine.builder().propName("responseCode").labelName("响应码").build());
-        defineList.add(RegionDefine.builder().propName("responseMessage").labelName("响应消息").build());
+        defineList.add(RegionDefine.builder().propName("address").labelName(I18n.t("LoginLog.address", "地址")).build());
+        defineList.add(RegionDefine.builder().propName("times").labelName(I18n.t("LoginLog.takeTime", "耗时")).build());
+        defineList.add(RegionDefine.builder().propName("responseCode").labelName(I18n.t("LoginLog.responseCode", "响应码")).build());
+        defineList.add(RegionDefine.builder().propName("responseMessage").labelName(I18n.t("LoginLog.responseMessage", "响应消息")).build());
 
 
         // 导出
-        KExcel kExcel = KExcel.fromDataList("登录日志.xls", "登录日志", defineList, pageDataRet.getList());
+        KExcel kExcel = KExcel.fromDataList(I18n.t("LoginLog.title", "登录日志") + ".xls", I18n.t("LoginLog.title", "登录日志") , defineList, pageDataRet.getList());
         ExcelWorker.getInstance().writeToWeb(kExcel);
     }
 
