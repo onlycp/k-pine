@@ -235,7 +235,7 @@ public class SessionManager {
                 if (onlineUser.isMe(loginToken)) {
                     if (updateExpired) {
                         onlineUser.setActiveTime(new Timestamp(System.currentTimeMillis()));
-                        log.info("更新活动时间:{}", DateUtils.formatDate(onlineUser.getActiveTime(), DateUtils.DATE_TIME));
+                        //log.info("更新活动时间:{}", DateUtils.formatDate(onlineUser.getActiveTime(), DateUtils.DATE_TIME));
                         onlineUser.setHasChanged(true);
                         onlineUser.setExpireTime(new Timestamp(onlineUser.getActiveTime().getTime() + (long) mockSessionExpireTime * 1000 * 60));
                         InstanceManager.getInstance().broadMessage("session-update", JsonUtil.toJson(onlineUser));

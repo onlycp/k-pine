@@ -9,6 +9,7 @@ import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.define.FlowDefinition;
 import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.orm.DataBaseProperties;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.orm.exception.TransactionException;
 import com.kingsware.kdev.core.util.HttpUtil;
@@ -169,25 +170,42 @@ public abstract class KdbApiAbstract implements KdbApi {
         String[] servers = getServer();
         List<String> newServers = new ArrayList<>();
         // 如果是系统应用
-        String currentAppId = "";
+        String currentAppId;
         if (argv.getVariables().containsKey("_appId")) {
             currentAppId = argv.getVariables().get("_appId") == null ? "" : argv.getVariables().get("_appId").toString();
+        } else {
+            currentAppId = "";
         }
         AppModeProperties appModeProperties = SpringContext.getBean(AppModeProperties.class);
         if (appModeProperties.getDev()) {
-            if (SysConst.pineAppId.equalsIgnoreCase(currentAppId) || servers.length == 1) {
-                log.info("系统应用流程：{}", argv.getFlowID());
-                newServers.addAll(Arrays.asList(servers));
+            DataBaseProperties dataBaseProperties = SpringContext.getBean(DataBaseProperties.class);
+            String appFaasUrl = "";
+            if (dataBaseProperties.getApp2Faas()!= null) {
+                Optional<DataBaseProperties.App2Faas> app2Faas = dataBaseProperties.getApp2Faas().stream().filter(item -> item.getId().equalsIgnoreCase(currentAppId)).findFirst();
+                if (app2Faas.isPresent()) {
+                    appFaasUrl = app2Faas.get().getServer();
+                    log.info("应用流程：{}，应用:{}, 服务器:{}", argv.getFlowID(),  app2Faas.get().getServer(), appFaasUrl);
+                }
+            }
+            if (StringUtils.isNotEmpty(appFaasUrl)) {
+                newServers.add(appFaasUrl);
             }
             else {
-                // 从第二个服务器开始
-                List<String> toSelectServers = Arrays.asList(servers).subList(1, servers.length);
-                // hashcode 应用id，然后取模数
-                int index = Math.abs(currentAppId.hashCode()) % toSelectServers.size();
-                // 加入到队列中
-                newServers.add(toSelectServers.get(index));
-                log.info("开发应用流程：{}， 选择：{}, 服务器:{}", argv.getFlowID(), index+1, toSelectServers.get(index) );
+                if (SysConst.pineAppId.equalsIgnoreCase(currentAppId) || servers.length == 1) {
+//                    log.info("系统应用流程：{}", argv.getFlowID());
+                    newServers.addAll(Arrays.asList(servers));
+                }
+                else {
+                    // 从第二个服务器开始
+                    List<String> toSelectServers = Arrays.asList(servers).subList(1, servers.length);
+                    // hashcode 应用id，然后取模数
+                    int index = Math.abs(currentAppId.hashCode()) % toSelectServers.size();
+                    // 加入到队列中
+                    newServers.add(toSelectServers.get(index));
+//                    log.info("开发应用流程：{}， 选择：{}, 服务器:{}", argv.getFlowID(), index+1, toSelectServers.get(index) );
+                }
             }
+
         }
         else {
             newServers.addAll(Arrays.asList(servers));

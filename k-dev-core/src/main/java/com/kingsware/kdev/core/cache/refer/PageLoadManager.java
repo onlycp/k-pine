@@ -81,7 +81,7 @@ public class PageLoadManager {
             }
             if (uiConfig.isFrontRouter(url, request) ) {
                 // 如果是第一次记录这个请求，则初始化开始时间和结束时间，并加入到map中
-                log.info("页面加载开始【{}】:{}, url:{}", md5, referer, url );
+//                log.info("页面加载开始【{}】:{}, url:{}", md5, referer, url );
                 PageLoadTime pageLoadTime = new PageLoadTime();
                 pageLoadTime.setStart(System.currentTimeMillis());
                 pageLoadTime.setLastEnd(now);

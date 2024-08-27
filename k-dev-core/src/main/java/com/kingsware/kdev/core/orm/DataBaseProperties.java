@@ -33,6 +33,12 @@ public class DataBaseProperties {
     private Map<String, Map<String, String>> sources = new HashMap<>();
 
     /**
+     * 应用与faas的映射关系
+     */
+    private List<App2Faas> app2faas;
+
+
+    /**
      * 获取所有的配置信息
      * @return  配置信息
      */
@@ -64,5 +70,37 @@ public class DataBaseProperties {
 
     public void setSources(Map<String, Map<String, String>> sources) {
         this.sources = sources;
+    }
+
+
+
+    public static class App2Faas {
+        private String id;
+        private String server;
+
+        // Getters and Setters
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getServer() {
+            return server;
+        }
+
+        public void setServer(String server) {
+            this.server = server;
+        }
+    }
+
+    public List<App2Faas> getApp2Faas() {
+        return app2faas;
+    }
+
+    public void setApp2Faas(List<App2Faas> app2faas) {
+        this.app2faas = app2faas;
     }
 }
