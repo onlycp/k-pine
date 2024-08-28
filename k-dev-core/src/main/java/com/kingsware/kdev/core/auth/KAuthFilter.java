@@ -639,11 +639,11 @@ public class KAuthFilter implements Filter {
         argvMap.put("_appId", api.getAppId());
 //        String key = MD5Utils.md5(request.getRequestURI()) ;
         KdbFlowResult result = null;
-//        boolean userDisableCache = false;
-//        if (argvMap.get("_disableCache") != null && argvMap.get("_disableCache").equals("true")) {
-//            userDisableCache = true;
-//        }
-        if (api.getCacheEnable() != null && api.getCacheEnable() == 1) {
+        boolean disableCache = false;
+        if (argvMap.get("_disableCache") != null && argvMap.get("_disableCache").equals("true")) {
+            disableCache = true;
+        }
+        if (api.getCacheEnable() != null && api.getCacheEnable() == 1 && disableCache == false) {
             String md5Key = ServletUtil.getRequestUuid(request.getRequestURI(), request.getQueryString(), requestBody, request);
             ApiResultCache res = ApiResultCacheManager.getInstance().get(md5Key);
             DynamicTask dynamicTask = SpringContext.getBean(DynamicTask.class);
