@@ -102,6 +102,9 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
             }
             fullPath = newParent.getRouterPath() + fullPath;
         }
+        if(StringUtils.isNotEmpty(fullPath) && !fullPath.startsWith("/")){
+            fullPath = "/"+ fullPath;
+        }
         model.setFullPath(fullPath);
         // 唯一性校验
 //        DBChecker<SysMenu> checker =DBChecker.build(model, SysMenu.class);
