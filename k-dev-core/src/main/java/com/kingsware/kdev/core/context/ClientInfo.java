@@ -44,4 +44,5 @@ public class ClientInfo {
     /** api响应适配器 **/
     private String apiRspAdapter;
 
+
 }

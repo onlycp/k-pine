@@ -82,4 +82,57 @@ public class KdbArgv {
         return this;
     }
 
+    /**
+     * 获取与指定键对应的字符串值
+     * 如果键不存在，则返回默认值；如果值为null，则返回null
+     *
+     * @param key        要获取的变量的键
+     * @param defaultValue  如果键不存在时返回的默认值
+     * @return 对应键的字符串值，如果键不存在或值为null，则返回null
+     */
+    public String getString(String key, String defaultValue) {
+        if (!variables.containsKey(key)) {
+            return defaultValue;
+        }
+        Object value = variables.get(key);
+        if (value == null) {
+            return null;
+        }
+        return value.toString();
+    }
+
+    /**
+     * 获取与指定键对应的整数值
+     * 如果键不存在，则返回默认值；如果值为null，则返回null
+     *
+     * @param key        要获取的变量的键
+     * @param defaultValue  如果键不存在时返回的默认整数值
+     * @return 对应键的整数值，如果键不存在或值为null，则返回null
+     */
+    public Integer getInteger(String key, Integer defaultValue) {
+        if (!variables.containsKey(key)) {
+            return defaultValue;
+        }
+        Object value = variables.get(key);
+        if (value == null) {
+            return null;
+        }
+        return Integer.parseInt(value.toString());
+    }
+
+    /**
+     * 获取与指定键对应的布尔值
+     * 如果键不存在，则返回默认值
+     *
+     * @param key        要获取的变量的键
+     * @param defaultValue  如果键不存在时返回的默认布尔值
+     * @return 对应键的布尔值，如果键不存在则返回默认值
+     */
+    public Boolean getBoolean(String key, Boolean defaultValue) {
+        if (!variables.containsKey(key)) {
+            return defaultValue;
+        }
+        return Boolean.parseBoolean(variables.get(key).toString());
+    }
+
 }
