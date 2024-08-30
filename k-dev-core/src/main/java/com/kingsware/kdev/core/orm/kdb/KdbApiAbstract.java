@@ -212,7 +212,12 @@ public abstract class KdbApiAbstract implements KdbApi {
         }
         return post(newServers.toArray(new String[0]), argv, executeFlowUrl, String.class, true);
     }
-
+    /**
+     * 执行给定的脚本
+     *
+     * @param script 要执行的脚本
+     * @return 返回执行结果
+     */
     @Override
     public KdbRet<String> executeScript(String script) {
         KdbArgv argv = new KdbArgv();
@@ -223,7 +228,30 @@ public abstract class KdbApiAbstract implements KdbApi {
         return ret;
     }
 
+    /**
+     * 使用指定变量执行给定的脚本
+     *
+     * @param script 要执行的脚本
+     * @param variables 用于脚本执行的变量映射
+     * @return 返回执行结果
+     */
+    @Override
+    public KdbRet<String> executeScript(String script, Map<String, Object> variables) {
+        KdbArgv argv = new KdbArgv();
+        argv.setFlowID("faas_script");
+        argv.getVariables().put("script", script);
+        argv.setDebugger(new ArrayList<>());
+        argv.setVariables(variables);
+        KdbRet<String> ret = this.executeFlow(argv, false, false);
+        return ret;
+    }
 
+    /**
+     * 添加新函数
+     *
+     * @param argv 包含要添加函数信息的AddFunctionInfo对象
+     * @throws OrmDbException 如果添加过程中发生错误
+     */
     @Override
     public void addFun(AddFunctionInfo argv) {
         KdbRet ret = post(getServer(), argv, ADD_FUN_URL, String.class, false);
@@ -232,6 +260,12 @@ public abstract class KdbApiAbstract implements KdbApi {
         }
     }
 
+    /**
+     * 编辑现有函数
+     *
+     * @param argv 包含要编辑函数信息的EditFunctionInfo对象
+     * @throws OrmDbException 如果编辑过程中发生错误
+     */
     @Override
     public void editFun(EditFunctionInfo argv) {
         KdbRet ret = post(getServer(), argv, EDIT_FUN_URL, String.class, false);
@@ -240,6 +274,12 @@ public abstract class KdbApiAbstract implements KdbApi {
         }
     }
 
+    /**
+     * 删除指定的函数
+     *
+     * @param funId 要删除函数的ID
+     * @throws OrmDbException 如果删除过程中发生错误
+     */
     @Override
     public void deleteFun(String funId) {
         Map<String, Object> params = new HashMap<>(1);

@@ -5,6 +5,7 @@ import lombok.SneakyThrows;
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 /**
  * kdb操作接口
@@ -163,4 +164,11 @@ public interface KdbApi {
      * @return
      */
     KdbRet<String> executeScript(String script);
+
+    /**
+     * 执行faas插件
+     * @param script
+     * @return
+     */
+    KdbRet<String> executeScript(String script, Map<String, Object> variables);
 }
