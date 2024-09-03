@@ -240,8 +240,8 @@ public abstract class KdbApiAbstract implements KdbApi {
         KdbArgv argv = new KdbArgv();
         argv.setFlowID("faas_script");
         argv.getVariables().put("script", script);
+        argv.getVariables().putAll(variables);
         argv.setDebugger(new ArrayList<>());
-        argv.setVariables(variables);
         KdbRet<String> ret = this.executeFlow(argv, false, false);
         return ret;
     }

@@ -5,6 +5,8 @@ import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.kflow.bean.GitCommit;
 import com.kingsware.kdev.core.kflow.bean.GitFile;
+import com.kingsware.kdev.core.kflow.bean.GitFileHis;
+import com.kingsware.kdev.core.kflow.bean.KOperationRet;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.KdbRet;
 import com.kingsware.kdev.core.util.DateUtils;
@@ -22,6 +24,7 @@ import java.util.Map;
  * @version 1.0.0
  * @date 2024/8/29 09:25
  */
+@SuppressWarnings("all")
 public class AppGit {
 
     private final String repoId;
@@ -44,14 +47,20 @@ public class AppGit {
      * @param script
      * @param variables
      */
-    private Object execute(String script, Map<String, Object> variables) {
+    private String execute(String script, Map<String, Object> variables) {
         // 调用数据库API执行脚本，实现仓库初始化
         KdbRet<String> ret = DB.kdbApi().executeScript(script, variables);
         // 如果执行失败，抛出业务异常
         if (ret.getErrorCode() != 0) {
             throw BusinessException.serviceThrow(ret.getMessage());
         }
-        return ret.getResponseBody();
+        String responseBody = ret.getResponseBody();
+        KOperationRet oper = JsonUtil.toBean(responseBody, KOperationRet.class);
+        if (oper.getStatus() != 0) {
+            throw BusinessException.serviceThrow(ret.getMessage());
+        }
+        return oper.getData();
+
     }
 
     /**
@@ -65,7 +74,7 @@ public class AppGit {
         // 创建GitCommit实例
         GitCommit commit = new GitCommit();
         // 设置提交者为当前上下文的用户名
-        commit.setAuthor(KClientContext.getContext().getUsername());
+        commit.setAuthor(KClientContext.getContext() == null ? "admin": KClientContext.getContext().getUsername());
         // 设置扩展提交ID为仓库ID，用于跟踪仓库
         commit.setExtendCommitId(this.repoId);
         // 设置提交时间为当前时间
@@ -77,6 +86,32 @@ public class AppGit {
         // 返回构建完成的提交对象
         return commit;
     }
+
+    /**
+     * 创建一个新的Git提交对象
+     * 此方法用于初始化一个GitCommit对象，设置提交的基本信息
+     *
+     * @param message 提交信息，记录本次提交的描述和原因
+     * @return 返回初始化完毕的GitCommit对象
+     */
+    public GitCommit getCommit(String author, String time, String message) {
+        // 创建GitCommit实例
+        GitCommit commit = new GitCommit();
+        // 设置提交者为当前上下文的用户名
+        commit.setAuthor(author);
+        // 设置扩展提交ID为仓库ID，用于跟踪仓库
+        commit.setExtendCommitId(this.repoId);
+        // 设置提交时间为当前时间
+        commit.setTime(time);
+        // 初始化标签为空字符串，留待后续可能的设置
+        commit.setTag("");
+        // 设置提交信息为参数提供的信息
+        commit.setMessage(message);
+        // 返回构建完成的提交对象
+        return commit;
+    }
+
+
 
     /**
      * 初始化Git仓库
@@ -105,9 +140,10 @@ public class AppGit {
         // 构造仓库路径，结合基础路径和仓库ID
         variables.put("repoPath", getBasePath() + "/" + repoId);
         // 定义查询仓库是否存在的脚本，使用getResult方法获取变量值
-        Object result = execute("git.existRepo(getResult('repoPath'));", variables);
+        String result = execute("git.existRepo(getResult('repoPath'));", variables);
+        Map<String, Object> resultMap = JsonUtil.toBean(result, Map.class);
         // 返回查询结果
-        return (Boolean) result;
+        return (Boolean) resultMap.get("value");
     }
 
 
@@ -125,18 +161,65 @@ public class AppGit {
      */
     public void addFiles(List<GitFile> gitFiles) {
         // 处理gitFile, 加上basePath
-        for (GitFile gitFile : gitFiles) {
-            gitFile.setPath(getBasePath() + "/" + repoId + "/" + gitFile.getPath());
-        }
+//        for (GitFile gitFile : gitFiles) {
+//            gitFile.setPath(getBasePath() + "/" + repoId + "/" + gitFile.getPath());
+//        }
         // 初始化变量Map，用于存放脚本执行时所需的变量值
         Map<String, Object> variables = new HashMap<>(2);
         variables.put("gitFiles", JsonUtil.toJson(gitFiles));
         variables.put("repoPath", getBasePath() + "/" + repoId);
         // 定义添加文件的脚本，使用getResult方法获取变量值
-        String script = "git.addMultipleFileByPath(getResult('repoPath'), getResult('gitFiles'));";
+        String script = "git.addMultipleFileByContent(getResult('repoPath'), context.get('gitFiles'));";
         // 执行脚本
         execute(script, variables);
     }
+
+    public void batchAddCommit(String filePath, List<GitFileHis> gitFileHis)  {
+        // 处理gitFile, 加上basePath
+//        for (GitFile gitFile : gitFiles) {
+//            gitFile.setPath(getBasePath() + "/" + repoId + "/" + gitFile.getPath());
+//        }
+        // 初始化变量Map，用于存放脚本执行时所需的变量值
+        Map<String, Object> variables = new HashMap<>(2);
+        variables.put("filePath", filePath);
+        variables.put("gitFileHis", JsonUtil.toJson(gitFileHis));
+        variables.put("repoPath", getBasePath() + "/" + repoId);
+        // 定义添加文件的脚本，使用getResult方法获取变量值
+        String script = "git.batchAddCommit(getResult('repoPath'), context.get('filePath'), context.get('gitFileHis'));";
+        // 执行脚本
+        execute(script, variables);
+    }
+
+
+    /**
+     * 批量向指定仓库添加文件
+     *
+     * @param gitFiles 待添加的文件列表，包含每个文件的路径信息
+     * @throws BusinessException 如果执行脚本出错，则抛出业务异常
+     *
+     * 该方法首先遍历待添加的文件列表，对每个文件的路径进行处理，加上基础路径和仓库ID，
+     * 以形成完整的文件系统路径。然后，将处理后的文件列表转换为JSON格式的字符串，
+     * 与其他必要的变量一起，作为脚本执行时的输入参数。接下来，调用Kdb接口执行
+     * 一个添加文件的脚本，该脚本使用传入的仓库路径和文件列表进行操作。如果脚本执行
+     * 出错，即返回的错误码不为0，则抛出业务异常。
+     */
+    public void addCommitFile(GitFile gitFile, GitCommit gitCommit) {
+        // 处理gitFile, 加上basePath
+//        for (GitFile gitFile : gitFiles) {
+//            gitFile.setPath(getBasePath() + "/" + repoId + "/" + gitFile.getPath());
+//        }
+        // 初始化变量Map，用于存放脚本执行时所需的变量值
+        Map<String, Object> variables = new HashMap<>(4);
+        variables.put("repoPath", getBasePath() + "/" + repoId);
+        variables.put("filePath", gitFile.getPath());
+        variables.put("content", gitFile.getContent());
+        variables.put("commitMessage", gitCommit.toString());
+        // 定义添加文件的脚本，使用getResult方法获取变量值
+        String script = "git.addSingleFileByContentWithCommit(getResult('repoPath'), context.get('filePath'), context.get('content'), context.get('commitMessage'));";
+        // 执行脚本
+        execute(script, variables);
+    }
+
 
 
     /**
