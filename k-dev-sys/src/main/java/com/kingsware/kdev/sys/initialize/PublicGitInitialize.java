@@ -45,7 +45,7 @@ public class PublicGitInitialize implements SystemInitialize {
             // 提交
             appGit.commit(appGit.getCommit( "初始化公共库"));
             // 处理公共函数
-            List<Functions> functions = DB.byName("kingDB").findList(Functions.class,"select id, script, updatetime as updateTime from functions where groupname is null or groupname=?", "public");
+            List<Functions> functions = DB.byName("kingDB").findList(Functions.class,"select id, script, updatetime as updateTime from functions where app_id is null or app_id=?", "public");
             List<GitFile> gitFiles = new ArrayList<>();
             for (Functions fun: functions) {
                 GitFile gitFile = new GitFile();

@@ -291,7 +291,13 @@ public class JsonUtil {
             List<Map<String, Object>> list = objectMapper.readValue(json, javaType);
             List<T> result = new ArrayList<>(list.size());
             for (Map<String, Object> map: list) {
-                result.add(transformMap2Entity(tClass, map));
+                if (Map.class.isAssignableFrom(tClass)) {
+                    result.add((T) map);
+                }
+                else {
+                    result.add(transformMap2Entity(tClass, map));
+                }
+
             }
             return result;
         } catch (Exception e) {

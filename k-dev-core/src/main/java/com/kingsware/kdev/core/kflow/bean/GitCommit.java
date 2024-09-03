@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.kflow.bean;
 
+import com.kingsware.kdev.core.util.JsonUtil;
 import lombok.Data;
 
 /**
@@ -32,14 +33,7 @@ public class GitCommit {
 
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("author:").append(author).append("\n");
-        sb.append("time:").append(time).append("\n");
-        sb.append("tag:").append(tag).append("\n");
-        sb.append("extendRepoId:").append(extendRepoId).append("\n");
-        sb.append("extendCommitId:").append(extendCommitId).append("\n");
-        sb.append("message:").append(message);
-        return sb.toString();
+        return JsonUtil.toJson(this);
     }
 
     /**
@@ -49,33 +43,7 @@ public class GitCommit {
      * @return 返回解析后的GitCommit对象
      */
     public static GitCommit parse(String str) {
-        // 将输入字符串按行分割，便于逐行解析
-        String[] arr = str.split("\n");
-        // 创建一个新的GitCommit对象，用于存储解析后的提交信息
-        GitCommit commit = new GitCommit();
-        // 遍历分割后的每一行，解析其中的提交信息
-        for (String s : arr) {
-            // 判断当前行的信息类型，并提取相应的内容，存储到commit对象中
-            if (s.startsWith("author:")) {
-                commit.setAuthor(s.substring(7));
-            }
-            else if (s.startsWith("time:")) {
-                commit.setTime(s.substring(5));
-            }
-            else if (s.startsWith("tag:")) {
-                commit.setTag(s.substring(4));
-            }
-            else if (s.startsWith("extendRepoId:")) {
-                commit.setExtendRepoId(s.substring(13));
-            }
-            else if (s.startsWith("extendCommitId:")) {
-                commit.setExtendCommitId(s.substring(15));
-            } else if (s.startsWith("message:")) {
-                commit.setMessage(s.substring(8));
-            }
-        }
-        // 返回填充了提交信息的commit对象
-        return commit;
+        return JsonUtil.toBean(str, GitCommit.class);
     }
 }
 

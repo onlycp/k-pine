@@ -100,7 +100,7 @@ public class AppGit {
         // 设置提交者为当前上下文的用户名
         commit.setAuthor(author);
         // 设置扩展提交ID为仓库ID，用于跟踪仓库
-        commit.setExtendCommitId(this.repoId);
+        commit.setExtendRepoId(this.repoId);
         // 设置提交时间为当前时间
         commit.setTime(time);
         // 初始化标签为空字符串，留待后续可能的设置
@@ -236,7 +236,7 @@ public class AppGit {
         // 将Git提交对象转换为字符串，作为提交信息
         variables.put("commit", gitCommit.toString());
         // 定义执行脚本，用于执行Git提交操作
-        String script = "git.commit(getResult('repoPath'), getResult('commit'));";
+        String script = "git.commit(getResult('repoPath'), context.get('commit'));";
         // 执行脚本，完成Git提交操作
         execute(script, variables);
     }
@@ -256,7 +256,7 @@ public class AppGit {
         // 存储标签信息，作为待创建的标签的描述
         variables.put("message", message);
         // 定义执行脚本，用于执行Git添加标签操作
-        String script = "git.addTag(getResult('repoPath'), getResult('tagName'), getResult('message'));";
+        String script = "git.addTag(getResult('repoPath'), context.get('tagName'), context.get('message'));";
         // 执行脚本，完成Git添加标签操作
         execute(script, variables);
     }
