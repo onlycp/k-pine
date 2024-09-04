@@ -1,6 +1,7 @@
 package com.kingsware.kdev.sys.initialize;
 
 import com.kingsware.kdev.core.base.SystemInitialize;
+import com.kingsware.kdev.core.bean.SqlSegment;
 import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.kflow.FlowUtils;
@@ -12,6 +13,7 @@ import com.kingsware.kdev.core.orm.kdb.KDBConnectConfig;
 import com.kingsware.kdev.core.orm.kdb.KdbFlowQueryArgv;
 import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.util.MD5Utils;
+import com.kingsware.kdev.core.util.SqlUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.bean.ExecutionFile;
 import com.kingsware.kdev.sys.model.DevSqlRun;
@@ -177,20 +179,16 @@ public class SysSqlInitialize implements SystemInitialize {
         boolean success = false;
         StringBuilder sqlSumary = new StringBuilder();
         try {
-            List<String> sqlList = parseSqlList(file.getResource());
-            for (String sql: sqlList) {
+            List<SqlSegment> sqlList = parseSqlList(file.getResource());
+            for (SqlSegment sql: sqlList) {
                 long eachSqlStart = System.currentTimeMillis();
-                sql = sql.trim();
-                if (sql.endsWith(";")) {
-                    sql = sql.substring(0, sql.length()-1);
-                }
                 sqlSumary.append(sql);
 //                String tmpSql = sql.toLowerCase().trim();
 //                if (tmpSql.startsWith("insert") || tmpSql.startsWith("update")) {
 //                    sql = FlowUtils.buildCDATASql(sql);
 //                }
                 try {
-                    DB.executeUpdateSql(FlowUtils.buildCDATASql(sql));
+                    DB.executeUpdateSql(FlowUtils.buildCDATASql(sql.getSql()));
                 } catch (OrmDbException e) {
                     if (e.getExceptionTrace().toLowerCase().contains("duplicate") || e.getMessage().toLowerCase().contains("duplicate")
                         || e.getExceptionTrace().toLowerCase().contains("already exists") || e.getMessage().toLowerCase().contains("already exists")
@@ -233,29 +231,11 @@ public class SysSqlInitialize implements SystemInitialize {
      * @param file  文件
      * @return  sql列表
      */
-    private List<String> parseSqlList(Resource file) {
+    private List<SqlSegment> parseSqlList(Resource file) {
 
         try {
             List<String> readList = FileUtils.readAllLine(file.getInputStream());
-            List<String> sqlList = new ArrayList<>();
-            StringBuffer sql = new StringBuffer();
-            readList.forEach(line -> {
-                // 去掉空格
-                String cleanLine = line.trim();
-                // 如果不是空才处理
-                if (isSql(cleanLine)) {
-                    sql.append(cleanLine).append("\n");
-                    if (cleanLine.endsWith(";")) {
-                        sqlList.add(sql.toString());
-                        // 清空sql
-                        sql.setLength(0);
-                    }
-                }
-            });
-            if (sql.length() > 0) {
-                sqlList.add(sql.toString());
-            }
-            return sqlList;
+            return SqlUtils.parseSql(readList);
 
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -263,23 +243,6 @@ public class SysSqlInitialize implements SystemInitialize {
 
     }
 
-    public boolean isSql(String content) {
-
-        if (content == null) {
-            return false;
-        }
-        if ("".equals(content.trim())) {
-            return false;
-        }
-        if (content.startsWith("--")) {
-            return false;
-        }
-        if (content.startsWith("/*")) {
-            return false;
-        }
-
-        return true;
-    }
 
     @Override
     public int sort() {

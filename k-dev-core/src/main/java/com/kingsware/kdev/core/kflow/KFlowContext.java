@@ -60,6 +60,7 @@ public class KFlowContext {
         sysMap.put("roleNames",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getRoleNames() : "");
         sysMap.put("sysUnitIds",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getSysUnitIds() : "");
         sysMap.put("sysUnitNames",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getSysUnitNames() : "");
+
         sysMap.put("isAdmin",  isAdmin());
         // 是否uniops
         sysMap.put("isUniops", LicenseManager.getInstance().isUniopsApp());
