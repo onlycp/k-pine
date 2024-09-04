@@ -65,6 +65,8 @@ public class KFaasInitialize implements SystemInitialize {
         // 启动faas
         startFaas();
         // 1. 初始化数据源
+        // 加入MySql
+        DbContext.getInstance().createDataBase("MySql", DbContext.getInstance().getDefault().getConfig());
         // 读取文件
         // 在windows环境中，代码版运行./xx会找不到文件，需要改成.\xx
         String dbConfigFilePath = initDatasourcePath + File.separator + "db.json";

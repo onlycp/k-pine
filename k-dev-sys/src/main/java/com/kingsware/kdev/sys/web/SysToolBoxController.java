@@ -14,6 +14,7 @@ import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.model.DevPageHistory;
+import com.kingsware.kdev.sys.service.DevModelSqlService;
 import io.swagger.annotations.Api;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
@@ -52,6 +54,9 @@ import java.util.*;
 @RestController
 @RequestMapping("/"+ Version.V1 + "/sys-tool-box")
 public class SysToolBoxController extends BaseController {
+
+    @Resource
+    private DevModelSqlService devModelSqlService;
 
     @GetMapping("/to-url")
     @ApiIgnore
@@ -87,6 +92,16 @@ public class SysToolBoxController extends BaseController {
         PageCacheManager.getInstance().clear();
         return BaseRet.success();
     }
+
+
+    @GetMapping("/executeScript/{appId}/{sourceName}")
+    public BaseRet<?> executeScript(@PathVariable String appId, @PathVariable String sourceName) {
+        devModelSqlService.execute(appId, sourceName);
+        return BaseRet.success();
+    }
+
+
+
 //
 //    @GetMapping("/compress-testing")
 //    @ApiIgnore

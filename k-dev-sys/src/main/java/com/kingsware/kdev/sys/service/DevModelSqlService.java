@@ -31,4 +31,10 @@ public interface DevModelSqlService {
      * @param devModelSql 要执行的SQL语句，可能包含复杂的查询或操作
      */
     void execute(DevModelSql devModelSql);
+
+    /**
+     * 根据ID执行开发模型SQL语句
+     * @param id
+     */
+    void executeById(String id);
 }
