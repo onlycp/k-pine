@@ -207,9 +207,15 @@ public class MessageWebSocket {
             Set<SessionToken> removeSessions = sessionTokenSet.stream().filter(it-> ((it.getHeartTime() + 30000) <= System.currentTimeMillis())).collect(Collectors.toSet());
             removeSessions.forEach(it -> {
                 try {
-                    logger.info("移除过时的session: {}", it.getSession().getId());
+                    //logger.info("移除过时的session: {}", it.getSession().getId());
                     sessionTokenSet.remove(it);
-                    it.getSession().close();
+                    try {
+                        it.getSession().close();
+                    }
+                    catch (Exception e) {
+
+                    }
+
                 }
                 catch (Exception e) {
                     logger.error("移除过时的sessionToken失败", e);
@@ -220,7 +226,7 @@ public class MessageWebSocket {
             sessionTokenSet.removeAll(removeSessions);
         }
         catch (Exception ignored) {
-            ignored.printStackTrace();
+            //ignored.printStackTrace();
         }
         //  移除过时的session
         try {

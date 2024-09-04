@@ -1,12 +1,12 @@
 alter table sys_login_log
     add address varchar(255) null;
 
-CREATE TABLE IF NOT EXISTS dev_chat_history (
-    id varchar2(36)  NOT NULL,
-    question CLOB  NOT NULL,
-    answer CLOB ,
-    args CLOB,
-    when_created varchar2(50)  DEFAULT NULL,
-    who_created varchar2(36)  DEFAULT NULL,
-    PRIMARY KEY (id)
-    );
+CREATE TABLE dev_chat_history (
+                                  id VARCHAR2(36 CHAR) NOT NULL,
+                                  question CLOB NOT NULL,
+                                  answer CLOB,
+                                  args CLOB,
+                                  when_created VARCHAR2(50 CHAR),
+                                  who_created VARCHAR2(36 CHAR),
+                                  PRIMARY KEY (id)
+);

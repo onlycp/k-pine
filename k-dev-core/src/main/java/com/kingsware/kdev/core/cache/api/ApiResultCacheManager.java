@@ -1,13 +1,21 @@
 package com.kingsware.kdev.core.cache.api;
 
 import com.kingsware.kdev.core.cache.TimedCache;
+import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.cron.DynamicTask;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
+import com.kingsware.kdev.core.util.ServletUtil;
+import com.kingsware.kdev.core.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author chenp
  * @date 2024/5/14
  */
 public class ApiResultCacheManager {
+    private static final Logger log = LoggerFactory.getLogger(ApiResultCacheManager.class);
     private static ApiResultCacheManager instance = new ApiResultCacheManager();
     /** 接口缓存 **/
     private final TimedCache<String, ApiResultCache> cache = new TimedCache<>();
@@ -33,6 +41,24 @@ public class ApiResultCacheManager {
      */
     public void put(String key, ApiResultCache value, long timeoutMillis) {
         cache.put(key, value, timeoutMillis);
+    }
+
+    public void clearMyCache() {
+        if (KClientContext.getContext() == null) {
+            return;
+        }
+        String token = KClientContext.getContext().getToken();
+        if (StringUtils.isEmpty(token)) {
+            return;
+        }
+        for (String key : cache.keySet()) {
+            if (cache.get(key).getTokens().contains(token)) {
+                cache.remove(key);
+                DynamicTask dynamicTask = SpringContext.getBean(DynamicTask.class);
+                dynamicTask.removeVirtualTask(key);
+                log.info("清除缓存：" + key);
+            }
+        }
     }
 
 
