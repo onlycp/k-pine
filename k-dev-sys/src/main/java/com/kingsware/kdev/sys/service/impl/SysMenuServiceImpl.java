@@ -95,7 +95,6 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
             if (newParent != null && newParent.getPath() != null) {
                 String [] pathArr = newParent.getPath().split("/");
                 if (pathArr.length > 3) {
-                    model.setParentId(pathArr[1]);
                     for (int i = pathArr.length - 3; i > 0; i--) {
                         SysMenu fatherMenu = DB.findById(SysMenu.class, pathArr[i]);
                         fullPath = fatherMenu.getRouterPath() + fullPath;
