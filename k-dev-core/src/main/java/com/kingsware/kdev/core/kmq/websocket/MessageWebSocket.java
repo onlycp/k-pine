@@ -275,7 +275,11 @@ public class MessageWebSocket {
      * 广播消息
      */
     public void broadMessage(String message) {
-        sessionTokenSet.forEach(it -> sendMessage(it.getSession(), message));
+        if (!allSessionSet.isEmpty()){
+            for (Session session : allSessionSet.keySet()) {
+                sendMessage(session, message);
+            }
+        }
     }
 
     /**
