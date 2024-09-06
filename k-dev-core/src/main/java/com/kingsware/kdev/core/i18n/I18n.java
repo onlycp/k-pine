@@ -1,12 +1,17 @@
 package com.kingsware.kdev.core.i18n;
 
 import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.model.SysI18n;
+import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import org.springframework.context.i18n.LocaleContextHolder;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 国际化工具类
@@ -38,6 +43,42 @@ public class I18n {
             map.put(lang, message);
             i18nData.put(key, map);
         }
+    }
+
+    /**
+     * 判断是否存在key
+     * @param key
+     * @return
+     */
+    public static boolean hasKey(String key) {
+        return i18nData.containsKey(key);
+    }
+
+
+    /**
+     * 创建国际化信息
+     *
+     * 该方法用于在系统中创建一个新的国际化（i18n）条目它接收一个关键字和一个默认消息，
+     * 并将它们存储为一个SysI18n对象SysI18n对象包含国际化键和一个消息映射，映射支持多种语言的消息，
+     * 此处只添加了中文默认消息之后，该对象被序列化并存储到数据库中
+     *
+     * @param key 要创建的国际化信息的键值这个键值用于在代码中引用相应的国际化消息
+     * @param defaultMessage 默认消息这是在没有找到特定语言消息时回退的消息它被存储为中文（zh_CN）消息
+     */
+    public static void create(String key, String defaultMessage) {
+        // 创建一个SysI18n对象，用于存储国际化信息
+        SysI18n sysI18n = new SysI18n();
+        // 设置国际化信息的键值
+        sysI18n.setI18nKey(key);
+        // 创建一个HashMap，用于存储不同语言的消息
+        Map<String, String> i18nMap = new HashMap<>();
+        // 将默认消息作为中文消息添加到映射中
+        i18nMap.put("zh_CN", defaultMessage);
+        i18nData.put(key, i18nMap);
+        // 将消息映射序列化为JSON字符串，并设置为SysI18n对象的消息
+        sysI18n.setMessage(JsonUtil.toJson(i18nMap));
+        // 将SysI18n对象保存到数据库
+        DB.save(sysI18n);
     }
 
 
@@ -107,13 +148,46 @@ public class I18n {
             return "zh_CN";
         }
         String lang = locale.getLanguage() + "_" + locale.getCountry();
-        if (lang.equalsIgnoreCase("zh_")) {
+        if (lang.toLowerCase().startsWith("zh")) {
             lang = "zh_CN";
         }
-        else if (lang.equalsIgnoreCase("en_")) {
+        else if (lang.toLowerCase().startsWith("en")) {
             lang = "en_US";
         }
         return lang;
+    }
+
+    /**
+     * 解析脚本中的国际化函数 t('i18nkey', '默认值') 或 t("i18nkey", "默认值")
+     *
+     * @param script 包含 t('i18nkey', '默认值') 或 t("i18nkey", "默认值") 的脚本字符串
+     * @return 替换后的字符串
+     */
+    public static String parseScript(String script) {
+        // 匹配 t('key', 'default') 或 t("key", "default") 的正则表达式
+        Pattern pattern = Pattern.compile("t\\((['\"])(.*?)\\1,\\s*(['\"])(.*?)\\3\\)");
+        Matcher matcher = pattern.matcher(script);
+        if (!matcher.find()) {
+            // 如果没有找到 t() 调用，直接将 script 作为 key 进行翻译
+            if (!I18n.hasKey(script)) {
+                I18n.create(script, script);
+            }
+            return I18n.t(script, script);
+        }
+
+        StringBuffer result = new StringBuffer();
+        while (matcher.find()) {
+            String key = matcher.group(2);         // 获取 i18n key
+            String defaultValue = matcher.group(4); // 获取默认值
+
+            // 查找国际化翻译
+            String translatedValue = I18n.t(key, defaultValue);
+
+            // 将匹配的 t('key', 'default') 或 t("key", "default") 替换为翻译结果
+            matcher.appendReplacement(result, translatedValue);
+        }
+        matcher.appendTail(result);
+        return result.toString();
     }
 
     /**
