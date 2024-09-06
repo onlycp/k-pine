@@ -55,6 +55,7 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
         ret.setJdbcUrl(info.getJdbcUrl());
         ret.setUsername(info.getUserName());
         ret.setPassword(info.getPassword());
+        ret.setAppId(info.getAppId());
         if (info.getJson() == null) {
             ret.setJson("{}");
         }
@@ -85,6 +86,7 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
             DataSourceInfo info = new DataSourceInfo();
             info.setSourceName(argv.getId());
             info.setDriverClass(argv.getDriverClass());
+            info.setAppId(argv.getAppId());
             instanceToField(info, argv);
             if (StringUtils.isNotEmpty(argv.getJson())) {
                 info.setJson(argv.getJson());
@@ -126,6 +128,7 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
             DataSourceInfo info = new DataSourceInfo();
             info.setSourceName(argv.getId());
             info.setDriverClass(argv.getDriverClass());
+            info.setAppId(argv.getAppId());
             instanceToField(info, argv);
             KdbApi api = (KdbApi)(DB.getDefault());
             if (StringUtils.isNotEmpty(argv.getJson())) {
@@ -162,6 +165,10 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
         // 按jdbc url过滤
         if (StringUtils.isNotEmpty(argv.getJdbcUrl())) {
             retList.removeIf(ret -> !ret.getJdbcUrl().contains(argv.getJdbcUrl()));
+        }
+        // 按应用id过滤
+        if (StringUtils.isNotEmpty(argv.getAppId())) {
+//            retList.removeIf(ret -> !argv.getAppId().equals(ret.getAppId()));
         }
         // 排序
         retList.sort(Comparator.comparing(SysKdbDataSourceRet::getId));

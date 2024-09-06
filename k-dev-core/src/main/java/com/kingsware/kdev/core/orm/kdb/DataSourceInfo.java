@@ -22,6 +22,8 @@ public class DataSourceInfo {
     private String driverClass;
     /** url **/
     private String jdbcUrl;
+    /** 数据源所属应用 **/
+    private String appId;
     /** 用户名 **/
     private String userName;
     /** 密码 **/
