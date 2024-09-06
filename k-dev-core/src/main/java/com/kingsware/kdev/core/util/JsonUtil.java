@@ -368,14 +368,19 @@ public class JsonUtil {
 
     @SneakyThrows
     public static String prettyJson(String compressedJson) {
-//        ObjectMapper objectMapper = new ObjectMapper();
-//
-//        // 解析 JSON 字符串到对象
-//        Object json = objectMapper.readValue(compressedJson, Object.class);
-//
-//        // 格式化输出 JSON 字符串
-//        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
-        return compressedJson;
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            // 解析 JSON 字符串到对象
+            Object json = objectMapper.readValue(compressedJson, Object.class);
+
+            // 格式化输出 JSON 字符串
+            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
+        }
+        catch (Exception e) {
+            return compressedJson;
+        }
+
 
     }
 
