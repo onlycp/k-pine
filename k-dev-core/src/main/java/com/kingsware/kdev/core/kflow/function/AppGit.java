@@ -276,7 +276,25 @@ public class AppGit {
         // 将文件路径存入变量，以便在脚本中使用
         variables.put("filePath", filePath);
         // 定义执行脚本，用于执行删除文件操作
-        String script = "git.deleteFile(getResult('repoPath'), getResult('filePath'));";
+        String script = "git.removeSingleFile(getResult('repoPath'), getResult('filePath'));";
+        // 执行脚本，完成文件删除操作
+        execute(script, variables);
+    }
+
+    /**
+     * 删除指定仓库中的多个文件并做一次提交
+     *
+     * @param filePathList 文件路径列表
+     * @param gitCommit 提交信息
+     */
+    public void deleteCommitMultiFile(List<String> filePathList, GitCommit gitCommit) {
+        // 初始化变量Map，用于存放脚本执行时所需的变量值
+        Map<String, Object> variables = new HashMap<>(2);
+        variables.put("repoPath", getBasePath() + "/" + repoId);
+        variables.put("filePath", JsonUtil.toJson(filePathList));
+        variables.put("commitMessage", gitCommit.toString());
+        // 定义执行脚本，用于执行删除文件操作
+        String script = "git.removeMultipleFileWithCommit(context.get('repoPath'), context.get('filePath'), context.get('commitMessage'));";
         // 执行脚本，完成文件删除操作
         execute(script, variables);
     }
