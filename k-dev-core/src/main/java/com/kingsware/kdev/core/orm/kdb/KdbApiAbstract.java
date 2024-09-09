@@ -1,7 +1,7 @@
 package com.kingsware.kdev.core.orm.kdb;
 
-import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.config.SysConst;
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.HttpClientException;
@@ -14,7 +14,6 @@ import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.orm.exception.TransactionException;
 import com.kingsware.kdev.core.util.HttpUtil;
 import com.kingsware.kdev.core.util.JsonUtil;
-import com.kingsware.kdev.core.util.PageUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -73,17 +72,18 @@ public abstract class KdbApiAbstract implements KdbApi {
 
     @Override
     public String addFlow(AddFlowInfo flowInfo) {
-        KdbRet<AddFlowInfoRet> ret = post(getServer(), flowInfo, ADD_FLOW_URL, AddFlowInfoRet.class, false);
+        KdbRet<AddFlowInfoRet> ret = post(getSelectServers(""), flowInfo, ADD_FLOW_URL, AddFlowInfoRet.class, false);
 //       log.info("新增逻辑编排响应:{}", JsonUtil.toJson(ret));
         return ret.getResponseBody().getFlowId();
     }
 
     @Override
     public void editFlow(EditFlowInfo flowInfo) {
-        KdbRet ret = post(getServer(), flowInfo, EDIT_FLOW_URL, String.class, false);
+        String[] servers = getSelectServers("");
+        KdbRet ret = post(servers, flowInfo, EDIT_FLOW_URL, String.class, false);
 //        log.info("编辑逻辑编排响应:{}", JsonUtil.toJson(ret));
         if (ret.getErrorCode() != 0) {
-            throw BusinessException.serviceThrow(I18n.t("KdbApiAbstract.error1","保存失败,错误信息:{0}", ret.getMessage()) );
+            throw BusinessException.serviceThrow(I18n.t("KdbApiAbstract.error1", "保存失败,错误信息:{0}", ret.getMessage()));
         }
     }
 
@@ -106,24 +106,43 @@ public abstract class KdbApiAbstract implements KdbApi {
         return list.get(0);
     }
 
+
+    /**
+     * 删除指定的流
+     *
+     * @param flowId 流的唯一标识
+     * @throws OrmDbException 如果删除操作失败
+     */
     @Override
     public void deleteFlow(String flowId) {
         Map<String, Object> params = new HashMap<>(1);
         params.put("flowId", flowId);
-        KdbRet ret = post(getServer(), params, DELETE_FLOW_URL, String.class, false);
+        KdbRet ret = post(getSelectServers(""), params, DELETE_FLOW_URL, String.class, false);
         if (ret.getErrorCode() != 0) {
             throw new OrmDbException(ret.getMessage(), ret.getKlog(), ret.getStackTrace());
         }
-
     }
 
+    /**
+     * 查询符合条件的流信息列表
+     *
+     * @param flowInfo 查询条件
+     * @return 符合条件的流信息列表
+     * @throws OrmDbException 如果查询操作失败
+     */
     @Override
     public List<FlowInfo> query(KdbFlowQueryArgv flowInfo) {
-        KdbRet<List> list = post(getServer(), flowInfo, QUERY_FLOW_URL, List.class, true);
+        KdbRet<List> list = post(getSelectServers(""), flowInfo, QUERY_FLOW_URL, List.class, true);
         String json = JsonUtil.toJson(list.getResponseBody());
         return JsonUtil.toListBean(json, FlowInfo.class);
     }
 
+    /**
+     * 添加数据源
+     *
+     * @param dataSourceInfo 数据源信息
+     * @throws OrmDbException 如果添加操作失败
+     */
     @Override
     public void addDataSource(DataSourceInfo dataSourceInfo) {
         KdbRet<String> ret = post(getServer(), dataSourceInfo, ADD_DS_URL, String.class, false);
@@ -133,6 +152,12 @@ public abstract class KdbApiAbstract implements KdbApi {
         this.refreshBaseFlow();
     }
 
+    /**
+     * 编辑数据源信息
+     *
+     * @param dataSourceInfo 数据源信息
+     * @throws OrmDbException 如果编辑操作失败
+     */
     @Override
     public void editDataSource(DataSourceInfo dataSourceInfo) {
         KdbRet<String> ret = post(getServer(), dataSourceInfo, EDIT_DS_URL, String.class, false);
@@ -141,6 +166,12 @@ public abstract class KdbApiAbstract implements KdbApi {
         }
     }
 
+    /**
+     * 删除指定的数据源
+     *
+     * @param sourceName 数据源名称
+     * @throws OrmDbException 如果删除操作失败
+     */
     @Override
     public void deleteDataSource(String sourceName) {
         Map<String, Object> params = new HashMap<>(1);
@@ -149,9 +180,15 @@ public abstract class KdbApiAbstract implements KdbApi {
         if (ret.getErrorCode() != 0) {
             throw new OrmDbException(ret.getMessage(), ret.getKlog(), ret.getStackTrace());
         }
-
     }
 
+    /**
+     * 根据条件查询数据源列表
+     *
+     * @param dataSourceInfo 查询条件
+     * @return 符合条件的数据源列表
+     * @throws OrmDbException 如果查询操作失败
+     */
     @Override
     public List<DataSourceInfo> queryDataSource(DataSourceQueryArgv dataSourceInfo) {
         KdbRet<List> list = post(getServer(), dataSourceInfo, QUERY_DS_URL, List.class, true);
@@ -160,6 +197,74 @@ public abstract class KdbApiAbstract implements KdbApi {
         return JsonUtil.toListBean(json, DataSourceInfo.class);
     }
 
+    /**
+     * 根据应用ID获取应选择的服务器列表
+     * <p>
+     * 此方法主要用于确定给定应用应该使用的服务器地址列表它考虑了当前应用是否为系统应用，
+     * 以及是否处于开发模式，以决定返回的服务器列表
+     *
+     * @param appId 应用程序ID如果为null，会尝试从上下文中获取ID
+     * @return 一个包含应选服务器地址的字符串列表
+     */
+    private String[] getSelectServers(String appId) {
+        // 获取所有服务器地址
+        String[] servers = getServer();
+        // 初始化一个新的服务器地址列表，用于存储筛选后的结果
+        List<String> newServers = new ArrayList<>();
+
+        // 确定当前应用ID如果输入为null，则尝试从上下文中获取
+        String currentAppId = appId == null ? "" : appId;
+        if (KClientContext.getContext() != null && KClientContext.getContext().getRequest() != null) {
+            String xAppId = KClientContext.getContext().getRequest().getHeader("_request_app");
+            if (StringUtils.isNotEmpty(xAppId)) {
+                currentAppId = xAppId;
+            }
+        }
+
+        // 获取应用模式属性，用于判断是否处于开发模式
+        AppModeProperties appModeProperties = SpringContext.getBean(AppModeProperties.class);
+
+        // 如果是开发模式
+        if (appModeProperties.getDev()) {
+            // 获取数据库配置属性
+            DataBaseProperties dataBaseProperties = SpringContext.getBean(DataBaseProperties.class);
+            // 初始化应用服务器URL
+            String appFaasUrl = "";
+
+            // 根据应用ID查找对应的服务器地址
+            if (dataBaseProperties.getApp2Faas() != null) {
+                String finalCurrentAppId = currentAppId;
+                Optional<DataBaseProperties.App2Faas> app2Faas = dataBaseProperties.getApp2Faas().stream()
+                        .filter(item -> item.getId().equalsIgnoreCase(finalCurrentAppId)).findFirst();
+                if (app2Faas.isPresent()) {
+                    appFaasUrl = app2Faas.get().getServer();
+                }
+            }
+
+            // 如果找到了特定的应用服务器URL
+            if (StringUtils.isNotEmpty(appFaasUrl)) {
+                newServers.add(appFaasUrl);
+            } else {
+                // 如果是系统应用或只有1个服务器，则直接使用所有服务器地址
+                if (SysConst.pineAppId.equalsIgnoreCase(currentAppId) || servers.length == 1) {
+                    newServers.addAll(Arrays.asList(servers));
+                } else {
+                    // 否则，从备选服务器列表中根据应用ID的hashcode选择一个服务器
+                    List<String> toSelectServers = Arrays.asList(servers).subList(1, servers.length);
+                    int index = Math.abs(currentAppId.hashCode()) % toSelectServers.size();
+                    newServers.add(toSelectServers.get(index));
+                }
+            }
+        } else {
+            // 如果不是开发模式，直接返回所有服务器地址
+            newServers.addAll(Arrays.asList(servers));
+        }
+
+        // 返回筛选后的服务器地址列表
+        return newServers.toArray(new String[0]);
+    }
+
+
     @Override
     public KdbRet<String> executeFlow(KdbArgv argv, boolean debug, boolean sync) {
         // 加入当前环境变量
@@ -167,50 +272,8 @@ public abstract class KdbApiAbstract implements KdbApi {
         if (sync) {
             executeFlowUrl = "/api/async/execute";
         }
-        String[] servers = getServer();
-        List<String> newServers = new ArrayList<>();
-        // 如果是系统应用
-        String currentAppId;
-        if (argv.getVariables().containsKey("_appId")) {
-            currentAppId = argv.getVariables().get("_appId") == null ? "" : argv.getVariables().get("_appId").toString();
-        } else {
-            currentAppId = "";
-        }
-        AppModeProperties appModeProperties = SpringContext.getBean(AppModeProperties.class);
-        if (appModeProperties.getDev()) {
-            DataBaseProperties dataBaseProperties = SpringContext.getBean(DataBaseProperties.class);
-            String appFaasUrl = "";
-            if (dataBaseProperties.getApp2Faas()!= null) {
-                Optional<DataBaseProperties.App2Faas> app2Faas = dataBaseProperties.getApp2Faas().stream().filter(item -> item.getId().equalsIgnoreCase(currentAppId)).findFirst();
-                if (app2Faas.isPresent()) {
-                    appFaasUrl = app2Faas.get().getServer();
-                    log.info("应用流程：{}，应用:{}, 服务器:{}", argv.getFlowID(),  app2Faas.get().getServer(), appFaasUrl);
-                }
-            }
-            if (StringUtils.isNotEmpty(appFaasUrl)) {
-                newServers.add(appFaasUrl);
-            }
-            else {
-                if (SysConst.pineAppId.equalsIgnoreCase(currentAppId) || servers.length == 1) {
-//                    log.info("系统应用流程：{}", argv.getFlowID());
-                    newServers.addAll(Arrays.asList(servers));
-                }
-                else {
-                    // 从第二个服务器开始
-                    List<String> toSelectServers = Arrays.asList(servers).subList(1, servers.length);
-                    // hashcode 应用id，然后取模数
-                    int index = Math.abs(currentAppId.hashCode()) % toSelectServers.size();
-                    // 加入到队列中
-                    newServers.add(toSelectServers.get(index));
-//                    log.info("开发应用流程：{}， 选择：{}, 服务器:{}", argv.getFlowID(), index+1, toSelectServers.get(index) );
-                }
-            }
-
-        }
-        else {
-            newServers.addAll(Arrays.asList(servers));
-        }
-        return post(newServers.toArray(new String[0]), argv, executeFlowUrl, String.class, true);
+        String[] newServers = getSelectServers(argv.getString("_appId", ""));
+        return post(newServers, argv, executeFlowUrl, String.class, true);
     }
     /**
      * 执行给定的脚本
@@ -311,8 +374,8 @@ public abstract class KdbApiAbstract implements KdbApi {
             String requestBody = JsonUtil.toJson(params);
             // 拼接请求
             List<String> urls = new ArrayList<>();
-            for (String a: severs) {
-                urls.add(a +  api);
+            for (String a : severs) {
+                urls.add(a + api);
             }
             String url = StringUtils.joinToString(urls, ";");
             long t1 = System.currentTimeMillis();
@@ -322,7 +385,7 @@ public abstract class KdbApiAbstract implements KdbApi {
             String responseBody = HttpUtil.postBody(url, requestBody, Collections.emptyMap(), anyone);
             KdbRet<T> ret = JsonUtil.toBean(responseBody, KdbRet.class, tClass);
             if (ret == null) {
-                throw new OrmDbException(I18n.t("KdbApiAbstract.error2", "响应数据不合法" )+ responseBody);
+                throw new OrmDbException(I18n.t("KdbApiAbstract.error2", "响应数据不合法") + responseBody);
             }
             return ret;
         } catch (HttpClientException e) {
@@ -375,8 +438,6 @@ public abstract class KdbApiAbstract implements KdbApi {
     }
 
 
-
-
     /**
      * 事务接口
      *
@@ -400,7 +461,7 @@ public abstract class KdbApiAbstract implements KdbApi {
 
     @Override
     public KdbDataRet<FlowInfo> queryFlow(KdbFlowQueryArgv flowInfo) {
-        KdbRet<List> list =  post(chooseServer(),flowInfo, QUERY_FLOW_URL, List.class, true);
+        KdbRet<List> list = post(chooseServer(), flowInfo, QUERY_FLOW_URL, List.class, true);
         String json = JsonUtil.toJson(list.getResponseBody());
         List<FlowInfo> flowInfoList = JsonUtil.toListBean(json, FlowInfo.class);
         KdbDataRet<FlowInfo> flowDataRet = new KdbDataRet<>();
@@ -419,7 +480,7 @@ public abstract class KdbApiAbstract implements KdbApi {
             // 获取所有的数据源
             List<DataSourceInfo> dataSourceInfos = DB.kdbApi().queryDataSource(new DataSourceQueryArgv());
             // 根据数据源生成流程
-            for (DataSourceInfo info: dataSourceInfos) {
+            for (DataSourceInfo info : dataSourceInfos) {
                 // 判断是否已存在，不存在才会加进去
                 boolean has = flowDefinition.getNodeDefinitions().stream().anyMatch(it -> it.getId().equals(info.getSourceName()));
                 if (!has) {
@@ -444,10 +505,11 @@ public abstract class KdbApiAbstract implements KdbApi {
 
     /**
      * 获取服务器
+     *
      * @return
      */
     private String[] chooseServer() {
         int index = new Random().nextInt(getServer().length);
-        return new String[] {getServer()[index]};
+        return new String[]{getServer()[index]};
     }
 }

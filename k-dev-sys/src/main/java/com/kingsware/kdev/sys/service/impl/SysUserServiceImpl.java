@@ -5,6 +5,7 @@ import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.cache.api.ApiResultCacheManager;
 import com.kingsware.kdev.core.cache.config.ConfigManager;
 import com.kingsware.kdev.core.cache.config.SysConfigInfo;
 import com.kingsware.kdev.core.cache.core.SysCacheService;
@@ -804,6 +805,8 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             InstanceManager.getInstance().broadMessage("session-remove", JsonUtil.toJson(onlineUser));
             SessionManager.getInstance().removeSession(onlineUser.getUserId(), onlineUser.getLoginToken());
         }
+        // 清除接口缓存
+        ApiResultCacheManager.getInstance().clearMyCache();
     }
 
     @Override

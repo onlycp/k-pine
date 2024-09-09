@@ -5,6 +5,7 @@ import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -40,6 +41,14 @@ public class TimedCache<K, V> {
     public void remove(K key) {
         cache.remove(key);
         expirationTimes.remove(key);
+    }
+
+    /**
+     * 获取所有键的集合
+     * @return
+     */
+    public Set<K> keySet() {
+        return cache.keySet();
     }
 
     private void cleanupExpiredEntries() {

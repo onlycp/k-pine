@@ -1,1 +1,1 @@
-ALTER TABLE sys_online_user MODIFY (login_token CLOB);
+alter table sys_dict_item modify  value varchar2(255) ;

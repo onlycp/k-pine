@@ -640,7 +640,8 @@ public class KAuthFilter implements Filter {
 //        String key = MD5Utils.md5(request.getRequestURI()) ;
         KdbFlowResult result = null;
         boolean disableCache = false;
-        if (argvMap.get("_disableCache") != null && argvMap.get("_disableCache").equals("true")) {
+        Object disableCacheObj = argvMap.get("_disableCache");
+        if (disableCacheObj != null && (disableCacheObj.equals("true") || (disableCacheObj instanceof Boolean && ((Boolean) disableCacheObj == true)))) {
             disableCache = true;
         }
         if (api.getCacheEnable() != null && api.getCacheEnable() == 1 && disableCache == false) {
