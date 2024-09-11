@@ -1,8 +1,11 @@
 package com.kingsware.kdev.sys.service.impl;
 
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.config.UiConfig;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
@@ -26,10 +29,7 @@ import org.springframework.util.ResourceUtils;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 业务实现类
@@ -58,18 +58,17 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
     @Override
     // @KCache(onlyForProd = true)
     public DevPageRet getByPath(String path) {
+        DevPageRet page = null;
         if ("menu".equalsIgnoreCase(menuSearchOrder)) {
 //            log.info("请求页面信息:{}", path );
             List<DevPageRet> pages =  DB.findList(DevPageRet.class, " select dp.* from dev_page dp left join sys_menu sm on (dp.id = sm.page_id and sm.menu_type='C' and sm.status=1) where sm.full_path=? and deleted=0 ", path);
-
-
             if (!pages.isEmpty()) {
-                return pages.get(0);
+                page = pages.get(0);
             }
             // 通过菜单去读取
             pages = DB.findList(DevPageRet.class, " select * from dev_page where (path = ? or id = ?) and deleted=0 ", path, path);
             if (!pages.isEmpty()) {
-                return pages.get(0);
+                page = pages.get(0);
             }
             else {
                 throw BusinessException.serviceThrow(I18n.t("DevPageServiceImpl.pageNotFound", "找不到页面"));
@@ -78,24 +77,26 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
         else {
 //            log.info("请求页面信息:{}", path );
             List<DevPageRet> pages =  DB.findList(DevPageRet.class, " select * from dev_page where (path = ? or id = ?) and deleted=0 ", path, path);
-
             if (!pages.isEmpty()) {
-                return pages.get(0);
+                page = pages.get(0);
             }
             // 通过菜单去读取
             pages =  DB.findList(DevPageRet.class, " select dp.* from dev_page dp left join sys_menu sm on (dp.id = sm.page_id and sm.menu_type='C' and sm.status=1) where sm.full_path=? and deleted=0 ", path);
             if (!pages.isEmpty()) {
-                return pages.get(0);
+                page = pages.get(0);
             }
             else {
                 throw BusinessException.serviceThrow(I18n.t("DevPageServiceImpl.pageNotFound", "找不到页面"));
             }
         }
-
-
-
-
+        if (StringUtils.isNotEmpty(page.getPageJson())) {
+            page.setPageJson(UiConfig.i18nTranslatePage(page.getAppId(), page.getPageJson()));
+        }
+        return page;
     }
+
+
+
 
     @Override
     public void add(DevPageArgv argv) {

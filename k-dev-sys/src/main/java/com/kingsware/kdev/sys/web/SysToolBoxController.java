@@ -6,6 +6,7 @@ import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.ExceptionLog;
 import com.kingsware.kdev.core.cache.page.PageCacheManager;
 import com.kingsware.kdev.core.constants.Version;
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.ExceptionLogManager;
 import com.kingsware.kdev.core.i18n.I18n;
@@ -66,6 +67,7 @@ public class SysToolBoxController extends BaseController {
 
     }
 
+
     @GetMapping("/clear-page")
     @ApiIgnore
     public BaseRet<?> clearPageCache() {
@@ -73,10 +75,23 @@ public class SysToolBoxController extends BaseController {
         return BaseRet.success();
     }
 
+    @GetMapping("/translate")
+    @ApiIgnore
+    public BaseRet<?> translate(String i18n) {
+        return BaseRet.success(I18n.translate(i18n));
+    }
+
+    @GetMapping("/translateAll")
+    @ApiIgnore
+    public BaseRet<?> translateAll(String i18n) {
+        I18n.translateAll();
+        return BaseRet.success();
+    }
+
     @PostMapping("/i18n-test")
     @ApiIgnore
     public BaseRet<?> i18nTest(@RequestBody Map<String, String> body) {
-        return BaseRet.success(I18n.parseScript(body.get("text")));
+        return BaseRet.success(I18n.parseScript(KClientContext.getCurrentAppId(), body.get("text")));
     }
 
 

@@ -2,13 +2,12 @@ package com.kingsware.kdev.core.cache.dict;
 
 import com.kingsware.kdev.core.bean.SysDictItemRet;
 import com.kingsware.kdev.core.bean.SysDictRet;
+import com.kingsware.kdev.core.i18n.I18n;
+import com.kingsware.kdev.core.util.CollectUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * // 字典管理 单实例.
@@ -85,45 +84,24 @@ public class DictManager {
         Map<String, Object> resultMap = new HashMap<>();
         // getAllDict
         long t1 = System.currentTimeMillis();
-//        List<SysDictRet> dictList = sysDictService.query(new SysDictQueryArgv()).getList();
-        //     /** 字典名 */
-        //    private String name;
-        //    /** 字典代码 */
-        //    private String code;
-        //    /** 备注 */
-        //    private String note;
-        //    /** 所属应用ID **/
-        //    private String appId;
-//        List<SysDictRet> dictList = DB.findList(SysDictRet.class, "select id, name, code from sys_dict");
         List<SysDictRet> dictList = DictManager.getInstance().getDictList();
         long t2 = System.currentTimeMillis();
-        // getAllDetail
-        //     /** 字典名 */
-        //    private String name;
-        //    /** 字典组名 */
-        //    private String groupName;
-        //    /** 字典类型ID */
-        //    private String sysDictId;
-        //    /** 字典类型名称 */
-        //    private String sysDictName;
-        //    /** 字典值 */
-        //    private String value;
-        //    /** 字典代码 */
-        //    private String code;
-        //    /** 备注 */
-        //    private String note;
-        //    /** 排序序号 */
-        //    private Integer orderNum;
-        //    /** 所属应用ID **/
-        //    private String appId;
-//        List<SysDictItemRet> dictItemList = DB.findList(SysDictItemRet.class, "select id, name, group_name, sys_dict_id, value, code,  order_num  from sys_dict_item");
         List<SysDictItemRet> dictItemList = DictManager.getInstance().getDictItemList();
         long t3 = System.currentTimeMillis();
+        List<SysDictItemRet> newDictItemList = new ArrayList<>();
+        Collections.copy(dictItemList, newDictItemList);
+        // 处理国际化
+        for (SysDictItemRet item : newDictItemList) {
+            String translate = I18n.parseScript(item.getAppId(), item.getName());
+            if (StringUtils.isNotEmpty(translate)) {
+                item.setName(translate);
+            }
+        }
 
         // setMap
-        resultMap.put("KEY", getKeyMap(dictList, dictItemList));
-        resultMap.put("VALUE", getValueMap(dictList, dictItemList));
-        resultMap.put("LIST", getListMap(dictList, dictItemList));
+        resultMap.put("KEY", getKeyMap(dictList, newDictItemList));
+        resultMap.put("VALUE", getValueMap(dictList, newDictItemList));
+        resultMap.put("LIST", getListMap(dictList, newDictItemList));
 
         return resultMap;
     }

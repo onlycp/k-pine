@@ -1,5 +1,16 @@
 package com.kingsware.kdev.core.util;
 
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -364,6 +375,69 @@ public class StringUtils {
         // 获取平均长度
         int avgSize = (size-4)/2;
         return str.substring(0, avgSize) + "...." + str.substring(str.length()-avgSize);
+    }
+
+    // 判断字符串中是否包含中文字符
+    public static boolean containsChinese(String str) {
+        if (str == null || str.isEmpty()) {
+            return false;
+        }
+
+        // 正则表达式匹配中文字符
+        String regex = "[\\u4E00-\\u9FFF]";
+        return str.matches(".*" + regex + ".*");
+    }
+
+    /**
+     * 将字符串的第一个字母大写
+     * 如果输入字符串为空或长度为0，返回原字符串
+     *
+     * @param str 待处理的字符串
+     * @return 处理后的字符串，如果第一个字母不是大写，则将其转为大写；否则返回原字符串
+     */
+    public static String capitalizeFirstLetter(String str) {
+        // 检查字符串是否为空或长度为0，如果是，则直接返回原字符串
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+        // 将字符串的第一个字母大写，然后与剩余部分拼接
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
+    }
+
+
+    /**
+     * 检查给定的字符串是否为XML格式
+     *
+     * @param text 待检查的字符串
+     * @return 如果字符串是XML格式，则返回true；否则返回false
+     */
+    public static Document parseXml(String text) {
+        try {
+            // 创建文档构建工厂的实例
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            // 使用工厂创建一个新的文档构建器
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            // 创建一个输入源，使用字符串读取器将给定的字符串作为输入
+            InputSource source = new InputSource(new StringReader(text));
+            // 使用构建器解析输入源，生成文档对象
+            Document doc = builder.parse(source);
+            return doc;
+        } catch (Exception e) {
+            return null; // 解析失败，不是XML格式
+        }
+    }
+
+    public static String documentToString(Document document) {
+        try {
+            TransformerFactory tf = TransformerFactory.newInstance();
+            Transformer transformer = tf.newTransformer();
+            StringWriter writer = new StringWriter();
+            transformer.transform(new DOMSource(document), new StreamResult(writer));
+            return writer.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 

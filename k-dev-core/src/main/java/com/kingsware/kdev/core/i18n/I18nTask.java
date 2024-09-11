@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.i18n;
 
+import com.kingsware.kdev.core.config.SysConst;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.cron.KRunner;
 import com.kingsware.kdev.core.cron.KTask;
@@ -38,9 +39,12 @@ public class I18nTask implements KTask, KRunner {
     @Override
     public void execute() throws Exception {
         // 查找所有的国际化配置
-        List<SysI18n> sysI18ns = DB.findList(SysI18n.class, "select i18n_key, message from sys_i18n");
+        List<SysI18n> sysI18ns = DB.findList(SysI18n.class, "select i18n_key, message, app_id from sys_i18n");
         for (SysI18n sysI18n : sysI18ns) {
             String key = sysI18n.getI18nKey();
+            if ("公共应用".equals(key)) {
+                System.currentTimeMillis();
+            }
             String message = sysI18n.getMessage();
             if (StringUtils.isNotEmpty(message)) {
                 try {
@@ -48,8 +52,10 @@ public class I18nTask implements KTask, KRunner {
                     if (datas != null) {
                         for (Map.Entry<String, Object> entry : datas.entrySet()) {
                             String lang = entry.getKey();
-                            String value = entry.getValue().toString();
-                             I18n.putI18n(key, lang, value);
+                            if (entry.getValue() != null) {
+                                String value = entry.getValue().toString();
+                                I18n.putI18n(sysI18n.getAppId(), key, lang, value);
+                            }
                         }
                     }
 
@@ -136,13 +142,18 @@ public class I18nTask implements KTask, KRunner {
             });
             // 第一行是标题，从第二列开始是语言标签
             List<String> langList = records.get(0).subList(1, records.get(0).size());
-            // 遍历读取内容，第一列是键，后续列是各语言的值
-            for (int i = 1; i < records.size(); i++) {
+            // 遍历读取内容，第一列是键，第二列是app_id，后续列是各语言的值
+            for (int i = 2; i < records.size(); i++) {
                 List<String> record = records.get(i);
                 String key = record.get(0);
+                String appId = record.get(1);
+                if (StringUtils.isEmpty(appId)) {
+                    appId = SysConst.pineAppId;
+                }
                 SysI18n sysI18n = new SysI18n();
                 Map<String, Object> lanMap = new HashMap<>();
                 sysI18n.setI18nKey(key);
+                sysI18n.setAppId(appId);
                 // 从第二列开始，为每个语言标签对应的键值对调用I18n.putI18n方法
                 for (int j = 1; j < record.size(); j++) {
                     String lang = langList.get(j - 1);

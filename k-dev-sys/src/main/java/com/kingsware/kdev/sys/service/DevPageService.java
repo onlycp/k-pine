@@ -24,6 +24,11 @@ public interface DevPageService extends BaseService {
      */
     DevPageRet get(String id);
 
+    /**
+     *
+     * @param path
+     * @return
+     */
     DevPageRet getByPath(String path);
 
     /**

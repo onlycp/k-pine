@@ -81,7 +81,7 @@ public class MessageWebSocket {
     private void removeSession(Session session) {
         // 查找session
         try {
-            logger.info("用户:【sessionId={}】下线，当前在线人数为:{} ",  session.getId(), sessionTokenSet.size());
+//            logger.info("用户:【sessionId={}】下线，当前在线人数为:{} ",  session.getId(), sessionTokenSet.size());
             // 从所有会话中移移
             allSessionSet.remove(session);
             Set<SessionToken> copiedSet = new HashSet<>(sessionTokenSet);
