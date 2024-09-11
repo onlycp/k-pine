@@ -3,13 +3,18 @@ package com.kingsware.kdev.sys.service.impl;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
+import com.kingsware.kdev.core.kflow.bean.GitCommit;
+import com.kingsware.kdev.core.kflow.bean.GitFile;
+import com.kingsware.kdev.core.kflow.function.AppGit;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.DataSourceInfo;
 import com.kingsware.kdev.core.orm.kdb.DataSourceQueryArgv;
 import com.kingsware.kdev.core.orm.kdb.KdbApi;
 import com.kingsware.kdev.core.util.JsonUtil;
+import com.kingsware.kdev.core.util.MapUtil;
 import com.kingsware.kdev.core.util.PageUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.DataBaseInstanceArgv;
@@ -19,9 +24,7 @@ import com.kingsware.kdev.sys.ret.SysKdbDataSourceRet;
 import com.kingsware.kdev.sys.service.SysKdbDataSourceService;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * kdb数据源业务实现类
@@ -89,13 +92,42 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
             info.setAppId(argv.getAppId());
             instanceToField(info, argv);
             if (StringUtils.isNotEmpty(argv.getJson())) {
-                info.setJson(argv.getJson());
+                // 添加appId到json字段里
+                String argvJson = argv.getJson();
+                if (StringUtils.isNotEmpty(argv.getAppId())){
+                    Map<String, Object> json2Map = JsonUtil.toBean(argvJson, Map.class);
+                    json2Map.put("appId", argv.getAppId());
+                    argvJson = JsonUtil.toJson(json2Map);
+                }
+                info.setJson(argvJson);
             }
             else {
-                info.setJson("{}");
+                String defaultJson = "{}";
+                if (StringUtils.isNotEmpty(argv.getAppId())){
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("appId", argv.getAppId());
+                    defaultJson = JsonUtil.toJson(map);
+                }
+                info.setJson(defaultJson);
             }
             KdbApi api = (KdbApi)(DB.getDefault());
             api.addDataSource(info);
+
+            // 查询数据源详情
+            SysKdbDataSourceRet sysKdbDataSourceRet = get(info.getSourceName());
+
+            // 提交git
+            String repoId = info.getAppId();
+            if (StringUtils.isEmpty(repoId)) repoId = "public";
+            String resourceId = info.getSourceName();
+
+            GitFile gitFile = new GitFile();
+            gitFile.setPath("data_sources/" + resourceId + ".json");
+            gitFile.setContent(JsonUtil.toJson(sysKdbDataSourceRet));
+
+            AppGit appGit = new AppGit(repoId);
+            GitCommit gitCommit = appGit.getCommit("添加数据源: " + resourceId);
+            appGit.addCommitFile(gitFile, gitCommit);
         }
         catch (Exception e) {
             throw BusinessException.serviceThrow(I18n.t("SysKdbDataSource.tip.addFail", "数据源新增失败，请检查连接信息！"));
@@ -128,16 +160,50 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
             DataSourceInfo info = new DataSourceInfo();
             info.setSourceName(argv.getId());
             info.setDriverClass(argv.getDriverClass());
-            info.setAppId(argv.getAppId());
+            // 截止2024/09/09，还不能设置此appId，否则faas会报错：
+            // Caused by: java.sql.SQLSyntaxErrorException: user lacks privilege or object not found:
+            // APPID in statement [update data_source set password=?,driverClass=?,appId=?,jdbcUrl=?,json=?,sourceName=?,userName=? where sourceName = ?]
+            // 但是 faas 表是已经有appId字段的了，推测是faas代码问题
+//            info.setAppId(argv.getAppId());
+
             instanceToField(info, argv);
             KdbApi api = (KdbApi)(DB.getDefault());
             if (StringUtils.isNotEmpty(argv.getJson())) {
-                info.setJson(argv.getJson());
+                // 添加appId到json字段里
+                String argvJson = argv.getJson();
+                if (StringUtils.isNotEmpty(argv.getAppId())){
+                    Map<String, Object> json2Map = JsonUtil.toBean(argvJson, Map.class);
+                    json2Map.put("appId", argv.getAppId());
+                    argvJson = JsonUtil.toJson(json2Map);
+                }
+                info.setJson(argvJson);
             }
             else {
-                info.setJson("{}");
+                String defaultJson = "{}";
+                if (StringUtils.isNotEmpty(argv.getAppId())){
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("appId", argv.getAppId());
+                    defaultJson = JsonUtil.toJson(map);
+                }
+                info.setJson(defaultJson);
             }
             api.editDataSource(info);
+
+            // 查询数据源详情
+            SysKdbDataSourceRet sysKdbDataSourceRet = get(info.getSourceName());
+
+            // 提交git
+            String repoId = argv.getAppId();
+            if (StringUtils.isEmpty(repoId)) repoId = "public";
+            String resourceId = info.getSourceName();
+
+            GitFile gitFile = new GitFile();
+            gitFile.setPath("data_sources/" + resourceId + ".json");
+            gitFile.setContent(JsonUtil.toJson(sysKdbDataSourceRet));
+
+            AppGit appGit = new AppGit(repoId);
+            GitCommit gitCommit = appGit.getCommit("编辑数据源: " + resourceId);
+            appGit.addCommitFile(gitFile, gitCommit);
         }
         catch (Exception e) {
             throw BusinessException.serviceThrow(I18n.t("SysKdbDataSource.tip.addFail", "数据源新增失败，请检查连接信息！"));
@@ -158,6 +224,20 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
         for (DataSourceInfo infoL: list) {
             retList.add(toRet(infoL));
         }
+        // 处理appId
+        for(SysKdbDataSourceRet ret: retList){
+            String appId = ret.getAppId();
+            String json = ret.getJson();
+            if (StringUtils.isEmpty(appId) && StringUtils.isNotEmpty(json)){
+                Map<String, Object> json2Map = JsonUtil.toBean(json, Map.class);
+                String anotherAppId = json2Map.get("appId") != null ? json2Map.get("appId").toString():null;
+                if (StringUtils.isNotEmpty(anotherAppId)){
+                    ret.setAppId(anotherAppId);
+                    json2Map.remove("appId");
+                    ret.setJson(JsonUtil.toJson(json2Map));
+                }
+            }
+        }
         // 按driverClass过滤
         if (StringUtils.isNotEmpty(argv.getDriverClass())) {
             retList.removeIf(ret -> !ret.getDriverClass().contains(argv.getDriverClass()));
@@ -168,7 +248,11 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
         }
         // 按应用id过滤
         if (StringUtils.isNotEmpty(argv.getAppId())) {
-//            retList.removeIf(ret -> !argv.getAppId().equals(ret.getAppId()));
+            // 应用数据源 appId = #{appId}
+            retList.removeIf(ret -> !argv.getAppId().equals(ret.getAppId()));
+        } else {
+            // 公共数据源 appId is null or appId = ''
+            retList.removeIf(ret -> StringUtils.isNotEmpty(ret.getAppId()));
         }
         // 排序
         retList.sort(Comparator.comparing(SysKdbDataSourceRet::getId));
@@ -181,6 +265,21 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
         for (String id: argv.getIds()) {
            api.deleteDataSource(id);
         }
+        // 提交git
+        String repoId = argv.getAppId();
+        if (StringUtils.isEmpty(repoId)) repoId = "public";
+        String resourceId = StringUtils.joinToString(new ArrayList<>(argv.getIds()), ",");
+
+        // ids转文件路径
+        List<String> filePathList = new ArrayList<>();
+        for (String id : argv.getIds()) {
+            filePathList.add("data_sources/" + id + ".json");
+        }
+
+        AppGit appGit = new AppGit(repoId);
+        GitCommit gitCommit = appGit.getCommit("删除数据源: " + resourceId);
+        appGit.deleteCommitMultiFile(filePathList, gitCommit);
+
     }
 
     /**
