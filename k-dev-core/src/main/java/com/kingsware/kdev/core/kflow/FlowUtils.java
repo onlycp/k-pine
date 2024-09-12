@@ -77,11 +77,19 @@ public class FlowUtils {
             JsonNode childNode = jsonNode != null ? jsonNode.get("properties") : null;
             for (Map.Entry<?,?> entry: ((Map<?, ?>) object).entrySet()) {
                 String humpKey = StringUtils.lineToHump(entry.getKey().toString());
+
                 JsonNode pNode = childNode != null ? childNode.get(humpKey) : null;
                 Object value = processData(entry.getValue(), context, pNode);
                 // 如果不是map和list，再进行属性处理
                 if (!(value instanceof Map) && !(value instanceof Collection) && value!= null && StringUtils.isNotEmpty(value.toString()) ) {
                     value = parserWithSchema(pNode, value);
+                }
+                if (value instanceof String && context.getI18nKeys().contains(humpKey)) {
+                    String valueStr = (String)value;
+                    if (StringUtils.isNotEmpty(valueStr)) {
+                        value = I18n.parseScript(context.getAppId(), valueStr);
+                        log.info("国际化处理:{}，原始值: {}, 国际化值：{}" ,humpKey, valueStr, value);
+                    }
                 }
                 // 如果是复合值，需要将label和value同时返回
                 if (value instanceof ComplexValue) {

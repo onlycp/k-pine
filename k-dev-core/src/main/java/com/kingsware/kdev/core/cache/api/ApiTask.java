@@ -42,7 +42,7 @@ public class ApiTask implements KTask, KRunner {
         // 查找所有接口
         try {
             SqlWrapper sqlWrapper = new SqlWrapper("select t0.id, t0.api_tags, t0.api_name, t0.api_result_handler, t0.api_rsp_argv,  t0.api_url, t0.api_method, t0.call_type, t0.api_flow_id, t0.api_code, t0.app_id, t0.who_created, t0.when_modified, t0.who_modified,t1.in_argv, t1.out_argv, t1.sub_flow_ids" +
-                    ",t0.cache_enable, t0.cache_cron, t0.cache_expire_time from sys_api t0 ");
+                    ",t0.cache_enable, t0.cache_cron, t0.cache_expire_time, t1.i18n_keys from sys_api t0 ");
             sqlWrapper.appendSql("inner join sys_logic_flow t1 on t1.flow_id=t0.api_flow_id ");
             sqlWrapper.appendSql("where t0.api_url is not null and t0.api_method is not null order by t0.when_modified desc ");
             if (ApiManager.getInstance().getDataModified() == null) {

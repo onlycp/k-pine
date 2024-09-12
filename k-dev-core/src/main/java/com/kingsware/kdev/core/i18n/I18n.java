@@ -270,6 +270,13 @@ public class I18n {
         if (StringUtils.isEmpty(appId)) {
             appId = SysConst.pineAppId;
         }
+        if (StringUtils.isEmpty(script)) {
+            return script;
+        }
+        // 适配原先的写法
+        if (script.contains("$") && script.contains("}") && script.contains("{") && script.contains("|") && script.contains("i18n")) {
+            return script;
+        }
         // 匹配 t('key', 'default') 或 t("key", "default") 的正则表达式
         Pattern pattern = Pattern.compile("t\\((['\"])(.*?)\\1,\\s*(['\"])(.*?)\\3\\)");
         Matcher matcher = pattern.matcher(script);

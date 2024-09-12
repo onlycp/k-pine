@@ -754,7 +754,7 @@ public class CopyAppManager {
 
         // 请求
         // 创建上下文
-        KFlowContext context = KFlowContext.createBaseContext("{}", "{}");
+        KFlowContext context = KFlowContext.createBaseContext("{}", "{}", null);
         // 调用流程
         String exportFlowId = SpringContext.getProperties("app.export.flowId", "609a655bae59402babe2c1f439849e03");
 

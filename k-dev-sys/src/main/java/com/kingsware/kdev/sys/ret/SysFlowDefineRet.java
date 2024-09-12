@@ -99,6 +99,8 @@ public class SysFlowDefineRet extends BaseSimpleRet {
     private List<Node> nodes = new ArrayList<>();
     /** 连续 **/
     private List<Link> links = new ArrayList<>();
+    /** 国际化key，多个用,分割 **/
+    private String i18nKeys;
 
     /** 设置 **/
     public void addNode(String id, String label, String type,  String executeType, String sourceName, String zIndex,

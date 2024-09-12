@@ -340,7 +340,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                 String flowId = groupProperties.stringValue(key, "");
                 if (StringUtils.isNotEmpty(flowId)) {
                     // 获取视图模型
-                    KFlowContext context = KFlowContext.createBaseContext( "{}",  "{}");
+                    KFlowContext context = KFlowContext.createBaseContext( "{}",  "{}", null);
                     Map<String,Object> params = JsonUtil.beanToMap(fileDecryptInfo);
                     log.info("验证文件权限，文件ID：{}，文件路径：{}，文件权限流程ID：{}， token:{}", id, path, flowId, TokenUtil.getTokenString(ServletUtil.request()));
 

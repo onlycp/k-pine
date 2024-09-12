@@ -101,7 +101,7 @@ public class FaasInvoke {
 
 
     public static KdbFlowResult callFlow(String id, Map<String, Object> variables) {
-        KFlowContext context = KFlowContext.createBaseContext("{}", "{}");
+        KFlowContext context = KFlowContext.createBaseContext("{}", "{}", null);
         variables.put("request", ServletUtil.getRequestData());
         String s = JsonUtil.toJson(variables);
         KdbFlowResult kdbFlowResult = KdbFlowExecutor.getInstance().execute(id, "", variables, context, false, false);

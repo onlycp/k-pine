@@ -43,7 +43,7 @@ public class SysSearchConfigServiceImpl extends BaseServiceImpl implements SysSe
         argvMap.put("page", argv.getPage());
         argvMap.put("pageQuery", argv.isPageQuery());
         // 创建上下文
-        KFlowContext context = KFlowContext.createBaseContext("{}", "{}");
+        KFlowContext context = KFlowContext.createBaseContext("{}", "{}", null);
 
         // 调用流程
         KdbFlowResult result = KdbFlowExecutor.getInstance().execute(FLOW_ID, "", argvMap, context, true, false);

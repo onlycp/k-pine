@@ -18,7 +18,7 @@ public class OpenApiConsumer implements KmqConsumer {
      */
     @Override
     public void onMessage(List<String> payloads) throws Exception {
-        KFlowContext ic = KFlowContext.createBaseContext("{}", "{}");
+        KFlowContext ic = KFlowContext.createBaseContext("{}", "{}", null);
         for (String payload: payloads) {
             Map<String, Object> recordMap = JsonUtil.toMap(payload);
             KdbFlowResult rs = KdbFlowExecutor.getInstance().execute("72caaa23e3744781b8e5d7565a6e23f7", "", recordMap, ic, false, true);

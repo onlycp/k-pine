@@ -13,8 +13,7 @@ import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.core.util.SystemUtil;
 import lombok.Data;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 流程环境变量
@@ -34,6 +33,10 @@ public class KFlowContext {
     private String inArgv;
     /** 输出参数定义 **/
     private String outArgv;
+    /** 应用id **/
+    private String appId;
+    /** 自动国际化键 **/
+    private Set<String> i18nKeys = new HashSet<>();
 
 
     /**
@@ -42,7 +45,7 @@ public class KFlowContext {
      * @param outArgv 输出参数
      * @return KFlowContext 返回流程上下文对象
      */
-    public static KFlowContext createBaseContext(String inArgv, String outArgv) {
+    public static KFlowContext createBaseContext(String inArgv, String outArgv, String i18nKeys) {
 
         KFlowContext context = new KFlowContext();
         Map<String, Object> sysMap = new HashMap<>();
@@ -75,6 +78,22 @@ public class KFlowContext {
         // 设置输入参数
         context.inArgv = StringUtils.isEmpty(inArgv) ? "{}" : inArgv;
         context.outArgv = StringUtils.isEmpty(outArgv) ? "{}" : outArgv;
+        if (StringUtils.isNotEmpty(i18nKeys)) {
+            String[] sets = i18nKeys.split(",");
+            context.i18nKeys.addAll(Arrays.asList(sets));
+        }
+        return context;
+    }
+
+    /**
+     * 创建基本上下文
+     * @param inArgv 输入参数
+     * @param outArgv 输出参数
+     * @return KFlowContext 返回流程上下文对象
+     */
+    public static KFlowContext createBaseContext(String inArgv, String outArgv, String i18nKeys, String appId) {
+        KFlowContext context = createBaseContext(inArgv, outArgv, i18nKeys);
+        context.appId = appId;
         return context;
     }
 

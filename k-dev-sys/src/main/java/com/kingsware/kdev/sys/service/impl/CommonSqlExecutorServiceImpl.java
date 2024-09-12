@@ -47,7 +47,7 @@ public class CommonSqlExecutorServiceImpl extends BaseServiceImpl implements Com
         Map<String, Object> argvMap = new HashMap<>();
 
         // 创建上下文
-        KFlowContext context = KFlowContext.createBaseContext("{}", "{}");
+        KFlowContext context = KFlowContext.createBaseContext("{}", "{}", null);
 
         // 调用流程
         KdbFlowResult result = KdbFlowExecutor.getInstance().execute(FLOW_ID, "", argvMap, context, true, false);

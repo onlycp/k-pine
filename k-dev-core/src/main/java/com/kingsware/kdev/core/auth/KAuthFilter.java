@@ -622,7 +622,7 @@ public class KAuthFilter implements Filter {
     @SuppressWarnings("all")
     private void  callByFlow(HttpServletRequest request, HttpServletResponse response, ApiInfo api, String path, Map<String, Object> argvMap, String requestBody) {
         // 获取视图模型
-        KFlowContext context = KFlowContext.createBaseContext(StringUtils.isNotEmpty(api.getInArgv()) ? api.getInArgv() : "{}", StringUtils.isNotEmpty(api.getOutArgv()) ? api.getOutArgv() : "{}");
+        KFlowContext context = KFlowContext.createBaseContext(StringUtils.isNotEmpty(api.getInArgv()) ? api.getInArgv() : "{}", StringUtils.isNotEmpty(api.getOutArgv()) ? api.getOutArgv() : "{}", api.getI18nKeys(), api.getAppId());
         // 用于接口测试，指定id
         if (argvMap.containsKey("replaceBody")) {
             Map<String, Object> sysMap = JsonUtil.toMap(argvMap.get("replaceBody").toString());
