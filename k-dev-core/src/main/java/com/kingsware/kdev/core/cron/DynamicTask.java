@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.cache.api.ApiResultCache;
 import com.kingsware.kdev.core.cache.api.ApiResultCacheManager;
 import com.kingsware.kdev.core.cache.instance.InstanceManager;
 import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.kflow.KFlowConstant;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
@@ -393,9 +394,10 @@ public class DynamicTask implements CommandLineRunner {
         Map<String, Object> body = new HashMap<>();
         body.put("md5", task.getId());
         body.put("changed", changed);
-        if (changed) {
-            body.put("data", data);
-        }
+        body.put("data", data);
+//        if (changed) {
+//
+//        }
         body.put("expire", (Integer.parseInt(task.getCron()) + 10) * 1000);
         toC.setBody(JsonUtil.toJson(body));
         for (String token : apiResultCache.getTokens() ) {
@@ -519,8 +521,9 @@ public class DynamicTask implements CommandLineRunner {
                     List<SysTask> tasks = DB.findList(SysTask.class, "select * from sys_task where enable=1 order by when_created asc");
                     // 移除超时的虚拟任务
                     List<SysTask> expireTasks = new ArrayList<>();
+                    int virtualTaskKeepaliveTime = SpringContext.getInt("app.schedule.virtual-task-keepalive-time", 1);
                     for (SysTask task: virtualTaskList) {
-                        if ((System.currentTimeMillis() - task.getWhenModified().getTime()) > 1000*60 ) {
+                        if ((System.currentTimeMillis() - task.getWhenModified().getTime()) > (long) virtualTaskKeepaliveTime * 1000*60 ) {
                             expireTasks.add(task);
                             ApiResultCache apiResultCache = ApiResultCacheManager.getInstance().get(task.getId());
                             if (apiResultCache != null) {

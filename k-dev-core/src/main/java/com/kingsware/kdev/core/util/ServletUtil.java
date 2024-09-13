@@ -523,6 +523,10 @@ public class ServletUtil {
         if (StringUtils.isNotEmpty(requestUuid)) {
             return requestUuid;
         }
+        requestUuid = request.getHeader("request-uuid");
+        if (StringUtils.isNotEmpty(requestUuid)) {
+            return requestUuid;
+        }
         TreeMap<String, Object> stringObjectTreeMap = new TreeMap<>();
         stringObjectTreeMap.put("request_uri", uri);
         stringObjectTreeMap.put("request_method", request);
