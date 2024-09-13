@@ -48,6 +48,7 @@ public class AppGit {
      * @param variables
      */
     private String execute(String script, Map<String, Object> variables) {
+
         // 调用数据库API执行脚本，实现仓库初始化
         KdbRet<String> ret = DB.kdbApi().executeScript(script, variables);
         // 如果执行失败，抛出业务异常

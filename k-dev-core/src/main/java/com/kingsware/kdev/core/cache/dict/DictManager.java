@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.bean.SysDictItemRet;
 import com.kingsware.kdev.core.bean.SysDictRet;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.util.CollectUtils;
+import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.Data;
 
@@ -88,8 +89,7 @@ public class DictManager {
         long t2 = System.currentTimeMillis();
         List<SysDictItemRet> dictItemList = DictManager.getInstance().getDictItemList();
         long t3 = System.currentTimeMillis();
-        List<SysDictItemRet> newDictItemList = new ArrayList<>();
-        Collections.copy(dictItemList, newDictItemList);
+        List<SysDictItemRet> newDictItemList = JsonUtil.toListBean(JsonUtil.toJson(dictItemList), SysDictItemRet.class);
         // 处理国际化
         for (SysDictItemRet item : newDictItemList) {
             String translate = I18n.parseScript(item.getAppId(), item.getName());

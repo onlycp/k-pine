@@ -50,5 +50,9 @@ public interface SysDictItemService extends BaseService {
      */
     void delete(MultiIdArgv argv);
 
+    /**
+     * 获取所有字典
+     * @return
+     */
     Map<String, Object> getAllDict();
 }

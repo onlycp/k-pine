@@ -37,6 +37,9 @@ public class PublicGitInitialize implements SystemInitialize {
 
     @Override
     public void execute() throws FileNotFoundException {
+        if (1 == 1) {
+            return ;
+        }
         usernameMap = this.getUserIdNameMap();
         // 应用库初始化
         this.initApps();
