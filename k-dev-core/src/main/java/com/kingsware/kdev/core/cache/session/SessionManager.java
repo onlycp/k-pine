@@ -124,6 +124,21 @@ public class SessionManager {
         return null;
     }
 
+    /**
+     * 判断给定的token是否存在于哈希映射中
+     *
+     * @param token 要检查的token字符串
+     * @return 如果token存在于哈希映射中，则返回true；否则返回false
+     */
+    public boolean hasToken(String token) {
+        return tokenHashMap.containsKey(token);
+    }
+
+    /**
+     * 根据用户ID移除相应的会话映射
+     *
+     * @param userId 用户ID，用于定位并移除相应的会话映射
+     */
     public void removeByUserId(String userId) {
         this.sessionMapping.remove(userId);
     }
@@ -137,7 +152,7 @@ public class SessionManager {
     public boolean checkSession(String userId, String loginToken) {
         if (sessionMapping.containsKey(userId)) {
             Set<TokenSession> onlineUsers = sessionMapping.get(userId);
-            if(onlineUsers.size() > 0) {
+            if(!onlineUsers.isEmpty()) {
                 TokenSession ts = onlineUsers.stream().max(Comparator.comparing(TokenSession::getLoginTime)).get();
                 return ts.isMe(loginToken);
             }

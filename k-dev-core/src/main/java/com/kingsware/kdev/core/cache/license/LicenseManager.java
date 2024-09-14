@@ -101,10 +101,7 @@ public class LicenseManager {
             String[] arr = str.split("\\|");
             String originStr = AESUtil.decrypt(arr[0], encryptProperties.getAes().getSecret());
             String md51 = MD5Utils.md5(originStr);
-            if (md51.equals(arr[1])) {
-                return true;
-            }
-            return false;
+            return md51.equals(arr[1]);
         }
         catch (Exception e) {
             return false;
