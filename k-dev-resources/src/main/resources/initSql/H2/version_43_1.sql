@@ -1,49 +1,53 @@
-CREATE TABLE if not exists dev_plugin_api (
-                                  `id` varchar(36) COLLATE utf8mb4_bin NOT NULL COMMENT '主键',
-                                  `title` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '标题',
-                                  `group_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '组编码',
-                                  `code` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '编码',
-                                  `tags` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '标签',
-                                  `notes` text COLLATE utf8mb4_bin COMMENT '描述',
-                                  `order_num` varchar(10) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '位置',
-                                  `who_created` varchar(36) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建人',
-                                  `when_created` varchar(30) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建时间',
-                                  `who_modified` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '修改人',
-                                  `when_modified` varchar(30) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '修改时间',
-                                  PRIMARY KEY (`id`)
+-- 创建 dev_plugin_api 表
+CREATE TABLE IF NOT EXISTS dev_plugin_api (
+                                              id VARCHAR(36) NOT NULL COMMENT '主键',
+                                              title VARCHAR(255) DEFAULT NULL COMMENT '标题',
+                                              group_code VARCHAR(255) DEFAULT NULL COMMENT '组编码',
+                                              code VARCHAR(255) DEFAULT NULL COMMENT '编码',
+                                              tags VARCHAR(255) DEFAULT NULL COMMENT '标签',
+                                              notes TEXT COMMENT '描述',
+                                              order_num VARCHAR(10) DEFAULT NULL COMMENT '位置',
+                                              who_created VARCHAR(36) DEFAULT NULL COMMENT '创建人',
+                                              when_created VARCHAR(30) DEFAULT NULL COMMENT '创建时间',
+                                              who_modified VARCHAR(36) DEFAULT NULL COMMENT '修改人',
+                                              when_modified VARCHAR(30) DEFAULT NULL COMMENT '修改时间',
+                                              PRIMARY KEY (id)
 ) COMMENT='FAAS接口组';
 
-CREATE TABLE if not exists  dev_plugin_group (
-                                    `id` varchar(36) COLLATE utf8mb4_bin NOT NULL COMMENT '主键',
-                                    `name` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '名称',
-                                    `code` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '编码',
-                                    `notes` text COLLATE utf8mb4_bin COMMENT '描述',
-                                    `order_num` int(11) DEFAULT NULL COMMENT '排序',
-                                    `who_created` varchar(36) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建人',
-                                    `when_created` varchar(30) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建时间',
-                                    `who_modified` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '修改人',
-                                    `when_modified` varchar(30) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '修改时间',
-                                    PRIMARY KEY (`id`)
+-- 创建 dev_plugin_group 表
+CREATE TABLE IF NOT EXISTS dev_plugin_group (
+                                                id VARCHAR(36) NOT NULL COMMENT '主键',
+                                                name VARCHAR(255) DEFAULT NULL COMMENT '名称',
+                                                code VARCHAR(255) DEFAULT NULL COMMENT '编码',
+                                                notes TEXT COMMENT '描述',
+                                                order_num INT DEFAULT NULL COMMENT '排序',
+                                                who_created VARCHAR(36) DEFAULT NULL COMMENT '创建人',
+                                                when_created VARCHAR(30) DEFAULT NULL COMMENT '创建时间',
+                                                who_modified VARCHAR(36) DEFAULT NULL COMMENT '修改人',
+                                                when_modified VARCHAR(30) DEFAULT NULL COMMENT '修改时间',
+                                                PRIMARY KEY (id)
 );
 
-CREATE TABLE if not exists `dev_plugin_operation` (
-                                        `id` varchar(36) COLLATE utf8mb4_bin NOT NULL COMMENT '主键',
-                                        `code` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '编码',
-                                        `tags` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '标签',
-                                        `api_id` varchar(36) COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'API',
-                                        `title` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '标题',
-                                        `notes` text COLLATE utf8mb4_bin COMMENT '描述',
-                                        `cases` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin COMMENT '示例',
-                                        `success_resp` text COLLATE utf8mb4_bin COMMENT '成功示例',
-                                        `error_resp` text COLLATE utf8mb4_bin COMMENT '失败示例',
-                                        `in_params` text COLLATE utf8mb4_bin COMMENT '请求参数 ',
-                                        `who_created` varchar(36) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建人',
-                                        `when_created` varchar(30) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建时间',
-                                        `who_modified` varchar(36) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '修改人',
-                                        `when_modified` varchar(30) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '修改时间',
-                                        `order_num` int(8) DEFAULT '0' COMMENT '序号',
-                                        PRIMARY KEY (`id`)
-) ;
+-- 创建 dev_plugin_operation 表
+CREATE TABLE IF NOT EXISTS dev_plugin_operation (
+                                                    id VARCHAR(36) NOT NULL COMMENT '主键',
+                                                    code VARCHAR(255) DEFAULT NULL COMMENT '编码',
+                                                    tags VARCHAR(255) DEFAULT NULL COMMENT '标签',
+                                                    api_id VARCHAR(36) DEFAULT NULL COMMENT 'API',
+                                                    title VARCHAR(255) DEFAULT NULL COMMENT '标题',
+                                                    notes TEXT COMMENT '描述',
+                                                    cases TEXT COMMENT '示例',
+                                                    success_resp TEXT COMMENT '成功示例',
+                                                    error_resp TEXT COMMENT '失败示例',
+                                                    in_params TEXT COMMENT '请求参数',
+                                                    who_created VARCHAR(36) DEFAULT NULL COMMENT '创建人',
+                                                    when_created VARCHAR(30) DEFAULT NULL COMMENT '创建时间',
+                                                    who_modified VARCHAR(36) DEFAULT NULL COMMENT '修改人',
+                                                    when_modified VARCHAR(30) DEFAULT NULL COMMENT '修改时间',
+                                                    order_num INT DEFAULT 0 COMMENT '序号',
+                                                    PRIMARY KEY (id)
+);
+
 
 INSERT INTO `dev_plugin_group`(`id`, `name`, `code`, `notes`, `order_num`, `who_created`, `when_created`, `who_modified`, `when_modified`) VALUES ('a7ce7fa1e3ef4d0080cf06789d43a27b', 'Elasticsearch', 'elasticsearch', 'Elasticsearch操作相关', 9, 'bab66508eefe49ada701257548bbe54a', '2023-06-05 16:07:33', 'bab66508eefe49ada701257548bbe54a', '2023-06-05 16:07:33');
 INSERT INTO `dev_plugin_group`(`id`, `name`, `code`, `notes`, `order_num`, `who_created`, `when_created`, `who_modified`, `when_modified`) VALUES ('b2d366679e774dda9b41aaabca3cf2d7', '流程引擎', 'workflow', '自研的流程引擎', 8, '94123ca363dc4dfaa62a6bb5dcd3bf50', '2023-05-26 09:30:32', '94123ca363dc4dfaa62a6bb5dcd3bf50', '2023-05-26 09:30:32');

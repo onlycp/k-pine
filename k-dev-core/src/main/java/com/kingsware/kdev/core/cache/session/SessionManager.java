@@ -17,15 +17,20 @@ import java.util.*;
 
 /**
  * // 会话管理 单实例.
+ *
  * @author chen peng
  * @version 1.0.0
  * @date 2022/1/6 9:25 上午
  */
 @Slf4j
 public class SessionManager {
-    /** 实例 **/
+    /**
+     * 实例
+     **/
     private static SessionManager instance;
-    /** 字典缓存 **/
+    /**
+     * 字典缓存
+     **/
     private Map<String, Set<TokenSession>> sessionMapping = new HashMap<>();
     private Map<String, String> tokenHashMap = new HashMap<>();
 
@@ -41,14 +46,15 @@ public class SessionManager {
 
     /**
      * 增加字典项
-     * @param onlineUser  在线用户
+     *
+     * @param onlineUser 在线用户
      */
     public void addSession(SysOnlineUser onlineUser) {
         Set<TokenSession> onlineUsers = sessionMapping.computeIfAbsent(onlineUser.getUserId(), key -> new HashSet<>());
         TokenSession tokenSession = BeanUtils.copyObject(onlineUser, TokenSession.class);
         tokenSession.setActiveTime(onlineUser.getLoginTime());
         boolean isNew = true;
-        for (TokenSession ts: onlineUsers) {
+        for (TokenSession ts : onlineUsers) {
             if (ts.isMe(tokenSession.getLoginToken())) {
                 isNew = false;
                 break;
@@ -67,6 +73,7 @@ public class SessionManager {
 
     /**
      * 通过md5获取token
+     *
      * @param md5 md5
      * @return token
      */
@@ -84,7 +91,7 @@ public class SessionManager {
         // 查找所有会话
         List<SysOnlineUser> onlineUserList = DB.findList(SysOnlineUser.class, Collections.emptyList());
         Map<String, Set<TokenSession>> map = new HashMap<>();
-        for (SysOnlineUser onlineUser: onlineUserList) {
+        for (SysOnlineUser onlineUser : onlineUserList) {
             Set<TokenSession> onlineUsers = map.computeIfAbsent(onlineUser.getUserId(), key -> new HashSet<>());
             // 从当前缓存中读取，如果已存在，则直接以缓存中的为准
             TokenSession ts = getByToken(onlineUser.getUserId(), onlineUser.getLoginToken());
@@ -108,14 +115,15 @@ public class SessionManager {
 
     /**
      * 通过用户id和令牌获取令牌会话
-     * @param userId    用户id
-     * @param token     令牌
+     *
+     * @param userId 用户id
+     * @param token  令牌
      * @return
      */
     public TokenSession getByToken(String userId, String token) {
         if (sessionMapping.containsKey(userId)) {
             Set<TokenSession> tokenSessions = sessionMapping.get(userId);
-            for (TokenSession ts: tokenSessions) {
+            for (TokenSession ts : tokenSessions) {
                 if (ts.isMe(token)) {
                     return ts;
                 }
@@ -145,14 +153,15 @@ public class SessionManager {
 
     /**
      * 检查会话
-     * @param userId  用户id
+     *
+     * @param userId     用户id
      * @param loginToken 令牌
-     * @return  是否成功
+     * @return 是否成功
      */
     public boolean checkSession(String userId, String loginToken) {
         if (sessionMapping.containsKey(userId)) {
             Set<TokenSession> onlineUsers = sessionMapping.get(userId);
-            if(!onlineUsers.isEmpty()) {
+            if (!onlineUsers.isEmpty()) {
                 TokenSession ts = onlineUsers.stream().max(Comparator.comparing(TokenSession::getLoginTime)).get();
                 return ts.isMe(loginToken);
             }
@@ -162,48 +171,50 @@ public class SessionManager {
 
     /**
      * 删除会话
-     * @param userId  用户id
+     *
+     * @param userId     用户id
      * @param loginToken 令牌
      */
     public void removeSession(String userId, String loginToken) {
-      if (sessionMapping.containsKey(userId)) {
-          Set<TokenSession> onlineUsers = sessionMapping.get(userId);
-          for (TokenSession onlineUser: onlineUsers) {
-              if (onlineUser.isMe(loginToken)) {
-                  onlineUsers.remove(onlineUser);
-                  return;
-              }
-          }
-      }
+        if (sessionMapping.containsKey(userId)) {
+            Set<TokenSession> onlineUsers = sessionMapping.get(userId);
+            for (TokenSession onlineUser : onlineUsers) {
+                if (onlineUser.isMe(loginToken)) {
+                    onlineUsers.remove(onlineUser);
+                    return;
+                }
+            }
+        }
     }
+
 
     public void updateSession(TokenSession session) {
         if (session == null) {
             return;
         }
-        for (Set<TokenSession> ts: sessionMapping.values()) {
-           for (TokenSession onlineUser: ts) {
-               if (onlineUser.isMe(session.getLoginToken())) {
-                   onlineUser.setActiveTime(session.getActiveTime());
-                   onlineUser.setExpireTime(session.getExpireTime());
-                   onlineUser.setPingTime(session.getPingTime());
-                   onlineUser.setLoginTime(session.getLoginTime());
+        for (Set<TokenSession> ts : sessionMapping.values()) {
+            for (TokenSession onlineUser : ts) {
+                if (onlineUser.isMe(session.getLoginToken())) {
+                    onlineUser.setActiveTime(session.getActiveTime());
+                    onlineUser.setExpireTime(session.getExpireTime());
+                    onlineUser.setPingTime(session.getPingTime());
+                    onlineUser.setLoginTime(session.getLoginTime());
 //                   onlineUser.setHasChanged(session.isHasChanged());
-               }
-           }
+                }
+            }
         }
-
     }
 
     /**
      * 失活会话
-     * @param userId    用户id
-     * @param loginToken    登录令牌
+     *
+     * @param userId     用户id
+     * @param loginToken 登录令牌
      */
     public void inActiveSession(String userId, String loginToken) {
         if (sessionMapping.containsKey(userId)) {
             Set<TokenSession> onlineUsers = sessionMapping.get(userId);
-            for (TokenSession onlineUser: onlineUsers) {
+            for (TokenSession onlineUser : onlineUsers) {
                 if (onlineUser.isMe(loginToken)) {
                     if (onlineUser.isActive()) {
                         log.info("用户名：{} 失活，原因是心跳超时", userId);
@@ -217,8 +228,9 @@ public class SessionManager {
 
     /**
      * 用户的活动会话数
-     * @param userId    用户id
-     * @return          激活数
+     *
+     * @param userId 用户id
+     * @return 激活数
      */
     public long activeCount(String userId, String sessionId) {
         Set<TokenSession> tokenSessions = sessionMapping.get(userId);
@@ -239,14 +251,15 @@ public class SessionManager {
 
     /**
      * 更新活动时间
+     *
      * @param userId        用户id
      * @param loginToken    登录令牌
-     * @param updateExpired  是否要更新过期时间
+     * @param updateExpired 是否要更新过期时间
      */
     public void updateActiveTime(String userId, String loginToken, int mockSessionExpireTime, boolean updateExpired) {
         if (sessionMapping.containsKey(userId)) {
             Set<TokenSession> onlineUsers = sessionMapping.get(userId);
-            for (TokenSession onlineUser: onlineUsers) {
+            for (TokenSession onlineUser : onlineUsers) {
                 if (onlineUser.isMe(loginToken)) {
                     if (updateExpired) {
                         onlineUser.setActiveTime(new Timestamp(System.currentTimeMillis()));
@@ -262,12 +275,13 @@ public class SessionManager {
 
     /**
      * 获取所有的
+     *
      * @return
      */
     public Set<TokenSession> getChanged() {
         Set<TokenSession> tokenSessions = new HashSet<>();
-        for (Map.Entry<String, Set<TokenSession>> entry: sessionMapping.entrySet()) {
-            for (TokenSession ts: entry.getValue()) {
+        for (Map.Entry<String, Set<TokenSession>> entry : sessionMapping.entrySet()) {
+            for (TokenSession ts : entry.getValue()) {
                 if (ts.isHasChanged()) {
                     tokenSessions.add(ts);
                 }
@@ -278,11 +292,12 @@ public class SessionManager {
 
     /**
      * 获取所有的会话
-     * @return  会话
+     *
+     * @return 会话
      */
     public Set<TokenSession> sessions() {
         Set<TokenSession> tokenSessions = new HashSet<>();
-        for (Map.Entry<String, Set<TokenSession>> entry: sessionMapping.entrySet()) {
+        for (Map.Entry<String, Set<TokenSession>> entry : sessionMapping.entrySet()) {
             tokenSessions.addAll(entry.getValue());
         }
         return tokenSessions;

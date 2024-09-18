@@ -104,6 +104,7 @@ public class LicenseManager {
             return md51.equals(arr[1]);
         }
         catch (Exception e) {
+            log.info("error", e);
             return false;
         }
 

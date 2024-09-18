@@ -1,10 +1,9 @@
-//[
-//  {
-//    "sourceName": "MySql",
-//    "driverClass": "com.mysql.jdbc.Driver",
-//    "jdbcUrl": "jdbc:mysql://192.168.107.143:3031/proxy-kingbase?characterEncoding=UTF-8&maxAllowedPacket=10000000",
-//    "username": "postgres",
-//    "password": "Kpine@2023",
-//    "userName": "postgres"
-//  }
-//]
+[
+  {
+    "sourceName":"MySql",
+    "driverClass":"org.h2.Driver",
+    "jdbcUrl":"jdbc:h2:~/kpine7;MODE=MYSQL;DATABASE_TO_UPPER=false",
+    "userName":"root",
+    "password":"123456"
+  }
+]

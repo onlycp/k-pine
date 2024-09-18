@@ -410,7 +410,7 @@ public class DynamicTask implements CommandLineRunner {
             try {
                 AppAuthProperties appAuthProperties = SpringContext.getBean(AppAuthProperties.class);
                 TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret(), appAuthProperties.getIss(),
-                        KClientContext.getContext().getIp(), appAuthProperties.getTokenExpireMinutes(), appAuthProperties.getMockSessionExpireMinutes());
+                        "", appAuthProperties.getTokenExpireMinutes(), appAuthProperties.getMockSessionExpireMinutes());
                 if (messageWebSocket.hasSessionByToken(token)) {
                     WmMessageArgv wmMessageArgv = new WmMessageArgv();
                     wmMessageArgv.setMessage(JsonUtil.toJson(toC));
