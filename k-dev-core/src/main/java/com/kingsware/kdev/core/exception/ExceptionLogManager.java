@@ -1,6 +1,7 @@
 package com.kingsware.kdev.core.exception;
 
 import com.kingsware.kdev.core.bean.ExceptionLog;
+import com.kingsware.kdev.core.bean.Option;
 import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
@@ -11,7 +12,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author chenp
@@ -131,5 +134,29 @@ public class ExceptionLogManager {
             return null;  // 读取或反序列化过程中出现异常，返回null
         }
     }
+
+
+    /**
+     * 获取异常日志列表
+     * @return
+     */
+    public List<Option> getExceptionList() {
+        List<Option> list = new ArrayList<>();
+        Path path = Paths.get("logs/exception/");
+        File currentDir = new File("logs/exception/");
+        for (File file : currentDir.listFiles()) {
+            if (file.isDirectory()) {
+                String date = file.getName();
+                File[] files = file.listFiles();
+                for (File f : files) {
+                    String id = f.getName();
+                    String exceptionId = date + "_" + id;
+                    list.add(new Option(exceptionId, exceptionId));
+                }
+            }
+        }
+        return list;
+    }
+
 
 }

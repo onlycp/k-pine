@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.ExceptionLog;
+import com.kingsware.kdev.core.bean.Option;
 import com.kingsware.kdev.core.cache.page.PageCacheManager;
 import com.kingsware.kdev.core.constants.Version;
 import com.kingsware.kdev.core.context.KClientContext;
@@ -22,7 +23,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 /**
  * 系统工具箱
  *
@@ -64,7 +68,14 @@ public class SysToolBoxController extends BaseController {
         else {
             return BaseRet.failMessage("未开启异常日志");
         }
+    }
 
+    @GetMapping("/exceptionList")
+    @ApiIgnore
+    public BaseRet<?> findException(String term) throws UnsupportedEncodingException {
+        List<Option> options = ExceptionLogManager.getInstance().getExceptionList();
+        List<Option> optionList = options.stream().filter(option -> option.getLabel().contains(term)).collect(Collectors.toList());
+       return BaseRet.success(optionList);
     }
 
 

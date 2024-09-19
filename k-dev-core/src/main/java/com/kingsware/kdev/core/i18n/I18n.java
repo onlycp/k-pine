@@ -222,6 +222,9 @@ public class I18n {
     public static String t(String key, String defaultMessage, Object... params) {
         // 获取当前应用的ID
         String appId = KClientContext.getCurrentAppId();
+        if (StringUtils.isEmpty(appId)) {
+            appId = SysConst.pineAppId;
+        }
         // 使用获取的应用ID、键、默认消息和参数对象数组进行翻译处理
         return t(appId, key, defaultMessage, params);
     }
