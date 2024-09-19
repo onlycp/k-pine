@@ -473,6 +473,7 @@ public class KAuthFilter implements Filter {
         String accessId = argvMap.getOrDefault("accessId", "").toString();
         Map<String, Object> recordMap = new HashMap<>();
         recordMap.put("id", StringUtils.getUUID());
+        recordMap.put("apiId", api.getId());
         recordMap.put("apiName", api.getApiName());
         recordMap.put("accessId", accessId);
         recordMap.put("requestParams", StringUtils.retrench(JsonUtil.toJson(argvMap), 1000));
