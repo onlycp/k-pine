@@ -321,30 +321,34 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         }
         // faas函数
         if (devPine.getFunctions() != null) {
-            for (Functions functions : devPine.getFunctions()) {
+            boolean enableImportFunction = SpringContext.getBoolean("app.import-function", false);
+            if (enableImportFunction) {
+                for (Functions functions : devPine.getFunctions()) {
 
-                FunctionQueryArgv functionQueryArgv = new FunctionQueryArgv();
-                functionQueryArgv.setId(functions.getId());
-                List<Functions> functionInfoList = DB.kdbApi().queryFunction(functionQueryArgv);
-                // 如果没有，则新增，后面之所以再次编辑，就是为了实时生效
-                if (functionInfoList.isEmpty()) {
-                    try {
-                        String sql = "insert into functions (id,name,type,desc,script) values (?,?,?,?,?)";
-                        DB.byName("kingDB").executeUpdateSql(sql, functions.getId(), functions.getName(), functions.getType(), functions.getDesc(), functions.getScript());
+                    FunctionQueryArgv functionQueryArgv = new FunctionQueryArgv();
+                    functionQueryArgv.setId(functions.getId());
+                    List<Functions> functionInfoList = DB.kdbApi().queryFunction(functionQueryArgv);
+                    // 如果没有，则新增，后面之所以再次编辑，就是为了实时生效
+                    if (functionInfoList.isEmpty()) {
+                        try {
+                            String sql = "insert into functions (id,name,type,desc,script) values (?,?,?,?,?)";
+                            DB.byName("kingDB").executeUpdateSql(sql, functions.getId(), functions.getName(), functions.getType(), functions.getDesc(), functions.getScript());
 
-                    } catch (Exception e) {
+                        } catch (Exception e) {
 
+                        }
                     }
+                    EditFunctionInfo editFunctionInfo = new EditFunctionInfo();
+                    editFunctionInfo.setId(functions.getId());
+                    editFunctionInfo.setName(functions.getName());
+                    editFunctionInfo.setDesc(functions.getDesc());
+                    editFunctionInfo.setScript(functions.getScript());
+                    editFunctionInfo.setType(functions.getType());
+                    DB.kdbApi().editFun(editFunctionInfo);
                 }
-                EditFunctionInfo editFunctionInfo = new EditFunctionInfo();
-                editFunctionInfo.setId(functions.getId());
-                editFunctionInfo.setName(functions.getName());
-                editFunctionInfo.setDesc(functions.getDesc());
-                editFunctionInfo.setScript(functions.getScript());
-                editFunctionInfo.setType(functions.getType());
-                DB.kdbApi().editFun(editFunctionInfo);
+                importMessageMap.put(I18n.t("DevApplicationServiceImpl.function", "函数库") , (long)devPine.getFunctions().size());
             }
-            importMessageMap.put(I18n.t("DevApplicationServiceImpl.function", "函数库") , (long)devPine.getFunctions().size());
+
         }
         try {
             if (appModeProperties.getDev() && !LicenseManager.getInstance().isUniopsApp()) {

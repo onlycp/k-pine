@@ -92,6 +92,14 @@ public class SysToolBoxController extends BaseController {
         return BaseRet.success(I18n.translate(i18n));
     }
 
+
+    @GetMapping("/translateApp")
+    @ApiIgnore
+    public BaseRet<?> translateApp(String appId) {
+        I18n.translateApp(appId);
+        return BaseRet.success();
+    }
+
     @GetMapping("/translateAll")
     @ApiIgnore
     public BaseRet<?> translateAll(String i18n) {

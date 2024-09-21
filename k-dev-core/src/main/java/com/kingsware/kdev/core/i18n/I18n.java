@@ -379,7 +379,13 @@ public class I18n {
         catch (Exception e) {
             return "zh_CN";
         }
-
     }
 
+    public static void translateApp(String appId) {
+        List<String> i18ns = DB.findSingleAttributeList(String.class, "select id from sys_i18n where message not like '%en_US%' or message like '%\"en_US\":\"\",%' and app_id=? order by when_created asc", appId);
+        for (int i = 0; i < i18ns.size(); i++) {
+            translate(i18ns.get(i));
+            log.info("translate i18n: {}, 进度:{}/{}", i18ns.get(i), i+1, i18ns.size());
+        }
+    }
 }
