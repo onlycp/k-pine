@@ -167,6 +167,13 @@ public class KdbFlowExecutor {
                     int endIndex = ret.getStackTrace().indexOf("@#");
                     String businessMessage = ret.getStackTrace().substring(startIndex, endIndex);
                     result.setData(new ErrorResult(businessMessage));
+                    if (LogicFlowManager.getInstance().isTranCtrl(argv.getFlowID())) {
+                        try {
+                            TransactionManager.getInstance().rollback();
+                        } catch (TransactionException ex) {
+                            log.warn("error", ex);
+                        }
+                    }
 
                 }
                 else {
