@@ -25,6 +25,8 @@ public class SysMenuRet extends BaseManageRet {
     private String parentId;
     /** 图标 **/
     private String icon;
+    /** 选中图标 **/
+    private String activeIcon;
     /** 编码 **/
     private String code;
     /** 路由路径 **/
