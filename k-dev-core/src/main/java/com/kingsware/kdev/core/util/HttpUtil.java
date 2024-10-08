@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.kingsware.kdev.core.context.NonStaticResourceHttpRequestHandler.URL_PATH;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_OCTET_STREAM_VALUE;
@@ -149,12 +150,54 @@ public class HttpUtil {
     }
 
 
-    public static String callHttp(String apiUrl, String body, Map<String, String> headerMap) throws HttpClientException {
+    /**
+     * 调用HTTP接口方法
+     *
+     * 此方法对外提供调用HTTP接口的能力，它会尝试连接到指定的API URL并发送POST请求
+     * 如果请求失败并满足重试条件，方法会自动重试，最多重试次数由配置项http.retry.max决定，默认为3次
+     *
+     * @param apiUrl API的URL地址
+     * @param body 请求体内容
+     * @param headerMap 请求头信息
+     * @return HTTP响应内容
+     */
+    public static String callHttp(String apiUrl, String body, Map<String, String> headerMap) {
+        // 用于记录并控制重试次数的原子整型变量
+        AtomicInteger retryCount = new AtomicInteger(0);
+        // 调用带有重试机制的私有HTTP调用方法
+        return privateCallHttp(apiUrl, body, headerMap, retryCount);
+    }
 
+    /**
+     * 私有HTTP接口调用方法
+     *
+     * 此方法实际执行HTTP调用，并处理可能的异常如果发生特定类型的HTTP错误（502），且未超过最大重试次数，
+     * 方法会递归地调用自身以重试请求重试逻辑通过传递AtomicInteger retryCount来维护重试计数
+     *
+     * @param apiUrl API的URL地址
+     * @param body 请求体内容
+     * @param headerMap 请求头信息
+     * @param retryCount 用于记录并控制重试次数的原子整型变量
+     * @return HTTP响应内容
+     * @throws HttpClientException 当HTTP请求失败且不再满足重试条件时抛出
+     */
+    private static String privateCallHttp(String apiUrl, String body, Map<String, String> headerMap, AtomicInteger retryCount) {
+        // 从配置中读取最大重试次数，默认为3次
+        int maxRetryCount = SpringContext.getInt("http.retry.max", 3);
         try {
+            // 增加重试计数，表示已尝试过至少一次
+            retryCount.getAndIncrement();
+            // 执行HTTP POST请求并返回响应
             return doPost(apiUrl, body, headerMap);
         } catch (Exception e) {
-            throw new HttpClientException(e.getLocalizedMessage(), -1, apiUrl, body);
+            // 检查异常是否由特定的HTTP错误（502）引起，且看是否已超过最大重试次数
+            if (e.getMessage().contains("502") && e.getMessage().contains("HTTP POST request") && retryCount.get() <= maxRetryCount) {
+                // 如果满足重试条件，递归调用自身重试请求
+                return privateCallHttp(apiUrl, body, headerMap, retryCount);
+            } else {
+                // 如果不再满足重试条件，抛出自定义异常指示调用失败
+                throw new HttpClientException(e.getLocalizedMessage(), -1, apiUrl, body);
+            }
         }
     }
 

@@ -208,8 +208,8 @@ public class MessageWebSocket {
             removeSessions.forEach(it -> {
                 try {
                     //logger.info("移除过时的session: {}", it.getSession().getId());
-                    sessionTokenSet.remove(it);
                     try {
+                        sessionTokenSet.remove(it);
                         it.getSession().close();
                     }
                     catch (Exception e) {
@@ -235,15 +235,15 @@ public class MessageWebSocket {
               try {
                   WmMessage exitMessage = new WmMessage("exit", "心跳超时，会话将被关闭");
                   it.getBasicRemote().sendText(JsonUtil.toJson(exitMessage));
-                  logger.info("移除过时的session: {}", it.getId());
                   it.close();
+                  logger.info("移除过时的session: {}", it.getId());
               }
               catch (Exception e) {
-                  logger.error("移除过时的session失败", e);
+                  // logger.error("移除过时的session失败", e);
               }
 
           });
-          allSessionSet.keySet().removeAll(removeSessions);
+          removeSessions.forEach(allSessionSet.keySet()::remove);
         }
         catch (Exception ignored) {
 

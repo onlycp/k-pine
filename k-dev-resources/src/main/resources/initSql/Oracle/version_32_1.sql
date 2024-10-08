@@ -1,2 +1,2 @@
 alter table SYS_INSTANCE
-    add "online" int;
+    add "ONLINE" int;

@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.net.InetAddress;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 心跳任务
@@ -54,13 +55,17 @@ public class HeartBeatTask implements KTask, KRunner {
 
     @Override
     public void execute() throws Exception {
-        DB.executeUpdateSql("update sys_instance set heart_beat_time=?, online = 1 where id=?", DateUtils.getNow(), INSTANCE_ID);
+        SysInstance instance = DB.findOne(SysInstance.class, "select * from sys_instance where id=?", INSTANCE_ID);
+        instance.setOnline(1);
+        instance.setHeartBeatTime(DateUtils.getNow());
+        DB.update(instance);
         this.refreshInstances();
     }
 
     private void refreshInstances() {
         // 查找所有会话
-        List<SysInstance> instanceList = DB.findList(SysInstance.class, "select * from sys_instance where online = 1 order by reg_time asc ");
+        List<SysInstance> instanceList = DB.findList(SysInstance.class, "select * from sys_instance order by reg_time asc ");
+        instanceList = instanceList.stream().filter(it -> it.getOnline() == 1).collect(Collectors.toList());
         InstanceManager.getInstance().setInstances(instanceList);
         String mqChannel = SpringContext.getProperties("app.mq-channel", "http");
         if ("tcp".equalsIgnoreCase(mqChannel)) {
@@ -70,8 +75,12 @@ public class HeartBeatTask implements KTask, KRunner {
         // 设置超时
         long instTimeoutSecond = Long.parseLong(SpringContext.getProperties("app.inst-time-out-second", "30"));
         Date date = new Date(new Date().getTime() - (1000*instTimeoutSecond));
-        DB.executeUpdateSql("update sys_instance set  online = 0 where heart_beat_time < ?", DateUtils.formatDate(date, DateUtils.DATE_TIME));
-
+        for (SysInstance instance : instanceList) {
+            if (instance.getHeartBeatTime().compareTo(DateUtils.formatDate(date, DateUtils.DATE_TIME)) < 0) {
+                instance.setOnline(0);
+                DB.update(instance);
+            }
+        }
     }
 
     @Override

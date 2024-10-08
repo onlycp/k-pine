@@ -59,8 +59,8 @@ public class DBInitialize {
             for (SystemInitialize systemInitialize : systemInitializes) {
                 systemInitialize.execute();
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            //e.printStackTrace();
         }
     }
 

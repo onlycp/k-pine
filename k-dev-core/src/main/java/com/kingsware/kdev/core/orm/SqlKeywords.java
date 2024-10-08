@@ -31,6 +31,15 @@ public class SqlKeywords {
         dmKeywords.add("distributed");
         dmKeywords.add("online");
         keywords.put("DM", dmKeywords);
+        /** oracle **/
+        Set<String> oracleKeywords = new HashSet<>();
+        oracleKeywords.add("online");
+        keywords.put("Oracle", oracleKeywords);
+        /** xugu **/
+        Set<String> xuguKeywords = new HashSet<>();
+        xuguKeywords.add("number");
+        xuguKeywords.add("order");
+        keywords.put("Xugu", xuguKeywords);
 
     }
 
@@ -72,6 +81,12 @@ public class SqlKeywords {
             return "`"+ columnName + "`";
         }
         else if (dataBaseTypeEnum.equalsIgnoreCase("DM")) {
+            return "\""+ columnName.toUpperCase() + "\"";
+        }
+        else if (dataBaseTypeEnum.equalsIgnoreCase("Oracle")) {
+            return "\""+ columnName.toUpperCase() + "\"";
+        }
+        else if (dataBaseTypeEnum.equalsIgnoreCase("Xugu")) {
             return "\""+ columnName.toUpperCase() + "\"";
         }
         return columnName;

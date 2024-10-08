@@ -203,7 +203,7 @@ public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
 
     @Override
     public <T> long saveAll(List<T> list) {
-        int defaultBatchNum = 20;
+        int defaultBatchNum = 5;
         if (list.size() < defaultBatchNum) {
             defaultBatchNum = list.size();
         }

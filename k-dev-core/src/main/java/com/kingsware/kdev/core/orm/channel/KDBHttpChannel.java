@@ -208,8 +208,14 @@ public class KDBHttpChannel implements DbChannel{
 
         }
         catch (HttpClientException e) {
-            logger.error("sql执行失败，响应码:{}, 响应信息：{}，接口:{}, 参数:{}", e.getCode(), e.getMessage(), e.getUrl(), e.getParams());
-            throw new OrmDbException(e.getMessage());
+            if (e.getMessage().contains("502") && e.getMessage().contains("HTTP POST request")) {
+                return send(kdbArgv);
+            }
+            else {
+                logger.error("sql执行失败，响应码:{}, 响应信息：{}，接口:{}, 参数:{}", e.getCode(), e.getMessage(), e.getUrl(), e.getParams());
+                throw new OrmDbException(e.getMessage());
+            }
+
         }
     }
 
