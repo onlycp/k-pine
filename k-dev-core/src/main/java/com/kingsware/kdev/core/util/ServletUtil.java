@@ -539,7 +539,7 @@ public class ServletUtil {
                 if (arr2.length == 2) {
                     stringObjectTreeMap.put(arr2[0], arr2[1]);
                 } else {
-                    stringObjectTreeMap.put(arr2[0], arr2[1]);
+                    stringObjectTreeMap.put(arr2[0], null);
                 }
             }
         }
