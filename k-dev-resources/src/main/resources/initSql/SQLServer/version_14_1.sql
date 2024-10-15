@@ -1,0 +1,1 @@
+ALTER TABLE sys_menu ALTER COLUMN active_icon  VARCHAR(255) null;

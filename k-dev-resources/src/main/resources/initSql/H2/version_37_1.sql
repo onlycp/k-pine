@@ -1,0 +1,3 @@
+ALTER TABLE dev_team
+    ADD COLUMN is_audit TINYINT NULL,
+    ADD COLUMN image VARCHAR(255) NULL;

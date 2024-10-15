@@ -146,6 +146,9 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
     public void delete(MultiIdArgv argv) {
         for (String id: argv.getIds()) {
             DB.delete(DevPage.class, id);
+            // 移除dev_page关联的menu 表的page_id内容。
+//            String updateSql = "update sys_menu set page_id=null where page_id  = '" + id + "'";
+//            DB.executeUpdateSql(updateSql);
         }
     }
 

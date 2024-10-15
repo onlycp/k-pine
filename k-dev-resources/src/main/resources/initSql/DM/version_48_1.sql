@@ -1,0 +1,3 @@
+ALTER TABLE dev_team
+    ADD is_audit TINYINT DEFAULT NULL,
+    ADD image VARCHAR(255) DEFAULT NULL;
