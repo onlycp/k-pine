@@ -17,10 +17,7 @@ import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.mode.AppModeProperties;
-import com.kingsware.kdev.core.model.DevPage;
-import com.kingsware.kdev.core.model.SysFile;
-import com.kingsware.kdev.core.model.SysLogicFlow;
-import com.kingsware.kdev.core.model.SysTask;
+import com.kingsware.kdev.core.model.*;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
@@ -255,6 +252,10 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         long configCount = DB.batchSaveOrUpdate(devPine.getConfigs(), SysConfig.class);
         log.info("完成导入系统配置：{}", configCount);
         importMessageMap.put(I18n.t("DevApplicationServiceImpl.config", "系统配置") , configCount);
+        // 国际化
+        long i18nCount = DB.batchSaveOrUpdate(devPine.getI18ns(), SysI18n.class);
+        log.info("完成导入国际化信息：{}", i18nCount);
+        importMessageMap.put(I18n.t("DevApplicationServiceImpl.i18n", "国际化信息") , i18nCount);
         // 菜单
         long menuCount = 0;
         if (LicenseManager.getInstance().isUniopsApp()) {

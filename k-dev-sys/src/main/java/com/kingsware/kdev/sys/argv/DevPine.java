@@ -69,6 +69,8 @@ public class DevPine {
     private List<SysRoleMenu> devRoleMenus;
     /** 页面模板 **/
     private List<DevPageTemplate> devPageTemplates;
+    /** 国际化 **/
+    private List<SysI18n> i18ns;
     /**
      * 如果是应用导出的，变量名要带s，如果是对应表的一般没有。
      */
