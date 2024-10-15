@@ -31,6 +31,10 @@ public class SysMenuArgv {
      **/
     private String icon;
     /**
+     * 选中图标
+     **/
+    private String activeIcon;
+    /**
      * 编码
      **/
     private String code;

@@ -85,6 +85,7 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
         model.setSidebarNavMode(argv.getSidebarNavMode());
         model.setTopNavMode(argv.getTopNavMode());
         model.setPageId(argv.getPageId());
+        model.setActiveIcon(argv.getActiveIcon());
         model.setAffix(argv.getAffix());
         // 处理path， 如果单位有变动时，才需要处理
         boolean parentChanged = !Objects.equals(model.getParentId(), argv.getParentId());
@@ -235,7 +236,7 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
             isSuperAdmin = isSuperAdmin(ids);
         }
         StringBuilder sql = new StringBuilder();
-        sql.append(" select sm.id, sm.name, sm.parent_id, sm.icon, sm.code, sm.router_path, sm.component_path, sm.is_hidden, sm.menu_type, sm.api_codes, sm.open_mode, sm.keep_alive, sm.order_num, sm.status,  sm.data_type, sm.theme, sm.page_type, sm.sidebar_nav_mode, sm.top_nav_mode, sm.main_mode, sm.page_id, sm.full_path, sm.is_dev, sm.affix ");
+        sql.append(" select sm.id, sm.name, sm.parent_id, sm.icon, sm.active_icon, sm.code, sm.router_path, sm.component_path, sm.is_hidden, sm.menu_type, sm.api_codes, sm.open_mode, sm.keep_alive, sm.order_num, sm.status,  sm.data_type, sm.theme, sm.page_type, sm.sidebar_nav_mode, sm.top_nav_mode, sm.main_mode, sm.page_id, sm.full_path, sm.is_dev, sm.affix ");
         sql.append(" from sys_menu sm ");
 //        if (!isSuperAdmin && ids != null) {
 //            sql.append(" right join sys_role_menu srm on srm.sys_menu_id = sm.id ");
