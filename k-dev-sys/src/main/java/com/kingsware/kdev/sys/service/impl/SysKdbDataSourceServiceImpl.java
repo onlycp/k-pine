@@ -48,7 +48,10 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
         KdbApi api = (KdbApi)(DB.getDefault());
         List<DataSourceInfo> list = api.queryDataSource(argv);
         // 转换成ret对象
-        return toRet(list.get(0));
+        if(list != null && !list.isEmpty()){
+            return toRet(list.get(0));
+        }
+        return null;
     }
 
     private SysKdbDataSourceRet toRet(DataSourceInfo info) {
@@ -84,6 +87,12 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
 
     @Override
     public void add(SysKdbDataSourceArgv argv) {
+        // 首先查询数据源名称是否已经存在，存在则抛出【数据源名称已经存在】异常
+        // 否则，经常会错误地认为是数据库连接参数有误，导致用户难以区分
+        SysKdbDataSourceRet isExist = get(argv.getId());
+        if (isExist != null){
+            throw BusinessException.serviceThrow(I18n.t("SysKdbDataSource.tip.alreadyExist", "数据源名称已存在，请更换其他名称！"));
+        }
 
         try {
             DataSourceInfo info = new DataSourceInfo();
