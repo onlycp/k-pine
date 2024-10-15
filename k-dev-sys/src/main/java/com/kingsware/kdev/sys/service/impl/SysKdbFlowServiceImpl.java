@@ -1,6 +1,5 @@
 package com.kingsware.kdev.sys.service.impl;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
@@ -11,26 +10,21 @@ import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.jsonschema.JsonschemaMock;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
+import com.kingsware.kdev.core.kflow.bean.ErrorResult;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
 import com.kingsware.kdev.core.kflow.define.*;
 import com.kingsware.kdev.core.orm.DB;
-import com.kingsware.kdev.core.orm.PagedList;
 import com.kingsware.kdev.core.orm.SqlWrapper;
-import com.kingsware.kdev.core.orm.annotation.Transactional;
 import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.orm.kdb.*;
 import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.sys.argv.*;
 import com.kingsware.kdev.core.model.SysLogicFlow;
-import com.kingsware.kdev.sys.bean.ApplicationConfig;
 import com.kingsware.kdev.sys.bean.CopyProcessData;
-import com.kingsware.kdev.sys.bean.ExportData;
-import com.kingsware.kdev.sys.bean.ExportRootData;
 import com.kingsware.kdev.sys.manager.CopyAppManager;
 import com.kingsware.kdev.sys.model.*;
-import com.kingsware.kdev.sys.ret.SysDemoRet;
 import com.kingsware.kdev.sys.ret.SysFlowDebugRet;
 import com.kingsware.kdev.sys.ret.SysFlowDefineRet;
 import com.kingsware.kdev.sys.ret.SysKdbFlowRet;
@@ -40,7 +34,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
-import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -307,11 +300,26 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         }
 
         // 保存历史记录
-        SysLogicHistory flowHistory = new SysLogicHistory();
-        flowHistory.setFlowId(argv.getId());
-        flowHistory.setFlowJson(info.getContent());
-        DB.save(flowHistory);
+        this.gitcommitDefine(argv.getId());
 
+    }
+
+    private void gitcommitDefine(String flowId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("flowId", flowId);
+        KdbFlowResult result = FaasInvoke.callFlow("f494d882a9554d1cbd9fb72559f6b9db", params);
+        if (result.getData() instanceof ErrorResult) {
+            throw BusinessException.serviceThrow(result.getExceptionStack());
+        }
+    }
+
+    private void gitRemoveDefine(String flowId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("flowId", flowId);
+        KdbFlowResult result = FaasInvoke.callFlow("2d28d8f7821649b1a948b4982ddbd817", params);
+        if (result.getData() instanceof ErrorResult) {
+            throw BusinessException.serviceThrow(result.getExceptionStack());
+        }
     }
 
     /**
@@ -405,10 +413,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         logicFlow.setI18nKeys(argv.getI18nKeys());
 
         // 保存历史记录
-        SysLogicHistory flowHistory = new SysLogicHistory();
-        flowHistory.setFlowId(flowId);
-        flowHistory.setFlowJson(info.getContent());
-        DB.save(flowHistory);
+        this.gitcommitDefine(flowId);
 
         // 获取子流程id
         String subFlowIds = getSubFlowIds(argv.getContent());
@@ -566,6 +571,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
     public void delete(MultiIdArgv argv) {
         KdbApi api = (KdbApi) (DB.getDefault());
         for (String id : argv.getIds()) {
+            gitRemoveDefine(id);
             api.deleteFlow(id);
             SysLogicFlow logicFlow = DB.findOne(SysLogicFlow.class, Expr.builder().add("flowId", "=", id).build());
             if (logicFlow != null) {

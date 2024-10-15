@@ -56,17 +56,12 @@ public class SysToolBoxController extends BaseController {
     @ApiIgnore
     public BaseRet<?> getExceptionDetail(String id) throws UnsupportedEncodingException {
         String enableException = SpringContext.getProperties("app.exception.enable", "false");
-        if ("true".equalsIgnoreCase(enableException)) {
-            ExceptionLog exceptionLog = ExceptionLogManager.getInstance().read(id);
-            if (exceptionLog == null) {
-                return BaseRet.failMessage("未找到异常日志");
-            }
-            else {
-                return BaseRet.success(exceptionLog);
-            }
+        ExceptionLog exceptionLog = ExceptionLogManager.getInstance().read(id);
+        if (exceptionLog == null) {
+            return BaseRet.failMessage("未找到异常日志");
         }
         else {
-            return BaseRet.failMessage("未开启异常日志");
+            return BaseRet.success(exceptionLog);
         }
     }
 

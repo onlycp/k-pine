@@ -616,7 +616,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         if (pineMap.containsKey("pages")) {
             List<Map<String, Object>> list = (List<Map<String, Object>>) pineMap.get("pages");
             for (Map<String, Object> map : list) {
-                MapUtil.transMapBooleanToInt(map, "devStatus", "enableStatus");
+                MapUtil.transMapBooleanToInt(map, "devStatus", "enableStatus", "loginRequired");
                 MapUtil.transMapDateToString(map, "whenCreated", "whenModified");
             }
 
@@ -659,6 +659,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         try {
             devPine = objectMapper.readValue(JsonUtil.toJson(pineMap), DevPine.class);
         } catch (JsonProcessingException e) {
+            log.error("数据解析异常", e);
             throw BusinessException.serviceThrow(I18n.t("DevApplicationServiceImpl.dataParseFail", "应用包数据解析异常"));
         }
         // 处理menu
