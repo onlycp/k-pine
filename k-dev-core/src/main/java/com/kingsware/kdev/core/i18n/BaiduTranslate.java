@@ -3,8 +3,11 @@ package com.kingsware.kdev.core.i18n;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.MD5Utils;
+import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.core.util.ThreadUtils;
 import lombok.Data;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +30,7 @@ public class BaiduTranslate {
 
     /** 密钥 **/
     private final static String securityKey = "wUmVbXTCgte52AOc9PrV";
+    private static final Logger log = LoggerFactory.getLogger(BaiduTranslate.class);
 
     @Data
     static class InnerTransResult {
@@ -77,7 +81,8 @@ public class BaiduTranslate {
             return result.getTransResult().get(0).getDst();
         }
         catch (Exception e) {
-            ThreadUtils.sleep(1001);
+//            log.info("翻译异常", e);
+            ThreadUtils.sleep(200);
             return getTransResult(query, from, to);
         }
 

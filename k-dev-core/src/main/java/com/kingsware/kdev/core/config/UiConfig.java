@@ -329,6 +329,9 @@ public class UiConfig extends WebMvcConfigurationSupport {
         matchKeys.add("remark");
         matchKeys.add("placeholder");
         matchKeys.add("tpl");
+        matchKeys.add("map");
+        matchKeys.add("btnLabel");
+        matchKeys.add("tooltip");
         List<String> pathKeys = new ArrayList<>();
         for (String key : matchKeys) {
             pathKeys.add("@." + key);
@@ -339,6 +342,9 @@ public class UiConfig extends WebMvcConfigurationSupport {
                 if (match.containsKey(key)) {
                     if (match.get(key) instanceof String) {
                         String text = match.get(key).toString();
+                        if(text.contains("已关闭")) {
+                            System.currentTimeMillis();
+                        }
                         if (StringUtils.containsChinese(text)) {
                             if (key.equals("tpl")) {
                                 org.w3c.dom.Document doc = StringUtils.parseXml(text);
@@ -355,12 +361,37 @@ public class UiConfig extends WebMvcConfigurationSupport {
                             }
                             else {
                                 String translatedText = I18n.parseScript(appId, text);
+
                                 if (!translatedText.equals(text)) {
                                     match.put(key, StringUtils.capitalizeFirstLetter(translatedText));
                                 }
                             }
 
                         }
+                    }
+                    else if (match.get(key) instanceof Map && "map".equalsIgnoreCase(key)) {
+                        Map<String, Object> map = (Map<String, Object>) match.get(key);
+                        if (map != null) {
+                            Map<String,Object> replacedMap = new HashMap<>();
+                            for (String k : map.keySet()) {
+                                String text = map.get(k).toString();
+                                org.w3c.dom.Document doc = StringUtils.parseXml(text);
+                                if (doc == null) {
+                                    String translatedText = I18n.parseScript(appId, text);
+                                    if (!translatedText.equals(text)) {
+                                        replacedMap.put(k, StringUtils.capitalizeFirstLetter(translatedText));
+                                    }
+                                }
+                                else {
+                                    replaceTextNodes(doc.getDocumentElement(), appId);
+                                    replacedMap.put(k, StringUtils.documentToString(doc));
+                                }
+                            }
+                            if (!replacedMap.isEmpty()) {
+                                map.putAll(replacedMap);
+                            }
+                        }
+
                     }
                 }
             }

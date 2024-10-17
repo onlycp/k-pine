@@ -200,6 +200,9 @@ public class I18n {
             if (StringUtils.isEmpty(message)) {
                 message = defaultMessage;
             }
+            if (params == null || params.length == 0) {
+                return message;
+            }
             // 使用参数格式化最终的消息，并返回
             return MessageFormat.format(message, params);
         }
@@ -276,6 +279,9 @@ public class I18n {
         if (StringUtils.isEmpty(script)) {
             return script;
         }
+        if (script.contains("已关闭")) {
+            System.currentTimeMillis();
+        }
         // 适配原先的写法
         if (script.contains("$") && script.contains("}") && script.contains("{") && script.contains("|") && script.contains("i18n")) {
             return script;
@@ -289,7 +295,7 @@ public class I18n {
                 I18n.create(appId,script, script);
             }
             String s =  I18n.t(appId, script, script);
-            log.info("i18n: {}", s );
+            //log.info("i18n: {}", s );
             if (s.equals("公共应用")) {
                 System.currentTimeMillis();
             }
