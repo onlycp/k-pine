@@ -78,15 +78,11 @@ public class PublicGitInitialize implements SystemInitialize {
                 this.commitFile(appGit, "page_templates/"  + pageTemplate.getRid() + ".page", historyList, i, pageTemplates.size());
             }
             // 处理工具库模板
-            List<SysLogicTemplate> logicTemplates = DB.findList(SysLogicTemplate.class, "select id, nodes, links, flow_config from sys_logic_template");
+            List<SysLogicTemplate> logicTemplates = DB.findList(SysLogicTemplate.class, "select * from sys_logic_template order by when_created asc");
             List<GitFile> gitLogicsFiles = new ArrayList<>();
             for (SysLogicTemplate logicTemplate: logicTemplates) {
                 GitFile gitFile = new GitFile();
-                Map<String, Object> templateData = new HashMap<>();
-                templateData.put("nodes", logicTemplate.getNodes());
-                templateData.put("links", logicTemplate.getLinks());
-                templateData.put("flowConfig", JsonUtil.toJson(logicTemplate.getFlowConfig()));
-                gitFile.setContent(JsonUtil.toJson(templateData));
+                gitFile.setContent(JsonUtil.toJson(logicTemplate));
                 gitFile.setPath("logic_templates/" + logicTemplate.getId() + ".json");
                 gitLogicsFiles.add(gitFile);
             }

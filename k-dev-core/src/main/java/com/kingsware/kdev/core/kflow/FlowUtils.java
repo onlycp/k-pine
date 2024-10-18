@@ -460,7 +460,6 @@ public class FlowUtils {
             ret = BaseRet.success(result);
         }
         ret.setLog(log);
-
         return ret;
     }
 
@@ -509,6 +508,10 @@ public class FlowUtils {
 
         if (StringUtils.isNotEmpty(ret.getLog())) {
             map.put("log", ret.getLog());
+        }
+        boolean devMode = SpringContext.getBoolean("app.mode.dev", true);
+        if (devMode) {
+            map.put("exceptionStack", stackException);
         }
         if (StringUtils.isNotEmpty(stackException)) {
             ExceptionLog exceptionLog = new ExceptionLog();
