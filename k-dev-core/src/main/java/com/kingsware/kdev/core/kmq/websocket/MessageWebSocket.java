@@ -236,7 +236,10 @@ public class MessageWebSocket {
                   WmMessage exitMessage = new WmMessage("exit", "心跳超时，会话将被关闭");
                   it.getBasicRemote().sendText(JsonUtil.toJson(exitMessage));
                   logger.info("移除过时的session: {}", it.getId());
-                  it.close();
+                  if (it.isOpen()) {
+                      it.close();
+                  }
+
               }
               catch (Exception e) {
                   logger.error("移除过时的session失败", e);

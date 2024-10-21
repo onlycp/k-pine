@@ -16,6 +16,8 @@ import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
+import com.kingsware.kdev.core.kflow.bean.ErrorResult;
+import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.model.*;
 import com.kingsware.kdev.core.orm.DB;
@@ -149,7 +151,17 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
     @Override
     public void delete(MultiIdArgv argv) {
         for (String id : argv.getIds()) {
+            this.gitRemoveDefine(id);
             DB.delete(DevApplication.class, id);
+        }
+    }
+
+    private void gitRemoveDefine(String appId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", appId);
+        KdbFlowResult result = FaasInvoke.callFlow("b46a4875a5594c82a87d440ba01416d6", params);
+        if (result.getData() instanceof ErrorResult) {
+            throw BusinessException.serviceThrow(result.getExceptionStack());
         }
     }
 

@@ -1021,9 +1021,9 @@ public class KAuthFilter implements Filter {
         long createTime = Long.parseLong(arr[0]);
         long hash = Integer.parseInt(arr[1]);
         // 计算超时时间（5分钟超时）
-        if (Math.abs(System.currentTimeMillis() - createTime) > 1000*60*5) {
-            throw BusinessException.serviceThrow(I18n.t("KAuthFilter.N002", "接口请求不合法，代码:N002"));
-        }
+//        if (Math.abs(System.currentTimeMillis() - createTime) > 1000*60*5) {
+//            throw BusinessException.serviceThrow(I18n.t("KAuthFilter.N002", "接口请求不合法，代码:N002"));
+//        }
         // 计算令牌的hash值
         int tokenHash = calculateHash(token);
         if (tokenHash!= hash) {
