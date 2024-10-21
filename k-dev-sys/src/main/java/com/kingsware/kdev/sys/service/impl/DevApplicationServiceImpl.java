@@ -659,8 +659,9 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         DevPine devPine = null;
         try {
             devPine = objectMapper.readValue(JsonUtil.toJson(pineMap), DevPine.class);
-        } catch (JsonProcessingException e) {
-            log.error("数据解析异常", e);
+        }
+        catch (JsonProcessingException e) {
+            log.error("error", e);
             throw BusinessException.serviceThrow(I18n.t("DevApplicationServiceImpl.dataParseFail", "应用包数据解析异常"));
         }
         // 处理menu
