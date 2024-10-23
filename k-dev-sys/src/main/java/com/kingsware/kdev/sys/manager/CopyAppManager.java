@@ -525,8 +525,8 @@ public class CopyAppManager {
                             DB.save(sysApi);
                         }
                         catch (BusinessException e) {
-                            throw new BusinessException(I18n.t("CopyAppManager.cpApiFail", "接口保存异常，拷贝失败") + ":"+ checkObj.getApiName());
-//                            log.warn("接口保存失败，rf", e.getMessage());
+//                            throw new BusinessException(I18n.t("CopyAppManager.cpApiFail", "接口保存异常，拷贝失败") + ":"+ checkObj.getApiName());
+                            log.warn("接口保存失败:{}", e.getMessage());
                         }
 
 

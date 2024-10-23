@@ -210,7 +210,9 @@ public class MessageWebSocket {
                     //logger.info("移除过时的session: {}", it.getSession().getId());
                     try {
                         sessionTokenSet.remove(it);
-                        it.getSession().close();
+                        if (it.getSession().isOpen()) {
+                            it.getSession().close();
+                        }
                     }
                     catch (Exception e) {
 
