@@ -412,13 +412,15 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         logicFlow.setTranCtrl(argv.getTranCtrl());
         logicFlow.setI18nKeys(argv.getI18nKeys());
 
-        // 保存历史记录
-        this.gitcommitDefine(flowId);
+
 
         // 获取子流程id
         String subFlowIds = getSubFlowIds(argv.getContent());
         logicFlow.setSubFlowIds(subFlowIds);
         DB.save(logicFlow);
+
+        // 保存历史记录
+        this.gitcommitDefine(flowId);
 
         if (StringUtils.isNotEmpty(argv.getApiUrl()) && StringUtils.isNotEmpty(argv.getApiMethod())) {
             SysApiArgv apiArgv = new SysApiArgv();

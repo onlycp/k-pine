@@ -234,11 +234,12 @@ public class MessageWebSocket {
           removeSessions.forEach(it -> {
               try {
                   WmMessage exitMessage = new WmMessage("exit", "心跳超时，会话将被关闭");
-                  it.getBasicRemote().sendText(JsonUtil.toJson(exitMessage));
-                  logger.info("移除过时的session: {}", it.getId());
                   if (it.isOpen()) {
+                      it.getBasicRemote().sendText(JsonUtil.toJson(exitMessage));
+                      logger.info("移除过时的session: {}", it.getId());
                       it.close();
                   }
+
 
               }
               catch (Exception e) {
@@ -292,6 +293,14 @@ public class MessageWebSocket {
      */
     public void sendMessageByToken(String token, String message) {
         sessionTokenSet.stream().filter(it -> it.getToken().equals(token)).forEach(it -> sendMessage(it.getSession(), message));
+    }
+
+    /**
+     * 广播消息
+     * @param message
+     */
+    public void broadMessageToAllSessions(String message) {
+        sessionTokenSet.stream().forEach(it -> sendMessage(it.getSession(), message));
     }
 
     /**

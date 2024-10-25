@@ -200,7 +200,7 @@ public class PublicGitInitialize implements SystemInitialize {
             Collections.reverse(historyList);
             // 加入当前
             historyList.add(pageTemplate);
-            this.commitFile(appGit, "pages/"  + pageTemplate.getRid() + ".page", historyList, i, pages.size());
+            this.commitFile(appGit, "pages/"  + pageTemplate.getRid() + ".json", historyList, i, pages.size());
         }
     }
 
@@ -255,14 +255,14 @@ public class PublicGitInitialize implements SystemInitialize {
             gitFile.setContent(JsonUtil.toJson(application));
             gitFile.setPath("app.json");
             appGit.addCommitFile(gitFile, appGit.getCommit("应用元数据"));
-            // 页面
-            this.gitCommitPages(application.getId());
-            // 函数列表
-            this.gitCommitFunctions(application.getId());
-            // 接口列表
-            this.gitCommitApis(application.getId());
-            // 编排
-            this.gitCommitLogics(application.getId());
+//            // 页面
+//            this.gitCommitPages(application.getId());
+//            // 函数列表
+//            this.gitCommitFunctions(application.getId());
+//            // 接口列表
+//            this.gitCommitApis(application.getId());
+//            // 编排
+//            this.gitCommitLogics(application.getId());
 
         }
     }
