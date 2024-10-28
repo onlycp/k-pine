@@ -8,6 +8,8 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.config.UiConfig;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
+import com.kingsware.kdev.core.kflow.bean.ErrorResult;
+import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
@@ -105,6 +107,8 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
         checkUnique(model);
         // 保存
         DB.save(model);
+        // 新增页面
+        this.gitCommit(argv.getId(), "新增页面:"+ argv.getName());
     }
 
     @Override
@@ -115,6 +119,30 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
 //        checkUnique(model);
         // 保存
         DB.update(model);
+        // 提交git
+        this.gitCommit(argv.getId(), null);
+    }
+
+    @Override
+    public void gitCommit(String id, String message) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", id);
+        params.put("message", message);
+        KdbFlowResult result = FaasInvoke.callFlow("9bcf44ad1eba4b1894a18937245b8db3", params);
+        if (result.getData() instanceof ErrorResult) {
+            throw BusinessException.serviceThrow(result.getExceptionStack());
+        }
+    }
+
+    @Override
+    public void gitRemove(String id, String message) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", id);
+        params.put("message", message);
+        KdbFlowResult result = FaasInvoke.callFlow("1243e9fa061c4a9196a481c5ca2de3a2", params);
+        if (result.getData() instanceof ErrorResult) {
+            throw BusinessException.serviceThrow(result.getExceptionStack());
+        }
     }
 
     @Override
@@ -145,6 +173,7 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
     @Override
     public void delete(MultiIdArgv argv) {
         for (String id: argv.getIds()) {
+            this.gitRemove(id, null);
             DB.delete(DevPage.class, id);
             // 移除dev_page关联的menu 表的page_id内容。
 //            String updateSql = "update sys_menu set page_id=null where page_id  = '" + id + "'";
