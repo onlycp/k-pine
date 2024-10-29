@@ -257,6 +257,8 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         log.info("完成导入字典项信息：{}", dictItemCount);
         importMessageMap.put(I18n.t("DevApplicationServiceImpl.dictItem", "字典项信息") , dictItemCount);
         // 任务调度
+        // 处理java类任务, 如果已有，即移除他们
+        devPine.getTasks().removeIf(task -> task.getTaskType() == 1);
         long taskCount = DB.batchSaveOrUpdate(devPine.getTasks(), SysTask.class);
         log.info("完成导入任务调度信息：{}", taskCount);
         importMessageMap.put(I18n.t("DevApplicationServiceImpl.task", "任务调度信息") , taskCount);

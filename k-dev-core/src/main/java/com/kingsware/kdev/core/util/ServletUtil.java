@@ -523,6 +523,10 @@ public class ServletUtil {
         if (StringUtils.isNotEmpty(requestUuid)) {
             return requestUuid;
         }
+        requestUuid = request.getHeader("request-uuid");
+        if (StringUtils.isNotEmpty(requestUuid)) {
+            return requestUuid;
+        }
         TreeMap<String, Object> stringObjectTreeMap = new TreeMap<>();
         stringObjectTreeMap.put("request_uri", uri);
         stringObjectTreeMap.put("request_method", request);
@@ -535,7 +539,7 @@ public class ServletUtil {
                 if (arr2.length == 2) {
                     stringObjectTreeMap.put(arr2[0], arr2[1]);
                 } else {
-                    stringObjectTreeMap.put(arr2[0], arr2[1]);
+                    stringObjectTreeMap.put(arr2[0], null);
                 }
             }
         }

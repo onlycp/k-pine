@@ -1,9 +1,15 @@
 package com.kingsware.kdev.core.cron;
 
+import com.kingsware.kdev.core.auth.AppAuthProperties;
+import com.kingsware.kdev.core.auth.BaseUserInfo;
+import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.cache.api.ApiResultCache;
 import com.kingsware.kdev.core.cache.api.ApiResultCacheManager;
 import com.kingsware.kdev.core.cache.instance.InstanceManager;
+import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.exception.UnauthorizedException;
 import com.kingsware.kdev.core.kflow.KFlowConstant;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
@@ -393,37 +399,68 @@ public class DynamicTask implements CommandLineRunner {
         Map<String, Object> body = new HashMap<>();
         body.put("md5", task.getId());
         body.put("changed", changed);
-        if (changed) {
-            body.put("data", data);
-        }
+        body.put("data", data);
+//        if (changed) {
+//
+//        }
         body.put("expire", (Integer.parseInt(task.getCron()) + 10) * 1000);
         toC.setBody(JsonUtil.toJson(body));
+        Set<String> removeTokens = new HashSet<>();
         for (String token : apiResultCache.getTokens() ) {
-            if (messageWebSocket.hasSessionByToken(token)) {
-                WmMessageArgv wmMessageArgv = new WmMessageArgv();
-                wmMessageArgv.setMessage(JsonUtil.toJson(toC));
-                wmMessageArgv.setToken(token);
-                KmqMessageCenter.getInstance().produce(WebsocketConstants.MQ_TO_WEBSOCKET, JsonUtil.toJson(wmMessageArgv));
+            try {
+                AppAuthProperties appAuthProperties = SpringContext.getBean(AppAuthProperties.class);
+                TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret(), appAuthProperties.getIss(),
+                        "", appAuthProperties.getTokenExpireMinutes(), appAuthProperties.getMockSessionExpireMinutes());
+                if (messageWebSocket.hasSessionByToken(token)) {
+                    WmMessageArgv wmMessageArgv = new WmMessageArgv();
+                    wmMessageArgv.setMessage(JsonUtil.toJson(toC));
+                    wmMessageArgv.setToken(token);
+                    KmqMessageCenter.getInstance().produce(WebsocketConstants.MQ_TO_WEBSOCKET, JsonUtil.toJson(wmMessageArgv));
+                }
             }
+            catch (UnauthorizedException e) {
+                this.sendRemove(token, task.getId());
+                removeTokens.add(token);
+            }
+        }
+        apiResultCache.getTokens().removeAll(removeTokens);
+    }
 
+    /**
+     * 向客户端发送数据移除通知
+     * 遍历给定的API结果缓存中的所有token，检查每个token是否在WebSocket会话中存在
+     * 如果会话存在，则调用sendRemove方法向客户端发送移除消息
+     *
+     * @param task         系统任务对象，包含任务ID等信息
+     * @param apiResultCache   API结果缓存对象，包含要通知的客户端的token
+     */
+    public void sendDataRemove(SysTask task, ApiResultCache apiResultCache) {
+        for (String token : apiResultCache.getTokens()) {
+            if (messageWebSocket.hasSessionByToken(token)) {
+                this.sendRemove(token, task.getId());
+            }
         }
     }
 
-    public void sendDataRemove(SysTask task, ApiResultCache apiResultCache) {
+    /**
+     * 准备并发送数据移除消息给特定客户端
+     * 创建一个消息，设置其主题为"api-data-remove"，并在消息体中包含要移除的任务的MD5值
+     * 然后将此消息转换为JSON格式，并通过消息队列发送给对应的客户端
+     *
+     * @param token    客户端的唯一标识符，用于定位WebSocket会话
+     * @param taskId   要移除的任务的ID
+     */
+    public void sendRemove(String token, String taskId) {
         WmMessage toC = new WmMessage();
         toC.setTopic("api-data-remove");
         Map<String, Object> body = new HashMap<>();
-        body.put("md5", task.getId());
+        body.put("md5", taskId);
         toC.setBody(JsonUtil.toJson(body));
-        for (String token : apiResultCache.getTokens()) {
-            if (messageWebSocket.hasSessionByToken(token)) {
-                WmMessageArgv wmMessageArgv = new WmMessageArgv();
-                wmMessageArgv.setMessage(JsonUtil.toJson(toC));
-                wmMessageArgv.setToken(token);
-                KmqMessageCenter.getInstance().produce(WebsocketConstants.MQ_TO_WEBSOCKET, JsonUtil.toJson(wmMessageArgv));
-            }
-        }
 
+        WmMessageArgv wmMessageArgv = new WmMessageArgv();
+        wmMessageArgv.setMessage(JsonUtil.toJson(toC));
+        wmMessageArgv.setToken(token);
+        KmqMessageCenter.getInstance().produce(WebsocketConstants.MQ_TO_WEBSOCKET, JsonUtil.toJson(wmMessageArgv));
     }
 
     private long getNextTriggerTime(String cron) {
@@ -519,8 +556,9 @@ public class DynamicTask implements CommandLineRunner {
                     List<SysTask> tasks = DB.findList(SysTask.class, "select * from sys_task where enable=1 order by when_created asc");
                     // 移除超时的虚拟任务
                     List<SysTask> expireTasks = new ArrayList<>();
+                    int virtualTaskKeepaliveTime = SpringContext.getInt("app.schedule.virtual-task-keepalive-time", 1);
                     for (SysTask task: virtualTaskList) {
-                        if ((System.currentTimeMillis() - task.getWhenModified().getTime()) > 1000*60 ) {
+                        if ((System.currentTimeMillis() - task.getWhenModified().getTime()) > (long) virtualTaskKeepaliveTime * 1000*60 ) {
                             expireTasks.add(task);
                             ApiResultCache apiResultCache = ApiResultCacheManager.getInstance().get(task.getId());
                             if (apiResultCache != null) {

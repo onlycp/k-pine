@@ -8,8 +8,8 @@ CREATE TABLE rep_template(
                              ds_sets VARCHAR(1024)    COMMENT '数据集列表' ,
                              note VARCHAR(255)    COMMENT '说明' ,
                              who_created VARCHAR(36)    COMMENT '创建人' ,
-                             when_created VARCHAR(20)    COMMENT '创建时间' ,
+                             when_created VARCHAR(30)    COMMENT '创建时间' ,
                              who_modified VARCHAR(36)    COMMENT '更新人' ,
-                             when_modified VARCHAR(20)    COMMENT '更新时间' ,
+                             when_modified VARCHAR(30)    COMMENT '更新时间' ,
                              PRIMARY KEY (id)
-);
+)  COMMENT = '报告模板表';

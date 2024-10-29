@@ -404,7 +404,6 @@ public class KAuthFilter implements Filter {
                         if (saveLoginOn) {
                             // 保存操作日志
                             String responseBody = wrapperResponse == null ? "" : ServletUtil.getResponseBody(wrapperResponse);
-
                             this.saveOperateLog(url, request.getMethod(), responseCode, errorMessage, takeTime, JsonUtil.toJson(argvMap), responseBody, callType, api, apiDefine, request);
                         }
                         // 保存登录日志
@@ -642,11 +641,12 @@ public class KAuthFilter implements Filter {
         KdbFlowResult result = null;
         boolean disableCache = false;
         Object disableCacheObj = argvMap.get("_disableCache");
+        String md5Key = ServletUtil.getRequestUuid(request.getRequestURI(), request.getQueryString(), requestBody, request);
         if (disableCacheObj != null && (disableCacheObj.equals("true") || (disableCacheObj instanceof Boolean && ((Boolean) disableCacheObj == true)))) {
             disableCache = true;
         }
         if (api.getCacheEnable() != null && api.getCacheEnable() == 1 && disableCache == false) {
-            String md5Key = ServletUtil.getRequestUuid(request.getRequestURI(), request.getQueryString(), requestBody, request);
+
             ApiResultCache res = ApiResultCacheManager.getInstance().get(md5Key);
             DynamicTask dynamicTask = SpringContext.getBean(DynamicTask.class);
             SysTask virtualTask = dynamicTask.getVirtualTask(md5Key);
@@ -700,7 +700,13 @@ public class KAuthFilter implements Filter {
 
         }
         else {
+            long t1 = System.currentTimeMillis();
             result = KdbFlowExecutor.getInstance().execute(api.getApiFlowId(), api.getSubFlowIds(), argvMap, context, false, false);
+            long t2 = System.currentTimeMillis();
+            if (ApiResultCacheManager.getInstance().has(md5Key)) {
+                ApiResultCache cache = ApiResultCacheManager.getInstance().get(md5Key);
+                cache.setResult(result);
+            }
         }
 
         KdbRetFile kdbRetFile = null;
