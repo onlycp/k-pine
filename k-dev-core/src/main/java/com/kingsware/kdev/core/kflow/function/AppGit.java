@@ -145,6 +145,10 @@ public class AppGit {
         Map<String, Object> resultMap = JsonUtil.toBean(result, Map.class);
         // 返回查询结果
         return (Boolean) resultMap.get("value");
+
+
+        /// 开发 10.11.2.115:18882
+        //  预览 10.11.2.115:18883
     }
 
 

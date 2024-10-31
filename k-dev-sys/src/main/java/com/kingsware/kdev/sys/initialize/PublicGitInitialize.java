@@ -42,7 +42,7 @@ public class PublicGitInitialize implements SystemInitialize {
         }
         usernameMap = this.getUserIdNameMap();
         // 应用库初始化
-        this.initApps();
+//        this.initApps();
         // 判断仓库是否已存在，如果已存在，则跳过初始化
         AppGit appGit = new AppGit("public");
         if (appGit.hasRepo()) {
@@ -190,80 +190,96 @@ public class PublicGitInitialize implements SystemInitialize {
 
     }
 
-    private void gitCommitPages(String appId) {
-        AppGit appGit = new AppGit(appId);
-        List<GitHistory> pages = DB.findList(GitHistory.class, "select id as rid, page_json as content, when_modified as time, who_modified as uid from dev_page where app_id=? and page_json is not null", appId);
-        for (int i= 0; i < pages.size(); i++) {
-            GitHistory pageTemplate = pages.get(i);
-            // 查找所有历史
-            List<GitHistory> historyList = DB.findList(GitHistory.class, "select page_json as content, when_created as time, who_created as uid from dev_page where app_id=? and page_json is not null order by when_created desc limit 10", pageTemplate.getRid());
-            Collections.reverse(historyList);
-            // 加入当前
-            historyList.add(pageTemplate);
-            this.commitFile(appGit, "pages/"  + pageTemplate.getRid() + ".json", historyList, i, pages.size());
-        }
-    }
+//    private void gitCommitPages(String appId) {
+//
+//        List<SysApi> apis = DB.findList(SysApi.class, "select * from dev_page dp inner join dev_application where app_id=?", appId);
+//        List<GitFile> gitFiles = new ArrayList<>();
+//        for (SysApi api: apis) {
+//            GitFile gitFile = new GitFile();
+//            gitFile.setContent(JsonUtil.prettyJson(JsonUtil.toJson(api)));
+//            gitFile.setPath("apis/" + api.getId() + ".json");
+//            gitFiles.add(gitFile);
+//        }
+//        if (!gitFiles.isEmpty()) {
+//            AppGit appGit = new AppGit(appId);
+//            appGit.addFiles(gitFiles);
+//            appGit.commit(appGit.getCommit( "初始化接口库"));
+//        }
+//
+//        AppGit appGit = new AppGit(appId);
+//        List<GitHistory> pages = DB.findList(GitHistory.class, "select id as rid, page_json as content, when_modified as time, who_modified as uid from dev_page where app_id=? and page_json is not null", appId);
+//        for (int i= 0; i < pages.size(); i++) {
+//            GitHistory pageTemplate = pages.get(i);
+//            // 查找所有历史
+//            List<GitHistory> historyList = DB.findList(GitHistory.class, "select page_json as content, when_created as time, who_created as uid from dev_page where app_id=? and page_json is not null order by when_created desc limit 10", pageTemplate.getRid());
+//            Collections.reverse(historyList);
+//            // 加入当前
+//            historyList.add(pageTemplate);
+//            this.commitFile(appGit, "pages/"  + pageTemplate.getRid() + ".json", historyList, i, pages.size());
+//        }
+//    }
 
-    private void gitCommitLogics(String appId) {
-        AppGit appGit = new AppGit(appId);
-        // 获取当前的逻辑编排id
-        List<GitHistory>  gitHistories = DB.findList(GitHistory.class, "select flow_id as rid, when_modified as time, who_modified as uid from sys_logic_flow where application_id=?", appId);
-        List<Object> flowIds = new ArrayList<>();
-        for (GitHistory gitHistory: gitHistories) {
-            flowIds.add(gitHistory.getRid());
-        }
-        if (flowIds.isEmpty()) {
-            return;
-        }
-        // 从faas中查询流程定义
-        SqlWrapper wrapper = new SqlWrapper("select flowid as rid, content as content from PUBLIC.FLOW where 1=1 ");
-        wrapper.in("flowid", flowIds);
-        List<GitHistory> flowJsonList = DB.byName("kingDB").findList(GitHistory.class, wrapper.getSql(), wrapper.getParams().toArray());
-        Map<String, String> flowContentMap = new HashMap<>();
-        for (GitHistory his: flowJsonList) {
-            flowContentMap.put(his.getRid(), his.getContent());
-        }
-        // 填充content
-        for (GitHistory his: gitHistories) {
-           his.setContent(flowContentMap.get(his.getRid()));
-        }
+//    private void gitCommitLogics(String appId) {
+//        AppGit appGit = new AppGit(appId);
+//        // 获取当前的逻辑编排id
+//        List<GitHistory>  gitHistories = DB.findList(GitHistory.class, "select flow_id as rid, when_modified as time, who_modified as uid from sys_logic_flow where application_id=?", appId);
+//        List<Object> flowIds = new ArrayList<>();
+//        for (GitHistory gitHistory: gitHistories) {
+//            flowIds.add(gitHistory.getRid());
+//        }
+//        if (flowIds.isEmpty()) {
+//            return;
+//        }
+//        // 从faas中查询流程定义
+//        SqlWrapper wrapper = new SqlWrapper("select flowid as rid, content as content from PUBLIC.FLOW where 1=1 ");
+//        wrapper.in("flowid", flowIds);
+//        List<GitHistory> flowJsonList = DB.byName("kingDB").findList(GitHistory.class, wrapper.getSql(), wrapper.getParams().toArray());
+//        Map<String, String> flowContentMap = new HashMap<>();
+//        for (GitHistory his: flowJsonList) {
+//            flowContentMap.put(his.getRid(), his.getContent());
+//        }
+//        // 填充content
+//        for (GitHistory his: gitHistories) {
+//           his.setContent(flowContentMap.get(his.getRid()));
+//        }
+//        System.currentTimeMillis()
+//
+//        for (int i= 0; i < gitHistories.size(); i++) {
+//            GitHistory pageTemplate = gitHistories.get(i);
+//            // 查找所有历史
+//            List<GitHistory> historyList = DB.findList(GitHistory.class, "select flow_json as content, when_created as time, who_created as uid from sys_logic_history where flow_id=?  order by when_created desc limit 10", pageTemplate.getRid());
+//            Collections.reverse(historyList);
+//            // 加入当前
+//            historyList.add(pageTemplate);
+//            this.commitFile(appGit, "logic/"  + pageTemplate.getRid() + ".json", historyList, i, gitHistories.size());
+//        }
+//    }
 
-        for (int i= 0; i < gitHistories.size(); i++) {
-            GitHistory pageTemplate = gitHistories.get(i);
-            // 查找所有历史
-            List<GitHistory> historyList = DB.findList(GitHistory.class, "select flow_json as content, when_created as time, who_created as uid from sys_logic_history where flow_id=?  order by when_created desc limit 10", pageTemplate.getRid());
-            Collections.reverse(historyList);
-            // 加入当前
-            historyList.add(pageTemplate);
-            this.commitFile(appGit, "logic/"  + pageTemplate.getRid() + ".json", historyList, i, gitHistories.size());
-        }
-    }
-
-    private void initApps() {
-        List<DevApplication> applications = DB.findList(DevApplication.class, "select * from dev_application");
-        for (DevApplication application: applications) {
-            AppGit appGit = new AppGit(application.getId());
-            if (appGit.hasRepo()) {
-                log.info("应用库已存在，跳过初始化");
-                return;
-            }
-            // 初始化应用创建
-            appGit.initRepo();
-            appGit.commit(appGit.getCommit("应用库初始化"));
-            // 应用元数据
-            GitFile gitFile = new GitFile();
-            gitFile.setContent(JsonUtil.toJson(application));
-            gitFile.setPath("app.json");
-            appGit.addCommitFile(gitFile, appGit.getCommit("应用元数据"));
-//            // 页面
-//            this.gitCommitPages(application.getId());
-//            // 函数列表
-//            this.gitCommitFunctions(application.getId());
-//            // 接口列表
-//            this.gitCommitApis(application.getId());
-//            // 编排
-//            this.gitCommitLogics(application.getId());
-
-        }
-    }
+//    private void initApps() {
+//        List<DevApplication> applications = DB.findList(DevApplication.class, "select * from dev_application");
+//        for (DevApplication application: applications) {
+//            AppGit appGit = new AppGit(application.getId());
+//            if (appGit.hasRepo()) {
+//                log.info("应用库已存在，跳过初始化");
+//                return;
+//            }
+//            // 初始化应用创建
+//            appGit.initRepo();
+//            appGit.commit(appGit.getCommit("应用库初始化"));
+//            // 应用元数据
+//            GitFile gitFile = new GitFile();
+//            gitFile.setContent(JsonUtil.toJson(application));
+//            gitFile.setPath("app.json");
+//            appGit.addCommitFile(gitFile, appGit.getCommit("应用元数据"));
+////            // 页面
+////            this.gitCommitPages(application.getId());
+////            // 函数列表
+////            this.gitCommitFunctions(application.getId());
+////            // 接口列表
+////            this.gitCommitApis(application.getId());
+////            // 编排
+////            this.gitCommitLogics(application.getId());
+//
+//        }
+//    }
 }

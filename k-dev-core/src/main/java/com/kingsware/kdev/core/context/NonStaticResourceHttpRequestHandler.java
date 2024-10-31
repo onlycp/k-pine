@@ -4,7 +4,6 @@ import com.kingsware.kdev.core.util.FileTypeChecker;
 import com.kingsware.kdev.core.util.HttpUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.connector.ClientAbortException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.ByteArrayResource;
@@ -162,13 +161,9 @@ public class NonStaticResourceHttpRequestHandler extends ResourceHttpRequestHand
 //                                        response.flushBuffer();
                                     }
                                     response.flushBuffer();  // 确保所有数据都被发送
-                                } catch (ClientAbortException e) {
+                                } catch (Exception e) {
                                     // 客户端中止异常，记录日志
                                     log.warn("Client aborted the connection: " + e.getMessage());
-                                    throw e;
-                                } catch (IOException e) {
-                                    // 其他IO异常，记录日志并重新抛出
-                                    log.warn("Error while reading/writing video stream: " + e.getMessage());
                                     throw e;
                                 }
 
