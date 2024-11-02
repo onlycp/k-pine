@@ -76,7 +76,7 @@ public class DynamicTask implements CommandLineRunner {
     private boolean distributedRun;
 
     /**
-     * 是否运行分布式
+     * 是否共享cron
      **/
     @Value("${schedule.share-cron:true}")
     private boolean shareCron;
