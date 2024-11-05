@@ -9,6 +9,7 @@ import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.bean.KFlowUploadFile;
+import com.kingsware.kdev.core.kflow.bean.KdbCustomResource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -466,6 +467,17 @@ public class ServletUtil {
         }
     }
 
+    public static void responseCustom(HttpServletResponse response, KdbCustomResource kdbCustomResource) {
+
+        response.setCharacterEncoding(kdbCustomResource.getCharacterEncoding());
+        response.setContentType(kdbCustomResource.getContentType());
+        try (OutputStream out = response.getOutputStream()) {
+            out.write(kdbCustomResource.getData());
+        } catch (IOException e) {
+            log.error("error", e);
+        }
+    }
+
     /**
      * 输出json
      * @param content    对象
@@ -550,7 +562,7 @@ public class ServletUtil {
                 Map<String, Object> map = JsonUtil.toMap(requestBody);
                 stringObjectTreeMap.putAll(map);
             } catch (Exception e) {
-                log.error("error", e);
+                // log.error("error", e);
             }
         }
 
@@ -634,6 +646,7 @@ public class ServletUtil {
 //        sb.append("【ui-access】================================================================================================================================================================================").append("\n");
 //        log.info(sb.toString());
     }
+
 
 
 }

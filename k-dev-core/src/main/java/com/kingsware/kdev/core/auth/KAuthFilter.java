@@ -28,6 +28,7 @@ import com.kingsware.kdev.core.exception.LicenseException;
 import com.kingsware.kdev.core.exception.UnauthorizedException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.*;
+import com.kingsware.kdev.core.kflow.bean.KdbCustomResource;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
 import com.kingsware.kdev.core.kmq.KmqMessageCenter;
@@ -715,17 +716,11 @@ public class KAuthFilter implements Filter {
         // 转为api格式
         switch (result.getType()) {
             case KFlowConstant.RESULT_JSON:
-                if (api.getApiFlowId().equalsIgnoreCase("a20fd82c126947f9ab3b599001df6126")) {
-                    log.info("用时：3");
-                }
                 if (StringUtils.isNotEmpty(api.getApiResultHandler()) && "user_json".equalsIgnoreCase(api.getApiResultHandler())) {
                     ServletUtil.responseJson(response, result.getData());
                 }
                 else {
                     ServletUtil.responseJson(response, FlowUtils.toJsonResult(result.getData(), result.getLog(), result.getExceptionStack()));
-                }
-                if (api.getApiFlowId().equalsIgnoreCase("a20fd82c126947f9ab3b599001df6126")) {
-                    log.info("用时：4");
                 }
                 break;
             case KFlowConstant.RESULT_EXCEL:
@@ -734,6 +729,10 @@ public class KAuthFilter implements Filter {
             case KFlowConstant.RESULT_FILE:
                 kdbRetFile = (KdbRetFile) result.getData();
                 ServletUtil.responseFile(response, kdbRetFile.getFileName(), kdbRetFile.getData());
+                break;
+            case KFlowConstant.RESULT_CUSTOM:
+                KdbCustomResource kdbCustomResource = (KdbCustomResource) result.getData();
+                ServletUtil.responseCustom(response, kdbCustomResource);
                 break;
             case KFlowConstant.RESULT_HTML:
                 ServletUtil.responseHtml(response, result.getData().toString());
