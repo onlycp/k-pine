@@ -15,6 +15,7 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 /**
  * // 会话管理 单实例.
@@ -30,6 +31,10 @@ public class InstanceManager {
     private List<SysInstance> instances = Collections.synchronizedList(new ArrayList<>());
     /** 上次执行节点 **/
     private Map<String, String> lastInstanceNameMap = new HashMap<>();
+    /**
+     * 线程池
+     */
+    private ExecutorService executorService = Executors.newFixedThreadPool(5);
 
 
 
@@ -40,7 +45,7 @@ public class InstanceManager {
         return instance;
     }
 
-    private ExecutorService executorService = Executors.newFixedThreadPool(5);
+
 
     private InstanceManager() {
     }
@@ -78,7 +83,26 @@ public class InstanceManager {
      * @return  返回实例
      */
     public SysInstance masterInstance() {
-        return this.instances.get(0);
+        Integer masterClusterNo = SpringContext.getInt("app.master-cluster-no", 1);
+        List<SysInstance> instanceList = DB.findList(SysInstance.class, "select * from sys_instance where cluster_no=? order by cluster_no asc, reg_time asc", masterClusterNo);
+        List<SysInstance> onlines = instanceList.stream().filter(it -> it.getOnline() == 1).collect(Collectors.toList());
+        for (SysInstance sysInstance: onlines) {
+            if (sysInstance.getClusterNo() == null) {
+                sysInstance.setClusterNo(1);
+            }
+        }
+        if (!onlines.isEmpty()) {
+            return onlines.get(0);
+        }
+        else {
+            SysInstance sysInstance = new SysInstance();
+            sysInstance.setClusterNo(9999);
+            sysInstance.setHostName("virtual");
+            sysInstance.setId("virtual");
+            sysInstance.setPort(0);
+            sysInstance.setRegTime(DateUtils.getNow());
+            return sysInstance;
+        }
     }
 
     /**
@@ -124,7 +148,9 @@ public class InstanceManager {
             MessageQueueManager.getInstance().broadMessage(topic, message);
         }
         else {
-            this.instances.forEach(it -> {
+            // 只广播到自己所在的集群
+            List<SysInstance> myClusterInstances = InstanceManager.getInstance().instances.stream().filter(instance -> Objects.equals(SystemUtil.getHost().getClusterNo(), instance.getClusterNo())).collect(Collectors.toList());
+            myClusterInstances.forEach(it -> {
                 try {
                     String blockList = SpringContext.getProperties("app.instance.black-list", "");
                     String[] blackListArray = blockList.split(",");
@@ -185,6 +211,16 @@ public class InstanceManager {
         }
         return true;
 
+    }
+
+    /**
+     * 判断是否是Active集群
+     * @return
+     */
+    public boolean isActiveCluster() {
+        Integer masterClusterNo = SpringContext.getInt("app.master-cluster-no", 1);
+        Integer clusterNo = SystemUtil.getHost().getClusterNo();
+        return masterClusterNo.equals(clusterNo);
     }
 
 }

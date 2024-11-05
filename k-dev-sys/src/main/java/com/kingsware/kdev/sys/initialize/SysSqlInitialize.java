@@ -45,7 +45,6 @@ public class SysSqlInitialize implements SystemInitialize {
 //    private String initDbType;
     @Override
     public void execute() {
-
         // 执行sql脚本
         List<ExecutionFile> fileList = getFileList(getMaxExecuteVersion());
         //log.info("初始化数据... starting");

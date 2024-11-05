@@ -15,6 +15,8 @@ public class HostInfo {
     private String hostName;
     /** 端口 **/
     private Integer port;
+    /** 集群号 **/
+    private Integer clusterNo;
 
     public String instanceName() {
         return hostName + ":" + port;

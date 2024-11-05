@@ -34,6 +34,7 @@ public class SystemUtil {
         }
         hostInfo.setHostName(ip);
         hostInfo.setPort(Integer.parseInt(SpringContext.getProperties("server.port", "8080")));
+        hostInfo.setClusterNo(SpringContext.getInt("app.cluster-no", 1));
         return hostInfo;
 
     }

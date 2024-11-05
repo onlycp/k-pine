@@ -34,8 +34,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+
+import static org.springframework.util.ResourceUtils.CLASSPATH_URL_PREFIX;
 
 /**
  *
@@ -158,6 +161,33 @@ public class UiConfig extends WebMvcConfigurationSupport {
     }
 
     /**
+     * 获取静态HTML内容
+     * 该方法从类路径下读取指定文件名的文件，并返回文件内容作为字符串
+     * 主要用于加载静态HTML页面或模板
+     *
+     * @param fileName 文件名，用于指定需要读取的文件
+     * @return 文件内容字符串，如果文件读取失败或文件不存在则返回null
+     */
+    public String getStaticsHtml(String fileName) {
+        // 根据文件名获取资源对象
+        Resource resource = SpringContext.getResource(CLASSPATH_URL_PREFIX + "/static/html" + fileName);
+        // 如果资源对象为空，则返回null
+        if (resource == null) {
+            return  null;
+        }
+        try {
+            // 使用FileUtils工具类读取文件内容，并以UTF-8编码返回字符串
+            List<String> readList = FileUtils.readAllLine(resource.getInputStream());
+            return StringUtils.joinToString(readList, "\n");
+        } catch (Exception e) {
+            // 捕获异常并记录错误日志
+            log.error("getStaticsHtml error", e);
+        }
+        // 如果发生异常或文件读取失败，返回null
+        return null;
+    }
+
+    /**
      * 向前端重定向到首页
      * @param response
      */
@@ -177,7 +207,10 @@ public class UiConfig extends WebMvcConfigurationSupport {
 
             }
         }
-        String html = getRouterPageHtml(request.getServletPath(), TokenUtil.getTokenString(request), null);
+        String html = getStaticsHtml(uri);
+        if (StringUtils.isEmpty(html)) {
+            html = getRouterPageHtml(request.getServletPath(), TokenUtil.getTokenString(request), null);
+        }
         response.setCharacterEncoding("UTF-8");//编码方式
         response.setContentType("text/html");//设置为html格式
         try (PrintWriter writer = response.getWriter()) {
@@ -233,7 +266,7 @@ public class UiConfig extends WebMvcConfigurationSupport {
      * 解压ui
      */
     private void unzipUi() {
-        String uiPath = ResourceUtils.CLASSPATH_URL_PREFIX + "ui/**";
+        String uiPath = CLASSPATH_URL_PREFIX + "ui/**";
         Resource[] resources = SpringContext.getResources(uiPath);
         if (resources == null || resources.length == 0) {
             return;
