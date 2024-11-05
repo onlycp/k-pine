@@ -42,6 +42,7 @@ import com.kingsware.kdev.core.util.jWi.JWildcard;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
@@ -65,6 +66,7 @@ import java.util.regex.Pattern;
  * @date 2022/1/18 4:53 下午
  */
 @Component
+@Order(2)
 @Slf4j
 public class KAuthFilter implements Filter {
 
@@ -151,8 +153,6 @@ public class KAuthFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         String url = request.getRequestURI();
         try {
-
-
             initContext(request, response);
             if (containUrl(request, url) ) {
                 filterChain.doFilter(request, response);

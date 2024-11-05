@@ -76,7 +76,7 @@ public class DynamicTask implements CommandLineRunner {
     private boolean distributedRun;
 
     /**
-     * 是否运行分布式
+     * 是否共享cron
      **/
     @Value("${schedule.share-cron:true}")
     private boolean shareCron;
@@ -119,6 +119,7 @@ public class DynamicTask implements CommandLineRunner {
             this.threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
             this.threadPoolTaskScheduler.setPoolSize(50);
             this.threadPoolTaskScheduler.initialize();
+            this.threadPoolTaskScheduler.setThreadNamePrefix("DynamicTask-");
         }
     }
 
@@ -498,6 +499,10 @@ public class DynamicTask implements CommandLineRunner {
      * 扫描Class类
      */
     private void scanJavaClassTask(String scanPackage) {
+        // 只有主集群
+        if (!InstanceManager.getInstance().isActiveCluster()) {
+            return;
+        }
         // 扫描所有的定时器类
         List<Class<?>> classList = ClassUtils.getClassesByParentClass(scanPackage, KTask.class);
         for (Class<?> tClass : classList) {
@@ -552,8 +557,16 @@ public class DynamicTask implements CommandLineRunner {
         threadPoolTaskScheduler.schedule(() -> {
 
             try {
-                if (DBInitialize.initCompleted) {
-                    List<SysTask> tasks = DB.findList(SysTask.class, "select * from sys_task where enable=1 order by when_created asc");
+                if (DBInitialize.initCompleted ) {
+                    List<SysTask> tasks = new ArrayList<>();
+                    if (InstanceManager.getInstance().isActiveCluster()) {
+                        tasks = DB.findList(SysTask.class, "select * from sys_task where enable=1 order by when_created asc");
+                    }
+                    else {
+                        // 只读取配置同步任务
+                        tasks = DB.findList(SysTask.class, "select * from sys_task where enable=1 and class_name=?", "com.kingsware.kdev.core.cache.config.ConfigTask");
+                        log.info("非主集群，不执行任务调度, 移除现有的定时任务:{}", sysTaskList.size());
+                    }
                     // 移除超时的虚拟任务
                     List<SysTask> expireTasks = new ArrayList<>();
                     int virtualTaskKeepaliveTime = SpringContext.getInt("app.schedule.virtual-task-keepalive-time", 1);
@@ -572,15 +585,16 @@ public class DynamicTask implements CommandLineRunner {
                     // 加入虚拟任务
                     tasks.addAll(virtualTaskList);
 //                    List<SysTask> apiCacheTasks =
-                    log.debug("线程池数量：{}，当前活动：{}， 任务数:{}", threadPoolTaskScheduler.getPoolSize(),  threadPoolTaskScheduler.getActiveCount(),  tasks.size());
+                    log.info("线程池数量：{}，当前活动：{}， 任务数:{}", threadPoolTaskScheduler.getPoolSize(),  threadPoolTaskScheduler.getActiveCount(),  tasks.size());
                     if (sysTaskList.isEmpty()) {
                         sysTaskList.addAll(tasks);
                     }
                     else {
                         // 删除不存在的任务
                         List<SysTask> removeTasks = new ArrayList<>();
+                        List<SysTask> finalTasks = tasks;
                         sysTaskList.forEach(it -> {
-                            Optional<SysTask> optional = tasks.stream().filter(task -> task.getId().equals(it.getId())).findFirst();
+                            Optional<SysTask> optional = finalTasks.stream().filter(task -> task.getId().equals(it.getId())).findFirst();
                             // 如果找到，就放到替换列表中
                             if (optional.isPresent()) {
                                 int index = sysTaskList.indexOf(it);

@@ -161,9 +161,10 @@ public class NonStaticResourceHttpRequestHandler extends ResourceHttpRequestHand
 //                                        response.flushBuffer();
                                     }
                                     response.flushBuffer();  // 确保所有数据都被发送
-                                } catch (Exception e) {
-                                    // 客户端中止异常，记录日志
-                                    log.warn("Client aborted the connection: " + e.getMessage());
+                                }
+                                catch (Exception e) {
+                                    // 其他IO异常，记录日志并重新抛出
+                                    log.warn("Error while reading/writing video stream: " + e.getMessage());
                                     throw e;
                                 }
 

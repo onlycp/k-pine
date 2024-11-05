@@ -13,6 +13,7 @@ import com.kingsware.kdev.sys.service.KubboService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.catalina.valves.HealthCheckValve;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -23,7 +24,7 @@ import java.util.List;
  * @date 2024/3/13
  */
 @Api(value = "kubbo服务", tags = {"kubbo服务"})
-@RestController
+@Controller
 @RequestMapping("/"+ Version.V1 + "/kubbo")
 public class KubboController extends BaseController {
 
@@ -36,6 +37,7 @@ public class KubboController extends BaseController {
      * @return 详细信息
      */
     @ApiOperation(value = "健康检查 " ,notes = "健康检查")
+    @ResponseBody
     @ApiIgnore
     @GetMapping("/health")
     public BaseRet<HealthRet> health() {
@@ -47,6 +49,7 @@ public class KubboController extends BaseController {
      * @return 应用信息
      */
     @ApiOperation(value = "应用信息 " ,notes = "应用信息")
+    @ResponseBody
     @ApiIgnore
     @GetMapping("/info")
     public BaseRet<AppInfoRet> info() {
@@ -58,6 +61,7 @@ public class KubboController extends BaseController {
      * @return 接口列表
      */
     @ApiOperation(value = "接口列表 " ,notes = "接口列表")
+    @ResponseBody
     @ApiIgnore
     @GetMapping("/apis/{appId}")
     public BaseRet<List<ApiRequestRet>> apis(@PathVariable String appId) {
@@ -71,11 +75,23 @@ public class KubboController extends BaseController {
      * @return 详细信息
      */
     @ApiOperation(value = "执行Faas " ,notes = "执行Faas")
+    @ResponseBody
     @ApiIgnore
     @PostMapping("/execute/faas")
     public BaseRet<?> executeFaas(@RequestBody ExecuteFaasArgv argv) {
         return BaseRet.success(kubboService.executeFaas(argv));
     }
+
+    /**
+     * 详细信息
+     */
+    @ApiOperation(value = "cluster " ,notes = "cluster")
+    @RequestMapping("/cluster")
+    @ApiIgnore
+    public void cluster() {
+        kubboService.cluster();
+    }
+
 
 
 

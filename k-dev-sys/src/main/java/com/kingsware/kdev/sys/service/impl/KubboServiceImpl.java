@@ -2,12 +2,13 @@ package com.kingsware.kdev.sys.service.impl;
 
 import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.cache.api.ApiManager;
+import com.kingsware.kdev.core.cache.instance.InstanceManager;
+import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.model.SysInstance;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.KdbArgv;
 import com.kingsware.kdev.core.orm.kdb.KdbRet;
-import com.kingsware.kdev.core.util.JsonUtil;
-import com.kingsware.kdev.core.util.StringUtils;
-import com.kingsware.kdev.core.util.SystemUtil;
+import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.sys.argv.ExecuteFaasArgv;
 import com.kingsware.kdev.sys.enums.HealthEnum;
 import com.kingsware.kdev.sys.ret.ApiRequestRet;
@@ -17,9 +18,16 @@ import com.kingsware.kdev.sys.ret.HealthRet;
 import com.kingsware.kdev.sys.service.KubboService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
+import org.springframework.util.StreamUtils;
 
+import java.io.PrintWriter;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -135,6 +143,60 @@ public class KubboServiceImpl implements KubboService {
             return apiRequestRet;
 
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public void cluster() {
+        org.springframework.core.io.Resource resource = SpringContext.getResource(ResourceUtils.CLASSPATH_URL_PREFIX + "static/clusters.html");
+        String templateContent = getResourceText(resource);
+
+        try {
+            // 设置响应的字符编码和内容类型
+            ServletUtil.response().setCharacterEncoding("UTF-8");
+            ServletUtil.response().setContentType("text/html; charset=UTF-8");
+            // 获取 PrintWriter
+            PrintWriter writer = ServletUtil.response().getWriter();
+
+            // 渲染模板内容
+            Map<String, String> contextMap = new HashMap<>();
+            List<SysInstance> instances = DB.findList(SysInstance.class, "select * from sys_instance order by cluster_no asc, reg_time asc");
+            StringBuffer sb = new StringBuffer();
+            for (SysInstance instance : instances) {
+                if (instance.getClusterNo() == null) {
+                    instance.setClusterNo(1);
+                }
+                sb.append("<tr>");
+                sb.append("<td>").append(instance.getClusterNo()).append("</td>");
+                sb.append("<td>").append(instance.getHostName()).append("</td>");
+                sb.append("<td>").append(instance.getPort()).append("</td>");
+                sb.append("<td>").append(instance.getHeartBeatTime()).append("</td>");
+                sb.append("<td>").append(instance.getOnline() == 1 ? "在线": "离线").append("</td>");
+                sb.append("</tr>");
+            }
+            SysInstance master = InstanceManager.getInstance().masterInstance();
+            contextMap.put("rows", sb.toString());
+            contextMap.put("status", InstanceManager.getInstance().isActiveCluster() ? "生产":"灾备");
+            contextMap.put("myClusterNo", SystemUtil.getHost().getClusterNo() + "");
+            contextMap.put("activeClusterNo", master.getClusterNo() + "");
+            contextMap.put("masterNodeName", master.getHostName() + "-" + master.getPort());
+
+            String html = TemplateUtil.render(templateContent, contextMap);
+            writer.write(html);
+        } catch (Exception e) {
+
+            throw new RuntimeException(e);
+        }
+    }
+
+
+
+    private String getResourceText(org.springframework.core.io.Resource resource) {
+        try {
+            return StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
+        }
+        catch (Exception e) {
+            return "";
+        }
     }
 
 
