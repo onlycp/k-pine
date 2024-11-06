@@ -42,6 +42,13 @@ public interface SysKdbDataSourceService {
     PageDataRet<SysKdbDataSourceRet> query(SysKdbDataSourceQueryArgv argv);
 
     /**
+     * APPID分页查询
+     * @param argv 编辑
+     * @return 查询结果
+     */
+    PageDataRet<SysKdbDataSourceRet> queryByAppId(SysKdbDataSourceQueryArgv argv);
+
+    /**
      * 删除
      * @param argv  查询
      */
