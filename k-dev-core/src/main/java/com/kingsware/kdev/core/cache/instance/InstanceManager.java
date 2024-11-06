@@ -95,13 +95,19 @@ public class InstanceManager {
             return onlines.get(0);
         }
         else {
-            SysInstance sysInstance = new SysInstance();
-            sysInstance.setClusterNo(9999);
-            sysInstance.setHostName("virtual");
-            sysInstance.setId("virtual");
-            sysInstance.setPort(0);
-            sysInstance.setRegTime(DateUtils.getNow());
-            return sysInstance;
+            if (instanceList.isEmpty()) {
+                SysInstance sysInstance = new SysInstance();
+                sysInstance.setClusterNo(masterClusterNo);
+                sysInstance.setHostName("virtual");
+                sysInstance.setId("virtual");
+                sysInstance.setPort(0);
+                sysInstance.setRegTime(DateUtils.getNow());
+                return sysInstance;
+            }
+            else  {
+                return instanceList.get(0);
+            }
+
         }
     }
 
