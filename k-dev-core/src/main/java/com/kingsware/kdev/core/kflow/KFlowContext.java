@@ -49,7 +49,7 @@ public class KFlowContext {
         String encodeDebugUserInfo = ServletUtil.request().getHeader("Debug-User-Info");
         KFlowContext context = new KFlowContext();
         Map<String, Object> sysMap = new HashMap<>();
-        if(isDevMode() && !encodeDebugUserInfo.isEmpty() && encodeDebugUserInfo!=null)   {
+        if(isDevMode() && encodeDebugUserInfo!=null && !encodeDebugUserInfo.isEmpty())   {
             try {
                 // 将解码后的字节转换成字符串
                 String decodedString = URLDecoder.decode(encodeDebugUserInfo,"UTF-8");
