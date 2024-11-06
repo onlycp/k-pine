@@ -71,7 +71,7 @@ public class KFlowContext {
                 sysMap.put("sysUnitNames", userMap.get("sysUnitNames"));
             }
             catch (Exception e) {
-                System.out.println(e);
+               ExceptionUtils.getStackTrace(e);
             }
         } else  {
             // 处理系统变量
