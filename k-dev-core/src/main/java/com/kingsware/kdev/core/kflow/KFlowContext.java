@@ -1,7 +1,6 @@
 package com.kingsware.kdev.core.kflow;
 
 import com.kingsware.kdev.core.auth.BaseUserInfo;
-import com.kingsware.kdev.core.bean.ExceptionLog;
 import com.kingsware.kdev.core.cache.access.AccessManager;
 import com.kingsware.kdev.core.cache.instance.HostInfo;
 import com.kingsware.kdev.core.cache.license.LicenseManager;
@@ -10,7 +9,6 @@ import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.util.*;
 import lombok.Data;
-import net.minidev.json.JSONObject;
 
 import java.net.URLDecoder;
 import java.util.*;
@@ -46,7 +44,7 @@ public class KFlowContext {
      * @return KFlowContext 返回流程上下文对象
      */
     public static KFlowContext createBaseContext(String inArgv, String outArgv, String i18nKeys) {
-        String encodeDebugUserInfo = ServletUtil.request().getHeader("Debug-User-Info");
+
         KFlowContext context = new KFlowContext();
         Map<String, Object> sysMap = new HashMap<>();
 
@@ -64,7 +62,33 @@ public class KFlowContext {
         sysMap.put("roleNames",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getRoleNames() : "");
         sysMap.put("sysUnitIds",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getSysUnitIds() : "");
         sysMap.put("sysUnitNames",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getSysUnitNames() : "");
+        sysMap.put("isAdmin",  isAdmin());
 
+        // 仅devMode模式下，且header中有Debug-User-Info时有效
+        setDebuggerUserInfo(sysMap);
+
+        // 是否uniops
+        sysMap.put("isUniops", LicenseManager.getInstance().isUniopsApp());
+        HostInfo hostInfo = SystemUtil.getHost();
+        String baseUrl = "http://" + hostInfo.getHostName() + ":" + hostInfo.getPort() + ServletUtil.getContextPath();
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length()-1);
+        }
+        sysMap.put("baseUrl", baseUrl);
+        context.getSystemContext().put("sys", sysMap);
+        context.getSystemContext().put("devMode", isDevMode());
+        // 设置输入参数
+        context.inArgv = StringUtils.isEmpty(inArgv) ? "{}" : inArgv;
+        context.outArgv = StringUtils.isEmpty(outArgv) ? "{}" : outArgv;
+        if (StringUtils.isNotEmpty(i18nKeys)) {
+            String[] sets = i18nKeys.split(",");
+            context.i18nKeys.addAll(Arrays.asList(sets));
+        }
+        return context;
+    }
+
+    private static void setDebuggerUserInfo(Map<String, Object> sysMap) {
+        String encodeDebugUserInfo = ServletUtil.request().getHeader("Debug-User-Info");
         if(isDevMode() && encodeDebugUserInfo != null && StringUtils.isNotEmpty(encodeDebugUserInfo))   {
             try {
                 // 将解码后的字节转换成字符串
@@ -106,29 +130,9 @@ public class KFlowContext {
                     }
                 }
             } catch (Exception e) {
-               ExceptionUtils.getStackTrace(e);
+                ExceptionUtils.getStackTrace(e);
             }
-       }
-
-        sysMap.put("isAdmin",  isAdmin());
-        // 是否uniops
-        sysMap.put("isUniops", LicenseManager.getInstance().isUniopsApp());
-        HostInfo hostInfo = SystemUtil.getHost();
-        String baseUrl = "http://" + hostInfo.getHostName() + ":" + hostInfo.getPort() + ServletUtil.getContextPath();
-        if (baseUrl.endsWith("/")) {
-            baseUrl = baseUrl.substring(0, baseUrl.length()-1);
         }
-        sysMap.put("baseUrl", baseUrl);
-        context.getSystemContext().put("sys", sysMap);
-        context.getSystemContext().put("devMode", isDevMode());
-        // 设置输入参数
-        context.inArgv = StringUtils.isEmpty(inArgv) ? "{}" : inArgv;
-        context.outArgv = StringUtils.isEmpty(outArgv) ? "{}" : outArgv;
-        if (StringUtils.isNotEmpty(i18nKeys)) {
-            String[] sets = i18nKeys.split(",");
-            context.i18nKeys.addAll(Arrays.asList(sets));
-        }
-        return context;
     }
 
     /**
