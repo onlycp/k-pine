@@ -61,7 +61,8 @@ public class HeartBeatTask implements KTask, KRunner {
 
     @Override
     public void execute() throws Exception {
-        SysInstance instance = DB.findOne(SysInstance.class, "select * from sys_instance where id=?", INSTANCE_ID);
+        HostInfo hostInfo = SystemUtil.getHost();
+        SysInstance instance = DB.findOne(SysInstance.class, "select * from sys_instance where host_name=? and port=?", hostInfo.getHostName(), hostInfo.getPort());
         instance.setOnline(1);
         instance.setHeartBeatTime(DateUtils.getNow());
         DB.update(instance);
