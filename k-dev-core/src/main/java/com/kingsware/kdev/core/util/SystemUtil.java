@@ -170,9 +170,9 @@ public class SystemUtil {
 
         } catch (Exception ignored) {
         }
-        for (MacAddress macAddress: macAddresses) {
-            log.info("网卡信息，网卡名称：{}， Mac地址:{}, IP:{}", macAddress.getName(), macAddress.getMac(), macAddress.getIp());
-        }
+//        for (MacAddress macAddress: macAddresses) {
+//            log.info("网卡信息，网卡名称：{}， Mac地址:{}, IP:{}", macAddress.getName(), macAddress.getMac(), macAddress.getIp());
+//        }
         return macAddresses;
     }
 
