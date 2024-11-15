@@ -28,6 +28,7 @@ public class HeartBeatTask implements KTask, KRunner {
 
     @Override
     public void runNow() throws Exception {
+        DB.update("update sys_instance set  cluster_no=1 where cluster_no is null");
         SysInstance masterInstance = InstanceManager.getInstance().masterInstance();
         if (masterInstance.getId().equalsIgnoreCase("virtual") && InstanceManager.getInstance().isActiveCluster()) {
             HostInfo hostInfo = SystemUtil.getHost();
@@ -63,9 +64,23 @@ public class HeartBeatTask implements KTask, KRunner {
     public void execute() throws Exception {
         HostInfo hostInfo = SystemUtil.getHost();
         SysInstance instance = DB.findOne(SysInstance.class, "select * from sys_instance where host_name=? and port=?", hostInfo.getHostName(), hostInfo.getPort());
-        instance.setOnline(1);
-        instance.setHeartBeatTime(DateUtils.getNow());
-        DB.update(instance);
+        if(instance == null) {
+            instance = new SysInstance();
+            instance.setPort(hostInfo.getPort());
+            instance.setHostName(hostInfo.getHostName());
+            instance.setId(StringUtils.getUUID());
+            instance.setHeartBeatTime(DateUtils.getNow());
+            instance.setRegTime(DateUtils.getNow());
+            instance.setOnline(1);
+            instance.setClusterNo(hostInfo.getClusterNo());
+            DB.save(instance);
+        }
+        else {
+            instance.setOnline(1);
+            instance.setHeartBeatTime(DateUtils.getNow());
+            DB.update(instance);
+        }
+
         this.refreshInstances();
     }
 

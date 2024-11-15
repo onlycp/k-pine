@@ -331,7 +331,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 // 如果没有，则新增，后面之所以再次编辑，就是为了实时生效
                 if (functionInfoList.isEmpty()) {
                     try {
-                        String sql = "insert into functions (id,name,type,script) values (?,?,?,?,?)";
+                        String sql = "insert into functions (id,name,type,script) values (?,?,?,?)";
                         DB.byName("kingDB").executeUpdateSql(sql, functions.getId(), functions.getName(), functions.getType(), functions.getScript());
 
                     } catch (Exception e) {
