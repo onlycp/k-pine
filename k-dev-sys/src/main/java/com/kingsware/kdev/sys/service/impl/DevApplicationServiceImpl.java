@@ -199,11 +199,11 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                     devTeamApp.setTeamType(0);
                     devTeamApp.setTeamId(teamId);
                     DB.save(devTeamApp);
-                 }
+                }
             }
         }
         log.info("完成导入应用信息：{}", appCount);
-         List<DataSourceInfo> dataSourceInfos = DB.kdbApi().queryDataSource(new DataSourceQueryArgv());
+        List<DataSourceInfo> dataSourceInfos = DB.kdbApi().queryDataSource(new DataSourceQueryArgv());
 
         if(devPine.getSources() != null) {
             long sourceCount = 0;
@@ -220,7 +220,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                         catch (Exception e) {
                             log.info("数据源接口新增失败，将直接插入数据库：%s", fileSource.getSourceName());
                             DB.byName("kingDB").executeUpdateSql("insert into DATA_SOURCE(SOURCENAME, DRIVERCLASS,JDBCURL,USERNAME,PASSWORD, SOURCEID,JSON) VALUES (?,?,?,?,?,?,?)"
-                                           , fileSource.getSourceName(), fileSource.getDriverClass(), fileSource.getJdbcUrl(), fileSource.getUserName(), fileSource.getPassword(), fileSource.getSourceName(), fileSource.getJson());
+                                    , fileSource.getSourceName(), fileSource.getDriverClass(), fileSource.getJdbcUrl(), fileSource.getUserName(), fileSource.getPassword(), fileSource.getSourceName(), fileSource.getJson());
                         }
 
                     }
@@ -243,7 +243,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         log.info("完成导入接口信息：{}", apiCount);
         importMessageMap.put(I18n.t("DevApplicationServiceImpl.api", "接口信息"), apiCount);
         // 字典分类
-         long dictCount = DB.batchSaveOrUpdate(devPine.getDict(), SysDict.class);
+        long dictCount = DB.batchSaveOrUpdate(devPine.getDict(), SysDict.class);
         log.info("完成导入字典信息：{}", dictCount);
         importMessageMap.put(I18n.t("DevApplicationServiceImpl.dict",  "字典信息"), dictCount);
         // 字典项
@@ -519,7 +519,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         Method[] methods = devPineClazz.getDeclaredMethods();
         for (Method method : methods) {
             if (method.getName().startsWith("get") && method.getParameterCount() == 0
-                && !isSystemImportVars(method.getName())) {
+                    && !isSystemImportVars(method.getName())) {
                 resultMethods.add(method);
             }
         }

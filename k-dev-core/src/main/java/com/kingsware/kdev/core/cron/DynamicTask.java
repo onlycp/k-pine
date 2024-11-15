@@ -299,6 +299,7 @@ public class DynamicTask implements CommandLineRunner {
                 errorMessage = e.getMessage();
             }
         } catch (Exception e) {
+            log.error("error", e);
             log.error("定时任务执行失败, 任务名: {}， 错误信息:{}", myTask.getName(), e.getMessage());
             executeStatus = 0;
             errorMessage = ExceptionUtils.getStackTrace(e);

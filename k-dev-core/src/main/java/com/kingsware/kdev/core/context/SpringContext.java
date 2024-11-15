@@ -91,7 +91,12 @@ public class SpringContext implements ApplicationContextAware {
      * @return
      */
     public static Integer getInt(String key, Integer defaultValue) {
-        return Integer.parseInt(getProperties(key, defaultValue.toString()));
+        try {
+            return Integer.parseInt(getProperties(key, defaultValue.toString()));
+        }
+        catch (Exception e) {
+            return defaultValue;
+        }
     }
 
     /**
