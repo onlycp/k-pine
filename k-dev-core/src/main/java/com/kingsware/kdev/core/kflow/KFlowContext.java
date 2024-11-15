@@ -1,7 +1,6 @@
 package com.kingsware.kdev.core.kflow;
 
 import com.kingsware.kdev.core.auth.BaseUserInfo;
-import com.kingsware.kdev.core.bean.ExceptionLog;
 import com.kingsware.kdev.core.cache.access.AccessManager;
 import com.kingsware.kdev.core.cache.instance.HostInfo;
 import com.kingsware.kdev.core.cache.license.LicenseManager;
@@ -10,7 +9,6 @@ import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.util.*;
 import lombok.Data;
-import net.minidev.json.JSONObject;
 
 import java.net.URLDecoder;
 import java.util.*;
@@ -46,51 +44,29 @@ public class KFlowContext {
      * @return KFlowContext 返回流程上下文对象
      */
     public static KFlowContext createBaseContext(String inArgv, String outArgv, String i18nKeys) {
-        String encodeDebugUserInfo = ServletUtil.request().getHeader("Debug-User-Info");
+
         KFlowContext context = new KFlowContext();
         Map<String, Object> sysMap = new HashMap<>();
-        if(isDevMode() && encodeDebugUserInfo!=null && !encodeDebugUserInfo.isEmpty())   {
-            try {
-                // 将解码后的字节转换成字符串
-                String decodedString = URLDecoder.decode(encodeDebugUserInfo,"UTF-8");
-                Map userMap = JsonUtil.toMap(decodedString);
-                System.out.println("===userMap===" + userMap);
-                assert userMap != null;
-                sysMap.put("who",  userMap.get("id"));
-                sysMap.put("username",  userMap.get("username"));
-                sysMap.put("when", DateUtils.getNow());
-                sysMap.put("uuid", StringUtils.getUUID());
-                sysMap.put("avatar",  userMap.get("avatar"));
-                sysMap.put("realName",  userMap.get("realName"));
-                sysMap.put("mobile",  userMap.get("mobile"));
-                sysMap.put("email", userMap.get("email"));
-                sysMap.put("roleIds",  userMap.get("roleIds"));
-                sysMap.put("roleCodes",  userMap.get("roleCodes"));
-                sysMap.put("roleNames",   userMap.get("roleNames"));
-                sysMap.put("sysUnitIds",   userMap.get("sysUnitIds"));
-                sysMap.put("sysUnitNames", userMap.get("sysUnitNames"));
-            }
-            catch (Exception e) {
-               ExceptionUtils.getStackTrace(e);
-            }
-        } else  {
-            // 处理系统变量
-            sysMap.put("who",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getId() : "");
-            sysMap.put("username",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getUsername() : "");
-            sysMap.put("when", DateUtils.getNow());
-            sysMap.put("uuid", StringUtils.getUUID());
-            sysMap.put("avatar", KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getAvatar() : "");
-            sysMap.put("realName",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getRealName() : "");
-            sysMap.put("mobile",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getMobile() : "");
-            sysMap.put("email",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getEmail() : "");
-            sysMap.put("roleIds",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getRoleIds() : "");
-            sysMap.put("roleCodes",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getRoleCodes() : "");
-            sysMap.put("roleNames",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getRoleNames() : "");
-            sysMap.put("sysUnitIds",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getSysUnitIds() : "");
-            sysMap.put("sysUnitNames",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getSysUnitNames() : "");
-        }
 
+        // 处理系统变量
+        sysMap.put("who",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getId() : "");
+        sysMap.put("username",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getUsername() : "");
+        sysMap.put("when", DateUtils.getNow());
+        sysMap.put("uuid", StringUtils.getUUID());
+        sysMap.put("avatar", KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getAvatar() : "");
+        sysMap.put("realName",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getRealName() : "");
+        sysMap.put("mobile",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getMobile() : "");
+        sysMap.put("email",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getEmail() : "");
+        sysMap.put("roleIds",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getRoleIds() : "");
+        sysMap.put("roleCodes",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getRoleCodes() : "");
+        sysMap.put("roleNames",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getRoleNames() : "");
+        sysMap.put("sysUnitIds",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getSysUnitIds() : "");
+        sysMap.put("sysUnitNames",  KClientContext.getContext() != null && KClientContext.getContext().getUserInfo()!= null ? KClientContext.getContext().getUserInfo().getSysUnitNames() : "");
         sysMap.put("isAdmin",  isAdmin());
+
+        // 仅devMode模式下，且header中有Debug-User-Info时有效
+        setDebuggerUserInfo(sysMap);
+
         // 是否uniops
         sysMap.put("isUniops", LicenseManager.getInstance().isUniopsApp());
         HostInfo hostInfo = SystemUtil.getHost();
@@ -109,6 +85,54 @@ public class KFlowContext {
             context.i18nKeys.addAll(Arrays.asList(sets));
         }
         return context;
+    }
+
+    private static void setDebuggerUserInfo(Map<String, Object> sysMap) {
+        String encodeDebugUserInfo = ServletUtil.request().getHeader("Debug-User-Info");
+        if(isDevMode() && encodeDebugUserInfo != null && StringUtils.isNotEmpty(encodeDebugUserInfo))   {
+            try {
+                // 将解码后的字节转换成字符串
+                String decodedString = URLDecoder.decode(encodeDebugUserInfo,"UTF-8");
+                Map<String, Object> userMap = JsonUtil.toMap(decodedString);
+                if (userMap != null && userMap.size() > 0) {
+                    if (userMap.get("id") != null) {
+                        sysMap.put("who",  (String) userMap.get("id"));
+                    }
+                    if (userMap.get("username") != null) {
+                        sysMap.put("username",  (String) userMap.get("username"));
+                    }
+                    if (userMap.get("avatar") != null) {
+                        sysMap.put("avatar",  (String) userMap.get("avatar"));
+                    }
+                    if (userMap.get("realName") != null) {
+                        sysMap.put("realName",  (String) userMap.get("realName"));
+                    }
+                    if (userMap.get("mobile") != null) {
+                        sysMap.put("mobile",  (String) userMap.get("mobile"));
+                    }
+                    if (userMap.get("email") != null) {
+                        sysMap.put("email",  (String) userMap.get("email"));
+                    }
+                    if (userMap.get("roleIds") != null) {
+                        sysMap.put("roleIds",  (String) userMap.get("roleIds"));
+                    }
+                    if (userMap.get("roleCodes") != null) {
+                        sysMap.put("roleCodes",  (String) userMap.get("roleCodes"));
+                    }
+                    if (userMap.get("roleNames") != null) {
+                        sysMap.put("roleNames",  (String) userMap.get("roleNames"));
+                    }
+                    if (userMap.get("sysUnitIds") != null) {
+                        sysMap.put("sysUnitIds",  (String) userMap.get("sysUnitIds"));
+                    }
+                    if (userMap.get("sysUnitNames") != null) {
+                        sysMap.put("sysUnitNames",  (String) userMap.get("sysUnitNames"));
+                    }
+                }
+            } catch (Exception e) {
+                ExceptionUtils.getStackTrace(e);
+            }
+        }
     }
 
     /**
