@@ -333,6 +333,7 @@ public class UiConfig extends WebMvcConfigurationSupport {
         matchKeys.add("btnLabel");
         matchKeys.add("tooltip");
         matchKeys.add("checkAllLabel");
+        matchKeys.add("description");
         List<String> pathKeys = new ArrayList<>();
         for (String key : matchKeys) {
             pathKeys.add("@." + key);
