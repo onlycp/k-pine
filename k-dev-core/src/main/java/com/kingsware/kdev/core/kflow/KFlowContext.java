@@ -88,9 +88,11 @@ public class KFlowContext {
     }
 
     private static void setDebuggerUserInfo(Map<String, Object> sysMap) {
-        String encodeDebugUserInfo = ServletUtil.request().getHeader("Debug-User-Info");
-        if(isDevMode() && encodeDebugUserInfo != null && StringUtils.isNotEmpty(encodeDebugUserInfo))   {
-            try {
+
+        try {
+                String encodeDebugUserInfo = ServletUtil.request().getHeader("Debug-User-Info");
+                if(isDevMode() && encodeDebugUserInfo != null && StringUtils.isNotEmpty(encodeDebugUserInfo))   {
+
                 // 将解码后的字节转换成字符串
                 String decodedString = URLDecoder.decode(encodeDebugUserInfo,"UTF-8");
                 Map<String, Object> userMap = JsonUtil.toMap(decodedString);
@@ -129,9 +131,10 @@ public class KFlowContext {
                         sysMap.put("sysUnitNames",  (String) userMap.get("sysUnitNames"));
                     }
                 }
-            } catch (Exception e) {
-                ExceptionUtils.getStackTrace(e);
             }
+        }
+        catch (Exception e) {
+//                ExceptionUtils.getStackTrace(e);
         }
     }
 

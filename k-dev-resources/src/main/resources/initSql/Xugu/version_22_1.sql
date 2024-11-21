@@ -3,7 +3,7 @@ CREATE TABLE sys_search_config
     id              varchar(36) NOT NULL,
     data_source     varchar(100),
     table_name      varchar(100),
-    columns         varchar(255),
+    columns         varchar(1000),
     primary_columns varchar(255),
     "LINK"            varchar(255),
     labels          varchar(255),

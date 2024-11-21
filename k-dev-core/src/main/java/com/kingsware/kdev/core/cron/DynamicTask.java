@@ -586,7 +586,7 @@ public class DynamicTask implements CommandLineRunner {
                     // 加入虚拟任务
                     tasks.addAll(virtualTaskList);
 //                    List<SysTask> apiCacheTasks =
-                    log.info("线程池数量：{}，当前活动：{}， 任务数:{}", threadPoolTaskScheduler.getPoolSize(),  threadPoolTaskScheduler.getActiveCount(),  tasks.size());
+                    // log.info("线程池数量：{}，当前活动：{}， 任务数:{}", threadPoolTaskScheduler.getPoolSize(),  threadPoolTaskScheduler.getActiveCount(),  tasks.size());
                     if (sysTaskList.isEmpty()) {
                         sysTaskList.addAll(tasks);
                     }
