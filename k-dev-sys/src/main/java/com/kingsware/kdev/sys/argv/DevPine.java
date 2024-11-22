@@ -1,5 +1,7 @@
 package com.kingsware.kdev.sys.argv;
 
+import com.kingsware.kdev.core.cache.open.OpenAccount;
+import com.kingsware.kdev.core.cache.open.OpenAccountInfo;
 import com.kingsware.kdev.core.model.*;
 import com.kingsware.kdev.core.orm.kdb.DataSourceInfo;
 import com.kingsware.kdev.core.orm.kdb.FlowInfo;
@@ -71,6 +73,10 @@ public class DevPine {
     private List<DevPageTemplate> devPageTemplates;
     /** [x]国际化 **/
     private List<SysI18n> i18ns;
+    /** 开放账号 **/
+    private List<OpenAccount> openAccounts;
+    /** 开放账号权限 **/
+    private List<OpenAccountApi> openAccountApis;
     /**
      * 如果是应用导出的，变量名要带s，如果是对应表的一般没有。
      */

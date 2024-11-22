@@ -11,6 +11,7 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.cache.access.AccessManager;
 import com.kingsware.kdev.core.cache.kcache.KCacheManager;
 import com.kingsware.kdev.core.cache.license.LicenseManager;
+import com.kingsware.kdev.core.cache.open.OpenAccount;
 import com.kingsware.kdev.core.cache.page.PageCacheManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
@@ -270,6 +271,14 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         long i18nCount = DB.batchSaveOrUpdate(devPine.getI18ns(), SysI18n.class);
         log.info("完成导入国际化信息：{}", i18nCount);
         importMessageMap.put(I18n.t("DevApplicationServiceImpl.i18n", "国际化信息") , i18nCount);
+        // 开放账号
+        long openAccountCount = DB.batchSaveOrUpdate(devPine.getOpenAccounts(), OpenAccount.class);
+        log.info("完成导入开放账号：{}", openAccountCount);
+        importMessageMap.put(I18n.t("DevApplicationServiceImpl.openAccount", "开放账号") , i18nCount);
+        // 开放账号权限
+        long openAccountApiCount = DB.batchSaveOrUpdate(devPine.getOpenAccountApis(), OpenAccountApi.class);
+        log.info("完成导入开放权限：{}", openAccountApiCount);
+        importMessageMap.put(I18n.t("DevApplicationServiceImpl.openAccountApi", "开放权限") , i18nCount);
         // 菜单
         long menuCount = 0;
         if (LicenseManager.getInstance().isUniopsApp()) {

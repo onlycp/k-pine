@@ -1,0 +1,1 @@
+ALTER TABLE open_account ADD COLUMN app_id varchar(36) NULL
