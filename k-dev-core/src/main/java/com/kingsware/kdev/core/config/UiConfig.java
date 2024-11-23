@@ -52,6 +52,7 @@ import java.util.regex.Pattern;
  */
 @Configuration
 @Slf4j
+@SuppressWarnings("all")
 public class UiConfig extends WebMvcConfigurationSupport {
 
     @Value("${app.ui:./ui/}")
@@ -335,6 +336,11 @@ public class UiConfig extends WebMvcConfigurationSupport {
         matchKeys.add("tooltip");
         matchKeys.add("checkAllLabel");
         matchKeys.add("description");
+        matchKeys.add("msg");
+        matchKeys.add("addBtnLabel");
+        matchKeys.add("editBtnLabel");
+        matchKeys.add("copyBtnLabel");
+//        matchKeys.add("unitOptions");
         List<String> pathKeys = new ArrayList<>();
         for (String key : matchKeys) {
             pathKeys.add("@." + key);
@@ -345,11 +351,11 @@ public class UiConfig extends WebMvcConfigurationSupport {
                 if (match.containsKey(key)) {
                     if (match.get(key) instanceof String) {
                         String text = match.get(key).toString();
-                        if(text.contains("编号")) {
+                        if(text.contains("向下")) {
                             System.currentTimeMillis();
                         }
                         if (StringUtils.containsChinese(text)) {
-                            if (key.equals("tpl") || key.equalsIgnoreCase("description")) {
+                            if (key.equals("tpl") || key.equalsIgnoreCase("description") || key.equalsIgnoreCase("msg") ) {
                                 org.w3c.dom.Document doc = StringUtils.parseXml(text);
                                 if (doc == null) {
                                     String translatedText = I18n.parseScript(appId, text);
@@ -365,13 +371,23 @@ public class UiConfig extends WebMvcConfigurationSupport {
                             }
                             else {
                                 String translatedText = I18n.parseScript(appId, text);
-                                translatedText = translatedText.replace("\\\\ ${","\\\\${");
+                                translatedText = translatedText.replace("\\ ${","\\${");
                                 if (!translatedText.equals(text)) {
                                     match.put(key, StringUtils.capitalizeFirstLetter(translatedText));
                                 }
                             }
 
                         }
+                    }
+                    else if (match.get(key) instanceof List) {
+                        List<Object> list = (List<Object>) match.get(key);
+                        for (int i = 0; i < list.size(); i++) {
+                            String translatedText = I18n.parseScript(appId, list.get(0).toString());
+                            translatedText = translatedText.replace("\\ ${","\\${");
+                            list.set(i, translatedText);
+                        }
+                        match.put(key, list);
+
                     }
                     else if (match.get(key) instanceof Map && "map".equalsIgnoreCase(key)) {
                         Map<String, Object> map = (Map<String, Object>) match.get(key);
@@ -382,6 +398,7 @@ public class UiConfig extends WebMvcConfigurationSupport {
                                 org.w3c.dom.Document doc = StringUtils.parseXml(text);
                                 if (doc == null) {
                                     String translatedText = I18n.parseScript(appId, text);
+                                    translatedText = translatedText.replace("\\ ${","\\${");
                                     if (!translatedText.equals(text)) {
                                         replacedMap.put(k, StringUtils.capitalizeFirstLetter(translatedText));
                                     }

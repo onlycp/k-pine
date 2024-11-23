@@ -713,6 +713,7 @@ public class KAuthFilter implements Filter {
         KdbRetFile kdbRetFile = null;
         KClientContext.getContext().setArgv(argvMap);
         KClientContext.getContext().setApiRspAdapter(api.getApiRspArgv());
+
         // 转为api格式
         switch (result.getType()) {
             case KFlowConstant.RESULT_JSON:
@@ -720,6 +721,17 @@ public class KAuthFilter implements Filter {
                     ServletUtil.responseJson(response, result.getData());
                 }
                 else {
+                    // 处理【请求fetch/pageById】48fd64ace3934b3b8fbbc06e9b16c784
+                    if ("48fd64ace3934b3b8fbbc06e9b16c784".equalsIgnoreCase(api.getApiFlowId())) {
+                        List<Map<String,Object>> pages = (List<Map<String,Object>>) result.getData();
+                        for (Map<String,Object> map : pages) {
+                            String pageJson = (String)map.get("pageJson");
+                            String appId = (String)map.get("appId");
+                            UiConfig uiConfig = SpringContext.getBean(UiConfig.class);
+                            String newPageJson = uiConfig.i18nTranslatePage(appId, pageJson);
+                            map.put("pageJson", newPageJson);
+                        }
+                    }
                     ServletUtil.responseJson(response, FlowUtils.toJsonResult(result.getData(), result.getLog(), result.getExceptionStack()));
                 }
                 break;

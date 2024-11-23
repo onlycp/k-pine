@@ -137,15 +137,7 @@ public class KdbFlowExecutor {
             }
 
             // 执行流程
-            if (argv.getFlowID().equalsIgnoreCase("a20fd82c126947f9ab3b599001df6126")) {
-                log.info("用时：5");
-            }
             KdbRet<String> ret = DB.kdbApi().executeFlow(argv, debug, sync);
-            if (argv.getFlowID().equalsIgnoreCase("a20fd82c126947f9ab3b599001df6126")) {
-                log.info("用时：6");
-            }
-
-
             if (LogicFlowManager.getInstance().isTranCtrl(argv.getFlowID())) {
                 if (ret.getErrorCode() == 0) {
                     // 提交事务
