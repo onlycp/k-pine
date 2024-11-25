@@ -19,3 +19,7 @@ CREATE TABLE if not exists  sys_config_group
     icon          varchar(50) DEFAULT NULL COMMENT '图标',
     PRIMARY KEY (id) USING BTREE
 );
+
+ALTER TABLE dev_application
+    ADD COLUMN depend_datasources text NULL COMMENT '依赖数据源',
+    ADD COLUMN depend_apps text NULL COMMENT '依赖应用';
