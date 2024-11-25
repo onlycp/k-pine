@@ -1,6 +1,7 @@
 package com.kingsware.kdev.core.auth;
 
 import com.kingsware.kdev.core.bean.BaseRet;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.enums.RetEnum;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
@@ -19,12 +20,12 @@ import org.springframework.stereotype.Component;
 @Component
 @Order(3)
 public class DevApiAspect {
-    @Value("${app.mode.dev:false}")
-    private boolean modeDev;
+
 
     @Around("execution(public * com.kingsware..web.*.*(..)) && @annotation(dev)")
     public Object process(ProceedingJoinPoint pjd, Dev dev) throws Throwable {
-        if (modeDev || ServletUtil.isRefererRule(ServletUtil.request())) {
+        boolean isDev = SpringContext.getBoolean("app.mode.dev", false);
+        if (isDev || ServletUtil.isRefererRule(ServletUtil.request())) {
             return pjd.proceed();
         }
         else {

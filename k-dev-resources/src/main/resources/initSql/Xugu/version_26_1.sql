@@ -1,0 +1,8 @@
+ALTER TABLE sys_logic_flow
+    ADD COLUMN module_id VARCHAR(36) DEFAULT NULL COMMENT '关联模块';
+
+ALTER TABLE dev_page
+    ADD COLUMN module_id VARCHAR(36) DEFAULT NULL COMMENT '关联模块';
+
+ALTER TABLE dev_page
+    ADD COLUMN tags VARCHAR(36) DEFAULT NULL COMMENT '标签';

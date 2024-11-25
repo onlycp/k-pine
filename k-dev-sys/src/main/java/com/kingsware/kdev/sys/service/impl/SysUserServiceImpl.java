@@ -643,7 +643,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                     ret.setActionMessage(map.get("tip").toString());
                 }
                 catch (Exception e) {
-                    log.warn("warn", e);
+                    // log.warn("warn", e);
                 }
             }
 

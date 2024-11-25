@@ -1,0 +1,3 @@
+ALTER TABLE sys_task
+    ADD COLUMN next_inst VARCHAR(36) DEFAULT NULL;
+

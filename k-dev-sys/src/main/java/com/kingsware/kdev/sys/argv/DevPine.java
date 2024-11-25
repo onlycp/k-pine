@@ -1,5 +1,7 @@
 package com.kingsware.kdev.sys.argv;
 
+import com.kingsware.kdev.core.cache.open.OpenAccount;
+import com.kingsware.kdev.core.cache.open.OpenAccountInfo;
 import com.kingsware.kdev.core.model.*;
 import com.kingsware.kdev.core.orm.kdb.DataSourceInfo;
 import com.kingsware.kdev.core.orm.kdb.FlowInfo;
@@ -25,29 +27,29 @@ public class DevPine {
             "tasks", "info", "powerLinks", "devPowerTrees", "extPluginInterfaces",
             "extPluginTrees", "sysLogicTemplates", "devFaasNodeTypes", "devFaasNodes", "extPluginInterfaces",
             "devRoles", "devRoleMenus", "devPageTemplates"};
-    /** 系统配置 **/
+    /** [x]系统配置 **/
     private List<SysConfig> configs;
-    /** 页面信息 **/
+    /** [x]页面信息 **/
     private List<DevPage> pages;
-    /** 数据源 **/
+    /** [x]数据源 **/
     private List<DataSourceInfo> sources;
-    /** 接口 **/
+    /** [x]接口 **/
     private List<SysApi> apis;
-    /** 函数 **/
+    /** [x]函数 **/
     private List<Functions> functions;
-    /** 字典项 **/
+    /** [x]字典项 **/
     private List<SysDictItem> dictItems;
-    /** 字典 **/
+    /** [x]字典 **/
     private List<SysDict> dict;
-    /** kdb流程 **/
+    /** [x]kdb流程 **/
     private List<FlowInfo> kdbFlows;
-    /** 青松流程信息 **/
+    /** [x]青松流程信息 **/
     private List<SysLogicFlow> logicFlows;
-    /** 菜单 **/
+    /** [x]菜单 **/
     private List<SysMenu> menus;
-    /** 定时任务 **/
+    /** [x]定时任务 **/
     private List<SysTask> tasks;
-    /** 应用信息 **/
+    /** [x]应用信息 **/
     private DevApplication info;
     /** 能力中间表 **/
     private List<DevPowerLink> powerLinks;
@@ -69,8 +71,12 @@ public class DevPine {
     private List<SysRoleMenu> devRoleMenus;
     /** 页面模板 **/
     private List<DevPageTemplate> devPageTemplates;
-    /** 国际化 **/
+    /** [x]国际化 **/
     private List<SysI18n> i18ns;
+    /** 开放账号 **/
+    private List<OpenAccount> openAccounts;
+    /** 开放账号权限 **/
+    private List<OpenAccountApi> openAccountApis;
     /**
      * 如果是应用导出的，变量名要带s，如果是对应表的一般没有。
      */

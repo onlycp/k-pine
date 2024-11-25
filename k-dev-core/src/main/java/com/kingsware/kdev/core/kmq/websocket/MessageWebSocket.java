@@ -208,9 +208,11 @@ public class MessageWebSocket {
             removeSessions.forEach(it -> {
                 try {
                     //logger.info("移除过时的session: {}", it.getSession().getId());
-                    sessionTokenSet.remove(it);
                     try {
-                        it.getSession().close();
+                        sessionTokenSet.remove(it);
+                        if (it.getSession().isOpen()) {
+                            it.getSession().close();
+                        }
                     }
                     catch (Exception e) {
 
@@ -243,11 +245,11 @@ public class MessageWebSocket {
 
               }
               catch (Exception e) {
-                  logger.error("移除过时的session失败", e);
+                  // logger.error("移除过时的session失败", e);
               }
 
           });
-          allSessionSet.keySet().removeAll(removeSessions);
+          removeSessions.forEach(allSessionSet.keySet()::remove);
         }
         catch (Exception ignored) {
 

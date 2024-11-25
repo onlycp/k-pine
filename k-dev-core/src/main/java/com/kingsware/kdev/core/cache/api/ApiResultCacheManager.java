@@ -43,6 +43,7 @@ public class ApiResultCacheManager {
         cache.put(key, value, timeoutMillis);
     }
 
+
     public void clearMyCache() {
         if (KClientContext.getContext() == null) {
             return;

@@ -233,6 +233,31 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
         for (DataSourceInfo infoL: list) {
             retList.add(toRet(infoL));
         }
+        // 按driverClass过滤
+        if (StringUtils.isNotEmpty(argv.getDriverClass())) {
+            retList.removeIf(ret -> !ret.getDriverClass().contains(argv.getDriverClass()));
+        }
+        // 按jdbc url过滤
+        if (StringUtils.isNotEmpty(argv.getJdbcUrl())) {
+            retList.removeIf(ret -> !ret.getJdbcUrl().contains(argv.getJdbcUrl()));
+        }
+        // 排序
+        retList.sort(Comparator.comparing(SysKdbDataSourceRet::getId));
+        return PageUtil.memoryPage(argv, retList, SysKdbDataSourceRet.class);
+    }
+
+    @Override
+    public PageDataRet<SysKdbDataSourceRet> queryByAppId(SysKdbDataSourceQueryArgv argv) {
+        DataSourceQueryArgv info = new DataSourceQueryArgv();
+        info.setSourceName(argv.getName());
+        // 查询所有数据
+        KdbApi api = (KdbApi)(DB.getDefault());
+        List<DataSourceInfo> list = api.queryDataSource(info);
+        // 转为ret类
+        List<SysKdbDataSourceRet> retList = new ArrayList<>();
+        for (DataSourceInfo infoL: list) {
+            retList.add(toRet(infoL));
+        }
         // 处理appId
         for(SysKdbDataSourceRet ret: retList){
             String appId = ret.getAppId();

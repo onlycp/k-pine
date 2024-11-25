@@ -1,0 +1,3 @@
+ALTER TABLE sys_menu
+    ADD COLUMN active_icon VARCHAR(255) DEFAULT NULL COMMENT '选中的图标';
+

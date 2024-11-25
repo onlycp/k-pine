@@ -45,6 +45,17 @@ public class SysKdbDataSourceController extends BaseController {
     }
 
     /**
+     *  通过APPID查询
+     * @return 分页
+     */
+    @ApiOperation(value = "查询 " ,notes = "查询")
+    @GetMapping("/queryByAppId")
+    @Dev
+    public BaseRet<PageDataRet<SysKdbDataSourceRet>> pageByAppId(SysKdbDataSourceQueryArgv argv) {
+        return BaseRet.success(sysKdbDataSourceService.queryByAppId(argv));
+    }
+
+    /**
      * 详细信息
      * @return 详细信息
      */

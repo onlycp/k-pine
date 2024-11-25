@@ -9,7 +9,7 @@ CREATE TABLE dev_faas_node_type(
                                    `when_modified` VARCHAR(255)    COMMENT '更新时间' ,
                                    `who_modified` VARCHAR(255)    COMMENT '更新人员',
                                    PRIMARY KEY (id)
-);
+)  COMMENT = '开发-FAAS节点类型';
 
 DROP TABLE IF EXISTS dev_faas_node;
 CREATE TABLE dev_faas_node(
@@ -27,4 +27,4 @@ CREATE TABLE dev_faas_node(
                               `when_modified` VARCHAR(255)    COMMENT '更新时间' ,
                               `who_modified` VARCHAR(255)    COMMENT '更新人员' ,
                               PRIMARY KEY (id)
-) ;
+)  COMMENT = '开发-FAAS节点';

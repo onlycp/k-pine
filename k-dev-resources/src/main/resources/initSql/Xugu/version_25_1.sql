@@ -1,0 +1,2 @@
+ALTER TABLE sys_task
+    ADD COLUMN task_argv TEXT DEFAULT NULL COMMENT '任务参数';

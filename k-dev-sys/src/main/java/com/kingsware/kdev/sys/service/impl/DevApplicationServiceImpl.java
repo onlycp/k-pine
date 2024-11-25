@@ -11,6 +11,7 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.cache.access.AccessManager;
 import com.kingsware.kdev.core.cache.kcache.KCacheManager;
 import com.kingsware.kdev.core.cache.license.LicenseManager;
+import com.kingsware.kdev.core.cache.open.OpenAccount;
 import com.kingsware.kdev.core.cache.page.PageCacheManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
@@ -199,11 +200,11 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                     devTeamApp.setTeamType(0);
                     devTeamApp.setTeamId(teamId);
                     DB.save(devTeamApp);
-                 }
+                }
             }
         }
         log.info("完成导入应用信息：{}", appCount);
-         List<DataSourceInfo> dataSourceInfos = DB.kdbApi().queryDataSource(new DataSourceQueryArgv());
+        List<DataSourceInfo> dataSourceInfos = DB.kdbApi().queryDataSource(new DataSourceQueryArgv());
 
         if(devPine.getSources() != null) {
             long sourceCount = 0;
@@ -220,7 +221,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                         catch (Exception e) {
                             log.info("数据源接口新增失败，将直接插入数据库：%s", fileSource.getSourceName());
                             DB.byName("kingDB").executeUpdateSql("insert into DATA_SOURCE(SOURCENAME, DRIVERCLASS,JDBCURL,USERNAME,PASSWORD, SOURCEID,JSON) VALUES (?,?,?,?,?,?,?)"
-                                           , fileSource.getSourceName(), fileSource.getDriverClass(), fileSource.getJdbcUrl(), fileSource.getUserName(), fileSource.getPassword(), fileSource.getSourceName(), fileSource.getJson());
+                                    , fileSource.getSourceName(), fileSource.getDriverClass(), fileSource.getJdbcUrl(), fileSource.getUserName(), fileSource.getPassword(), fileSource.getSourceName(), fileSource.getJson());
                         }
 
                     }
@@ -243,7 +244,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         log.info("完成导入接口信息：{}", apiCount);
         importMessageMap.put(I18n.t("DevApplicationServiceImpl.api", "接口信息"), apiCount);
         // 字典分类
-         long dictCount = DB.batchSaveOrUpdate(devPine.getDict(), SysDict.class);
+        long dictCount = DB.batchSaveOrUpdate(devPine.getDict(), SysDict.class);
         log.info("完成导入字典信息：{}", dictCount);
         importMessageMap.put(I18n.t("DevApplicationServiceImpl.dict",  "字典信息"), dictCount);
         // 字典项
@@ -257,6 +258,8 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         log.info("完成导入字典项信息：{}", dictItemCount);
         importMessageMap.put(I18n.t("DevApplicationServiceImpl.dictItem", "字典项信息") , dictItemCount);
         // 任务调度
+        // 处理java类任务, 如果已有，即移除他们
+        devPine.getTasks().removeIf(task -> task.getTaskType() == 1);
         long taskCount = DB.batchSaveOrUpdate(devPine.getTasks(), SysTask.class);
         log.info("完成导入任务调度信息：{}", taskCount);
         importMessageMap.put(I18n.t("DevApplicationServiceImpl.task", "任务调度信息") , taskCount);
@@ -268,6 +271,14 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         long i18nCount = DB.batchSaveOrUpdate(devPine.getI18ns(), SysI18n.class);
         log.info("完成导入国际化信息：{}", i18nCount);
         importMessageMap.put(I18n.t("DevApplicationServiceImpl.i18n", "国际化信息") , i18nCount);
+        // 开放账号
+        long openAccountCount = DB.batchSaveOrUpdate(devPine.getOpenAccounts(), OpenAccount.class);
+        log.info("完成导入开放账号：{}", openAccountCount);
+        importMessageMap.put(I18n.t("DevApplicationServiceImpl.openAccount", "开放账号") , i18nCount);
+        // 开放账号权限
+        long openAccountApiCount = DB.batchSaveOrUpdate(devPine.getOpenAccountApis(), OpenAccountApi.class);
+        log.info("完成导入开放权限：{}", openAccountApiCount);
+        importMessageMap.put(I18n.t("DevApplicationServiceImpl.openAccountApi", "开放权限") , i18nCount);
         // 菜单
         long menuCount = 0;
         if (LicenseManager.getInstance().isUniopsApp()) {
@@ -517,7 +528,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         Method[] methods = devPineClazz.getDeclaredMethods();
         for (Method method : methods) {
             if (method.getName().startsWith("get") && method.getParameterCount() == 0
-                && !isSystemImportVars(method.getName())) {
+                    && !isSystemImportVars(method.getName())) {
                 resultMethods.add(method);
             }
         }

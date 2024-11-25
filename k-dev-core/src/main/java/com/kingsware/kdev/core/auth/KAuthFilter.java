@@ -28,6 +28,7 @@ import com.kingsware.kdev.core.exception.LicenseException;
 import com.kingsware.kdev.core.exception.UnauthorizedException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.*;
+import com.kingsware.kdev.core.kflow.bean.KdbCustomResource;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
 import com.kingsware.kdev.core.kmq.KmqMessageCenter;
@@ -42,6 +43,7 @@ import com.kingsware.kdev.core.util.jWi.JWildcard;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
@@ -65,6 +67,7 @@ import java.util.regex.Pattern;
  * @date 2022/1/18 4:53 下午
  */
 @Component
+@Order(2)
 @Slf4j
 public class KAuthFilter implements Filter {
 
@@ -151,8 +154,6 @@ public class KAuthFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         String url = request.getRequestURI();
         try {
-
-
             initContext(request, response);
             if (containUrl(request, url) ) {
                 filterChain.doFilter(request, response);
@@ -404,7 +405,6 @@ public class KAuthFilter implements Filter {
                         if (saveLoginOn) {
                             // 保存操作日志
                             String responseBody = wrapperResponse == null ? "" : ServletUtil.getResponseBody(wrapperResponse);
-
                             this.saveOperateLog(url, request.getMethod(), responseCode, errorMessage, takeTime, JsonUtil.toJson(argvMap), responseBody, callType, api, apiDefine, request);
                         }
                         // 保存登录日志
@@ -642,11 +642,12 @@ public class KAuthFilter implements Filter {
         KdbFlowResult result = null;
         boolean disableCache = false;
         Object disableCacheObj = argvMap.get("_disableCache");
+        String md5Key = ServletUtil.getRequestUuid(request.getRequestURI(), request.getQueryString(), requestBody, request);
         if (disableCacheObj != null && (disableCacheObj.equals("true") || (disableCacheObj instanceof Boolean && ((Boolean) disableCacheObj == true)))) {
             disableCache = true;
         }
         if (api.getCacheEnable() != null && api.getCacheEnable() == 1 && disableCache == false) {
-            String md5Key = ServletUtil.getRequestUuid(request.getRequestURI(), request.getQueryString(), requestBody, request);
+
             ApiResultCache res = ApiResultCacheManager.getInstance().get(md5Key);
             DynamicTask dynamicTask = SpringContext.getBean(DynamicTask.class);
             SysTask virtualTask = dynamicTask.getVirtualTask(md5Key);
@@ -700,26 +701,38 @@ public class KAuthFilter implements Filter {
 
         }
         else {
+            long t1 = System.currentTimeMillis();
             result = KdbFlowExecutor.getInstance().execute(api.getApiFlowId(), api.getSubFlowIds(), argvMap, context, false, false);
+            long t2 = System.currentTimeMillis();
+            if (ApiResultCacheManager.getInstance().has(md5Key)) {
+                ApiResultCache cache = ApiResultCacheManager.getInstance().get(md5Key);
+                cache.setResult(result);
+            }
         }
 
         KdbRetFile kdbRetFile = null;
         KClientContext.getContext().setArgv(argvMap);
         KClientContext.getContext().setApiRspAdapter(api.getApiRspArgv());
+
         // 转为api格式
         switch (result.getType()) {
             case KFlowConstant.RESULT_JSON:
-                if (api.getApiFlowId().equalsIgnoreCase("a20fd82c126947f9ab3b599001df6126")) {
-                    log.info("用时：3");
-                }
                 if (StringUtils.isNotEmpty(api.getApiResultHandler()) && "user_json".equalsIgnoreCase(api.getApiResultHandler())) {
                     ServletUtil.responseJson(response, result.getData());
                 }
                 else {
+                    // 处理【请求fetch/pageById】48fd64ace3934b3b8fbbc06e9b16c784
+                    if ("48fd64ace3934b3b8fbbc06e9b16c784".equalsIgnoreCase(api.getApiFlowId())) {
+                        List<Map<String,Object>> pages = (List<Map<String,Object>>) result.getData();
+                        for (Map<String,Object> map : pages) {
+                            String pageJson = (String)map.get("pageJson");
+                            String appId = (String)map.get("appId");
+                            UiConfig uiConfig = SpringContext.getBean(UiConfig.class);
+                            String newPageJson = uiConfig.i18nTranslatePage(appId, pageJson);
+                            map.put("pageJson", newPageJson);
+                        }
+                    }
                     ServletUtil.responseJson(response, FlowUtils.toJsonResult(result.getData(), result.getLog(), result.getExceptionStack()));
-                }
-                if (api.getApiFlowId().equalsIgnoreCase("a20fd82c126947f9ab3b599001df6126")) {
-                    log.info("用时：4");
                 }
                 break;
             case KFlowConstant.RESULT_EXCEL:
@@ -728,6 +741,10 @@ public class KAuthFilter implements Filter {
             case KFlowConstant.RESULT_FILE:
                 kdbRetFile = (KdbRetFile) result.getData();
                 ServletUtil.responseFile(response, kdbRetFile.getFileName(), kdbRetFile.getData());
+                break;
+            case KFlowConstant.RESULT_CUSTOM:
+                KdbCustomResource kdbCustomResource = (KdbCustomResource) result.getData();
+                ServletUtil.responseCustom(response, kdbCustomResource);
                 break;
             case KFlowConstant.RESULT_HTML:
                 ServletUtil.responseHtml(response, result.getData().toString());

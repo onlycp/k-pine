@@ -1,12 +1,11 @@
+CREATE TABLE SYS_INSTANCE (
+                              ID VARCHAR2(32 CHAR) NOT NULL PRIMARY KEY,
+                              HOST_NAME VARCHAR2(32 CHAR),
+                              PORT NUMBER,
+                              HEART_BEAT_TIME VARCHAR2(20 CHAR),
+                              REG_TIME VARCHAR2(20 CHAR)
+);
 
-CREATE TABLE sys_instance(
-                             id VARCHAR(32) NOT NULL PRIMARY KEY,
-                             host_name VARCHAR(32)  ,
-                             port INT  ,
-                             heart_beat_time VARCHAR(20)   ,
-                             reg_time VARCHAR(20)
-
-) ;
 
 alter table sys_role_menu modify  id varchar(36);
 alter table sys_role_menu modify  sys_menu_id varchar(36) ;
