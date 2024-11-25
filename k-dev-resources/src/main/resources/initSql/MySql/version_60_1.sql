@@ -1,4 +1,3 @@
-ALTER TABLE `open_account` ADD COLUMN `app_id` varchar(36) COMMENT '应用id' ;
 ALTER TABLE `open_api_log` ADD COLUMN `app_id` varchar(36) COMMENT '应用id' ;
 
 CREATE TABLE `dev_model_latest` (
