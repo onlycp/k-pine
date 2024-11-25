@@ -21,5 +21,7 @@ public class SysKdbDataSourceQueryArgv extends BasePageArgv {
     private String driverClass;
     /** jdbc url **/
     private String jdbcUrl;
+    /** 是否依赖 **/
+    private Integer type;
 
 }

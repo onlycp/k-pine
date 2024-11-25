@@ -1,9 +1,7 @@
-[
-  {
-    "sourceName":"MySql",
-    "driverClass":"org.h2.Driver",
-    "jdbcUrl":"jdbc:h2:~/kpine7;MODE=MYSQL;DATABASE_TO_UPPER=false",
-    "userName":"root",
-    "password":"123456"
-  }
-]
+//[{
+//  "sourceName":"MySql",
+//  "driverClass":"com.xugu.cloudjdbc.Driver",
+//  "jdbcUrl":"jdbc:xugu://192.168.107.105/kpine",
+//  "userName":"SYSDBA",
+//  "password":"SYSDBA"
+//}]

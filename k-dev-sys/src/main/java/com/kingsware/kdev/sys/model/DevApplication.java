@@ -54,4 +54,13 @@ public class DevApplication extends BaseManageModel {
     /** 应用发布类型 */
     private Integer appPublicType;
 
+    /**
+     * 依赖数据源
+     */
+    private String dependDatasources;
+    /**
+     * 依赖应用
+     */
+    private String dependApps;
+
 }

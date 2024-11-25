@@ -13,13 +13,12 @@ import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.DataSourceInfo;
 import com.kingsware.kdev.core.orm.kdb.DataSourceQueryArgv;
 import com.kingsware.kdev.core.orm.kdb.KdbApi;
-import com.kingsware.kdev.core.util.JsonUtil;
-import com.kingsware.kdev.core.util.MapUtil;
-import com.kingsware.kdev.core.util.PageUtil;
-import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.sys.argv.DataBaseInstanceArgv;
+import com.kingsware.kdev.sys.argv.DataSourceTakeArgv;
 import com.kingsware.kdev.sys.argv.SysKdbDataSourceArgv;
 import com.kingsware.kdev.sys.argv.SysKdbDataSourceQueryArgv;
+import com.kingsware.kdev.sys.model.DevApplication;
 import com.kingsware.kdev.sys.ret.SysKdbDataSourceRet;
 import com.kingsware.kdev.sys.service.SysKdbDataSourceService;
 import org.springframework.stereotype.Service;
@@ -49,7 +48,12 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
         List<DataSourceInfo> list = api.queryDataSource(argv);
         // 转换成ret对象
         if(list != null && !list.isEmpty()){
-            return toRet(list.get(0));
+            for(DataSourceInfo dataSourceInfo : list){
+                if (dataSourceInfo.getSourceName().equals(id)) {
+                    return toRet(dataSourceInfo);
+                }
+            }
+
         }
         return null;
     }
@@ -185,6 +189,11 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
                     json2Map.put("appId", argv.getAppId());
                     argvJson = JsonUtil.toJson(json2Map);
                 }
+                else {
+                    Map<String, Object> json2Map = JsonUtil.toBean(argvJson, Map.class);
+                    json2Map.remove("appId");
+                    argvJson = JsonUtil.toJson(json2Map);
+                }
                 info.setJson(argvJson);
             }
             else {
@@ -281,12 +290,16 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
             retList.removeIf(ret -> !ret.getJdbcUrl().contains(argv.getJdbcUrl()));
         }
         // 按应用id过滤
-        if (StringUtils.isNotEmpty(argv.getAppId())) {
+        if (StringUtils.isNotEmpty(argv.getAppId()) && argv.getType() == 1) {
             // 应用数据源 appId = #{appId}
             retList.removeIf(ret -> !argv.getAppId().equals(ret.getAppId()));
         } else {
+            DevApplication devApplication =  DB.findById(DevApplication.class, argv.getAppId());
+            String depends = devApplication.getDependDatasources() == null ? "" : devApplication.getDependDatasources();
+            String[] arr = depends.split(",");
+            Set<String> set = new HashSet<>(Arrays.asList(arr));
             // 公共数据源 appId is null or appId = ''
-            retList.removeIf(ret -> StringUtils.isNotEmpty(ret.getAppId()));
+            retList.removeIf(ret -> !set.contains(ret.getId()));
         }
         // 排序
         retList.sort(Comparator.comparing(SysKdbDataSourceRet::getId));
@@ -324,6 +337,22 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
     @Override
     public void refreshBaseFlow() {
         DB.kdbApi().refreshBaseFlow();
+    }
+
+    @Override
+    public void take(DataSourceTakeArgv argv) {
+        SysKdbDataSourceRet data = get(argv.getSourceName());
+        SysKdbDataSourceArgv editArgv = BeanUtils.copyObject(data, SysKdbDataSourceArgv.class);
+        editArgv.setAppId(argv.getAppId());
+        this.edit(editArgv);
+    }
+
+    @Override
+    public void unTake(DataSourceTakeArgv argv) {
+        SysKdbDataSourceRet data = get(argv.getSourceName());
+        SysKdbDataSourceArgv editArgv = BeanUtils.copyObject(data, SysKdbDataSourceArgv.class);
+        editArgv.setAppId(null);
+        this.edit(editArgv);
     }
 
 }

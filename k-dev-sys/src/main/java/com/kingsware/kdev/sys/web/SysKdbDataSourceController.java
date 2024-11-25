@@ -7,6 +7,7 @@ import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
+import com.kingsware.kdev.sys.argv.DataSourceTakeArgv;
 import com.kingsware.kdev.sys.argv.SysKdbDataSourceArgv;
 import com.kingsware.kdev.sys.argv.SysKdbDataSourceQueryArgv;
 import com.kingsware.kdev.sys.ret.SysKdbDataSourceRet;
@@ -77,6 +78,34 @@ public class SysKdbDataSourceController extends BaseController {
         sysKdbDataSourceService.add(argv);
         return BaseRet.success();
     }
+
+
+    /**
+     *  新增
+     * @return 提示
+     */
+    @ApiOperation(value = "认领 " ,notes = "认领")
+    @PostMapping("/take")
+    @Dev
+    public BaseRet<?> takeSource(@RequestBody DataSourceTakeArgv argv) {
+        sysKdbDataSourceService.take(argv);
+        return BaseRet.success();
+    }
+
+
+    /**
+     *  新增
+     * @return 提示
+     */
+    @ApiOperation(value = "丢弃 " ,notes = "丢弃")
+    @PostMapping("/unTake")
+    @Dev
+    public BaseRet<?> unTake(@RequestBody DataSourceTakeArgv argv) {
+        sysKdbDataSourceService.unTake(argv);
+        return BaseRet.success();
+    }
+
+
 
 
     /**
