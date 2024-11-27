@@ -351,9 +351,6 @@ public class UiConfig extends WebMvcConfigurationSupport {
                 if (match.containsKey(key)) {
                     if (match.get(key) instanceof String) {
                         String text = match.get(key).toString();
-                        if(text.contains("向下")) {
-                            System.currentTimeMillis();
-                        }
                         if (StringUtils.containsChinese(text)) {
                             if (key.equals("tpl") || key.equalsIgnoreCase("description") || key.equalsIgnoreCase("msg") ) {
                                 org.w3c.dom.Document doc = StringUtils.parseXml(text);
@@ -371,7 +368,6 @@ public class UiConfig extends WebMvcConfigurationSupport {
                             }
                             else {
                                 String translatedText = I18n.parseScript(appId, text);
-                                translatedText = translatedText.replace("\\ ${","\\${");
                                 if (!translatedText.equals(text)) {
                                     match.put(key, StringUtils.capitalizeFirstLetter(translatedText));
                                 }

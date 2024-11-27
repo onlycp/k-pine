@@ -5,6 +5,8 @@ import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.model.SysI18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.JsonUtil;
+import com.kingsware.kdev.core.util.MD5Utils;
+import com.kingsware.kdev.core.util.RandomUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.exec.util.MapUtils;
@@ -47,6 +49,22 @@ public class I18n {
 
     }
 
+    public static void updateI18Key(String oldKey, String newKey, String appId) {
+        if (appI18nData.containsKey(appId)) {
+            AppI18n appI18n = appI18nData.get(appId);
+            if( appI18n.getI18nData().containsKey(oldKey) ) {
+                Map<String, String> map = appI18n.getI18nData().get(oldKey);
+                appI18n.getI18nData().put(newKey, map);
+                appI18n.getI18nData().remove(oldKey);
+            }
+        }
+    }
+
+    public static void remove(String appId, String key) {
+        if (appI18nData.containsKey(appId)) {
+            appI18nData.get(appId).getI18nData().remove(key);
+        }
+    }
 
 
 
@@ -291,14 +309,28 @@ public class I18n {
         Matcher matcher = pattern.matcher(script);
         if (!matcher.find()) {
             // 如果没有找到 t() 调用，直接将 script 作为 key 进行翻译
-            if (!I18n.hasKey(appId, script)) {
-                I18n.create(appId,script, script);
+            String key = script;
+            if (script.length() > 20) {
+                key = MD5Utils.md5(key);
+                if(I18n.hasKey(appId, script) && !I18n.hasKey(appId, key)) {
+                    DB.executeUpdateSql("update sys_i18n set i18n_key = ?  where i18n_key=? and app_id=?", key,  script, appId);
+                    I18n.updateI18Key(script, key, appId);
+
+                }
+                else if(I18n.hasKey(appId, script) && I18n.hasKey(appId, key)) {
+                    DB.executeUpdateSql("delete from  sys_i18n set i18n_key  where i18n_key=? and app_id=?", script, appId);
+                    I18n.updateI18Key(script, key, appId);
+
+                }
+
             }
-            String s =  I18n.t(appId, script, script);
-            //log.info("i18n: {}", s );
-            if (s.equals("公共应用")) {
-                System.currentTimeMillis();
+            if (!I18n.hasKey(appId, key)) {
+                I18n.create(appId,key, script);
             }
+            log.info("1 key:{}", script);
+            String s =  I18n.t(appId, key, script);
+            s = s.replace("\\ ${","\\${");
+            s = s.replace("$ {","${");
             return s;
         }
 
@@ -309,6 +341,7 @@ public class I18n {
 
             // 查找国际化翻译
             String translatedValue = I18n.t(appId, key, defaultValue);
+            log.info("2 key:{}, value:{}", key, translatedValue);
 
             // 将匹配的 t('key', 'default') 或 t("key", "default") 替换为翻译结果
             matcher.appendReplacement(result, translatedValue);
