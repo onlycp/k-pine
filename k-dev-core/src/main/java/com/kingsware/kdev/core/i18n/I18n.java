@@ -327,7 +327,6 @@ public class I18n {
             if (!I18n.hasKey(appId, key)) {
                 I18n.create(appId,key, script);
             }
-            log.info("1 key:{}", script);
             String s =  I18n.t(appId, key, script);
             s = s.replace("\\ ${","\\${");
             s = s.replace("$ {","${");
@@ -341,7 +340,6 @@ public class I18n {
 
             // 查找国际化翻译
             String translatedValue = I18n.t(appId, key, defaultValue);
-            log.info("2 key:{}, value:{}", key, translatedValue);
 
             // 将匹配的 t('key', 'default') 或 t("key", "default") 替换为翻译结果
             matcher.appendReplacement(result, translatedValue);
