@@ -27,7 +27,11 @@ public class MasterClusterUrlFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         // 如果不是主节点，则转发到/api/v1/kubbo/cluster页面
         if (!InstanceManager.getInstance().isActiveCluster() && !request.getRequestURI().contains("/api/v1/kubbo/cluster")) {
-            response.sendRedirect("/api/v1/kubbo/cluster");
+            String contextPath = request.getContextPath();
+            if(!contextPath.endsWith("/")) {
+                contextPath += "/";
+            }
+            response.sendRedirect(contextPath + "api/v1/kubbo/cluster");
             return;
         }
         // 调用下一个过滤器

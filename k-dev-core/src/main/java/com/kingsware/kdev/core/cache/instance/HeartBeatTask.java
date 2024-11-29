@@ -28,7 +28,7 @@ public class HeartBeatTask implements KTask, KRunner {
 
     @Override
     public void runNow() throws Exception {
-        DB.update("update sys_instance set  cluster_no=1 where cluster_no is null");
+        DB.executeUpdateSql("update sys_instance set  cluster_no=1 where cluster_no is null");
         SysInstance masterInstance = InstanceManager.getInstance().masterInstance();
         if (masterInstance.getId().equalsIgnoreCase("virtual") && InstanceManager.getInstance().isActiveCluster()) {
             HostInfo hostInfo = SystemUtil.getHost();
