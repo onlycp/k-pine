@@ -88,4 +88,18 @@ public interface DevApplicationService extends BaseService {
      */
     void backupPine(String pineBody, String fileName);
 
+
+    /**
+     *
+     * @param id
+     * @param message
+     */
+    void gitCommit(String id, String message);
+
+    /**
+     * 删除
+     * @param id
+     * @param message
+     */
+    void gitRemove(String id, String message);
 }

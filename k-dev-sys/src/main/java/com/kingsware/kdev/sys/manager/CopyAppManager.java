@@ -28,8 +28,10 @@ import com.kingsware.kdev.sys.bean.CopyProcessData;
 import com.kingsware.kdev.sys.bean.ExportData;
 import com.kingsware.kdev.sys.bean.ExportRootData;
 import com.kingsware.kdev.sys.model.*;
+import com.kingsware.kdev.sys.service.DevApplicationService;
 import com.kingsware.kdev.sys.service.DevPageService;
 import com.kingsware.kdev.sys.service.SysApiService;
+import com.kingsware.kdev.sys.service.SysKdbFlowService;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONArray;
 
@@ -589,6 +591,29 @@ public class CopyAppManager {
                     log.info("数据拷贝---应用管理：{}, 进度:{}/{}", devApplication.getName(), i + 1, total);
 
                 }
+            }
+            // 处理git
+            try {
+                SysApiService sysApiService = SpringContext.getBean(SysApiService.class);
+                DevPageService devPageService = SpringContext.getBean(DevPageService.class);
+                SysKdbFlowService sysKdbFlowService = SpringContext.getBean(SysKdbFlowService.class);
+                DevApplicationService devApplicationService = SpringContext.getBean(DevApplicationService.class);
+
+                for (String pageId:  copyProcessData.getPageIds()) {
+                    devPageService.gitCommit(pageId, "拷贝页面");
+                }
+                for (String apiId:  copyProcessData.getApiIds()) {
+                    sysApiService.gitCommit(apiId, "拷贝接口");
+                }
+                for (String faasLogicId: copyProcessData.getFaasFlowIds()) {
+                    sysKdbFlowService.gitCommit(faasLogicId);
+                }
+                for (String appId: copyProcessData.getAppIds()) {
+                    devApplicationService.gitCommit(appId, "拷贝应用");
+                }
+
+            } catch (Exception e) {
+                log.warn("回滚失败:{}", e.getMessage());
             }
         } catch (Exception e) {
 

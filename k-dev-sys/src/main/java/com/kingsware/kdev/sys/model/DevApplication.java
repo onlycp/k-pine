@@ -62,5 +62,9 @@ public class DevApplication extends BaseManageModel {
      * 依赖应用
      */
     private String dependApps;
+    /**
+     * 命名空间
+     */
+    private String appNamespace;
 
 }

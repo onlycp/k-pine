@@ -755,5 +755,25 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
 
     }
 
+    @Override
+    public void gitCommit(String id, String message) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", id);
+        params.put("message", message);
+        KdbFlowResult result = FaasInvoke.callFlow("e506a9def73344a0b468eda8fc6dc3a9", params);
+        if (result.getData() instanceof ErrorResult) {
+            throw BusinessException.serviceThrow(result.getExceptionStack());
+        }
+    }
 
+    @Override
+    public void gitRemove(String id, String message) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", id);
+        params.put("message", message);
+        KdbFlowResult result = FaasInvoke.callFlow("b46a4875a5594c82a87d440ba01416d6", params);
+        if (result.getData() instanceof ErrorResult) {
+            throw BusinessException.serviceThrow(result.getExceptionStack());
+        }
+    }
 }

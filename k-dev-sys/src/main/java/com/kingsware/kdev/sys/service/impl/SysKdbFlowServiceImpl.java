@@ -300,11 +300,12 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         }
 
         // 保存历史记录
-        this.gitcommitDefine(argv.getId());
+        this.gitCommit(argv.getId());
 
     }
 
-    private void gitcommitDefine(String flowId) {
+    @Override
+    public void gitCommit(String flowId) {
         Map<String, Object> params = new HashMap<>();
         params.put("flowId", flowId);
         KdbFlowResult result = FaasInvoke.callFlow("f494d882a9554d1cbd9fb72559f6b9db", params);
@@ -420,7 +421,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         DB.save(logicFlow);
 
         // 保存历史记录
-        this.gitcommitDefine(flowId);
+        this.gitCommit(flowId);
 
         if (StringUtils.isNotEmpty(argv.getApiUrl()) && StringUtils.isNotEmpty(argv.getApiMethod())) {
             SysApiArgv apiArgv = new SysApiArgv();
