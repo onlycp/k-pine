@@ -6,6 +6,8 @@ import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.sys.initialize.KAppInitialize;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * @author chenp
  * @date 2023/3/22
@@ -13,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class KAppAutoImportTask implements KTask, KRunner {
 
-    private static boolean upgrading = false;
+    private static final AtomicBoolean upgrading = new AtomicBoolean(false);
     /**
      * 马上运行
      */
@@ -27,20 +29,21 @@ public class KAppAutoImportTask implements KTask, KRunner {
      **/
     @Override
     public void execute() throws Exception {
+        if (upgrading.get()) {
+            log.info("当前正在升级，将跳过本次升级");
+            return;
+        }
         try {
-            if (upgrading) {
-                //log.info("当前正在升级，将跳过本次升级");
-                return;
-            }
-            upgrading = true;
+            upgrading.set(true);
             KAppInitialize kAppInitialize = SpringContext.getBean(KAppInitialize.class);
             kAppInitialize.execute();
         }
-        catch (Exception ignored) {
+        catch (Exception e) {
+            log.info("系统自动安装Pine包任务执行失败", e);
 
         }
         finally {
-            upgrading = false;
+            upgrading.set(false);
         }
 
     }
