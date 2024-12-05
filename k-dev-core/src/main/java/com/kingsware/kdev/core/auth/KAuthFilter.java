@@ -96,7 +96,7 @@ public class KAuthFilter implements Filter {
     @Value("${app.mode.dev:false}")
     private boolean modeDev;
 
-    @Value("#{'${app.ignore.urls:websocket;/eiac;/sys-tool-box}'.split(';')}")
+    @Value("#{'${app.ignore.urls:websocket;/eiac;/sys-tool-box;/kubbo/logs}'.split(';')}")
     private List<String> ignoreUrls;
 
     @Value("#{'${app.cache.urls:/hellworld}'.split(';')}")

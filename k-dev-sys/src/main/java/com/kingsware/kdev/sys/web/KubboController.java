@@ -5,6 +5,7 @@ import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.constants.Version;
 import com.kingsware.kdev.core.jsonschema.BaseSchemaDefine;
+import com.kingsware.kdev.core.log.BoundedQueueAppender;
 import com.kingsware.kdev.sys.argv.ExecuteFaasArgv;
 import com.kingsware.kdev.sys.ret.ApiRequestRet;
 import com.kingsware.kdev.sys.ret.AppInfoRet;
@@ -13,11 +14,18 @@ import com.kingsware.kdev.sys.service.KubboService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.catalina.valves.HealthCheckValve;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import javax.annotation.Resource;
+import java.io.OutputStream;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.BlockingDeque;
+
 
 /**
  * @author chenp
@@ -92,6 +100,26 @@ public class KubboController extends BaseController {
         kubboService.cluster();
     }
 
+    @GetMapping("/logs")
+    @ApiIgnore
+    public ResponseEntity<StreamingResponseBody> handleLog() {
+        BlockingDeque<String> logQueue = BoundedQueueAppender.getLogQueue();
+        StreamingResponseBody stream = (OutputStream outputStream) -> {
+//            while (true) {
+//                try {
+//                    // 阻塞等待新日志
+//                    String log = logQueue.takeFirst();
+//                    outputStream.write((log + "\n").getBytes());
+//                    outputStream.flush();
+//                } catch (InterruptedException e) {
+//                    Thread.currentThread().interrupt();
+//                    break;
+//                }
+//            }
+        };
+
+        return new ResponseEntity<>(stream, HttpStatus.OK);
+    }
 
 
 
