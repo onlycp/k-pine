@@ -12,6 +12,7 @@ import com.kingsware.kdev.core.orm.kdb.KdbApi;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.PageUtil;
 import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.sys.argv.DataBaseInstanceArgv;
 import com.kingsware.kdev.sys.argv.SysKdbDataSourceArgv;
 import com.kingsware.kdev.sys.argv.SysKdbDataSourceQueryArgv;
@@ -214,8 +215,9 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
             retList.add(toRet(infoL, argv.isCrud()));
         }
         // 按应用id过滤
-        if (StringUtils.isNotEmpty(argv.getAppId())) {
-            retList.removeIf(ret -> !argv.getAppId().equals(ret.getAppId()) && StringUtils.isNotEmpty(ret.getAppId()));
+        String appId = ServletUtil.request().getHeader("_request_app");
+        if (StringUtils.isNotEmpty(appId)) {
+            retList.removeIf(ret -> !appId.equals(ret.getAppId()) && StringUtils.isNotEmpty(ret.getAppId()));
         } else {
             retList.removeIf(ret -> StringUtils.isNotEmpty(ret.getAppId()));
         }
