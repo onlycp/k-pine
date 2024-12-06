@@ -76,13 +76,20 @@ public class FileUtils {
      */
     public static String getMD5(InputStream fileInputStream) {
         try {
+            // 包装成 BufferedInputStream
+            if (!fileInputStream.markSupported()) {
+                fileInputStream = new BufferedInputStream(fileInputStream);
+            }
+            fileInputStream.mark(Integer.MAX_VALUE); // 标记当前位置
             MessageDigest MD5 = MessageDigest.getInstance("MD5");
             byte[] buffer = new byte[8192];
             int length;
             while ((length = fileInputStream.read(buffer)) != -1) {
                 MD5.update(buffer, 0, length);
             }
-            return toHexString(MD5.digest());
+            String md5 = toHexString(MD5.digest());
+            fileInputStream.reset(); // 重置流到标记位置
+            return md5;
         } catch (Exception e) {
             return null;
         }

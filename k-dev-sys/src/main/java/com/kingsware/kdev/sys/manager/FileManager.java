@@ -161,14 +161,16 @@ public class FileManager {
                 if (!withoutChecking && isCloseReplaceMode) {
                     saveFileName = realName;
                 }
+                // 文件md5码
+                sysFile.setFileMd5(FileUtils.getMD5(inputStream));
+
                 KdbRet<String> kdbRet =  DB.kdbApi().uploadFile(inputStream, saveFileName, filePath);
                 if (!"成功".equals(kdbRet.getMessage())) {
                     throw BusinessException.serviceThrow(I18n.t("FileManager.saveToFaasFail", "文件存储失败,错误信息:{0}", kdbRet.getMessage()));
                 }
                 FaasUploadRet faasUploadRet = JsonUtil.toBean(kdbRet.getResponseBody(), FaasUploadRet.class);
                 sysFile.setFilePath(fileFrom + "/" + faasUploadRet.getFileName());
-                // 文件md5码
-                sysFile.setFileMd5(FileUtils.getMD5(inputStream));
+
 
             }
             else {
