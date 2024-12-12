@@ -41,6 +41,7 @@ public class LogSourceManager {
         return SingletonHolder.INSTANCE;
     }
 
+
     /**
      * 获取日志
      *
@@ -49,7 +50,7 @@ public class LogSourceManager {
     public void registerLogSource(LogTailArgv argv, PipedOutputStream out) {
         // 由于前端不支持主动断开，在这里，如果存在，则移除相关的流程
 
-        StreamingLog streamingLog = new StreamingLog(out, argv.getClientId());
+        StreamingLog streamingLog = new StreamingLog(out, argv.getClientId(), argv.getKeyword());
         String id = argv.getApp() + "_" + argv.getLevel();
         LogSourceEntry LogSourceEntry = logSources.get(id);
        if (LogSourceEntry == null) {
@@ -60,6 +61,15 @@ public class LogSourceManager {
                        localFilePath = "logs/error.log";
                    }
                    LogSource logSource = new LocalFileLogSource(argv.getApp(), argv.getLevel(), localFilePath);
+                   LogSourceEntry = new LogSourceEntry(logSource);
+                   logSources.put(id, LogSourceEntry);
+               }
+               else if ("faas".equalsIgnoreCase(argv.getApp())) {
+                   String localFilePath = "logs/info/kfaas_info.log";
+                   if ("error".equalsIgnoreCase(argv.getLevel())) {
+                       localFilePath = "logs/error/kfaas_error.log";
+                   }
+                   LogSource logSource = new FaasFileLogSource(argv.getApp(), argv.getLevel(), localFilePath);
                    LogSourceEntry = new LogSourceEntry(logSource);
                    logSources.put(id, LogSourceEntry);
                }

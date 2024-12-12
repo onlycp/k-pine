@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.log;
 
+import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.StreamingLog;
 import com.kingsware.kdev.sys.ret.LogTailRet;
 import lombok.Getter;
@@ -7,6 +8,7 @@ import lombok.Getter;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 
@@ -20,6 +22,7 @@ public abstract class LogSource {
     // 日志级别
     protected String level;
     // 日志偏移量，用于记录读取日志的位置
+    protected AtomicBoolean isRunning = new AtomicBoolean(false);
     @Getter
     protected AtomicLong offset = new AtomicLong(0);
     // 存储读取的日志行
@@ -27,6 +30,7 @@ public abstract class LogSource {
     protected LinkedBlockingQueue<LogLine> lines = new LinkedBlockingQueue<>();
     @Getter
     protected Set<StreamingLog> streamingLogs = new HashSet<>();
+
 
     /**
      * 构造方法，初始化日志源
@@ -69,7 +73,18 @@ public abstract class LogSource {
         Set<StreamingLog> toRemove = new HashSet<>();
         for (StreamingLog log : streamingLogs) {
             try {
-                log.getPipedOutputStream().write((message + "\n").getBytes());
+                String myMessage = message;
+                if (!message.endsWith("\n")) {
+                    myMessage += "\n";
+                }
+                if (StringUtils.isNotEmpty(log.getKeyword())) {
+                    if (myMessage.contains(log.getKeyword())) {
+                        log.getPipedOutputStream().write((myMessage).getBytes());
+                    }
+                }
+                else {
+                    log.getPipedOutputStream().write((myMessage).getBytes());
+                }
             }
             catch (Exception e) {
                 toRemove.add(log);
@@ -93,6 +108,10 @@ public abstract class LogSource {
      * 不同的日志源可能有不同的跟踪方式，因此这个方法需要由子类实现
      */
     public abstract void tail();
+
+    public void close() {
+        isRunning.set(false);
+    }
 
     /**
      * 从指定偏移量开始获取日志行

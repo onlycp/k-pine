@@ -32,4 +32,9 @@ public class StreamingLog {
      * This allows logs from different clients to be distinguished and processed separately.
      */
     private String clientId;
+
+    /**
+     * 查询关键字
+     */
+    private String keyword;
 }

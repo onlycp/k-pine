@@ -32,6 +32,7 @@ public class LocalFileLogSource extends LogSource {
 
     @Override
     public void tail() {
+        this.isRunning.set(true);
         // 创建一个监听器
         TailerListener listener = new TailerListenerAdapter() {
             @Override
