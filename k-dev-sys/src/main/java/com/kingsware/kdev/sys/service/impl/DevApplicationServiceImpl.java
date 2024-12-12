@@ -239,7 +239,13 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         importMessageMap.put(I18n.t("DevApplicationServiceImpl.dict",  "字典信息"), dictCount);
         // 字典项
         // 先删除已有字典项
+        List<SysDictItem> myItems = DB.findList(SysDictItem.class, "select * from sys_dict_item");
+        Map<String, SysDictItem> dictItemMap = new HashMap<>();
+        for (SysDictItem item : myItems) {
+            dictItemMap.put(String.format("%s-%s", item.getCode(), item.getValue()), item);
+        }
         if (devPine.getDictItems() != null && !devPine.getDictItems().isEmpty()) {
+            devPine.getDictItems().removeIf(item -> dictItemMap.containsKey(String.format("%s-%s", item.getCode(), item.getValue())));
             for (SysDictItem item : devPine.getDictItems()) {
                 DB.delete(item);
             }
