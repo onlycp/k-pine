@@ -318,7 +318,7 @@ public class I18n {
 
                 }
                 else if(I18n.hasKey(appId, script) && I18n.hasKey(appId, key)) {
-                    DB.executeUpdateSql("delete from  sys_i18n set i18n_key  where i18n_key=? and app_id=?", script, appId);
+                    DB.executeUpdateSql("delete from  sys_i18n  where i18n_key=? and app_id=?", script, appId);
                     I18n.updateI18Key(script, key, appId);
 
                 }
