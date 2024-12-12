@@ -20,11 +20,15 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.CacheControl;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StreamUtils;
+import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.w3c.dom.Node;
@@ -87,6 +91,22 @@ public class UiConfig extends WebMvcConfigurationSupport {
         }
         super.addResourceHandlers(registry);
 
+    }
+
+    protected AsyncTaskExecutor getAsyncExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(10);
+        executor.setMaxPoolSize(50);
+        executor.setQueueCapacity(1000);
+        executor.setThreadNamePrefix("mvc-async-");
+        executor.initialize();
+        return executor;
+    }
+    @Override
+    protected void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+        configurer.setTaskExecutor(getAsyncExecutor());
+        configurer.setDefaultTimeout(0);
+        super.configureAsyncSupport(configurer);
     }
 
     /**
