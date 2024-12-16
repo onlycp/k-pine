@@ -96,7 +96,7 @@ public class FaasFileLogSource extends LogSource {
 
                 }
                 finally {
-                    ThreadUtils.sleep(1000);
+                    ThreadUtils.sleep(500);
                 }
             }
 

@@ -114,7 +114,7 @@ public class KubboController extends BaseController {
     @ApiIgnore
     @SneakyThrows
     public ResponseEntity<StreamingResponseBody> tailLog(LogTailArgv argv) {
-        if (StringUtils.isEmpty(argv.getApp())) {
+        if (StringUtils.isEmpty(argv.getApp()) || StringUtils.isEmpty(argv.getClientId())) {
             return ResponseEntity.ok().body(null);
         }
         // 管道实现线程间通信

@@ -22,7 +22,7 @@ public class LogSourceManager {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     // 定义心跳超时时间（单位：秒）
-    private static final long HEARTBEAT_TIMEOUT = 10;
+    private static final long HEARTBEAT_TIMEOUT = 1;
 
     /**
      * 私有构造方法，防止直接实例化
@@ -69,6 +69,9 @@ public class LogSourceManager {
                    if ("error".equalsIgnoreCase(argv.getLevel())) {
                        localFilePath = "logs/error/kfaas_error.log";
                    }
+                   else if ("KLog".equalsIgnoreCase(argv.getLevel())) {
+                       localFilePath = "logs/klog/info/klog_info.log";
+                   }
                    LogSource logSource = new FaasFileLogSource(argv.getApp(), argv.getLevel(), localFilePath);
                    LogSourceEntry = new LogSourceEntry(logSource);
                    logSources.put(id, LogSourceEntry);
@@ -102,7 +105,7 @@ public class LogSourceManager {
      * 定期检测并移除超时的 LogSource
      */
     private void removeInactiveLogSources() {
-        long currentTime = System.currentTimeMillis();
+//        long currentTime = System.currentTimeMillis();
         log.info("log-" + DateUtils.getNow());
 //        logSources.forEach((id, entry) -> {
 //            if (currentTime - entry.getLastHeartbeat() > HEARTBEAT_TIMEOUT * 1000) {

@@ -54,8 +54,9 @@ public abstract class LogSource {
         for (StreamingLog log : streamingLogs) {
             if (log.getClientId().equals(clientId)) {
                 try {
-                    toRemove.add(log);
                     log.getPipedOutputStream().close();
+                    toRemove.add(log);
+
                 }
                 catch (Exception e) {
 
@@ -71,6 +72,7 @@ public abstract class LogSource {
      */
     public void publish(String message) {
         Set<StreamingLog> toRemove = new HashSet<>();
+        System.out.println("publish: " + message);
         for (StreamingLog log : streamingLogs) {
             try {
                 String myMessage = message;
@@ -113,35 +115,5 @@ public abstract class LogSource {
         isRunning.set(false);
     }
 
-    /**
-     * 从指定偏移量开始获取日志行
-     *
-     * @param offset 起始偏移量
-     * @param limit 最大返回数量
-     * @return 日志行列表，从指定偏移量开始，最多包含limit个元素
-     */
-    public LogTailRet take(Long offset, Long limit, String query) {
-        LogTailRet ret = new LogTailRet();
-        ret.setBegin(offset);
-        if (offset == null) {
-            offset = this.offset.get();
-        }
-        if (limit == null) {
-            limit = 100L;
-        }
-        for (LogLine it : lines) {
-            // 检查当前日志行的偏移量是否达到起始偏移量
-            if (it.getOffset() >= offset && (query == null || it.getLineText().contains(query))) {
-                ret.getLines().add(it.getLineText());
-                ret.setOffset(it.getOffset());
-            }
-            // 如果结果集已达到最大限制，则停止添加
-            if (ret.getLines().size() >= limit) {
-                ret.setOffset(it.getOffset());
-                break; // 满足条件时退出循环
-            }
-        }
-        return ret;
-    }
 
 }
