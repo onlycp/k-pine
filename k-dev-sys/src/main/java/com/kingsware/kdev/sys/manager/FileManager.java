@@ -60,7 +60,7 @@ public class FileManager {
             }
             String basePath = SpringContext.getProperties("file.base-path", ".");
             FileInputStream inputStream = new FileInputStream(file);
-            return register(inputStream, file.getName(), (int)file.length(), fileFrom, saveType, basePath);
+            return register(inputStream, file.getName(), (int)file.length(), fileFrom, saveType, basePath, false, false, FileUtils.getMD5(new FileInputStream(file)));
         } catch (FileNotFoundException e) {
             log.error("文件不存在，文件路径:{}", file.getAbsolutePath());
             return null;
@@ -84,7 +84,7 @@ public class FileManager {
         return this.register(inputStream, fileName, fileSize, targetDir, saveType, basePath, withoutChecking, false);
     }
 
-    public SysFile register(InputStream inputStream, String fileName, int fileSize,  String targetDir, Integer saveType, String basePath, boolean withoutChecking, boolean withCrypt) {
+    public SysFile register(InputStream inputStream, String fileName, int fileSize,  String targetDir, Integer saveType, String basePath, boolean withoutChecking, boolean withCrypt, String md5) {
         try {
             boolean isCloseReplaceMode = PropertiesConstant.TRUE.equals(SpringContext.getProperties("file.close-replace-mode", PropertiesConstant.FALSE));
             String fileFrom = targetDir.replaceAll("/", Matcher.quoteReplacement(File.separator));
@@ -128,7 +128,13 @@ public class FileManager {
                 }
                 sysFile.setFileContent(new String(Base64.getEncoder().encode(FileCopyUtils.copyToByteArray(inputStream))));
                 // 文件md5码
-                sysFile.setFileMd5(FileUtils.getMD5(inputStream));
+                if (StringUtils.isEmpty(md5)) {
+                    sysFile.setFileMd5(FileUtils.getMD5(inputStream));
+                }
+                else {
+                    sysFile.setFileMd5(md5);
+                }
+
             }
             else if (saveType == 1) {
                 // 相对路径
@@ -146,7 +152,13 @@ public class FileManager {
                 File saveFile = new File(path.getAbsolutePath() + "/" + saveFileName);
                 FileCopyUtils.copy(inputStream, Files.newOutputStream(saveFile.toPath()));
 //                sysFile.setFileMd5(FileUtils.getMD5(inputStream));
-                sysFile.setFileMd5(FileUtils.getMD5(Files.newInputStream(saveFile.toPath())));
+                if (StringUtils.isEmpty(md5)) {
+                    sysFile.setFileMd5(FileUtils.getMD5(Files.newInputStream(saveFile.toPath())));
+                }
+                else {
+                    sysFile.setFileMd5(md5);
+                }
+
 
                 // 文件表只存储相对路径
                 sysFile.setFilePath(relativePath + saveFileName);
@@ -162,7 +174,7 @@ public class FileManager {
                     saveFileName = realName;
                 }
                 // 文件md5码
-                sysFile.setFileMd5(FileUtils.getMD5(inputStream));
+                sysFile.setFileMd5(md5);
 
                 KdbRet<String> kdbRet =  DB.kdbApi().uploadFile(inputStream, saveFileName, filePath);
                 if (!"成功".equals(kdbRet.getMessage())) {
@@ -205,6 +217,10 @@ public class FileManager {
         catch (IOException e) {
             throw BusinessException.serviceThrow(I18n.t("FileManager.pathNoExistTip", "源文件路径不存在, IO异常:{0}", e.getMessage()));
         }
+    }
+
+    public SysFile register(InputStream inputStream, String fileName, int fileSize,  String targetDir, Integer saveType, String basePath, boolean withoutChecking, boolean withCrypt) {
+        return this.register(inputStream, fileName, fileSize, targetDir, saveType, basePath, withoutChecking, withCrypt, null);
     }
 
     /**
