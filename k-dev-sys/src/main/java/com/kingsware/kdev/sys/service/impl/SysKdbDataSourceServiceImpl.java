@@ -12,6 +12,7 @@ import com.kingsware.kdev.core.orm.kdb.KdbApi;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.PageUtil;
 import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.sys.argv.DataBaseInstanceArgv;
 import com.kingsware.kdev.sys.argv.SysKdbDataSourceArgv;
 import com.kingsware.kdev.sys.argv.SysKdbDataSourceQueryArgv;
@@ -22,6 +23,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * kdb数据源业务实现类
@@ -45,52 +48,84 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
         KdbApi api = (KdbApi)(DB.getDefault());
         List<DataSourceInfo> list = api.queryDataSource(argv);
         // 转换成ret对象
-        return toRet(list.get(0));
+        return list.isEmpty() ? null : toRet(list.get(0));
     }
-
     private SysKdbDataSourceRet toRet(DataSourceInfo info) {
+        return toRet(info, true);
+    }
+    private SysKdbDataSourceRet toRet(DataSourceInfo info, boolean isCrud) {
         SysKdbDataSourceRet ret = new SysKdbDataSourceRet();
         ret.setId(info.getSourceName());
         ret.setDriverClass(info.getDriverClass());
         ret.setJdbcUrl(info.getJdbcUrl());
         ret.setUsername(info.getUserName());
-        ret.setPassword(info.getPassword());
+        if(isCrud) {
+            ret.setPassword(info.getPassword());
+        }
         if (info.getJson() == null) {
             ret.setJson("{}");
         }
         else {
             ret.setJson(info.getJson());
+            Map<String, Object> json2Map = JsonUtil.toBean(ret.getJson(), Map.class);
+            if(json2Map.containsKey("appId")){
+                ret.setAppId((String)json2Map.get("appId"));
+            }
         }
 
-        // 处理instance
-        List<DataBaseInstanceArgv> instances = new ArrayList<>();
-        String[] urls = info.getJdbcUrl().split(SPLIT_TAG);
-        String[] usernames = info.getUserName().split(SPLIT_TAG);
-        String[] passwords = info.getPassword().split(SPLIT_TAG);
-        for (int i=0; i<urls.length; i++) {
-            DataBaseInstanceArgv instance = new DataBaseInstanceArgv();
-            instance.setJdbcUrl(urls[i]);
-            instance.setUserName((usernames.length-1 < i)? "":  usernames[i]);
-            instance.setPassword((passwords.length-1 < i)? "":  passwords[i]);
-            instances.add(instance);
+        if(isCrud) {
+            // 处理instance
+            List<DataBaseInstanceArgv> instances = new ArrayList<>();
+            String[] urls = info.getJdbcUrl().split(SPLIT_TAG);
+            String[] usernames = info.getUserName().split(SPLIT_TAG);
+            String[] passwords = info.getPassword().split(SPLIT_TAG);
+            for (int i=0; i<urls.length; i++) {
+                DataBaseInstanceArgv instance = new DataBaseInstanceArgv();
+                instance.setJdbcUrl(urls[i]);
+                instance.setUserName((usernames.length-1 < i)? "":  usernames[i]);
+                if(isCrud) {
+                    instance.setPassword((passwords.length-1 < i)? "":  passwords[i]);
+                }
+                instances.add(instance);
+            }
+            ret.setInstances(instances);
         }
-        ret.setInstances(instances);
         return ret;
     }
 
     @Override
     public void add(SysKdbDataSourceArgv argv) {
+        // 首先查询数据源名称是否已经存在，存在则抛出【数据源名称已经存在】异常
+        // 否则，经常会错误地认为是数据库连接参数有误，导致用户难以区分
+        SysKdbDataSourceRet isExist = get(argv.getId());
+        if (isExist != null){
+            throw BusinessException.serviceThrow(I18n.t("SysKdbDataSource.tip.alreadyExist", "数据源名称已存在，请更换其他名称！"));
+        }
 
         try {
             DataSourceInfo info = new DataSourceInfo();
             info.setSourceName(argv.getId());
             info.setDriverClass(argv.getDriverClass());
+//            info.setAppId(argv.getAppId());
             instanceToField(info, argv);
             if (StringUtils.isNotEmpty(argv.getJson())) {
-                info.setJson(argv.getJson());
+                // 添加appId到json字段里
+                String argvJson = argv.getJson();
+                if (StringUtils.isNotEmpty(argv.getAppId())){
+                    Map<String, Object> json2Map = JsonUtil.toBean(argvJson, Map.class);
+                    json2Map.put("appId", argv.getAppId());
+                    argvJson = JsonUtil.toJson(json2Map);
+                }
+                info.setJson(argvJson);
             }
             else {
-                info.setJson("{}");
+                String defaultJson = "{}";
+                if (StringUtils.isNotEmpty(argv.getAppId())){
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("appId", argv.getAppId());
+                    defaultJson = JsonUtil.toJson(map);
+                }
+                info.setJson(defaultJson);
             }
             KdbApi api = (KdbApi)(DB.getDefault());
             api.addDataSource(info);
@@ -126,13 +161,37 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
             DataSourceInfo info = new DataSourceInfo();
             info.setSourceName(argv.getId());
             info.setDriverClass(argv.getDriverClass());
+            // 截止2024/09/09，还不能设置此appId，否则faas会报错：
+            // Caused by: java.sql.SQLSyntaxErrorException: user lacks privilege or object not found:
+            // APPID in statement [update data_source set password=?,driverClass=?,appId=?,jdbcUrl=?,json=?,sourceName=?,userName=? where sourceName = ?]
+            // 但是 faas 表是已经有appId字段的了，推测是faas代码问题
+//            info.setAppId(argv.getAppId());
+
             instanceToField(info, argv);
             KdbApi api = (KdbApi)(DB.getDefault());
             if (StringUtils.isNotEmpty(argv.getJson())) {
-                info.setJson(argv.getJson());
+                // 添加appId到json字段里
+                String argvJson = argv.getJson();
+                if (StringUtils.isNotEmpty(argv.getAppId())){
+                    Map<String, Object> json2Map = JsonUtil.toBean(argvJson, Map.class);
+                    json2Map.put("appId", argv.getAppId());
+                    argvJson = JsonUtil.toJson(json2Map);
+                }
+                else {
+                    Map<String, Object> json2Map = JsonUtil.toBean(argvJson, Map.class);
+                    json2Map.remove("appId");
+                    argvJson = JsonUtil.toJson(json2Map);
+                }
+                info.setJson(argvJson);
             }
             else {
-                info.setJson("{}");
+                String defaultJson = "{}";
+                if (StringUtils.isNotEmpty(argv.getAppId())){
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("appId", argv.getAppId());
+                    defaultJson = JsonUtil.toJson(map);
+                }
+                info.setJson(defaultJson);
             }
             api.editDataSource(info);
         }
@@ -153,7 +212,14 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
         // 转为ret类
         List<SysKdbDataSourceRet> retList = new ArrayList<>();
         for (DataSourceInfo infoL: list) {
-            retList.add(toRet(infoL));
+            retList.add(toRet(infoL, argv.isCrud()));
+        }
+        // 按应用id过滤
+        String appId = ServletUtil.request().getHeader("_request_app");
+        if (StringUtils.isNotEmpty(appId)) {
+            retList.removeIf(ret -> !appId.equals(ret.getAppId()) && StringUtils.isNotEmpty(ret.getAppId()));
+        } else {
+            retList.removeIf(ret -> StringUtils.isNotEmpty(ret.getAppId()));
         }
         // 按driverClass过滤
         if (StringUtils.isNotEmpty(argv.getDriverClass())) {
