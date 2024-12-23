@@ -106,7 +106,7 @@ public class LogSourceManager {
      */
     private void removeInactiveLogSources() {
 //        long currentTime = System.currentTimeMillis();
-        log.info("log-" + DateUtils.getNow());
+//        log.info("log-" + DateUtils.getNow());
 //        logSources.forEach((id, entry) -> {
 //            if (currentTime - entry.getLastHeartbeat() > HEARTBEAT_TIMEOUT * 1000) {
 //                logSources.remove(id);
