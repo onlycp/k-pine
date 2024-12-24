@@ -1,6 +1,5 @@
 package com.kingsware.kdev.core.cache.license;
 
-import com.kingsware.kdev.core.auth.KAuthFilter;
 
 /**
  *
