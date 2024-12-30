@@ -377,6 +377,7 @@ public class UiConfig extends WebMvcConfigurationSupport {
                                 if (doc == null) {
                                     String translatedText = I18n.parseScript(appId, text);
                                     translatedText = translatedText.replace("\\ ${","\\${");
+                                    translatedText = translatedText.replace("$ ","$");
                                     if (!translatedText.equals(text)) {
                                         match.put(key, StringUtils.capitalizeFirstLetter(translatedText));
                                     }
@@ -400,6 +401,7 @@ public class UiConfig extends WebMvcConfigurationSupport {
                         for (int i = 0; i < list.size(); i++) {
                             String translatedText = I18n.parseScript(appId, list.get(0).toString());
                             translatedText = translatedText.replace("\\ ${","\\${");
+                            translatedText = translatedText.replace("$ ","$");
                             list.set(i, translatedText);
                         }
                         match.put(key, list);
@@ -415,6 +417,7 @@ public class UiConfig extends WebMvcConfigurationSupport {
                                 if (doc == null) {
                                     String translatedText = I18n.parseScript(appId, text);
                                     translatedText = translatedText.replace("\\ ${","\\${");
+                                    translatedText = translatedText.replace("$ ","$");
                                     if (!translatedText.equals(text)) {
                                         replacedMap.put(k, StringUtils.capitalizeFirstLetter(translatedText));
                                     }
