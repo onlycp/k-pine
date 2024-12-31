@@ -3,6 +3,7 @@ package com.kingsware.kdev.sys.task;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.cron.KRunner;
 import com.kingsware.kdev.core.cron.KTask;
+import com.kingsware.kdev.core.model.SysFile;
 import com.kingsware.kdev.sys.initialize.KAppInitialize;
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,7 +41,6 @@ public class KAppAutoImportTask implements KTask, KRunner {
         }
         catch (Exception e) {
             log.info("系统自动安装Pine包任务执行失败", e);
-
         }
         finally {
             upgrading.set(false);
