@@ -61,9 +61,9 @@ public class KAppInitialize {
             try {
                 // 通过文件名和md5去查询
                 String md5 = FileUtils.getMD5(new FileInputStream(file));
-                String id = DB.findSingleAttribute(String.class, "select id from sys_file where file_md5 = ? and file_name = ?", md5, file.getName());
+                List<String> ids = DB.findSingleAttributeList(String.class, "select id from sys_file where file_md5 = ? and file_name = ?", md5, file.getName());
                 String fileContent = readFile(file);
-                if(StringUtils.isNotEmpty(id)) {
+                if(!ids.isEmpty()) {
                     log.info("文件已存在，跳过: {}", file.getName());
                 }
                 else {
