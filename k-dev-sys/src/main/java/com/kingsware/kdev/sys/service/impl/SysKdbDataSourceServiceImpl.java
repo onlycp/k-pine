@@ -140,6 +140,7 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
 
             AppGit appGit = new AppGit(repoId);
             GitCommit gitCommit = appGit.getCommit("添加数据源: " + resourceId);
+            gitCommit.setAuthor(KClientContext.getContext().getUserInfo().getUsername());
             appGit.addCommitFile(gitFile, gitCommit);
         }
         catch (Exception e) {
@@ -221,6 +222,7 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
 
             AppGit appGit = new AppGit(repoId);
             GitCommit gitCommit = appGit.getCommit("编辑数据源: " + resourceId);
+            gitCommit.setAuthor(KClientContext.getContext().getUserInfo().getUsername());
             appGit.addCommitFile(gitFile, gitCommit);
         }
         catch (Exception e) {

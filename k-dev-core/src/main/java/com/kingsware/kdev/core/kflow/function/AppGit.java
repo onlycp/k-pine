@@ -212,7 +212,7 @@ public class AppGit {
         // 处理gitFile, 加上basePath
 //        for (GitFile gitFile : gitFiles) {
 //            gitFile.setPath(getBasePath() + "/" + repoId + "/" + gitFile.getPath());
-//        }
+//
         // 初始化变量Map，用于存放脚本执行时所需的变量值
         Map<String, Object> variables = new HashMap<>(4);
         variables.put("repoPath", getBasePath() + "/" + repoId);
