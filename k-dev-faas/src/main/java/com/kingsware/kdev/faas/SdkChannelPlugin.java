@@ -31,17 +31,16 @@ public class SdkChannelPlugin implements FaasChannelPlugin {
     /** 是否已经初始化 **/
     private static boolean inited = false;
 
-    @Value("${faas.ext-path:../faas/ext}")
+    @Value("${faas.ext-path:./ext}")
     private String extPath;
 
-    @Value("${faas.lib-path:../faas/lib}")
+    @Value("${faas.lib-path:./lib}")
     private String libPath;
 
-    @PostConstruct
-    public void init() {
-        initSdk();
-    }
-
+//    @PostConstruct
+//    public void init() {
+//        initSdk();
+//    }
 
     /**
      * 初始化sdk
@@ -53,8 +52,8 @@ public class SdkChannelPlugin implements FaasChannelPlugin {
         inited = true;
         JSONObject config = new JSONObject();
         config.put("mode", "sdk");
-//        config.put("ext.path", extPath);
-//        config.put("lib.path", libPath);
+        config.put("ext.path", extPath);
+        config.put("lib.path", libPath);
         config.put("profiler.open", false);
         FEnv.setConfig(config);
         log.info("插件加载准备:{}",  name());
