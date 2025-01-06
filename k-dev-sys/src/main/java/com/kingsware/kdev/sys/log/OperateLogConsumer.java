@@ -27,8 +27,8 @@ public class OperateLogConsumer implements KmqConsumer {
     public void onMessage(List<String> payloads) throws Exception {
         long t1 = System.currentTimeMillis();
         String enableLog = SpringContext.getProperties("app.log.enable", "true");
-        String toUniops = SpringContext.getProperties("app.log.toUniops", "false");
-        String uniopsLogUrl = SpringContext.getProperties("app.log.UrlUniops", "http://10.11.2.96:8083/mdb/log/batchSave");
+        String toUniops = SpringContext.getProperties("uniops.log.enable", "false");
+        String uniopsLogUrl = SpringContext.getProperties("uniops.log.url", "http://10.11.2.96:8083/mdb/log/batchSave");
         List<Map<String,Object>> rows  = new ArrayList<>();
         if ("true".equalsIgnoreCase(enableLog)) {
             List<SysOperateLog> sysOperateLogs = new ArrayList<>();
@@ -70,7 +70,7 @@ public class OperateLogConsumer implements KmqConsumer {
                     requestBody.put("operateLogList", rows);
                     try {
                         String resp = HttpUtil.postBody(uniopsLogUrl, JsonUtil.toJson(requestBody), new HashMap<>());
-                        log.info("日志推送：{}", JsonUtil.toJson(requestBody));
+                        // log.info("日志推送：{}", JsonUtil.toJson(requestBody));
                         Map<String, Object> respMap = JsonUtil.toMap(resp);
                         if (respMap == null || respMap.get("errorCode") == null || (int)respMap.get("errorCode") != 0) {
                             log.warn("日志推送uniops失败：{}", resp);
