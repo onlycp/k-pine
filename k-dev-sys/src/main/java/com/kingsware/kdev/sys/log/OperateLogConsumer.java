@@ -1,17 +1,18 @@
 package com.kingsware.kdev.sys.log;
 
+import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.kmq.KmqConsumer;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.SyncValueManager;
-import com.kingsware.kdev.core.util.JsonUtil;
+import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.core.model.SysOperateLog;
-import com.kingsware.kdev.core.util.MD5Utils;
-import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 操作日志消费类
@@ -25,21 +26,65 @@ public class OperateLogConsumer implements KmqConsumer {
     @Override
     public void onMessage(List<String> payloads) throws Exception {
         long t1 = System.currentTimeMillis();
-        String md5 = MD5Utils.md5(JsonUtil.toJson(payloads));
         String enableLog = SpringContext.getProperties("app.log.enable", "true");
+        String toUniops = SpringContext.getProperties("app.log.toUniops", "true");
+        String uniopsLogUrl = SpringContext.getProperties("app.log.UrlUniops", "http://10.11.2.96:8083/mdb/log/batchSave");
+        List<Map<String,Object>> rows  = new ArrayList<>();
         if ("true".equalsIgnoreCase(enableLog)) {
             List<SysOperateLog> sysOperateLogs = new ArrayList<>();
             for (String payload: payloads) {
                 SysOperateLog sysOperateLog = JsonUtil.toBean(payload, SysOperateLog.class);
-                if (StringUtils.isNotEmpty(sysOperateLog.getResponseBody()) && sysOperateLog.getResponseBody().length() > 1000) {
-                    sysOperateLog.setResponseBody(sysOperateLog.getResponseBody().substring(0,1000));
+                if ("true".equalsIgnoreCase(toUniops)) {
+                    Map<String, Object> row = new HashMap<>();
+                    row.put("type", sysOperateLog.getModule());
+                    row.put("content", sysOperateLog.getAction());
+                    row.put("ip", sysOperateLog.getIp());
+                    row.put("path", sysOperateLog.getUrl());
+                    row.put("user", sysOperateLog.getOperator());
+                    row.put("time", sysOperateLog.getOperateTime().getTime());
+                    Map<String, Object> params = JsonUtil.toMap(sysOperateLog.getRequestBody());
+                    if (params == null) {
+                        params = new HashMap<>();
+                        params.put("requestBody", sysOperateLog.getRequestBody());
+                    }
+                    else {
+                        params.remove("request");
+                        params.remove("requestBody");
+                    }
+                    row.put("param", params);
+                    rows.add(row);
                 }
-                sysOperateLogs.add(sysOperateLog);
+                else {
+                    if (StringUtils.isNotEmpty(sysOperateLog.getResponseBody()) && sysOperateLog.getResponseBody().length() > 1000) {
+                        sysOperateLog.setResponseBody(sysOperateLog.getResponseBody().substring(0,1000));
+                    }
+                    sysOperateLogs.add(sysOperateLog);
+                }
+
             }
             try {
                 String resultValue = String.format("{\"errorCode\":0,\"message\":\"成功\",\"responseBody\":\"%d\",\"time\":1709277360835,\"total\":0}", sysOperateLogs.size());
                 SyncValueManager.getInstance().setSyncValue(resultValue);
-                DB.saveAll(sysOperateLogs);
+                if ("true".equalsIgnoreCase(toUniops)) {
+                    Map<String, Object> requestBody = new HashMap<>();
+                    requestBody.put("operateLogList", rows);
+                    try {
+                        String resp = HttpUtil.postBody(uniopsLogUrl, JsonUtil.toJson(requestBody), new HashMap<>());
+                        log.info("日志推送：{}", JsonUtil.toJson(requestBody));
+                        Map<String, Object> respMap = JsonUtil.toMap(resp);
+                        if (respMap == null || respMap.get("errorCode") == null || (int)respMap.get("errorCode") != 0) {
+                            log.warn("日志推送uniops失败：{}", resp);
+                        }
+                    }
+                    catch (Exception e) {
+                        log.error("error", e);
+                    }
+
+                }
+                else {
+                    DB.saveAll(sysOperateLogs);
+                }
+
             }
             catch (Exception e) {
                 log.error("error", e);
