@@ -31,16 +31,17 @@ public class SdkChannelPlugin implements FaasChannelPlugin {
     /** 是否已经初始化 **/
     private static boolean inited = false;
 
-    @Value("${faas.ext-path:./ext}")
-    private String extPath;
-
-    @Value("${faas.lib-path:./lib}")
-    private String libPath;
-
+//    @Value("${faas.ext-path:../faas/ext}")
+//    private String extPath;
+//
+//    @Value("${faas.lib-path:../faas/lib}")
+//    private String libPath;
+//
 //    @PostConstruct
 //    public void init() {
 //        initSdk();
 //    }
+
 
     /**
      * 初始化sdk
@@ -49,6 +50,9 @@ public class SdkChannelPlugin implements FaasChannelPlugin {
         if (inited) {
             return;
         }
+        String faasPath = SpringContext.getProperties("faas.path", ".");
+        String extPath = faasPath + File.separator + "ext";
+        String libPath = faasPath + File.separator + "lib";
         inited = true;
         JSONObject config = new JSONObject();
         config.put("mode", "sdk");

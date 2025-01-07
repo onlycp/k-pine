@@ -58,6 +58,11 @@ public class OperateLogConsumer implements KmqConsumer {
                     if (StringUtils.isNotEmpty(sysOperateLog.getResponseBody()) && sysOperateLog.getResponseBody().length() > 1000) {
                         sysOperateLog.setResponseBody(sysOperateLog.getResponseBody().substring(0,1000));
                     }
+                    // 处理请求参数
+                    String requestBody = sysOperateLog.getRequestBody();
+                    if (StringUtils.isNotEmpty(requestBody) && requestBody.length() > 1000) {
+                        sysOperateLog.setRequestBody(requestBody.substring(0,1000));
+                    }
                     sysOperateLogs.add(sysOperateLog);
                 }
 
@@ -69,8 +74,8 @@ public class OperateLogConsumer implements KmqConsumer {
                     Map<String, Object> requestBody = new HashMap<>();
                     requestBody.put("operateLogList", rows);
                     try {
-                        String resp = HttpUtil.postBody(uniopsLogUrl, JsonUtil.toJson(requestBody), new HashMap<>());
-                        // log.info("日志推送：{}", JsonUtil.toJson(requestBody));
+                        String resp = HttpUtil.doPost(uniopsLogUrl, JsonUtil.toJson(requestBody), new HashMap<>());
+                         log.info("日志推送：{}", JsonUtil.toJson(requestBody));
                         Map<String, Object> respMap = JsonUtil.toMap(resp);
                         if (respMap == null || respMap.get("errorCode") == null || (int)respMap.get("errorCode") != 0) {
                             log.warn("日志推送uniops失败：{}", resp);

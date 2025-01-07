@@ -42,4 +42,8 @@
         <appender-ref ref="logFile"/>
         <appender-ref ref="errorFile"/>
     </logger>
+    <logger name="com.kingsware.flow" level="info" />
+    <logger name="com.kingsware.tools" level="info" />
+    <logger name="com.kingsware.catalina.Bootstrap" level="warn" />
+    <logger name ="com.kingsware.flow.mem.MemDFlowEngine" level="warn"/>
 </configuration>
