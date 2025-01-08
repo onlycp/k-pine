@@ -52,13 +52,26 @@ public class PageCacheManager {
         cache.clean();
     }
 
+    /**
+     * 通过页面路径获取页面信息（抛出错误）
+     * @param path
+     * @return
+     */
+    public DevPage getByPath(String path) {
+        DevPage page = getByPathWithNull(path);
+        if (page == null) {
+            // 保留原有的抛出错误
+            throw BusinessException.serviceThrow(I18n.t("DevPageServiceImpl.pageNotFound", "找不到页面"));
+        }
+        return page;
+    }
 
     /**
      * 通过页面路径获取页面信息
      * @param path
      * @return
      */
-    public DevPage getByPath(String path) {
+    public DevPage getByPathWithNull(String path) {
         log.info("path == " + path);
         String menuSearchOrder = SpringContext.getProperties("app.menu.search-order", "menu");
         Object cacheObj = cache.get(path);
@@ -81,7 +94,9 @@ public class PageCacheManager {
                 return pages.get(0);
             }
             else {
-                throw BusinessException.serviceThrow(I18n.t("DevPageServiceImpl.pageNotFound", "找不到页面"));
+                // 这里抛出null，保证其他接口调用时不会出错
+//                throw BusinessException.serviceThrow(I18n.t("DevPageServiceImpl.pageNotFound", "找不到页面"));
+                return null;
             }
         }
         else {
@@ -101,7 +116,9 @@ public class PageCacheManager {
                 return pages.get(0);
             }
             else {
-                throw BusinessException.serviceThrow(I18n.t("DevPageServiceImpl.pageNotFound", "找不到页面"));
+                // 这里抛出null，保证其他接口调用时不会出错
+//                throw BusinessException.serviceThrow(I18n.t("DevPageServiceImpl.pageNotFound", "找不到页面"));
+                return null;
             }
         }
 

@@ -5,9 +5,9 @@ import com.jayway.jsonpath.JsonPath;
 import com.kingsware.kdev.core.bean.JsonPathSearchResult;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.cache.api.ApiManager;
+import com.kingsware.kdev.core.cache.page.PageCacheManager;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
-import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
@@ -38,8 +38,6 @@ import net.minidev.json.JSONArray;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-
-import com.kingsware.kdev.core.config.SysConst;
 
 import static com.kingsware.kdev.core.config.SysConst.pineAppId;
 
@@ -234,17 +232,40 @@ public class CopyAppManager {
                             }
                             log.info("拷贝api:{}, name:{}, url:{}", apiInfo.getId(), apiInfo.getApiName(), apiInfo.getApiUrl());
                             this.copyApiData(apiInfo.getId(), copyContext, copyProcessData);
-                            String url1 = String.format("%s-%s", apiUrl, copyContext.getUrlSuffix());
-                            String afterUrl = apiUrl.replace(url, url1);
-                            Map<String, Object> finalMap = JsonUtil.toMap(JsonUtil.toJson(segment.getValue()));
-                            finalMap.put(segment.getField(), afterUrl);
-                            try {
-                                documentContext.set(segment.getPath(), finalMap);
-                            }
-                            catch (Exception e) {
-                                log.warn("warn", e);
-                            }
 
+                        } else {
+                            // 如果不是接口，还需要判断是否是页面跳转
+                            /*
+                             * 如果是页面跳转，需要考虑以下若干事项
+                             * 1、地址是否为 http:// 或者 域名 开头，是的话不需要添加后缀
+                             * 2、通过路径查询页面信息，跳转页面是否位于拷贝应用下
+                             *  2.1、如果不是拷贝应用下的，说明是第三方应用的，应该保留原来的跳转地址
+                             *  2.2、如果是拷贝应用下的，应该给跳转地址添加后缀
+                             */
+                            if(!apiUrl.trim().startsWith("/")){
+                                continue;
+                            }
+                            DevPage targetPage = PageCacheManager.getInstance().getByPathWithNull(apiUrl);
+                            if (targetPage == null){
+                                continue;
+                            }
+                            if (pineAppId.equalsIgnoreCase(targetPage.getAppId()) && copyContext.getWithSystemData() == 0) {
+                                continue;
+                            }
+                            if(!devPage.getAppId().equalsIgnoreCase(targetPage.getAppId())){
+                                continue;
+                            }
+                        }
+
+                        String url1 = String.format("%s-%s", apiUrl, copyContext.getUrlSuffix());
+                        String afterUrl = url.replace(apiUrl, url1);
+                        Map<String, Object> finalMap = JsonUtil.toMap(JsonUtil.toJson(segment.getValue()));
+                        finalMap.put(segment.getField(), afterUrl);
+                        try {
+                            documentContext.set(segment.getPath(), finalMap);
+                        }
+                        catch (Exception e) {
+                            log.warn("warn", e);
                         }
                     }
                 }
