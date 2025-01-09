@@ -166,6 +166,21 @@ public class CopyAppManager {
 
     }
 
+    /**
+     * 拷贝页面分组
+     *
+     * @param id          页面分组id
+     * @param copyContext 拷贝参数
+     */
+    public void copyPageModuleData(String id, CopyContextArgv copyContext, CopyProcessData copyProcessData) {
+        // 查找页面分组
+        DevModule devModule = DB.findById(DevModule.class, id);
+        if(devModule == null) {
+            return;
+        }
+        copyProcessData.addCopyObject(devModule);
+        copyProcessData.addMapping(devModule.getId(), StringUtils.getUUID());
+    }
 
     /**
      * 拷贝页面
@@ -409,6 +424,13 @@ public class CopyAppManager {
             for (String pageId: pageIds) {
                 this.copyPageData(pageId, copyContext, copyProcessData);
             }
+            // 拷贝页面分组
+            List<String> pageModuleIds = DB.findSingleAttributeList(String.class, "select id from dev_module where app_id=?", id);
+            if(!pageModuleIds.isEmpty()) {
+                for (String pageModuleId : pageModuleIds) {
+                    this.copyPageModuleData(pageModuleId, copyContext, copyProcessData);
+                }
+            }
             // 拷贝所有的逻辑编排
             List<String> apiIds = DB.findSingleAttributeList(String.class, "select id from sys_api where app_id=?", id);
             for (String apiId: apiIds) {
@@ -463,40 +485,40 @@ public class CopyAppManager {
 
                 if (api instanceof String) {
 
-                        String value = (String) api;
-                        if (StringUtils.isEmpty(value)) {
-                            continue;
-                        }
-                        if(value.contains("'")) {
-                            value = value.replace("'", "\\'");
-                        }
-                        String path = String.format("$..[?(@.%s == '%s')]", tag.trim(), value);
-                        String[] arr = trimTag.split("\\.");
-                        try {
-                            JSONArray jsonArray = documentContext.read(path);
+                    String value = (String) api;
+                    if (StringUtils.isEmpty(value)) {
+                        continue;
+                    }
+                    if(value.contains("'")) {
+                        value = value.replace("'", "\\'");
+                    }
+                    String path = String.format("$..[?(@.%s == '%s')]", tag.trim(), value);
+                    String[] arr = trimTag.split("\\.");
+                    try {
+                        JSONArray jsonArray = documentContext.read(path);
 
-                            for (int i=0; i < jsonArray.size(); i++) {
-                                JsonPathSearchResult searchResult  = new JsonPathSearchResult();
-                                searchResult.setField(arr[arr.length-1]);
-                                Map<String, Object> node = (Map<String, Object>) jsonArray.get(i);
-                                List<String> paths = new ArrayList<>();
-                                node.forEach((k, v) -> {
-                                    if (v instanceof String) {
-                                        String str = (String) v;
-                                        if(str.contains("'")) {
-                                            str = str.replace("'", "\\'");
-                                        }
-                                        String pa = String.format("@.%s == '%s'", k, str);
-                                        paths.add(pa);
+                        for (int i=0; i < jsonArray.size(); i++) {
+                            JsonPathSearchResult searchResult  = new JsonPathSearchResult();
+                            searchResult.setField(arr[arr.length-1]);
+                            Map<String, Object> node = (Map<String, Object>) jsonArray.get(i);
+                            List<String> paths = new ArrayList<>();
+                            node.forEach((k, v) -> {
+                                if (v instanceof String) {
+                                    String str = (String) v;
+                                    if(str.contains("'")) {
+                                        str = str.replace("'", "\\'");
                                     }
-                                });
-                                searchResult.setPath("$..[?(" + StringUtils.joinToString(paths, " && ") + ")]");
-                                searchResult.setValue(node);
-                                jsonPathSearchResults.add(searchResult);
-                            }
+                                    String pa = String.format("@.%s == '%s'", k, str);
+                                    paths.add(pa);
+                                }
+                            });
+                            searchResult.setPath("$..[?(" + StringUtils.joinToString(paths, " && ") + ")]");
+                            searchResult.setValue(node);
+                            jsonPathSearchResults.add(searchResult);
                         }
-                        catch (Exception e) {
-                            log.warn("json-path匹配出错，path:{}", path);
+                    }
+                    catch (Exception e) {
+                        log.warn("json-path匹配出错，path:{}", path);
 
                     }
 
@@ -571,6 +593,14 @@ public class CopyAppManager {
                     DB.save(devPage);
                     copyProcessData.getPageIds().add(devPage.getId());
                     log.info("数据拷贝---页面管理：{}, 进度:{}/{}", devPage.getName(), i + 1, total);
+                }
+                else if(obj instanceof DevModule) {
+                    DevModule devModule = replaceObj(copyProcessData, obj, DevModule.class);
+                    devModule.setAppId(context.getTargetAppId());
+                    devModule.cleanAuthor();
+                    DB.save(devModule);
+                    copyProcessData.getDevModuleIds().add(devModule.getId());
+                    log.info("数据拷贝---页面分组管理：{}, 进度:{}/{}", devModule.getName(), i + 1, total);
                 }
                 else if (obj instanceof SysDict) {
                     SysDict sysDict = replaceObj(copyProcessData, obj, SysDict.class);
