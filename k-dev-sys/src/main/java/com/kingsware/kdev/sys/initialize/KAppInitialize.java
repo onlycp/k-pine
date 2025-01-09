@@ -48,15 +48,15 @@ public class KAppInitialize {
     public void execute() {
         String regex = ".*\\.pine";
 //        executeExportFlowSql();
-        log.info("开始安装pine应用包");
+//        log.info("开始安装pine应用包");
         // 扫描指定目录的psi文件
         File[] files = new File(initPsiPath).listFiles((dir, name) -> Pattern.compile(regex).matcher(name).matches());
         if (files == null) {
             return;
         }
-        log.info("扫描到{}个pine文件", files.length);
+//        log.info("扫描到{}个pine文件", files.length);
         Arrays.sort(files, Comparator.comparing(File::getName));
-        log.info("开始安装pine应用包...........");
+//        log.info("开始安装pine应用包...........");
         // 遍历安装
         for (File file: files) {
             log.info("开始安装pine应用包: {}", file.getName());
