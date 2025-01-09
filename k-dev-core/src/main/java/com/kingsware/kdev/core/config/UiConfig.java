@@ -360,6 +360,7 @@ public class UiConfig extends WebMvcConfigurationSupport {
         matchKeys.add("addBtnLabel");
         matchKeys.add("editBtnLabel");
         matchKeys.add("copyBtnLabel");
+        matchKeys.add("success");
 //        matchKeys.add("unitOptions");
         List<String> pathKeys = new ArrayList<>();
         for (String key : matchKeys) {
