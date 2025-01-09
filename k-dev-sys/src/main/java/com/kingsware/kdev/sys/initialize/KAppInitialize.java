@@ -48,15 +48,18 @@ public class KAppInitialize {
     public void execute() {
         String regex = ".*\\.pine";
 //        executeExportFlowSql();
+//        log.info("开始安装pine应用包");
         // 扫描指定目录的psi文件
         File[] files = new File(initPsiPath).listFiles((dir, name) -> Pattern.compile(regex).matcher(name).matches());
         if (files == null) {
             return;
         }
+//        log.info("扫描到{}个pine文件", files.length);
         Arrays.sort(files, Comparator.comparing(File::getName));
-
+//        log.info("开始安装pine应用包...........");
         // 遍历安装
         for (File file: files) {
+            log.info("开始安装pine应用包: {}", file.getName());
             String fileId = "";
             try {
                 // 通过文件名和md5去查询
@@ -79,9 +82,11 @@ public class KAppInitialize {
                     long t2 = System.currentTimeMillis();
                     log.info("应用安装成功，应用包名称:{}, 用时:{} ms", file.getName(),  (t2 -t1));
                 }
+                log.info("开始备份应用: {}", file.getName());
                 // 将文件移动到备份目录
                 devApplicationService.backupPine(fileContent, file.getName());
                 // 移除当前文件
+                log.info("开始移除应用: {}", file.getName());
                 Files.delete(file.toPath());
             }
             catch (Exception e) {
@@ -92,6 +97,7 @@ public class KAppInitialize {
                 log.error("文件读取失败: ", e);
 
             }
+            log.info("pine应用包安装完成: {}", file.getName());
 
         }
     }

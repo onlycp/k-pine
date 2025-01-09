@@ -303,13 +303,18 @@ public class DynamicTask implements CommandLineRunner {
             log.error("定时任务执行失败, 任务名: {}， 错误信息:{}", myTask.getName(), e.getMessage());
             executeStatus = 0;
             errorMessage = ExceptionUtils.getStackTrace(e);
-        } finally {
-            long t2 = System.currentTimeMillis();
-            log.debug("任务执行完成，名称:{}, 执行结果:{}, 用时:{}, 信息:{}", myTask.getName(), executeStatus == 1 ? "成功" : "失败", (t2 - t1), errorMessage);
-            if (resultToDb) {
-                String sql = "update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ?,  last_execute_time=?, next_inst=? where id=?";
-                DB.executeUpdateSql(sql, executeStatus, (t2 - t1), errorMessage, DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME), SystemUtil.getHost().instanceName(), myTask.getId());
+        }
+        finally {
+            // 只有java类的才更新
+            if (myTask.getTaskType() == 1) {
+                long t2 = System.currentTimeMillis();
+                log.debug("任务执行完成，名称:{}, 执行结果:{}, 用时:{}, 信息:{}", myTask.getName(), executeStatus == 1 ? "成功" : "失败", (t2 - t1), errorMessage);
+                if (resultToDb) {
+                    String sql = "update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ?,  last_execute_time=?, next_inst=? where id=?";
+                    DB.executeUpdateSql(sql, executeStatus, (t2 - t1), errorMessage, DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME), SystemUtil.getHost().instanceName(), myTask.getId());
+                }
             }
+
 
         }
 
@@ -338,7 +343,9 @@ public class DynamicTask implements CommandLineRunner {
      */
     private void runFlowTask(SysTask sysTask) {
 
-
+        if (sysTask.getTaskResourceId() == null) {
+            return;
+        }
         // 先查找一下看流程是否存在
         SysLogicFlow logicFlow = DB.findOne(SysLogicFlow.class, "select in_argv, application_id, out_argv from sys_logic_flow where flow_id=?", sysTask.getTaskResourceId());
         String inArgv = "{}";
@@ -361,6 +368,7 @@ public class DynamicTask implements CommandLineRunner {
         }
         params.put("_expireTime",  getNextTriggerTime(sysTask.getCron()));
         params.put("_appId", sysTask.getApplicationId());
+
         long t1 = System.currentTimeMillis();
         // 如果是虚拟任务，将改为同步任务
         if (sysTask.getName().startsWith("virtual-api-cache") && hasVirtualTask(sysTask.getId())) {
@@ -388,7 +396,13 @@ public class DynamicTask implements CommandLineRunner {
             }
         }
        else {
-            KdbFlowResult kdbFlowResult = KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), "", params, context, false, asyncExecute);
+            Map<String, Object> totalVariables = new HashMap<>();
+            totalVariables.put("__taskId", sysTask.getId());
+            totalVariables.put("__flowId", sysTask.getTaskResourceId());
+            totalVariables.put("__instanceId", SystemUtil.getHost().instanceName());
+            totalVariables.put("variables", params);
+            KdbFlowResult kdbFlowResult = KdbFlowExecutor.getInstance().execute("task_agent", "", totalVariables, context, false, asyncExecute);
+            System.currentTimeMillis();
         }
         long t2 = System.currentTimeMillis();
             log.debug("流程任务完成：{}", sysTask.getName());
