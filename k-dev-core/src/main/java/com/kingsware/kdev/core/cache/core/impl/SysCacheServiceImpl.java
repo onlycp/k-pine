@@ -19,7 +19,7 @@ public class SysCacheServiceImpl implements SysCacheService {
     private final String GET_SQL = "select * from sys_cache where code = ? ";
     private final String LIST_SQL = "select * from sys_cache where when_expired is not null";
     private final String DELETE_SQL = "delete from sys_cache where code = ? ";
-    private final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss:SSS");
+    private final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
 
     @Override
     public String getCache(String key) {

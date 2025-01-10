@@ -10,6 +10,7 @@ import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.tools.FEnv;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -31,16 +32,16 @@ public class SdkChannelPlugin implements FaasChannelPlugin {
     /** 是否已经初始化 **/
     private static boolean inited = false;
 
-    @Value("${faas.ext-path:../faas/ext}")
-    private String extPath;
-
-    @Value("${faas.lib-path:../faas/lib}")
-    private String libPath;
-
-    @PostConstruct
-    public void init() {
-        initSdk();
-    }
+//    @Value("${faas.ext-path:../faas/ext}")
+//    private String extPath;
+//
+//    @Value("${faas.lib-path:../faas/lib}")
+//    private String libPath;
+//
+//    @PostConstruct
+//    public void init() {
+//        initSdk();
+//    }
 
 
     /**
@@ -50,11 +51,16 @@ public class SdkChannelPlugin implements FaasChannelPlugin {
         if (inited) {
             return;
         }
+
+        String faasPath = SpringContext.getBootProperties("faas.path", ".");
+        log.info("FAAS目录:" + faasPath);
+        String extPath = faasPath + File.separator + "ext";
+        String libPath = faasPath + File.separator + "lib";
         inited = true;
         JSONObject config = new JSONObject();
         config.put("mode", "sdk");
-//        config.put("ext.path", extPath);
-//        config.put("lib.path", libPath);
+        config.put("ext.path", extPath);
+        config.put("lib.path", libPath);
         config.put("profiler.open", false);
         FEnv.setConfig(config);
         log.info("插件加载准备:{}",  name());

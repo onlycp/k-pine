@@ -557,7 +557,7 @@ public class KAuthFilter implements Filter {
 
 
         }
-        operateLog.setRequestBody(StringUtils.retrench(requestBody, 1000));
+        operateLog.setRequestBody(requestBody);
 //                        log.info("操作日志保存:{}, url:{}" , operateLog.getAction(), request.getRequ
 //                        estURI());
         KmqMessageCenter.getInstance().produce("t_operate_log", JsonUtil.toJson(operateLog) );
