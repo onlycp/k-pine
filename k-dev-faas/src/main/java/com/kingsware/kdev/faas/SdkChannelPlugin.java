@@ -10,6 +10,7 @@ import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.tools.FEnv;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -50,7 +51,9 @@ public class SdkChannelPlugin implements FaasChannelPlugin {
         if (inited) {
             return;
         }
-        String faasPath = SpringContext.getProperties("faas.path", ".");
+
+        String faasPath = SpringContext.getBootProperties("faas.path", ".");
+        log.info("FAAS目录:" + faasPath);
         String extPath = faasPath + File.separator + "ext";
         String libPath = faasPath + File.separator + "lib";
         inited = true;
