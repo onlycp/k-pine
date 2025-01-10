@@ -1,0 +1,75 @@
+{
+  "node_link": [
+    {
+      "catchException": "false",
+      "name": "开始->JS任务",
+      "from": "start",
+      "id": "ba1c4ae6-c00f-4f8c-8015-91bf41344c88",
+      "to": "d3321fac-2432-48a2-811d-00970413f734"
+    },
+    {
+      "catchException": "false",
+      "name": "JS任务->结束",
+      "from": "d3321fac-2432-48a2-811d-00970413f734",
+      "id": "c6c5fa7d-07c7-4774-85a0-b1b259af0621",
+      "to": "end"
+    }
+  ],
+  "name": "任务调度中间层",
+  "node_definition": [
+    {
+      "auto": true,
+      "variables": {
+
+      },
+      "debug": false,
+      "shape": "start",
+      "extra": {
+        "position": "270,0"
+      },
+      "name": "开始",
+      "id": "start",
+      "state": "completed",
+      "type": "start"
+    },
+    {
+      "auto": true,
+      "variables": {
+
+      },
+      "debug": false,
+      "shape": "end",
+      "extra": {
+        "position": "270,338"
+      },
+      "name": "结束",
+      "id": "end",
+      "state": "completed",
+      "type": "end"
+    },
+    {
+      "auto": true,
+      "variables": {
+
+      },
+      "debug": false,
+      "shape": "task",
+      "extra": {
+        "position": "206.5,190"
+      },
+      "name": "JS任务",
+      "id": "d3321fac-2432-48a2-811d-00970413f734",
+      "state": "completed",
+      "type": "task",
+      "execute": {
+        "script": {
+          "type": "js",
+          "params": [
+
+          ],
+          "content": "const System = Java.type('java.lang.System')\n// 获取要执行的逻辑编排\nconst flowId = context.get('__flowId');\nconst taskId = context.get('__taskId');\nconst instanceId = context.get('__instanceId');\nlet  variables = getResult('variables')\nklog.info(`[X-TASK]-[${taskId}]-[${flowId}]开始执行`)\nif (!variables) {\n    variables = {}\n}\nconst taskInstanceId = instanceId + \".\" + taskId\nvariables['_taskId'] = taskId\nconst lck = kutils.getCache('x-task', taskInstanceId);\nif (lck) {\n    klog.info(`[X-TASK]-[${taskId}]-[${flowId}]任务正在执行中，将跳过此次执行`)\n}\nelse {\n    let t1 = System.currentTimeMillis()\n    let lastExecuteStatus = 1;\n    let errorMessage = '';\n    try {\n        kutils.setCache('x-task', taskInstanceId, '1')\n        kutils.dbCommand('MySql', 'update sys_task set last_execute_time=?, last_execute_status=? where id=?', [context.get('sys').get('when'), 2,  taskId])\n        const s = kutils.callFlow(flowId, JSON.stringify(variables));\n        klog.info(`[X-TASK]-[${taskId}]-[${flowId}]执行结果:` + JSON.stringify(s))\n        if (s.status != 0) {\n            errorMessage = s.errorMsg;\n            lastExecuteStatus = 0;\n        }\n    }\n    catch (e) {\n        const errorDetails = e instanceof Error ? `${e.message}\n${e.stack}` : JSON.stringify(e);\n        klog.info(`[X-TASK]-[${taskId}]-[${flowId}]执行异常: ${errorDetails}`);\n        errorMessage = errorDetails;\n        lastExecuteStatus = 0;\n    }\n    finally {\n        kutils.removeCache('x-task', taskInstanceId)\n    }\n    let t2 = System.currentTimeMillis()\n    if (lastExecuteStatus == 0) {\n        const sql = \"update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ? where id=?\";\n        const params = [lastExecuteStatus, (t2 - t1), errorMessage, taskId]\n        kutils.dbCommand('MySql', sql, params)\n    }\n    else {\n        const sql = \"update sys_task set last_execute_status=?, last_execute_take = ? where id=?\";\n        const params = [lastExecuteStatus, (t2 - t1), taskId]\n        kutils.dbCommand('MySql', sql, params)\n    }\n\n\n    klog.info(`[X-TASK]-[${taskId}]-[${flowId}]开始结束`)\n\n}\n\n"
+        }
+      }
+    }
+  ]
+}
