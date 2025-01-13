@@ -24,4 +24,6 @@ public class SysKdbDataSourceQueryArgv extends BasePageArgv {
     /** 是否依赖 **/
     private Integer type;
 
+    /** 是否是crud管理列表 **/
+    private boolean crud;
 }

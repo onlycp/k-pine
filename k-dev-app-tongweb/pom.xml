@@ -9,8 +9,6 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>k-dev-app-tongweb</artifactId>
-    <version>${kdev.version}</version>
-    <packaging>jar</packaging>
     <properties>
         <docker.repostory>192.168.6.11</docker.repostory>
         <docker.registry.name>k-pine</docker.registry.name>

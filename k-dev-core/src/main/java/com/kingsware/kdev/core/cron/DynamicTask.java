@@ -10,6 +10,7 @@ import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.UnauthorizedException;
+import com.kingsware.kdev.core.kflow.FlowUtils;
 import com.kingsware.kdev.core.kflow.KFlowConstant;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
@@ -396,6 +397,9 @@ public class DynamicTask implements CommandLineRunner {
             }
         }
        else {
+            if (logicFlow != null && StringUtils.isNotEmpty(logicFlow.getInArgv())) {
+                FlowUtils.handleInArgv(params, logicFlow.getInArgv());
+            }
             Map<String, Object> totalVariables = new HashMap<>();
             totalVariables.put("__taskId", sysTask.getId());
             totalVariables.put("__flowId", sysTask.getTaskResourceId());

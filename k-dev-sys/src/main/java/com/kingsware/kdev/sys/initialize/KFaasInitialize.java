@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.base.SystemInitialize;
 import com.kingsware.kdev.core.bean.JdbcUrl;
 import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.encrypt.SM4Utils;
 import com.kingsware.kdev.core.kflow.define.FlowDefinition;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBConnectConfig;
@@ -13,9 +14,13 @@ import com.kingsware.kdev.core.orm.kdb.*;
 import com.kingsware.kdev.core.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ResourceUtils;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
 import java.util.*;
 
@@ -60,6 +65,37 @@ public class KFaasInitialize implements SystemInitialize {
     @Value("${database.faas-ip:127.0.0.1}")
     private String faasIp;
 
+    @Value("${encrypt.sm4.key:k-pine@kingsware}")
+    private String sm4Key;
+
+    @Value("${encrypt.sm4.iv:2024120120991231}")
+    private String iv;
+
+
+    /**
+     * 解密数据源信息
+     * @param dataSourceInfo    数据源
+     */
+    private DataSourceInfo decryptDataSourceInfo(DataSourceInfo dataSourceInfo) {
+        if (dataSourceInfo.getUserName().startsWith("[SM4-") && dataSourceInfo.getUserName().endsWith("-SM4]")) {
+            String str0 = dataSourceInfo.getUserName().substring(5, dataSourceInfo.getUserName().length() - 5);
+            String str1 = SM4Utils.decryptData_CBC(str0, sm4Key, iv);
+            dataSourceInfo.setUserName(str1);
+        }
+        if (dataSourceInfo.getPassword().startsWith("[SM4-") && dataSourceInfo.getPassword().endsWith("-SM4]")) {
+            String str0 = dataSourceInfo.getPassword().substring(5, dataSourceInfo.getPassword().length() - 5);
+            String str1 = SM4Utils.decryptData_CBC(str0, sm4Key, iv);
+            dataSourceInfo.setPassword(str1);
+        }
+        if (dataSourceInfo.getJdbcUrl().startsWith("[SM4-") && dataSourceInfo.getJdbcUrl().endsWith("-SM4]")) {
+            String str0 = dataSourceInfo.getJdbcUrl().substring(5, dataSourceInfo.getJdbcUrl().length() - 5);
+            String str1 = SM4Utils.decryptData_CBC(str0, sm4Key, iv);
+            dataSourceInfo.setJdbcUrl(str1);
+        }
+        return dataSourceInfo;
+
+    }
+
     @Override
     public void execute() {
         // 启动faas
@@ -89,7 +125,7 @@ public class KFaasInitialize implements SystemInitialize {
                         ds.setDriverClass(it.getDriverClass());
                         ds.setSourceName(it.getSourceName());
                         ds.setJson(JsonUtil.toJson(it.getJson()));
-                        targetSources.add(ds);
+                        targetSources.add(decryptDataSourceInfo(ds));
                     });
                     // 获取所有的数据源
                     List<DataSourceInfo> dataSourceInfos = DB.kdbApi().queryDataSource(new DataSourceQueryArgv());
@@ -100,7 +136,7 @@ public class KFaasInitialize implements SystemInitialize {
                         Optional<DataSourceInfo> optional = dataSourceInfos.stream().filter(it -> it.getSourceName().equals(fileSource.getSourceName())).findFirst();
                         // 如果已存储，则修改
                         if (optional.isPresent()) {
-                            log.info("数据源初始化修改: {}", fileSource);
+                            log.info("数据源初始化修改-001: {}", fileSource);
                             DB.kdbApi().editDataSource(fileSource);
                         } else {
                             log.info("数据源初始化新增: {}", fileSource);
@@ -135,6 +171,72 @@ public class KFaasInitialize implements SystemInitialize {
             }
         }
 
+        try {
+            // 初始化内置的逻辑编排
+            List<FlowInfo> flowInfoList = getNestFlows();
+            for (FlowInfo flowInfo: flowInfoList) {
+
+                KdbFlowQueryArgv kdbFlowQueryArgv = new KdbFlowQueryArgv();
+                kdbFlowQueryArgv.setFlowId(flowInfo.getFlowId());
+                List<FlowInfo> functionInfoList = DB.kdbApi().query(kdbFlowQueryArgv);
+                // 如果没有，则新增
+                if (functionInfoList.isEmpty()) {
+                    log.info("[内置逻辑编排]-加载新增:{}", flowInfo.getName());
+                    String sql = "insert into flow (flowid,name,content,description) values (?,?,?,?)";
+                    DB.byName("kingDB").executeUpdateSql(sql, flowInfo.getFlowId(), flowInfo.getName(), flowInfo.getContent(), flowInfo.getDescription());
+                }
+                else {
+                    log.info("[内置逻辑编排]-加载更新:{}", flowInfo.getName());
+                    EditFlowInfo editFlowInfo = new EditFlowInfo();
+                    editFlowInfo.setFlowId(flowInfo.getFlowId());
+                    editFlowInfo.setContent(flowInfo.getContent());
+                    editFlowInfo.setName(flowInfo.getName());
+                    editFlowInfo.setDescription(flowInfo.getDescription());
+                    DB.kdbApi().editFlow(editFlowInfo);
+                }
+            }
+        }
+        catch (Exception e) {
+            log.error("初始化内置的逻辑编排失败", e);
+        }
+
+    }
+
+    /**
+     * 获取内置的逻辑编排列表
+     * @return
+     */
+    private List<FlowInfo> getNestFlows() {
+        List<FlowInfo> list = new ArrayList<>();
+        String path = ResourceUtils.CLASSPATH_URL_PREFIX + "logicFlow/**";
+        log.info("[内置逻辑编排]-资源路径:{}", path);
+        Resource[] resources = SpringContext.getResources(path);
+        if (resources == null) {
+            return list;
+        }
+        for(Resource resource : resources) {
+            String filename = resource.getFilename();
+            if (StringUtils.isEmpty(filename)) {
+                continue;
+            }
+            log.info("[内置逻辑编排]-获取文件名:{}", filename);
+            FlowInfo flow = new FlowInfo();
+            String name = filename.split("\\.")[0];
+            flow.setFlowId(name);
+            flow.setName(name);
+            flow.setDescription("内置编排");
+            flow.setCreateTime(System.currentTimeMillis());
+            flow.setUpdateTime(System.currentTimeMillis());
+            try (InputStream inputStream = resource.getInputStream()){
+                List<String> lines = FileUtils.readAllLine(inputStream);
+                flow.setContent(StringUtils.joinToString(lines, ""));
+            } catch (IOException e) {
+                flow.setContent("{}");
+            }
+            list.add(flow);
+
+        }
+        return list;
     }
 
     /**

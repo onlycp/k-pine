@@ -3,11 +3,6 @@ package com.kingsware.kdev.core.cache.open;
 import com.kingsware.kdev.core.bean.BaseManageModel;
 import lombok.Data;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 /**
  *
  * @author chen peng

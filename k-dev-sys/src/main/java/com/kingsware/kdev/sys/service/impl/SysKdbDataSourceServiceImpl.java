@@ -13,6 +13,10 @@ import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.DataSourceInfo;
 import com.kingsware.kdev.core.orm.kdb.DataSourceQueryArgv;
 import com.kingsware.kdev.core.orm.kdb.KdbApi;
+import com.kingsware.kdev.core.util.JsonUtil;
+import com.kingsware.kdev.core.util.PageUtil;
+import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.sys.argv.DataBaseInstanceArgv;
 import com.kingsware.kdev.sys.argv.DataSourceTakeArgv;
@@ -24,6 +28,11 @@ import com.kingsware.kdev.sys.service.SysKdbDataSourceService;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * kdb数据源业务实现类
@@ -50,20 +59,25 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
         if(list != null && !list.isEmpty()){
             for(DataSourceInfo dataSourceInfo : list){
                 if (dataSourceInfo.getSourceName().equals(id)) {
-                    return toRet(dataSourceInfo);
+                    return list.isEmpty() ? null : toRet(dataSourceInfo);
                 }
             }
 
         }
         return null;
     }
-
     private SysKdbDataSourceRet toRet(DataSourceInfo info) {
+        return toRet(info, true);
+    }
+    private SysKdbDataSourceRet toRet(DataSourceInfo info, boolean isCrud) {
         SysKdbDataSourceRet ret = new SysKdbDataSourceRet();
         ret.setId(info.getSourceName());
         ret.setDriverClass(info.getDriverClass());
         ret.setJdbcUrl(info.getJdbcUrl());
         ret.setUsername(info.getUserName());
+        if(isCrud) {
+            ret.setPassword(info.getPassword());
+        }
         ret.setPassword(info.getPassword());
         ret.setAppId(info.getAppId());
         if (info.getJson() == null) {
@@ -71,21 +85,29 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
         }
         else {
             ret.setJson(info.getJson());
+            Map<String, Object> json2Map = JsonUtil.toBean(ret.getJson(), Map.class);
+            if(json2Map.containsKey("appId")){
+                ret.setAppId((String)json2Map.get("appId"));
+            }
         }
 
-        // 处理instance
-        List<DataBaseInstanceArgv> instances = new ArrayList<>();
-        String[] urls = info.getJdbcUrl().split(SPLIT_TAG);
-        String[] usernames = info.getUserName().split(SPLIT_TAG);
-        String[] passwords = info.getPassword().split(SPLIT_TAG);
-        for (int i=0; i<urls.length; i++) {
-            DataBaseInstanceArgv instance = new DataBaseInstanceArgv();
-            instance.setJdbcUrl(urls[i]);
-            instance.setUserName((usernames.length-1 < i)? "":  usernames[i]);
-            instance.setPassword((passwords.length-1 < i)? "":  passwords[i]);
-            instances.add(instance);
+        if(isCrud) {
+            // 处理instance
+            List<DataBaseInstanceArgv> instances = new ArrayList<>();
+            String[] urls = info.getJdbcUrl().split(SPLIT_TAG);
+            String[] usernames = info.getUserName().split(SPLIT_TAG);
+            String[] passwords = info.getPassword().split(SPLIT_TAG);
+            for (int i=0; i<urls.length; i++) {
+                DataBaseInstanceArgv instance = new DataBaseInstanceArgv();
+                instance.setJdbcUrl(urls[i]);
+                instance.setUserName((usernames.length-1 < i)? "":  usernames[i]);
+                if(isCrud) {
+                    instance.setPassword((passwords.length-1 < i)? "":  passwords[i]);
+                }
+                instances.add(instance);
+            }
+            ret.setInstances(instances);
         }
-        ret.setInstances(instances);
         return ret;
     }
 
@@ -103,6 +125,7 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
             info.setSourceName(argv.getId());
             info.setDriverClass(argv.getDriverClass());
             info.setAppId(argv.getAppId());
+//            info.setAppId(argv.getAppId());
             instanceToField(info, argv);
             if (StringUtils.isNotEmpty(argv.getJson())) {
                 // 添加appId到json字段里
@@ -242,7 +265,14 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
         // 转为ret类
         List<SysKdbDataSourceRet> retList = new ArrayList<>();
         for (DataSourceInfo infoL: list) {
-            retList.add(toRet(infoL));
+            retList.add(toRet(infoL, argv.isCrud()));
+        }
+        // 按应用id过滤
+        String appId = ServletUtil.request().getHeader("_request_app");
+        if (StringUtils.isNotEmpty(appId)) {
+            retList.removeIf(ret -> !appId.equals(ret.getAppId()) && StringUtils.isNotEmpty(ret.getAppId()));
+        } else {
+            retList.removeIf(ret -> StringUtils.isNotEmpty(ret.getAppId()));
         }
         // 按driverClass过滤
         if (StringUtils.isNotEmpty(argv.getDriverClass())) {

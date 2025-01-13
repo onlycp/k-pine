@@ -200,7 +200,6 @@ public class SysFileController extends BaseController {
     @ApiOperation(value = "静态文件树 " ,notes = "静态文件树")
     @GetMapping("/getStaticFileTree")
     @ResponseBody
-    @ApiIgnore
     public BaseRet<List<SysStaticFileRet>> getStaticFileTree(boolean onlyFolder) throws IOException {
         return sysFileService.getStaticFileTree(onlyFolder);
     }
