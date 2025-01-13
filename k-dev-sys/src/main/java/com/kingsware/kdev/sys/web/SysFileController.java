@@ -102,7 +102,8 @@ public class SysFileController extends BaseController {
     @ResponseBody
     @ApiIgnore
     public BaseRet<List<SysFileRet>> upload(@RequestParam("files") MultipartFile[] files, @PathVariable String fileFrom, @PathVariable Integer saveType) {
-        if (LicenseManager.getInstance().isUniopsApp()) {
+        String callMode = SpringContext.getBootProperties("app.k-flow.call-model", "");
+        if (LicenseManager.getInstance().isUniopsApp() || "sdk".equalsIgnoreCase(callMode)) {
             saveType = 1;
         }
         return BaseRet.success(sysFileService.upload(files, fileFrom, saveType));
