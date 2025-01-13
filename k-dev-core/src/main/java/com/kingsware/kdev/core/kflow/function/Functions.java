@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 函数类
@@ -63,7 +64,10 @@ public class Functions {
      */
     public static String props() {
 //        log.info("全部配置:{}",JsonUtil.toJson(SpringContext.getProperties()));
-        return JsonUtil.toJson(SpringContext.getProperties());
+        Map<String, String> properties = SpringContext.getProperties();
+        // 去掉空值的
+        properties.entrySet().removeIf(entry -> StringUtils.isEmpty(entry.getValue()));
+        return JsonUtil.toJson(properties);
     }
 
     /**
