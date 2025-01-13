@@ -29,10 +29,10 @@ public class TcpClientContext {
     /**
      * tcp客户端集合
      */
-    private Set<TcpClient> clients = Collections.synchronizedSet(new HashSet<>());
+    private final Set<TcpClient> clients = Collections.synchronizedSet(new HashSet<>());
 
     /** 输入队列-收**/
-    private final BlockingDeque<TMessage> recvBlockQueue =  new LinkedBlockingDeque<>(102400);
+    private final BlockingDeque<TMessage> revBlockQueue =  new LinkedBlockingDeque<>(102400);
     /** 输出队列-发 **/
     private final BlockingDeque<TMessage> sendBlockQueue =  new LinkedBlockingDeque<>(102400);
 
@@ -113,7 +113,7 @@ public class TcpClientContext {
         new Thread(() -> {
             while (true) {
                 try {
-                    TMessage tMessage = recvBlockQueue.take();
+                    TMessage tMessage = revBlockQueue.take();
                     //log.info("接收数据:" + JsonUtil.toJson(tMessage));
                     TRspMessage tRspMessage = JsonUtil.toBean(tMessage.getBody(), TRspMessage.class);
                     // klog响应
@@ -135,7 +135,6 @@ public class TcpClientContext {
                             toC.setBody(JsonUtil.toJson(kLogData));
                             // 发送到前端
                             sendWsByToken(token, JsonUtil.toJson(toC));
-
 
                         }
                     }
@@ -216,7 +215,7 @@ public class TcpClientContext {
      * @param msg       消息
      */
     public void read(TMessage msg) {
-        recvBlockQueue.add(msg);
+        revBlockQueue.add(msg);
         //this.write("reply:" + msg.getBody());
     }
 

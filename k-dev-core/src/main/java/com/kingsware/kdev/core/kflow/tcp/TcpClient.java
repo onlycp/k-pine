@@ -12,6 +12,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.codec.Delimiters;
 import io.netty.util.concurrent.GenericFutureListener;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Date;
@@ -28,17 +29,19 @@ public class TcpClient {
     private static final int MAX_MSG_LEN = 1024 * 1024 * 255 + 100;
 
     /** 客户端id **/
+    @Getter
     private final TcpClientContext context;
     /** 客户端id **/
+    @Getter
     private final String id;
-    private String ip;
-    private int port;
+    private final String ip;
+    private final int port;
     /** 接收字节 **/
     private long heartTime = new Date().getTime();
 
-    private NioEventLoopGroup workerGroup = new NioEventLoopGroup();
+    private final NioEventLoopGroup workerGroup = new NioEventLoopGroup();
     private ChannelHandlerContext channelHandlerContext;
-    private SocketHeadType socketHeadType;
+    private final SocketHeadType socketHeadType;
     private Bootstrap b = new Bootstrap();
 
     private static final AtomicInteger CONNECT_COUNT = new AtomicInteger(0);
@@ -55,7 +58,6 @@ public class TcpClient {
         final TcpClient myThis = this;
         new Thread(() -> {
             try {
-
                 b.group(workerGroup);
                 b.channel(NioSocketChannel.class);
                 b.option(ChannelOption.SO_KEEPALIVE, true);
@@ -91,17 +93,13 @@ public class TcpClient {
             else {
                 log.info("TCP连接成功，ip:{}, port:{}", ip, port);
             }
-        }).sync();
+         }).sync();
         f.channel().closeFuture().sync();
         return f;
     }
 
     public void iActive() {
         this.heartTime = new Date().getTime();
-    }
-
-    public TcpClientContext getContext() {
-        return this.context;
     }
 
     public void setChannelHandlerContext(ChannelHandlerContext channelHandlerContext) {
@@ -133,10 +131,6 @@ public class TcpClient {
         this.context.read(msg);
     }
 
-
-    public String getId() {
-        return id;
-    }
 
     /**
      * 发送消息

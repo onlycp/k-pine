@@ -400,10 +400,13 @@ public class UiConfig extends WebMvcConfigurationSupport {
                     else if (match.get(key) instanceof List) {
                         List<Object> list = (List<Object>) match.get(key);
                         for (int i = 0; i < list.size(); i++) {
-                            String translatedText = I18n.parseScript(appId, list.get(0).toString());
-                            translatedText = translatedText.replace("\\ ${","\\${");
-                            translatedText = translatedText.replace("$ ","$");
-                            list.set(i, translatedText);
+                            if (list.get(i) instanceof String) {
+                                String translatedText = I18n.parseScript(appId, list.get(0).toString());
+                                translatedText = translatedText.replace("\\ ${","\\${");
+                                translatedText = translatedText.replace("$ ","$");
+                                list.set(i, translatedText);
+                            }
+
                         }
                         match.put(key, list);
 
