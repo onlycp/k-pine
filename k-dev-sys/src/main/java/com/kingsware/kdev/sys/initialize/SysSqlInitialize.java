@@ -45,32 +45,13 @@ public class SysSqlInitialize implements SystemInitialize {
 //    private String initDbType;
     @Override
     public void execute() {
+
         // 执行sql脚本
         List<ExecutionFile> fileList = getFileList(getMaxExecuteVersion());
         //log.info("初始化数据... starting");
         fileList.stream().sorted((Comparator.comparingInt(ExecutionFile::getVersion))).forEach(this::executeSqlFile);
         //log.info("初始化数据... end");
-        // 初始化内置的逻辑编排
-        List<FlowInfo> flowInfoList = getNestFlows();
-        for (FlowInfo flowInfo: flowInfoList) {
 
-            KdbFlowQueryArgv kdbFlowQueryArgv = new KdbFlowQueryArgv();
-            kdbFlowQueryArgv.setFlowId(flowInfo.getFlowId());
-            List<FlowInfo> functionInfoList = DB.kdbApi().query(kdbFlowQueryArgv);
-            // 如果没有，则新增
-            if (functionInfoList.isEmpty()) {
-                String sql = "insert into flow (flowid,name,content,description) values (?,?,?,?)";
-                DB.byName("kingDB").executeUpdateSql(sql, flowInfo.getFlowId(), flowInfo.getName(), flowInfo.getContent(), flowInfo.getDescription());
-            }
-            else {
-                EditFlowInfo editFlowInfo = new EditFlowInfo();
-                editFlowInfo.setFlowId(flowInfo.getFlowId());
-                editFlowInfo.setContent(flowInfo.getContent());
-                editFlowInfo.setName(flowInfo.getName());
-                editFlowInfo.setDescription(flowInfo.getDescription());
-                DB.kdbApi().editFlow(editFlowInfo);
-            }
-        }
     }
 
     private int getMaxExecuteVersion() {
@@ -87,39 +68,7 @@ public class SysSqlInitialize implements SystemInitialize {
 
     }
 
-    /**
-     * 获取内置的逻辑编排列表
-     * @return
-     */
-    private List<FlowInfo> getNestFlows() {
-        List<FlowInfo> list = new ArrayList<>();
-        String path = ResourceUtils.CLASSPATH_URL_PREFIX + "logicFlow/**";
-        Resource[] resources = SpringContext.getResources(path);
-        if (resources == null) {
-            return list;
-        }
-        for(Resource resource : resources) {
-            String filename = resource.getFilename();
-            if (StringUtils.isEmpty(filename)) {
-                continue;
-            }
-            FlowInfo flow = new FlowInfo();
-            String name = filename.split("\\.")[0];
-            flow.setFlowId(name);
-            flow.setName(name);
-            flow.setDescription("内置编排");
-            flow.setCreateTime(System.currentTimeMillis());
-            flow.setUpdateTime(System.currentTimeMillis());
-            try (InputStream inputStream = resource.getInputStream()){
-                List<String> lines = FileUtils.readAllLine(inputStream);
-                flow.setContent(StringUtils.joinToString(lines, ""));
-            } catch (IOException e) {
-                flow.setContent("{}");
-            }
-            list.add(flow);
-        }
-        return list;
-    }
+
 
     private List<ExecutionFile> getFileList(int maxVersion) {
         List<ExecutionFile> resultList = new ArrayList<>();
