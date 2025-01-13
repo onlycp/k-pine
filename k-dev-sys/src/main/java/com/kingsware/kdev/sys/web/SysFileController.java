@@ -125,7 +125,8 @@ public class SysFileController extends BaseController {
         if (saveType == null) {
             saveType = 1;
         }
-        if (LicenseManager.getInstance().isUniopsApp()) {
+        String callMode = SpringContext.getBootProperties("app.k-flow.call-model", "");
+        if (LicenseManager.getInstance().isUniopsApp() || "sdk".equalsIgnoreCase(callMode)) {
             saveType = 1;
         }
         return BaseRet.success(sysFileService.upload(files, fileFrom, saveType));
