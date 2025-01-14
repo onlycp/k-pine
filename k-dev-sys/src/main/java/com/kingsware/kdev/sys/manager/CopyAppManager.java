@@ -85,21 +85,23 @@ public class CopyAppManager {
             return;
         }
         // 查询子流程
-        String faasContent = faasFlow.getContent();
-        List<String> childFaasFlowIds = JsonPath.read(faasContent, "$.node_definition[*].flowID");
+        if(copyContext.getDeepCopy() == 1){
+            String faasContent = faasFlow.getContent();
+            List<String> childFaasFlowIds = JsonPath.read(faasContent, "$.node_definition[*].flowID");
 
-        for (String childFaasId : childFaasFlowIds) {
-            // 查找子流程
-            SysLogicFlow childLogicFlow = DB.findOne(SysLogicFlow.class, "select * from sys_logic_flow where flow_id=?", childFaasId);
-            // 如果是个青松应用，当前是不拷贝基础数据，那就跳过
-            if (childLogicFlow == null ||  pineAppId.equalsIgnoreCase(childLogicFlow.getApplicationId()) && copyContext.getWithSystemData() == 0) {
-                continue;
+            for (String childFaasId : childFaasFlowIds) {
+                // 查找子流程
+                SysLogicFlow childLogicFlow = DB.findOne(SysLogicFlow.class, "select * from sys_logic_flow where flow_id=?", childFaasId);
+                // 如果是个青松应用，当前是不拷贝基础数据，那就跳过
+                if (childLogicFlow == null ||  pineAppId.equalsIgnoreCase(childLogicFlow.getApplicationId()) && copyContext.getWithSystemData() == 0) {
+                    continue;
+                }
+                // 如果已存在，则跳过
+                if (copyProcessData.getFaasFlowIds().contains(childLogicFlow.getId())) {
+                    continue;
+                }
+                this.copyFlowData(childLogicFlow.getId(), copyContext, copyProcessData);
             }
-            // 如果已存在，则跳过
-            if (copyProcessData.getFaasFlowIds().contains(childLogicFlow.getId())) {
-                continue;
-            }
-            this.copyFlowData(childLogicFlow.getId(), copyContext, copyProcessData);
         }
         // 加入到待拷贝列表
         String logicDbName = sysLogicFlow.getName();
