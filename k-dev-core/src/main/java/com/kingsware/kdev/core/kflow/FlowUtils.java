@@ -88,7 +88,7 @@ public class FlowUtils {
                     String valueStr = (String)value;
                     if (StringUtils.isNotEmpty(valueStr)) {
                         value = I18n.parseScript(context.getAppId(), valueStr);
-                        log.info("国际化处理:{}，原始值: {}, 国际化值：{}" ,humpKey, valueStr, value);
+                        //log.info("国际化处理:{}，原始值: {}, 国际化值：{}" ,humpKey, valueStr, value);
                     }
                 }
                 // 如果是复合值，需要将label和value同时返回

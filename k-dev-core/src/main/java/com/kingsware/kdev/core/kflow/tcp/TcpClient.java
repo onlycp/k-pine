@@ -49,9 +49,7 @@ public class TcpClient {
 
     public TcpClient(String ip, int port, boolean autoConnect, TcpClientContext context, SocketHeadType socketHeadType) {
         this.id = CONNECT_COUNT.getAndIncrement() + "";
-        /** ip **/
         this.ip = ip;
-        /** 端口 **/
         this.port = port;
         this.context = context;
         this.socketHeadType = socketHeadType;

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.jsonschema.JsonschemaMock;
@@ -14,6 +15,9 @@ import com.kingsware.kdev.core.kflow.bean.ErrorResult;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
 import com.kingsware.kdev.core.kflow.define.*;
+import com.kingsware.kdev.core.kflow.tcp.SocketHeadType;
+import com.kingsware.kdev.core.kflow.tcp.TReqMessage;
+import com.kingsware.kdev.core.kflow.tcp.TcpClientContext;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Expr;
@@ -627,6 +631,11 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             if (fieldMap != null) {
                 argvMap.putAll(fieldMap);
             }
+        }
+        // 判断是否调试，如果是调试，则通过faas
+        if (argv.getDebugger() != null && argv.getDebugger().size() > 0) {
+            TcpClientContext.getInstance().write(new TReqMessage(SocketHeadType.PINE, argv.getDebugger().get(0).getSerial(), "{}"));
+            TcpClientContext.getInstance().debugSessionMap.put(argv.getDebugger().get(0).getSerial(), KClientContext.getContext().getToken());
         }
         // 将请求的body加进去
         Map<String, Object> requestMap = new HashMap<>();

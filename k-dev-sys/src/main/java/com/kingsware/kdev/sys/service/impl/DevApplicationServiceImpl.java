@@ -315,9 +315,24 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         }
 
         // pine逻辑
-        long pineFlowCount = DB.batchSaveOrUpdate(devPine.getLogicFlows(), SysLogicFlow.class);
-        log.info("完成导入pine逻辑：{}", pineFlowCount);
-        importMessageMap.put(I18n.t("DevApplicationServiceImpl.logic", "逻辑编排"), pineFlowCount);
+        if (devPine.getLogicFlows() != null && !devPine.getLogicFlows().isEmpty()){
+            List<SysLogicFlow> currentFlows = DB.findList(SysLogicFlow.class, "select id, i18n_keys from sys_logic_flow");
+            Map<String, String> currentI18nMap = new HashMap<>();
+            for (SysLogicFlow flow: currentFlows) {
+                if (StringUtils.isNotEmpty(flow.getI18nKeys())) {
+                    currentI18nMap.put(flow.getId(), flow.getI18nKeys());
+                }
+            }
+            for (SysLogicFlow flow : devPine.getLogicFlows()) {
+                if (currentI18nMap.containsKey(flow.getId()) && StringUtils.isEmpty(flow.getI18nKeys())) {
+                    flow.setI18nKeys(currentI18nMap.get(flow.getId()));
+                }
+            }
+            long pineFlowCount = DB.batchSaveOrUpdate(devPine.getLogicFlows(), SysLogicFlow.class);
+            log.info("完成导入pine逻辑：{}", pineFlowCount);
+            importMessageMap.put(I18n.t("DevApplicationServiceImpl.logic", "逻辑编排"), pineFlowCount);
+        }
+
         // faas逻辑
         if (devPine.getKdbFlows() != null) {
             for (FlowInfo flowInfo : devPine.getKdbFlows()) {
