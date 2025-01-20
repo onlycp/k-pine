@@ -150,7 +150,7 @@ public class UiConfig extends WebMvcConfigurationSupport {
     public String getRouterPageHtml(String path, String token, Map<String, Object> extraData) {
         String indexPageHtmlFile = ui + "index.html";
         String html = FileUtils.readFileToString(new File(indexPageHtmlFile), StandardCharsets.UTF_8);
-        boolean enableSSR = SpringContext.getProperties("app.ui.enableSSR", "true").equalsIgnoreCase("false");
+        boolean enableSSR = SpringContext.getBoolean("app.ui.enableSSR", false);
         if (enableSSR) {
             Document doc = Jsoup.parse(html);
             // 选择所有的 <script> 标签

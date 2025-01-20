@@ -366,7 +366,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         }
         // faas函数
         if (devPine.getFunctions() != null) {
-            boolean enableImportFunction = SpringContext.getBoolean("app.import-function", false);
+            boolean enableImportFunction = SpringContext.getBoolean("app.import-function", true);
             if (enableImportFunction) {
                 for (Functions functions : devPine.getFunctions()) {
 

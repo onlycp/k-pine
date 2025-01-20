@@ -1,6 +1,8 @@
 package com.kingsware.kdev.sys.initialize;
 
 import com.kingsware.kdev.core.base.SystemInitialize;
+import com.kingsware.kdev.core.cache.license.LicenseManager;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.kflow.bean.KFlowUploadFile;
@@ -71,7 +73,12 @@ public class KAppInitialize {
                 }
                 else {
                     log.info("准备上传pine数据包，文件名:{}", file.getName());
-                    SysFile sysFile = FileManager.getInstance().register(file, "install", 2);
+                    String callMode = SpringContext.getBootProperties("app.k-flow.call-model", "");
+                    int saveType = 2;
+                    if (LicenseManager.getInstance().isUniopsApp() || "sdk".equalsIgnoreCase(callMode)) {
+                        saveType = 1;
+                    }
+                    SysFile sysFile = FileManager.getInstance().register(file, "install", saveType);
                     fileId = sysFile.getId();
                     log.info("完成上传pine数据包，文件ID:{}", sysFile.getId());
 

@@ -2,6 +2,7 @@ package com.kingsware.kdev.core.i18n;
 
 import com.kingsware.kdev.core.config.SysConst;
 import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.model.SysI18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.JsonUtil;
@@ -327,7 +328,12 @@ public class I18n {
 
             }
             if (!I18n.hasKey(appId, key)) {
-                I18n.create(appId,key, script);
+                boolean devMode = SpringContext.getBoolean("app.mode.dev", false);
+                // 只要开发模式下才创建
+                if (devMode) {
+                    I18n.create(appId,key, script);
+                }
+
             }
             String s =  I18n.t(appId, key, script);
             s = s.replace("\\ ${","\\${");
