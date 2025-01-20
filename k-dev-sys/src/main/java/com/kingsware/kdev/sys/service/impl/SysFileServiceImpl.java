@@ -73,7 +73,8 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
 
     private boolean isFileLocalToFaas() {
         String flag = SpringContext.getProperties("app.file-local-to-faas", "false");
-        return "true".equalsIgnoreCase(flag);
+        String callMode = SpringContext.getBootProperties("app.k-flow.call-model", "");
+        return "true".equalsIgnoreCase(flag) && (!"sdk".equalsIgnoreCase(callMode));
     }
 
     private final NonStaticResourceHttpRequestHandler nonStaticResourceHttpRequestHandler;
