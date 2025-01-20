@@ -19,9 +19,7 @@
   "node_definition": [
     {
       "auto": true,
-      "variables": {
-
-      },
+      "variables": {},
       "debug": false,
       "shape": "start",
       "extra": {
@@ -34,9 +32,7 @@
     },
     {
       "auto": true,
-      "variables": {
-
-      },
+      "variables": {},
       "debug": false,
       "shape": "end",
       "extra": {
@@ -49,9 +45,7 @@
     },
     {
       "auto": true,
-      "variables": {
-
-      },
+      "variables": {},
       "debug": false,
       "shape": "task",
       "extra": {
@@ -64,10 +58,8 @@
       "execute": {
         "script": {
           "type": "js",
-          "params": [
-
-          ],
-          "content": "const System = Java.type('java.lang.System')\n// 获取要执行的逻辑编排\nconst flowId = context.get('__flowId');\nconst taskId = context.get('__taskId');\nconst instanceId = context.get('__instanceId');\nlet  variables = getResult('variables')\nklog.info(`[X-TASK]-[${taskId}]-[${flowId}]开始执行`)\nif (!variables) {\n    variables = {}\n}\nconst taskInstanceId = instanceId + \".\" + taskId\nvariables['_taskId'] = taskId\nconst lck = kutils.getCache('x-task', taskInstanceId);\nif (lck) {\n    klog.info(`[X-TASK]-[${taskId}]-[${flowId}]任务正在执行中，将跳过此次执行`)\n}\nelse {\n    let t1 = System.currentTimeMillis()\n    let lastExecuteStatus = 1;\n    let errorMessage = '';\n    try {\n        kutils.setCache('x-task', taskInstanceId, '1')\n        kutils.dbCommand('MySql', 'update sys_task set last_execute_time=?, last_execute_status=? where id=?', [context.get('sys').get('when'), 2,  taskId])\n        const s = kutils.callFlow(flowId, JSON.stringify(variables));\n        klog.info(`[X-TASK]-[${taskId}]-[${flowId}]执行结果:` + JSON.stringify(s))\n        if (s.status != 0) {\n            errorMessage = s.errorMsg;\n            lastExecuteStatus = 0;\n        }\n    }\n    catch (e) {\n        const errorDetails = e instanceof Error ? `${e.message}\n${e.stack}` : JSON.stringify(e);\n        klog.info(`[X-TASK]-[${taskId}]-[${flowId}]执行异常: ${errorDetails}`);\n        errorMessage = errorDetails;\n        lastExecuteStatus = 0;\n    }\n    finally {\n        kutils.removeCache('x-task', taskInstanceId)\n    }\n    let t2 = System.currentTimeMillis()\n    if (lastExecuteStatus == 0) {\n        const sql = \"update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ? where id=?\";\n        const params = [lastExecuteStatus, (t2 - t1), errorMessage, taskId]\n        kutils.dbCommand('MySql', sql, params)\n    }\n    else {\n        const sql = \"update sys_task set last_execute_status=?, last_execute_take = ? where id=?\";\n        const params = [lastExecuteStatus, (t2 - t1), taskId]\n        kutils.dbCommand('MySql', sql, params)\n    }\n\n\n    klog.info(`[X-TASK]-[${taskId}]-[${flowId}]开始结束`)\n\n}\n\n"
+          "params": [],
+          "content": "const System = Java.type('java.lang.System')\nconst JSONObject = Java.type('com.alibaba.fastjson.JSONObject')\n// 获取要执行的逻辑编排\nconst flowId = context.get('__flowId');\nconst taskId = context.get('__taskId');\nconst instanceId = context.get('__instanceId');\nlet  variables = getResult('variables')\nklog.info(`[X-TASK]-[${taskId}]-[${flowId}]开始执行`)\nif (!variables) {\n    variables = {}\n}\n// 加入系统变量\nconst currentVariables = JSONObject.toJSON(context)\nconst sysVariables = JSON.parse(currentVariables);"
         }
       }
     }
