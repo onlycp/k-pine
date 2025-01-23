@@ -37,6 +37,7 @@ import com.kingsware.kdev.core.model.SysOperateLog;
 import com.kingsware.kdev.core.model.SysTask;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
+import com.kingsware.kdev.core.orm.kdb.TransactionManager;
 import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.core.util.jWi.JWildcard;
 import lombok.extern.slf4j.Slf4j;
@@ -49,11 +50,9 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
-import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
@@ -425,6 +424,15 @@ public class KAuthFilter implements Filter {
             if (!containUrl(request, url)) {
                 PageLoadManager.getInstance().endCalculate(request, response);
             }
+            // 释放线程变量
+            try {
+                KClientContext.clear();
+                TransactionManager.getInstance().clear();
+            }
+            catch (Exception ignored) {
+
+            }
+
 
         }
 

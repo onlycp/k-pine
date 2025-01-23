@@ -653,7 +653,7 @@ public class HttpUtil {
 
         HttpURLConnection connection = null;
         try {
-            log.info("流式下载文件开始:" + downloadUrl);
+//            log.info("流式下载文件开始:" + downloadUrl);
 //            ServletUtil.response().sendRedirect("/download/YeCongOA_784c88fa4c504b9285923a6d9bc9c1c3.zip?path=%2Fusr%2Flocal%2Fkfaas%2Fserver%2Fupload%2Fpackage");
             URL url = new URL(downloadUrl);
             connection = (HttpURLConnection) url.openConnection();

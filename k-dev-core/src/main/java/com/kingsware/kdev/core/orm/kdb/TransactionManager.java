@@ -3,12 +3,13 @@ package com.kingsware.kdev.core.orm.kdb;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.exception.TransactionException;
+import io.netty.util.concurrent.FastThreadLocal;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class TransactionManager {
     /** 事务id **/
-    private static ThreadLocal<TransactionCache> transactionCache = new ThreadLocal<>();
+    private static final FastThreadLocal<TransactionCache> transactionCache = new FastThreadLocal<>();
     private static TransactionManager instance;
 
     public static TransactionManager getInstance() {
@@ -31,6 +32,17 @@ public class TransactionManager {
             return null;
         }
         return cache;
+    }
+
+    /**
+     * 清理线程变量
+     */
+    public void clear() {
+        TransactionCache cache = transactionCache.get();
+        if (cache != null) {
+            transactionCache.remove();
+        }
+
     }
 
     /**

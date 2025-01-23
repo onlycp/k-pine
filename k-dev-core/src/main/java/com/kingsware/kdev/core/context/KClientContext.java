@@ -27,4 +27,9 @@ public class KClientContext {
         clientInfoThreadLocal.set(clientInfo);
     }
 
+
+    public static void clear() {
+        clientInfoThreadLocal.remove();
+    }
+
 }
