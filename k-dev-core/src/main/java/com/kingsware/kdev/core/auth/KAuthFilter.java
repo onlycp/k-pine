@@ -416,7 +416,7 @@ public class KAuthFilter implements Filter {
                     }
                 }
                 catch (Exception ignored) {
-                    ignored.printStackTrace();
+                    // ignored.printStackTrace();
                 }
             }
         }
