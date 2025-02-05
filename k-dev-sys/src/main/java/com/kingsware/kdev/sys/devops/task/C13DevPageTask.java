@@ -34,7 +34,7 @@ public class C13DevPageTask extends TableCopyTask {
     public void start(DataCopyParam context) {
         List<DevPage> list = DB.byName(DataCopyConst.PROD_DATA_SOURCE).findList(DevPage.class, "select * from dev_page");
         tatal = list.size();
-        DB.executeUpdateSql("delete from dev_page where id not in ('01ea280e2600403dae260824d74b7a1e')");
+//        DB.executeUpdateSql("delete from dev_page where id not in ('01ea280e2600403dae260824d74b7a1e')");
         List<List<DevPage>> lists = CollectUtils.splitList(list, 100);
         for (List<DevPage> devPages : lists) {
             DB.batchSaveOrUpdate(devPages, DevPage.class);
