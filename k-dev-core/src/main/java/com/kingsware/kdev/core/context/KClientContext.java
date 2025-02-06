@@ -28,6 +28,11 @@ public class KClientContext {
     }
 
 
+    public static void clear() {
+        clientInfoThreadLocal.remove();
+    }
+
+
     /**
      * 获取当前应用的标识
      *

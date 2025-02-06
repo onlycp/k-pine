@@ -314,7 +314,8 @@ public class KFaasInitialize implements SystemInitialize {
                     DB.kdbApi().refreshBaseFlow();
                     String createSchemaSql = String.format("CREATE DATABASE IF NOT EXISTS `%s` DEFAULT CHARSET utf8 COLLATE utf8_general_ci;", dbName);
                     DB.byName(initDs.getSourceName()).executeUpdateSql(createSchemaSql);
-                } catch (Exception ignored) {
+                }
+                catch (Exception ignored) {
                 }
 
             } else if ("postgresql".equalsIgnoreCase(jdbcUrl.getDbType())) {
