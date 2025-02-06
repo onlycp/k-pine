@@ -67,14 +67,17 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
             if (!pages.isEmpty()) {
                 page = pages.get(0);
             }
-            // 通过菜单去读取
-            pages = DB.findList(DevPageRet.class, " select * from dev_page where (path = ? or id = ?) and deleted=0 ", path, path);
-            if (!pages.isEmpty()) {
-                page = pages.get(0);
+            if (page == null) {
+                // 通过菜单去读取
+                pages = DB.findList(DevPageRet.class, " select * from dev_page where (path = ? or id = ?) and deleted=0 ", path, path);
+                if (!pages.isEmpty()) {
+                    page = pages.get(0);
+                }
+                else {
+                    throw BusinessException.serviceThrow(I18n.t("DevPageServiceImpl.pageNotFound", "找不到页面"));
+                }
             }
-            else {
-                throw BusinessException.serviceThrow(I18n.t("DevPageServiceImpl.pageNotFound", "找不到页面"));
-            }
+
         }
         else {
 //            log.info("请求页面信息:{}", path );
@@ -82,14 +85,17 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
             if (!pages.isEmpty()) {
                 page = pages.get(0);
             }
-            // 通过菜单去读取
-            pages =  DB.findList(DevPageRet.class, " select dp.* from dev_page dp left join sys_menu sm on (dp.id = sm.page_id and sm.menu_type='C' and sm.status=1) where sm.full_path=? and deleted=0 ", path);
-            if (!pages.isEmpty()) {
-                page = pages.get(0);
+            if (page == null) {
+                // 通过菜单去读取
+                pages =  DB.findList(DevPageRet.class, " select dp.* from dev_page dp left join sys_menu sm on (dp.id = sm.page_id and sm.menu_type='C' and sm.status=1) where sm.full_path=? and deleted=0 ", path);
+                if (!pages.isEmpty()) {
+                    page = pages.get(0);
+                }
+                else {
+                    throw BusinessException.serviceThrow(I18n.t("DevPageServiceImpl.pageNotFound", "找不到页面"));
+                }
             }
-            else {
-                throw BusinessException.serviceThrow(I18n.t("DevPageServiceImpl.pageNotFound", "找不到页面"));
-            }
+
         }
         if (StringUtils.isNotEmpty(page.getPageJson())) {
             page.setPageJson(UiConfig.i18nTranslatePage(page.getAppId(), page.getPageJson()));
