@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.ret;
 
+import com.kingsware.kdev.core.cache.license.License;
 import lombok.Data;
 
 /**
@@ -24,5 +25,7 @@ public class LicenseRet {
     private String mac;
     /** 错误信息 **/
     private String errorMessage;
-
+    private Integer serverPort;
+    private License licenseData;
+    private String license;
 }
