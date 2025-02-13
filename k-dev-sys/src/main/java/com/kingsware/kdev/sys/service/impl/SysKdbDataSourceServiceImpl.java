@@ -25,6 +25,9 @@ import com.kingsware.kdev.sys.argv.SysKdbDataSourceQueryArgv;
 import com.kingsware.kdev.sys.model.DevApplication;
 import com.kingsware.kdev.sys.ret.SysKdbDataSourceRet;
 import com.kingsware.kdev.sys.service.SysKdbDataSourceService;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -44,6 +47,7 @@ import java.util.HashMap;
 @Service
 public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysKdbDataSourceService {
 
+    private static final Logger log = LoggerFactory.getLogger(SysKdbDataSourceServiceImpl.class);
     /** 分隔符 **/
     private final String SPLIT_TAG = "\\\0a01";
 
@@ -167,6 +171,7 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
             appGit.addCommitFile(gitFile, gitCommit);
         }
         catch (Exception e) {
+            log.warn("新增数据源失败", e );
             throw BusinessException.serviceThrow(I18n.t("SysKdbDataSource.tip.addFail", "数据源新增失败，请检查连接信息！"));
         }
 
@@ -249,7 +254,8 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
             appGit.addCommitFile(gitFile, gitCommit);
         }
         catch (Exception e) {
-            throw BusinessException.serviceThrow(I18n.t("SysKdbDataSource.tip.addFail", "数据源新增失败，请检查连接信息！"));
+            log.warn("编辑数据源失败", e );
+            throw BusinessException.serviceThrow(I18n.t("SysKdbDataSource.tip.addFail", "数据源编辑失败，请检查连接信息！") + e.getMessage());
         }
 
     }
