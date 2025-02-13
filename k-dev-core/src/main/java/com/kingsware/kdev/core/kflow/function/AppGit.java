@@ -12,6 +12,7 @@ import com.kingsware.kdev.core.orm.kdb.KdbRet;
 import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.FaasInvoke;
 import com.kingsware.kdev.core.util.JsonUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.Map;
  * @date 2024/8/29 09:25
  */
 @SuppressWarnings("all")
+@Slf4j
 public class AppGit {
 
     private final String repoId;
@@ -56,6 +58,7 @@ public class AppGit {
             throw BusinessException.serviceThrow(ret.getMessage());
         }
         String responseBody = ret.getResponseBody();
+        log.info("executeScript:{}", responseBody);
         KOperationRet oper = JsonUtil.toBean(responseBody, KOperationRet.class);
         if (oper.getStatus() != 0) {
             throw BusinessException.serviceThrow(ret.getMessage());
