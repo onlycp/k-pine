@@ -338,6 +338,13 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
             Set<String> set = new HashSet<>(Arrays.asList(arr));
             // 公共数据源 appId is null or appId = ''
             retList.removeIf(ret -> !set.contains(ret.getId()));
+            // [KPINE-1075] 依赖数据源 kingDB
+            boolean hasKingDB = retList.stream().anyMatch(ret -> ret.getId().equalsIgnoreCase("kingDB"));
+            if(!hasKingDB && set.contains("kingDB")){
+                SysKdbDataSourceRet sourceRet = new SysKdbDataSourceRet();
+                sourceRet.setId("kingDB");
+                retList.add(sourceRet);
+            }
         }
         // 排序
         retList.sort(Comparator.comparing(SysKdbDataSourceRet::getId));
