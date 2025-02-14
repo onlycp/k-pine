@@ -6,6 +6,7 @@ import com.kingsware.kdev.core.enums.RetEnum;
 import com.kingsware.kdev.core.excel.ExcelWorker;
 import com.kingsware.kdev.core.excel.KExcel;
 import com.kingsware.kdev.core.excel.RegionDefine;
+import com.kingsware.kdev.core.excel.format.RegionDateTimeFormat;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
@@ -95,7 +96,7 @@ public class SysOperateLogServiceImpl extends BaseServiceImpl implements SysOper
         defineList.add(RegionDefine.builder().propName("requestMethod").labelName(I18n.t("SysOperate.field.requestMethod", "请求方式")).build());
         defineList.add(RegionDefine.builder().propName("responseBody").labelName(I18n.t("SysOperate.field.responseBody", "响应内容体")).build());
         defineList.add(RegionDefine.builder().propName("operator").labelName(I18n.t("SysOperate.field.operator", "用户名")).build());
-        defineList.add(RegionDefine.builder().propName("operateTime").labelName(I18n.t("SysOperate.field.operateTime", "操作时间")).build());
+        defineList.add(RegionDefine.builder().propName("operateTime").labelName(I18n.t("SysOperate.field.operateTime", "操作时间")).format(new RegionDateTimeFormat()).build());
         // 导出
         KExcel kExcel = KExcel.fromDataList(I18n.t("SysOperate.title", "服务日志" ) +".xls", I18n.t("SysOperate.title", "服务日志" ), defineList, pageDataRet.getList());
         ExcelWorker.getInstance().writeToWeb(kExcel);
