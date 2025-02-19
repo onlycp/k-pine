@@ -368,12 +368,24 @@ public class UiConfig extends WebMvcConfigurationSupport {
         }
         List<Map<String, Object>> matches = context.read("$..[?(" + StringUtils.joinToString(pathKeys, " || ") + ")]");
         for (Map<String, Object> match : matches) {
+            String s = JsonUtil.toJson(match);
+            if (s.contains("菜单")) {
+                //log.info("菜单:{}", s);
+            }
+
             for (String key : matchKeys) {
                 if (match.containsKey(key)) {
                     if (match.get(key) instanceof String) {
                         String text = match.get(key).toString();
                         if (StringUtils.containsChinese(text)) {
+                            if (text.contains("菜单")) {
+                                //log.info("菜单:{}", text);
+                            }
                             if (key.equals("tpl") || key.equalsIgnoreCase("description") || key.equalsIgnoreCase("msg") ) {
+                                text = text.trim();
+                                if (text.startsWith("<") && text.endsWith(">" )) {
+                                    //text = StringUtils.fixUnclosedTags(text);
+                                }
                                 org.w3c.dom.Document doc = StringUtils.parseXml(text);
                                 if (doc == null) {
                                     String translatedText = I18n.parseScript(appId, text);

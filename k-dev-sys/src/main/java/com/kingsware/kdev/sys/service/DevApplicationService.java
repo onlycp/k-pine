@@ -4,8 +4,10 @@ import com.kingsware.kdev.core.base.BaseService;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.sys.argv.*;
+import com.kingsware.kdev.sys.bean.ResourceFile;
 import com.kingsware.kdev.sys.ret.DevApplicationRet;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -59,6 +61,13 @@ public interface DevApplicationService extends BaseService {
      * @param json json
      */
     String importApp(String json, String teamId);
+
+    /**
+     * 导入资源
+     * @param resourceFileList
+     * @return
+     */
+    String importResources(List<ResourceFile> resourceFileList);
 
 
     /**

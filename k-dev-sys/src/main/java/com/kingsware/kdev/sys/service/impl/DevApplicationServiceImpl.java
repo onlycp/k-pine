@@ -29,6 +29,7 @@ import com.kingsware.kdev.core.orm.kdb.*;
 import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.sys.argv.*;
 import com.kingsware.kdev.sys.bean.CopyProcessData;
+import com.kingsware.kdev.sys.bean.ResourceFile;
 import com.kingsware.kdev.sys.manager.CopyAppManager;
 import com.kingsware.kdev.sys.model.*;
 import com.kingsware.kdev.sys.ret.DevApplicationRet;
@@ -507,6 +508,11 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         log.info(result);
         return result;
 
+    }
+
+    @Override
+    public String importResources(List<ResourceFile> resourceFileList) {
+        return "";
     }
 
 //    public static void main(String[] args) {
