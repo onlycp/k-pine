@@ -1,0 +1,1 @@
+ALTER TABLE sys_config ADD is_public NUMBER(10) DEFAULT 0 NULL;
