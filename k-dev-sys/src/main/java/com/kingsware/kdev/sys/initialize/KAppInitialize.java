@@ -88,6 +88,7 @@ public class KAppInitialize {
                 // 移除当前文件
                 log.info("开始移除应用: {}", file.getName());
                 Files.delete(file.toPath());
+                log.info("pine应用包安装完成: {}", file.getName());
             }
             catch (Exception e) {
                 if (StringUtils.isNotEmpty(fileId)) {
@@ -97,7 +98,7 @@ public class KAppInitialize {
                 log.error("文件读取失败: ", e);
 
             }
-            log.info("pine应用包安装完成: {}", file.getName());
+
 
         }
     }

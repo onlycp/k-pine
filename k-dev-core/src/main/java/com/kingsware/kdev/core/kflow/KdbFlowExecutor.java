@@ -17,8 +17,11 @@ import com.kingsware.kdev.core.orm.exception.TransactionException;
 import com.kingsware.kdev.core.orm.kdb.KdbArgv;
 import com.kingsware.kdev.core.orm.kdb.KdbRet;
 import com.kingsware.kdev.core.orm.kdb.TransactionManager;
+import com.kingsware.kdev.core.util.ExceptionUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -229,6 +232,20 @@ public class KdbFlowExecutor {
     public KdbFlowResult execute(String flowId, String subFlowIds, Map<String, Object> params, KFlowContext context, boolean debug, boolean sync) {
         return this.execute(flowId, subFlowIds, params, context, debug, sync, new ArrayList<>());
     }
+
+    /**
+     *  执行流程
+     * @param flowId        流程id
+     * @param params       参数对
+     * @param context      上下文信息
+     * @return             执行结果
+     */
+    public Mono<KdbFlowResult> execute(String flowId, String subFlowIds, Map<String, Object> params, KFlowContext context) {
+        return Mono.fromCallable(() -> this.execute(flowId, subFlowIds, params, context, false, true, new ArrayList<>()))
+                .subscribeOn(Schedulers.boundedElastic()) // 使用自定义线程池
+                .doOnNext(result -> log.info("Flow {} executed with result: {}", flowId, result));
+    }
+
 
 
 
