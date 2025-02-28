@@ -3,10 +3,14 @@ package com.kingsware.kdev.sys.service.impl;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.kflow.bean.ErrorResult;
+import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.BeanUtils;
+import com.kingsware.kdev.core.util.FaasInvoke;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.DevPageHistoryArgv;
 import com.kingsware.kdev.sys.argv.DevPageHistoryQueryArgv;
@@ -15,6 +19,9 @@ import com.kingsware.kdev.sys.model.DevPageHistory;
 import com.kingsware.kdev.sys.ret.DevPageHistoryRet;
 import com.kingsware.kdev.sys.service.DevPageHistoryService;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 业务实现类
@@ -55,6 +62,8 @@ public class DevPageHistoryServiceImpl extends BaseServiceImpl implements DevPag
             model.setPageJson(argv.getPageJson());
             // 保存
             DB.update(model);
+            // 提交git
+            this.gitCommit(argv.getPageId(), null);
         }
     }
 
@@ -74,6 +83,16 @@ public class DevPageHistoryServiceImpl extends BaseServiceImpl implements DevPag
     public void delete(MultiIdArgv argv) {
         for (String id: argv.getIds()) {
             DB.delete(DevPageHistory.class, id);
+        }
+    }
+
+    public void gitCommit(String id, String message) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", id);
+        params.put("message", message);
+        KdbFlowResult result = FaasInvoke.callFlow("9bcf44ad1eba4b1894a18937245b8db3", params);
+        if (result.getData() instanceof ErrorResult) {
+            throw BusinessException.serviceThrow(result.getExceptionStack());
         }
     }
 }

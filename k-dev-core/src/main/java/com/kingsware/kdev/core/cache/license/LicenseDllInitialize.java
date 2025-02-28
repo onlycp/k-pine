@@ -42,6 +42,10 @@ public class LicenseDllInitialize implements SystemInitialize {
 
         String osName = System.getProperty("os.name").toLowerCase();
         String osArch = System.getProperty("os.arch").toLowerCase();
+//        System.getProperty()
+        if (osName.toLowerCase().contains("win")) {
+            System.setProperty("jna.encoding", "UTF-8");
+        }
         String libFileName = "";
         String targetFileName = "";
         String libName = "k-license";

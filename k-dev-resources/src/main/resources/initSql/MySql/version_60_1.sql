@@ -1,4 +1,4 @@
-ALTER TABLE `open_api_log` ADD COLUMN `app_id` varchar(36) COMMENT '应用id' ;
+ALTER TABLE `open_api_log` ADD COLUMN `api_id` varchar(36) COMMENT '接口id' ;
 
 CREATE TABLE `dev_model_latest` (
     `id` varchar(36) NOT NULL COMMENT '主键ID',
