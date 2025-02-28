@@ -153,6 +153,7 @@ license.error.1,064b3b44b85a45fe87fcce88d72b2519,许可证未生效,許可證未
 permission.api-forbidden,064b3b44b85a45fe87fcce88d72b2519,接口无权限,接口無權限,No permission to access the API
 KAuthFilter.openApi.empty,064b3b44b85a45fe87fcce88d72b2519,接入商ID为空！,接入商ID為空！,Partner ID is empty!
 KAuthFilter.openApi.hasnot,064b3b44b85a45fe87fcce88d72b2519,接入商不存在！,接入商不存在！,Partner does not exist!
+KAuthFilter.openApi.enable,064b3b44b85a45fe87fcce88d72b2519,接入商未生效！,接入商未生效！,Partner ID is not effective!
 KAuthFilter.openApi.expired,064b3b44b85a45fe87fcce88d72b2519,接入商已过期！,接入商已過期！,Partner ID is expired!
 KAuthFilter.openApi.authFail,064b3b44b85a45fe87fcce88d72b2519,接口未授权,接口未授權,API not authorized
 KAuthFilter.openApi.timestamp,064b3b44b85a45fe87fcce88d72b2519,缺少时间戳参数: timestamp,缺少時間戳參數: timestamp,Missing timestamp parameter: timestamp

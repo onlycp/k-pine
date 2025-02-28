@@ -58,6 +58,20 @@ public class OpenApiManager {
     }
 
     /**
+     * 接入商是否生效
+     * @param accessId  接入商id
+     */
+    public boolean isEnable(String accessId) {
+        if (hasAccess(accessId)){
+            String validDate = this.accessor.get(accessId).getValidDate();
+            if (validDate != null) {
+                return LocalDate.now().isEqual(LocalDate.parse(validDate)) || LocalDate.now().isAfter(LocalDate.parse(validDate));
+            }
+        }
+        return false;
+    }
+
+    /**
      * 接入商是否过期
      * @param accessId  接入商id
      */
