@@ -438,6 +438,11 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             validateFilePermission(file.getId(),  file.getFilePath());
             fileName = file.getFileName();
 
+            // 如果是自动转为faas的，那么新上传的文件也改为faas
+            if (!isFileLocalToFaas() && file.getSaveType() == 2) {
+                file.setSaveType(1);
+            }
+
             // 通过ID找得到文件，按数据库里的存储类型读文件
             if (file.getSaveType() == 0) {
                 try {
