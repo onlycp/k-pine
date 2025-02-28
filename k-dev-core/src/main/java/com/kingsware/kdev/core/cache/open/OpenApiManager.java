@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.cache.open;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -52,6 +53,20 @@ public class OpenApiManager {
     public boolean hasOpenApi(String accessId, String apiCode) {
         if (hasAccess(accessId)) {
             return this.accessor.get(accessId).getApiCodes().contains(apiCode);
+        }
+        return false;
+    }
+
+    /**
+     * 接入商是否过期
+     * @param accessId  接入商id
+     */
+    public boolean isExpired(String accessId) {
+        if (hasAccess(accessId)){
+            String invalidDate = this.accessor.get(accessId).getInvalidDate();
+            if (invalidDate != null) {
+                return LocalDate.now().isAfter(LocalDate.parse(invalidDate));
+            }
         }
         return false;
     }

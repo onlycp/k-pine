@@ -842,6 +842,9 @@ public class KAuthFilter implements Filter {
         if (!OpenApiManager.getInstance().hasAccess(accessId)) {
             throw BusinessException.serviceThrow(I18n.t("KAuthFilter.openApi.hasnot", "接入商不存在！"));
         }
+        if(OpenApiManager.getInstance().isExpired(accessId)) {
+            throw BusinessException.serviceThrow(I18n.t("KAuthFilter.openApi.expired", "接入商已过期！"));
+        }
         if (!OpenApiManager.getInstance().hasOpenApi(accessId, apiInfo.getApiCode())) {
             throw BusinessException.serviceThrow(I18n.t("KAuthFilter.openApi.authFail","接口未授权"));
         }
