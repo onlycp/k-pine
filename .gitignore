@@ -15,3 +15,5 @@
 /webapps/
 /k-dev-app-with-ops/src/main/resources/ui
 ui
+res
+.vscode
