@@ -34,7 +34,7 @@ public class I18n {
     /**
      * 国际化数据
      */
-    private static Map<String, AppI18n> appI18nData = new HashMap<>();
+    private static final Map<String, AppI18n> appI18nData = new HashMap<>();
 
 
     /**
@@ -166,14 +166,14 @@ public class I18n {
         String message = null;
 
         // 尝试从特定应用程序ID的消息数据中获取消息
-        if (i18nData.containsKey(key)) {
+        if (Objects.requireNonNull(i18nData).containsKey(key)) {
             message = i18nData.get(key).get(lang);
         }
 
         // 如果消息为空且语言代码不为空，则尝试从公共消息数据中获取消息
         if (StringUtils.isEmpty(message)) {
             Map<String, Map<String, String>> publicI18nData = getI18nData(SysConst.pineAppId);
-            if (publicI18nData.containsKey(key)) {
+            if (Objects.requireNonNull(publicI18nData).containsKey(key)) {
                 message = publicI18nData.get(key).get(lang);
             }
         }
@@ -205,7 +205,7 @@ public class I18n {
             if (i18nData == null) {
                 i18nData = getI18nData(SysConst.pineAppId);
             }
-            if (i18nData.containsKey(key)) {
+            if (Objects.requireNonNull(i18nData).containsKey(key)) {
                 // 尝试用特定语言获取消息
                 String str = getMessage(appId, key, lang());
                 // 如果获取的消息为空或仅含空格，则回退到默认消息
@@ -327,11 +327,11 @@ public class I18n {
                 }
 
             }
-            if (!I18n.hasKey(appId, key)) {
+            if (!I18n.hasKey(appId, key) &&  !I18n.hasKey(SysConst.pineAppId, key)) {
                 boolean devMode = SpringContext.getBoolean("app.mode.dev", false);
                 // 只要开发模式下才创建
                 if (devMode) {
-                    I18n.create(appId,key, script);
+                    I18n.create(appId, key, script);
                 }
 
             }
