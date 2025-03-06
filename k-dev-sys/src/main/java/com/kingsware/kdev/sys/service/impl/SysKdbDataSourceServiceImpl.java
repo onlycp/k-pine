@@ -3,6 +3,7 @@ package com.kingsware.kdev.sys.service.impl;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
@@ -215,9 +216,15 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
             retList.add(toRet(infoL, argv.isCrud()));
         }
         // 按应用id过滤
-        String appId = ServletUtil.request().getHeader("_request_app");
+        String appId = KClientContext.getContext().getRequest().getHeader("_request_app");
+        // nginx 默认不转发带下划线的header，所以获取_request_app之后再获取一次 appId 防止为空。
+        // 之所以优先使用 _request_app 是因为切换应用时 _request_app 会实时变化，但是 appId 不会实时更新。
+        if(StringUtils.isEmpty(appId)) {
+            appId = KClientContext.getContext().getRequest().getHeader("appId");
+        }
         if (StringUtils.isNotEmpty(appId)) {
-            retList.removeIf(ret -> !appId.equals(ret.getAppId()) && StringUtils.isNotEmpty(ret.getAppId()));
+            String finalAppId = appId;
+            retList.removeIf(ret -> !finalAppId.equals(ret.getAppId()) && StringUtils.isNotEmpty(ret.getAppId()));
         } else {
             retList.removeIf(ret -> StringUtils.isNotEmpty(ret.getAppId()));
         }

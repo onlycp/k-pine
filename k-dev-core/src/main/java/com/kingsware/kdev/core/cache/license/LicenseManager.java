@@ -77,6 +77,11 @@ public class LicenseManager {
 
     }
 
+    public String getLicense() {
+        loadLicense();
+        return this.license;
+    }
+
 
 
 
@@ -120,6 +125,10 @@ public class LicenseManager {
         return this.kLicenseLibrary.GetMachineSN();
     }
 
+    public Integer getServerPort() {
+        return Integer.parseInt(SpringContext.getBootProperties("server.port", "0"));
+    }
+
     /**
      * 获取license状态
      *
@@ -130,7 +139,9 @@ public class LicenseManager {
             lic = "";
         }
         //  获取端口
-        String port = SpringContext.getBootProperties("server.port", "0") ;
+        String port = getServerPort().toString();
+        log.info("license : {}, server port:{}", lic, port);
+        log.info("license data:{}", this.kLicenseLibrary.GetLicenseData(lic));
         int status = this.kLicenseLibrary.ValidateLicense(lic, port);
         if (status != 2) {
             return status;
