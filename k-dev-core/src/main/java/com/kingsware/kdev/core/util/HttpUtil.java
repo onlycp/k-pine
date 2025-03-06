@@ -203,86 +203,86 @@ public class HttpUtil {
 
     public static String doPost(String apiUrl, String body, Map<String, String> headerMap) throws IOException {
         long t1 = System.currentTimeMillis();
+//        try {
+//            OkHttpReactiveClient client = SpringContext.getBean(OkHttpReactiveClient.class);
+////            return client.doPost(apiUrl, body, headerMap).block();
+//            return client.doPostSync(apiUrl, body, headerMap);
+//        }
+//        finally {
+//            if (KClientContext.getContext() != null) {
+////                log.info("{}  {}ms", apiUrl, System.currentTimeMillis() - t1);
+//            }
+//
+//        }
+
+        System.setProperty("networkaddress.cache.ttl", "0");
+        System.setProperty("networkaddress.cache.negative.ttl", "0");
+
+        HttpURLConnection connection = null;
+        OutputStream outputStream = null;
+        InputStream inputStream = null;
+        BufferedReader reader = null;
+        StringBuilder responseBody = new StringBuilder();
+
         try {
-            OkHttpReactiveClient client = SpringContext.getBean(OkHttpReactiveClient.class);
-//            return client.doPost(apiUrl, body, headerMap).block();
-            return client.doPostSync(apiUrl, body, headerMap);
-        }
-        finally {
-            if (KClientContext.getContext() != null) {
-//                log.info("{}  {}ms", apiUrl, System.currentTimeMillis() - t1);
+            URL url = new URL(apiUrl);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setDoOutput(true);
+            // 设置高级DNS解析器
+            connection.setUseCaches(false);
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+            // 设置超时时间
+            connection.setConnectTimeout(5 * 1000);
+            if (apiUrl.contains("/api/async/execute")) {
+                connection.setReadTimeout(5 * 1000);
+            }
+            else {
+                String httpReadTimeout = SpringContext.getProperties("app.http-read-timeout", (5 * 60 * 1000)+"");
+                connection.setReadTimeout(Integer.parseInt(httpReadTimeout));
             }
 
-        }
+            if (headerMap!= null && !headerMap.isEmpty()) {
+                headerMap.forEach(connection::setRequestProperty);
+            }
 
-//        System.setProperty("networkaddress.cache.ttl", "0");
-//        System.setProperty("networkaddress.cache.negative.ttl", "0");
-//
-//        HttpURLConnection connection = null;
-//        OutputStream outputStream = null;
-//        InputStream inputStream = null;
-//        BufferedReader reader = null;
-//        StringBuilder responseBody = new StringBuilder();
-//
-//        try {
-//            URL url = new URL(apiUrl);
-//            connection = (HttpURLConnection) url.openConnection();
-//            connection.setDoOutput(true);
-//            // 设置高级DNS解析器
-//            connection.setUseCaches(false);
-//            connection.setRequestMethod("POST");
-//            connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-//            // 设置超时时间
-//            connection.setConnectTimeout(5 * 1000);
-//            if (apiUrl.contains("/api/async/execute")) {
-//                connection.setReadTimeout(5 * 1000);
-//            }
-//            else {
-//                String httpReadTimeout = SpringContext.getProperties("app.http-read-timeout", (5 * 60 * 1000)+"");
-//                connection.setReadTimeout(Integer.parseInt(httpReadTimeout));
-//            }
-//
-//            if (headerMap!= null && !headerMap.isEmpty()) {
-//                headerMap.forEach(connection::setRequestProperty);
-//            }
-//
-//            outputStream = connection.getOutputStream();
-//            outputStream.write(body.getBytes(StandardCharsets.UTF_8));
-//            outputStream.flush();
-//
-//            int responseCode = connection.getResponseCode();
-//
-//            if (responseCode == HttpURLConnection.HTTP_OK) {
-//                inputStream = connection.getInputStream();
-//                reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-//
-//                String line;
-//                while ((line = reader.readLine()) != null) {
-//                    responseBody.append(line);
-//                }
-//            } else {
-//                throw new IOException("HTTP POST request failed with response code: " + responseCode);
-//            }
-//        } finally {
-//            if (outputStream != null) {
-//                outputStream.close();
-//            }
-//            if (reader != null) {
-//                reader.close();
-//            }
-//            if (inputStream != null) {
-//                inputStream.close();
-//            }
-//            if (connection != null) {
-//                connection.disconnect();
-//
-//            }
-//        }
-//        String response = responseBody.toString();
-//        if (response.length() > 1024 * 500) {
-//            // log.error("请求响应内容过大，请检查接口是否有返回大量数据，接口地址：{}, 长度:{}, 参数:{}", apiUrl, response.length(), StringUtils.retrench(body, 500));
-//        }
-//        return responseBody.toString();
+            outputStream = connection.getOutputStream();
+            outputStream.write(body.getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+
+            int responseCode = connection.getResponseCode();
+
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                inputStream = connection.getInputStream();
+                reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    responseBody.append(line);
+                }
+            } else {
+                throw new IOException("HTTP POST request failed with response code: " + responseCode);
+            }
+        } finally {
+            if (outputStream != null) {
+                outputStream.close();
+            }
+            if (reader != null) {
+                reader.close();
+            }
+            if (inputStream != null) {
+                inputStream.close();
+            }
+            if (connection != null) {
+                connection.disconnect();
+
+            }
+        }
+        String response = responseBody.toString();
+        if (response.length() > 1024 * 500) {
+            // log.error("请求响应内容过大，请检查接口是否有返回大量数据，接口地址：{}, 长度:{}, 参数:{}", apiUrl, response.length(), StringUtils.retrench(body, 500));
+        }
+        return responseBody.toString();
     }
 
 
