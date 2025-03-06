@@ -1,0 +1,1 @@
+ALTER TABLE sys_config ADD is_public int NULL DEFAULT '0' COMMENT '是否是公开的配置，公开的配置未登录也可以查看';

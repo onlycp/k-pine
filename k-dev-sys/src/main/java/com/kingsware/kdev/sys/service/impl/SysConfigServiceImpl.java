@@ -74,6 +74,7 @@ public class SysConfigServiceImpl extends BaseServiceImpl implements SysConfigSe
             model.setValue(argv.getValue());
         }
         model.setIsSys(argv.getIsSys());
+        model.setIsPublic(argv.getIsPublic());
         model.setNote(argv.getNote());
         // 校验
         checkUnique(model);
