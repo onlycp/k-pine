@@ -314,6 +314,7 @@ public class KAuthFilter implements Filter {
                         if (api.getApiFlowId().equalsIgnoreCase("a20fd82c126947f9ab3b599001df6126")) {
                             log.info("用时：1");
                         }
+                        argvMap.put("openApiFlag", isOpenApi || argvMap.containsKey("accessId") );
                         callByFlow(request, response, api, path, argvMap, requestBody);     if (api.getApiFlowId().equalsIgnoreCase("a20fd82c126947f9ab3b599001df6126")) {
                             log.info("用时：2");
                         }
@@ -717,11 +718,18 @@ public class KAuthFilter implements Filter {
                 if (api.getApiFlowId().equalsIgnoreCase("a20fd82c126947f9ab3b599001df6126")) {
                     log.info("用时：3");
                 }
+
                 if (StringUtils.isNotEmpty(api.getApiResultHandler()) && "user_json".equalsIgnoreCase(api.getApiResultHandler())) {
                     ServletUtil.responseJson(response, result.getData());
                 }
                 else {
-                    ServletUtil.responseJson(response, FlowUtils.toJsonResult(result.getData(), result.getLog(), result.getExceptionStack()));
+                    if (argvMap.containsKey("openApiFlag") && (boolean)argvMap.get("openApiFlag") != true) {
+                        ServletUtil.responseJsonWithEncrypt(response, FlowUtils.toJsonResult(result.getData(), result.getLog(), result.getExceptionStack()));
+                    }
+                    else {
+                        ServletUtil.responseJson(response, FlowUtils.toJsonResult(result.getData(), result.getLog(), result.getExceptionStack()));
+
+                    }
                 }
                 if (api.getApiFlowId().equalsIgnoreCase("a20fd82c126947f9ab3b599001df6126")) {
                     log.info("用时：4");
