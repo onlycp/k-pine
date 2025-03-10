@@ -24,6 +24,8 @@ public class SysConfigRet extends BaseManageRet {
     private String value;
     /** 是否系统内置 */
     private Integer isSys;
+    /** 是否开放配置 */
+    private Integer isPublic;
     /** 备注 */
     private String note;
     /** 所属应用ID **/

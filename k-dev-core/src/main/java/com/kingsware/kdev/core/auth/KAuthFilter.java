@@ -200,7 +200,7 @@ public class KAuthFilter implements Filter {
             ContentCachingResponseWrapper wrapperResponse = null;
             String path = "";
             // 处理限流
-            int limit = SpringContext.getInt("app.rate-limit.max", 300);
+            int limit = SpringContext.getInt("app.rate-limit.max", 1000);
             if (!rateLimiter.tryAcquire(limit)) {
                 log.info("Too many requests at the moment. Please try again later. {} > {} ",  rateLimiter.getCount(), limit);
                 ServletUtil.responseJson((HttpServletResponse)servletResponse, BaseRet.failMessage("Too many requests at the moment. Please try again later."));
@@ -208,7 +208,7 @@ public class KAuthFilter implements Filter {
             }
             try {
                 // 计数器
-                int requestInQueueMax = SpringContext.getInt("app.request-in-queue.max", 80);
+                int requestInQueueMax = SpringContext.getInt("app.request-in-queue.max", 1000);
                 if (currentInQueueCount.incrementAndGet() > requestInQueueMax) {
                     log.info("The current request queue is too long. Please try again later. {} > {} ", currentInQueueCount.get(), requestInQueueMax);
                     ServletUtil.responseJson((HttpServletResponse)servletResponse, BaseRet.failMessage("The current request queue is too long. Please try again later."));
@@ -314,6 +314,7 @@ public class KAuthFilter implements Filter {
                         if (api.getApiFlowId().equalsIgnoreCase("a20fd82c126947f9ab3b599001df6126")) {
                             log.info("用时：1");
                         }
+                        argvMap.put("openApiFlag", isOpenApi || argvMap.containsKey("accessId") );
                         callByFlow(request, response, api, path, argvMap, requestBody);     if (api.getApiFlowId().equalsIgnoreCase("a20fd82c126947f9ab3b599001df6126")) {
                             log.info("用时：2");
                         }
@@ -377,6 +378,7 @@ public class KAuthFilter implements Filter {
             finally {
                 // 减数
                 currentInQueueCount.decrementAndGet();
+
                 int takeTime = (int)(System.currentTimeMillis()-t1);
                 if (argvMap.isEmpty()) {
                     argvMap = ServletUtil.getRequestParams(api, path, request, requestBody, false);
@@ -494,6 +496,11 @@ public class KAuthFilter implements Filter {
     }
 
     private void saveOperateLog(String url, String requestMethod, int responseCode,  String errorMessage, int takeTime, String requestBody, String responseBody, CallType callType, ApiInfo api, ApiDefine apiDefine, HttpServletRequest request) {
+        String enable = SpringContext.getProperties("app.log.enable", "true");
+        if ("false".equalsIgnoreCase(enable)) {
+            return;
+        }
+//        log.info("保存操作日志:{}", enable);
         String opertator = KClientContext.getContext().getUserInfo() != null ? KClientContext.getContext().getUserInfo().getUsername() : "";
         // 保存操作日志
         SysOperateLog operateLog = new SysOperateLog();
@@ -725,6 +732,10 @@ public class KAuthFilter implements Filter {
         // 转为api格式
         switch (result.getType()) {
             case KFlowConstant.RESULT_JSON:
+                if (api.getApiFlowId().equalsIgnoreCase("a20fd82c126947f9ab3b599001df6126")) {
+                    log.info("用时：3");
+                }
+
                 if (StringUtils.isNotEmpty(api.getApiResultHandler()) && "user_json".equalsIgnoreCase(api.getApiResultHandler())) {
                     ServletUtil.responseJson(response, result.getData());
                 }

@@ -1,3 +1,4 @@
+ALTER TABLE `sys_config` ADD COLUMN `is_public` int NULL COMMENT '是否是公开的配置，公开的配置未登录也可以查看';
 CREATE TABLE if not exists `dev_model_sql`
 (
     `id`            varchar(36) NOT NULL COMMENT '主键',

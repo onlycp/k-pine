@@ -26,14 +26,14 @@ public class CommonSqlExecutorController {
     @Autowired
     private CommonSqlExecutorService commonSqlExecutorService;
 
-    /**
-     *  执行SQL
-     * @return 执行SQL
-     */
-    @ApiOperation(value = "执行SQL " ,notes = "执行SQL")
-    @ApiIgnore
-    @PostMapping("/execute")
-    public BaseRet<?> execute(@RequestBody CommonSqlExecutorArgv argv) {
-        return BaseRet.success(commonSqlExecutorService.execute(argv));
-    }
+//    /**
+//     *  执行SQL
+//     * @return 执行SQL
+//     */
+//    @ApiOperation(value = "执行SQL " ,notes = "执行SQL")
+//    @ApiIgnore
+//    @PostMapping("/execute")
+//    public BaseRet<?> execute(@RequestBody CommonSqlExecutorArgv argv) {
+//        return BaseRet.success(commonSqlExecutorService.execute(argv));
+//    }
 }

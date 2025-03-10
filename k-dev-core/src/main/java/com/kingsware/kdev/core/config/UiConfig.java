@@ -2,11 +2,14 @@ package com.kingsware.kdev.core.config;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import com.kingsware.kdev.core.auth.AppAuthProperties;
+import com.kingsware.kdev.core.auth.BaseUserInfo;
 import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.cache.dict.DictManager;
 import com.kingsware.kdev.core.cache.kcache.LruCache;
 import com.kingsware.kdev.core.cache.page.PageCacheManager;
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.KFlowContext;
@@ -19,6 +22,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -61,6 +65,9 @@ public class UiConfig extends WebMvcConfigurationSupport {
 
     @Value("${app.ui:./ui/}")
     private String ui;
+
+    @Autowired
+    private AppAuthProperties appAuthProperties;
 
     private LruCache cache = new LruCache(100);
 
@@ -172,7 +179,7 @@ public class UiConfig extends WebMvcConfigurationSupport {
                             builder.append("window.ssrOpen=false;\n");
                         }
                         builder.append("window.ssr=true;\n");
-                        builder.append("window.ssrConfig = ").append(getSysConfig()).append(";\n");
+                        builder.append("window.ssrConfig = ").append(getSysConfig(token)).append(";\n");
                         builder.append("window.ssrPage = ").append(getPageJson(path, extraData)).append(";\n");
                         builder.append("window.ssrDict = ").append(getDict()).append(";\n");
                         ssrScript.append(builder.toString());
@@ -217,9 +224,24 @@ public class UiConfig extends WebMvcConfigurationSupport {
 
     private String getSysConfig() {
         KFlowContext context = KFlowContext.createBaseContext( "{}",  "{}", null);
+    private String getSysConfig(String token) {
+        KFlowContext context = KFlowContext.createBaseContext( "{}",  "{}");
+
         // 加入应用id
         Map<String, Object> flowArgvMap = new HashMap<>();
         long t1 = System.currentTimeMillis();
+        if(StringUtils.isNotEmpty(token)) {
+            // 如果有token，就把用户token作为用户id传进去
+//            ((Map<String, Object>)context.getSystemContext().get("sys")).put("who", token);
+            // 通过token获取用户信息，把user id 传到sys 参数里
+            HttpServletRequest request = KClientContext.getContext().getRequest();
+            String ip = ServletUtil.getClientIp(request);
+            BaseUserInfo userInfo = TokenUtil.getUserInfoByToken(token, appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), ip, appAuthProperties.getTokenExpireMinutes(), appAuthProperties.getMockSessionExpireMinutes());
+            if(null != userInfo){
+                ((Map<String, Object>)context.getSystemContext().get("sys")).put("who", userInfo.getId());
+            }
+        }
+
         KdbFlowResult result = KdbFlowExecutor.getInstance().execute("f09c30463acc44e58a8562b79312fbae", "", flowArgvMap, context, false, false);
         long t2 = System.currentTimeMillis();
         log.info("getSysConfig time:" + (t2 - t1));

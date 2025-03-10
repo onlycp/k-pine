@@ -1,9 +1,8 @@
 package com.kingsware.kdev.core.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
-import com.kingsware.kdev.core.cache.instance.HostInfo;
-import com.kingsware.kdev.core.config.MyHttpServletRequestWrapper;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
@@ -23,12 +22,10 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 import org.springframework.web.util.WebUtils;
 import org.yaml.snakeyaml.util.UriEncoder;
 
-import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -40,6 +37,7 @@ import java.util.regex.Pattern;
  * @date 2022/3/4 3:53 下午
  */
 @Slf4j
+@SuppressWarnings("all")
 public class ServletUtil {
 
     private ServletUtil() {
@@ -461,7 +459,8 @@ public class ServletUtil {
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json; charset=utf-8");
         try (PrintWriter out = response.getWriter()) {
-            out.append(new ObjectMapper().writeValueAsString(object));
+            String responseBody = new ObjectMapper().writeValueAsString(object);
+            out.append(responseBody);
         } catch (IOException e) {
             log.error("error", e);
         }
@@ -476,6 +475,65 @@ public class ServletUtil {
         } catch (IOException e) {
             log.error("error", e);
         }
+    }
+
+    /**
+     * 输出json
+     * @param object    对象
+     */
+    public static void responseJsonWithEncrypt(HttpServletResponse response, Object object) {
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json; charset=utf-8");
+        try (PrintWriter out = response.getWriter()) {
+            if (object instanceof Map) {
+                Object data = ((Map) object).get("data");
+                if (data != null) {
+                    // 如果是对象，就对它进行加密和处理
+                    Object dat = encryptObject(data);
+                    ((Map) object).put("data", dat);
+
+                }
+            } else if (object instanceof BaseRet) {
+                Object data = ((BaseRet) object).getData();
+                if (data != null) {
+                    // 如果是对象，就对它进行加密和处理
+                    Object dat = encryptObject(data);
+                    ((BaseRet) object).setData(dat);
+                }
+            }
+            String responseBody = new ObjectMapper().writeValueAsString(object);
+            out.append(responseBody);
+        } catch (IOException e) {
+            log.error("error", e);
+        }
+    }
+
+    public static Object encryptObject(Object object) {
+        if (object == null) {
+            return object;
+        }
+        if (object instanceof String) {
+            return object;
+        }
+        // 如果是数字类型或者布尔类型，以及其他简单类型，就不加密
+        if (object instanceof Number || object instanceof Boolean || object instanceof Character || object instanceof Enum) {
+            return object;
+        }
+        try {
+            String encryptMethod = SpringContext.getProperties("encrypt.http.encrypt-method", "");
+            if ("cs".equalsIgnoreCase(encryptMethod)) {
+                String responseBody = new ObjectMapper().writeValueAsString(object);
+                String base64str = Base64.getEncoder().encodeToString(responseBody.getBytes());
+//                String str =  CaesarCipher.encrypt(base64str, 5);
+                responseBody = "enc##" + encryptMethod +"##"+ base64str;
+                return responseBody;
+            }
+        }
+        catch (Exception ignored) {
+
+        }
+
+        return object;
     }
 
     /**

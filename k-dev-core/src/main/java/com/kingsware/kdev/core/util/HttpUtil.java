@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.util;
 
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.NonStaticResourceHttpRequestHandler;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
@@ -201,6 +202,19 @@ public class HttpUtil {
     }
 
     public static String doPost(String apiUrl, String body, Map<String, String> headerMap) throws IOException {
+        long t1 = System.currentTimeMillis();
+//        try {
+//            OkHttpReactiveClient client = SpringContext.getBean(OkHttpReactiveClient.class);
+////            return client.doPost(apiUrl, body, headerMap).block();
+//            return client.doPostSync(apiUrl, body, headerMap);
+//        }
+//        finally {
+//            if (KClientContext.getContext() != null) {
+////                log.info("{}  {}ms", apiUrl, System.currentTimeMillis() - t1);
+//            }
+//
+//        }
+
         System.setProperty("networkaddress.cache.ttl", "0");
         System.setProperty("networkaddress.cache.negative.ttl", "0");
 

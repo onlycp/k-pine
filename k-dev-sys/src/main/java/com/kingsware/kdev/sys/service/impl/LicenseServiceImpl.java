@@ -31,33 +31,42 @@ public class LicenseServiceImpl implements LicenseService {
     @Override
     public LicenseRet getLicense() {
 
-        if (LicenseManager.getInstance().isUniopsApp() || LicenseManager.getInstance().whoSYourDaddy()) {
-            return getVirtualLicense();
-        }
-
         LicenseRet ret = new LicenseRet();
-        // 读取文件
         try {
-            int status = LicenseManager.getInstance().getStatus();
-            License license = LicenseManager.getInstance().getLicenseData();
-            ret.setStatus(status);
-            if (license != null) {
-                ret.setCustomer(license.getCustomer());
-                ret.setValidDate(license.getValidDate());
-                ret.setInvalidDate(license.getInvalidDate());
-                ret.setMac(LicenseManager.getInstance().getMac());
+            if (LicenseManager.getInstance().isUniopsApp() || LicenseManager.getInstance().whoSYourDaddy()) {
+                return getVirtualLicense();
             }
-            if (ret.getStatus() != 2 && ret.getStatus() != 2) {
-                ret.setMac(LicenseManager.getInstance().getMac());
+
+            ret = new LicenseRet();
+            // 读取文件
+            try {
+                int status = LicenseManager.getInstance().getStatus();
+                License license = LicenseManager.getInstance().getLicenseData();
+                ret.setStatus(status);
+                if (license != null) {
+                    ret.setCustomer(license.getCustomer());
+                    ret.setValidDate(license.getValidDate());
+                    ret.setInvalidDate(license.getInvalidDate());
+                    ret.setMac(LicenseManager.getInstance().getMac());
+                }
+                if (ret.getStatus() != 2) {
+                    ret.setMac(LicenseManager.getInstance().getMac());
+                }
             }
+            catch (LicenseException e) {
+                ret.setStatus(4);
+                ret.setMac(LicenseManager.getInstance().getMac());
+                ret.setErrorMessage(e.getMessage());
+            }
+
+            return ret;
         }
-        catch (LicenseException e) {
-            ret.setStatus(4);
-            ret.setMac(LicenseManager.getInstance().getMac());
-            ret.setErrorMessage(e.getMessage());
+        finally {
+            ret.setLicense(LicenseManager.getInstance().getLicense());
+            ret.setServerPort(LicenseManager.getInstance().getServerPort());
+            ret.setLicense(LicenseManager.getInstance().getLicense());
         }
 
-        return ret;
     }
 
     private LicenseRet getVirtualLicense() {

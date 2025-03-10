@@ -7,10 +7,6 @@ import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.kflow.FlowUtils;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
-import com.kingsware.kdev.core.orm.kdb.EditFlowInfo;
-import com.kingsware.kdev.core.orm.kdb.FlowInfo;
-import com.kingsware.kdev.core.orm.kdb.KDBConnectConfig;
-import com.kingsware.kdev.core.orm.kdb.KdbFlowQueryArgv;
 import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.util.MD5Utils;
 import com.kingsware.kdev.core.util.SqlUtils;
@@ -25,7 +21,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,9 +45,12 @@ public class SysSqlInitialize implements SystemInitialize {
 
         // 执行sql脚本
         List<ExecutionFile> fileList = getFileList(getMaxExecuteVersion());
-        //log.info("初始化数据... starting");
+        log.info("初始化数据... starting");
         fileList.stream().sorted((Comparator.comparingInt(ExecutionFile::getVersion))).forEach(this::executeSqlFile);
-        //log.info("初始化数据... end");
+        // 加入R文件
+        List<ExecutionFile> rFileList = getRFileList();
+        rFileList.forEach(this::executeSqlFile);
+        log.info("初始化数据... end");
 
     }
 
@@ -115,6 +113,43 @@ public class SysSqlInitialize implements SystemInitialize {
                 }
             }
         }
+        log.info("[k-pine:SysSqlInitialize resultList]{}", resultList);
+        return resultList;
+    }
+
+    private List<ExecutionFile> getRFileList() {
+        List<ExecutionFile> resultList = new ArrayList<>();
+        boolean isCustomInitSqlPath = Boolean.parseBoolean(SpringContext.getProperties("file.is-custom-init-sql-path", "false"));
+        String initDbType = DB.getDefault().getConfig().getInnerType();
+
+        String path = ResourceUtils.CLASSPATH_URL_PREFIX + "initSql/" + initDbType + "/**";
+        if (isCustomInitSqlPath) {
+            // 在windows环境中，代码版运行./xx会找不到文件，需要改成.\xx
+            File fileList = new File("");
+            path = "file:" + initDatasourcePath + File.separator + "initSql" + File.separator + initDbType + "/**";
+            log.info("[k-pine:SysSqlInitialize isCustomInitSqlPath]: true");
+        }
+        log.info("数据库脚本准备检查，目录为:" + path);
+        Resource[] resources = SpringContext.getResources(path);
+//        log.info("[k-pine:SysSqlInitialize resources]" + resources);
+        if (resources != null) {
+            for(Resource resource : resources) {
+                ExecutionFile executionFile = new ExecutionFile();
+                String filename = resource.getFilename();
+//                log.info("[k-pine:SysSqlInitialize filename]" + filename + "----" + maxVersion);
+                if (StringUtils.isEmpty(filename)) {
+                    continue;
+                }
+                if (filename.startsWith("R_") && filename.endsWith(".sql")) {
+                    executionFile.setResource(resource);
+                    executionFile.setName(filename);
+                    executionFile.setVersion(0);
+                    executionFile.setOnce(true);
+                    resultList.add(executionFile);
+                }
+            }
+        }
+        log.info("[k-pine:SysSqlInitialize resultList]{}", resultList);
         return resultList;
     }
 
@@ -129,6 +164,8 @@ public class SysSqlInitialize implements SystemInitialize {
             return;
         }
         // 记录开始执行的时间
+        String md5 = "";
+        log.info("运行数据库脚本:{}", file.getName());
         long start = System.currentTimeMillis();
         // 标记执行是否成功
         boolean success = false;
@@ -168,6 +205,7 @@ public class SysSqlInitialize implements SystemInitialize {
             // 计算并记录所有执行SQL的MD5值，用于后续的校验
             model.setMd5(MD5Utils.md5(sqlSumary.toString()));
             // 记录SQL版本
+            model.setMd5(md5);
             model.setVersion(file.getVersion());
             // 保存数据库操作记录
             DB.save(model);
