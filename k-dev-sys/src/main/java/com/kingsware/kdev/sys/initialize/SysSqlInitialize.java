@@ -1,15 +1,10 @@
 package com.kingsware.kdev.sys.initialize;
 
 import com.kingsware.kdev.core.base.SystemInitialize;
-import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.kflow.FlowUtils;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
-import com.kingsware.kdev.core.orm.kdb.EditFlowInfo;
-import com.kingsware.kdev.core.orm.kdb.FlowInfo;
-import com.kingsware.kdev.core.orm.kdb.KDBConnectConfig;
-import com.kingsware.kdev.core.orm.kdb.KdbFlowQueryArgv;
 import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.util.MD5Utils;
 import com.kingsware.kdev.core.util.StringUtils;
@@ -23,7 +18,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,6 +44,9 @@ public class SysSqlInitialize implements SystemInitialize {
         List<ExecutionFile> fileList = getFileList(getMaxExecuteVersion());
         log.info("初始化数据... starting");
         fileList.stream().sorted((Comparator.comparingInt(ExecutionFile::getVersion))).forEach(this::executeSqlFile);
+        // 加入R文件
+        List<ExecutionFile> rFileList = getRFileList();
+        rFileList.forEach(this::executeSqlFile);
         log.info("初始化数据... end");
 
     }
@@ -113,6 +110,43 @@ public class SysSqlInitialize implements SystemInitialize {
                 }
             }
         }
+        log.info("[k-pine:SysSqlInitialize resultList]{}", resultList);
+        return resultList;
+    }
+
+    private List<ExecutionFile> getRFileList() {
+        List<ExecutionFile> resultList = new ArrayList<>();
+        boolean isCustomInitSqlPath = Boolean.parseBoolean(SpringContext.getProperties("file.is-custom-init-sql-path", "false"));
+        String initDbType = DB.getDefault().getConfig().getInnerType();
+
+        String path = ResourceUtils.CLASSPATH_URL_PREFIX + "initSql/" + initDbType + "/**";
+        if (isCustomInitSqlPath) {
+            // 在windows环境中，代码版运行./xx会找不到文件，需要改成.\xx
+            File fileList = new File("");
+            path = "file:" + initDatasourcePath + File.separator + "initSql" + File.separator + initDbType + "/**";
+            log.info("[k-pine:SysSqlInitialize isCustomInitSqlPath]: true");
+        }
+        log.info("数据库脚本准备检查，目录为:" + path);
+        Resource[] resources = SpringContext.getResources(path);
+//        log.info("[k-pine:SysSqlInitialize resources]" + resources);
+        if (resources != null) {
+            for(Resource resource : resources) {
+                ExecutionFile executionFile = new ExecutionFile();
+                String filename = resource.getFilename();
+//                log.info("[k-pine:SysSqlInitialize filename]" + filename + "----" + maxVersion);
+                if (StringUtils.isEmpty(filename)) {
+                    continue;
+                }
+                if (filename.startsWith("R_") && filename.endsWith(".sql")) {
+                    executionFile.setResource(resource);
+                    executionFile.setName(filename);
+                    executionFile.setVersion(0);
+                    executionFile.setOnce(true);
+                    resultList.add(executionFile);
+                }
+            }
+        }
+        log.info("[k-pine:SysSqlInitialize resultList]{}", resultList);
         return resultList;
     }
 
@@ -120,6 +154,7 @@ public class SysSqlInitialize implements SystemInitialize {
         if (file == null) {
             return;
         }
+        String md5 = "";
         log.info("运行数据库脚本:{}", file.getName());
         long start = System.currentTimeMillis();
         boolean success = false;
@@ -133,6 +168,18 @@ public class SysSqlInitialize implements SystemInitialize {
                     sql = sql.substring(0, sql.length()-1);
                 }
                 sqlSumary.append(sql);
+                md5 = MD5Utils.md5(sqlSumary.toString());
+                try {
+                    long cnt = DB.findCount("select count(1) from dev_sql_run where md5=? and success=1", md5);
+                    if (cnt > 0) {
+                        log.info("[k-pine:SysSqlInitialize]跳过重复执行:{}", file.getName());
+                        return;
+                    }
+
+                }
+                catch (Exception ignored) {
+
+                }
 //                String tmpSql = sql.toLowerCase().trim();
 //                if (tmpSql.startsWith("insert") || tmpSql.startsWith("update")) {
 //                    sql = FlowUtils.buildCDATASql(sql);
@@ -170,7 +217,7 @@ public class SysSqlInitialize implements SystemInitialize {
             DevSqlRun model = new DevSqlRun();
             model.setExecutionTime(end - start);
             model.setSuccess(success ? 1 : 0);
-            model.setMd5(MD5Utils.md5(sqlSumary.toString()));
+            model.setMd5(md5);
             model.setVersion(file.getVersion());
             DB.save(model);
         }

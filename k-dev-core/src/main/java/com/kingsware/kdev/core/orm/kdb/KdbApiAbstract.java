@@ -192,7 +192,7 @@ public abstract class KdbApiAbstract implements KdbApi {
     @Override
     public List<DataSourceInfo> queryDataSource(DataSourceQueryArgv dataSourceInfo) {
         KdbRet<List> list = post(getServer(), dataSourceInfo, QUERY_DS_URL, List.class, true);
-        log.info("数据源查询响应:{}", JsonUtil.toJson(list));
+        //log.info("数据源查询响应:{}", JsonUtil.toJson(list));
         String json = JsonUtil.toJson(list.getResponseBody());
         return JsonUtil.toListBean(json, DataSourceInfo.class);
     }
