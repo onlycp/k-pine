@@ -222,10 +222,10 @@ public class UiConfig extends WebMvcConfigurationSupport {
         }
     }
 
-    private String getSysConfig() {
-        KFlowContext context = KFlowContext.createBaseContext( "{}",  "{}", null);
+//    private String getSysConfig() {
+//        KFlowContext context = KFlowContext.createBaseContext( "{}",  "{}", null);
     private String getSysConfig(String token) {
-        KFlowContext context = KFlowContext.createBaseContext( "{}",  "{}");
+        KFlowContext context = KFlowContext.createBaseContext( "{}",  "{}", null);
 
         // 加入应用id
         Map<String, Object> flowArgvMap = new HashMap<>();
