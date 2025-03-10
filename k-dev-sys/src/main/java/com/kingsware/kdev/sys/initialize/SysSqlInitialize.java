@@ -174,6 +174,18 @@ public class SysSqlInitialize implements SystemInitialize {
         try {
             // 解析SQL文件，获取所有SQL语句段
             List<SqlSegment> sqlList = parseSqlList(file.getResource());
+            md5 = MD5Utils.md5(StringUtils.joinToString(sqlList, "\n"));
+            try {
+                long cnt = DB.findCount("select count(1) from dev_sql_run where md5=? and success=1", md5);
+                if (cnt > 0) {
+                    log.info("[k-pine:SysSqlInitialize]跳过重复执行:{}", file.getName());
+                    return;
+                }
+
+            }
+            catch (Exception ignored) {
+
+            }
             // 遍历并执行每条SQL语句
             for (SqlSegment sql: sqlList) {
                 // 记录当前SQL语句开始执行的时间
@@ -202,8 +214,8 @@ public class SysSqlInitialize implements SystemInitialize {
             model.setExecutionTime(end - start);
             // 记录执行结果，1表示成功，0表示失败
             model.setSuccess(success ? 1 : 0);
-            // 计算并记录所有执行SQL的MD5值，用于后续的校验
-            model.setMd5(MD5Utils.md5(sqlSumary.toString()));
+//            // 计算并记录所有执行SQL的MD5值，用于后续的校验
+//            model.setMd5(MD5Utils.md5(sqlSumary.toString()));
             // 记录SQL版本
             model.setMd5(md5);
             model.setVersion(file.getVersion());
