@@ -1,0 +1,1 @@
+alter table DEV_APPLICATION modify  SHORT_NAME varchar2(200) ;
