@@ -568,9 +568,11 @@ public class DynamicTask implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-//        if (1 ==1) {
-//            return;
-//        }
+        String enableTask = SpringContext.getProperties("app.task.enable", "true");
+        if ("false".equalsIgnoreCase(enableTask)) {
+            return;
+        }
+
         initThreadPool();
         scanJavaClassTask(scanPackage);
         threadPoolTaskScheduler.schedule(() -> {

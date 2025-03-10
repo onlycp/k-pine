@@ -100,6 +100,16 @@ public class SpringContext implements ApplicationContextAware {
     }
 
 
+    public static Boolean getBoolean(String key, Boolean defaultValue) {
+        try {
+            return Boolean.parseBoolean(getProperties(key, defaultValue.toString()));
+        }
+        catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
+
     /**
      * 获取组属性
      *

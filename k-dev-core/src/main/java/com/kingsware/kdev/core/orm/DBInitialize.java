@@ -55,12 +55,14 @@ public class DBInitialize {
         List<SystemInitialize> systemInitializes = SpringContext.getBeansOfType(SystemInitialize.class);
         // 按顺序初始化
         sortSystemInitializes(systemInitializes);
-        try {
-            for (SystemInitialize systemInitialize : systemInitializes) {
+        for (SystemInitialize systemInitialize : systemInitializes) {
+            try {
+                logger.info("开始运行启动类：{}", systemInitialize.getClass().getName());
                 systemInitialize.execute();
+                logger.info("完成运行启动类：{}", systemInitialize.getClass().getName());
+            } catch (Exception e) {
+                logger.error("初始化系统失败，请检查配置文件：{}", e.getMessage());
             }
-        } catch (Exception e) {
-            //e.printStackTrace();
         }
     }
 
