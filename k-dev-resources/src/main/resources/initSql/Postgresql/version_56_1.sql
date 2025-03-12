@@ -1,0 +1,1 @@
+ALTER TABLE "dev_application" ALTER COLUMN "short_name" TYPE varchar(200);
