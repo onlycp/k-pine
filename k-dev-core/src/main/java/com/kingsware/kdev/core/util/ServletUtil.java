@@ -5,6 +5,7 @@ import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.encrypt.SM4Utils;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.bean.KFlowUploadFile;
@@ -496,6 +497,20 @@ public class ServletUtil {
         }
     }
 
+    public static String rot47(String input) {
+        StringBuilder result = new StringBuilder();
+        for (char c : input.toCharArray()) {
+            if (c >= '!' && c <= '~') { // 判断是否为可打印 ASCII 字符
+                // 对字符进行 ROT47 移位
+                result.append((char) (((c - 33 + 47) % 94) + 33));
+            } else {
+                // 如果不是可打印字符，直接保留
+                result.append(c);
+            }
+        }
+        return result.toString();
+    }
+
     public static Object encryptObject(Object object) {
         if (object == null) {
             return object;
@@ -512,6 +527,7 @@ public class ServletUtil {
             if ("cs".equalsIgnoreCase(encryptMethod)) {
                 String responseBody = new ObjectMapper().writeValueAsString(object);
                 String base64str = Base64.getEncoder().encodeToString(responseBody.getBytes());
+                base64str = rot47(base64str);
 //                String str =  CaesarCipher.encrypt(base64str, 5);
                 responseBody = "enc##" + encryptMethod +"##"+ base64str;
                 return responseBody;

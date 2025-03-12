@@ -32,7 +32,7 @@ public class CaesarCipher {
     }
 
     public static void main(String[] args) {
-        String originalText = "Hello, World 陈鹏!";
+        String originalText = "Hello, World==!";
         int shift = 3;
 
         String encryptedText = encrypt(originalText, shift);

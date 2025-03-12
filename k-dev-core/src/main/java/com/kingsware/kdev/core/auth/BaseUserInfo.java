@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.auth;
 
+import com.kingsware.kdev.core.bean.BaseSimpleRet;
 import com.kingsware.kdev.core.enums.ApiSystemEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,7 +16,7 @@ import java.util.Set;
  */
 @Data
 @EqualsAndHashCode
-public class BaseUserInfo {
+public class BaseUserInfo extends BaseSimpleRet {
     /** 用户id **/
     private String id;
     /** 用户名 **/
