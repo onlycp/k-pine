@@ -86,14 +86,9 @@ public class PublicGitRepoInitialize implements SystemInitialize {
             // 提交到 Git 仓库
             List<GitFile> gitFiles = new ArrayList<>();
             for (SysLogicTemplate template : templates) {
-                Map<String, String> mergeMap = new HashMap<>();
-                mergeMap.put("nodes", template.getNodes());
-                mergeMap.put("links", template.getLinks());
-                mergeMap.put("flowConfig", template.getFlowConfig());
-
                 GitFile gitFile = new GitFile();
                 gitFile.setPath("logic_templates/" + template.getId() + ".json");
-                gitFile.setContent(JsonUtil.toJson(mergeMap));
+                gitFile.setContent(JsonUtil.toJson(template));
                 gitFiles.add(gitFile);
             }
             appGit.addFiles(gitFiles);

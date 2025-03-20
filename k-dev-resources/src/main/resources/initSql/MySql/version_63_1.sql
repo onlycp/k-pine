@@ -7,8 +7,8 @@ ALTER TABLE `dev_page_template` ADD COLUMN `copy_part_num` int DEFAULT '0' COMME
 -- `k-pine`.dev_search_history definition
 
 CREATE TABLE `dev_search_history` (
-  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '主键',
-  `keyword` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '关键字',
+  `id` varchar(36) CHARACTER SET utf8mb4 NOT NULL COMMENT '主键',
+  `keyword` varchar(36) CHARACTER SET utf8mb4 NOT NULL COMMENT '关键字',
   `use_num` int DEFAULT NULL COMMENT '搜索次数',
   `deleted` tinyint(1) DEFAULT '0' COMMENT '是否删除',
   PRIMARY KEY (`id`) USING BTREE
