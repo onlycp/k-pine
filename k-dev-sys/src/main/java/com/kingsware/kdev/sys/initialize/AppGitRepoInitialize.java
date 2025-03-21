@@ -93,7 +93,8 @@ public class AppGitRepoInitialize implements SystemInitialize {
             return;
         }
         // 过滤应用id的数据源
-        List<DataSourceInfo> appDataSources = allDataSources.stream().filter(it -> app.getId().equals(it.getAppId()) || it.getJson().contains(app.getId())).collect(Collectors.toList());
+        List<DataSourceInfo> appDataSources = allDataSources.stream().filter(it -> app.getId().equals(it.getAppId())
+                || (it.getJson() != null && !it.getJson().isEmpty() && it.getJson().contains(app.getId()))).collect(Collectors.toList());
         // 提交到 Git 仓库
         if (appDataSources.isEmpty()) {
             return;
@@ -251,7 +252,7 @@ public class AppGitRepoInitialize implements SystemInitialize {
 
     @Override
     public int sort() {
-        return 7;
+        return 8;
     }
 
 }

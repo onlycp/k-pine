@@ -7,6 +7,7 @@ import com.kingsware.kdev.core.model.DevPage;
 import com.kingsware.kdev.core.model.SysLogicFlow;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.*;
+import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.sys.model.DevApplication;
 import com.kingsware.kdev.sys.model.DevPageTemplate;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -86,9 +88,20 @@ public class PublicGitRepoInitialize implements SystemInitialize {
             // 提交到 Git 仓库
             List<GitFile> gitFiles = new ArrayList<>();
             for (SysLogicTemplate template : templates) {
+                // 时间戳需要转换格式，保持格式一致
+                Map<String, Object> object2Map = JsonUtil.beanToMap(template);
+                Timestamp whenCreated = template.getWhenCreated();
+                Timestamp whenModified = template.getWhenModified();
+                if (whenCreated != null) {
+                    object2Map.put("whenCreated",DateUtils.formatDate(whenCreated, "yyyy-MM-dd HH:mm:ss"));
+                }
+                if (whenModified != null) {
+                    object2Map.put("whenModified",DateUtils.formatDate(whenModified, "yyyy-MM-dd HH:mm:ss"));
+                }
+
                 GitFile gitFile = new GitFile();
                 gitFile.setPath("logic_templates/" + template.getId() + ".json");
-                gitFile.setContent(JsonUtil.toJson(template));
+                gitFile.setContent(JsonUtil.toJson(object2Map));
                 gitFiles.add(gitFile);
             }
             appGit.addFiles(gitFiles);
