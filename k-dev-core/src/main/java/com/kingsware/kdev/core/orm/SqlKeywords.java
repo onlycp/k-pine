@@ -29,7 +29,7 @@ public class SqlKeywords {
         /** dm **/
         Set<String> dmKeywords = new HashSet<>();
         dmKeywords.add("distributed");
-        dmKeywords.add("online");
+        dmKeywords.add("distributed");
         keywords.put("DM", dmKeywords);
         /** oracle **/
         Set<String> oracleKeywords = new HashSet<>();
@@ -40,7 +40,11 @@ public class SqlKeywords {
         xuguKeywords.add("number");
         xuguKeywords.add("order");
         keywords.put("Xugu", xuguKeywords);
-
+        /** postgresql **/
+        Set<String> postgresKeywords = new HashSet<>();
+        postgresKeywords.add("distributed");
+        postgresKeywords.add("online");
+        keywords.put("Postgresql", postgresKeywords);
     }
 
 
@@ -88,6 +92,9 @@ public class SqlKeywords {
         }
         else if (dataBaseTypeEnum.equalsIgnoreCase("Xugu")) {
             return "\""+ columnName.toUpperCase() + "\"";
+        }
+        else if (dataBaseTypeEnum.equalsIgnoreCase("PostgreSQL")) {
+            return "\""+ columnName + "\"";
         }
         return columnName;
     }
