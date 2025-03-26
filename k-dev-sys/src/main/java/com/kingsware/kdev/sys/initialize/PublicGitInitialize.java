@@ -29,7 +29,7 @@ import java.util.*;
  * @version 1.0.0
  * @date 2024/8/29 14:31
  */
-@Component
+//@Component
 @Slf4j
 public class PublicGitInitialize implements SystemInitialize {
 
@@ -37,6 +37,8 @@ public class PublicGitInitialize implements SystemInitialize {
 
     @Override
     public void execute() throws FileNotFoundException {
+        // 出于保险原因，暂未直接修改此类，而是注释@Component，使用 PublicGitRepoInitialize 替代
+        // 原因：青松 4.0 全新部署安装包使用
         if (1 == 1) {
             return ;
         }
