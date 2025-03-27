@@ -7,11 +7,8 @@ import com.kingsware.kdev.core.model.SysI18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.MD5Utils;
-import com.kingsware.kdev.core.util.RandomUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.exec.util.MapUtils;
-import org.springframework.context.i18n.LocaleContextHolder;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.MessageFormat;
@@ -120,31 +117,37 @@ public class I18n {
      * @param defaultMessage 默认消息这是在没有找到特定语言消息时回退的消息它被存储为中文（zh_CN）消息
      */
     public static void create(String appId, String key, String defaultMessage) {
-        // 如果应用ID为空，则使用默认的Pine应用ID
-        if (StringUtils.isEmpty(appId)) {
-            appId = SysConst.pineAppId;
+        try {
+            // 如果应用ID为空，则使用默认的Pine应用ID
+            if (StringUtils.isEmpty(appId)) {
+                appId = SysConst.pineAppId;
+            }
+            // 创建一个SysI18n对象，用于存储国际化信息
+            SysI18n sysI18n = new SysI18n();
+            // 设置应用id
+            sysI18n.setAppId(appId);
+            // 设置国际化信息的键值
+            sysI18n.setI18nKey(key);
+            // 创建一个HashMap，用于存储不同语言的消息
+            Map<String, String> i18nMap = new HashMap<>();
+            // 将默认消息作为中文消息添加到映射中
+            i18nMap.put("zh_CN", defaultMessage);
+            // 将消息映射序列化为JSON字符串，并设置为SysI18n对象的消息
+            sysI18n.setMessage(JsonUtil.toJson(i18nMap));
+            // 将SysI18n对象保存到数据库
+            DB.save(sysI18n);
+            // 将国际化数据添加到全局数据中
+            Map<String, Map<String, String>> i18nData = getI18nData(appId);
+            if (i18nData == null) {
+                appI18nData.put(appId, new AppI18n(appId));
+                i18nData = appI18nData.get(appId).getI18nData();
+            }
+            i18nData.put(key, i18nMap);
         }
-        // 创建一个SysI18n对象，用于存储国际化信息
-        SysI18n sysI18n = new SysI18n();
-        // 设置应用id
-        sysI18n.setAppId(appId);
-        // 设置国际化信息的键值
-        sysI18n.setI18nKey(key);
-        // 创建一个HashMap，用于存储不同语言的消息
-        Map<String, String> i18nMap = new HashMap<>();
-        // 将默认消息作为中文消息添加到映射中
-        i18nMap.put("zh_CN", defaultMessage);
-        // 将消息映射序列化为JSON字符串，并设置为SysI18n对象的消息
-        sysI18n.setMessage(JsonUtil.toJson(i18nMap));
-        // 将SysI18n对象保存到数据库
-        DB.save(sysI18n);
-        // 将国际化数据添加到全局数据中
-        Map<String, Map<String, String>> i18nData = getI18nData(appId);
-        if (i18nData == null) {
-            appI18nData.put(appId, new AppI18n(appId));
-            i18nData = appI18nData.get(appId).getI18nData();
+        catch (Exception ignored) {
+
         }
-        i18nData.put(key, i18nMap);
+
     }
 
     /**
