@@ -253,10 +253,11 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         List<SysDictItem> myItems = DB.findList(SysDictItem.class, "select * from sys_dict_item");
         Map<String, SysDictItem> dictItemMap = new HashMap<>();
         for (SysDictItem item : myItems) {
-            dictItemMap.put(String.format("%s-%s", item.getCode(), item.getValue()), item);
+            String appId = item.getAppId() != null ? item.getAppId() : "";
+            dictItemMap.put(String.format("%s-%s-%s", appId, item.getCode(), item.getValue()), item);
         }
         if (devPine.getDictItems() != null && !devPine.getDictItems().isEmpty()) {
-            devPine.getDictItems().removeIf(item -> dictItemMap.containsKey(String.format("%s-%s", item.getCode(), item.getValue())));
+            devPine.getDictItems().removeIf(item -> dictItemMap.containsKey(String.format("%s-%s-%s",  item.getAppId() != null ? item.getAppId() : "", item.getCode(), item.getValue())));
             for (SysDictItem item : devPine.getDictItems()) {
                 DB.delete(item);
             }
