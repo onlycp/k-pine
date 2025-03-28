@@ -45,6 +45,9 @@ public class I18nTask implements KTask, KRunner {
             if ("公共应用".equals(key)) {
                 System.currentTimeMillis();
             }
+            if (sysI18n.getI18nKey() == null) {
+                continue;
+            }
             String message = sysI18n.getMessage();
             if (StringUtils.isNotEmpty(message)) {
                 try {
