@@ -140,10 +140,10 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
 
     @Override
     public BaseRet<List<SysStaticFileRet>> getStaticFileTree(boolean onlyFolder) throws IOException {
-        String path = "file:" + STATIC_FILE_FOLD + File.separator + "/**";
+        String path = "file:" + STATIC_FILE_FOLD + File.separator + "**";
         String rootPath = "file:*.*";
         Resource[] rootResources = SpringContext.getResources(rootPath);
-        String rootPathUrl = rootResources[0].getFile().getParent() + "/";
+        String rootPathUrl = rootResources[0].getFile().getParent() + File.separator;
         log.info("rootPathUrl: " + rootPathUrl);
 
         Resource[] resources = SpringContext.getResources(path);
@@ -341,7 +341,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                 String flowId = groupProperties.stringValue(key, "");
                 if (StringUtils.isNotEmpty(flowId)) {
                     // 获取视图模型
-                    KFlowContext context = KFlowContext.createBaseContext( "{}",  "{}");
+                    KFlowContext context = KFlowContext.createBaseContext( "{}",  "{}", null);
                     Map<String,Object> params = JsonUtil.beanToMap(fileDecryptInfo);
                     log.info("验证文件权限，文件ID：{}，文件路径：{}，文件权限流程ID：{}， token:{}", id, path, flowId, TokenUtil.getTokenString(ServletUtil.request()));
 
@@ -437,6 +437,11 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             // 检测文件权限
             validateFilePermission(file.getId(),  file.getFilePath());
             fileName = file.getFileName();
+
+            // 如果是自动转为faas的，那么新上传的文件也改为faas
+            if (!isFileLocalToFaas() && file.getSaveType() == 2) {
+                file.setSaveType(1);
+            }
 
             // 通过ID找得到文件，按数据库里的存储类型读文件
             if (file.getSaveType() == 0) {

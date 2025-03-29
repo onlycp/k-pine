@@ -31,6 +31,7 @@ public class TRspMessage {
      */
     private String data;
 
+
     public TRspMessage() {
     }
 

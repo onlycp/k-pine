@@ -41,5 +41,7 @@ public class SysLogicFlow extends BaseManageModel {
     private String tranCtrl;
     /** 流程json **/
     private String newFlowJson;
+    /** 国际化key，多个用,分割 **/
+    private String i18nKeys;
 
 }

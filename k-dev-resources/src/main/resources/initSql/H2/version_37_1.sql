@@ -15,3 +15,7 @@ CREATE TABLE sys_logic_flow_mock(
 )  COMMENT = '逻辑编排mock';
 -- CREATE INDEX idx_dev_page_deleted USING BTREE ON dev_page (deleted,`path`);
 
+
+ALTER TABLE dev_team
+    ADD COLUMN is_audit TINYINT NULL,
+    ADD COLUMN image VARCHAR(255) NULL;

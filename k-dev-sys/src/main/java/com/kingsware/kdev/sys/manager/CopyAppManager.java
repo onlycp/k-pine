@@ -5,9 +5,9 @@ import com.jayway.jsonpath.JsonPath;
 import com.kingsware.kdev.core.bean.JsonPathSearchResult;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
 import com.kingsware.kdev.core.cache.api.ApiManager;
+import com.kingsware.kdev.core.cache.page.PageCacheManager;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
-import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
@@ -28,16 +28,16 @@ import com.kingsware.kdev.sys.bean.CopyProcessData;
 import com.kingsware.kdev.sys.bean.ExportData;
 import com.kingsware.kdev.sys.bean.ExportRootData;
 import com.kingsware.kdev.sys.model.*;
+import com.kingsware.kdev.sys.service.DevApplicationService;
 import com.kingsware.kdev.sys.service.DevPageService;
 import com.kingsware.kdev.sys.service.SysApiService;
+import com.kingsware.kdev.sys.service.SysKdbFlowService;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONArray;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-
-import com.kingsware.kdev.core.config.SysConst;
 
 import static com.kingsware.kdev.core.config.SysConst.pineAppId;
 
@@ -168,6 +168,21 @@ public class CopyAppManager {
 
     }
 
+    /**
+     * 拷贝页面分组
+     *
+     * @param id          页面分组id
+     * @param copyContext 拷贝参数
+     */
+    public void copyPageModuleData(String id, CopyContextArgv copyContext, CopyProcessData copyProcessData) {
+        // 查找页面分组
+        DevModule devModule = DB.findById(DevModule.class, id);
+        if(devModule == null) {
+            return;
+        }
+        copyProcessData.addCopyObject(devModule);
+        copyProcessData.addMapping(devModule.getId(), StringUtils.getUUID());
+    }
 
     /**
      * 拷贝页面
@@ -234,17 +249,40 @@ public class CopyAppManager {
                             }
                             log.info("拷贝api:{}, name:{}, url:{}", apiInfo.getId(), apiInfo.getApiName(), apiInfo.getApiUrl());
                             this.copyApiData(apiInfo.getId(), copyContext, copyProcessData);
-                            String url1 = String.format("%s-%s", apiUrl, copyContext.getUrlSuffix());
-                            String afterUrl = apiUrl.replace(url, url1);
-                            Map<String, Object> finalMap = JsonUtil.toMap(JsonUtil.toJson(segment.getValue()));
-                            finalMap.put(segment.getField(), afterUrl);
-                            try {
-                                documentContext.set(segment.getPath(), finalMap);
-                            }
-                            catch (Exception e) {
-                                log.warn("warn", e);
-                            }
 
+                        } else {
+                            // 如果不是接口，还需要判断是否是页面跳转
+                            /*
+                             * 如果是页面跳转，需要考虑以下若干事项
+                             * 1、地址是否为 http:// 或者 域名 开头，是的话不需要添加后缀
+                             * 2、通过路径查询页面信息，跳转页面是否位于拷贝应用下
+                             *  2.1、如果不是拷贝应用下的，说明是第三方应用的，应该保留原来的跳转地址
+                             *  2.2、如果是拷贝应用下的，应该给跳转地址添加后缀
+                             */
+                            if(!apiUrl.trim().startsWith("/")){
+                                continue;
+                            }
+                            DevPage targetPage = PageCacheManager.getInstance().getByPathWithNull(apiUrl);
+                            if (targetPage == null){
+                                continue;
+                            }
+                            if (pineAppId.equalsIgnoreCase(targetPage.getAppId()) && copyContext.getWithSystemData() == 0) {
+                                continue;
+                            }
+                            if(!devPage.getAppId().equalsIgnoreCase(targetPage.getAppId())){
+                                continue;
+                            }
+                        }
+
+                        String url1 = String.format("%s-%s", apiUrl, copyContext.getUrlSuffix());
+                        String afterUrl = url.replace(apiUrl, url1);
+                        Map<String, Object> finalMap = JsonUtil.toMap(JsonUtil.toJson(segment.getValue()));
+                        finalMap.put(segment.getField(), afterUrl);
+                        try {
+                            documentContext.set(segment.getPath(), finalMap);
+                        }
+                        catch (Exception e) {
+                            log.warn("warn", e);
                         }
                     }
                 }
@@ -388,6 +426,13 @@ public class CopyAppManager {
             for (String pageId: pageIds) {
                 this.copyPageData(pageId, copyContext, copyProcessData);
             }
+            // 拷贝页面分组
+            List<String> pageModuleIds = DB.findSingleAttributeList(String.class, "select id from dev_module where app_id=?", id);
+            if(!pageModuleIds.isEmpty()) {
+                for (String pageModuleId : pageModuleIds) {
+                    this.copyPageModuleData(pageModuleId, copyContext, copyProcessData);
+                }
+            }
             // 拷贝所有的逻辑编排
             List<String> apiIds = DB.findSingleAttributeList(String.class, "select id from sys_api where app_id=?", id);
             for (String apiId: apiIds) {
@@ -442,40 +487,40 @@ public class CopyAppManager {
 
                 if (api instanceof String) {
 
-                        String value = (String) api;
-                        if (StringUtils.isEmpty(value)) {
-                            continue;
-                        }
-                        if(value.contains("'")) {
-                            value = value.replace("'", "\\'");
-                        }
-                        String path = String.format("$..[?(@.%s == '%s')]", tag.trim(), value);
-                        String[] arr = trimTag.split("\\.");
-                        try {
-                            JSONArray jsonArray = documentContext.read(path);
+                    String value = (String) api;
+                    if (StringUtils.isEmpty(value)) {
+                        continue;
+                    }
+                    if(value.contains("'")) {
+                        value = value.replace("'", "\\'");
+                    }
+                    String path = String.format("$..[?(@.%s == '%s')]", tag.trim(), value);
+                    String[] arr = trimTag.split("\\.");
+                    try {
+                        JSONArray jsonArray = documentContext.read(path);
 
-                            for (int i=0; i < jsonArray.size(); i++) {
-                                JsonPathSearchResult searchResult  = new JsonPathSearchResult();
-                                searchResult.setField(arr[arr.length-1]);
-                                Map<String, Object> node = (Map<String, Object>) jsonArray.get(i);
-                                List<String> paths = new ArrayList<>();
-                                node.forEach((k, v) -> {
-                                    if (v instanceof String) {
-                                        String str = (String) v;
-                                        if(str.contains("'")) {
-                                            str = str.replace("'", "\\'");
-                                        }
-                                        String pa = String.format("@.%s == '%s'", k, str);
-                                        paths.add(pa);
+                        for (int i=0; i < jsonArray.size(); i++) {
+                            JsonPathSearchResult searchResult  = new JsonPathSearchResult();
+                            searchResult.setField(arr[arr.length-1]);
+                            Map<String, Object> node = (Map<String, Object>) jsonArray.get(i);
+                            List<String> paths = new ArrayList<>();
+                            node.forEach((k, v) -> {
+                                if (v instanceof String) {
+                                    String str = (String) v;
+                                    if(str.contains("'")) {
+                                        str = str.replace("'", "\\'");
                                     }
-                                });
-                                searchResult.setPath("$..[?(" + StringUtils.joinToString(paths, " && ") + ")]");
-                                searchResult.setValue(node);
-                                jsonPathSearchResults.add(searchResult);
-                            }
+                                    String pa = String.format("@.%s == '%s'", k, str);
+                                    paths.add(pa);
+                                }
+                            });
+                            searchResult.setPath("$..[?(" + StringUtils.joinToString(paths, " && ") + ")]");
+                            searchResult.setValue(node);
+                            jsonPathSearchResults.add(searchResult);
                         }
-                        catch (Exception e) {
-                            log.warn("json-path匹配出错，path:{}", path);
+                    }
+                    catch (Exception e) {
+                        log.warn("json-path匹配出错，path:{}", path);
 
                     }
 
@@ -551,6 +596,14 @@ public class CopyAppManager {
                     copyProcessData.getPageIds().add(devPage.getId());
                     log.info("数据拷贝---页面管理：{}, 进度:{}/{}", devPage.getName(), i + 1, total);
                 }
+                else if(obj instanceof DevModule) {
+                    DevModule devModule = replaceObj(copyProcessData, obj, DevModule.class);
+                    devModule.setAppId(context.getTargetAppId());
+                    devModule.cleanAuthor();
+                    DB.save(devModule);
+                    copyProcessData.getDevModuleIds().add(devModule.getId());
+                    log.info("数据拷贝---页面分组管理：{}, 进度:{}/{}", devModule.getName(), i + 1, total);
+                }
                 else if (obj instanceof SysDict) {
                     SysDict sysDict = replaceObj(copyProcessData, obj, SysDict.class);
                     sysDict.setAppId(context.getTargetAppId());
@@ -591,6 +644,29 @@ public class CopyAppManager {
                     log.info("数据拷贝---应用管理：{}, 进度:{}/{}", devApplication.getName(), i + 1, total);
 
                 }
+            }
+            // 处理git
+            try {
+                SysApiService sysApiService = SpringContext.getBean(SysApiService.class);
+                DevPageService devPageService = SpringContext.getBean(DevPageService.class);
+                SysKdbFlowService sysKdbFlowService = SpringContext.getBean(SysKdbFlowService.class);
+                DevApplicationService devApplicationService = SpringContext.getBean(DevApplicationService.class);
+
+                for (String pageId:  copyProcessData.getPageIds()) {
+                    devPageService.gitCommit(pageId, "拷贝页面");
+                }
+                for (String apiId:  copyProcessData.getApiIds()) {
+                    sysApiService.gitCommit(apiId, "拷贝接口");
+                }
+                for (String faasLogicId: copyProcessData.getFaasFlowIds()) {
+                    sysKdbFlowService.gitCommit(faasLogicId);
+                }
+                for (String appId: copyProcessData.getAppIds()) {
+                    devApplicationService.gitCommit(appId, "拷贝应用");
+                }
+
+            } catch (Exception e) {
+                log.warn("回滚失败:{}", e.getMessage());
             }
         } catch (Exception e) {
 
@@ -756,7 +832,7 @@ public class CopyAppManager {
 
         // 请求
         // 创建上下文
-        KFlowContext context = KFlowContext.createBaseContext("{}", "{}");
+        KFlowContext context = KFlowContext.createBaseContext("{}", "{}", null);
         // 调用流程
         String exportFlowId = SpringContext.getProperties("app.export.flowId", "609a655bae59402babe2c1f439849e03");
 
@@ -775,6 +851,7 @@ public class CopyAppManager {
         devMap.put("devFaasNodeTypes", Collections.emptyList());
         devMap.put("menus", Collections.emptyList());
         devMap.put("tasks", Collections.emptyList());
+        devMap.put("i18ns", Collections.emptyList());
         devMap.put("sources", Collections.emptyList());
         devMap.put("configs", Collections.emptyList());
         devMap.put("sysLogicTemplates", Collections.emptyList());

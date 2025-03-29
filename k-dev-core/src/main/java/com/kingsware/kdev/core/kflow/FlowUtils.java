@@ -3,6 +3,7 @@ package com.kingsware.kdev.core.kflow;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.kingsware.kdev.core.bean.BaseRet;
@@ -61,6 +62,69 @@ public class FlowUtils {
         return JsonUtil.snakeCaseToListBean(text, Object.class);
     }
 
+
+    @SuppressWarnings("unchecked")
+    public static String lineToHumpJson(String str) {
+        try {
+            // 创建ObjectMapper
+            ObjectMapper mapper = new ObjectMapper();
+            // 设置命名策略：下划线转小写驼峰
+            mapper.setPropertyNamingStrategy(new PropertyNamingStrategies.SnakeCaseStrategy() {
+                @Override
+                public String translate(String input) {
+                    return StringUtils.lineToHump(input);
+                }
+            });
+            // 读取为JsonNode，判断是否为数组
+            JsonNode rootNode = mapper.readTree(str);
+            // 处理数组
+            ArrayNode arrayNode = (ArrayNode) rootNode;
+            ArrayNode resultArray = mapper.createArrayNode();
+
+            for (JsonNode node : arrayNode) {
+                if (node.isObject()) {
+                    // 将对象节点转为Map再转回JSON，以应用命名策略
+                    Map<String, Object> map = mapper.convertValue(node, Map.class);
+                    ObjectNode newNode = mapper.valueToTree(map);
+                    resultArray.add(newNode);
+                } else {
+                    resultArray.add(node); // 非对象直接保留
+                }
+            }
+            return mapper.writeValueAsString(resultArray);
+        }
+        catch (Exception e) {
+            return str;
+        }
+
+    }
+
+    @SuppressWarnings("unchecked")
+    public static String lineToHumpObjectString(String str) {
+        try {
+            // 创建ObjectMapper
+            ObjectMapper mapper = new ObjectMapper();
+            // 设置命名策略：下划线转小写驼峰
+            mapper.setPropertyNamingStrategy(new PropertyNamingStrategies.SnakeCaseStrategy() {
+                @Override
+                public String translate(String input) {
+                    return StringUtils.lineToHump(input);
+                }
+            });
+
+            // 先将JSON转为Map（通用结构）
+            @SuppressWarnings("unchecked")
+            Map<String, Object> map = mapper.readValue(str, Map.class);
+
+            // 将Map转回JSON字符串，此时键名会变成驼峰风格
+            return mapper.writeValueAsString(map);
+        }
+        catch (Exception e) {
+            return str;
+        }
+
+    }
+
     /**
      *  处理结果
      *  1. 全部转为骆峰
@@ -77,11 +141,19 @@ public class FlowUtils {
             JsonNode childNode = jsonNode != null ? jsonNode.get("properties") : null;
             for (Map.Entry<?,?> entry: ((Map<?, ?>) object).entrySet()) {
                 String humpKey = StringUtils.lineToHump(entry.getKey().toString());
+
                 JsonNode pNode = childNode != null ? childNode.get(humpKey) : null;
                 Object value = processData(entry.getValue(), context, pNode);
                 // 如果不是map和list，再进行属性处理
                 if (!(value instanceof Map) && !(value instanceof Collection) && value!= null && StringUtils.isNotEmpty(value.toString()) ) {
                     value = parserWithSchema(pNode, value);
+                }
+                if (value instanceof String && context.getI18nKeys().contains(humpKey)) {
+                    String valueStr = (String)value;
+                    if (StringUtils.isNotEmpty(valueStr)) {
+                        value = I18n.parseScript(context.getAppId(), valueStr);
+                        //log.info("国际化处理:{}，原始值: {}, 国际化值：{}" ,humpKey, valueStr, value);
+                    }
                 }
                 // 如果是复合值，需要将label和value同时返回
                 if (value instanceof ComplexValue) {
@@ -427,6 +499,11 @@ public class FlowUtils {
             message.setHandlerName("html");
             message.setData(text);
         }
+        else if (responseBody.startsWith(KFlowConstant.CUSTOM_FLAG)) {
+            String text = responseBody.replace(KFlowConstant.CUSTOM_FLAG, "");
+            message.setHandlerName("custom");
+            message.setData(text);
+        }
         else {
             message.setHandlerName("simple");
             message.setData(responseBody);
@@ -452,7 +529,6 @@ public class FlowUtils {
             ret = BaseRet.success(result);
         }
         ret.setLog(log);
-
         return ret;
     }
 
@@ -501,6 +577,10 @@ public class FlowUtils {
 
         if (StringUtils.isNotEmpty(ret.getLog())) {
             map.put("log", ret.getLog());
+        }
+        boolean devMode = SpringContext.getBoolean("app.mode.dev", true);
+        if (devMode) {
+            map.put("exceptionStack", stackException);
         }
         if (StringUtils.isNotEmpty(stackException)) {
             ExceptionLog exceptionLog = new ExceptionLog();

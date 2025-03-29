@@ -2,6 +2,7 @@ package com.kingsware.kdev.sys.service;
 
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.sys.argv.DataSourceTakeArgv;
 import com.kingsware.kdev.sys.argv.SysKdbDataSourceArgv;
 import com.kingsware.kdev.sys.argv.SysKdbDataSourceQueryArgv;
 import com.kingsware.kdev.sys.ret.SysKdbDataSourceRet;
@@ -42,6 +43,13 @@ public interface SysKdbDataSourceService {
     PageDataRet<SysKdbDataSourceRet> query(SysKdbDataSourceQueryArgv argv);
 
     /**
+     * APPID分页查询
+     * @param argv 编辑
+     * @return 查询结果
+     */
+    PageDataRet<SysKdbDataSourceRet> queryByAppId(SysKdbDataSourceQueryArgv argv);
+
+    /**
      * 删除
      * @param argv  查询
      */
@@ -52,4 +60,16 @@ public interface SysKdbDataSourceService {
      * @return
      */
     void refreshBaseFlow();
+
+    /**
+     * 认领数据源
+     * @param argv
+     */
+    void take(DataSourceTakeArgv argv);
+
+    /**
+     * 丢弃数据源
+     * @param argv
+     */
+    void unTake(DataSourceTakeArgv argv);
 }

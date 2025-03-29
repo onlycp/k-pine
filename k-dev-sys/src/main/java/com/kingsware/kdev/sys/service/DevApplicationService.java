@@ -4,8 +4,10 @@ import com.kingsware.kdev.core.base.BaseService;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.sys.argv.*;
+import com.kingsware.kdev.sys.bean.ResourceFile;
 import com.kingsware.kdev.sys.ret.DevApplicationRet;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -60,6 +62,13 @@ public interface DevApplicationService extends BaseService {
      */
     String importApp(String json, String teamId);
 
+    /**
+     * 导入资源
+     * @param resourceFileList
+     * @return
+     */
+    String importResources(List<ResourceFile> resourceFileList);
+
 
     /**
      * 安装应用
@@ -88,4 +97,18 @@ public interface DevApplicationService extends BaseService {
      */
     void backupPine(String pineBody, String fileName);
 
+
+    /**
+     *
+     * @param id
+     * @param message
+     */
+    void gitCommit(String id, String message);
+
+    /**
+     * 删除
+     * @param id
+     * @param message
+     */
+    void gitRemove(String id, String message);
 }

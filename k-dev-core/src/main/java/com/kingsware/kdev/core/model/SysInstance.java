@@ -30,6 +30,8 @@ public class SysInstance extends BaseModel {
     private String regTime;
     /** 在线状态 **/
     private Integer online;
+    /** 集群号 **/
+    private Integer clusterNo;
 
     public String instanceName() {
         return hostName + ":" + port;

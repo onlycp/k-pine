@@ -1,0 +1,111 @@
+INSERT INTO sys_user (id, username, password, real_name, mobile, email, sex, sys_unit_id, post, status, note,
+                      who_created, when_created, who_modified, when_modified, deleted, avatar, app_id)
+VALUES ('056fb0eeb9a44cb0953534b4c0ca01fa', 'admin', 'MTIzNDU2', '超级管理员', NULL, NULL, 1, NULL, NULL, 1, NULL, '',
+        '2021-12-29 16:36:46', '056fb0eeb9a44cb0953534b4c0ca01fa', '2022-04-01 08:58:32', 0,
+        'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif', NULL);
+INSERT INTO sys_role (id, name, code, note, status, who_created, when_created, who_modified, when_modified, app_id)
+VALUES ('10d26189026a4dba86a8e63a4c717ed6', '超级管理员', 'admin', '应用超级管理员', 1, '', '2021-12-28 15:22:56',
+        '056fb0eeb9a44cb0953534b4c0ca01fa', '2022-03-29 11:43:41', NULL);
+INSERT INTO sys_user_role (id, sys_user_id, sys_role_id, who_created, when_created, app_id)
+VALUES ('b5f79a7cc794423e843a2b1fd9a27007', '056fb0eeb9a44cb0953534b4c0ca01fa', '10d26189026a4dba86a8e63a4c717ed6', '',
+        '2022-03-10 06:31:39', NULL);
+INSERT INTO sys_menu (id, name, parent_id, icon, code, router_path, component_path, is_hidden, menu_type, api_codes,
+                      open_mode, keep_alive, path, order_num, status, who_created, when_created, who_modified,
+                      when_modified, app_id, data_type, theme, page_type, sidebar_nav_mode, top_nav_mode, main_mode,
+                      page_id, full_path, is_dev)
+VALUES ('c2348bbf343a47b5852f12ee32869b13', '基础信息', NULL, 'documentation', 'system-info', 'sys/info', NULL, 0, 'M',
+        '', 0, 1, '/c2348bbf343a47b5852f12ee32869b13/', 4, 1, '056fb0eeb9a44cb0953534b4c0ca01fa', '2021-12-30 11:11:11',
+        '', '2022-01-10 19:02:36', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '/sys/info', 0);
+INSERT INTO sys_menu (id, name, parent_id, icon, code, router_path, component_path, is_hidden, menu_type, api_codes,
+                      open_mode, keep_alive, path, order_num, status, who_created, when_created, who_modified,
+                      when_modified, app_id, data_type, theme, page_type, sidebar_nav_mode, top_nav_mode, main_mode,
+                      page_id, full_path, is_dev)
+VALUES ('1a246429b14e4db2be0e1847a3939e98', '菜单管理', '843af15ab7694d54af793e4a5e6fb76e', 'nested', 'menu', 'menu',
+        '/sys/menu/index', 0, 'C', NULL, 0, 1, '/843af15ab7694d54af793e4a5e6fb76e/1a246429b14e4db2be0e1847a3939e98/', 5,
+        1, '056fb0eeb9a44cb0953534b4c0ca01fa', '2021-12-30 11:11:11', '', '2022-02-23 00:29:21', NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, '/sys/conf/menu', 0);
+INSERT INTO sys_menu (id, name, parent_id, icon, code, router_path, component_path, is_hidden, menu_type, api_codes,
+                      open_mode, keep_alive, path, order_num, status, who_created, when_created, who_modified,
+                      when_modified, app_id, data_type, theme, page_type, sidebar_nav_mode, top_nav_mode, main_mode,
+                      page_id, full_path, is_dev)
+VALUES ('843af15ab7694d54af793e4a5e6fb76e', '系统配置', NULL, 'system', 'system-config', 'sys/conf', NULL, 0, 'M', NULL,
+        0, 1, '/843af15ab7694d54af793e4a5e6fb76e/', 5, 1, '056fb0eeb9a44cb0953534b4c0ca01fa', '2021-12-30 11:11:11', '',
+        '2022-01-10 19:02:56', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '/sys/conf', 0);
+INSERT INTO sys_menu (id, name, parent_id, icon, code, router_path, component_path, is_hidden, menu_type, api_codes,
+                      open_mode, keep_alive, path, order_num, status, who_created, when_created, who_modified,
+                      when_modified, app_id, data_type, theme, page_type, sidebar_nav_mode, top_nav_mode, main_mode,
+                      page_id, full_path, is_dev)
+VALUES ('58f5f98c57c74a91b6c2ca24c5df0ba9', '用户管理', 'c2348bbf343a47b5852f12ee32869b13', 'user', 'user',
+        'user/index', '/sys/user/index', 0, 'C', 'sys:user:list', 0, 1,
+        '/c2348bbf343a47b5852f12ee32869b13/58f5f98c57c74a91b6c2ca24c5df0ba9/', 0, 1, '056fb0eeb9a44cb0953534b4c0ca01fa',
+        '2021-12-30 11:11:11', '', '2022-02-23 00:28:46', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+        '/sys/info/user/index', 0);
+INSERT INTO sys_menu (id, name, parent_id, icon, code, router_path, component_path, is_hidden, menu_type, api_codes,
+                      open_mode, keep_alive, path, order_num, status, who_created, when_created, who_modified,
+                      when_modified, app_id, data_type, theme, page_type, sidebar_nav_mode, top_nav_mode, main_mode,
+                      page_id, full_path, is_dev)
+VALUES ('611b9195b7ce4b3fb37f41023a907bda', '角色管理', 'c2348bbf343a47b5852f12ee32869b13', 'peoples', 'role',
+        'role/index', '/sys/role/index', 0, 'C', NULL, 0, 1,
+        '/c2348bbf343a47b5852f12ee32869b13/611b9195b7ce4b3fb37f41023a907bda/', 2, 1, '056fb0eeb9a44cb0953534b4c0ca01fa',
+        '2021-12-30 11:11:11', '', '2022-02-23 00:29:33', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+        '/sys/info/role/index', 0);
+INSERT INTO sys_menu (id, name, parent_id, icon, code, router_path, component_path, is_hidden, menu_type, api_codes,
+                      open_mode, keep_alive, path, order_num, status, who_created, when_created, who_modified,
+                      when_modified, app_id, data_type, theme, page_type, sidebar_nav_mode, top_nav_mode, main_mode,
+                      page_id, full_path, is_dev)
+VALUES ('49d3319c02e542db9db32a6491193348', '字典管理', '843af15ab7694d54af793e4a5e6fb76e', 'dict', 'dictionary',
+        'dict/index', '/sys/dict/index', 0, 'C', NULL, 0, 1,
+        '/843af15ab7694d54af793e4a5e6fb76e/49d3319c02e542db9db32a6491193348/', 0, 1, '056fb0eeb9a44cb0953534b4c0ca01fa',
+        '2021-12-30 11:11:11', '', '2022-02-23 00:38:52', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+        '/sys/conf/dict/index', 0);
+INSERT INTO sys_menu (id, name, parent_id, icon, code, router_path, component_path, is_hidden, menu_type, api_codes,
+                      open_mode, keep_alive, path, order_num, status, who_created, when_created, who_modified,
+                      when_modified, app_id, data_type, theme, page_type, sidebar_nav_mode, top_nav_mode, main_mode,
+                      page_id, full_path, is_dev)
+VALUES ('49d3319c02e542db9db32a6491193349', '字典数据', '843af15ab7694d54af793e4a5e6fb76e', '', 'dictionary-item',
+        'dict-item/index', '/sys/dictItem/index', 1, 'C', NULL, 0, 1,
+        '/843af15ab7694d54af793e4a5e6fb76e/49d3319c02e542db9db32a6491193349/', 1, 1, '056fb0eeb9a44cb0953534b4c0ca01fa',
+        '2021-12-30 11:11:11', '', '2021-12-30 15:32:53', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+        '/sys/conf/dict-item/index', 0);
+INSERT INTO sys_menu (id, name, parent_id, icon, code, router_path, component_path, is_hidden, menu_type, api_codes,
+                      open_mode, keep_alive, path, order_num, status, who_created, when_created, who_modified,
+                      when_modified, app_id, data_type, theme, page_type, sidebar_nav_mode, top_nav_mode, main_mode,
+                      page_id, full_path, is_dev)
+VALUES ('a17e9c809f1049668633d8fe6103e740', '系统配置管理', '843af15ab7694d54af793e4a5e6fb76e', 'swagger', 'config',
+        'config', '/sys/config/index', 0, 'C', NULL, 0, 1,
+        '/843af15ab7694d54af793e4a5e6fb76e/a17e9c809f1049668633d8fe6103e740/', 7, 1, '056fb0eeb9a44cb0953534b4c0ca01fa',
+        '2021-12-30 11:11:11', '', '2022-02-23 00:41:11', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+        '/sys/conf/config', 0);
+INSERT INTO sys_dict (id, name, code, note, who_created, when_created, who_modified, when_modified, app_id)
+VALUES ('27906b13c5c0484396e284a4368b24b3', '参数类型', 'sys_config_value_type', NULL, '', '2022-01-17 17:36:40', '',
+        '2022-01-17 17:36:40', NULL);
+INSERT INTO sys_dict_item (id, name, group_name, sys_dict_id, code, value, order_num, note, who_created, when_created,
+                           who_modified, when_modified, app_id)
+VALUES ('53fa72c48f4c4324bd36733fe871b242', '文本', NULL, '27906b13c5c0484396e284a4368b24b3', 'sys_config_value_type',
+        '0', 1, NULL, '', '2022-01-17 17:36:59', '', '2022-01-17 17:36:59', NULL);
+INSERT INTO sys_dict_item (id, name, group_name, sys_dict_id, code, value, order_num, note, who_created, when_created,
+                           who_modified, when_modified, app_id)
+VALUES ('98dba411055b460c913ab5454a6718c9', '图片', NULL, '27906b13c5c0484396e284a4368b24b3', 'sys_config_value_type',
+        '1', 2, NULL, '', '2022-01-17 17:37:07', '', '2022-01-17 17:37:07', NULL);
+INSERT INTO sys_dict_item (id, name, group_name, sys_dict_id, code, value, order_num, note, who_created, when_created,
+                           who_modified, when_modified, app_id)
+VALUES ('a988ca46b6b445fc8f36d8b9d1243cb8', '颜色', NULL, '27906b13c5c0484396e284a4368b24b3', 'sys_config_value_type',
+        '2', 3, NULL, '', '2022-01-17 17:37:15', '', '2022-01-17 17:37:15', NULL);
+
+INSERT INTO sys_user (id, app_id, avatar, deleted, email, mobile, note, password, post, real_name, sex, status,
+                      when_created, when_modified, who_created, who_modified, sys_unit_id, username)
+VALUES ('8116f0bc8222413fb72de98a32960b1a', NULL, NULL, 0, NULL, NULL, NULL, 'MTIzNDU2', NULL, '开发人员', 1, 1,
+        '2022-09-28 14:45:53', '2022-09-28 14:45:53', '056fb0eeb9a44cb0953534b4c0ca01fa',
+        '056fb0eeb9a44cb0953534b4c0ca01fa', NULL, 'dev');
+
+INSERT INTO sys_role
+(id, name, code, note, status, who_created, when_created, who_modified, when_modified, app_id)
+VALUES ('3fc43c9c69f44144bd032d9451ba328b', '团队成员', 'team_member', '青松开发者平台-团队成员', 1, '',
+        '2022-03-10 06:13:01', '056fb0eeb9a44cb0953534b4c0ca01fa', '2022-03-29 11:43:59', NULL);
+INSERT INTO sys_role
+(id, name, code, note, status, who_created, when_created, who_modified, when_modified, app_id)
+VALUES ('4a30f4d346074b4ba8363944f004c1d9', '团队负责人', 'team_owner', '青松开发者平台-团队负责人', 1, '',
+        '2022-03-10 06:12:31', '056fb0eeb9a44cb0953534b4c0ca01fa', '2022-03-29 11:44:06', NULL);
+INSERT INTO sys_user_role (id, app_id, when_created, who_created, sys_role_id, sys_user_id)
+VALUES ('8d641b3aded845feae88aef3d7e32e33', NULL, '2022-09-28 14:45:53', '056fb0eeb9a44cb0953534b4c0ca01fa',
+        '4a30f4d346074b4ba8363944f004c1d9', '8116f0bc8222413fb72de98a32960b1a');

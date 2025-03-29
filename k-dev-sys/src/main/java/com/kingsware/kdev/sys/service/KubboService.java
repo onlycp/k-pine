@@ -42,4 +42,9 @@ public interface KubboService {
      * @return
      */
     List<ApiRequestRet> apis(String appId);
+
+    /**
+     * 集群状态
+     */
+    void cluster();
 }

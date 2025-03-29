@@ -117,4 +117,6 @@ public interface SysUserService extends BaseService {
     BaseRet<?> validVerificationCode(String uuid, String code, String encryptCode);
 
     void addRoles(SysUserArgv argv);
+
+
 }

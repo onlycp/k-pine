@@ -410,7 +410,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                     throw BusinessException.serviceThrow(I18n.t("SysUser.tip.modeNotEnable","认证未启用！"));
                 }
                 // 获取视图模型
-                KFlowContext context = KFlowContext.createBaseContext( "{}",  "{}");
+                KFlowContext context = KFlowContext.createBaseContext( "{}",  "{}", null);
                 // 加入应用id
                 Map<String, Object> flowArgvMap = new HashMap<>(argv);
                 flowArgvMap.put("authId", sysAuthSource.getId());
@@ -437,7 +437,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             if (!KFlowContext.isDevMode()) {
                 SysConfigInfo beforeFlow = ConfigManager.getInstance().getItem("application.customLoginBeforeFlow");
                 if (beforeFlow != null && StringUtils.isNotEmpty(beforeFlow.getValue())) {
-                    KFlowContext beforeIc = KFlowContext.createBaseContext("{}", "{}");
+                    KFlowContext beforeIc = KFlowContext.createBaseContext("{}", "{}", null);
                     KdbFlowResult beforeFlowResult = KdbFlowExecutor.getInstance().execute(beforeFlow.getValue(), "", argv, beforeIc, false, false);
                     beforeFlowResultMap = (Map<String, Object>) beforeFlowResult.getData();
                 }
@@ -625,7 +625,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             if (!KFlowContext.isDevMode()) {
                 SysConfigInfo afterFlow = ConfigManager.getInstance().getItem("application.customLoginBeforeFlow");
                 if (afterFlow != null && StringUtils.isNotEmpty(afterFlow.getValue())) {
-                    KFlowContext afterIc = KFlowContext.createBaseContext("{}", "{}");
+                    KFlowContext afterIc = KFlowContext.createBaseContext("{}", "{}", null);
                     afterParams.putAll(beforeFlowResultMap);
                     afterParams.putAll(argv);
                     afterParams.put("password", null);
@@ -643,7 +643,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                     ret.setActionMessage(map.get("tip").toString());
                 }
                 catch (Exception e) {
-                    log.warn("warn", e);
+                    // log.warn("warn", e);
                 }
             }
 

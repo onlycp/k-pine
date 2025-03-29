@@ -10,6 +10,7 @@ import com.kingsware.kdev.core.cache.session.SessionManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.UnauthorizedException;
+import com.kingsware.kdev.core.kflow.FlowUtils;
 import com.kingsware.kdev.core.kflow.KFlowConstant;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
@@ -119,6 +120,7 @@ public class DynamicTask implements CommandLineRunner {
             this.threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
             this.threadPoolTaskScheduler.setPoolSize(50);
             this.threadPoolTaskScheduler.initialize();
+            this.threadPoolTaskScheduler.setThreadNamePrefix("DynamicTask-");
         }
     }
 
@@ -298,16 +300,22 @@ public class DynamicTask implements CommandLineRunner {
                 errorMessage = e.getMessage();
             }
         } catch (Exception e) {
+            log.error("error", e);
             log.error("定时任务执行失败, 任务名: {}， 错误信息:{}", myTask.getName(), e.getMessage());
             executeStatus = 0;
             errorMessage = ExceptionUtils.getStackTrace(e);
-        } finally {
-            long t2 = System.currentTimeMillis();
-            log.debug("任务执行完成，名称:{}, 执行结果:{}, 用时:{}, 信息:{}", myTask.getName(), executeStatus == 1 ? "成功" : "失败", (t2 - t1), errorMessage);
-            if (resultToDb) {
-                String sql = "update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ?,  last_execute_time=?, next_inst=? where id=?";
-                DB.executeUpdateSql(sql, executeStatus, (t2 - t1), errorMessage, DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME), SystemUtil.getHost().instanceName(), myTask.getId());
+        }
+        finally {
+            // 只有java类的才更新
+            if (myTask.getTaskType() == 1) {
+                long t2 = System.currentTimeMillis();
+                log.debug("任务执行完成，名称:{}, 执行结果:{}, 用时:{}, 信息:{}", myTask.getName(), executeStatus == 1 ? "成功" : "失败", (t2 - t1), errorMessage);
+                if (resultToDb) {
+                    String sql = "update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ?,  last_execute_time=?, next_inst=? where id=?";
+                    DB.executeUpdateSql(sql, executeStatus, (t2 - t1), errorMessage, DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME), SystemUtil.getHost().instanceName(), myTask.getId());
+                }
             }
+
 
         }
 
@@ -336,7 +344,9 @@ public class DynamicTask implements CommandLineRunner {
      */
     private void runFlowTask(SysTask sysTask) {
 
-
+        if (sysTask.getTaskResourceId() == null) {
+            return;
+        }
         // 先查找一下看流程是否存在
         SysLogicFlow logicFlow = DB.findOne(SysLogicFlow.class, "select in_argv, application_id, out_argv from sys_logic_flow where flow_id=?", sysTask.getTaskResourceId());
         String inArgv = "{}";
@@ -349,7 +359,7 @@ public class DynamicTask implements CommandLineRunner {
                 outArgv = logicFlow.getOutArgv();
             }
         }
-        KFlowContext context = KFlowContext.createBaseContext(inArgv, outArgv);
+        KFlowContext context = KFlowContext.createBaseContext(inArgv, outArgv, null);
         Map<String, Object> params = new HashMap<>();
         if (StringUtils.isNotEmpty(sysTask.getTaskArgv())) {
             Map<String, Object> taskArgvMap = JsonUtil.toMap(sysTask.getTaskArgv());
@@ -359,6 +369,7 @@ public class DynamicTask implements CommandLineRunner {
         }
         params.put("_expireTime",  getNextTriggerTime(sysTask.getCron()));
         params.put("_appId", sysTask.getApplicationId());
+
         long t1 = System.currentTimeMillis();
         // 如果是虚拟任务，将改为同步任务
         if (sysTask.getName().startsWith("virtual-api-cache") && hasVirtualTask(sysTask.getId())) {
@@ -386,7 +397,16 @@ public class DynamicTask implements CommandLineRunner {
             }
         }
        else {
-            KdbFlowResult kdbFlowResult = KdbFlowExecutor.getInstance().execute(sysTask.getTaskResourceId(), "", params, context, false, asyncExecute);
+            if (logicFlow != null && StringUtils.isNotEmpty(logicFlow.getInArgv())) {
+                FlowUtils.handleInArgv(params, logicFlow.getInArgv());
+            }
+            Map<String, Object> totalVariables = new HashMap<>();
+            totalVariables.put("__taskId", sysTask.getId());
+            totalVariables.put("__flowId", sysTask.getTaskResourceId());
+            totalVariables.put("__instanceId", SystemUtil.getHost().instanceName());
+            totalVariables.put("variables", params);
+            KdbFlowResult kdbFlowResult = KdbFlowExecutor.getInstance().execute("task_agent", "", totalVariables, context, false, asyncExecute);
+            System.currentTimeMillis();
         }
         long t2 = System.currentTimeMillis();
             log.debug("流程任务完成：{}", sysTask.getName());
@@ -498,6 +518,10 @@ public class DynamicTask implements CommandLineRunner {
      * 扫描Class类
      */
     private void scanJavaClassTask(String scanPackage) {
+        // 只有主集群
+        if (!InstanceManager.getInstance().isActiveCluster()) {
+            return;
+        }
         // 扫描所有的定时器类
         List<Class<?>> classList = ClassUtils.getClassesByParentClass(scanPackage, KTask.class);
         for (Class<?> tClass : classList) {
@@ -544,16 +568,26 @@ public class DynamicTask implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-//        if (1 ==1) {
-//            return;
-//        }
+        String enableTask = SpringContext.getProperties("app.task.enable", "true");
+        if ("false".equalsIgnoreCase(enableTask)) {
+            return;
+        }
+
         initThreadPool();
         scanJavaClassTask(scanPackage);
         threadPoolTaskScheduler.schedule(() -> {
 
             try {
-                if (DBInitialize.initCompleted) {
-                    List<SysTask> tasks = DB.findList(SysTask.class, "select * from sys_task where enable=1 order by when_created asc");
+                if (DBInitialize.initCompleted ) {
+                    List<SysTask> tasks = new ArrayList<>();
+                    if (InstanceManager.getInstance().isActiveCluster()) {
+                        tasks = DB.findList(SysTask.class, "select * from sys_task where enable=1 order by when_created asc");
+                    }
+                    else {
+                        // 只读取配置同步任务
+                        tasks = DB.findList(SysTask.class, "select * from sys_task where enable=1 and class_name=?", "com.kingsware.kdev.core.cache.config.ConfigTask");
+                        log.info("非主集群，不执行任务调度, 移除现有的定时任务:{}", sysTaskList.size());
+                    }
                     // 移除超时的虚拟任务
                     List<SysTask> expireTasks = new ArrayList<>();
                     int virtualTaskKeepaliveTime = SpringContext.getInt("app.schedule.virtual-task-keepalive-time", 1);
@@ -572,15 +606,16 @@ public class DynamicTask implements CommandLineRunner {
                     // 加入虚拟任务
                     tasks.addAll(virtualTaskList);
 //                    List<SysTask> apiCacheTasks =
-                    log.debug("线程池数量：{}，当前活动：{}， 任务数:{}", threadPoolTaskScheduler.getPoolSize(),  threadPoolTaskScheduler.getActiveCount(),  tasks.size());
+                    // log.info("线程池数量：{}，当前活动：{}， 任务数:{}", threadPoolTaskScheduler.getPoolSize(),  threadPoolTaskScheduler.getActiveCount(),  tasks.size());
                     if (sysTaskList.isEmpty()) {
                         sysTaskList.addAll(tasks);
                     }
                     else {
                         // 删除不存在的任务
                         List<SysTask> removeTasks = new ArrayList<>();
+                        List<SysTask> finalTasks = tasks;
                         sysTaskList.forEach(it -> {
-                            Optional<SysTask> optional = tasks.stream().filter(task -> task.getId().equals(it.getId())).findFirst();
+                            Optional<SysTask> optional = finalTasks.stream().filter(task -> task.getId().equals(it.getId())).findFirst();
                             // 如果找到，就放到替换列表中
                             if (optional.isPresent()) {
                                 int index = sysTaskList.indexOf(it);

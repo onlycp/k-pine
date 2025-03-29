@@ -117,6 +117,11 @@
 			</exclusions>
 		</dependency>
 		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.11.0</version>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
 			<version>2.20.0</version>
@@ -209,6 +214,11 @@
 			</dependency>
 			<dependency>
 				<artifactId>k-dev-resources</artifactId>
+				<groupId>com.kingsware.dev</groupId>
+				<version>${kdev.version}</version>
+			</dependency>
+			<dependency>
+				<artifactId>k-dev-faas</artifactId>
 				<groupId>com.kingsware.dev</groupId>
 				<version>${kdev.version}</version>
 			</dependency>

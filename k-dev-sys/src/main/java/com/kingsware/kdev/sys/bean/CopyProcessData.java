@@ -24,6 +24,8 @@ public class CopyProcessData {
     private Set<String> apiIds = new HashSet<>();
     /** 页面id集合 **/
     private Set<String> pageIds = new HashSet<>();
+    /** 页面分组id集合 **/
+    private Set<String> devModuleIds = new HashSet<>();
     /** 字典id集合 **/
     private Set<String> dictIds = new HashSet<>();
     /** 字典项id集合 **/
@@ -55,6 +57,7 @@ public class CopyProcessData {
         faasFlowIds.addAll(addData.getFaasFlowIds());
         apiIds.addAll(addData.getApiIds());
         pageIds.addAll(addData.getPageIds());
+        devModuleIds.addAll(addData.getDevModuleIds());
         dictIds.addAll(addData.getDictIds());
         dictItemIds.addAll(addData.getDictItemIds());
         configIds.addAll(addData.getConfigIds());
@@ -112,6 +115,18 @@ public class CopyProcessData {
         return strings.isEmpty()? null: strings;
     }
 
+    /**
+     * 获取页面分组id
+     */
+    public Set<String> getDevModuleIdsFromObjects() {
+        Set<String> strings = new HashSet<>();
+        for (Object curObj: toCopySet) {
+            if (curObj instanceof DevModule) {
+                strings.add(((DevModule)curObj).getId());
+            }
+        }
+        return strings.isEmpty()? null: strings;
+    }
 
     /**
      * 判断拷贝对象是否已存在
@@ -156,6 +171,15 @@ public class CopyProcessData {
             if (obj instanceof DevPage) {
                 DevPage o1 = (DevPage) curObj;
                 DevPage o2 = (DevPage) obj;
+                if (o1.getId().equals(o2.getId())) {
+                    exist = true;
+                    break;
+                }
+            }
+            // 页面分组
+            if(obj instanceof DevModule) {
+                DevModule o1 = (DevModule) curObj;
+                DevModule o2 = (DevModule) obj;
                 if (o1.getId().equals(o2.getId())) {
                     exist = true;
                     break;

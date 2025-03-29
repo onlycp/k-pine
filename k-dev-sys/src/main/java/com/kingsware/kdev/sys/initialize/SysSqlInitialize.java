@@ -1,17 +1,15 @@
 package com.kingsware.kdev.sys.initialize;
 
 import com.kingsware.kdev.core.base.SystemInitialize;
+import com.kingsware.kdev.core.bean.SqlSegment;
 import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.kflow.FlowUtils;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
-import com.kingsware.kdev.core.orm.kdb.EditFlowInfo;
-import com.kingsware.kdev.core.orm.kdb.FlowInfo;
-import com.kingsware.kdev.core.orm.kdb.KDBConnectConfig;
-import com.kingsware.kdev.core.orm.kdb.KdbFlowQueryArgv;
 import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.util.MD5Utils;
+import com.kingsware.kdev.core.util.SqlUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.bean.ExecutionFile;
 import com.kingsware.kdev.sys.model.DevSqlRun;
@@ -23,7 +21,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,30 +45,13 @@ public class SysSqlInitialize implements SystemInitialize {
 
         // 执行sql脚本
         List<ExecutionFile> fileList = getFileList(getMaxExecuteVersion());
-        //log.info("初始化数据... starting");
+        log.info("初始化数据... starting");
         fileList.stream().sorted((Comparator.comparingInt(ExecutionFile::getVersion))).forEach(this::executeSqlFile);
-        //log.info("初始化数据... end");
-        // 初始化内置的逻辑编排
-        List<FlowInfo> flowInfoList = getNestFlows();
-        for (FlowInfo flowInfo: flowInfoList) {
+        // 加入R文件
+        List<ExecutionFile> rFileList = getRFileList();
+        rFileList.forEach(this::executeSqlFile);
+        log.info("初始化数据... end");
 
-            KdbFlowQueryArgv kdbFlowQueryArgv = new KdbFlowQueryArgv();
-            kdbFlowQueryArgv.setFlowId(flowInfo.getFlowId());
-            List<FlowInfo> functionInfoList = DB.kdbApi().query(kdbFlowQueryArgv);
-            // 如果没有，则新增
-            if (functionInfoList.isEmpty()) {
-                String sql = "insert into flow (flowid,name,content,description) values (?,?,?,?)";
-                DB.byName("kingDB").executeUpdateSql(sql, flowInfo.getFlowId(), flowInfo.getName(), flowInfo.getContent(), flowInfo.getDescription());
-            }
-            else {
-                EditFlowInfo editFlowInfo = new EditFlowInfo();
-                editFlowInfo.setFlowId(flowInfo.getFlowId());
-                editFlowInfo.setContent(flowInfo.getContent());
-                editFlowInfo.setName(flowInfo.getName());
-                editFlowInfo.setDescription(flowInfo.getDescription());
-                DB.kdbApi().editFlow(editFlowInfo);
-            }
-        }
     }
 
     private int getMaxExecuteVersion() {
@@ -88,39 +68,7 @@ public class SysSqlInitialize implements SystemInitialize {
 
     }
 
-    /**
-     * 获取内置的逻辑编排列表
-     * @return
-     */
-    private List<FlowInfo> getNestFlows() {
-        List<FlowInfo> list = new ArrayList<>();
-        String path = ResourceUtils.CLASSPATH_URL_PREFIX + "logicFlow/**";
-        Resource[] resources = SpringContext.getResources(path);
-        if (resources == null) {
-            return list;
-        }
-        for(Resource resource : resources) {
-            String filename = resource.getFilename();
-            if (StringUtils.isEmpty(filename)) {
-                continue;
-            }
-            FlowInfo flow = new FlowInfo();
-            String name = filename.split("\\.")[0];
-            flow.setFlowId(name);
-            flow.setName(name);
-            flow.setDescription("内置编排");
-            flow.setCreateTime(System.currentTimeMillis());
-            flow.setUpdateTime(System.currentTimeMillis());
-            try (InputStream inputStream = resource.getInputStream()){
-                List<String> lines = FileUtils.readAllLine(inputStream);
-                flow.setContent(StringUtils.joinToString(lines, ""));
-            } catch (IOException e) {
-                flow.setContent("{}");
-            }
-            list.add(flow);
-        }
-        return list;
-    }
+
 
     private List<ExecutionFile> getFileList(int maxVersion) {
         List<ExecutionFile> resultList = new ArrayList<>();
@@ -165,65 +113,113 @@ public class SysSqlInitialize implements SystemInitialize {
                 }
             }
         }
+        log.info("[k-pine:SysSqlInitialize resultList]{}", resultList);
         return resultList;
     }
 
+    private List<ExecutionFile> getRFileList() {
+        List<ExecutionFile> resultList = new ArrayList<>();
+        boolean isCustomInitSqlPath = Boolean.parseBoolean(SpringContext.getProperties("file.is-custom-init-sql-path", "false"));
+        String initDbType = DB.getDefault().getConfig().getInnerType();
+
+        String path = ResourceUtils.CLASSPATH_URL_PREFIX + "initSql/" + initDbType + "/**";
+        if (isCustomInitSqlPath) {
+            // 在windows环境中，代码版运行./xx会找不到文件，需要改成.\xx
+            File fileList = new File("");
+            path = "file:" + initDatasourcePath + File.separator + "initSql" + File.separator + initDbType + "/**";
+            log.info("[k-pine:SysSqlInitialize isCustomInitSqlPath]: true");
+        }
+        log.info("数据库脚本准备检查，目录为:" + path);
+        Resource[] resources = SpringContext.getResources(path);
+//        log.info("[k-pine:SysSqlInitialize resources]" + resources);
+        if (resources != null) {
+            for(Resource resource : resources) {
+                ExecutionFile executionFile = new ExecutionFile();
+                String filename = resource.getFilename();
+//                log.info("[k-pine:SysSqlInitialize filename]" + filename + "----" + maxVersion);
+                if (StringUtils.isEmpty(filename)) {
+                    continue;
+                }
+                if (filename.startsWith("R_") && filename.endsWith(".sql")) {
+                    executionFile.setResource(resource);
+                    executionFile.setName(filename);
+                    executionFile.setVersion(0);
+                    executionFile.setOnce(true);
+                    resultList.add(executionFile);
+                }
+            }
+        }
+        log.info("[k-pine:SysSqlInitialize resultList]{}", resultList);
+        return resultList;
+    }
+
+    /**
+     * 执行数据库脚本文件
+     *
+     * @param file 数据库脚本文件，包含脚本的位置和版本信息
+     */
     public void executeSqlFile(ExecutionFile file) {
+        // 如果文件为null，则直接返回，不执行任何操作
         if (file == null) {
             return;
         }
+        // 记录开始执行的时间
+        String md5 = "";
         log.info("运行数据库脚本:{}", file.getName());
         long start = System.currentTimeMillis();
+        // 标记执行是否成功
         boolean success = false;
+        // 用于拼接所有的SQL语句，以便记录
         StringBuilder sqlSumary = new StringBuilder();
         try {
-            List<String> sqlList = parseSqlList(file.getResource());
-            for (String sql: sqlList) {
+            // 解析SQL文件，获取所有SQL语句段
+            List<SqlSegment> sqlList = parseSqlList(file.getResource());
+            md5 = MD5Utils.md5(StringUtils.joinToString(sqlList, "\n"));
+            try {
+                long cnt = DB.findCount("select count(1) from dev_sql_run where md5=? and success=1", md5);
+                if (cnt > 0) {
+                    log.info("[k-pine:SysSqlInitialize]跳过重复执行:{}", file.getName());
+                    return;
+                }
+
+            }
+            catch (Exception ignored) {
+
+            }
+            // 遍历并执行每条SQL语句
+            for (SqlSegment sql: sqlList) {
+                // 记录当前SQL语句开始执行的时间
                 long eachSqlStart = System.currentTimeMillis();
-                sql = sql.trim();
-                if (sql.endsWith(";")) {
-                    sql = sql.substring(0, sql.length()-1);
-                }
+                // 将当前SQL语句添加到汇总中
                 sqlSumary.append(sql);
-//                String tmpSql = sql.toLowerCase().trim();
-//                if (tmpSql.startsWith("insert") || tmpSql.startsWith("update")) {
-//                    sql = FlowUtils.buildCDATASql(sql);
-//                }
-                try {
-                    DB.executeUpdateSql(FlowUtils.buildCDATASql(sql));
-                } catch (OrmDbException e) {
-                    if (e.getExceptionTrace().toLowerCase().contains("duplicate") || e.getMessage().toLowerCase().contains("duplicate")
-                        || e.getExceptionTrace().toLowerCase().contains("already exists") || e.getMessage().toLowerCase().contains("already exists")
-                            || e.getExceptionTrace().toLowerCase().contains("重复") || e.getMessage().toLowerCase().contains("重复")
-                            || e.getExceptionTrace().toLowerCase().contains("存在") || e.getMessage().toLowerCase().contains("存在")) {
-                        continue;
-                    }
-                    log.error("sql执行失败: " + sql + ", error: " + e.getExceptionTrace(), e);
-                    throw e;
-                } catch (RuntimeException e) {
-                    if (e.getMessage().toLowerCase().contains("duplicate")
-                            || e.getMessage().toLowerCase().contains("already exists")
-                            || e.getMessage().toLowerCase().contains("重复")
-                            || e.getMessage().toLowerCase().contains("存在")) {
-                        continue;
-                    }
-                    log.error("sql执行失败: " + sql + ", error: " + e.getMessage(), e);
-                    throw e;
-                }
+                // 执行SQL语句
+                SqlUtils.executeSql("db", sql.getSql());
+                // 记录当前SQL语句执行结束的时间
                 long eachSqlEnd = System.currentTimeMillis();
+                // 记录SQL语句的版本、语句内容及执行时间
                 log.info(String.format("SQL版本：%s，执行SQL: %s，用时：%sms", file.getVersion(), sql, (eachSqlEnd - eachSqlStart)));
             }
+            // 如果所有SQL语句都成功执行，则标记为成功
             success = true;
         } catch (Exception e) {
+            // 如果有异常抛出，则记录错误日志，并标记执行失败
             log.error(String.format("SQL版本执行失败：%s", file.getVersion()));
 
         } finally {
+            // 记录结束执行的时间
             long end = System.currentTimeMillis();
+            // 创建数据库操作记录模型
             DevSqlRun model = new DevSqlRun();
+            // 记录执行时间
             model.setExecutionTime(end - start);
+            // 记录执行结果，1表示成功，0表示失败
             model.setSuccess(success ? 1 : 0);
-            model.setMd5(MD5Utils.md5(sqlSumary.toString()));
+//            // 计算并记录所有执行SQL的MD5值，用于后续的校验
+//            model.setMd5(MD5Utils.md5(sqlSumary.toString()));
+            // 记录SQL版本
+            model.setMd5(md5);
             model.setVersion(file.getVersion());
+            // 保存数据库操作记录
             DB.save(model);
         }
     }
@@ -233,29 +229,11 @@ public class SysSqlInitialize implements SystemInitialize {
      * @param file  文件
      * @return  sql列表
      */
-    private List<String> parseSqlList(Resource file) {
+    private List<SqlSegment> parseSqlList(Resource file) {
 
         try {
             List<String> readList = FileUtils.readAllLine(file.getInputStream());
-            List<String> sqlList = new ArrayList<>();
-            StringBuffer sql = new StringBuffer();
-            readList.forEach(line -> {
-                // 去掉空格
-                String cleanLine = line.trim();
-                // 如果不是空才处理
-                if (isSql(cleanLine)) {
-                    sql.append(cleanLine).append("\n");
-                    if (cleanLine.endsWith(";")) {
-                        sqlList.add(sql.toString());
-                        // 清空sql
-                        sql.setLength(0);
-                    }
-                }
-            });
-            if (sql.length() > 0) {
-                sqlList.add(sql.toString());
-            }
-            return sqlList;
+            return SqlUtils.parseSql(readList);
 
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -263,23 +241,6 @@ public class SysSqlInitialize implements SystemInitialize {
 
     }
 
-    public boolean isSql(String content) {
-
-        if (content == null) {
-            return false;
-        }
-        if ("".equals(content.trim())) {
-            return false;
-        }
-        if (content.startsWith("--")) {
-            return false;
-        }
-        if (content.startsWith("/*")) {
-            return false;
-        }
-
-        return true;
-    }
 
     @Override
     public int sort() {

@@ -58,4 +58,11 @@ public interface SysMenuService extends BaseService {
      * @param argv  查询
      */
     void delete(MultiIdArgv argv);
+
+    /**
+     * 我的菜单
+     * @param isMobile
+     * @return
+     */
+    List<TreeDataRet<Object>> myMenus(boolean isMobile);
 }

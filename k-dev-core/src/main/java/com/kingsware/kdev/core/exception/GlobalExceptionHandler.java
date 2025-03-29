@@ -5,6 +5,8 @@ import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.enums.RetEnum;
 import com.kingsware.kdev.core.i18n.I18n;
+import com.kingsware.kdev.core.kflow.FlowUtils;
+import com.kingsware.kdev.core.kflow.bean.ErrorResult;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.orm.exception.TransactionException;
 import com.kingsware.kdev.core.util.ExceptionUtils;
@@ -36,15 +38,9 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = OrmDbException.class)
     @ResponseBody
-    public BaseRet<?> ormExceptionHandler(HttpServletRequest request, OrmDbException e) {
-        String devMode = SpringContext.getProperties("app.mode.dev", "true");
-        String message = I18n.t("GlobalExceptionHandler.error1","数据库操作异常:{0}", e.getMessage());
-        if ("true".equals(devMode)) {
-            return BaseRet.failMessage(message, e.getKlog(), e.getExceptionTrace());
-        }
-        else {
-            return BaseRet.failMessage(message);
-        }
+    public Object ormExceptionHandler(HttpServletRequest request, OrmDbException e) {
+        ErrorResult errorResult = new ErrorResult(I18n.t("GlobalExceptionHandler.error1","数据库操作异常:{0}", e.getMessage()));
+        return FlowUtils.toJsonResult(errorResult, "", ExceptionUtils.getStackTrace(e) );
 
     }
 
@@ -53,16 +49,9 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = Exception.class)
     @ResponseBody
-    public BaseRet<?> exceptionHandler(HttpServletRequest request, Exception e) {
-        String devMode = SpringContext.getProperties("app.mode.dev", "true");
-        log.error("系统内部异常:", e);
-        String message = I18n.t("GlobalExceptionHandler.error2","系统内部异常:{0}", e.getMessage());
-        if ("true".equals(devMode)) {
-            return BaseRet.failMessage(message, null, ExceptionUtils.getStackTrace(e));
-        }
-        else {
-            return BaseRet.failMessage(message);
-        }
+    public Object exceptionHandler(HttpServletRequest request, Exception e) {
+        ErrorResult errorResult = new ErrorResult(I18n.t("GlobalExceptionHandler.error2","系统内部异常:{0}", e.getMessage()));
+        return FlowUtils.toJsonResult(errorResult, "",  ExceptionUtils.getStackTrace(e));
 
     }
 

@@ -1,5 +1,7 @@
 package com.kingsware.kdev.core.config;
 
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
 import com.kingsware.kdev.core.auth.AppAuthProperties;
 import com.kingsware.kdev.core.auth.BaseUserInfo;
 import com.kingsware.kdev.core.auth.TokenUtil;
@@ -9,6 +11,7 @@ import com.kingsware.kdev.core.cache.kcache.LruCache;
 import com.kingsware.kdev.core.cache.page.PageCacheManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
@@ -21,13 +24,19 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.CacheControl;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StreamUtils;
+import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -37,7 +46,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -49,6 +60,7 @@ import java.util.regex.Pattern;
  */
 @Configuration
 @Slf4j
+@SuppressWarnings("all")
 public class UiConfig extends WebMvcConfigurationSupport {
 
     @Value("${app.ui:./ui/}")
@@ -86,6 +98,22 @@ public class UiConfig extends WebMvcConfigurationSupport {
         }
         super.addResourceHandlers(registry);
 
+    }
+
+    protected AsyncTaskExecutor getAsyncExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(10);
+        executor.setMaxPoolSize(50);
+        executor.setQueueCapacity(1000);
+        executor.setThreadNamePrefix("mvc-async-");
+        executor.initialize();
+        return executor;
+    }
+    @Override
+    protected void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+        configurer.setTaskExecutor(getAsyncExecutor());
+        configurer.setDefaultTimeout(0);
+        super.configureAsyncSupport(configurer);
     }
 
     /**
@@ -129,7 +157,7 @@ public class UiConfig extends WebMvcConfigurationSupport {
     public String getRouterPageHtml(String path, String token, Map<String, Object> extraData) {
         String indexPageHtmlFile = ui + "index.html";
         String html = FileUtils.readFileToString(new File(indexPageHtmlFile), StandardCharsets.UTF_8);
-        boolean enableSSR = SpringContext.getProperties("app.ui.enableSSR", "true").equalsIgnoreCase("true");
+        boolean enableSSR = SpringContext.getBoolean("app.ui.enableSSR", false);
         if (enableSSR) {
             Document doc = Jsoup.parse(html);
             // 选择所有的 <script> 标签
@@ -194,8 +222,10 @@ public class UiConfig extends WebMvcConfigurationSupport {
         }
     }
 
+//    private String getSysConfig() {
+//        KFlowContext context = KFlowContext.createBaseContext( "{}",  "{}", null);
     private String getSysConfig(String token) {
-        KFlowContext context = KFlowContext.createBaseContext( "{}",  "{}");
+        KFlowContext context = KFlowContext.createBaseContext( "{}",  "{}", null);
 
         // 加入应用id
         Map<String, Object> flowArgvMap = new HashMap<>();
@@ -238,6 +268,7 @@ public class UiConfig extends WebMvcConfigurationSupport {
                 }
             }
         }
+        page.setPageJson(i18nTranslatePage(page.getAppId(), page.getPageJson()));
         return JsonUtil.toJson(BaseRet.success(page));
 //        return FileUtils.readFileToString(new File("data/page.json"), StandardCharsets.UTF_8);
     }
@@ -324,6 +355,155 @@ public class UiConfig extends WebMvcConfigurationSupport {
         }
         return null;
     }
+
+
+    public static String i18nTranslatePage(String appId, String pageJson) {
+        long t1 = System.currentTimeMillis();
+        // 解析 JSON
+        DocumentContext context = JsonPath.parse(pageJson);
+        // 查找所有匹配的键
+        List<String> matchKeys = new ArrayList<>();
+        matchKeys.add("label");
+        matchKeys.add("title");
+        matchKeys.add("confirmText");
+        matchKeys.add("cancelText");
+        matchKeys.add("onText");
+        matchKeys.add("offText");
+        matchKeys.add("remark");
+        matchKeys.add("placeholder");
+        matchKeys.add("tpl");
+        matchKeys.add("map");
+        matchKeys.add("option");
+        matchKeys.add("btnLabel");
+        matchKeys.add("tooltip");
+        matchKeys.add("checkAllLabel");
+        matchKeys.add("description");
+        matchKeys.add("msg");
+        matchKeys.add("addBtnLabel");
+        matchKeys.add("editBtnLabel");
+        matchKeys.add("copyBtnLabel");
+        matchKeys.add("success");
+        matchKeys.add("content");
+        matchKeys.add("suffix");
+//        matchKeys.add("unitOptions");
+        List<String> pathKeys = new ArrayList<>();
+        for (String key : matchKeys) {
+            pathKeys.add("@." + key);
+        }
+        List<Map<String, Object>> matches = context.read("$..[?(" + StringUtils.joinToString(pathKeys, " || ") + ")]");
+        for (Map<String, Object> match : matches) {
+            String s = JsonUtil.toJson(match);
+            if (s.contains("菜单")) {
+                //log.info("菜单:{}", s);
+            }
+
+            for (String key : matchKeys) {
+                if (match.containsKey(key)) {
+                    if (match.get(key) instanceof String) {
+                        String text = match.get(key).toString();
+                        if (StringUtils.containsChinese(text)) {
+                            if (text.contains("菜单")) {
+                                //log.info("菜单:{}", text);
+                            }
+                            if (key.equals("tpl") || key.equalsIgnoreCase("description") || key.equalsIgnoreCase("msg") ) {
+                                text = text.trim();
+                                if (text.startsWith("<") && text.endsWith(">" )) {
+                                    //text = StringUtils.fixUnclosedTags(text);
+                                }
+                                org.w3c.dom.Document doc = StringUtils.parseXml(text);
+                                if (doc == null) {
+                                    String translatedText = I18n.parseScript(appId, text);
+                                    translatedText = translatedText.replace("\\ ${","\\${");
+                                    translatedText = translatedText.replace("$ ","$");
+                                    if (!translatedText.equals(text)) {
+                                        match.put(key, StringUtils.capitalizeFirstLetter(translatedText));
+                                    }
+                                }
+                                else {
+                                    replaceTextNodes(doc.getDocumentElement(), appId);
+                                    match.put(key, StringUtils.documentToString(doc));
+                                }
+                            }
+                            else {
+                                String translatedText = I18n.parseScript(appId, text);
+                                if (!translatedText.equals(text)) {
+                                    match.put(key, StringUtils.capitalizeFirstLetter(translatedText));
+                                }
+                            }
+
+                        }
+                    }
+                    else if (match.get(key) instanceof List) {
+                        List<Object> list = (List<Object>) match.get(key);
+                        for (int i = 0; i < list.size(); i++) {
+                            if (list.get(i) instanceof String) {
+                                String translatedText = I18n.parseScript(appId, list.get(0).toString());
+                                translatedText = translatedText.replace("\\ ${","\\${");
+                                translatedText = translatedText.replace("$ ","$");
+                                list.set(i, translatedText);
+                            }
+
+                        }
+                        match.put(key, list);
+
+                    }
+                    else if (match.get(key) instanceof Map && "map".equalsIgnoreCase(key)) {
+                        Map<String, Object> map = (Map<String, Object>) match.get(key);
+                        if (map != null) {
+                            Map<String,Object> replacedMap = new HashMap<>();
+                            for (String k : map.keySet()) {
+                                String text = map.get(k).toString();
+                                org.w3c.dom.Document doc = StringUtils.parseXml(text);
+                                if (doc == null) {
+                                    String translatedText = I18n.parseScript(appId, text);
+                                    translatedText = translatedText.replace("\\ ${","\\${");
+                                    translatedText = translatedText.replace("$ ","$");
+                                    if (!translatedText.equals(text)) {
+                                        replacedMap.put(k, StringUtils.capitalizeFirstLetter(translatedText));
+                                    }
+                                }
+                                else {
+                                    replaceTextNodes(doc.getDocumentElement(), appId);
+                                    replacedMap.put(k, StringUtils.documentToString(doc));
+                                }
+                            }
+                            if (!replacedMap.isEmpty()) {
+                                map.putAll(replacedMap);
+                            }
+                        }
+
+                    }
+                }
+            }
+            System.currentTimeMillis();
+        }
+        if (!matches.isEmpty()) {
+            return context.jsonString();
+        }
+        long t2 = System.currentTimeMillis();
+        log.info("解析页面JSON耗时:{}ms", t2 - t1);
+        return pageJson;
+    }
+
+    // 递归方法，用于遍历和替换文本
+    private static void replaceTextNodes(Node node,  String appId) {
+        if (node.getNodeType() == Node.TEXT_NODE) {
+            String text = node.getTextContent();
+            if (StringUtils.isNotEmpty(text) && StringUtils.containsChinese(text))  {
+                String translatedText = I18n.parseScript(appId, text);
+                if (!translatedText.equals(text)) {
+                    node.setTextContent(StringUtils.capitalizeFirstLetter(translatedText));  // 替换文本内容
+                }
+            }
+        }
+
+        // 遍历所有子节点
+        NodeList children = node.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            replaceTextNodes(children.item(i),  appId);
+        }
+    }
+
 
     /**
      * 替换文本内容

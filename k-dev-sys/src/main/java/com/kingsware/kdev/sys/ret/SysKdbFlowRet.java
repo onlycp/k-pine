@@ -47,4 +47,6 @@ public class SysKdbFlowRet extends BaseSimpleRet {
     private Timestamp whenModified;
     /** 是否开始事务 **/
     private String tranCtrl;
+    /** 国际化key，多个用,分割 **/
+    private String i18nKeys;
 }

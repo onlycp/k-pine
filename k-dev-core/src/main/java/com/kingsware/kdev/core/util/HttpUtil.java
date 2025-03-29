@@ -1,5 +1,6 @@
 package com.kingsware.kdev.core.util;
 
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.NonStaticResourceHttpRequestHandler;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
@@ -201,6 +202,19 @@ public class HttpUtil {
     }
 
     public static String doPost(String apiUrl, String body, Map<String, String> headerMap) throws IOException {
+        long t1 = System.currentTimeMillis();
+//        try {
+//            OkHttpReactiveClient client = SpringContext.getBean(OkHttpReactiveClient.class);
+////            return client.doPost(apiUrl, body, headerMap).block();
+//            return client.doPostSync(apiUrl, body, headerMap);
+//        }
+//        finally {
+//            if (KClientContext.getContext() != null) {
+////                log.info("{}  {}ms", apiUrl, System.currentTimeMillis() - t1);
+//            }
+//
+//        }
+
         System.setProperty("networkaddress.cache.ttl", "0");
         System.setProperty("networkaddress.cache.negative.ttl", "0");
 
@@ -653,7 +667,7 @@ public class HttpUtil {
 
         HttpURLConnection connection = null;
         try {
-            log.info("流式下载文件开始:" + downloadUrl);
+//            log.info("流式下载文件开始:" + downloadUrl);
 //            ServletUtil.response().sendRedirect("/download/YeCongOA_784c88fa4c504b9285923a6d9bc9c1c3.zip?path=%2Fusr%2Flocal%2Fkfaas%2Fserver%2Fupload%2Fpackage");
             URL url = new URL(downloadUrl);
             connection = (HttpURLConnection) url.openConnection();
@@ -747,7 +761,7 @@ public class HttpUtil {
 
 
         } catch (Exception e) {
-            log.error("error", e);
+//            log.error("error", e);
             throw BusinessException.serviceThrow(I18n.t("HttpUtil.fileDownloadFail", "文件下载失败"));
 
         } finally {

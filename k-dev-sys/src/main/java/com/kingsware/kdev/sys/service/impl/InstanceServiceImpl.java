@@ -88,6 +88,11 @@ public class InstanceServiceImpl implements InstanceService {
             WmMessageArgv wmMessageArgv = JsonUtil.toBean(message, WmMessageArgv.class);
             messageWebSocket.sendMessageByToken(wmMessageArgv.getToken(), wmMessageArgv.getMessage());
         }
+        else if ("broad-to-sessions".equalsIgnoreCase(topic)) {
+            WmMessageArgv wmMessageArgv = JsonUtil.toBean(message, WmMessageArgv.class);
+            messageWebSocket.broadMessageToAllSessions(wmMessageArgv.getMessage());
+
+        }
         // 刷新api数据
         else if("refresh-api-data".equalsIgnoreCase(topic)){
             WmMessage wmMessage = JsonUtil.toBean(message, WmMessage.class);

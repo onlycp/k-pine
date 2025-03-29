@@ -28,10 +28,43 @@ public class HeartBeatTask implements KTask, KRunner {
 
     @Override
     public void runNow() throws Exception {
+        DB.executeUpdateSql("update sys_instance set  cluster_no=1 where cluster_no is null");
+        SysInstance masterInstance = InstanceManager.getInstance().masterInstance();
+        if (masterInstance.getId().equalsIgnoreCase("virtual") && InstanceManager.getInstance().isActiveCluster()) {
+            HostInfo hostInfo = SystemUtil.getHost();
+            // 判断是否注册过
+            SysInstance instance = DB.findOne(SysInstance.class, "select * from sys_instance where host_name=? and port=?", hostInfo.getHostName(), hostInfo.getPort());
+            if (instance == null) {
+                instance = new SysInstance();
+                instance.setPort(hostInfo.getPort());
+                instance.setHostName(hostInfo.getHostName());
+                instance.setId(StringUtils.getUUID());
+                instance.setHeartBeatTime(DateUtils.getNow());
+                instance.setRegTime(DateUtils.getNow());
+                instance.setOnline(1);
+                instance.setClusterNo(hostInfo.getClusterNo());
+                DB.save(instance);
+            }
+            else {
+                instance.setHeartBeatTime(DateUtils.getNow());
+                instance.setOnline(1);
+                instance.setClusterNo(hostInfo.getClusterNo());
+                DB.update(instance);
+            }
+            // 设置实例id
+            HeartBeatTask.INSTANCE_ID = instance.getId();
+            this.refreshInstances();
+        }
+
+
+
+    }
+
+    @Override
+    public void execute() throws Exception {
         HostInfo hostInfo = SystemUtil.getHost();
-        // 判断是否注册过
         SysInstance instance = DB.findOne(SysInstance.class, "select * from sys_instance where host_name=? and port=?", hostInfo.getHostName(), hostInfo.getPort());
-        if (instance == null) {
+        if(instance == null) {
             instance = new SysInstance();
             instance.setPort(hostInfo.getPort());
             instance.setHostName(hostInfo.getHostName());
@@ -39,33 +72,27 @@ public class HeartBeatTask implements KTask, KRunner {
             instance.setHeartBeatTime(DateUtils.getNow());
             instance.setRegTime(DateUtils.getNow());
             instance.setOnline(1);
+            instance.setClusterNo(hostInfo.getClusterNo());
             DB.save(instance);
         }
         else {
-            instance.setHeartBeatTime(DateUtils.getNow());
             instance.setOnline(1);
+            instance.setHeartBeatTime(DateUtils.getNow());
             DB.update(instance);
         }
-        // 设置实例id
-        HeartBeatTask.INSTANCE_ID = instance.getId();
-        this.refreshInstances();
 
-
-    }
-
-    @Override
-    public void execute() throws Exception {
-        SysInstance instance = DB.findOne(SysInstance.class, "select * from sys_instance where id=?", INSTANCE_ID);
-        instance.setOnline(1);
-        instance.setHeartBeatTime(DateUtils.getNow());
-        DB.update(instance);
         this.refreshInstances();
     }
 
     private void refreshInstances() {
         // 查找所有会话
-        List<SysInstance> instanceList = DB.findList(SysInstance.class, "select * from sys_instance order by reg_time asc ");
+        List<SysInstance> instanceList = DB.findList(SysInstance.class, "select * from sys_instance order by cluster_no asc, reg_time asc ");
         instanceList = instanceList.stream().filter(it -> it.getOnline() == 1).collect(Collectors.toList());
+        for (SysInstance instance : instanceList) {
+            if (instance.getClusterNo() == null) {
+                instance.setClusterNo(1);
+            }
+        }
         InstanceManager.getInstance().setInstances(instanceList);
         String mqChannel = SpringContext.getProperties("app.mq-channel", "http");
         if ("tcp".equalsIgnoreCase(mqChannel)) {

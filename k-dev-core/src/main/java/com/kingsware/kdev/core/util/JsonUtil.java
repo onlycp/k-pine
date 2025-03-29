@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.annotation.Column;
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -290,7 +291,13 @@ public class JsonUtil {
             List<Map<String, Object>> list = objectMapper.readValue(json, javaType);
             List<T> result = new ArrayList<>(list.size());
             for (Map<String, Object> map: list) {
-                result.add(transformMap2Entity(tClass, map));
+                if (Map.class.isAssignableFrom(tClass)) {
+                    result.add((T) map);
+                }
+                else {
+                    result.add(transformMap2Entity(tClass, map));
+                }
+
             }
             return result;
         } catch (Exception e) {
@@ -357,6 +364,24 @@ public class JsonUtil {
             e.printStackTrace();
             return null;
         }
+    }
+
+    @SneakyThrows
+    public static String prettyJson(String compressedJson) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            // 解析 JSON 字符串到对象
+            Object json = objectMapper.readValue(compressedJson, Object.class);
+
+            // 格式化输出 JSON 字符串
+            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
+        }
+        catch (Exception e) {
+            return compressedJson;
+        }
+
+
     }
 
 

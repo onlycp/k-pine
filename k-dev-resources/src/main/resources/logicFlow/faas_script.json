@@ -34,7 +34,7 @@
       "type": "task",
       "execute": {
         "script": {
-          "content": "const script = context.get('script');\nconst res = eval(script);\nsetResult('result', res)",
+          "content": "const script = context.get('script');\nconst res = eval(script);\nif (res == null) {\n    setResult('result', null)\n}\nelse if (typeof res === 'string') {\n    setResult('result', res)\n}\nelse {\n    setResult('result', JSON.stringify(res))\n}",
           "type": "js",
           "params": []
         }
