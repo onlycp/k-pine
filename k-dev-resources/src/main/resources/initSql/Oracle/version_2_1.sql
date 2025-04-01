@@ -48,29 +48,14 @@ create table DEV_APPLICATION
     APP_PUBLIC_TYPE NUMBER    default 0
 );
 
-create table DEV_APPLICATION_VERSION_HISTOR
-(
-    ID           VARCHAR2(36 char) not null
-        constraint IND_E4BBE32D6CA201E9
-        primary key,
-    WHEN_CREATED VARCHAR2(20 char),
-    WHO_CREATED  VARCHAR2(36 char),
-    APP_ID       VARCHAR2(36 char),
-    VERSION      VARCHAR2(50 char),
-    FILE_NAME    VARCHAR2(255 char),
-    NOTE         VARCHAR2(255 char),
-    EXPORT_DATA  CLOB
-);
 create table DEV_DOCUMENT
 (
-    ID           VARCHAR2(255 char) not null,
+    ID           VARCHAR2(255 char) not null primary key,
     NAME         VARCHAR2(255 char),
     PATH         VARCHAR2(255 char),
     CONTENT      CLOB,
     PARENT_ID    VARCHAR2(255 char),
-    "ORDER"      NUMBER             not null
-        constraint IND_CB324EE3A9A32AA8
-            primary key,
+    "ORDER"      NUMBER             not null,
     WHEN_CREATED DATE,
     WHO_CREATED  VARCHAR2(255 char),
     DELETED      NUMBER(3) default 0
@@ -133,16 +118,16 @@ create table DEV_PAGE
     DEV_STATUS     NUMBER(3),
     PAGE_JSON      CLOB
 );
-
-create table DEV_PAGE_HISTORY
+create table dev_page_history
 (
-    ID           VARCHAR2(36 char) not null
-        constraint DEV_PAGE_HISTORY_PK_DEV_PAGE
+    id               varchar(36) not null
         primary key,
-    PAGE_ID      VARCHAR2(36 char),
-    PAGE_JSON    CLOB,
-    WHEN_CREATED VARCHAR2(20 char),
-    WHO_CREATED  VARCHAR2(36 char)
+    page_id          varchar(36) ,
+    page_json        clob   ,
+    when_created     timestamp   ,
+    who_created      varchar(36) ,
+    version_tag      varchar(50) ,
+    version_tag_time varchar(30)
 );
 
 create table DEV_POWER_LINK
@@ -290,40 +275,41 @@ create table DEV_VIEW_MODEL_FLOW
     APP_ID        VARCHAR2(36 char)
 );
 
-create table EXT_PLUGIN_INTERFACE
+create table ext_plugin_interface
 (
-    ID          VARCHAR2(255 char)           not null
-        constraint IND_8D78E5F327677A55
+    id          varchar(255)                           not null
         primary key,
-    NAME        VARCHAR2(255 char),
-    RESP_TYPE   VARCHAR2(255 char) default '',
-    CONTENT     CLOB,
-    DESCRIPTION VARCHAR2(1024 char),
-    PLUGINID    VARCHAR2(255 char),
-    CREATETIME  TIMESTAMP(6)       default CURRENT_TIMESTAMP,
-    CREATEUSER  VARCHAR2(255 char),
-    UPDATETIME  TIMESTAMP(6)       default CURRENT_TIMESTAMP,
-    UPDATEUSER  VARCHAR2(255 char),
-    DELETED     NUMBER             default 0 not null
+    name        varchar(255)                           ,
+    resp_type   varchar(255) default ''                ,
+    content     CLOB                                ,
+    description varchar(1024)                         ,
+    plugin_id   varchar(255)                           ,
+    create_time timestamp    default CURRENT_TIMESTAMP ,
+    create_user varchar(255)                           ,
+    update_time timestamp    default CURRENT_TIMESTAMP ,
+    update_user varchar(255)                           ,
+    deleted     int          default 0
 );
 
-create table EXT_PLUGIN_TREE
+
+
+
+create table ext_plugin_tree
 (
-    ID          VARCHAR2(255 char) not null
-        constraint IND_AFB6F8499CF142A4
+    id          varchar(255)
         primary key,
-    EXTNAME     VARCHAR2(255 char),
-    JARNAME     VARCHAR2(255 char),
-    TYPE        NUMBER,
-    CREATETIME  TIMESTAMP(6) default CURRENT_TIMESTAMP,
-    UPDATETIME  TIMESTAMP(6) default CURRENT_TIMESTAMP,
-    CREATEUSER  VARCHAR2(255 char),
-    UPDATEUSER  VARCHAR2(255 char),
-    STATUS      NUMBER       default 0,
-    NAME        VARCHAR2(255 char),
-    CLAZZNAME   VARCHAR2(255 char),
-    DESCRIPTION VARCHAR2(255 char),
-    CHECKTIME   TIMESTAMP(6)
+    ext_name    varchar(255)                     ,
+    jar_name    varchar(255)                       ,
+    type        int                                ,
+    create_time timestamp default CURRENT_TIMESTAMP,
+    update_time timestamp default CURRENT_TIMESTAMP ,
+    create_user varchar(255)                        ,
+    update_user varchar(255)                        ,
+    status      int       default 0               ,
+    name        varchar(255)                        ,
+    clazz_name  varchar(255)                        ,
+    description CLOB                              ,
+    check_time  timestamp
 );
 
 create table KFAAS_LIB
@@ -363,7 +349,7 @@ create table OPEN_ACCOUNT_API
     ID           VARCHAR2(36 char) not null
         constraint IND_18E26ABA9325DC00
         primary key,
-    ACCOUNT_ID   RAW(32),
+    ACCOUNT_ID   VARCHAR2(36),
     API_ID       VARCHAR2(36 char),
     WHEN_CREATED VARCHAR2(20 char),
     WHO_CREATED  VARCHAR2(36 char)
@@ -389,7 +375,7 @@ create table SYS_API
     ID                 VARCHAR2(36 char) default '' not null
         constraint SYS_API_PK_OPEN_API_LOG
         primary key,
-    API_NAME           VARCHAR2(50 char),
+    API_NAME           VARCHAR2(255 char),
     API_URL            VARCHAR2(128 char),
     API_NOTE           CLOB,
     API_TAGS           VARCHAR2(128 char),
@@ -508,8 +494,8 @@ create table SYS_DICT
     ID            VARCHAR2(36 char) not null
         constraint SYS_DICT_PK_SYS_DATA_RESOURCE
         primary key,
-    NAME          VARCHAR2(50 char),
-    CODE          VARCHAR2(50 char),
+    NAME          VARCHAR2(255 char),
+    CODE          VARCHAR2(255 char),
     NOTE          CLOB,
     WHO_CREATED   VARCHAR2(36 char),
     WHEN_CREATED  VARCHAR2(20 char),
@@ -523,10 +509,10 @@ create table SYS_DICT_ITEM
     ID            VARCHAR2(36 char) not null
         constraint SYS_DICT_ITEM_PK_SYS_DICT
         primary key,
-    NAME          VARCHAR2(50 char),
-    GROUP_NAME    VARCHAR2(50 char),
+    NAME          VARCHAR2(255 char),
+    GROUP_NAME    VARCHAR2(255 char),
     SYS_DICT_ID   VARCHAR2(36 char),
-    CODE          VARCHAR2(50 char),
+    CODE          VARCHAR2(255 char),
     VALUE         VARCHAR2(20 char),
     ORDER_NUM     NUMBER,
     NOTE          CLOB,
@@ -592,17 +578,17 @@ create table SYS_LOGIC_FLOW
     DEFAULT_SOURCE_NAME VARCHAR2(100 char)
 );
 
-create table SYS_LOGIC_HISTORY
+create table sys_logic_history
 (
-    ID           VARCHAR2(36 char) not null
-        constraint IND_11837FCF33865305
+    id               varchar(36) not null
         primary key,
-    FLOW_ID      VARCHAR2(36 char),
-    FLOW_JSON    CLOB,
-    WHEN_CREATED VARCHAR2(20 char),
-    WHO_CREATED  VARCHAR2(36 char)
+    flow_id          varchar(36) null ,
+    flow_json        clob    null ,
+    when_created     timestamp   null ,
+    who_created      varchar(36) null ,
+    version_tag      varchar(50) null ,
+    version_tag_time varchar(30) null
 );
-
 create table SYS_LOGIC_TEMPLATE
 (
     ID            VARCHAR2(36 char) not null
@@ -640,7 +626,7 @@ create table SYS_MENU
     ID               VARCHAR2(36 char)        not null
         constraint SYS_MENU_PK_SYS_LOGIN_LOG
         primary key,
-    NAME             VARCHAR2(50 char)        not null,
+    NAME             VARCHAR2(255 char)        not null,
     PARENT_ID        VARCHAR2(36 char),
     ICON             VARCHAR2(50 char),
     CODE             VARCHAR2(50 char),
@@ -695,8 +681,8 @@ create table SYS_NOTICE_RECORD
     TO_WHO        VARCHAR2(36 char)   not null,
     NOTICE_ID     VARCHAR2(36 char),
     IS_READ       NUMBER(3) default 0 not null,
-    READ_TIME     VARCHAR2(20 char),
-    NOTICE_TIME   VARCHAR2(20 char)   not null,
+    READ_TIME     VARCHAR2(30 char),
+    NOTICE_TIME   VARCHAR2(30 char)   not null,
     TITLE         VARCHAR2(255 char),
     CONTENT       CLOB,
     TO_WHO_NAME   VARCHAR2(255 char),
@@ -744,14 +730,14 @@ create table SYS_ROLE
     ID            VARCHAR2(36 char) not null
         constraint SYS_ROLE_PK_SYS_OPERATE_LOG
         primary key,
-    NAME          VARCHAR2(50 char) not null,
-    CODE          VARCHAR2(50 char) not null,
+    NAME          VARCHAR2(255 char) not null,
+    CODE          VARCHAR2(255 char) not null,
     NOTE          CLOB,
     STATUS        NUMBER(3),
-    WHO_CREATED   VARCHAR2(36 char) not null,
-    WHEN_CREATED  VARCHAR2(20 char) not null,
-    WHO_MODIFIED  VARCHAR2(36 char) not null,
-    WHEN_MODIFIED VARCHAR2(20 char) not null,
+    WHO_CREATED   VARCHAR2(36 char) ,
+    WHEN_CREATED  VARCHAR2(20 char),
+    WHO_MODIFIED  VARCHAR2(36 char),
+    WHEN_MODIFIED VARCHAR2(20 char),
     APP_ID        VARCHAR2(36 char)
 );
 
@@ -775,7 +761,7 @@ create table SYS_TASK
         primary key,
     NAME                VARCHAR2(100 char),
     CRON                VARCHAR2(50 char),
-    DISTRIBUTED         NUMBER(3),
+    "DISTRIBUTED"         NUMBER(3),
     APPLICATION_ID      VARCHAR2(36 char),
     TASK_TYPE           NUMBER(3) default 1,
     TASK_RESOURCE_ID    VARCHAR2(36 char),
@@ -802,7 +788,7 @@ create table SYS_UNIT
     ID            VARCHAR2(36 char)   not null
         constraint SYS_UNIT_PK_SYS_TASK
         primary key,
-    NAME          VARCHAR2(50 char)   not null,
+    NAME          VARCHAR2(255 char)   not null,
     PARENT_ID     VARCHAR2(36 char),
     PATH          CLOB                not null,
     LEADER        VARCHAR2(255 char),
@@ -823,9 +809,9 @@ create table SYS_USER
     ID            VARCHAR2(36 char) not null
         constraint SYS_USER_PK_SYS_UNIT
         primary key,
-    USERNAME      VARCHAR2(50 char) not null,
+    USERNAME      VARCHAR2(255 char) not null,
     PASSWORD      VARCHAR2(256 char),
-    REAL_NAME     VARCHAR2(50 char) not null,
+    REAL_NAME     VARCHAR2(255 char) not null,
     MOBILE        VARCHAR2(20 char),
     EMAIL         VARCHAR2(50 char),
     SEX           NUMBER(3),
@@ -901,3 +887,33 @@ create table SYS_VIEW_MODEL_FLOW
     WHO_MODIFIED  VARCHAR2(36 char),
     WHEN_MODIFIED VARCHAR2(20 char)
 );
+
+create table dev_faas_node
+(
+    id            varchar(32)    ,
+    name          varchar(90)   ,
+    type_id       varchar(32)    ,
+    template      CLOB ,
+    icon          varchar(32)   ,
+    pub_status    int           ,
+    order_num     varchar(255)   ,
+    when_created  varchar(255)   ,
+    who_created   varchar(255)   ,
+    when_modified varchar(255)   ,
+    who_modified  varchar(255)   ,
+    config        CLOB        ,
+    code          varchar(255)
+);
+
+create table dev_faas_node_type
+(
+    id            varchar(32)  ,
+    name          varchar(90)  ,
+    pub_status    int         ,
+    icon          varchar(32)  ,
+    when_created  varchar(255) ,
+    who_created   varchar(255) ,
+    when_modified varchar(255) ,
+    who_modified  varchar(255)
+);
+
