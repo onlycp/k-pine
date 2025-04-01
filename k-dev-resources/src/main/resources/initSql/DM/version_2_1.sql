@@ -50,14 +50,12 @@ create table DEV_APPLICATION
 
 create table DEV_DOCUMENT
 (
-    ID           VARCHAR2(255 char) not null,
+    ID           VARCHAR2(255 char) not null primary key,
     NAME         VARCHAR2(255 char),
     PATH         VARCHAR2(255 char),
     CONTENT      CLOB,
     PARENT_ID    VARCHAR2(255 char),
-    "ORDER"      NUMBER             not null
-        constraint IND_CB324EE3A9A32AA8
-            primary key,
+    "ORDER"      NUMBER             not null,
     WHEN_CREATED DATE,
     WHO_CREATED  VARCHAR2(255 char),
     DELETED      NUMBER(3) default 0
@@ -736,10 +734,10 @@ create table SYS_ROLE
     CODE          VARCHAR2(255 char) not null,
     NOTE          CLOB,
     STATUS        NUMBER(3),
-    WHO_CREATED   VARCHAR2(36 char) not null,
-    WHEN_CREATED  VARCHAR2(20 char) not null,
-    WHO_MODIFIED  VARCHAR2(36 char) not null,
-    WHEN_MODIFIED VARCHAR2(20 char) not null,
+    WHO_CREATED   VARCHAR2(36 char) ,
+    WHEN_CREATED  VARCHAR2(20 char),
+    WHO_MODIFIED  VARCHAR2(36 char),
+    WHEN_MODIFIED VARCHAR2(20 char),
     APP_ID        VARCHAR2(36 char)
 );
 
