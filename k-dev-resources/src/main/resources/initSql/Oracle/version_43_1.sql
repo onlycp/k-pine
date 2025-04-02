@@ -42,32 +42,21 @@ alter table sys_logic_template add publish_status integer null;
 
 
 CREATE TABLE  dev_page_template_history (
-    id varchar(36) NOT NULL,
-    tpl_id varchar(36) DEFAULT NULL,
-    page_json CLOB,
-    when_created varchar(50) NULL DEFAULT NULL,
-    who_created varchar(36) DEFAULT NULL,
-    version_tag varchar(50) DEFAULT NULL,
-    version_tag_time varchar(30) DEFAULT NULL,
-    app_id varchar(36) DEFAULT NULL,
-    PRIMARY KEY (id)
-    );
-
-
-CREATE TABLE  dev_chat_history (
-    id varchar(36)  NOT NULL,
-    question CLOB  NOT NULL,
-    answer CLOB ,
-    args CLOB,
-    when_created varchar(50)  DEFAULT NULL,
-    who_created varchar(36)  DEFAULT NULL,
-    PRIMARY KEY (id)
-    );
+        id varchar(36) NOT NULL,
+        tpl_id varchar(36) DEFAULT NULL,
+        page_json CLOB,
+        when_created varchar(50) NULL ,
+        who_created varchar(36) DEFAULT NULL,
+        version_tag varchar(50) DEFAULT NULL,
+        version_tag_time varchar(30),
+        app_id varchar(36) DEFAULT NULL,
+        PRIMARY KEY (id)
+);
 
 
 -- 修改 dev_power_tree 表
-ALTER TABLE dev_power_tree ADD order_num integer NULL;
+ALTER TABLE dev_power_tree ADD order_num integer ;
 
 -- 修改 sys_logic_template 表
-ALTER TABLE sys_logic_template ADD order_num integer NULL;
-ALTER TABLE sys_logic_template ADD enable_status integer NULL;
+ALTER TABLE sys_logic_template ADD order_num integer ;
+ALTER TABLE sys_logic_template ADD enable_status integer ;
