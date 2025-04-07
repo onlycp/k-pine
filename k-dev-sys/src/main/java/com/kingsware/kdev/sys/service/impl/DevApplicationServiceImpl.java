@@ -295,29 +295,33 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         importMessageMap.put(I18n.t("DevApplicationServiceImpl.i18n", "国际化信息") , i18nCount);
         // 开放账号
         List<OpenAccount> openAccounts = devPine.getOpenAccounts();
-        openAccounts = openAccounts.stream()
-                .collect(Collectors.collectingAndThen(
-                        Collectors.groupingBy(OpenAccount::getId),  // 按id分组
-                        map -> map.values().stream()
-                                .map(group -> group.get(0))  // 取每组第一个元素
-                                .collect(Collectors.toList())
-                ));
-        long openAccountCount = DB.batchSaveOrUpdate(openAccounts, OpenAccount.class);
-        log.info("完成导入开放账号：{}", openAccountCount);
-        importMessageMap.put(I18n.t("DevApplicationServiceImpl.openAccount", "开放账号") , i18nCount);
+        if (openAccounts != null && !openAccounts.isEmpty()) {
+            openAccounts = openAccounts.stream()
+                    .collect(Collectors.collectingAndThen(
+                            Collectors.groupingBy(OpenAccount::getId),  // 按id分组
+                            map -> map.values().stream()
+                                    .map(group -> group.get(0))  // 取每组第一个元素
+                                    .collect(Collectors.toList())
+                    ));
+            long openAccountCount = DB.batchSaveOrUpdate(openAccounts, OpenAccount.class);
+            log.info("完成导入开放账号：{}", openAccountCount);
+            importMessageMap.put(I18n.t("DevApplicationServiceImpl.openAccount", "开放账号") , openAccountCount);
+        }
         // 开放账号权限
         List<OpenAccountApi> openAccountApis = devPine.getOpenAccountApis();
-        // 去除重复数据
-        openAccountApis = openAccountApis.stream()
-                .collect(Collectors.collectingAndThen(
-                        Collectors.groupingBy(OpenAccountApi::getId),  // 按id分组
-                        map -> map.values().stream()
-                                .map(group -> group.get(0))  // 取每组第一个元素
-                                .collect(Collectors.toList())
-                ));
-        long openAccountApiCount = DB.batchSaveOrUpdate(openAccountApis, OpenAccountApi.class);
-        log.info("完成导入开放权限：{}", openAccountApiCount);
-        importMessageMap.put(I18n.t("DevApplicationServiceImpl.openAccountApi", "开放权限") , i18nCount);
+        if (openAccountApis != null && !openAccountApis.isEmpty()) {
+            // 去除重复数据
+            openAccountApis = openAccountApis.stream()
+                    .collect(Collectors.collectingAndThen(
+                            Collectors.groupingBy(OpenAccountApi::getId),  // 按id分组
+                            map -> map.values().stream()
+                                    .map(group -> group.get(0))  // 取每组第一个元素
+                                    .collect(Collectors.toList())
+                    ));
+            long openAccountApiCount = DB.batchSaveOrUpdate(openAccountApis, OpenAccountApi.class);
+            log.info("完成导入开放权限：{}", openAccountApiCount);
+            importMessageMap.put(I18n.t("DevApplicationServiceImpl.openAccountApi", "开放权限") , openAccountApiCount);
+        }
         // 菜单
         long menuCount = 0;
         if (LicenseManager.getInstance().isUniopsApp()) {
