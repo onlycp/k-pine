@@ -30,12 +30,16 @@ public class KFlowConstant {
     public final static String EXCEL_FLAG = "excel|";
     /** 导出kexcel **/
     public final static String KEXCEL_FLAG = "kexcel|";
+    /** 导出kexcel **/
+    public final static String RAW_FLAG = "raw|";
     /** 导出文件 **/
     public final static String FILE_FLAG = "file|";
     public final static String BASE64_TO_FILE_FLAG = "base64ToFile|";
 
     /** 结果类型 json **/
     public final static String RESULT_JSON = "json";
+    /** 结果类型 raw **/
+    public final static String RESULT_RAW = "raw";
     /** 结果类型 excel **/
     public final static String RESULT_EXCEL = "excel";
     /** 结果类型 file **/

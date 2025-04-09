@@ -738,6 +738,9 @@ public class KAuthFilter implements Filter {
             case KFlowConstant.RESULT_EXCEL:
                 ExcelWorker.getInstance().writeToWeb(response, (KExcel) result.getData());
                 break;
+            case KFlowConstant.RESULT_RAW:
+                ServletUtil.responseRaw(response, (String) result.getData());
+                break;
             case KFlowConstant.RESULT_FILE:
                 kdbRetFile = (KdbRetFile) result.getData();
                 ServletUtil.responseFile(response, kdbRetFile.getFileName(), kdbRetFile.getData());
