@@ -66,7 +66,7 @@ public class SysMenuController extends BaseController {
     @GetMapping("/my")
     public BaseRet<List<TreeDataRet<Object>>> my(boolean isMobile) {
         try {
-            return BaseRet.success(SysMenuService.treeOptions("0", KClientContext.getContext().getUserInfo().getRoleIds(), isMobile));
+            return BaseRet.success(SysMenuService.myMenus(isMobile));
         }
         catch (Exception e) {
             log.error("error", e);

@@ -24,6 +24,11 @@ public interface DevPageService extends BaseService {
      */
     DevPageRet get(String id);
 
+    /**
+     *
+     * @param path
+     * @return
+     */
     DevPageRet getByPath(String path);
 
     /**
@@ -77,5 +82,19 @@ public interface DevPageService extends BaseService {
      * @return
      */
     void exportPine(MultiIdArgv argv);
+
+    /**
+     *
+     * @param id
+     * @param message
+     */
+    void gitCommit(String id, String message);
+
+    /**
+     * 删除
+     * @param id
+     * @param message
+     */
+    void gitRemove(String id, String message);
 
 }

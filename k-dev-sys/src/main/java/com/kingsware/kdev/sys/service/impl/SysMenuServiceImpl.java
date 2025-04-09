@@ -4,6 +4,8 @@ import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.bean.TreeDataRet;
+import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
@@ -83,6 +85,7 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
         model.setSidebarNavMode(argv.getSidebarNavMode());
         model.setTopNavMode(argv.getTopNavMode());
         model.setPageId(argv.getPageId());
+        model.setActiveIcon(argv.getActiveIcon());
         model.setAffix(argv.getAffix());
         // 处理path， 如果单位有变动时，才需要处理
         boolean parentChanged = !Objects.equals(model.getParentId(), argv.getParentId());
@@ -233,7 +236,7 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
             isSuperAdmin = isSuperAdmin(ids);
         }
         StringBuilder sql = new StringBuilder();
-        sql.append(" select sm.id, sm.name, sm.parent_id, sm.icon, sm.code, sm.router_path, sm.component_path, sm.is_hidden, sm.menu_type, sm.api_codes, sm.open_mode, sm.keep_alive, sm.order_num, sm.status,  sm.data_type, sm.theme, sm.page_type, sm.sidebar_nav_mode, sm.top_nav_mode, sm.main_mode, sm.page_id, sm.full_path, sm.is_dev, sm.affix ");
+        sql.append(" select sm.id, sm.name, sm.parent_id, sm.icon, sm.active_icon, sm.code, sm.router_path, sm.component_path, sm.is_hidden, sm.menu_type, sm.api_codes, sm.open_mode, sm.keep_alive, sm.order_num, sm.status,  sm.data_type, sm.theme, sm.page_type, sm.sidebar_nav_mode, sm.top_nav_mode, sm.main_mode, sm.page_id, sm.full_path, sm.is_dev, sm.affix ");
         sql.append(" from sys_menu sm ");
 //        if (!isSuperAdmin && ids != null) {
 //            sql.append(" right join sys_role_menu srm on srm.sys_menu_id = sm.id ");
@@ -310,10 +313,80 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
         return treeDataRet;
     }
 
+    /**
+     * 根据多重ID参数删除系统菜单
+     *
+     * @param argv 包含多个ID的参数对象，用于指定要删除的菜单
+     */
     @Override
     public void delete(MultiIdArgv argv) {
+        // 遍历参数对象中的所有ID
         for (String id: argv.getIds()) {
+            // 使用DB工具类删除指定ID的SysMenu记录
             DB.delete(SysMenu.class, id);
         }
     }
+
+    /**
+     * 获取个性化菜单列表
+     *
+     * @param isMobile 表示是否是移动设备的布尔值，用于调整菜单显示方式
+     * @return 返回根据用户角色和设备类型生成的菜单列表
+     */
+    @Override
+    public List<TreeDataRet<Object>> myMenus(boolean isMobile) {
+        // 根据根节点ID和当前用户角色ID列表获取菜单树选项
+        List<TreeDataRet<Object>> menus = this.treeOptions("0", KClientContext.getContext().getUserInfo().getRoleIds(), isMobile);
+        // 遍历所有的菜单项
+        for (TreeDataRet<Object> menu: menus) {
+            // 为每个菜单项的label进行国际化处理
+            i18nLabel(menu);
+        }
+        // 返回处理后的菜单列表
+        return menus;
+    }
+
+
+    /**
+     * 国际化菜单中的文本内容
+     *
+     * 本函数的目的是将菜单项中的标签文本进行国际化处理
+     * 国际化处理通过调用I18n工具类的parseScript方法实现，该方法能够识别并替换标签中的国际化标识符
+     * 此外，函数还将递归处理菜单的所有子项，确保整个菜单结构中的所有文本都能得到国际化
+     *
+     * @param menu 树形数据结构的菜单对象，包含菜单项及其可能存在的子菜单
+     */
+    private void i18nLabel(TreeDataRet<Object> menu) {
+        // 如果菜单对象为空，则直接返回，不进行任何操作
+        if (menu == null) {
+            return;
+        }
+        SysMenu extraData = (SysMenu) menu.getExtraData();
+        // 如果菜单项的标签文本不为空，则进行国际化处理
+        if (StringUtils.isNotEmpty(menu.getLabel())) {
+            String str = I18n.parseScript(extraData.getAppId(), menu.getLabel());
+            if (StringUtils.isNotEmpty(str)) {
+                str = StringUtils.capitalizeFirstLetter(str);
+            }
+            menu.setLabel(str);
+        }
+        if (menu.getExtraData() != null) {
+
+            if (StringUtils.isNotEmpty(extraData.getName())) {
+                String str = I18n.parseScript(extraData.getAppId(), extraData.getName());
+                if (StringUtils.isNotEmpty(str)) {
+                    str = StringUtils.capitalizeFirstLetter(str);
+                }
+                extraData.setName(str);
+            }
+        }
+        // 如果菜单项包含子菜单，则遍历所有子菜单项，对每个子菜单项也执行国际化处理
+        if (menu.getChildren() != null) {
+            for (TreeDataRet<Object> child: menu.getChildren()) {
+                i18nLabel(child);
+            }
+        }
+    }
+
+
 }

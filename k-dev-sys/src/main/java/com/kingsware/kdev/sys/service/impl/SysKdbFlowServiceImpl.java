@@ -1,36 +1,34 @@
 package com.kingsware.kdev.sys.service.impl;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.jsonschema.JsonschemaMock;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
+import com.kingsware.kdev.core.kflow.bean.ErrorResult;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
 import com.kingsware.kdev.core.kflow.define.*;
+import com.kingsware.kdev.core.kflow.tcp.SocketHeadType;
+import com.kingsware.kdev.core.kflow.tcp.TReqMessage;
+import com.kingsware.kdev.core.kflow.tcp.TcpClientContext;
 import com.kingsware.kdev.core.orm.DB;
-import com.kingsware.kdev.core.orm.PagedList;
 import com.kingsware.kdev.core.orm.SqlWrapper;
-import com.kingsware.kdev.core.orm.annotation.Transactional;
 import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.orm.kdb.*;
 import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.sys.argv.*;
 import com.kingsware.kdev.core.model.SysLogicFlow;
-import com.kingsware.kdev.sys.bean.ApplicationConfig;
 import com.kingsware.kdev.sys.bean.CopyProcessData;
-import com.kingsware.kdev.sys.bean.ExportData;
-import com.kingsware.kdev.sys.bean.ExportRootData;
 import com.kingsware.kdev.sys.manager.CopyAppManager;
 import com.kingsware.kdev.sys.model.*;
-import com.kingsware.kdev.sys.ret.SysDemoRet;
 import com.kingsware.kdev.sys.ret.SysFlowDebugRet;
 import com.kingsware.kdev.sys.ret.SysFlowDefineRet;
 import com.kingsware.kdev.sys.ret.SysKdbFlowRet;
@@ -40,7 +38,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
-import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -91,6 +88,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             defineRet.setDefaultSourceName(logicFlow.getDefaultSourceName());
             defineRet.setTranCtrl(logicFlow.getTranCtrl());
             defineRet.setNewFlowJson(logicFlow.getNewFlowJson());
+            defineRet.setI18nKeys(logicFlow.getI18nKeys());
             // 定义mock的merge map
             List<Map<String, Object>> mockMapList = new ArrayList<>();
             Map<String, Object> mockMap = JsonschemaMock.getInstance().mockMap(logicFlow.getInArgv());
@@ -306,11 +304,27 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         }
 
         // 保存历史记录
-        SysLogicHistory flowHistory = new SysLogicHistory();
-        flowHistory.setFlowId(argv.getId());
-        flowHistory.setFlowJson(info.getContent());
-        DB.save(flowHistory);
+        this.gitCommit(argv.getId());
 
+    }
+
+    @Override
+    public void gitCommit(String flowId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("flowId", flowId);
+        KdbFlowResult result = FaasInvoke.callFlow("f494d882a9554d1cbd9fb72559f6b9db", params);
+        if (result.getData() instanceof ErrorResult) {
+            throw BusinessException.serviceThrow(result.getExceptionStack());
+        }
+    }
+
+    private void gitRemoveDefine(String flowId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("flowId", flowId);
+        KdbFlowResult result = FaasInvoke.callFlow("2d28d8f7821649b1a948b4982ddbd817", params);
+        if (result.getData() instanceof ErrorResult) {
+            throw BusinessException.serviceThrow(result.getExceptionStack());
+        }
     }
 
     /**
@@ -349,6 +363,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         flowRet.setName(logicFlow.getName());
         flowRet.setDescription(logicFlow.getDescription());
         flowRet.setDbId(logicFlow.getDbId());
+        flowRet.setI18nKeys(logicFlow.getI18nKeys());
 
         if (info != null) {
             flowRet.setContent(info.getContent());
@@ -400,17 +415,17 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         logicFlow.setTags(argv.getTags());
         logicFlow.setFlowId(flowId);
         logicFlow.setTranCtrl(argv.getTranCtrl());
+        logicFlow.setI18nKeys(argv.getI18nKeys());
 
-        // 保存历史记录
-        SysLogicHistory flowHistory = new SysLogicHistory();
-        flowHistory.setFlowId(flowId);
-        flowHistory.setFlowJson(info.getContent());
-        DB.save(flowHistory);
+
 
         // 获取子流程id
         String subFlowIds = getSubFlowIds(argv.getContent());
         logicFlow.setSubFlowIds(subFlowIds);
         DB.save(logicFlow);
+
+        // 保存历史记录
+        this.gitCommit(flowId);
 
         if (StringUtils.isNotEmpty(argv.getApiUrl()) && StringUtils.isNotEmpty(argv.getApiMethod())) {
             SysApiArgv apiArgv = new SysApiArgv();
@@ -445,6 +460,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
             logicFlow.setFlowId(argv.getId());
             logicFlow.setSubFlowIds(subFlowIds);
             logicFlow.setTranCtrl(argv.getTranCtrl());
+            logicFlow.setI18nKeys(argv.getI18nKeys());
             DB.update(logicFlow);
         }
         // 更新流程名称
@@ -529,7 +545,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
 
         // 拼装sql
         // 根据条件查询appId、tags和apiUrl数据
-        String selectFields = "t0.id as db_id, t0.name,t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name, sa.api_url, sa.api_method, t0.when_created, t0.note  as description, t0.app_id as tran_ctrl ";
+        String selectFields = "t0.id as db_id, t0.name,t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name, sa.api_url, sa.api_method, t0.when_created, t0.note  as description, t0.app_id as tran_ctrl, t0.i18n_keys ";
 
 //        if (argv.isPageQuery()) {
 //            selectFields = "t0.id as db_id, t0.name,t0.in_argv, t0.out_argv, t0.tags, t0.flow_id as id, t0.application_id, t1.name as application_name, sa.api_url, sa.api_method, t0.when_created, t0.note  as description, t0.app_id as tran_ctrl ";
@@ -562,6 +578,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
     public void delete(MultiIdArgv argv) {
         KdbApi api = (KdbApi) (DB.getDefault());
         for (String id : argv.getIds()) {
+            gitRemoveDefine(id);
             api.deleteFlow(id);
             SysLogicFlow logicFlow = DB.findOne(SysLogicFlow.class, Expr.builder().add("flowId", "=", id).build());
             if (logicFlow != null) {
@@ -599,7 +616,7 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
         // 查询流程信息
         SysLogicFlow logicFlow = DB.findOne(SysLogicFlow.class, Expr.builder().add("flowId", "=", argv.getFlowId()).build());
         // 创建上下文
-        KFlowContext context = KFlowContext.createBaseContext(logicFlow == null ? "{}" : logicFlow.getInArgv(), logicFlow == null ? "{}" : logicFlow.getOutArgv());
+        KFlowContext context = KFlowContext.createBaseContext(logicFlow == null ? "{}" : logicFlow.getInArgv(), logicFlow == null ? "{}" : logicFlow.getOutArgv(), logicFlow.getI18nKeys(), logicFlow.getApplicationId());
         String json = argv.getJson();
         if (StringUtils.isEmpty(json)) {
             json = "{}";
@@ -615,10 +632,16 @@ public class SysKdbFlowServiceImpl extends BaseServiceImpl implements SysKdbFlow
                 argvMap.putAll(fieldMap);
             }
         }
+        // 判断是否调试，如果是调试，则通过faas
+        if (argv.getDebugger() != null && argv.getDebugger().size() > 0) {
+            TcpClientContext.getInstance().write(new TReqMessage(SocketHeadType.PINE, argv.getDebugger().get(0).getSerial(), "{}"));
+            TcpClientContext.getInstance().debugSessionMap.put(argv.getDebugger().get(0).getSerial(), KClientContext.getContext().getToken());
+        }
         // 将请求的body加进去
         Map<String, Object> requestMap = new HashMap<>();
         requestMap.put("body", json);
         requestMap.put("headers", ServletUtil.getHeaders(ServletUtil.request()));
+        requestMap.putAll(ServletUtil.getRequestData());
         argvMap.put("request", requestMap);
         argvMap.put("_appId", logicFlow.getApplicationId());
         // 调用流程

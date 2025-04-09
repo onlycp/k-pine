@@ -65,5 +65,8 @@ public class KTransactionAspect {
             }
             throw e;
         }
+        finally {
+            TransactionManager.getInstance().clear();
+        }
     }
 }

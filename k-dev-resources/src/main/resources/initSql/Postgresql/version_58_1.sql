@@ -1,0 +1,1 @@
+ALTER TABLE open_account ADD COLUMN app_id VARCHAR(36);

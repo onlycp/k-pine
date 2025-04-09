@@ -11,6 +11,8 @@ import com.kingsware.kdev.core.cache.instance.InstanceManager;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
+import com.kingsware.kdev.core.kflow.bean.ErrorResult;
+import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
 import com.kingsware.kdev.core.model.SysLogicFlow;
 import com.kingsware.kdev.core.orm.DB;
@@ -64,6 +66,8 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
         checkUnique(model);
         // 保存
         DB.save(model);
+        // 提交git
+        gitCommit(model.getId(), "新增接口");
         // 缓存api
         cacheApi(model.getId());
     }
@@ -76,6 +80,8 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
         checkUnique(model);
         // 保存
         DB.update(model);
+        // 提交git
+        gitCommit(model.getId(), "修改接口");
         // 缓存api
         cacheApi(model.getId());
 
@@ -151,6 +157,7 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
     @Override
     public void delete(MultiIdArgv argv) {
         for (String id: argv.getIds()) {
+            this.gitDelete(id);
             DB.delete(SysApi.class, id);
             InstanceManager.getInstance().broadMessage("api-delete", id);
         }
@@ -258,6 +265,29 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
         }
         KdbRetFile retFile = CopyAppManager.getInstance().exportPine(copyProcessData);
         ServletUtil.responseFile(ServletUtil.response(), "Api" + DateUtils.formatDate(new Date(), DateUtils.DATE_TIME_1) + ".pine", retFile.getData());
+    }
+
+    @Override
+    public void gitCommit(String id, String message) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", id);
+        params.put("message", message);
+        KdbFlowResult result = FaasInvoke.callFlow("adfd0cddb56e48bc885d69fff3c20548", params);
+        if (result.getData() instanceof ErrorResult) {
+            throw BusinessException.serviceThrow(result.getExceptionStack());
+        }
+    }
+
+    @Override
+    public void gitDelete(String id) {
+        String flowId = "566a229a7b7f4827bf6afc5f0cd3f868";
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", id);
+        KdbFlowResult result = FaasInvoke.callFlow(flowId, params);
+        if (result.getData() instanceof ErrorResult) {
+            throw BusinessException.serviceThrow(result.getExceptionStack());
+        }
+
     }
 
 

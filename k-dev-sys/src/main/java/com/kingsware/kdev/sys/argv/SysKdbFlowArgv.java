@@ -38,5 +38,7 @@ public class SysKdbFlowArgv {
     private String tranCtrl;
     /** 接口编码 **/
     private String apiCode;
+    /** 国际化key，多个用,分割 **/
+    private String i18nKeys;
 
 }

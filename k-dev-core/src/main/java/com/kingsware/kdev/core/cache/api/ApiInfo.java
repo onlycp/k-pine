@@ -50,5 +50,7 @@ public class ApiInfo{
     private String cacheCron;
     // 缓存过期时长（毫秒）
     private Integer cacheExpireTime;
+    // 自动化国际键值
+    private String i18nKeys;
 
 }

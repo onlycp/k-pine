@@ -1,0 +1,10 @@
+ALTER TABLE dev_team
+    ADD COLUMN is_audit TINYINT DEFAULT NULL COMMENT '是否审核 0: 否 1：是';
+
+ALTER TABLE dev_team
+    ADD COLUMN image VARCHAR(255) DEFAULT NULL COMMENT '团队头像';
+
+ALTER TABLE sys_instance
+    ADD COLUMN cluster_no INT DEFAULT NULL COMMENT '集群号';
+
+

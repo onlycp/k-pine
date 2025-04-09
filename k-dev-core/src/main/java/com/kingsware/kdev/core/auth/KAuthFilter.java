@@ -28,6 +28,7 @@ import com.kingsware.kdev.core.exception.LicenseException;
 import com.kingsware.kdev.core.exception.UnauthorizedException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.*;
+import com.kingsware.kdev.core.kflow.bean.KdbCustomResource;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
 import com.kingsware.kdev.core.kmq.KmqMessageCenter;
@@ -37,22 +38,22 @@ import com.kingsware.kdev.core.model.SysOperateLog;
 import com.kingsware.kdev.core.model.SysTask;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
+import com.kingsware.kdev.core.orm.kdb.TransactionManager;
 import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.core.util.jWi.JWildcard;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
-import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
@@ -65,6 +66,7 @@ import java.util.regex.Pattern;
  * @date 2022/1/18 4:53 下午
  */
 @Component
+@Order(2)
 @Slf4j
 public class KAuthFilter implements Filter {
 
@@ -93,7 +95,7 @@ public class KAuthFilter implements Filter {
     @Value("${app.mode.dev:false}")
     private boolean modeDev;
 
-    @Value("#{'${app.ignore.urls:websocket;/eiac;/sys-tool-box}'.split(';')}")
+    @Value("#{'${app.ignore.urls:websocket;/eiac;/sys-tool-box;/kubbo/logs}'.split(';')}")
     private List<String> ignoreUrls;
 
     @Value("#{'${app.cache.urls:/hellworld}'.split(';')}")
@@ -151,8 +153,6 @@ public class KAuthFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         String url = request.getRequestURI();
         try {
-
-
             initContext(request, response);
             if (containUrl(request, url) ) {
                 filterChain.doFilter(request, response);
@@ -200,7 +200,7 @@ public class KAuthFilter implements Filter {
             ContentCachingResponseWrapper wrapperResponse = null;
             String path = "";
             // 处理限流
-            int limit = SpringContext.getInt("app.rate-limit.max", 300);
+            int limit = SpringContext.getInt("app.rate-limit.max", 1000);
             if (!rateLimiter.tryAcquire(limit)) {
                 log.info("Too many requests at the moment. Please try again later. {} > {} ",  rateLimiter.getCount(), limit);
                 ServletUtil.responseJson((HttpServletResponse)servletResponse, BaseRet.failMessage("Too many requests at the moment. Please try again later."));
@@ -208,7 +208,7 @@ public class KAuthFilter implements Filter {
             }
             try {
                 // 计数器
-                int requestInQueueMax = SpringContext.getInt("app.request-in-queue.max", 80);
+                int requestInQueueMax = SpringContext.getInt("app.request-in-queue.max", 1000);
                 if (currentInQueueCount.incrementAndGet() > requestInQueueMax) {
                     log.info("The current request queue is too long. Please try again later. {} > {} ", currentInQueueCount.get(), requestInQueueMax);
                     ServletUtil.responseJson((HttpServletResponse)servletResponse, BaseRet.failMessage("The current request queue is too long. Please try again later."));
@@ -378,6 +378,7 @@ public class KAuthFilter implements Filter {
             finally {
                 // 减数
                 currentInQueueCount.decrementAndGet();
+
                 int takeTime = (int)(System.currentTimeMillis()-t1);
                 if (argvMap.isEmpty()) {
                     argvMap = ServletUtil.getRequestParams(api, path, request, requestBody, false);
@@ -418,7 +419,7 @@ public class KAuthFilter implements Filter {
                     }
                 }
                 catch (Exception ignored) {
-                    ignored.printStackTrace();
+                    // ignored.printStackTrace();
                 }
             }
         }
@@ -426,6 +427,15 @@ public class KAuthFilter implements Filter {
             if (!containUrl(request, url)) {
                 PageLoadManager.getInstance().endCalculate(request, response);
             }
+            // 释放线程变量
+            try {
+                KClientContext.clear();
+                TransactionManager.getInstance().clear();
+            }
+            catch (Exception ignored) {
+
+            }
+
 
         }
 
@@ -473,6 +483,7 @@ public class KAuthFilter implements Filter {
         String accessId = argvMap.getOrDefault("accessId", "").toString();
         Map<String, Object> recordMap = new HashMap<>();
         recordMap.put("id", StringUtils.getUUID());
+        recordMap.put("apiId", api.getId());
         recordMap.put("apiName", api.getApiName());
         recordMap.put("accessId", accessId);
         recordMap.put("requestParams", StringUtils.retrench(JsonUtil.toJson(argvMap), 1000));
@@ -485,6 +496,11 @@ public class KAuthFilter implements Filter {
     }
 
     private void saveOperateLog(String url, String requestMethod, int responseCode,  String errorMessage, int takeTime, String requestBody, String responseBody, CallType callType, ApiInfo api, ApiDefine apiDefine, HttpServletRequest request) {
+        String enable = SpringContext.getProperties("app.log.enable", "true");
+        if ("false".equalsIgnoreCase(enable)) {
+            return;
+        }
+//        log.info("保存操作日志:{}", enable);
         String opertator = KClientContext.getContext().getUserInfo() != null ? KClientContext.getContext().getUserInfo().getUsername() : "";
         // 保存操作日志
         SysOperateLog operateLog = new SysOperateLog();
@@ -622,7 +638,7 @@ public class KAuthFilter implements Filter {
     @SuppressWarnings("all")
     private void  callByFlow(HttpServletRequest request, HttpServletResponse response, ApiInfo api, String path, Map<String, Object> argvMap, String requestBody) {
         // 获取视图模型
-        KFlowContext context = KFlowContext.createBaseContext(StringUtils.isNotEmpty(api.getInArgv()) ? api.getInArgv() : "{}", StringUtils.isNotEmpty(api.getOutArgv()) ? api.getOutArgv() : "{}");
+        KFlowContext context = KFlowContext.createBaseContext(StringUtils.isNotEmpty(api.getInArgv()) ? api.getInArgv() : "{}", StringUtils.isNotEmpty(api.getOutArgv()) ? api.getOutArgv() : "{}", api.getI18nKeys(), api.getAppId());
         // 用于接口测试，指定id
         if (argvMap.containsKey("replaceBody")) {
             Map<String, Object> sysMap = JsonUtil.toMap(argvMap.get("replaceBody").toString());
@@ -712,6 +728,7 @@ public class KAuthFilter implements Filter {
         KdbRetFile kdbRetFile = null;
         KClientContext.getContext().setArgv(argvMap);
         KClientContext.getContext().setApiRspAdapter(api.getApiRspArgv());
+
         // 转为api格式
         switch (result.getType()) {
             case KFlowConstant.RESULT_JSON:
@@ -723,16 +740,18 @@ public class KAuthFilter implements Filter {
                     ServletUtil.responseJson(response, result.getData());
                 }
                 else {
-                    if (argvMap.containsKey("openApiFlag") && (boolean)argvMap.get("openApiFlag") != true) {
-                        ServletUtil.responseJsonWithEncrypt(response, FlowUtils.toJsonResult(result.getData(), result.getLog(), result.getExceptionStack()));
+                    // 处理【请求fetch/pageById】48fd64ace3934b3b8fbbc06e9b16c784
+                    if ("48fd64ace3934b3b8fbbc06e9b16c784".equalsIgnoreCase(api.getApiFlowId())) {
+                        List<Map<String,Object>> pages = (List<Map<String,Object>>) result.getData();
+                        for (Map<String,Object> map : pages) {
+                            String pageJson = (String)map.get("pageJson");
+                            String appId = (String)map.get("appId");
+                            UiConfig uiConfig = SpringContext.getBean(UiConfig.class);
+                            String newPageJson = uiConfig.i18nTranslatePage(appId, pageJson);
+                            map.put("pageJson", newPageJson);
+                        }
                     }
-                    else {
-                        ServletUtil.responseJson(response, FlowUtils.toJsonResult(result.getData(), result.getLog(), result.getExceptionStack()));
-
-                    }
-                }
-                if (api.getApiFlowId().equalsIgnoreCase("a20fd82c126947f9ab3b599001df6126")) {
-                    log.info("用时：4");
+                    ServletUtil.responseJson(response, FlowUtils.toJsonResult(result.getData(), result.getLog(), result.getExceptionStack()));
                 }
                 break;
             case KFlowConstant.RESULT_EXCEL:
@@ -744,6 +763,10 @@ public class KAuthFilter implements Filter {
             case KFlowConstant.RESULT_FILE:
                 kdbRetFile = (KdbRetFile) result.getData();
                 ServletUtil.responseFile(response, kdbRetFile.getFileName(), kdbRetFile.getData());
+                break;
+            case KFlowConstant.RESULT_CUSTOM:
+                KdbCustomResource kdbCustomResource = (KdbCustomResource) result.getData();
+                ServletUtil.responseCustom(response, kdbCustomResource);
                 break;
             case KFlowConstant.RESULT_HTML:
                 ServletUtil.responseHtml(response, result.getData().toString());
@@ -832,6 +855,12 @@ public class KAuthFilter implements Filter {
         }
         if (!OpenApiManager.getInstance().hasAccess(accessId)) {
             throw BusinessException.serviceThrow(I18n.t("KAuthFilter.openApi.hasnot", "接入商不存在！"));
+        }
+        if(!OpenApiManager.getInstance().isEnable(accessId)) {
+            throw BusinessException.serviceThrow(I18n.t("KAuthFilter.openApi.enable", "接入商未生效！"));
+        }
+        if(OpenApiManager.getInstance().isExpired(accessId)) {
+            throw BusinessException.serviceThrow(I18n.t("KAuthFilter.openApi.expired", "接入商已过期！"));
         }
         if (!OpenApiManager.getInstance().hasOpenApi(accessId, apiInfo.getApiCode())) {
             throw BusinessException.serviceThrow(I18n.t("KAuthFilter.openApi.authFail","接口未授权"));
@@ -1037,9 +1066,9 @@ public class KAuthFilter implements Filter {
         long createTime = Long.parseLong(arr[0]);
         long hash = Integer.parseInt(arr[1]);
         // 计算超时时间（5分钟超时）
-        if (Math.abs(System.currentTimeMillis() - createTime) > 1000*60*5) {
-            throw BusinessException.serviceThrow(I18n.t("KAuthFilter.N002", "接口请求不合法，代码:N002"));
-        }
+//        if (Math.abs(System.currentTimeMillis() - createTime) > 1000*60*5) {
+//            throw BusinessException.serviceThrow(I18n.t("KAuthFilter.N002", "接口请求不合法，代码:N002"));
+//        }
         // 计算令牌的hash值
         int tokenHash = calculateHash(token);
         if (tokenHash!= hash) {

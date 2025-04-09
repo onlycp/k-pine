@@ -88,4 +88,16 @@ public interface SysApiService extends BaseService {
      */
     void exportPine(MultiIdArgv argv);
 
+    /**
+     * git提交
+     * @param id
+     */
+    void gitCommit(String id, String message);
+
+    /**
+     * git删除
+     * @param id
+     */
+    void gitDelete(String id);
+
 }

@@ -26,6 +26,8 @@ public class KFlowConstant {
     public final static String MESSAGE_FLAG = "message|";
     /** 提示标志 **/
     public final static String HTML_FLAG = "html|";
+    /** 自定义响应标志 **/
+    public final static String CUSTOM_FLAG = "custom|";
     /** 导出excel **/
     public final static String EXCEL_FLAG = "excel|";
     /** 导出kexcel **/
@@ -44,6 +46,8 @@ public class KFlowConstant {
     public final static String RESULT_EXCEL = "excel";
     /** 结果类型 file **/
     public final static String RESULT_FILE = "file";
+    /** 自定义响应类型 **/
+    public final static String RESULT_CUSTOM = "custom";
     /** Html file **/
     public final static String RESULT_HTML = "html";
     public final static String RESULT_BASE64_TO_FILE = "base64ToFile";

@@ -27,4 +27,24 @@ public class KClientContext {
         clientInfoThreadLocal.set(clientInfo);
     }
 
+
+    public static void clear() {
+        clientInfoThreadLocal.remove();
+    }
+
+
+    /**
+     * 获取当前应用的标识
+     *
+     * @return 当前应用的标识，如果上下文为空则返回null
+     */
+    public static String getCurrentAppId() {
+        // 如果上下文为空，则直接返回null
+        if (getContext() == null) {
+            return null;
+        }
+        // 从请求头中获取应用标识
+        return getContext().getRequest().getHeader("_request_app");
+    }
+
 }

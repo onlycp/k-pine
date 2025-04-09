@@ -5,11 +5,11 @@
   <parent>
     <groupId>com.kingsware.dev</groupId>
     <artifactId>k-dev-parent</artifactId>
-    <version>3.2.1-20240703-01</version>
+    <version>4.0.0-20250330-01</version>
   </parent>
   <groupId>com.kingsware.dev</groupId>
   <artifactId>k-dev-app</artifactId>
-  <version>3.2.1-20240703-01</version>
+  <version>4.0.0-20250330-01</version>
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
@@ -56,8 +56,6 @@
               <artifactId>lombok</artifactId>
             </exclude>
           </excludes>
-          <executable>true</executable>
-          <layout>ZIP</layout>
           <mainClass>com.kingsware.kdev.App</mainClass>
         </configuration>
       </plugin>

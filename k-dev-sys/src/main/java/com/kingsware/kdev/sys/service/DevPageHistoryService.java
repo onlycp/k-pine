@@ -49,4 +49,11 @@ public interface DevPageHistoryService extends BaseService {
      */
     void delete(MultiIdArgv argv);
 
+    /**
+     *
+     * @param id
+     * @param message
+     */
+    void gitCommit(String id, String message);
+
 }

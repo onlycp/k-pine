@@ -1,10 +1,15 @@
 package com.kingsware.kdev.sys.service.impl;
 
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.config.UiConfig;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
+import com.kingsware.kdev.core.kflow.bean.ErrorResult;
+import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
@@ -26,10 +31,7 @@ import org.springframework.util.ResourceUtils;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 业务实现类
@@ -58,44 +60,51 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
     @Override
     // @KCache(onlyForProd = true)
     public DevPageRet getByPath(String path) {
+        DevPageRet page = null;
         if ("menu".equalsIgnoreCase(menuSearchOrder)) {
 //            log.info("请求页面信息:{}", path );
             List<DevPageRet> pages =  DB.findList(DevPageRet.class, " select dp.* from dev_page dp left join sys_menu sm on (dp.id = sm.page_id and sm.menu_type='C' and sm.status=1) where sm.full_path=? and deleted=0 ", path);
-
-
             if (!pages.isEmpty()) {
-                return pages.get(0);
+                page = pages.get(0);
             }
-            // 通过菜单去读取
-            pages = DB.findList(DevPageRet.class, " select * from dev_page where (path = ? or id = ?) and deleted=0 ", path, path);
-            if (!pages.isEmpty()) {
-                return pages.get(0);
+            if (page == null) {
+                // 通过菜单去读取
+                pages = DB.findList(DevPageRet.class, " select * from dev_page where (path = ? or id = ?) and deleted=0 ", path, path);
+                if (!pages.isEmpty()) {
+                    page = pages.get(0);
+                }
+                else {
+                    throw BusinessException.serviceThrow(I18n.t("DevPageServiceImpl.pageNotFound", "找不到页面"));
+                }
             }
-            else {
-                throw BusinessException.serviceThrow(I18n.t("DevPageServiceImpl.pageNotFound", "找不到页面"));
-            }
+
         }
         else {
 //            log.info("请求页面信息:{}", path );
             List<DevPageRet> pages =  DB.findList(DevPageRet.class, " select * from dev_page where (path = ? or id = ?) and deleted=0 ", path, path);
+            if (!pages.isEmpty()) {
+                page = pages.get(0);
+            }
+            if (page == null) {
+                // 通过菜单去读取
+                pages =  DB.findList(DevPageRet.class, " select dp.* from dev_page dp left join sys_menu sm on (dp.id = sm.page_id and sm.menu_type='C' and sm.status=1) where sm.full_path=? and deleted=0 ", path);
+                if (!pages.isEmpty()) {
+                    page = pages.get(0);
+                }
+                else {
+                    throw BusinessException.serviceThrow(I18n.t("DevPageServiceImpl.pageNotFound", "找不到页面"));
+                }
+            }
 
-            if (!pages.isEmpty()) {
-                return pages.get(0);
-            }
-            // 通过菜单去读取
-            pages =  DB.findList(DevPageRet.class, " select dp.* from dev_page dp left join sys_menu sm on (dp.id = sm.page_id and sm.menu_type='C' and sm.status=1) where sm.full_path=? and deleted=0 ", path);
-            if (!pages.isEmpty()) {
-                return pages.get(0);
-            }
-            else {
-                throw BusinessException.serviceThrow(I18n.t("DevPageServiceImpl.pageNotFound", "找不到页面"));
-            }
         }
-
-
-
-
+        if (StringUtils.isNotEmpty(page.getPageJson())) {
+            page.setPageJson(UiConfig.i18nTranslatePage(page.getAppId(), page.getPageJson()));
+        }
+        return page;
     }
+
+
+
 
     @Override
     public void add(DevPageArgv argv) {
@@ -104,6 +113,8 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
         checkUnique(model);
         // 保存
         DB.save(model);
+        // 新增页面
+        this.gitCommit(argv.getId(), "新增页面:"+ argv.getName());
     }
 
     @Override
@@ -114,6 +125,30 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
 //        checkUnique(model);
         // 保存
         DB.update(model);
+        // 提交git
+        this.gitCommit(argv.getId(), null);
+    }
+
+    @Override
+    public void gitCommit(String id, String message) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", id);
+        params.put("message", message);
+        KdbFlowResult result = FaasInvoke.callFlow("9bcf44ad1eba4b1894a18937245b8db3", params);
+        if (result.getData() instanceof ErrorResult) {
+            throw BusinessException.serviceThrow(result.getExceptionStack());
+        }
+    }
+
+    @Override
+    public void gitRemove(String id, String message) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", id);
+        params.put("message", message);
+        KdbFlowResult result = FaasInvoke.callFlow("1243e9fa061c4a9196a481c5ca2de3a2", params);
+        if (result.getData() instanceof ErrorResult) {
+            throw BusinessException.serviceThrow(result.getExceptionStack());
+        }
     }
 
     @Override
@@ -144,7 +179,11 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
     @Override
     public void delete(MultiIdArgv argv) {
         for (String id: argv.getIds()) {
+            this.gitRemove(id, null);
             DB.delete(DevPage.class, id);
+            // 移除dev_page关联的menu 表的page_id内容。
+//            String updateSql = "update sys_menu set page_id=null where page_id  = '" + id + "'";
+//            DB.executeUpdateSql(updateSql);
         }
     }
 

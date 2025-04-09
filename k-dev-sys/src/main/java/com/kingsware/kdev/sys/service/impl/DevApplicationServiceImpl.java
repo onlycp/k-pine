@@ -11,16 +11,30 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.cache.access.AccessManager;
 import com.kingsware.kdev.core.cache.kcache.KCacheManager;
 import com.kingsware.kdev.core.cache.license.LicenseManager;
+import com.kingsware.kdev.core.cache.open.OpenAccount;
 import com.kingsware.kdev.core.cache.page.PageCacheManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
+import com.kingsware.kdev.core.kflow.bean.ErrorResult;
+import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.mode.AppModeProperties;
+
 import com.kingsware.kdev.core.model.DevPage;
+import com.kingsware.kdev.core.model.SysApiMock;
+import com.kingsware.kdev.core.model.SysCache;
 import com.kingsware.kdev.core.model.SysFile;
+import com.kingsware.kdev.core.model.SysInstance;
+import com.kingsware.kdev.core.model.SysI18n;
 import com.kingsware.kdev.core.model.SysLogicFlow;
+import com.kingsware.kdev.core.model.SysLogicFlowMock;
+import com.kingsware.kdev.core.model.SysLoginLog;
+import com.kingsware.kdev.core.model.SysNoticeRecord;
+import com.kingsware.kdev.core.model.SysOnlineUser;
+import com.kingsware.kdev.core.model.SysOperateLog;
 import com.kingsware.kdev.core.model.SysTask;
+import com.kingsware.kdev.core.model.SysTaskDetail;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
@@ -29,6 +43,7 @@ import com.kingsware.kdev.core.orm.kdb.*;
 import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.sys.argv.*;
 import com.kingsware.kdev.sys.bean.CopyProcessData;
+import com.kingsware.kdev.sys.bean.ResourceFile;
 import com.kingsware.kdev.sys.manager.CopyAppManager;
 import com.kingsware.kdev.sys.model.*;
 import com.kingsware.kdev.sys.ret.DevApplicationRet;
@@ -152,7 +167,17 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
     @Override
     public void delete(MultiIdArgv argv) {
         for (String id : argv.getIds()) {
+            this.gitRemoveDefine(id);
             DB.delete(DevApplication.class, id);
+        }
+    }
+
+    private void gitRemoveDefine(String appId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", appId);
+        KdbFlowResult result = FaasInvoke.callFlow("b46a4875a5594c82a87d440ba01416d6", params);
+        if (result.getData() instanceof ErrorResult) {
+            throw BusinessException.serviceThrow(result.getExceptionStack());
         }
     }
 
@@ -190,11 +215,11 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                     devTeamApp.setTeamType(0);
                     devTeamApp.setTeamId(teamId);
                     DB.save(devTeamApp);
-                 }
+                }
             }
         }
         log.info("完成导入应用信息：{}", appCount);
-         List<DataSourceInfo> dataSourceInfos = DB.kdbApi().queryDataSource(new DataSourceQueryArgv());
+        List<DataSourceInfo> dataSourceInfos = DB.kdbApi().queryDataSource(new DataSourceQueryArgv());
 
         if(devPine.getSources() != null) {
             long sourceCount = 0;
@@ -211,7 +236,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                         catch (Exception e) {
                             log.info("数据源接口新增失败，将直接插入数据库：%s", fileSource.getSourceName());
                             DB.byName("kingDB").executeUpdateSql("insert into DATA_SOURCE(SOURCENAME, DRIVERCLASS,JDBCURL,USERNAME,PASSWORD, SOURCEID,JSON) VALUES (?,?,?,?,?,?,?)"
-                                           , fileSource.getSourceName(), fileSource.getDriverClass(), fileSource.getJdbcUrl(), fileSource.getUserName(), fileSource.getPassword(), fileSource.getSourceName(), fileSource.getJson());
+                                    , fileSource.getSourceName(), fileSource.getDriverClass(), fileSource.getJdbcUrl(), fileSource.getUserName(), fileSource.getPassword(), fileSource.getSourceName(), fileSource.getJson());
                         }
 
                     }
@@ -234,12 +259,19 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         log.info("完成导入接口信息：{}", apiCount);
         importMessageMap.put(I18n.t("DevApplicationServiceImpl.api", "接口信息"), apiCount);
         // 字典分类
-         long dictCount = DB.batchSaveOrUpdate(devPine.getDict(), SysDict.class);
+        long dictCount = DB.batchSaveOrUpdate(devPine.getDict(), SysDict.class);
         log.info("完成导入字典信息：{}", dictCount);
         importMessageMap.put(I18n.t("DevApplicationServiceImpl.dict",  "字典信息"), dictCount);
         // 字典项
         // 先删除已有字典项
+        List<SysDictItem> myItems = DB.findList(SysDictItem.class, "select * from sys_dict_item");
+        Map<String, SysDictItem> dictItemMap = new HashMap<>();
+        for (SysDictItem item : myItems) {
+            String appId = item.getAppId() != null ? item.getAppId() : "";
+            dictItemMap.put(String.format("%s-%s-%s", appId, item.getCode(), item.getValue()), item);
+        }
         if (devPine.getDictItems() != null && !devPine.getDictItems().isEmpty()) {
+            devPine.getDictItems().removeIf(item -> dictItemMap.containsKey(String.format("%s-%s-%s",  item.getAppId() != null ? item.getAppId() : "", item.getCode(), item.getValue())));
             for (SysDictItem item : devPine.getDictItems()) {
                 DB.delete(item);
             }
@@ -257,6 +289,39 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         long configCount = DB.batchSaveOrUpdate(devPine.getConfigs(), SysConfig.class);
         log.info("完成导入系统配置：{}", configCount);
         importMessageMap.put(I18n.t("DevApplicationServiceImpl.config", "系统配置") , configCount);
+        // 国际化
+        long i18nCount = DB.batchSaveOrUpdate(devPine.getI18ns(), SysI18n.class);
+        log.info("完成导入国际化信息：{}", i18nCount);
+        importMessageMap.put(I18n.t("DevApplicationServiceImpl.i18n", "国际化信息") , i18nCount);
+        // 开放账号
+        List<OpenAccount> openAccounts = devPine.getOpenAccounts();
+        if (openAccounts != null && !openAccounts.isEmpty()) {
+            openAccounts = openAccounts.stream()
+                    .collect(Collectors.collectingAndThen(
+                            Collectors.groupingBy(OpenAccount::getId),  // 按id分组
+                            map -> map.values().stream()
+                                    .map(group -> group.get(0))  // 取每组第一个元素
+                                    .collect(Collectors.toList())
+                    ));
+            long openAccountCount = DB.batchSaveOrUpdate(openAccounts, OpenAccount.class);
+            log.info("完成导入开放账号：{}", openAccountCount);
+            importMessageMap.put(I18n.t("DevApplicationServiceImpl.openAccount", "开放账号") , openAccountCount);
+        }
+        // 开放账号权限
+        List<OpenAccountApi> openAccountApis = devPine.getOpenAccountApis();
+        if (openAccountApis != null && !openAccountApis.isEmpty()) {
+            // 去除重复数据
+            openAccountApis = openAccountApis.stream()
+                    .collect(Collectors.collectingAndThen(
+                            Collectors.groupingBy(OpenAccountApi::getId),  // 按id分组
+                            map -> map.values().stream()
+                                    .map(group -> group.get(0))  // 取每组第一个元素
+                                    .collect(Collectors.toList())
+                    ));
+            long openAccountApiCount = DB.batchSaveOrUpdate(openAccountApis, OpenAccountApi.class);
+            log.info("完成导入开放权限：{}", openAccountApiCount);
+            importMessageMap.put(I18n.t("DevApplicationServiceImpl.openAccountApi", "开放权限") , openAccountApiCount);
+        }
         // 菜单
         long menuCount = 0;
         if (LicenseManager.getInstance().isUniopsApp()) {
@@ -287,9 +352,24 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         }
 
         // pine逻辑
-        long pineFlowCount = DB.batchSaveOrUpdate(devPine.getLogicFlows(), SysLogicFlow.class);
-        log.info("完成导入pine逻辑：{}", pineFlowCount);
-        importMessageMap.put(I18n.t("DevApplicationServiceImpl.logic", "逻辑编排"), pineFlowCount);
+        if (devPine.getLogicFlows() != null && !devPine.getLogicFlows().isEmpty()){
+            List<SysLogicFlow> currentFlows = DB.findList(SysLogicFlow.class, "select id, i18n_keys from sys_logic_flow");
+            Map<String, String> currentI18nMap = new HashMap<>();
+            for (SysLogicFlow flow: currentFlows) {
+                if (StringUtils.isNotEmpty(flow.getI18nKeys())) {
+                    currentI18nMap.put(flow.getId(), flow.getI18nKeys());
+                }
+            }
+            for (SysLogicFlow flow : devPine.getLogicFlows()) {
+                if (currentI18nMap.containsKey(flow.getId()) && StringUtils.isEmpty(flow.getI18nKeys())) {
+                    flow.setI18nKeys(currentI18nMap.get(flow.getId()));
+                }
+            }
+            long pineFlowCount = DB.batchSaveOrUpdate(devPine.getLogicFlows(), SysLogicFlow.class);
+            log.info("完成导入pine逻辑：{}", pineFlowCount);
+            importMessageMap.put(I18n.t("DevApplicationServiceImpl.logic", "逻辑编排"), pineFlowCount);
+        }
+
         // faas逻辑
         if (devPine.getKdbFlows() != null) {
             for (FlowInfo flowInfo : devPine.getKdbFlows()) {
@@ -323,30 +403,34 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         }
         // faas函数
         if (devPine.getFunctions() != null) {
-            for (Functions functions : devPine.getFunctions()) {
+            boolean enableImportFunction = SpringContext.getBoolean("app.import-function", true);
+            if (enableImportFunction) {
+                for (Functions functions : devPine.getFunctions()) {
 
-                FunctionQueryArgv functionQueryArgv = new FunctionQueryArgv();
-                functionQueryArgv.setId(functions.getId());
-                List<Functions> functionInfoList = DB.kdbApi().queryFunction(functionQueryArgv);
-                // 如果没有，则新增，后面之所以再次编辑，就是为了实时生效
-                if (functionInfoList.isEmpty()) {
-                    try {
-                        String sql = "insert into functions (id,name,type,desc,script) values (?,?,?,?,?)";
-                        DB.byName("kingDB").executeUpdateSql(sql, functions.getId(), functions.getName(), functions.getType(), functions.getDesc(), functions.getScript());
+                    FunctionQueryArgv functionQueryArgv = new FunctionQueryArgv();
+                    functionQueryArgv.setId(functions.getId());
+                    List<Functions> functionInfoList = DB.kdbApi().queryFunction(functionQueryArgv);
+                    // 如果没有，则新增，后面之所以再次编辑，就是为了实时生效
+                    if (functionInfoList.isEmpty()) {
+                        try {
+                            String sql = "insert into functions (id,name,type,desc,script) values (?,?,?,?,?)";
+                            DB.byName("kingDB").executeUpdateSql(sql, functions.getId(), functions.getName(), functions.getType(), functions.getDesc(), functions.getScript());
 
-                    } catch (Exception e) {
+                        } catch (Exception e) {
 
+                        }
                     }
+                    EditFunctionInfo editFunctionInfo = new EditFunctionInfo();
+                    editFunctionInfo.setId(functions.getId());
+                    editFunctionInfo.setName(functions.getName());
+                    editFunctionInfo.setDesc(functions.getDesc());
+                    editFunctionInfo.setScript(functions.getScript());
+                    editFunctionInfo.setType(functions.getType());
+                    DB.kdbApi().editFun(editFunctionInfo);
                 }
-                EditFunctionInfo editFunctionInfo = new EditFunctionInfo();
-                editFunctionInfo.setId(functions.getId());
-                editFunctionInfo.setName(functions.getName());
-                editFunctionInfo.setDesc(functions.getDesc());
-                editFunctionInfo.setScript(functions.getScript());
-                editFunctionInfo.setType(functions.getType());
-                DB.kdbApi().editFun(editFunctionInfo);
+                importMessageMap.put(I18n.t("DevApplicationServiceImpl.function", "函数库") , (long)devPine.getFunctions().size());
             }
-            importMessageMap.put(I18n.t("DevApplicationServiceImpl.function", "函数库") , (long)devPine.getFunctions().size());
+
         }
         try {
             if (appModeProperties.getDev() && !LicenseManager.getInstance().isUniopsApp()) {
@@ -462,6 +546,11 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
 
     }
 
+    @Override
+    public String importResources(List<ResourceFile> resourceFileList) {
+        return "";
+    }
+
 //    public static void main(String[] args) {
 //        DevPine devPine = new DevPine();
 //        List<DevModule> moduleList = new ArrayList();
@@ -502,7 +591,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         Method[] methods = devPineClazz.getDeclaredMethods();
         for (Method method : methods) {
             if (method.getName().startsWith("get") && method.getParameterCount() == 0
-                && !isSystemImportVars(method.getName())) {
+                    && !isSystemImportVars(method.getName())) {
                 resultMethods.add(method);
             }
         }
@@ -614,7 +703,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         if (pineMap.containsKey("pages")) {
             List<Map<String, Object>> list = (List<Map<String, Object>>) pineMap.get("pages");
             for (Map<String, Object> map : list) {
-                MapUtil.transMapBooleanToInt(map, "devStatus", "enableStatus");
+                MapUtil.transMapBooleanToInt(map, "devStatus", "enableStatus", "loginRequired");
                 MapUtil.transMapDateToString(map, "whenCreated", "whenModified");
             }
 
@@ -656,7 +745,9 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         DevPine devPine = null;
         try {
             devPine = objectMapper.readValue(JsonUtil.toJson(pineMap), DevPine.class);
-        } catch (JsonProcessingException e) {
+        }
+        catch (JsonProcessingException e) {
+            log.error("error", e);
             throw BusinessException.serviceThrow(I18n.t("DevApplicationServiceImpl.dataParseFail", "应用包数据解析异常"));
         }
         // 处理menu
@@ -727,5 +818,25 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
 
     }
 
+    @Override
+    public void gitCommit(String id, String message) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", id);
+        params.put("message", message);
+        KdbFlowResult result = FaasInvoke.callFlow("e506a9def73344a0b468eda8fc6dc3a9", params);
+        if (result.getData() instanceof ErrorResult) {
+            throw BusinessException.serviceThrow(result.getExceptionStack());
+        }
+    }
 
+    @Override
+    public void gitRemove(String id, String message) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", id);
+        params.put("message", message);
+        KdbFlowResult result = FaasInvoke.callFlow("b46a4875a5594c82a87d440ba01416d6", params);
+        if (result.getData() instanceof ErrorResult) {
+            throw BusinessException.serviceThrow(result.getExceptionStack());
+        }
+    }
 }
