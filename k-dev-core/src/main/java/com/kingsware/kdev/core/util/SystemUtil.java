@@ -26,12 +26,16 @@ public class SystemUtil {
     @SneakyThrows
     public static HostInfo getHost() {
         HostInfo hostInfo = new HostInfo();
-        String ip = getLocalIPv4Address();
+        String ip = "";
         // 如果有配置ip，直接从配置里读取
         String configIp = SpringContext.getProperties("network.ip", "");
         if (StringUtils.isNotEmpty(configIp)) {
             ip = configIp;
         }
+        else {
+            ip = getLocalIPv4Address();
+        }
+
         hostInfo.setHostName(ip);
         hostInfo.setPort(Integer.parseInt(SpringContext.getProperties("server.port", "8080")));
         hostInfo.setClusterNo(SpringContext.getInt("app.cluster-no", 1));
