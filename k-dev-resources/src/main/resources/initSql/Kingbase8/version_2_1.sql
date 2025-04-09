@@ -1,8 +1,6 @@
 create table DEV_API
 (
-    ID                 VARCHAR2(36 char) default '' not null
-        constraint DEV_API_PK_
-        primary key,
+    ID                 VARCHAR2(36 char) default '' not null primary key,
     API_NAME           VARCHAR2(50 char),
     APPLICATION_ID     VARCHAR2(36 char),
     API_URL            VARCHAR2(128 char),
@@ -24,9 +22,7 @@ create table DEV_API
 );
 create table DEV_APPLICATION
 (
-    ID              VARCHAR2(36 char)   not null
-        constraint DEV_APPLICATION_PK_DEV_API
-        primary key,
+    ID              VARCHAR2(36 char)   not null primary key,
     NAME            VARCHAR2(100 char),
     SHORT_NAME      VARCHAR2(30 char)   not null,
     DESCRIPTION     VARCHAR2(255 char),
@@ -48,29 +44,14 @@ create table DEV_APPLICATION
     APP_PUBLIC_TYPE NUMBER    default 0
 );
 
-create table DEV_APPLICATION_VERSION_HISTOR
-(
-    ID           VARCHAR2(36 char) not null
-        constraint IND_E4BBE32D6CA201E9
-        primary key,
-    WHEN_CREATED VARCHAR2(20 char),
-    WHO_CREATED  VARCHAR2(36 char),
-    APP_ID       VARCHAR2(36 char),
-    VERSION      VARCHAR2(50 char),
-    FILE_NAME    VARCHAR2(255 char),
-    NOTE         VARCHAR2(255 char),
-    EXPORT_DATA  CLOB
-);
 create table DEV_DOCUMENT
 (
-    ID           VARCHAR2(255 char) not null,
+    ID           VARCHAR2(255 char) not null primary key,
     NAME         VARCHAR2(255 char),
     PATH         VARCHAR2(255 char),
     CONTENT      CLOB,
     PARENT_ID    VARCHAR2(255 char),
-    "ORDER"      NUMBER             not null
-        constraint IND_CB324EE3A9A32AA8
-            primary key,
+    "ORDER"      NUMBER      not null,
     WHEN_CREATED DATE,
     WHO_CREATED  VARCHAR2(255 char),
     DELETED      NUMBER(3) default 0
@@ -80,9 +61,7 @@ create table DEV_DOCUMENT
 
 create table DEV_MODULE
 (
-    ID            VARCHAR2(36 char) not null
-        constraint DEV_MODULE_PK_DEV_DOCUMENT
-        primary key,
+    ID            VARCHAR2(36 char) not null primary key,
     NAME          VARCHAR2(100 char),
     PATH          VARCHAR2(255 char),
     HAS_PATH      NUMBER,
@@ -98,9 +77,7 @@ create table DEV_MODULE
 
 create table DEV_OTA_CHANNEL
 (
-    ID            VARCHAR2(36 char) not null
-        constraint DEV_OTA_CHANNEL_PK_DEV_MODULE
-        primary key,
+    ID            VARCHAR2(36 char) not null primary key,
     CHANNEL_NAME  VARCHAR2(50 char),
     CHANNEL_URL   VARCHAR2(100 char),
     AUTH_TOKEN    VARCHAR2(50 char),
@@ -115,9 +92,7 @@ create table DEV_OTA_CHANNEL
 
 create table DEV_PAGE
 (
-    ID             VARCHAR2(36 char) not null
-        constraint DEV_PAGE_PK_DEV_OTA_CHANNEL
-        primary key,
+    ID             VARCHAR2(36 char) not null primary key,
     WHEN_CREATED   VARCHAR2(20 char),
     WHEN_MODIFIED  VARCHAR2(20 char),
     WHO_CREATED    VARCHAR2(36 char),
@@ -135,8 +110,7 @@ create table DEV_PAGE
 );
 create table dev_page_history
 (
-    id               varchar(36) not null
-        primary key,
+    id               varchar(36) not null primary key,
     page_id          varchar(36) ,
     page_json        clob   ,
     when_created     timestamp   ,
@@ -147,9 +121,7 @@ create table dev_page_history
 
 create table DEV_POWER_LINK
 (
-    ID           VARCHAR2(36 char) not null
-        constraint IND_93035A0CDEDE6A72
-        primary key,
+    ID           VARCHAR2(36 char) not null primary key,
     TREE_ID      VARCHAR2(36 char),
     POWER_ID     VARCHAR2(36 char),
     POWER_TYPE   NUMBER,
@@ -159,9 +131,7 @@ create table DEV_POWER_LINK
 
 create table DEV_POWER_TREE
 (
-    ID            VARCHAR2(36 char) not null
-        constraint IND_61723BC7B93A02FB
-        primary key,
+    ID            VARCHAR2(36 char) not null primary key,
     NAME          VARCHAR2(128 char),
     PARENT_ID     VARCHAR2(36 char),
     NOTE          VARCHAR2(255 char),
@@ -176,18 +146,14 @@ create table DEV_SQL_SCRIPT
 (
     SQL         CLOB                not null,
     DESCRIPTION VARCHAR2(255 char),
-    VERSION     NUMBER              not null
-        constraint DEV_SQL_SCRIPT_PK_DEV_SQL_RUN
-            primary key,
+    VERSION     NUMBER              not null primary key,
     IS_ONCE     NUMBER(3) default 1 not null
 );
 
 
 create table DEV_TEAM
 (
-    ID            VARCHAR2(36 char)   not null
-        constraint DEV_TEAM_PK_DEV_SQL_SCRIPT
-        primary key,
+    ID            VARCHAR2(36 char)   not null primary key,
     NAME          VARCHAR2(100 char)  not null,
     OWNER         VARCHAR2(36 char)   not null,
     DESCRIPTION   VARCHAR2(255 char),
@@ -200,9 +166,7 @@ create table DEV_TEAM
 
 create table DEV_TEAM_APP
 (
-    ID           VARCHAR2(36 char) not null
-        constraint DEV_TEAM_APP_PK_DEV_TEAM
-        primary key,
+    ID           VARCHAR2(36 char) not null primary key,
     TEAM_ID      VARCHAR2(36 char),
     APP_ID       VARCHAR2(36 char),
     TEAM_TYPE    NUMBER(3)         not null,
@@ -212,9 +176,7 @@ create table DEV_TEAM_APP
 
 create table DEV_TEAM_MEMBER
 (
-    ID           VARCHAR2(36 char) not null
-        constraint IND_9780D19670F5F074
-        primary key,
+    ID           VARCHAR2(36 char) not null primary key,
     TEAM_ID      VARCHAR2(36 char) not null,
     USER_ID      VARCHAR2(36 char) not null,
     WHEN_JOIN    VARCHAR2(20 char),
@@ -241,9 +203,7 @@ create table DEV_TOPOLOGICAL
 
 create table DEV_VIEW_MODEL
 (
-    ID            VARCHAR2(36 char) not null
-        constraint IND_D45B602F3B03325E
-        primary key,
+    ID            VARCHAR2(36 char) not null primary key,
     NAME          VARCHAR2(50 char),
     NOTE          CLOB,
     WHO_CREATED   VARCHAR2(36 char),
@@ -257,9 +217,7 @@ create table DEV_VIEW_MODEL
 
 create table DEV_VIEW_MODEL_FIELD
 (
-    ID             VARCHAR2(36 char) not null
-        constraint IND_B7F8EC3B5B6D845F
-        primary key,
+    ID             VARCHAR2(36 char) not null  primary key,
     VIEW_MODEL_ID  VARCHAR2(36 char),
     FIELD          VARCHAR2(50 char),
     LABEL          VARCHAR2(50 char),
@@ -278,9 +236,7 @@ create table DEV_VIEW_MODEL_FIELD
 
 create table DEV_VIEW_MODEL_FLOW
 (
-    ID            VARCHAR2(36 char) not null
-        constraint IND_69EC72C50F2576E3
-        primary key,
+    ID            VARCHAR2(36 char) not null primary key,
     FLOW_ID       VARCHAR2(36 char),
     VIEW_MODEL_ID VARCHAR2(36 char),
     WHO_CREATED   VARCHAR2(36 char),
@@ -329,9 +285,7 @@ create table ext_plugin_tree
 
 create table KFAAS_LIB
 (
-    JARNAME    VARCHAR2(255 char) not null
-        constraint KFAAS_LIB_PK_EXT_PLUGIN_TREE
-        primary key,
+    JARNAME    VARCHAR2(255 char) not null primary key,
     CREATETIME TIMESTAMP(6) default CURRENT_TIMESTAMP,
     UPDATETIME TIMESTAMP(6) default CURRENT_TIMESTAMP,
     CREATEUSER VARCHAR2(255 char),
@@ -341,9 +295,7 @@ create table KFAAS_LIB
 
 create table OPEN_ACCOUNT
 (
-    ID            VARCHAR2(36 char) not null
-        constraint OPEN_ACCOUNT_PK_KFAAS_LIB
-        primary key,
+    ID            VARCHAR2(36 char) not null primary key,
     ACCESS_NAME   VARCHAR2(128 char),
     ACCESS_ID     VARCHAR2(36 char),
     AUTH_TYPE     NUMBER,
@@ -361,9 +313,7 @@ create table OPEN_ACCOUNT
 
 create table OPEN_ACCOUNT_API
 (
-    ID           VARCHAR2(36 char) not null
-        constraint IND_18E26ABA9325DC00
-        primary key,
+    ID           VARCHAR2(36 char) not null primary key,
     ACCOUNT_ID   VARCHAR2(36),
     API_ID       VARCHAR2(36 char),
     WHEN_CREATED VARCHAR2(20 char),
@@ -372,9 +322,7 @@ create table OPEN_ACCOUNT_API
 
 create table OPEN_API_LOG
 (
-    ID             VARCHAR2(36 char) not null
-        constraint IND_5054CEE393E0EEE5
-        primary key,
+    ID             VARCHAR2(36 char) not null primary key,
     ACCESS_ID      VARCHAR2(100 char),
     API_NAME       VARCHAR2(100 char),
     REQUEST_PARAMS CLOB,
@@ -387,9 +335,7 @@ create table OPEN_API_LOG
 
 create table SYS_API
 (
-    ID                 VARCHAR2(36 char) default '' not null
-        constraint SYS_API_PK_OPEN_API_LOG
-        primary key,
+    ID                 VARCHAR2(36 char) default '' not null primary key,
     API_NAME           VARCHAR2(255 char),
     API_URL            VARCHAR2(128 char),
     API_NOTE           CLOB,
@@ -411,9 +357,7 @@ create table SYS_API
 
 create table SYS_BASE
 (
-    ID            VARCHAR2(36 char) not null
-        constraint SYS_BASE_PK_SYS_API
-        primary key,
+    ID            VARCHAR2(36 char) not null primary key,
     NAME          VARCHAR2(50 char),
     CODE          VARCHAR2(50 char),
     NOTE          CLOB,
@@ -427,9 +371,7 @@ create table SYS_BASE
 
 create table SYS_CONFIG
 (
-    ID            VARCHAR2(36 char) not null
-        constraint SYS_CONFIG_PK_SYS_BASE
-        primary key,
+    ID            VARCHAR2(36 char) not null primary key,
     NAME          VARCHAR2(255 char),
     CODE          VARCHAR2(255 char),
     VALUE         VARCHAR2(255 char),
@@ -445,9 +387,7 @@ create table SYS_CONFIG
 
 create table SYS_DATA_ACCESS
 (
-    ID            VARCHAR2(36 char) not null
-        constraint SYS_DATA_ACCESS_PK_SYS_CONFIG
-        primary key,
+    ID            VARCHAR2(36 char) not null primary key,
     NAME          VARCHAR2(50 char),
     STATUS        NUMBER(3),
     NOTE          CLOB,
@@ -460,9 +400,7 @@ create table SYS_DATA_ACCESS
 
 create table SYS_DATA_ACCESS_RESOURCE
 (
-    ID           VARCHAR2(36 char) not null
-        constraint IND_4F3FAC411D998D88
-        primary key,
+    ID           VARCHAR2(36 char) not null primary key,
     DATA_ID      VARCHAR2(36 char),
     ACCESS_ID    VARCHAR2(36 char),
     TABLE_NAME   VARCHAR2(50 char),
@@ -473,9 +411,7 @@ create table SYS_DATA_ACCESS_RESOURCE
 
 create table SYS_DATA_ACCESS_USER
 (
-    ID                 VARCHAR2(36 char) not null
-        constraint IND_B9439577C148032B
-        primary key,
+    ID                 VARCHAR2(36 char) not null primary key,
     SYS_USER_ID        VARCHAR2(36 char),
     SYS_DATA_ACCESS_ID VARCHAR2(50 char),
     WHO_CREATED        VARCHAR2(36 char),
@@ -485,9 +421,7 @@ create table SYS_DATA_ACCESS_USER
 
 create table SYS_DATA_RESOURCE
 (
-    ID            VARCHAR2(36 char) not null
-        constraint IND_C0094018357BBE24
-        primary key,
+    ID            VARCHAR2(36 char) not null primary key,
     NAME          VARCHAR2(50 char),
     TABLE_NAME    VARCHAR2(50 char),
     LABEL_FIELD   VARCHAR2(50 char),
@@ -506,11 +440,9 @@ create table SYS_DATA_RESOURCE
 
 create table SYS_DICT
 (
-    ID            VARCHAR2(36 char) not null
-        constraint SYS_DICT_PK_SYS_DATA_RESOURCE
-        primary key,
+    ID            VARCHAR2(36 char) not null  primary key,
     NAME          VARCHAR2(255 char),
-    CODE          VARCHAR2(50 char),
+    CODE          VARCHAR2(255 char),
     NOTE          CLOB,
     WHO_CREATED   VARCHAR2(36 char),
     WHEN_CREATED  VARCHAR2(20 char),
@@ -521,9 +453,7 @@ create table SYS_DICT
 
 create table SYS_DICT_ITEM
 (
-    ID            VARCHAR2(36 char) not null
-        constraint SYS_DICT_ITEM_PK_SYS_DICT
-        primary key,
+    ID            VARCHAR2(36 char) not null primary key,
     NAME          VARCHAR2(255 char),
     GROUP_NAME    VARCHAR2(255 char),
     SYS_DICT_ID   VARCHAR2(36 char),
@@ -541,9 +471,7 @@ create table SYS_DICT_ITEM
 
 create table SYS_FILE
 (
-    ID                 VARCHAR2(36 char) not null
-        constraint SYS_FILE_PK_SYS_DICT_ITEM
-        primary key,
+    ID                 VARCHAR2(36 char) not null primary key,
     FILE_NAME          VARCHAR2(100 char),
     FILE_ORIGINAL_NAME VARCHAR2(100 char),
     FILE_SIZE          NUMBER,
@@ -561,9 +489,7 @@ create table SYS_FILE
 );
 create table SYS_I18N
 (
-    ID            VARCHAR2(36 char)  not null
-        constraint SYS_I18N_PK_SYS_FILE
-        primary key,
+    ID            VARCHAR2(36 char)  not null primary key,
     I18N_KEY      VARCHAR2(255 char) not null,
     MESSAGE       CLOB,
     APP_ID        VARCHAR2(36 char),
@@ -574,9 +500,7 @@ create table SYS_I18N
 );
 create table SYS_LOGIC_FLOW
 (
-    ID                  VARCHAR2(36 char) not null
-        constraint SYS_LOGIC_FLOW_PK_SYS_I18N
-        primary key,
+    ID                  VARCHAR2(36 char) not null primary key,
     NAME                VARCHAR2(255 char),
     FLOW_ID             VARCHAR2(36 char),
     APPLICATION_ID      VARCHAR2(36 char),
@@ -595,8 +519,7 @@ create table SYS_LOGIC_FLOW
 
 create table sys_logic_history
 (
-    id               varchar(36) not null
-        primary key,
+    id               varchar(36) not null primary key,
     flow_id          varchar(36) null ,
     flow_json        clob    null ,
     when_created     timestamp   null ,
@@ -606,9 +529,7 @@ create table sys_logic_history
 );
 create table SYS_LOGIC_TEMPLATE
 (
-    ID            VARCHAR2(36 char) not null
-        constraint IND_7785ED58DD2228CF
-        primary key,
+    ID            VARCHAR2(36 char) not null primary key,
     NAME          VARCHAR2(255 char),
     MODULE_ID     VARCHAR2(36 char),
     DESCRIPTION   CLOB,
@@ -623,9 +544,7 @@ create table SYS_LOGIC_TEMPLATE
 
 create table SYS_LOGIN_LOG
 (
-    ID               VARCHAR2(36 char) not null
-        constraint IND_92DBFF804AA263E0
-        primary key,
+    ID               VARCHAR2(36 char) not null primary key,
     OPERATE_TIME     VARCHAR2(20 char),
     OPERATOR         VARCHAR2(36 char),
     IP               VARCHAR2(20 char),
@@ -638,9 +557,7 @@ create table SYS_LOGIN_LOG
 
 create table SYS_MENU
 (
-    ID               VARCHAR2(36 char)        not null
-        constraint SYS_MENU_PK_SYS_LOGIN_LOG
-        primary key,
+    ID               VARCHAR2(36 char)        not null primary key,
     NAME             VARCHAR2(255 char)        not null,
     PARENT_ID        VARCHAR2(36 char),
     ICON             VARCHAR2(50 char),
@@ -672,9 +589,7 @@ create table SYS_MENU
 );
 create table SYS_NOTICE
 (
-    ID            VARCHAR2(36 char)   not null
-        constraint SYS_NOTICE_PK_SYS_MENU
-        primary key,
+    ID            VARCHAR2(36 char)   not null primary key,
     TITLE         VARCHAR2(255 char),
     CONTENT       CLOB,
     TYPE          NUMBER(3),
@@ -689,15 +604,13 @@ create table SYS_NOTICE
 
 create table SYS_NOTICE_RECORD
 (
-    ID            VARCHAR2(36 char)   not null
-        constraint IND_1ADC39F23AD032B1
-        primary key,
+    ID            VARCHAR2(36 char)   not null primary key,
     FROM_WHO      VARCHAR2(36 char),
     TO_WHO        VARCHAR2(36 char)   not null,
     NOTICE_ID     VARCHAR2(36 char),
     IS_READ       NUMBER(3) default 0 not null,
-    READ_TIME     VARCHAR2(20 char),
-    NOTICE_TIME   VARCHAR2(20 char)   not null,
+    READ_TIME     VARCHAR2(30 char),
+    NOTICE_TIME   VARCHAR2(30 char)   not null,
     TITLE         VARCHAR2(255 char),
     CONTENT       CLOB,
     TO_WHO_NAME   VARCHAR2(255 char),
@@ -707,9 +620,7 @@ create table SYS_NOTICE_RECORD
 
 create table SYS_ONLINE_USER
 (
-    ID           VARCHAR2(36 char) not null
-        constraint IND_534210AC1B2C86A1
-        primary key,
+    ID           VARCHAR2(36 char) not null primary key,
     USER_ID      VARCHAR2(36 char),
     LOGIN_TIME   VARCHAR2(20 char),
     LOGIN_IP     VARCHAR2(20 char),
@@ -722,9 +633,7 @@ create table SYS_ONLINE_USER
 
 create table SYS_OPERATE_LOG
 (
-    ID               VARCHAR2(36 char) not null
-        constraint IND_7E50FF753E7784FC
-        primary key,
+    ID               VARCHAR2(36 char) not null primary key,
     MODULE           VARCHAR2(100 char),
     ACTION           VARCHAR2(255 char),
     URL              VARCHAR2(255 char),
@@ -742,26 +651,22 @@ create table SYS_OPERATE_LOG
 
 create table SYS_ROLE
 (
-    ID            VARCHAR2(36 char) not null
-        constraint SYS_ROLE_PK_SYS_OPERATE_LOG
-        primary key,
-    NAME           VARCHAR2(255 char) not null,
-    CODE           VARCHAR2(255 char) not null,
+    ID            VARCHAR2(36 char) not null primary key,
+    NAME          VARCHAR2(255 char) not null,
+    CODE          VARCHAR2(255 char) not null,
     NOTE          CLOB,
     STATUS        NUMBER(3),
-    WHO_CREATED   VARCHAR2(36 char) not null,
-    WHEN_CREATED  VARCHAR2(20 char) not null,
-    WHO_MODIFIED  VARCHAR2(36 char) not null,
-    WHEN_MODIFIED VARCHAR2(20 char) not null,
+    WHO_CREATED   VARCHAR2(36 char),
+    WHEN_CREATED  VARCHAR2(20 char),
+    WHO_MODIFIED  VARCHAR2(36 char),
+    WHEN_MODIFIED VARCHAR2(20 char),
     APP_ID        VARCHAR2(36 char)
 );
 
 
 create table SYS_ROLE_MENU
 (
-    ID           VARCHAR2(36 char) not null
-        constraint SYS_ROLE_MENU_PK_SYS_ROLE
-        primary key,
+    ID           VARCHAR2(36 char) not null primary key,
     SYS_MENU_ID  VARCHAR2(36 char) not null,
     SYS_ROLE_ID  VARCHAR2(36 char) not null,
     WHO_CREATED  VARCHAR2(36 char) not null,
@@ -771,9 +676,7 @@ create table SYS_ROLE_MENU
 
 create table SYS_TASK
 (
-    ID                  VARCHAR2(36 char) not null
-        constraint SYS_TASK_PK_SYS_ROLE_MENU
-        primary key,
+    ID                  VARCHAR2(36 char) not null primary key,
     NAME                VARCHAR2(100 char),
     CRON                VARCHAR2(50 char),
     "DISTRIBUTED"         NUMBER(3),
@@ -800,10 +703,8 @@ create table SYS_TASK
 
 create table SYS_UNIT
 (
-    ID            VARCHAR2(36 char)   not null
-        constraint SYS_UNIT_PK_SYS_TASK
-        primary key,
-    NAME           VARCHAR2(255 char)   not null,
+    ID            VARCHAR2(36 char)   not null  primary key,
+    NAME          VARCHAR2(255 char)   not null,
     PARENT_ID     VARCHAR2(36 char),
     PATH          CLOB                not null,
     LEADER        VARCHAR2(255 char),
@@ -821,12 +722,10 @@ create table SYS_UNIT
 
 create table SYS_USER
 (
-    ID            VARCHAR2(36 char) not null
-        constraint SYS_USER_PK_SYS_UNIT
-        primary key,
-    USERNAME       VARCHAR2(255 char) not null,
+    ID            VARCHAR2(36 char) not null  primary key,
+    USERNAME      VARCHAR2(255 char) not null,
     PASSWORD      VARCHAR2(256 char),
-    REAL_NAME      VARCHAR2(255 char) not null,
+    REAL_NAME     VARCHAR2(255 char) not null,
     MOBILE        VARCHAR2(20 char),
     EMAIL         VARCHAR2(50 char),
     SEX           NUMBER(3),
@@ -846,9 +745,7 @@ create table SYS_USER
 
 create table SYS_USER_ROLE
 (
-    ID           VARCHAR2(36 char) not null
-        constraint SYS_USER_ROLE_PK_SYS_USER
-        primary key,
+    ID           VARCHAR2(36 char) not null primary key,
     SYS_USER_ID  VARCHAR2(36 char) not null,
     SYS_ROLE_ID  VARCHAR2(36 char) not null,
     WHO_CREATED  VARCHAR2(36 char) not null,
@@ -859,9 +756,7 @@ create table SYS_USER_ROLE
 
 create table SYS_VIEW_MODEL
 (
-    ID            VARCHAR2(36 char) not null
-        constraint IND_804CF57D84E815EB
-        primary key,
+    ID            VARCHAR2(36 char) not null primary key,
     NAME          VARCHAR2(50 char),
     NOTE          CLOB,
     WHO_CREATED   VARCHAR2(36 char),
@@ -892,9 +787,7 @@ create table SYS_VIEW_MODEL_FIELD
 
 create table SYS_VIEW_MODEL_FLOW
 (
-    ID            VARCHAR2(36 char) not null
-        constraint IND_8B74B862559750DE
-        primary key,
+    ID            VARCHAR2(36 char) not null primary key,
     FLOW_ID       VARCHAR2(36 char),
     VIEW_MODEL_ID VARCHAR2(36 char),
     WHO_CREATED   VARCHAR2(36 char),

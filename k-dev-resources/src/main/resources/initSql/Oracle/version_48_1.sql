@@ -1,0 +1,2 @@
+ALTER TABLE dev_team ADD is_audit number DEFAULT NULL;
+ALTER TABLE dev_team ADD image VARCHAR(255) DEFAULT NULL;

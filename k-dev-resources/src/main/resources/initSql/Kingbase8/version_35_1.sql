@@ -2,11 +2,11 @@ ALTER TABLE sys_unit
     ADD required_unit int DEFAULT 0 NULL;
 
 alter table sys_api
-    alter column api_tags type VARCHAR(255) ;
+    modify api_tags VARCHAR(255) null;
 alter table sys_logic_flow
-    alter column tags type VARCHAR(255) ;
+    modify tags VARCHAR(255) null;
 alter table dev_page
-    alter column tags  type VARCHAR(255) ;
+    modify tags VARCHAR(255) null;
 
 
 CREATE TABLE IF NOT EXISTS sys_logic_flow_mock
@@ -102,9 +102,9 @@ CREATE TABLE IF NOT EXISTS dev_table_update_log
     PRIMARY KEY (id)
 );
 
-alter table sys_operate_log alter column operate_time type varchar(20);
-alter table dev_application alter column enable_status type int;
-alter table dev_application alter column dev_status type int;
+alter table sys_operate_log modify  operate_time varchar(20);
+alter table dev_application modify  enable_status int;
+alter table dev_application modify  dev_status int;
 
 create table if not exists sf_ext_form
 (

@@ -109,7 +109,7 @@ public class DictManager {
     private List<Map<String, String>> getDetailByDictId(List<SysDictItemRet> sysDictItemList, String dictId) {
         List<Map<String, String>> list = new ArrayList<>();
         for (SysDictItemRet detail : sysDictItemList) {
-            if (detail.getSysDictId().equals(dictId)) {
+            if (detail.getSysDictId() != null && detail.getSysDictId().equals(dictId)) {
                 Map<String, String> map = new HashMap();
                 map.put("KEY", detail.getValue());
                 map.put("VALUE", detail.getName());
@@ -155,7 +155,7 @@ public class DictManager {
     private Map<String, String> getDetailKeyMapByDictId(List<SysDictItemRet> sysDictItemList, String dictId) {
         Map<String, String> map = new HashMap<>();
         for (SysDictItemRet detail : sysDictItemList) {
-            if (detail.getSysDictId().equals(dictId) && StringUtils.isNotEmpty(detail.getValue())) {
+            if (detail.getSysDictId() != null && detail.getSysDictId().equals(dictId) && StringUtils.isNotEmpty(detail.getValue())) {
                 map.put(detail.getValue(), detail.getValue());
             }
         }
@@ -165,7 +165,7 @@ public class DictManager {
     private Map<String, String> getDetailValueMapByDictId(List<SysDictItemRet> sysDictItemList, String dictId) {
         Map<String, String> map = new HashMap<>();
         for (SysDictItemRet detail : sysDictItemList) {
-            if (detail.getSysDictId().equals(dictId) && StringUtils.isNotEmpty(detail.getValue())) {
+            if (detail.getSysDictId() != null && detail.getSysDictId().equals(dictId) && StringUtils.isNotEmpty(detail.getValue())) {
                 map.put(detail.getValue(), detail.getName());
             }
         }

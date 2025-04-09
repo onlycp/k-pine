@@ -64,14 +64,6 @@ CREATE TABLE IF NOT EXISTS dev_chat_history (
     PRIMARY KEY (id)
     );
 
-create index idx_sys_operate_log_app_id on sys_operate_log (app_id);
-create index idx_sys_operate_log_module on sys_operate_log (module);
-create index idx_sys_operate_log_operate_time on sys_operate_log (operate_time);
-create index sys_operate_log_action_IDX on sys_operate_log (action);
-create index dev_team_app_app_id on dev_team_app (app_id);
-create index dev_team_app_team_id on dev_team_app (team_id);
-create index idx_username_uindex on sys_user (username);
-
 
 -- 修改 dev_power_tree 表
 ALTER TABLE dev_power_tree ADD order_num integer NULL;

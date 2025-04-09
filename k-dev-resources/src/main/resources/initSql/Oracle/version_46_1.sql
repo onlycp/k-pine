@@ -1,3 +1,6 @@
-ALTER TABLE dev_application
-    ADD app_namespace VARCHAR2(255);
-COMMENT ON COLUMN dev_application.app_namespace IS '应用命名空间';
+-- sys_unit
+ALTER TABLE  sys_unit add short_name varchar(36) null;
+ALTER TABLE  sys_unit add short_code varchar(100)  null;
+
+-- sys_user
+ALTER TABLE sys_user add jira_name varchar(100)  null;
