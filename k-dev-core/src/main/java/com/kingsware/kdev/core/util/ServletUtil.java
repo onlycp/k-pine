@@ -538,6 +538,39 @@ public class ServletUtil {
         }
     }
 
+    public static void responseRaw(HttpServletResponse response, String content) {
+        if (content == null || content.isEmpty()) {
+            return;
+        }
+
+        // 设置默认编码
+        response.setCharacterEncoding("UTF-8");
+        
+        // 根据内容格式判断 Content-Type
+        String contentType = "text/plain";
+        if (content.trim().startsWith("<")) {
+            // XML 格式
+            if (content.trim().startsWith("<?xml")) {
+                contentType = "application/xml";
+            } else if (content.trim().startsWith("<html") || content.trim().startsWith("<!DOCTYPE html")) {
+                contentType = "text/html";
+            }
+        } else if (content.trim().startsWith("{") || content.trim().startsWith("[")) {
+            // JSON 格式
+            contentType = "application/json";
+        }
+
+        // 设置 Content-Type
+        response.setContentType(contentType + ";charset=UTF-8");
+
+        try {
+            response.getWriter().write(content);
+            response.getWriter().flush();
+        } catch (IOException e) {
+            throw new RuntimeException("响应内容写入失败", e);
+        }
+    }
+
     /**
      * 打印返回参数
      *
@@ -692,6 +725,7 @@ public class ServletUtil {
 //        sb.append("【ui-access】================================================================================================================================================================================").append("\n");
 //        log.info(sb.toString());
     }
+
 
 
 }
