@@ -356,39 +356,47 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             importMessageMap.put(I18n.t("DevApplicationServiceImpl.logic", "逻辑编排"), pineFlowCount);
         }
 
-        // faas逻辑
-        if (devPine.getKdbFlows() != null) {
-            for (FlowInfo flowInfo : devPine.getKdbFlows()) {
-                if (flowInfo.getFlowId().equalsIgnoreCase("base_flow")) {
-                    continue;
-                }
-                KdbFlowQueryArgv kdbFlowQueryArgv = new KdbFlowQueryArgv();
-                kdbFlowQueryArgv.setFlowId(flowInfo.getFlowId());
-                List<FlowInfo> functionInfoList = DB.kdbApi().query(kdbFlowQueryArgv);
-
-                // 如果没有，则新增
-                if (functionInfoList.isEmpty()) {
-                    try {
-                        String sql = "insert into flow (flowid,name,content,description) values (?,?,?,?)";
-                        DB.byName("kingDB").executeUpdateSql(sql, flowInfo.getFlowId(), flowInfo.getName(), flowInfo.getContent(), flowInfo.getDescription());
-                    } catch (Exception e) {
+        try {
+            // faas逻辑
+            if (devPine.getKdbFlows() != null && !devPine.getKdbFlows().isEmpty()) {
+                for (FlowInfo flowInfo : devPine.getKdbFlows()) {
+                    if (flowInfo.getFlowId().equalsIgnoreCase("base_flow")) {
+                        continue;
                     }
-                } else {
-                    EditFlowInfo editFlowInfo = new EditFlowInfo();
-                    editFlowInfo.setFlowId(flowInfo.getFlowId());
-                    editFlowInfo.setContent(flowInfo.getContent());
-                    editFlowInfo.setName(flowInfo.getName());
-                    editFlowInfo.setDescription(flowInfo.getDescription());
-                    log.info("更新FAAS逻辑编排完整信息:{}", editFlowInfo.toString());
-                    DB.kdbApi().editFlow(editFlowInfo);
-                    log.info("更新FAAS逻辑编排:{}", editFlowInfo.getName());
-                }
+                    KdbFlowQueryArgv kdbFlowQueryArgv = new KdbFlowQueryArgv();
+                    kdbFlowQueryArgv.setFlowId(flowInfo.getFlowId());
+                    List<FlowInfo> functionInfoList = DB.kdbApi().query(kdbFlowQueryArgv);
 
+                    // 如果没有，则新增
+                    if (functionInfoList.isEmpty()) {
+                        try {
+                            String sql = "insert into flow (flowid,name,content,description) values (?,?,?,?)";
+                            DB.byName("kingDB").executeUpdateSql(sql, flowInfo.getFlowId(), flowInfo.getName(), flowInfo.getContent(), flowInfo.getDescription());
+                        } catch (Exception e) {
+                        }
+                    } else {
+                        EditFlowInfo editFlowInfo = new EditFlowInfo();
+                        editFlowInfo.setFlowId(flowInfo.getFlowId());
+                        // 若KDB数据库的flowId没有内容则跳过。解决KDB的FLOWID数据为空的问题
+                        if (flowInfo.getContent() == null || flowInfo.getContent().isEmpty()) {
+                            continue;
+                        }
+                        editFlowInfo.setContent(flowInfo.getContent());
+                        editFlowInfo.setName(flowInfo.getName());
+                        editFlowInfo.setDescription(flowInfo.getDescription());
+                        log.info("更新FAAS逻辑编排完整信息:{}", editFlowInfo.toString());
+                        DB.kdbApi().editFlow(editFlowInfo);
+                        log.info("更新FAAS逻辑编排:{}", editFlowInfo.getName());
+                    }
+
+                }
+                // 刷新
             }
-            // 刷新
+        } catch (Exception e) {
+            log.warn("fass逻辑flow内容更新异常：" + e.getMessage());
         }
         // faas函数
-        if (devPine.getFunctions() != null) {
+        if (devPine.getFunctions() != null && !devPine.getFunctions().isEmpty()) {
             boolean enableImportFunction = SpringContext.getBoolean("app.import-function", true);
             if (enableImportFunction) {
                 for (Functions functions : devPine.getFunctions()) {

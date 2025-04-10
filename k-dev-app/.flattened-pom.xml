@@ -56,8 +56,6 @@
               <artifactId>lombok</artifactId>
             </exclude>
           </excludes>
-          <executable>true</executable>
-          <layout>ZIP</layout>
           <mainClass>com.kingsware.kdev.App</mainClass>
         </configuration>
       </plugin>
