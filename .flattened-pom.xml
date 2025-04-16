@@ -10,7 +10,7 @@
   </parent>
   <groupId>com.kingsware.dev</groupId>
   <artifactId>k-dev-parent</artifactId>
-  <version>4.0.0-20250330-01</version>
+  <version>4.0.0-20250416-01</version>
   <packaging>pom</packaging>
   <name>k-dev-cli-api</name>
   <description>金智维青松平台</description>
@@ -44,7 +44,7 @@
     </snapshotRepository>
   </distributionManagement>
   <properties>
-    <kdev.version>4.0.0-20250330-01</kdev.version>
+    <kdev.version>4.0.0-20250416-01</kdev.version>
     <maven.compiler.target>8</maven.compiler.target>
     <java.version>1.8</java.version>
     <maven.compiler.source>8</maven.compiler.source>
@@ -118,56 +118,6 @@
         <exclusion>
           <groupId>org.apache.tomcat</groupId>
           <artifactId>tomcat-annotations-api</artifactId>
-        </exclusion>
-        <exclusion>
-          <artifactId>logback-classic</artifactId>
-          <groupId>ch.qos.logback</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>logback-core</artifactId>
-          <groupId>ch.qos.logback</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>tomcat-embed-core</artifactId>
-          <groupId>org.apache.tomcat.embed</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>tomcat-embed-el</artifactId>
-          <groupId>org.apache.tomcat.embed</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>tomcat-embed-websocket</artifactId>
-          <groupId>org.apache.tomcat.embed</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.tomcat.embed</groupId>
-      <artifactId>tomcat-embed-core</artifactId>
-      <version>9.0.98</version>
-      <scope>compile</scope>
-      <exclusions>
-        <exclusion>
-          <artifactId>tomcat-annotations-api</artifactId>
-          <groupId>org.apache.tomcat</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.tomcat.embed</groupId>
-      <artifactId>tomcat-embed-el</artifactId>
-      <version>9.0.98</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.tomcat.embed</groupId>
-      <artifactId>tomcat-embed-websocket</artifactId>
-      <version>9.0.98</version>
-      <scope>compile</scope>
-      <exclusions>
-        <exclusion>
-          <artifactId>tomcat-annotations-api</artifactId>
-          <groupId>org.apache.tomcat</groupId>
         </exclusion>
       </exclusions>
     </dependency>
