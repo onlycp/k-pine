@@ -3283,3 +3283,17 @@ CREATE TABLE dev_seats (
      who_modified varchar(255) DEFAULT NULL,
      PRIMARY KEY (id)
 );
+
+CREATE TABLE dev_floors (
+    id varchar(100) NOT NULL,
+    name varchar(255) DEFAULT NULL,
+    type varchar(50) DEFAULT NULL,
+    status varchar(50) DEFAULT NULL,
+    description varchar(200) DEFAULT NULL,
+    flow_id varchar(100) DEFAULT NULL,
+    when_created varchar(100) DEFAULT NULL,
+    when_modified varchar(100) DEFAULT NULL,
+    who_created varchar(255) DEFAULT NULL,
+    who_modified varchar(255) DEFAULT NULL,
+    PRIMARY KEY (id)
+);

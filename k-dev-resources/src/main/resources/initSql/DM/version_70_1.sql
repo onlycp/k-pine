@@ -2166,48 +2166,6 @@ COMMENT ON COLUMN DEV_FILE_VERSION.WHEN_MODIFIED IS '更新时间';
 COMMENT ON COLUMN DEV_FILE_VERSION.WHO_MODIFIED IS '更新人';
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 -- 以下是来自 version_50_1.sql 的内容 --
 
 ALTER TABLE OPEN_ACCOUNT ADD APP_ID varchar(36);
@@ -2284,23 +2242,6 @@ COMMENT ON COLUMN SYS_INSTANCE.CLUSTER_NO IS '集群号';
 ALTER TABLE DEV_SQL_SCRIPT ADD ID varchar(36) NOT NULL;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 -- 以下是来自 version_51_1.sql 的内容 --
 
 CREATE TABLE dev_seats (
@@ -2317,4 +2258,18 @@ CREATE TABLE dev_seats (
        who_created varchar2(255 char) DEFAULT NULL,
        who_modified varchar2(255 char) DEFAULT NULL,
        PRIMARY KEY (id)
+);
+
+CREATE TABLE dev_floors (
+        id varchar2(100 char) NOT NULL,
+        name varchar2(255 char) DEFAULT NULL,
+        type varchar2(50 char) DEFAULT NULL,
+        status varchar2(50 char) DEFAULT NULL,
+        description varchar2(200 char) DEFAULT NULL,
+        flow_id varchar2(100 char) DEFAULT NULL,
+        when_created varchar2(100 char) DEFAULT NULL,
+        when_modified varchar2(100 char) DEFAULT NULL,
+        who_created varchar2(255 char) DEFAULT NULL,
+        who_modified varchar2(255 char) DEFAULT NULL,
+        PRIMARY KEY (id)
 );
