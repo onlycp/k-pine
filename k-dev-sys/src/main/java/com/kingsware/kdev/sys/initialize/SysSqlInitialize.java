@@ -197,7 +197,12 @@ public class SysSqlInitialize implements SystemInitialize {
                 if (DB.getDefault().getConfig().getInnerType().equalsIgnoreCase("Oracle") && curSql.endsWith(";")) {
                     curSql = curSql.substring(0, curSql.length() - 1);
                 }
-                SqlUtils.executeSql("db", curSql);
+                // 这里需要 catch 异常，否则上面的异常了，下面的sql 无法继续执行
+                try {
+                    SqlUtils.executeSql("db", curSql);
+                }catch (Exception ignored) {
+
+                }
                 // 记录当前SQL语句执行结束的时间
                 long eachSqlEnd = System.currentTimeMillis();
                 // 记录SQL语句的版本、语句内容及执行时间
