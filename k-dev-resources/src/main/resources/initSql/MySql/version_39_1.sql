@@ -1,1 +1,0 @@
-alter table sys_operate_log modify column operate_time timestamp;

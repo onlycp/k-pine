@@ -1,3 +1,0 @@
-ALTER TABLE "sys_dict"
-    ALTER COLUMN "name" DROP NOT NULL,
-ALTER COLUMN "code" DROP NOT NULL;
