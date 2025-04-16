@@ -1,1 +1,0 @@
-alter table sys_dict_item alter column value type varchar(255) ;

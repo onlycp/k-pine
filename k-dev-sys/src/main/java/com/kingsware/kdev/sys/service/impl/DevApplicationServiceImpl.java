@@ -305,12 +305,12 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                     ));
             long openAccountCount = DB.batchSaveOrUpdate(openAccounts, OpenAccount.class);
             log.info("完成导入开放账号：{}", openAccountCount);
-            importMessageMap.put(I18n.t("DevApplicationServiceImpl.openAccount", "开放账号") , openAccountCount);
+            importMessageMap.put(I18n.t("DevApplicationServiceImpl.openAccount", "开放账号") , i18nCount);
         }
         // 开放账号权限
         List<OpenAccountApi> openAccountApis = devPine.getOpenAccountApis();
+        // 去除重复数据
         if (openAccountApis != null && !openAccountApis.isEmpty()) {
-            // 去除重复数据
             openAccountApis = openAccountApis.stream()
                     .collect(Collectors.collectingAndThen(
                             Collectors.groupingBy(OpenAccountApi::getId),  // 按id分组
@@ -320,7 +320,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                     ));
             long openAccountApiCount = DB.batchSaveOrUpdate(openAccountApis, OpenAccountApi.class);
             log.info("完成导入开放权限：{}", openAccountApiCount);
-            importMessageMap.put(I18n.t("DevApplicationServiceImpl.openAccountApi", "开放权限") , openAccountApiCount);
+            importMessageMap.put(I18n.t("DevApplicationServiceImpl.openAccountApi", "开放权限") , i18nCount);
         }
         // 菜单
         long menuCount = 0;
@@ -370,39 +370,47 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             importMessageMap.put(I18n.t("DevApplicationServiceImpl.logic", "逻辑编排"), pineFlowCount);
         }
 
-        // faas逻辑
-        if (devPine.getKdbFlows() != null) {
-            for (FlowInfo flowInfo : devPine.getKdbFlows()) {
-                if (flowInfo.getFlowId().equalsIgnoreCase("base_flow")) {
-                    continue;
-                }
-                KdbFlowQueryArgv kdbFlowQueryArgv = new KdbFlowQueryArgv();
-                kdbFlowQueryArgv.setFlowId(flowInfo.getFlowId());
-                List<FlowInfo> functionInfoList = DB.kdbApi().query(kdbFlowQueryArgv);
-
-                // 如果没有，则新增
-                if (functionInfoList.isEmpty()) {
-                    try {
-                        String sql = "insert into flow (flowid,name,content,description) values (?,?,?,?)";
-                        DB.byName("kingDB").executeUpdateSql(sql, flowInfo.getFlowId(), flowInfo.getName(), flowInfo.getContent(), flowInfo.getDescription());
-                    } catch (Exception e) {
+        try {
+            // faas逻辑
+            if (devPine.getKdbFlows() != null && !devPine.getKdbFlows().isEmpty()) {
+                for (FlowInfo flowInfo : devPine.getKdbFlows()) {
+                    if (flowInfo.getFlowId().equalsIgnoreCase("base_flow")) {
+                        continue;
                     }
-                } else {
-                    EditFlowInfo editFlowInfo = new EditFlowInfo();
-                    editFlowInfo.setFlowId(flowInfo.getFlowId());
-                    editFlowInfo.setContent(flowInfo.getContent());
-                    editFlowInfo.setName(flowInfo.getName());
-                    editFlowInfo.setDescription(flowInfo.getDescription());
-                    log.info("更新FAAS逻辑编排完整信息:{}", editFlowInfo.toString());
-                    DB.kdbApi().editFlow(editFlowInfo);
-                    log.info("更新FAAS逻辑编排:{}", editFlowInfo.getName());
-                }
+                    KdbFlowQueryArgv kdbFlowQueryArgv = new KdbFlowQueryArgv();
+                    kdbFlowQueryArgv.setFlowId(flowInfo.getFlowId());
+                    List<FlowInfo> functionInfoList = DB.kdbApi().query(kdbFlowQueryArgv);
 
+                    // 如果没有，则新增
+                    if (functionInfoList.isEmpty()) {
+                        try {
+                            String sql = "insert into flow (flowid,name,content,description) values (?,?,?,?)";
+                            DB.byName("kingDB").executeUpdateSql(sql, flowInfo.getFlowId(), flowInfo.getName(), flowInfo.getContent(), flowInfo.getDescription());
+                        } catch (Exception e) {
+                        }
+                    } else {
+                        EditFlowInfo editFlowInfo = new EditFlowInfo();
+                        editFlowInfo.setFlowId(flowInfo.getFlowId());
+                        // 若KDB数据库的flowId没有内容则跳过。解决KDB的FLOWID数据为空的问题
+                        if (flowInfo.getContent() == null || flowInfo.getContent().isEmpty()) {
+                            continue;
+                        }
+                        editFlowInfo.setContent(flowInfo.getContent());
+                        editFlowInfo.setName(flowInfo.getName());
+                        editFlowInfo.setDescription(flowInfo.getDescription());
+                        log.info("更新FAAS逻辑编排完整信息:{}", editFlowInfo.toString());
+                        DB.kdbApi().editFlow(editFlowInfo);
+                        log.info("更新FAAS逻辑编排:{}", editFlowInfo.getName());
+                    }
+
+                }
+                // 刷新
             }
-            // 刷新
+        } catch (Exception e) {
+            log.warn("fass逻辑flow内容更新异常：" + e.getMessage());
         }
         // faas函数
-        if (devPine.getFunctions() != null) {
+        if (devPine.getFunctions() != null && !devPine.getFunctions().isEmpty()) {
             boolean enableImportFunction = SpringContext.getBoolean("app.import-function", true);
             if (enableImportFunction) {
                 for (Functions functions : devPine.getFunctions()) {

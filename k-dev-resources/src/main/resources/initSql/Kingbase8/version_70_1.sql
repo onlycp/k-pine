@@ -1,4 +1,853 @@
-INSERT INTO DEV_APPLICATION (ID, "NAME", SHORT_NAME, DESCRIPTION, ENABLE_STATUS, DEV_STATUS, VERSION, WHO_IN_CHARGE, SYSTEM_LOGO, APP_TYPE, DEFAULT_PATH, DELETED, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, FAAS_PORT, PINE_PORT, DATA_SOURCE, APP_PUBLIC_TYPE) VALUES ('064b3b44b85a45fe87fcce88d72b2519', '青松开发管理', 'dev', '青松K-Pine 1.0', 1, 1, 'v1.0.0', null, '3508f1b2f1f442a584c4ffe118e2a9dd', '0', '/', 0, '2022-02-13 19:53:19', null, '2022-08-24 16:56:26', 'a7d903b65e8c42479b9774db664f9468', null, null, null, 2) ON DUPLICATE KEY ;
+
+-- 以下是来自 version_1_1.sql 的内容 --
+
+create table DEV_SQL_RUN
+(
+    ID             VARCHAR2(36 char) not null
+        constraint DEV_SQL_RUN_PK_DEV_POWER_TREE
+        primary key,
+    VERSION        NUMBER            not null,
+    MD5            VARCHAR(100),
+    WHEN_CREATED   VARCHAR(20),
+    EXECUTION_TIME NUMBER,
+    SUCCESS        NUMBER(3)         not null
+);
+
+
+-- 以下是来自 version_2_1.sql 的内容 --
+
+create table DEV_API
+(
+    ID                 VARCHAR2(36 char) default '' not null primary key,
+    API_NAME           VARCHAR2(50 char),
+    APPLICATION_ID     VARCHAR2(36 char),
+    API_URL            VARCHAR2(128 char),
+    API_NOTE           CLOB,
+    API_TAGS           VARCHAR2(128 char),
+    API_METHOD         VARCHAR2(36 char) default 'get',
+    API_ARGV_TYPE      NUMBER,
+    API_REQ_ARGV       CLOB,
+    API_RSP_ARGV       CLOB,
+    API_RESULT_HANDLER VARCHAR2(128 char),
+    WHO_CREATED        VARCHAR2(36 char),
+    WHEN_CREATED       VARCHAR2(20 char),
+    WHO_MODIFIED       VARCHAR2(36 char),
+    WHEN_MODIFIED      VARCHAR2(20 char),
+    API_FLOW_ID        VARCHAR2(50 char),
+    API_CODE           VARCHAR2(50 char),
+    CALL_TYPE          NUMBER,
+    APP_ID             VARCHAR2(36 char)
+);
+create table DEV_APPLICATION
+(
+    ID              VARCHAR2(36 char)   not null primary key,
+    NAME            VARCHAR2(100 char),
+    SHORT_NAME      VARCHAR2(30 char)   not null,
+    DESCRIPTION     VARCHAR2(255 char),
+    ENABLE_STATUS   NUMBER(3),
+    DEV_STATUS      NUMBER(3),
+    VERSION         VARCHAR2(50 char),
+    WHO_IN_CHARGE   VARCHAR2(255 char),
+    SYSTEM_LOGO     VARCHAR2(255 char),
+    APP_TYPE        VARCHAR2(100 char),
+    DEFAULT_PATH    VARCHAR2(255 char),
+    DELETED         NUMBER(3) default 0 not null,
+    WHEN_CREATED    VARCHAR2(20 char),
+    WHO_CREATED     VARCHAR2(36 char),
+    WHEN_MODIFIED   VARCHAR2(20 char),
+    WHO_MODIFIED    VARCHAR2(36 char),
+    FAAS_PORT       NUMBER,
+    PINE_PORT       NUMBER,
+    DATA_SOURCE     VARCHAR2(1000 char),
+    APP_PUBLIC_TYPE NUMBER    default 0
+);
+
+create table DEV_DOCUMENT
+(
+    ID           VARCHAR2(255 char) not null primary key,
+    NAME         VARCHAR2(255 char),
+    PATH         VARCHAR2(255 char),
+    CONTENT      CLOB,
+    PARENT_ID    VARCHAR2(255 char),
+    "ORDER"      NUMBER      not null,
+    WHEN_CREATED DATE,
+    WHO_CREATED  VARCHAR2(255 char),
+    DELETED      NUMBER(3) default 0
+);
+
+
+
+create table DEV_MODULE
+(
+    ID            VARCHAR2(36 char) not null primary key,
+    NAME          VARCHAR2(100 char),
+    PATH          VARCHAR2(255 char),
+    HAS_PATH      NUMBER,
+    PARENT_ID     VARCHAR2(36 char),
+    SORT          NUMBER,
+    WHEN_CREATED  VARCHAR2(50 char),
+    WHO_CREATED   VARCHAR2(36 char),
+    WHEN_MODIFIED VARCHAR2(50 char),
+    WHO_MODIFIED  VARCHAR2(36 char),
+    IS_SYS        NUMBER,
+    APP_ID        VARCHAR2(36 char)
+);
+
+create table DEV_OTA_CHANNEL
+(
+    ID            VARCHAR2(36 char) not null primary key,
+    CHANNEL_NAME  VARCHAR2(50 char),
+    CHANNEL_URL   VARCHAR2(100 char),
+    AUTH_TOKEN    VARCHAR2(50 char),
+    SIGN_SECRET   VARCHAR2(50 char),
+    MASTER        NUMBER default 0,
+    NOTE          VARCHAR2(255 char),
+    WHEN_CREATED  VARCHAR2(20 char),
+    WHO_CREATED   VARCHAR2(36 char),
+    WHEN_MODIFIED VARCHAR2(20 char),
+    WHO_MODIFIED  VARCHAR2(36 char)
+);
+
+create table DEV_PAGE
+(
+    ID             VARCHAR2(36 char) not null primary key,
+    WHEN_CREATED   VARCHAR2(20 char),
+    WHEN_MODIFIED  VARCHAR2(20 char),
+    WHO_CREATED    VARCHAR2(36 char),
+    WHO_MODIFIED   VARCHAR2(36 char),
+    DELETED        NUMBER(3) default 0,
+    APP_ID         VARCHAR2(36 char),
+    NAME           VARCHAR2(255 char),
+    DESCRIPTION    VARCHAR2(255 char),
+    PATH           VARCHAR2(255 char),
+    APP_TYPE       VARCHAR2(100 char),
+    LOGIN_REQUIRED NUMBER(3),
+    ENABLE_STATUS  NUMBER(3),
+    DEV_STATUS     NUMBER(3),
+    PAGE_JSON      CLOB
+);
+create table dev_page_history
+(
+    id               varchar(36) not null primary key,
+    page_id          varchar(36) ,
+    page_json        clob   ,
+    when_created     timestamp   ,
+    who_created      varchar(36) ,
+    version_tag      varchar(50) ,
+    version_tag_time varchar(30)
+);
+
+create table DEV_POWER_LINK
+(
+    ID           VARCHAR2(36 char) not null primary key,
+    TREE_ID      VARCHAR2(36 char),
+    POWER_ID     VARCHAR2(36 char),
+    POWER_TYPE   NUMBER,
+    WHO_CREATED  VARCHAR2(36 char),
+    WHEN_CREATED VARCHAR2(20 char)
+);
+
+create table DEV_POWER_TREE
+(
+    ID            VARCHAR2(36 char) not null primary key,
+    NAME          VARCHAR2(128 char),
+    PARENT_ID     VARCHAR2(36 char),
+    NOTE          VARCHAR2(255 char),
+    WHO_CREATED   VARCHAR2(36 char),
+    WHEN_CREATED  VARCHAR2(20 char),
+    WHO_MODIFIED  VARCHAR2(36 char),
+    WHEN_MODIFIED VARCHAR2(20 char),
+    PATH          CLOB
+);
+
+create table DEV_SQL_SCRIPT
+(
+    SQL         CLOB                not null,
+    DESCRIPTION VARCHAR2(255 char),
+    VERSION     NUMBER              not null primary key,
+    IS_ONCE     NUMBER(3) default 1 not null
+);
+
+
+create table DEV_TEAM
+(
+    ID            VARCHAR2(36 char)   not null primary key,
+    NAME          VARCHAR2(100 char)  not null,
+    OWNER         VARCHAR2(36 char)   not null,
+    DESCRIPTION   VARCHAR2(255 char),
+    DELETED       NUMBER(3) default 0 not null,
+    WHEN_CREATED  VARCHAR2(20 char),
+    WHO_CREATED   VARCHAR2(36 char),
+    WHEN_MODIFIED VARCHAR2(20 char),
+    WHO_MODIFIED  VARCHAR2(36 char)
+);
+
+create table DEV_TEAM_APP
+(
+    ID           VARCHAR2(36 char) not null primary key,
+    TEAM_ID      VARCHAR2(36 char),
+    APP_ID       VARCHAR2(36 char),
+    TEAM_TYPE    NUMBER(3)         not null,
+    WHEN_CREATED VARCHAR2(20 char),
+    WHO_CREATED  VARCHAR2(36 char)
+);
+
+create table DEV_TEAM_MEMBER
+(
+    ID           VARCHAR2(36 char) not null primary key,
+    TEAM_ID      VARCHAR2(36 char) not null,
+    USER_ID      VARCHAR2(36 char) not null,
+    WHEN_JOIN    VARCHAR2(20 char),
+    WHO_INVITE   VARCHAR2(36 char),
+    TEAM_ROLE_ID VARCHAR2(36 char),
+    IS_OWNER     NUMBER(3),
+    APP_ID       VARCHAR2(255 char)
+);
+
+create table DEV_TOPOLOGICAL
+(
+    ID            VARCHAR2(36 char) not null,
+    WHEN_CREATED  VARCHAR2(20 char),
+    WHEN_MODIFIED VARCHAR2(20 char),
+    WHO_CREATED   VARCHAR2(36 char),
+    WHO_MODIFIED  VARCHAR2(36 char),
+    DELETED       NUMBER(3) default 0,
+    APP_ID        VARCHAR2(36 char),
+    NAME          VARCHAR2(255 char),
+    DESCRIPTION   VARCHAR2(255 char),
+    PAGE_JSON     CLOB,
+    ENABLE_STATUS NUMBER(3)
+);
+
+create table DEV_VIEW_MODEL
+(
+    ID            VARCHAR2(36 char) not null primary key,
+    NAME          VARCHAR2(50 char),
+    NOTE          CLOB,
+    WHO_CREATED   VARCHAR2(36 char),
+    WHEN_CREATED  VARCHAR2(20 char),
+    WHO_MODIFIED  VARCHAR2(36 char),
+    WHEN_MODIFIED VARCHAR2(20 char),
+    DELETED       NUMBER default 0,
+    TAG           VARCHAR2(100 char),
+    APP_ID        VARCHAR2(36 char)
+);
+
+create table DEV_VIEW_MODEL_FIELD
+(
+    ID             VARCHAR2(36 char) not null  primary key,
+    VIEW_MODEL_ID  VARCHAR2(36 char),
+    FIELD          VARCHAR2(50 char),
+    LABEL          VARCHAR2(50 char),
+    TYPE           VARCHAR2(20 char),
+    FORMAT_TYPE    VARCHAR2(20 char),
+    FORMAT_PATTERN VARCHAR2(50 char),
+    DEFAULT_TEXT   VARCHAR2(50 char),
+    WHO_CREATED    VARCHAR2(36 char),
+    WHEN_CREATED   VARCHAR2(20 char),
+    WHO_MODIFIED   VARCHAR2(36 char),
+    WHEN_MODIFIED  TIMESTAMP(6),
+    HIDDEN         VARCHAR2(20 char) default '0',
+    ORDER_NUM      NUMBER            default 0,
+    APP_ID         VARCHAR2(36 char)
+);
+
+create table DEV_VIEW_MODEL_FLOW
+(
+    ID            VARCHAR2(36 char) not null primary key,
+    FLOW_ID       VARCHAR2(36 char),
+    VIEW_MODEL_ID VARCHAR2(36 char),
+    WHO_CREATED   VARCHAR2(36 char),
+    WHEN_CREATED  VARCHAR2(20 char),
+    WHO_MODIFIED  VARCHAR2(36 char),
+    WHEN_MODIFIED VARCHAR2(20 char),
+    APP_ID        VARCHAR2(36 char)
+);
+
+create table ext_plugin_interface
+(
+    id          varchar(255)                           not null
+        primary key,
+    name        varchar(255)                           ,
+    resp_type   varchar(255) default ''                ,
+    content     text                                ,
+    description varchar(1024)                         ,
+    plugin_id   varchar(255)                           ,
+    create_time timestamp    default CURRENT_TIMESTAMP ,
+    create_user varchar(255)                           ,
+    update_time timestamp    default CURRENT_TIMESTAMP ,
+    update_user varchar(255)                           ,
+    deleted     int          default 0
+);
+
+
+
+
+create table ext_plugin_tree
+(
+    id          varchar(255)
+        primary key,
+    ext_name    varchar(255)                     ,
+    jar_name    varchar(255)                       ,
+    type        int                                ,
+    create_time timestamp default CURRENT_TIMESTAMP,
+    update_time timestamp default CURRENT_TIMESTAMP ,
+    create_user varchar(255)                        ,
+    update_user varchar(255)                        ,
+    status      int       default 0               ,
+    name        varchar(255)                        ,
+    clazz_name  varchar(255)                        ,
+    description text                              ,
+    check_time  timestamp
+);
+
+create table KFAAS_LIB
+(
+    JARNAME    VARCHAR2(255 char) not null primary key,
+    CREATETIME TIMESTAMP(6) default CURRENT_TIMESTAMP,
+    UPDATETIME TIMESTAMP(6) default CURRENT_TIMESTAMP,
+    CREATEUSER VARCHAR2(255 char),
+    UPDATEUSER VARCHAR2(255 char),
+    STATUS     NUMBER       default 0
+);
+
+create table OPEN_ACCOUNT
+(
+    ID            VARCHAR2(36 char) not null primary key,
+    ACCESS_NAME   VARCHAR2(128 char),
+    ACCESS_ID     VARCHAR2(36 char),
+    AUTH_TYPE     NUMBER,
+    SIGN_KEY      VARCHAR2(50 char),
+    VALIDATE_SIGN NUMBER default 0,
+    VALID_DATE    VARCHAR2(20 char),
+    INVALID_DATE  VARCHAR2(20 char),
+    STATUS        NUMBER default 1,
+    AUTH_PARAMS   CLOB,
+    WHO_CREATED   VARCHAR2(36 char),
+    WHEN_CREATED  VARCHAR2(20 char),
+    WHO_MODIFIED  VARCHAR2(36 char),
+    WHEN_MODIFIED VARCHAR2(20 char)
+);
+
+create table OPEN_ACCOUNT_API
+(
+    ID           VARCHAR2(36 char) not null primary key,
+    ACCOUNT_ID   VARCHAR2(36),
+    API_ID       VARCHAR2(36 char),
+    WHEN_CREATED VARCHAR2(20 char),
+    WHO_CREATED  VARCHAR2(36 char)
+);
+
+create table OPEN_API_LOG
+(
+    ID             VARCHAR2(36 char) not null primary key,
+    ACCESS_ID      VARCHAR2(100 char),
+    API_NAME       VARCHAR2(100 char),
+    REQUEST_PARAMS CLOB,
+    REQUEST_TIME   VARCHAR2(20 char),
+    REQUEST_IP     VARCHAR2(20 char),
+    USE_TIME       NUMBER(3),
+    SUCCESS        NUMBER(3),
+    ERROR_MESSAGE  VARCHAR2(255 char)
+);
+
+create table SYS_API
+(
+    ID                 VARCHAR2(36 char) default '' not null primary key,
+    API_NAME           VARCHAR2(255 char),
+    API_URL            VARCHAR2(128 char),
+    API_NOTE           CLOB,
+    API_TAGS           VARCHAR2(128 char),
+    API_METHOD         VARCHAR2(36 char) default 'get',
+    API_ARGV_TYPE      NUMBER,
+    API_REQ_ARGV       CLOB,
+    API_RSP_ARGV       CLOB,
+    API_RESULT_HANDLER VARCHAR2(128 char),
+    WHO_CREATED        VARCHAR2(36 char),
+    WHEN_CREATED       VARCHAR2(20 char),
+    WHO_MODIFIED       VARCHAR2(36 char),
+    WHEN_MODIFIED      VARCHAR2(20 char),
+    API_FLOW_ID        VARCHAR2(50 char),
+    API_CODE           VARCHAR2(50 char),
+    CALL_TYPE          NUMBER,
+    APP_ID             VARCHAR2(36 char)
+);
+
+create table SYS_BASE
+(
+    ID            VARCHAR2(36 char) not null primary key,
+    NAME          VARCHAR2(50 char),
+    CODE          VARCHAR2(50 char),
+    NOTE          CLOB,
+    WHO_CREATED   VARCHAR2(36 char),
+    WHEN_CREATED  VARCHAR2(20 char),
+    WHO_MODIFIED  VARCHAR2(36 char),
+    WHEN_MODIFIED VARCHAR2(20 char),
+    IS_TEST       NUMBER(3),
+    APP_ID        VARCHAR2(36 char)
+);
+
+create table SYS_CONFIG
+(
+    ID            VARCHAR2(36 char) not null primary key,
+    NAME          VARCHAR2(255 char),
+    CODE          VARCHAR2(255 char),
+    VALUE         VARCHAR2(255 char),
+    IS_SYS        NUMBER(3),
+    NOTE          VARCHAR2(255 char),
+    WHO_CREATED   VARCHAR2(36 char),
+    WHEN_CREATED  VARCHAR2(20 char),
+    WHO_MODIFIED  VARCHAR2(36 char),
+    WHEN_MODIFIED VARCHAR2(20 char),
+    VALUE_TYPE    NUMBER(3) default 0,
+    APP_ID        VARCHAR2(36 char)
+);
+
+create table SYS_DATA_ACCESS
+(
+    ID            VARCHAR2(36 char) not null primary key,
+    NAME          VARCHAR2(50 char),
+    STATUS        NUMBER(3),
+    NOTE          CLOB,
+    WHO_CREATED   VARCHAR2(36 char),
+    WHEN_CREATED  VARCHAR2(20 char),
+    WHO_MODIFIED  VARCHAR2(36 char),
+    WHEN_MODIFIED VARCHAR2(20 char),
+    APP_ID        VARCHAR2(36 char)
+);
+
+create table SYS_DATA_ACCESS_RESOURCE
+(
+    ID           VARCHAR2(36 char) not null primary key,
+    DATA_ID      VARCHAR2(36 char),
+    ACCESS_ID    VARCHAR2(36 char),
+    TABLE_NAME   VARCHAR2(50 char),
+    WHO_CREATED  VARCHAR2(36 char),
+    WHEN_CREATED VARCHAR2(20 char),
+    APP_ID       VARCHAR2(36 char)
+);
+
+create table SYS_DATA_ACCESS_USER
+(
+    ID                 VARCHAR2(36 char) not null primary key,
+    SYS_USER_ID        VARCHAR2(36 char),
+    SYS_DATA_ACCESS_ID VARCHAR2(50 char),
+    WHO_CREATED        VARCHAR2(36 char),
+    WHEN_CREATED       VARCHAR2(20 char),
+    APP_ID             VARCHAR2(36 char)
+);
+
+create table SYS_DATA_RESOURCE
+(
+    ID            VARCHAR2(36 char) not null primary key,
+    NAME          VARCHAR2(50 char),
+    TABLE_NAME    VARCHAR2(50 char),
+    LABEL_FIELD   VARCHAR2(50 char),
+    VALUE_FIELD   VARCHAR2(50 char),
+    QUERY_SQL     CLOB,
+    IS_TREE       NUMBER(3),
+    IS_ONLY_LEAF  NUMBER(3),
+    STATUS        NUMBER(3),
+    WHO_CREATED   VARCHAR2(36 char),
+    WHEN_CREATED  VARCHAR2(20 char),
+    WHO_MODIFIED  VARCHAR2(36 char),
+    WHEN_MODIFIED VARCHAR2(20 char),
+    EXTRA_SQL     CLOB,
+    APP_ID        VARCHAR2(36 char)
+);
+
+create table SYS_DICT
+(
+    ID            VARCHAR2(36 char) not null  primary key,
+    NAME          VARCHAR2(255 char),
+    CODE          VARCHAR2(255 char),
+    NOTE          CLOB,
+    WHO_CREATED   VARCHAR2(36 char),
+    WHEN_CREATED  VARCHAR2(20 char),
+    WHO_MODIFIED  VARCHAR2(36 char),
+    WHEN_MODIFIED VARCHAR2(20 char),
+    APP_ID        VARCHAR2(36 char)
+);
+
+create table SYS_DICT_ITEM
+(
+    ID            VARCHAR2(36 char) not null primary key,
+    NAME          VARCHAR2(255 char),
+    GROUP_NAME    VARCHAR2(255 char),
+    SYS_DICT_ID   VARCHAR2(36 char),
+    CODE          VARCHAR2(255 char),
+    VALUE         VARCHAR2(20 char),
+    ORDER_NUM     NUMBER,
+    NOTE          CLOB,
+    WHO_CREATED   VARCHAR2(36 char),
+    WHEN_CREATED  VARCHAR2(20 char),
+    WHO_MODIFIED  VARCHAR2(36 char),
+    WHEN_MODIFIED VARCHAR2(20 char),
+    APP_ID        VARCHAR2(36 char)
+);
+
+
+create table SYS_FILE
+(
+    ID                 VARCHAR2(36 char) not null primary key,
+    FILE_NAME          VARCHAR2(100 char),
+    FILE_ORIGINAL_NAME VARCHAR2(100 char),
+    FILE_SIZE          NUMBER,
+    FILE_EXT           CLOB,
+    FILE_MD5           VARCHAR2(40 char),
+    FILE_FROM          VARCHAR2(50 char),
+    SAVE_TYPE          NUMBER,
+    FILE_PATH          VARCHAR2(100 char),
+    FILE_CONTENT       CLOB,
+    WHO_CREATED        VARCHAR2(36 char),
+    WHEN_CREATED       VARCHAR2(20 char),
+    WHO_MODIFIED       VARCHAR2(36 char),
+    WHEN_MODIFIED      VARCHAR2(20 char),
+    APP_ID             VARCHAR2(36 char)
+);
+create table SYS_I18N
+(
+    ID            VARCHAR2(36 char)  not null primary key,
+    I18N_KEY      VARCHAR2(255 char) not null,
+    MESSAGE       CLOB,
+    APP_ID        VARCHAR2(36 char),
+    WHEN_CREATED  VARCHAR2(20 char),
+    WHO_CREATED   VARCHAR2(36 char),
+    WHEN_MODIFIED VARCHAR2(20 char),
+    WHO_MODIFIED  VARCHAR2(36 char)
+);
+create table SYS_LOGIC_FLOW
+(
+    ID                  VARCHAR2(36 char) not null primary key,
+    NAME                VARCHAR2(255 char),
+    FLOW_ID             VARCHAR2(36 char),
+    APPLICATION_ID      VARCHAR2(36 char),
+    TAGS                VARCHAR2(255 char),
+    IN_ARGV             CLOB,
+    OUT_ARGV            CLOB,
+    SUB_FLOW_IDS        CLOB,
+    NOTE                VARCHAR2(255 char),
+    WHO_CREATED         VARCHAR2(36 char),
+    WHEN_CREATED        VARCHAR2(20 char),
+    WHO_MODIFIED        VARCHAR2(36 char),
+    WHEN_MODIFIED       VARCHAR2(20 char),
+    APP_ID              VARCHAR2(36 char),
+    DEFAULT_SOURCE_NAME VARCHAR2(100 char)
+);
+
+create table sys_logic_history
+(
+    id               varchar(36) not null primary key,
+    flow_id          varchar(36) null ,
+    flow_json        clob    null ,
+    when_created     timestamp   null ,
+    who_created      varchar(36) null ,
+    version_tag      varchar(50) null ,
+    version_tag_time varchar(30) null
+);
+create table SYS_LOGIC_TEMPLATE
+(
+    ID            VARCHAR2(36 char) not null primary key,
+    NAME          VARCHAR2(255 char),
+    MODULE_ID     VARCHAR2(36 char),
+    DESCRIPTION   CLOB,
+    NODES         CLOB,
+    LINKS         CLOB,
+    APP_ID        VARCHAR2(36 char),
+    WHEN_CREATED  VARCHAR2(50 char),
+    WHO_CREATED   VARCHAR2(36 char),
+    WHEN_MODIFIED VARCHAR2(50 char),
+    WHO_MODIFIED  VARCHAR2(36 char)
+);
+
+create table SYS_LOGIN_LOG
+(
+    ID               VARCHAR2(36 char) not null primary key,
+    OPERATE_TIME     VARCHAR2(20 char),
+    OPERATOR         VARCHAR2(36 char),
+    IP               VARCHAR2(20 char),
+    TIMES            NUMBER,
+    RESPONSE_CODE    NUMBER,
+    RESPONSE_MESSAGE VARCHAR2(100 char),
+    WHEN_CREATED     VARCHAR2(20 char)
+);
+
+
+create table SYS_MENU
+(
+    ID               VARCHAR2(36 char)        not null primary key,
+    NAME             VARCHAR2(255 char)        not null,
+    PARENT_ID        VARCHAR2(36 char),
+    ICON             VARCHAR2(50 char),
+    CODE             VARCHAR2(50 char),
+    ROUTER_PATH      VARCHAR2(255 char),
+    COMPONENT_PATH   VARCHAR2(255 char),
+    IS_HIDDEN        NUMBER(3)    default 0   not null,
+    MENU_TYPE        CHAR(1 char) default '0' not null,
+    API_CODES        VARCHAR2(255 char),
+    OPEN_MODE        NUMBER(3)                not null,
+    KEEP_ALIVE       NUMBER(3),
+    PATH             CLOB                     not null,
+    ORDER_NUM        NUMBER       default 0   not null,
+    STATUS           NUMBER(3)    default 1   not null,
+    WHO_CREATED      VARCHAR2(36 char)        not null,
+    WHEN_CREATED     VARCHAR2(20 char)        not null,
+    WHO_MODIFIED     VARCHAR2(36 char)        not null,
+    WHEN_MODIFIED    VARCHAR2(20 char)        not null,
+    APP_ID           VARCHAR2(36 char),
+    DATA_TYPE        NUMBER(3),
+    THEME            VARCHAR2(50 char),
+    PAGE_TYPE        NUMBER(3),
+    SIDEBAR_NAV_MODE NUMBER(3),
+    TOP_NAV_MODE     NUMBER(3),
+    MAIN_MODE        NUMBER(3),
+    PAGE_ID          VARCHAR2(36 char),
+    FULL_PATH        VARCHAR2(255 char),
+    IS_DEV           NUMBER(3)    default 0
+);
+create table SYS_NOTICE
+(
+    ID            VARCHAR2(36 char)   not null primary key,
+    TITLE         VARCHAR2(255 char),
+    CONTENT       CLOB,
+    TYPE          NUMBER(3),
+    STATUS        NUMBER(3) default 1 not null,
+    WHO_CREATED   VARCHAR2(36 char),
+    WHEN_CREATED  VARCHAR2(20 char),
+    WHO_MODIFIED  VARCHAR2(36 char),
+    WHEN_MODIFIED VARCHAR2(20 char),
+    DELETED       NUMBER(3),
+    APP_ID        VARCHAR2(36 char)
+);
+
+create table SYS_NOTICE_RECORD
+(
+    ID            VARCHAR2(36 char)   not null primary key,
+    FROM_WHO      VARCHAR2(36 char),
+    TO_WHO        VARCHAR2(36 char)   not null,
+    NOTICE_ID     VARCHAR2(36 char),
+    IS_READ       NUMBER(3) default 0 not null,
+    READ_TIME     VARCHAR2(30 char),
+    NOTICE_TIME   VARCHAR2(30 char)   not null,
+    TITLE         VARCHAR2(255 char),
+    CONTENT       CLOB,
+    TO_WHO_NAME   VARCHAR2(255 char),
+    FROM_WHO_NAME VARCHAR2(255 char),
+    APP_ID        VARCHAR2(36 char)
+);
+
+create table SYS_ONLINE_USER
+(
+    ID           VARCHAR2(36 char) not null primary key,
+    USER_ID      VARCHAR2(36 char),
+    LOGIN_TIME   VARCHAR2(20 char),
+    LOGIN_IP     VARCHAR2(20 char),
+    LOGIN_TOKEN  VARCHAR2(1024 char),
+    EXPIRE_TIME  VARCHAR2(20 char),
+    WHEN_CREATED VARCHAR2(20 char),
+    APP_ID       VARCHAR2(36 char)
+);
+
+
+create table SYS_OPERATE_LOG
+(
+    ID               VARCHAR2(36 char) not null primary key,
+    MODULE           VARCHAR2(100 char),
+    ACTION           VARCHAR2(255 char),
+    URL              VARCHAR2(255 char),
+    OPERATE_TIME     VARCHAR2(20 char),
+    OPERATOR         VARCHAR2(36 char),
+    IP               VARCHAR2(20 char),
+    TIMES            NUMBER,
+    REQUEST_BODY     CLOB,
+    RESPONSE_CODE    NUMBER,
+    RESPONSE_MESSAGE VARCHAR2(100 char),
+    WHEN_CREATED     VARCHAR2(20 char),
+    APP_ID           VARCHAR2(36 char)
+);
+
+
+create table SYS_ROLE
+(
+    ID            VARCHAR2(36 char) not null primary key,
+    NAME          VARCHAR2(255 char) not null,
+    CODE          VARCHAR2(255 char) not null,
+    NOTE          CLOB,
+    STATUS        NUMBER(3),
+    WHO_CREATED   VARCHAR2(36 char),
+    WHEN_CREATED  VARCHAR2(20 char),
+    WHO_MODIFIED  VARCHAR2(36 char),
+    WHEN_MODIFIED VARCHAR2(20 char),
+    APP_ID        VARCHAR2(36 char)
+);
+
+
+create table SYS_ROLE_MENU
+(
+    ID           VARCHAR2(36 char) not null primary key,
+    SYS_MENU_ID  VARCHAR2(36 char) not null,
+    SYS_ROLE_ID  VARCHAR2(36 char) not null,
+    WHO_CREATED  VARCHAR2(36 char) not null,
+    WHEN_CREATED VARCHAR2(20 char) not null,
+    APP_ID       VARCHAR2(36 char)
+);
+
+create table SYS_TASK
+(
+    ID                  VARCHAR2(36 char) not null primary key,
+    NAME                VARCHAR2(100 char),
+    CRON                VARCHAR2(50 char),
+    "DISTRIBUTED"         NUMBER(3),
+    APPLICATION_ID      VARCHAR2(36 char),
+    TASK_TYPE           NUMBER(3) default 1,
+    TASK_RESOURCE_ID    VARCHAR2(36 char),
+    CLASS_NAME          VARCHAR2(255 char),
+    ENABLE              NUMBER(3) default 1,
+    LAST_EXECUTE_STATUS NUMBER(3),
+    LAST_EXECUTE_MSG    CLOB,
+    LAST_EXECUTE_TIME   VARCHAR2(20 char),
+    LAST_EXECUTE_TAKE   NUMBER,
+    LOCK_STATUS         NUMBER(3) default 0,
+    LOCK_FOR_MOST       NUMBER    default 30,
+    LOCK_FOR_LEAST      NUMBER    default 1,
+    LOCK_FOR_TIME       VARCHAR2(20 char),
+    NOTE                CLOB,
+    WHO_CREATED         VARCHAR2(36 char),
+    WHEN_CREATED        VARCHAR2(20 char),
+    WHO_MODIFIED        VARCHAR2(36 char),
+    WHEN_MODIFIED       VARCHAR2(20 char),
+    APP_ID              VARCHAR2(36 char)
+);
+
+create table SYS_UNIT
+(
+    ID            VARCHAR2(36 char)   not null  primary key,
+    NAME          VARCHAR2(255 char)   not null,
+    PARENT_ID     VARCHAR2(36 char),
+    PATH          CLOB                not null,
+    LEADER        VARCHAR2(255 char),
+    MOBILE        VARCHAR2(20 char),
+    EMAIL         VARCHAR2(50 char),
+    STATUS        NUMBER(3) default 1 not null,
+    NOTE          CLOB,
+    ORDER_NUM     NUMBER    default 0,
+    WHO_CREATED   VARCHAR2(36 char)   not null,
+    WHEN_CREATED  VARCHAR2(20 char)   not null,
+    WHO_MODIFIED  VARCHAR2(36 char)   not null,
+    WHEN_MODIFIED VARCHAR2(20 char)   not null,
+    APP_ID        VARCHAR2(36 char)
+);
+
+create table SYS_USER
+(
+    ID            VARCHAR2(36 char) not null  primary key,
+    USERNAME      VARCHAR2(255 char) not null,
+    PASSWORD      VARCHAR2(256 char),
+    REAL_NAME     VARCHAR2(255 char) not null,
+    MOBILE        VARCHAR2(20 char),
+    EMAIL         VARCHAR2(50 char),
+    SEX           NUMBER(3),
+    SYS_UNIT_ID   VARCHAR2(36 char),
+    POST          VARCHAR2(50 char),
+    STATUS        NUMBER(3) default 1,
+    NOTE          CLOB,
+    WHO_CREATED   VARCHAR2(36 char),
+    WHEN_CREATED  VARCHAR2(20 char),
+    WHO_MODIFIED  VARCHAR2(36 char),
+    WHEN_MODIFIED VARCHAR2(20 char),
+    DELETED       NUMBER(3) default 0,
+    AVATAR        VARCHAR2(255 char),
+    APP_ID        VARCHAR2(36 char)
+);
+
+
+create table SYS_USER_ROLE
+(
+    ID           VARCHAR2(36 char) not null primary key,
+    SYS_USER_ID  VARCHAR2(36 char) not null,
+    SYS_ROLE_ID  VARCHAR2(36 char) not null,
+    WHO_CREATED  VARCHAR2(36 char) not null,
+    WHEN_CREATED VARCHAR2(20 char) not null,
+    APP_ID       VARCHAR2(36 char)
+);
+
+
+create table SYS_VIEW_MODEL
+(
+    ID            VARCHAR2(36 char) not null primary key,
+    NAME          VARCHAR2(50 char),
+    NOTE          CLOB,
+    WHO_CREATED   VARCHAR2(36 char),
+    WHEN_CREATED  VARCHAR2(20 char),
+    WHO_MODIFIED  VARCHAR2(36 char),
+    WHEN_MODIFIED VARCHAR2(20 char),
+    DELETED       NUMBER default 0,
+    TAG           VARCHAR2(100 char)
+);
+
+create table SYS_VIEW_MODEL_FIELD
+(
+    ID             VARCHAR2(36 char) not null,
+    VIEW_MODEL_ID  VARCHAR2(36 char),
+    FIELD          VARCHAR2(50 char),
+    LABEL          VARCHAR2(50 char),
+    TYPE           VARCHAR2(20 char),
+    FORMAT_TYPE    VARCHAR2(20 char),
+    FORMAT_PATTERN VARCHAR2(50 char),
+    DEFAULT_TEXT   VARCHAR2(50 char),
+    WHO_CREATED    VARCHAR2(36 char),
+    WHEN_CREATED   VARCHAR2(20 char),
+    WHO_MODIFIED   VARCHAR2(36 char),
+    WHEN_MODIFIED  VARCHAR2(20 char),
+    HIDDEN         NUMBER default 0,
+    ORDER_NUM      NUMBER default 0
+);
+
+create table SYS_VIEW_MODEL_FLOW
+(
+    ID            VARCHAR2(36 char) not null primary key,
+    FLOW_ID       VARCHAR2(36 char),
+    VIEW_MODEL_ID VARCHAR2(36 char),
+    WHO_CREATED   VARCHAR2(36 char),
+    WHEN_CREATED  VARCHAR2(20 char),
+    WHO_MODIFIED  VARCHAR2(36 char),
+    WHEN_MODIFIED VARCHAR2(20 char)
+);
+
+create table dev_faas_node
+(
+    id            varchar(32)    ,
+    name          varchar(90)   ,
+    type_id       varchar(32)    ,
+    template      varchar(10240) ,
+    icon          varchar(32)   ,
+    pub_status    int           ,
+    order_num     varchar(255)   ,
+    when_created  varchar(255)   ,
+    who_created   varchar(255)   ,
+    when_modified varchar(255)   ,
+    who_modified  varchar(255)   ,
+    config        text        ,
+    code          varchar(255)
+);
+
+create table dev_faas_node_type
+(
+    id            varchar(32)  ,
+    name          varchar(90)  ,
+    pub_status    int         ,
+    icon          varchar(32)  ,
+    when_created  varchar(255) ,
+    who_created   varchar(255) ,
+    when_modified varchar(255) ,
+    who_modified  varchar(255)
+);
+
+
+
+-- 以下是来自 version_3_1.sql 的内容 --
+
+INSERT INTO DEV_APPLICATION (ID, "NAME", SHORT_NAME, DESCRIPTION, ENABLE_STATUS, DEV_STATUS, VERSION, WHO_IN_CHARGE, SYSTEM_LOGO, APP_TYPE, DEFAULT_PATH, DELETED, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, FAAS_PORT, PINE_PORT, DATA_SOURCE, APP_PUBLIC_TYPE) VALUES ('064b3b44b85a45fe87fcce88d72b2519', '青松开发管理', 'dev', '青松K-Pine 1.0', 1, 1, 'v1.0.0', null, '3508f1b2f1f442a584c4ffe118e2a9dd', '0', '/', 0, '2022-02-13 19:53:19', null, '2022-08-24 16:56:26', 'a7d903b65e8c42479b9774db664f9468', null, null, null, 2);
 INSERT INTO DEV_OTA_CHANNEL (ID, CHANNEL_NAME, CHANNEL_URL, AUTH_TOKEN, SIGN_SECRET, MASTER, NOTE, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED) VALUES ('8bab3a61164740c5958e4652d344f3f9', '主通道', 'http://10.11.2.115:18882', 'yebKhNp2prcAXHkNFX4M8HDZc5ybsMep', '8T4xxmArYXjQWJjK', 1, '青松应用', '2022-08-23 15:56:38', '94123ca363dc4dfaa62a6bb5dcd3bf50', '2022-08-23 18:41:46', '94123ca363dc4dfaa62a6bb5dcd3bf50');
 INSERT INTO SYS_API (ID, API_NAME, API_URL, API_NOTE, API_TAGS, API_METHOD, API_ARGV_TYPE, API_REQ_ARGV, API_RSP_ARGV, API_RESULT_HANDLER, WHO_CREATED, WHEN_CREATED, WHO_MODIFIED, WHEN_MODIFIED, API_FLOW_ID, API_CODE, CALL_TYPE, APP_ID) VALUES ('285a470cb68b451f95938b3cf9e3a7eb', '团队删除', '/v1/admin-team/del', null, 'admin', 'delete', null, null, null, null, '7aed8c297a6940f681c26eb6ab68893d', '2022-06-13 01:50:56', null, '2022-07-14 18:07:03', '8f825dac514845ea87c955767cf3c938', null, 2, '064b3b44b85a45fe87fcce88d72b2519');
 INSERT INTO SYS_API (ID, API_NAME, API_URL, API_NOTE, API_TAGS, API_METHOD, API_ARGV_TYPE, API_REQ_ARGV, API_RSP_ARGV, API_RESULT_HANDLER, WHO_CREATED, WHEN_CREATED, WHO_MODIFIED, WHEN_MODIFIED, API_FLOW_ID, API_CODE, CALL_TYPE, APP_ID) VALUES ('285dc1e328a6435491d96f1eccefe17e', '通用下拉删除', '/v1/sys/hint-select/delete', null, null, 'post', null, null, null, null, 'd4040ae0800844d99406157b798bae01', '2022-07-28 14:04:13', 'd4040ae0800844d99406157b798bae01', '2022-07-28 14:04:13', 'a5694ac62ca945a3aae26c673db81f79', null, 2, '064b3b44b85a45fe87fcce88d72b2519');
@@ -238,3 +1087,1097 @@ INSERT INTO SYS_ROLE
 (ID, "NAME", CODE, NOTE, STATUS, WHO_CREATED, WHEN_CREATED, WHO_MODIFIED, WHEN_MODIFIED, APP_ID)
 VALUES('4a30f4d346074b4ba8363944f004c1d9', '团队负责人', 'team_owner', '青松开发者平台-团队负责人', 1, '', '2022-03-10 06:12:31', '056fb0eeb9a44cb0953534b4c0ca01fa', '2022-03-29 11:44:06', NULL);
 INSERT INTO SYS_USER_ROLE (ID, APP_ID, WHEN_CREATED, WHO_CREATED, SYS_ROLE_ID, SYS_USER_ID) VALUES('8d641b3aded845feae88aef3d7e32e33', NULL, '2022-09-28 14:45:53', '056fb0eeb9a44cb0953534b4c0ca01fa', '4a30f4d346074b4ba8363944f004c1d9', '8116f0bc8222413fb72de98a32960b1a');
+
+
+-- 以下是来自 version_4_1.sql 的内容 --
+
+create table sys_user_unit (
+       id varchar(36) not null ,
+       sys_user_id varchar(36) not null ,
+       sys_unit_id varchar(36) not null,
+       who_created varchar(36) not null ,
+       when_created varchar(20) not null ,
+       app_id varchar(36),
+       primary key(id)
+);
+
+-- 以下是来自 version_5_1.sql 的内容 --
+
+
+
+CREATE TABLE sys_search_config (
+                                   id varchar2(36)  NOT NULL,
+                                   data_source varchar2(100) ,
+                                   table_name varchar2(100),
+                                   columns varchar2(255),
+                                   primary_columns varchar2(255),
+                                   link varchar2(255) ,
+                                   labels varchar2(255) ,
+                                   when_created varchar2(50) ,
+                                   when_modified varchar2(50) ,
+                                   who_created varchar2(36) ,
+                                   who_modified varchar2(36) ,
+                                   title_column varchar2(100) ,
+                                   PRIMARY KEY (id)
+) ;
+
+CREATE TABLE rep_template(
+                             id varchar2(36) NOT NULL ,
+                             name varchar2(255) NOT NULL  ,
+                             tpl_file_id varchar2(36) ,
+                             excel_file varchar2(36) ,
+                             type varchar2(10) ,
+                             ds_sets varchar2(1024) ,
+                             note varchar2(255) ,
+                             who_created varchar2(36) ,
+                             when_created varchar2(30)  ,
+                             who_modified varchar2(36) ,
+                             when_modified varchar2(30)  ,
+                             PRIMARY KEY (id)
+) ;
+CREATE TABLE sys_cache (
+                           id varchar2(36) NOT NULL,
+                           code varchar2(255) DEFAULT NULL,
+                           value varchar2(255) DEFAULT NULL ,
+                           when_expired varchar2(30) DEFAULT NULL,
+                           when_created varchar2(30) DEFAULT NULL ,
+                           app_id varchar2(36) DEFAULT NULL  ,
+                           PRIMARY KEY (id)
+);
+
+-- 以下是来自 version_6_1.sql 的内容 --
+
+alter table SYS_TASK add TASK_ARGV CLOB;
+
+
+-- 以下是来自 version_7_1.sql 的内容 --
+
+
+alter table sys_api add module_id VARCHAR(36) null ;
+alter table sys_logic_flow add module_id VARCHAR(36) null;
+alter table dev_page add module_id VARCHAR(36) null;
+alter table dev_page add tags VARCHAR(36) null ;
+
+
+
+-- 以下是来自 version_8_1.sql 的内容 --
+
+alter table sys_dict_item modify  value varchar2(255) ;
+
+
+-- 以下是来自 version_29_1.sql 的内容 --
+
+alter table SYS_OPERATE_LOG
+    add METHOD varchar(255) null;
+alter table SYS_OPERATE_LOG
+    add REQUEST_METHOD varchar(255) null;
+alter table SYS_OPERATE_LOG
+    add RESPONSE_BODY text null;
+
+
+
+-- 以下是来自 version_30_1.sql 的内容 --
+
+
+CREATE TABLE sys_instance(
+                                  id VARCHAR(32) NOT NULL PRIMARY KEY,
+                                  host_name VARCHAR(32)  ,
+                                  port INT  ,
+                                  heart_beat_time VARCHAR(20)   ,
+                                  reg_time VARCHAR(20),
+                                  "online" INT
+
+);
+
+alter table sys_role_menu modify  id varchar(36);
+alter table sys_role_menu modify  sys_menu_id varchar(36) ;
+alter table sys_role_menu modify  who_created varchar(36) ;
+
+
+-- 以下是来自 version_31_1.sql 的内容 --
+
+alter table sys_task
+    add next_inst varchar(36) null;
+
+
+-- 以下是来自 version_33_1.sql 的内容 --
+
+
+CREATE TABLE sys_offline_download(
+                                     id VARCHAR(36) NOT NULL   primary key,
+                                     file_name VARCHAR(90)   ,
+                                     task_name VARCHAR(255)  ,
+                                     file_path VARCHAR(255)   ,
+                                     end_time VARCHAR(255)    ,
+                                     script VARCHAR(1024)   ,
+                                     process INT    ,
+                                     status VARCHAR(255)     ,
+                                     params VARCHAR(255)   ,
+                                     error_message VARCHAR(900)   ,
+                                     who_created VARCHAR(36)  ,
+                                     when_created VARCHAR(20)
+) ;
+
+
+-- 以下是来自 version_34_1.sql 的内容 --
+
+
+ALTER TABLE sys_unit ADD unit_level int NULL ;
+ALTER TABLE sys_search_config ADD search_columns varchar(1000) NULL ;
+ALTER TABLE sys_search_config MODIFY  columns varchar(1000) ;
+
+
+-- 以下是来自 version_35_1.sql 的内容 --
+
+ALTER TABLE sys_unit
+    ADD required_unit int DEFAULT 0 NULL;
+
+alter table sys_api
+    modify api_tags VARCHAR(255) null;
+alter table sys_logic_flow
+    modify tags VARCHAR(255) null;
+alter table dev_page
+    modify tags VARCHAR(255) null;
+
+
+CREATE TABLE IF NOT EXISTS sys_logic_flow_mock
+(
+    id            VARCHAR(36) NOT NULL,
+    name          VARCHAR(90),
+    flow_id       VARCHAR(36),
+    depend_id     VARCHAR(36),
+    request_argv  text,
+    assert_expr   VARCHAR(900),
+    enable_mock   INT,
+    who_created   VARCHAR(36),
+    when_created  VARCHAR(20),
+    who_modified  VARCHAR(36),
+    when_modified VARCHAR(20),
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS dev_page_template
+(
+    id            varchar(36) NOT NULL,
+    when_created  varchar(20),
+    when_modified varchar(20),
+    who_created   varchar(36),
+    who_modified  varchar(36),
+    deleted       int DEFAULT 0,
+    app_id        varchar(36),
+    name          varchar(255),
+    description   varchar(255),
+    app_type      varchar(100),
+    page_json CLOB,
+    tags          varchar(255),
+    module_id     varchar(36),
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS dev_table
+(
+    id            varchar(36),
+    data_source   varchar(100),
+    name          varchar(100),
+    "comment"     varchar(255),
+    when_created  varchar(100),
+    when_modified varchar(100),
+    who_created   varchar(100),
+    who_modified  varchar(100),
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS dev_table_column
+(
+    id              varchar(36),
+    table_id        varchar(36),
+    name            varchar(100),
+    "comment"       varchar(255),
+    sort            int,
+    type            varchar(50),
+    length          varchar(36),
+    decimal_point   varchar(100),
+    is_primary      int,
+    is_null         int,
+    when_created    varchar(100),
+    when_modified   varchar(100),
+    who_created     varchar(100),
+    who_modified    varchar(100),
+    is_label_column int NOT NULL DEFAULT 0,
+    PRIMARY KEY (id)
+);
+
+
+CREATE TABLE IF NOT EXISTS dev_table_update_log
+(
+    id              varchar(36),
+    operate_type    int,
+    table_name      varchar(100),
+    column_name     varchar(100),
+    version_tag     varchar(100),
+    when_created    varchar(100),
+    when_modified   varchar(100),
+    who_created     varchar(100),
+    who_modified    varchar(100),
+    old_table_name  varchar(100),
+    old_column_name varchar(100),
+    type            varchar(36),
+    length          varchar(36),
+    decimal_point   int,
+    is_primary      int,
+    is_null         int,
+    sort            varchar(36),
+    "comment"       varchar(255),
+    table_id        varchar(100),
+    is_column_label int,
+    PRIMARY KEY (id)
+);
+
+alter table sys_operate_log modify  operate_time varchar(20);
+alter table dev_application modify  enable_status int;
+alter table dev_application modify  dev_status int;
+
+create table if not exists sf_ext_form
+(
+    id               varchar(50)  not null
+        primary key,
+    who_created      varchar(50)  null,
+    when_created     varchar(50)  null,
+    who_modified     varchar(50)  null,
+    when_modified    varchar(50)  null,
+    name             varchar(100) null,
+    type             varchar(50)  null,
+    group_name       varchar(500) null,
+    field_properties CLOB     null,
+    list_button      CLOB     null,
+    page_path        varchar(500) null,
+    db_name          varchar(100) null,
+    tab_name         varchar(500) null,
+    is_app           varchar(50)  null,
+    app_id           varchar(50)  null,
+    page_id          varchar(50)  null,
+    description      text         null
+);
+
+create table if not exists rep_app
+(
+    id            varchar(32)  not null
+        primary key,
+    app_name      varchar(50)  null,
+    app_note      varchar(256) null,
+    who_created   varchar(32)  null,
+    when_created  varchar(20)  null,
+    who_modified  varchar(32)  null,
+    when_modified varchar(20)  null
+);
+
+-- auto-generated definition
+create table rep_dataset
+(
+    id            varchar(32)  not null
+        primary key,
+    ds_name       varchar(50)  null,
+    rep_app_id    varchar(32)  null,
+    ds_meta       text         null,
+    ds_type       int          null,
+    ds_note       varchar(255) null,
+    when_created  varchar(20)  null,
+    who_modified  varchar(32)  null,
+    when_modified varchar(20)  null,
+    who_created   varchar(32)  null,
+    column_def    text         null
+);
+
+create table if not exists rep_dataset_config
+(
+    id                  varchar(32)  not null,
+    select_table        varchar(100) null ,
+    conditions_assembly text         null ,
+    field_alias         text         null,
+    condition_group     text         null ,
+    when_create         varchar(100) null,
+    who_create          varchar(100) null ,
+    when_modified       varchar(100) null ,
+    who_modified        varchar(100) null ,
+    rep_dataset_id      varchar(32)  null,
+    source_id           varchar(32)  null
+);
+
+-- auto-generated definition
+create table if not exists wf_ext_category
+(
+    id            varchar(32) not null
+        primary key,
+    category_name varchar(50) null ,
+    order_num     int      null ,
+    who_created   varchar(32) null ,
+    when_created  varchar(20) null ,
+    who_modified  varchar(32) null ,
+    when_modified varchar(20) null
+);
+
+-- auto-generated definition
+create table if not exists wf_ext_comment
+(
+    id             varchar(32)                   not null
+        primary key,
+    task_name      varchar(50)                   null,
+    proc_inst_id   varchar(32)                   null ,
+    task_id        varchar(32)                   null ,
+    type           varchar(20) default 'comment' null,
+    user_id        varchar(32)                   null ,
+    message        varchar(255)                  null,
+    when_created   varchar(20)                   null ,
+    parent_inst_id varchar(50)                   null
+);
+
+
+-- auto-generated definition
+create table if not exists wf_ext_node_attribute
+(
+    id             varchar(100) not null
+        primary key,
+    node_type      varchar(50)  null,
+    next_user      varchar(500) null,
+    msg_send_rule  varchar(100) null,
+    time_out       varchar(50)  null,
+    actions        varchar(100) null,
+    when_created   varchar(50)  null,
+    who_created    varchar(100) null,
+    when_modified  varchar(50)  null,
+    who_modified   varchar(100) null,
+    flow_id        varchar(100) null,
+    node_id        varchar(100) null,
+    form_attribute text         null,
+    exec_mode      varchar(50)  null,
+    pass_ok        varchar(50)  null,
+    person         varchar(50)  null ,
+    back_node      varchar(500) null,
+    name           varchar(200) null
+);
+
+-- auto-generated definition
+create table if not exists wf_ext_node_define
+(
+    id            varchar(50)  null,
+    who_created   varchar(50)  null,
+    when_created  varchar(50)  null,
+    who_modified  varchar(50)  null,
+    when_modified varchar(50)  null,
+    name          varchar(200) null,
+    group_name    varchar(200) null,
+    type          varchar(200) null,
+    start_icon    text         null,
+    show_icon     text         null,
+    node_json     varchar(200) null,
+    is_extend     varchar(200) null,
+    status        varchar(200) null
+);
+
+-- auto-generated definition
+create table if not exists wf_ext_procdef
+(
+    id                  varchar(50)  not null
+        primary key,
+    proc_definition_key varchar(100) null,
+    proc_name           varchar(100) null,
+    category_id         varchar(32)  null,
+    proc_version        int      null,
+    deploy_md5          varchar(255) null,
+    icon                varchar(50)  null,
+    content             clob     null,
+    deploy_status       int      null,
+    deploy_time         varchar(20)  null,
+    order_num           int       null,
+    who_created         varchar(32)  null,
+    when_created        varchar(20)  null,
+    who_modified        varchar(32)  null,
+    when_modified       varchar(20)  null,
+    proc_definition_id  varchar(32)  null,
+    form_page_id        varchar(32)  null,
+    form_key            varchar(50)  null,
+    work_num            varchar(100) null,
+    inst_desc           varchar(255) null,
+    page_form           clob     null
+);
+
+-- auto-generated definition
+create table if not exists wf_ext_procinst
+(
+    id           varchar(32)  not null
+        primary key,
+    proc_inst_id varchar(32)  null ,
+    starter      varchar(32)  null ,
+    bill_code    varchar(50)  null ,
+    bill_title   varchar(100) null ,
+    when_created varchar(20)  null ,
+    form_data    text         null ,
+    main_inst_id varchar(50)  null ,
+    main_task_id varchar(50)  null
+);
+
+-- auto-generated definition
+create table sys_excel
+(
+    id            varchar(255) not null
+        primary key,
+    name          varchar(255) null,
+    data_json     clob     null,
+    data_from     int          null ,
+    when_created  varchar(30)  null ,
+    when_modified varchar(30)  null,
+    who_created   varchar(36)  null ,
+    who_modified  varchar(36)  null ,
+    app_id        varchar(36)  null ,
+    data_from_id  varchar(36)  null
+);
+
+-- auto-generated definition
+create table dev_application_version_history
+(
+    id           varchar(36)  not null
+        primary key,
+    when_created timestamp    null,
+    who_created  varchar(36)  null,
+    app_id       varchar(36)  null,
+    version      varchar(50)  null,
+    file_name    varchar(255) null,
+    note         varchar(255) null,
+    export_data  text         null
+);
+
+INSERT INTO DEV_MODULE (ID, NAME, PATH, HAS_PATH, PARENT_ID, SORT, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, IS_SYS, APP_ID) VALUES ('0913bc0b384c44d99e384b992cb7fe40', '开发平台', '/dev', 1, null, 1, '2023-03-29 10:43:48', '7aed8c297a6940f681c26eb6ab68893d', '2023-03-30 09:55:00', '7aed8c297a6940f681c26eb6ab68893d', 1, '064b3b44b85a45fe87fcce88d72b2519');
+INSERT INTO DEV_MODULE (ID, NAME, PATH, HAS_PATH, PARENT_ID, SORT, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, IS_SYS, APP_ID) VALUES ('09e4ec197da14de3844b6b04c4fa5ee9', '开发平台管理', null, 0, null, 3, '2023-03-29 10:48:15', '7aed8c297a6940f681c26eb6ab68893d', '2023-03-29 10:48:15', '7aed8c297a6940f681c26eb6ab68893d', 1, '064b3b44b85a45fe87fcce88d72b2519');
+INSERT INTO DEV_MODULE (ID, NAME, PATH, HAS_PATH, PARENT_ID, SORT, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, IS_SYS, APP_ID) VALUES ('1e329b86988b4dd79b49887b774b0879', '示例', null, 0, null, 18, '2023-03-29 16:28:22', '7aed8c297a6940f681c26eb6ab68893d', '2023-03-29 16:28:22', '7aed8c297a6940f681c26eb6ab68893d', 1, '064b3b44b85a45fe87fcce88d72b2519');
+INSERT INTO DEV_MODULE (ID, NAME, PATH, HAS_PATH, PARENT_ID, SORT, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, IS_SYS, APP_ID) VALUES ('5a10d15671704b6cbc01cc3a8bed365a', '公共库', null, 0, null, 4, '2022-05-31 15:18:08', '7aed8c297a6940f681c26eb6ab68893d', '2022-05-31 15:24:40', '7aed8c297a6940f681c26eb6ab68893d', 1, '064b3b44b85a45fe87fcce88d72b2519');
+INSERT INTO DEV_MODULE (ID, NAME, PATH, HAS_PATH, PARENT_ID, SORT, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, IS_SYS, APP_ID) VALUES ('90f2c2ea0f9942d181388e24fd6ee936', 'v3开发', '/dev/v3', 1, '0913bc0b384c44d99e384b992cb7fe40', 1, '2023-03-29 17:37:35', '7aed8c297a6940f681c26eb6ab68893d', '2023-03-30 09:55:12', '7aed8c297a6940f681c26eb6ab68893d', 1, '064b3b44b85a45fe87fcce88d72b2519');
+INSERT INTO DEV_MODULE (ID, NAME, PATH, HAS_PATH, PARENT_ID, SORT, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, IS_SYS, APP_ID) VALUES ('9bbe33574d0547e78f72f5982bea26cd', '子页面', null, 0, '0913bc0b384c44d99e384b992cb7fe40', 0, '2023-03-29 10:46:23', '7aed8c297a6940f681c26eb6ab68893d', '2023-03-30 09:55:08', '7aed8c297a6940f681c26eb6ab68893d', 1, '064b3b44b85a45fe87fcce88d72b2519');
+INSERT INTO DEV_MODULE (ID, NAME, PATH, HAS_PATH, PARENT_ID, SORT, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, IS_SYS, APP_ID) VALUES ('d4820db91eab4cdc9c82703cf1d4df83', '流程关联表单页', null, 0, '1e329b86988b4dd79b49887b774b0879', 0, '2023-03-29 16:28:46', '7aed8c297a6940f681c26eb6ab68893d', '2023-03-29 16:28:46', '7aed8c297a6940f681c26eb6ab68893d', 0, '064b3b44b85a45fe87fcce88d72b2519');
+INSERT INTO DEV_MODULE (ID, NAME, PATH, HAS_PATH, PARENT_ID, SORT, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, IS_SYS, APP_ID) VALUES ('e0047b3716fa48789d8d2377b1d23195', '系统配置', null, 0, null, 2, '2023-03-29 09:27:04', '7aed8c297a6940f681c26eb6ab68893d', '2023-03-29 09:27:04', '7aed8c297a6940f681c26eb6ab68893d', 1, '064b3b44b85a45fe87fcce88d72b2519');
+INSERT INTO DEV_MODULE (ID, NAME, PATH, HAS_PATH, PARENT_ID, SORT, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, IS_SYS, APP_ID) VALUES ('fbe9d1e36a37423aa9ab4711c569093f', '基础功能', null, 0, null, 2, '2023-03-29 09:26:54', '7aed8c297a6940f681c26eb6ab68893d', '2023-03-29 09:26:54', '7aed8c297a6940f681c26eb6ab68893d', 1, '064b3b44b85a45fe87fcce88d72b2519');
+
+
+
+
+
+
+
+
+-- 以下是来自 version_36_1.sql 的内容 --
+
+CREATE TABLE if not exists dev_plugin_api (
+                                id VARCHAR(36) PRIMARY KEY,
+                                title VARCHAR(255),
+                                group_code VARCHAR(255),
+                                code VARCHAR(255),
+                                tags VARCHAR(255),
+                                notes CLOB,
+                                order_num VARCHAR(10),
+                                who_created VARCHAR(36),
+                                when_created VARCHAR(20),
+                                who_modified VARCHAR(36),
+                                when_modified VARCHAR(20)
+);
+
+CREATE TABLE  if not exists dev_plugin_group (
+                                                 id VARCHAR(36) PRIMARY KEY,
+                                                 name VARCHAR(255),
+                                                 code VARCHAR(255),
+                                                 notes CLOB,
+                                                 order_num INT,
+                                                 who_created VARCHAR(36),
+                                                 when_created VARCHAR(20),
+                                                 who_modified VARCHAR(36),
+                                                 when_modified VARCHAR(20)
+);
+
+
+
+CREATE TABLE if not exists dev_plugin_operation (
+                                                    id VARCHAR(36) PRIMARY KEY,
+                                                    code VARCHAR(255),
+                                                    tags VARCHAR(255),
+                                                    api_id VARCHAR(36),
+                                                    title VARCHAR(255),
+                                                    notes CLOB,
+                                                    cases CLOB,
+                                                    success_resp CLOB,
+                                                    error_resp CLOB,
+                                                    in_params CLOB,
+                                                    who_created VARCHAR(36),
+                                                    when_created VARCHAR(20),
+                                                    who_modified VARCHAR(36),
+                                                    when_modified VARCHAR(20),
+                                                    order_num INT DEFAULT 0
+);
+
+
+
+
+-- 以下是来自 version_37_1.sql 的内容 --
+
+delete from sys_dict_item where id='1537c3ca5e934e6c846b0415229dbe85';
+
+
+-- 以下是来自 version_38_1.sql 的内容 --
+
+
+alter table sys_logic_flow add new_flow_json CLOB null;
+alter table sys_logic_history add new_flow_json CLOB null;
+alter table sys_logic_template add flow_config CLOB null;
+alter table sys_logic_template add type INT null;
+alter table sys_logic_template add new_flow_json CLOB null;
+
+
+-- 以下是来自 version_39_1.sql 的内容 --
+
+CREATE TABLE IF NOT EXISTS "SYS_DATA_CHANGE" ("ID" VARCHAR(32) NOT NULL, "NAME" VARCHAR(255), "TABLE_NAME" VARCHAR(255), "OBJECT_NAME" VARCHAR(255), "OPERATOR" VARCHAR(255), "OPER_TYPE" VARCHAR(255), "OPER_TIME" VARCHAR(255), "CONTENT" VARCHAR(255), PRIMARY KEY ("ID"));
+
+CREATE TABLE IF NOT EXISTS "NUMBER_REGULATION" ("ID" VARCHAR(36) NOT NULL, "SORT" VARCHAR(255), "TYPE" VARCHAR(255), "VALUE" VARCHAR(255), PRIMARY KEY ("ID"));
+
+CREATE TABLE IF NOT EXISTS "NUMBER_SERIAL" ("ID" VARCHAR(36) NOT NULL, "CREATE_TIME" VARCHAR(255), "NAME" VARCHAR(255), "NUMBER" VARCHAR(255), "REGULATIONID" VARCHAR(64), "REMARK" VARCHAR(255), "START_VALUE" VARCHAR(255), "STEP_VALUE" VARCHAR(255), "UPDATE_TIME" VARCHAR(255), PRIMARY KEY ("ID"));
+
+CREATE TABLE IF NOT EXISTS "SYS_AUTO_SERIAL" ("ID" VARCHAR(36) NOT NULL, "AUTO_NUM" INT, "CATEGORY" VARCHAR(100), "CREATE_TIME" VARCHAR(20), "CREATE_USER" VARCHAR(50), "KEY" VARCHAR(50), "LOCKED" INT DEFAULT 0, "NUM_LENGTH" INT, "START_NUM" INT, "STEP" INT, "TPL" VARCHAR(100), "TYPE" INT, "UPDATE_TIME" VARCHAR(20), "UPDATE_USER" VARCHAR(50), PRIMARY KEY ("ID"));
+
+CREATE TABLE IF NOT EXISTS "SYS_HINT_SELECT" ("ID" VARCHAR(36) NOT NULL, "CODE" VARCHAR(100), "DB_ID" VARCHAR(100), "FLOW_ID" VARCHAR(50), "REMARK" CLOB, "SELECT_FIELDS" CLOB, "SELECT_SQL" CLOB, "TYPE" VARCHAR(50), PRIMARY KEY ("ID"));
+
+CREATE TABLE IF NOT EXISTS "SYS_MQ_CHANNEL" ("ID" VARCHAR(36) NOT NULL, "BATCH_CONSUMER" INT, "CHANNEL_NAME" VARCHAR(50), "CONSUMER_GROUP" VARCHAR(50), "CONSUMER_THREAD" INT, "ENABLE" INT, "MESSAGE_NAME" VARCHAR(50), "TOPIC" VARCHAR(50), "ZK_ADDRESS" VARCHAR(50), PRIMARY KEY ("ID"));
+
+
+-- 以下是来自 version_40_1.sql 的内容 --
+
+
+
+-- 以下是来自 version_41_1.sql 的内容 --
+
+create table sys_auth_source
+(
+    id varchar2 (36 char) not null,
+    code varchar2 (36 char),
+    icon varchar2 (255 char),
+    config clob,
+    logic_flow_id varchar2 (36 char),
+    name varchar2 (255 char),
+    note varchar2 (255 char),
+    order_num number (10,0),
+    status number (10,0),
+    type number (10,0),
+    when_created varchar2 (20 char),
+    when_modified varchar2 (20 char),
+    who_created varchar2 (36 char),
+    who_modified varchar2 (36 char),
+    primary key (id)
+);
+
+
+-- 以下是来自 version_42_1.sql 的内容 --
+
+alter table SYS_LOGIN_LOG
+    add ADDRESS varchar(255) null;
+
+CREATE TABLE IF NOT EXISTS dev_chat_history (
+    id varchar2(36)  NOT NULL,
+    question CLOB  NOT NULL,
+    answer CLOB ,
+    args CLOB,
+    when_created varchar2(50)  DEFAULT NULL,
+    who_created varchar2(36)  DEFAULT NULL,
+    PRIMARY KEY (id)
+    );
+
+-- 以下是来自 version_43_1.sql 的内容 --
+
+INSERT INTO dev_team (id, deleted, description, name, owner, when_created, when_modified, who_created, who_modified) VALUES('991718335d57416a9be67d4090538402', 0, NULL, '默认团队', '8116f0bc8222413fb72de98a32960b1a', '2022-09-28 14:52:00', '2022-09-28 14:52:00', '056fb0eeb9a44cb0953534b4c0ca01fa', '056fb0eeb9a44cb0953534b4c0ca01fa');
+INSERT INTO dev_team_member (id, app_id, is_owner, team_role_id, user_id, when_join, who_invite, team_id) VALUES('dfae64f660ff435086ae2482d7fa1a48', NULL, 0, '3fc43c9c69f44144bd032d9451ba328b', '8116f0bc8222413fb72de98a32960b1a', '2022-09-28 14:52:00', '056fb0eeb9a44cb0953534b4c0ca01fa', '991718335d57416a9be67d4090538402');
+INSERT INTO dev_team_member (id, app_id, is_owner, team_role_id, user_id, when_join, who_invite, team_id) VALUES('dfae64f660ff435086ae2482d7fa1a49', NULL, 1, '4a30f4d346074b4ba8363944f004c1d9', '056fb0eeb9a44cb0953534b4c0ca01fa', '2022-09-28 14:52:00', '056fb0eeb9a44cb0953534b4c0ca01fa', '991718335d57416a9be67d4090538402');
+
+CREATE TABLE IF NOT EXISTS sys_logic_template_user (
+                                         id varchar(36) NOT NULL,
+                                         app_id varchar(36) DEFAULT NULL,
+                                         when_created varchar(50) DEFAULT NULL,
+                                         who_created varchar(36) DEFAULT NULL,
+                                         template_id varchar(36) DEFAULT NULL,
+                                         PRIMARY KEY (id)
+);
+CREATE TABLE IF NOT EXISTS dev_curd (
+    id varchar(36)  NOT NULL ,
+    name varchar(255)  DEFAULT null,
+    group_id varchar(36)  DEFAULT NULL,
+    source_name varchar(255)  DEFAULT NULL,
+    table_name varchar(255)  DEFAULT NULL,
+    primary_name varchar(50)  DEFAULT NULL,
+    request_prefix varchar(255)  DEFAULT NULL,
+    enable_funs varchar(255)  DEFAULT NULL,
+    create_funs varchar(255)  DEFAULT NULL,
+    column_json clob ,
+    app_id varchar(36)  DEFAULT NULL,
+    who_created varchar(36)  DEFAULT NULL,
+    when_created varchar(20)  DEFAULT NULL,
+    who_modified varchar(36)  DEFAULT NULL,
+    when_modified varchar(255)  DEFAULT NULL ,
+    PRIMARY KEY (id)
+    );
+
+ALTER TABLE dev_page_template ADD snapshot_img_id VARCHAR(32) NULL;
+ALTER TABLE dev_page_template ADD order_num integer NULL  ;
+ALTER TABLE dev_page_template ADD bg_colors VARCHAR(64) NULL;
+ALTER TABLE dev_page_template ADD page_type VARCHAR(32) NULL;
+ALTER TABLE dev_page_template ADD use_num integer DEFAULT 0 NULL;
+ALTER TABLE dev_page_template ADD extra text NULL;
+
+
+alter table sys_logic_template add sys_suggested integer null;
+alter table sys_logic_template add publish_status integer null;
+
+
+CREATE TABLE IF NOT EXISTS dev_page_template_history (
+    id varchar(36) NOT NULL,
+    tpl_id varchar(36) DEFAULT NULL,
+    page_json text,
+    when_created varchar(50) NULL DEFAULT NULL,
+    who_created varchar(36) DEFAULT NULL,
+    version_tag varchar(50) DEFAULT NULL,
+    version_tag_time varchar(30) DEFAULT NULL,
+    app_id varchar(36) DEFAULT NULL,
+    PRIMARY KEY (id)
+    );
+
+
+CREATE TABLE IF NOT EXISTS dev_chat_history (
+    id varchar(36)  NOT NULL,
+    question text  NOT NULL,
+    answer text ,
+    args text,
+    when_created varchar(50)  DEFAULT NULL,
+    who_created varchar(36)  DEFAULT NULL,
+    PRIMARY KEY (id)
+    );
+
+
+-- 修改 dev_power_tree 表
+ALTER TABLE dev_power_tree ADD order_num integer NULL;
+
+-- 修改 sys_logic_template 表
+ALTER TABLE sys_logic_template ADD order_num integer NULL;
+ALTER TABLE sys_logic_template ADD enable_status integer NULL default 1;
+
+-- 以下是来自 version_44_1.sql 的内容 --
+
+alter table sys_menu add affix integer null default 0;
+ALTER TABLE sys_api add cache_enable integer null;
+ALTER TABLE sys_api add cache_expire_time integer null;
+ALTER TABLE sys_api add cache_cron VARCHAR(64) null;
+
+
+-- 以下是来自 version_45_1.sql 的内容 --
+
+CREATE TABLE sys_password_log (
+                                  id VARCHAR(36) PRIMARY KEY,
+                                  user_id VARCHAR(36),
+                                  when_created VARCHAR(20)
+);
+
+COMMENT ON COLUMN sys_password_log.id IS '主键';
+COMMENT ON COLUMN sys_password_log.user_id IS '用户id';
+COMMENT ON COLUMN sys_password_log.when_created IS '创建时间';
+
+CREATE TABLE sys_secret_rule (
+                                 id VARCHAR(36) PRIMARY KEY,
+                                 name VARCHAR(255),
+                                 logic_id VARCHAR(36),
+                                 secret_type INTEGER DEFAULT 0,
+                                 status INTEGER,
+                                 order_num INTEGER,
+                                 notes TEXT,
+                                 when_created VARCHAR(20),
+                                 who_created VARCHAR(36),
+                                 when_modified VARCHAR(20),
+                                 who_modified VARCHAR(36)
+);
+
+COMMENT ON COLUMN sys_secret_rule.id IS '主键';
+COMMENT ON COLUMN sys_secret_rule.name IS '规则名称';
+COMMENT ON COLUMN sys_secret_rule.logic_id IS '逻辑编排ID';
+COMMENT ON COLUMN sys_secret_rule.secret_type IS '安全类型';
+COMMENT ON COLUMN sys_secret_rule.status IS '是否启用';
+COMMENT ON COLUMN sys_secret_rule.order_num IS '排序';
+COMMENT ON COLUMN sys_secret_rule.notes IS '说明';
+COMMENT ON COLUMN sys_secret_rule.when_created IS '创建时间';
+COMMENT ON COLUMN sys_secret_rule.who_created IS '创建人';
+COMMENT ON COLUMN sys_secret_rule.when_modified IS '更新时间';
+COMMENT ON COLUMN sys_secret_rule.who_modified IS '更新人';
+
+
+-- 以下是来自 version_46_1.sql 的内容 --
+
+-- sys_unit
+ALTER TABLE  sys_unit add short_name varchar(36) null;
+ALTER TABLE  sys_unit add short_code varchar(100)  null;
+
+-- sys_user
+ALTER TABLE sys_user add jira_name varchar(100)  null;
+
+-- 以下是来自 version_47_1.sql 的内容 --
+
+ALTER TABLE sys_menu
+    ADD active_icon VARCHAR(255) NULL;
+alter table sys_config add is_public integer null default 0;
+
+
+-- 以下是来自 version_48_1.sql 的内容 --
+
+ALTER TABLE dev_team ADD is_audit TINYINT DEFAULT NULL;
+ALTER TABLE dev_team ADD image VARCHAR(255) DEFAULT NULL;
+
+-- 以下是来自 version_49_1.sql 的内容 --
+
+CREATE TABLE IF NOT EXISTS DEV_PINE_PLUGIN (
+    ID varchar(36) NOT NULL,
+    APP_ID varchar(36),
+    AUTHOR varchar(50),
+    ENABLE_STATUS int DEFAULT 0,
+    FILE_ID varchar(36),
+    NOTE clob,
+    PLUGIN_NAME varchar(50),
+    PLUGIN_VERSION varchar(10),
+    WHEN_CREATED varchar(36),
+    WHEN_MODIFIED varchar(30),
+    WHO_CREATED varchar(36),
+    WHO_MODIFIED varchar(36),
+    PRIMARY KEY (ID)
+);
+COMMENT ON COLUMN DEV_PINE_PLUGIN.APP_ID IS '归属应用id';
+COMMENT ON COLUMN DEV_PINE_PLUGIN.AUTHOR IS '插件作者';
+COMMENT ON COLUMN DEV_PINE_PLUGIN.ENABLE_STATUS IS '是否启动';
+COMMENT ON COLUMN DEV_PINE_PLUGIN.FILE_ID IS '文件id';
+COMMENT ON COLUMN DEV_PINE_PLUGIN.NOTE IS '说明';
+COMMENT ON COLUMN DEV_PINE_PLUGIN.PLUGIN_NAME IS '插件名称';
+COMMENT ON COLUMN DEV_PINE_PLUGIN.PLUGIN_VERSION IS '插件版本号';
+COMMENT ON COLUMN DEV_PINE_PLUGIN.WHEN_CREATED IS '创建时间';
+COMMENT ON COLUMN DEV_PINE_PLUGIN.WHEN_MODIFIED IS '修改时间';
+COMMENT ON COLUMN DEV_PINE_PLUGIN.WHO_CREATED IS '创建人';
+COMMENT ON COLUMN DEV_PINE_PLUGIN.WHO_MODIFIED IS '修改人员';
+
+
+CREATE TABLE IF NOT EXISTS DEV_MODEL_SQL (
+    ID varchar(36) NOT NULL,
+    APP_ID varchar(36),
+    TITLE varchar(255),
+    SOURCE_NAME varchar(50),
+    CONTENT clob,
+    STATUS int DEFAULT 0,
+    SQL_VERSION int,
+    MESSAGES clob,
+    IGNORE_EXCEPT int DEFAULT 1,
+    EXEC_ERR_LINE int DEFAULT 0,
+    EXEC_TIME varchar(20),
+    EXEC_USER_ID varchar(36),
+    WHEN_CREATED varchar(20),
+    WHO_CREATED varchar(36),
+    WHEN_MODIFIED varchar(20),
+    WHO_MODIFIED varchar(36),
+    PRIMARY KEY (ID)
+);
+COMMENT ON COLUMN DEV_MODEL_SQL.ID IS '主键';
+COMMENT ON COLUMN DEV_MODEL_SQL.APP_ID IS '应用id';
+COMMENT ON COLUMN DEV_MODEL_SQL.TITLE IS '标题';
+COMMENT ON COLUMN DEV_MODEL_SQL.SOURCE_NAME IS '数据源';
+COMMENT ON COLUMN DEV_MODEL_SQL.CONTENT IS '脚本';
+COMMENT ON COLUMN DEV_MODEL_SQL.STATUS IS '执行状态 0: 未执行 1：已执行 2：执行异常';
+COMMENT ON COLUMN DEV_MODEL_SQL.SQL_VERSION IS '版本号';
+COMMENT ON COLUMN DEV_MODEL_SQL.MESSAGES IS '执行结果';
+COMMENT ON COLUMN DEV_MODEL_SQL.IGNORE_EXCEPT IS '是否忽略错误';
+COMMENT ON COLUMN DEV_MODEL_SQL.EXEC_ERR_LINE IS '错误行号';
+COMMENT ON COLUMN DEV_MODEL_SQL.EXEC_TIME IS '执行时间';
+COMMENT ON COLUMN DEV_MODEL_SQL.EXEC_USER_ID IS '执行人';
+COMMENT ON COLUMN DEV_MODEL_SQL.WHEN_CREATED IS '创建时间';
+COMMENT ON COLUMN DEV_MODEL_SQL.WHO_CREATED IS '创建人';
+COMMENT ON COLUMN DEV_MODEL_SQL.WHEN_MODIFIED IS '修改时间';
+COMMENT ON COLUMN DEV_MODEL_SQL.WHO_MODIFIED IS '修改人';
+
+
+CREATE TABLE IF NOT EXISTS DEV_DATA_SOURCE (
+    ID varchar(36) NOT NULL,
+    NAME varchar(100),
+    WHO_CREATED varchar(36),
+    WHEN_CREATED varchar(30),
+    WHO_MODIFIED varchar(36),
+    WHEN_MODIFIED varchar(30),
+    APP_ID varchar(36),
+    KDB_ID varchar(40),
+    TEAM_ID varchar(36),
+    DELETED int,
+    PRIMARY KEY (ID)
+);
+COMMENT ON COLUMN DEV_DATA_SOURCE.ID IS 'ID';
+COMMENT ON COLUMN DEV_DATA_SOURCE.NAME IS '数据源名称';
+COMMENT ON COLUMN DEV_DATA_SOURCE.WHO_CREATED IS '创建人员';
+COMMENT ON COLUMN DEV_DATA_SOURCE.WHEN_CREATED IS '创建时间';
+COMMENT ON COLUMN DEV_DATA_SOURCE.WHO_MODIFIED IS '修改人员';
+COMMENT ON COLUMN DEV_DATA_SOURCE.WHEN_MODIFIED IS '修改时间';
+COMMENT ON COLUMN DEV_DATA_SOURCE.APP_ID IS '关联应用';
+COMMENT ON COLUMN DEV_DATA_SOURCE.KDB_ID IS '在kingDB中对应的ID';
+COMMENT ON COLUMN DEV_DATA_SOURCE.TEAM_ID IS '所属团队ID';
+COMMENT ON COLUMN DEV_DATA_SOURCE.DELETED IS '是否已删除';
+
+
+CREATE TABLE IF NOT EXISTS DEV_SEARCH_HISTORY (
+    ID varchar(36) NOT NULL,
+    KEYWORD varchar(36) NOT NULL,
+    USE_NUM int,
+    DELETED int DEFAULT 0,
+    PRIMARY KEY (ID)
+ );
+COMMENT ON COLUMN DEV_SEARCH_HISTORY.ID IS '主键';
+COMMENT ON COLUMN DEV_SEARCH_HISTORY.KEYWORD IS '关键字';
+COMMENT ON COLUMN DEV_SEARCH_HISTORY.USE_NUM IS '搜索次数';
+COMMENT ON COLUMN DEV_SEARCH_HISTORY.DELETED IS '是否删除';
+
+
+CREATE TABLE IF NOT EXISTS DEV_GIT_TAG (
+    ID varchar(36) NOT NULL,
+    TAG varchar(255),
+    REPO varchar(255),
+    "RESOURCE" varchar(255),
+    COMMIT_ID varchar(255),
+    PUBLIC_COMMIT_IDS clob,
+    NOTE clob,
+    WHEN_CREATED varchar(20),
+    WHO_CREATED varchar(255),
+    PRIMARY KEY (ID)
+);
+COMMENT ON COLUMN DEV_GIT_TAG.ID IS '主键';
+COMMENT ON COLUMN DEV_GIT_TAG.TAG IS '标签名称';
+COMMENT ON COLUMN DEV_GIT_TAG.REPO IS '仓库地址';
+COMMENT ON COLUMN DEV_GIT_TAG."RESOURCE" IS '资源文件';
+COMMENT ON COLUMN DEV_GIT_TAG.COMMIT_ID IS '提交ID';
+COMMENT ON COLUMN DEV_GIT_TAG.PUBLIC_COMMIT_IDS IS '公共依赖库';
+COMMENT ON COLUMN DEV_GIT_TAG.NOTE IS '版本说明';
+COMMENT ON COLUMN DEV_GIT_TAG.WHEN_CREATED IS '创建时间';
+COMMENT ON COLUMN DEV_GIT_TAG.WHO_CREATED IS '创建人';
+
+CREATE TABLE IF NOT EXISTS SYS_CONFIG_GROUP (
+    ID varchar(36) NOT NULL,
+    APP_ID varchar(36),
+    GROUP_NAME varchar(255) NOT NULL,
+    GROUP_PATH varchar(255),
+    WHEN_CREATED varchar(30),
+    WHEN_MODIFIED varchar(30),
+    WHO_CREATED varchar(36),
+    WHO_MODIFIED varchar(36),
+    NOTE varchar(255),
+    PARENT_ID varchar(32),
+    GROUP_TYPE int DEFAULT 1,
+    LEAF_CONFIG clob,
+    SORT int,
+    ICON varchar(50),
+    PRIMARY KEY (ID)
+);
+COMMENT ON COLUMN SYS_CONFIG_GROUP.ID IS '主键ID';
+COMMENT ON COLUMN SYS_CONFIG_GROUP.APP_ID IS '关联应用';
+COMMENT ON COLUMN SYS_CONFIG_GROUP.GROUP_NAME IS '组名称';
+COMMENT ON COLUMN SYS_CONFIG_GROUP.GROUP_PATH IS '路径';
+COMMENT ON COLUMN SYS_CONFIG_GROUP.WHEN_CREATED IS '创建时间';
+COMMENT ON COLUMN SYS_CONFIG_GROUP.WHEN_MODIFIED IS '修改时间';
+COMMENT ON COLUMN SYS_CONFIG_GROUP.WHO_CREATED IS '创建人员';
+COMMENT ON COLUMN SYS_CONFIG_GROUP.WHO_MODIFIED IS '修改人员';
+COMMENT ON COLUMN SYS_CONFIG_GROUP.NOTE IS '备注';
+COMMENT ON COLUMN SYS_CONFIG_GROUP.PARENT_ID IS '父分组ID';
+COMMENT ON COLUMN SYS_CONFIG_GROUP.GROUP_TYPE IS '分组层级';
+COMMENT ON COLUMN SYS_CONFIG_GROUP.LEAF_CONFIG IS '配置格式json';
+COMMENT ON COLUMN SYS_CONFIG_GROUP.SORT IS '排序';
+COMMENT ON COLUMN SYS_CONFIG_GROUP.ICON IS '图标';
+
+
+CREATE TABLE IF NOT EXISTS DEV_MODEL_LATEST (
+    ID varchar(36) NOT NULL,
+    MODEL_NAME varchar(50),
+    SOURCE_NAME varchar(50),
+    VERSION_NAME varchar(100),
+    VERSION_WHO varchar(100),
+    VERSION_TIME varchar(20),
+    DESCRIPTION varchar(255),
+    DIAGRAM clob,
+    INNER_VERSION bigint DEFAULT 0,
+    CUSTOM_TYPE_MAPPING clob,
+    APP_ID varchar(36),
+    WHO_CREATED varchar(36),
+    WHEN_CREATED varchar(20),
+    WHO_MODIFIED varchar(36),
+    WHEN_MODIFIED varchar(20),
+    PRIMARY KEY (ID)
+);
+COMMENT ON COLUMN DEV_MODEL_LATEST.ID IS '主键ID';
+COMMENT ON COLUMN DEV_MODEL_LATEST.MODEL_NAME IS '模型名称';
+COMMENT ON COLUMN DEV_MODEL_LATEST.SOURCE_NAME IS '数据源名称';
+COMMENT ON COLUMN DEV_MODEL_LATEST.VERSION_NAME IS '修订版本';
+COMMENT ON COLUMN DEV_MODEL_LATEST.VERSION_WHO IS '修订人';
+COMMENT ON COLUMN DEV_MODEL_LATEST.VERSION_TIME IS '修订时间';
+COMMENT ON COLUMN DEV_MODEL_LATEST.DESCRIPTION IS '备注';
+COMMENT ON COLUMN DEV_MODEL_LATEST.DIAGRAM IS '模型数据';
+COMMENT ON COLUMN DEV_MODEL_LATEST.INNER_VERSION IS '内部版本号，用于服务端保存时校验';
+COMMENT ON COLUMN DEV_MODEL_LATEST.CUSTOM_TYPE_MAPPING IS '用户自定义类型映射，当用户导入表出现系统未适配的字段类型时，提醒用户选择要转成什么类型';
+COMMENT ON COLUMN DEV_MODEL_LATEST.APP_ID IS '所属应用ID';
+COMMENT ON COLUMN DEV_MODEL_LATEST.WHO_CREATED IS '创建人';
+COMMENT ON COLUMN DEV_MODEL_LATEST.WHEN_CREATED IS '创建时间';
+COMMENT ON COLUMN DEV_MODEL_LATEST.WHO_MODIFIED IS '更新人';
+COMMENT ON COLUMN DEV_MODEL_LATEST.WHEN_MODIFIED IS '更新时间';
+
+
+CREATE TABLE IF NOT EXISTS DEV_PAGE_TEMPLATE_ACTION_LOG (
+    ID varchar(36) NOT NULL,
+    ACTION_TYPE int NOT NULL,
+    IS_COPY_ALL int,
+    TEMPLATE_ID varchar(36) NOT NULL,
+    APP_ID varchar(36),
+    TEAM_ID varchar(36),
+    ACTION_CONTENT clob,
+    WHO_CREATED varchar(36) NOT NULL,
+    WHEN_CREATED varchar(20) NOT NULL,
+    PRIMARY KEY (ID)
+);
+COMMENT ON COLUMN DEV_PAGE_TEMPLATE_ACTION_LOG.ID IS '主键';
+COMMENT ON COLUMN DEV_PAGE_TEMPLATE_ACTION_LOG.ACTION_TYPE IS '动作类型；1：模板复制；2：模板预览';
+COMMENT ON COLUMN DEV_PAGE_TEMPLATE_ACTION_LOG.IS_COPY_ALL IS '是否全文复制';
+COMMENT ON COLUMN DEV_PAGE_TEMPLATE_ACTION_LOG.TEMPLATE_ID IS '数据id，根据action_type指向不同的表';
+COMMENT ON COLUMN DEV_PAGE_TEMPLATE_ACTION_LOG.APP_ID IS '关联应用';
+COMMENT ON COLUMN DEV_PAGE_TEMPLATE_ACTION_LOG.TEAM_ID IS '关联团队';
+COMMENT ON COLUMN DEV_PAGE_TEMPLATE_ACTION_LOG.ACTION_CONTENT IS '动作关联的内容，例如action_type为模板复制时，content就是复制的内容';
+COMMENT ON COLUMN DEV_PAGE_TEMPLATE_ACTION_LOG.WHO_CREATED IS '创建人员';
+COMMENT ON COLUMN DEV_PAGE_TEMPLATE_ACTION_LOG.WHEN_CREATED IS '创建时间';
+
+
+CREATE TABLE IF NOT EXISTS DEV_FILE_VERSION (
+    ID varchar(36) NOT NULL,
+    FILE_NAME varchar(255),
+    PATH varchar(1000),
+    OS_TYPE varchar(20),
+    VERSION varchar(100),
+    PATH_BY_PACKAGE varchar(1000),
+    FILE_SIZE int,
+    DESCRIPTION varchar(255),
+    PARENT_PATH varchar(1000),
+    WHEN_MODIFIED varchar(30),
+    WHO_MODIFIED varchar(36),
+    PRIMARY KEY (ID)
+);
+COMMENT ON COLUMN DEV_FILE_VERSION.ID IS 'ID';
+COMMENT ON COLUMN DEV_FILE_VERSION.FILE_NAME IS '文件名';
+COMMENT ON COLUMN DEV_FILE_VERSION.PATH IS '导致安装包的位置';
+COMMENT ON COLUMN DEV_FILE_VERSION.OS_TYPE IS '操作系统类型';
+COMMENT ON COLUMN DEV_FILE_VERSION.VERSION IS '版本号（vX.X.X结构）';
+COMMENT ON COLUMN DEV_FILE_VERSION.PATH_BY_PACKAGE IS '所在package中的真实位置';
+COMMENT ON COLUMN DEV_FILE_VERSION.FILE_SIZE IS '文件大小';
+COMMENT ON COLUMN DEV_FILE_VERSION.DESCRIPTION IS '描述';
+COMMENT ON COLUMN DEV_FILE_VERSION.PARENT_PATH IS '父目录';
+COMMENT ON COLUMN DEV_FILE_VERSION.WHEN_MODIFIED IS '更新时间';
+COMMENT ON COLUMN DEV_FILE_VERSION.WHO_MODIFIED IS '更新人';
+
+
+-- 以下是来自 version_50_1.sql 的内容 --
+
+ALTER TABLE OPEN_ACCOUNT ADD APP_ID varchar(36);
+
+ALTER TABLE SYS_NOTICE ADD IS_FORCE int;
+COMMENT ON COLUMN SYS_NOTICE.IS_FORCE IS '是否重要 0: 否 1：是';
+
+ALTER TABLE SYS_NOTICE ADD CONFIG clob;
+COMMENT ON COLUMN SYS_NOTICE.CONFIG IS '团队头像';
+
+ALTER TABLE DEV_APPLICATION ADD DEPEND_DATASOURCES clob;
+COMMENT ON COLUMN DEV_APPLICATION.DEPEND_DATASOURCES IS '依赖数据源';
+
+ALTER TABLE DEV_APPLICATION ADD DEPEND_APPS clob;
+COMMENT ON COLUMN DEV_APPLICATION.DEPEND_APPS IS '依赖应用';
+
+ALTER TABLE DEV_APPLICATION ADD APP_NAMESPACE varchar(255);
+COMMENT ON COLUMN DEV_APPLICATION.APP_NAMESPACE IS '应用命名空间';
+
+ALTER TABLE KFAAS_LIB ADD ID varchar(36) NOT NULL;
+ALTER TABLE KFAAS_LIB ADD CREATE_TIME varchar(20);
+ALTER TABLE KFAAS_LIB ADD CREATE_USER varchar(255);
+ALTER TABLE KFAAS_LIB ADD JAR_NAME varchar(255);
+ALTER TABLE KFAAS_LIB ADD UPDATE_TIME varchar(20);
+ALTER TABLE KFAAS_LIB ADD UPDATE_USER varchar(255);
+ALTER TABLE KFAAS_LIB DROP COLUMN jarname;
+ALTER TABLE KFAAS_LIB DROP COLUMN createtime;
+ALTER TABLE KFAAS_LIB DROP COLUMN updatetime;
+ALTER TABLE KFAAS_LIB DROP COLUMN createuser;
+ALTER TABLE KFAAS_LIB DROP COLUMN updateuser;
+ALTER TABLE KFAAS_LIB MODIFY STATUS int;
+
+ALTER TABLE REP_DATASET ADD DATASET_SEARCH_ID varchar(32);
+COMMENT ON COLUMN REP_DATASET.DATASET_SEARCH_ID IS '是否为搜索数据';
+
+ALTER TABLE REP_DATASET ADD SHAPE int;
+COMMENT ON COLUMN REP_DATASET.SHAPE IS '是否为自定义SQL';
+
+ALTER TABLE REP_DATASET ADD TEMPLATE int;
+COMMENT ON COLUMN REP_DATASET.TEMPLATE IS '是否为Excel模板（0：否，1：是）';
+
+ALTER TABLE REP_DATASET ADD REP_CRON varchar(50);
+COMMENT ON COLUMN REP_DATASET.REP_CRON IS '模板报表定时任务Cron表达式';
+
+-- ALTER TABLE SYS_AUTH_SOURCE ADD WHOCREATED varchar(36);
+
+ALTER TABLE DEV_PAGE_TEMPLATE ADD VIEW_NUM int DEFAULT 0;
+COMMENT ON COLUMN DEV_PAGE_TEMPLATE.VIEW_NUM IS '预览量';
+
+ALTER TABLE DEV_PAGE_TEMPLATE ADD COPY_NUM int DEFAULT 0;
+COMMENT ON COLUMN DEV_PAGE_TEMPLATE.COPY_NUM IS '被复制的次数；copy_num = copy_all_num+copy_part_num';
+
+ALTER TABLE DEV_PAGE_TEMPLATE ADD COPY_ALL_NUM int DEFAULT 0;
+COMMENT ON COLUMN DEV_PAGE_TEMPLATE.COPY_ALL_NUM IS '被全量复制的次数';
+
+ALTER TABLE DEV_PAGE_TEMPLATE ADD COPY_PART_NUM int DEFAULT 0;
+COMMENT ON COLUMN DEV_PAGE_TEMPLATE.COPY_PART_NUM IS '被部分复制的次数';
+
+ALTER TABLE OPEN_API_LOG ADD API_ID varchar(36);
+COMMENT ON COLUMN OPEN_API_LOG.API_ID IS '接口id';
+
+ALTER TABLE SYS_LOGIC_FLOW ADD I18N_KEYS clob;
+COMMENT ON COLUMN SYS_LOGIC_FLOW.I18N_KEYS IS '国际化键名';
+
+ALTER TABLE SYS_UNIT ADD UNIT_CODE varchar(100);
+COMMENT ON COLUMN SYS_UNIT.UNIT_CODE IS '机构编码';
+
+ALTER TABLE SYS_CONFIG ADD GROUP_ID varchar(36);
+COMMENT ON COLUMN SYS_CONFIG.GROUP_ID IS '关联组';
+
+ALTER TABLE SYS_INSTANCE ADD CLUSTER_NO int;
+COMMENT ON COLUMN SYS_INSTANCE.CLUSTER_NO IS '集群号';
+
+ALTER TABLE DEV_SQL_SCRIPT ADD ID varchar(36) NOT NULL;
+
+
+-- 以下是来自 version_51_1.sql 的内容 --
+
+CREATE TABLE dev_seats (
+       id varchar2(100 char) NOT NULL,
+       node_id varchar2(100 char) DEFAULT NULL,
+       num varchar2(50 char) DEFAULT NULL,
+       type varchar2(50 char) DEFAULT NULL,
+       status varchar2(50 char) DEFAULT NULL,
+       user_id varchar2(50 char) DEFAULT NULL,
+       floor_id varchar2(50 char) DEFAULT NULL,
+       description varchar2(200 char) DEFAULT NULL,
+       when_created varchar2(100 char) DEFAULT NULL,
+       when_modified varchar2(100 char) DEFAULT NULL,
+       who_created varchar2(255 char) DEFAULT NULL,
+       who_modified varchar2(255 char) DEFAULT NULL,
+       PRIMARY KEY (id)
+);
+
+CREATE TABLE dev_floors (
+        id varchar2(100 char) NOT NULL,
+        name varchar2(255 char) DEFAULT NULL,
+        type varchar2(50 char) DEFAULT NULL,
+        status varchar2(50 char) DEFAULT NULL,
+        description varchar2(200 char) DEFAULT NULL,
+        flow_id varchar2(100 char) DEFAULT NULL,
+        when_created varchar2(100 char) DEFAULT NULL,
+        when_modified varchar2(100 char) DEFAULT NULL,
+        who_created varchar2(255 char) DEFAULT NULL,
+        who_modified varchar2(255 char) DEFAULT NULL,
+        PRIMARY KEY (id)
+);
