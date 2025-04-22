@@ -385,10 +385,12 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 if(lowerKey.contains("password")) {
                     Object value = entry.getValue();
                     if (value != null && StringUtils.isNotEmpty(value.toString())) {
-                        String decryptPassword = decodeBase64(argv.get(key).toString());
                         String loginBySM2 = SpringContext.getProperties("app.loginBySM2", PropertiesConstant.FALSE);
+                        String decryptPassword = argv.get(key).toString();
                         if (PropertiesConstant.TRUE.equals(loginBySM2)) {
                             decryptPassword = FaasInvoke.loginDecrypt(decryptPassword);
+                        } else {
+                            decryptPassword = decodeBase64(argv.get(key).toString());
                         }
                         argv.put(key, decryptPassword);
                     }
