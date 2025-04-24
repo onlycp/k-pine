@@ -167,14 +167,15 @@ public class FileUtils {
                     deleteFileOrDirectory(file.getAbsolutePath());
                 }
             }
-        }
-
-        // 删除文件或空目录
-        if (fileOrDirectory.delete()) {
-            System.out.println("File or directory deleted successfully: " + fileOrDirectory.getAbsolutePath());
         } else {
-            System.out.println("Failed to delete file or directory: " + fileOrDirectory.getAbsolutePath());
+            // 删除文件或空目录
+            if (fileOrDirectory.delete()) {
+                System.out.println("File or directory deleted successfully: " + fileOrDirectory.getAbsolutePath());
+            } else {
+                System.out.println("Failed to delete file or directory: " + fileOrDirectory.getAbsolutePath());
+            }
         }
+        fileOrDirectory.delete();
     }
 
     /**

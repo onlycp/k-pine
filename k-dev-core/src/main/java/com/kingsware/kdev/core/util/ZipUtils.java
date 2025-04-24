@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
-
 /**
  * zip工具
  *
@@ -33,6 +32,47 @@ public class ZipUtils {
 
     private ZipUtils() {}
 
+    public static void zip(File[] files, String outFilePath, String deleteRootPath) {
+        try {
+            File outFile = new File(outFilePath);
+            File parentFile = outFile.getParentFile();
+            if (parentFile != null) {
+                parentFile.mkdirs();
+            }
+            ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(outFilePath)));
+            for (File file : files) {
+                copyToZip(file, zos, deleteRootPath);
+            }
+            zos.close();
+        } catch (Exception e){
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    private static void copyToZip(File source, ZipOutputStream zos, String deleteRootPath) throws Exception {
+        if (source.isDirectory()) {
+            File[] files = source.listFiles();
+            for (File file : files) {
+                copyToZip(file, zos, deleteRootPath);
+            }
+        } else {
+            // deleteRootPath 去除业务上的路径前缀
+            String entryPath = source.getPath();
+            if (deleteRootPath != null && entryPath.startsWith(deleteRootPath)) {
+                entryPath = entryPath.substring(deleteRootPath.length() + 1);
+            }
+            ZipEntry zipEntry = new ZipEntry(entryPath);
+            zos.putNextEntry(zipEntry);
+            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(source));
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = bis.read(buffer, 0, 1024)) >= 0) {
+                zos.write(buffer, 0, read);
+            }
+            zos.closeEntry();
+        }
+    }
+    
     /**
      *  压缩文件
      * @param fileList      文件列表

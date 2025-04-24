@@ -597,7 +597,52 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         }
     }
 
+    @Override
+    public String compressStaticZip(String filePaths, String name)  throws IOException {
+        if (filePaths == null || filePaths.trim().isEmpty()) {
+            return null;
+        }
 
+        String targetDir = "upload/package/pinezip/" + System.currentTimeMillis();
+        new File(targetDir).mkdirs();
+
+        String zipName = name;
+        if(StringUtils.isEmpty(name)){
+            zipName = targetDir + ".zip";
+        }
+
+
+        String[] pathList = Arrays.stream(filePaths.split(","))
+                .map(String::trim).filter(StringUtils::isNotEmpty).toArray(String[]::new);
+        for (String path : pathList) {
+            File file = new File(path);
+            if (file.exists()) {
+                compressStaticFileInner(file, targetDir);
+            }
+        }
+
+        File[] copyFiles = new File(targetDir).listFiles();
+        ZipUtils.zip(copyFiles, zipName, new File(targetDir).getPath()); // getPath兼容windows
+
+        // 删除目录
+        FileUtils.deleteFileOrDirectory(targetDir);
+        return zipName;
+    }
+
+    private void compressStaticFileInner(File source, String targetDir) throws IOException {
+        if (source.isDirectory()){
+            File[] files = source.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    compressStaticFileInner(file, targetDir);
+                }
+            }
+        } else {
+            File destFile = new File(targetDir, source.getPath());
+            destFile.getParentFile().mkdirs();
+            Files.copy(source.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
 
     @Override
     public void downloadZip(String ids) {
