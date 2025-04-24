@@ -324,14 +324,15 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         }
         // 菜单
         long menuCount = 0;
-        if (LicenseManager.getInstance().isUniopsApp()) {
-            List<SysMenu> menus = devPine.getMenus().stream().filter(it -> StringUtils.isNotEmpty(it.getAppId()) && !it.getAppId().equals(pineAppId)).collect(Collectors.toList());
-            menuCount = DB.batchSaveOrUpdate(menus, SysMenu.class);
-
-        }
-        else {
+//        if (LicenseManager.getInstance().isUniopsApp()) {
+//            List<SysMenu> menus = devPine.getMenus().stream().filter(it -> StringUtils.isNotEmpty(it.getAppId())
+//                    && !it.getAppId().equals(pineAppId)).collect(Collectors.toList());
+//            menuCount = DB.batchSaveOrUpdate(menus, SysMenu.class);
+//
+//        }
+//        else {
             menuCount = DB.batchSaveOrUpdate(devPine.getMenus(), SysMenu.class);
-        }
+//        }
         log.info("完成导入菜单：{}", menuCount);
         importMessageMap.put(I18n.t("DevApplicationServiceImpl.menu", "菜单") , menuCount);
         // 开发平台角色
