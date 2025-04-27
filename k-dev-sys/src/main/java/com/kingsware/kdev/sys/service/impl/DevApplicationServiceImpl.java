@@ -42,9 +42,12 @@ import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.io.FileInputStream;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -652,28 +655,108 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 String[] ids = argv.getLocalFileIds().split(",");
                 for (String fileId : ids) {
                     SysFile sysFile = DB.findById(SysFile.class, fileId);
-                    String json = "";
-                    if(sysFile.getSaveType() == 2) {
-                        File file = sysFileService.getFaasFile(sysFile.getFilePath());
-                        json = FileUtils.readFile(file);
-                        file.delete();
+                    // 判断 pinezip 压缩包还是普通 pine 文件
+                    String fileExt = sysFile.getFileExt();
+                    if ("pinezip".equalsIgnoreCase(fileExt)) {
+                        // pinezip 安装
+                        /**
+                         * 1. 解压 pinezip
+                         * 2. 依次：安装pine、拷贝fass文件&插件、拷贝api文件、执行DDL、导入表数据
+                         */
+                        File file = null;
+                        if (sysFile.getSaveType() == 2) {
+                            file = sysFileService.getFaasFile(sysFile.getFilePath());
+                        } else {
+                            file = new File(SpringContext.getProperties("file.base-path", "/") + sysFile.getFilePath());
+                        }
+                        if (file == null || !file.exists()) {
+                            throw new RuntimeException(I18n.t("DevApplicationServiceImpl.fileNotFound", "安装文件不存在"));
+                        }
+                        // 解压文件
+                        String unzipPath = SpringContext.getProperties("file.base-path", "/") + "temp/" + StringUtils.getUUID();
+                        File unzipFile = new File(unzipPath);
+                        if (!unzipFile.exists()) {
+                            unzipFile.mkdirs();
+                        }
+                        ZipUtils.unzip(unzipPath, file.getPath(), "UTF8");
+                        // 安装pine
+                        File pines = new File(unzipPath + "/pines");
+                        File[] appFiles = pines.listFiles();
+                        if(appFiles != null && appFiles.length > 0){
+                            for (File pine : appFiles) {
+                                String json = FileUtils.readFile(pine);
+                                importApp(json, argv.getTeamId());
+                            }
+                        }
+                        // 拷贝res文件
+                        File pineFiles = new File(unzipPath + "/pineFiles");
+                        copyFileToPine(pineFiles, pineFiles.getPath());
+                        // 拷贝faas文件
+                        File faasFiles = new File(unzipPath + "/faasFiles");
+                        copyFileToFaas(faasFiles, faasFiles.getPath());
+                    } else {
+                        // pine 安装
+                        String json = "";
+                        if(sysFile.getSaveType() == 2) {
+                            File file = sysFileService.getFaasFile(sysFile.getFilePath());
+                            json = FileUtils.readFile(file);
+                            file.delete();
+                        } else {
+                            json = FileUtils.readFile(new File(SpringContext.getProperties("file.base-path", "/") + sysFile.getFilePath()));
+                        }
+                        logStack.addMessage(I18n.t("DevApplicationServiceImpl.startInstall", "开始安装应用:") + sysFile.getFileOriginalName());
+                        String result = importApp(json, argv.getTeamId());
+                        this.backupPine(json, backupName);
+                        logStack.addMessage(I18n.t("DevApplicationServiceImpl.completeInstall", "应用安装完成：")  + result);
                     }
-                    else {
-                        json = FileUtils.readFile(new File(SpringContext.getProperties("file.base-path", "/") + sysFile.getFilePath()));
-                    }
-                    logStack.addMessage(I18n.t("DevApplicationServiceImpl.startInstall", "开始安装应用:") + sysFile.getFileOriginalName());
-                    String result = importApp(json, argv.getTeamId());
-                    this.backupPine(json, backupName);
-                    logStack.addMessage(I18n.t("DevApplicationServiceImpl.completeInstall", "应用安装完成：")  + result);
                 }
             }
-
-
         } catch (Exception e) {
             logStack.addMessage(ExceptionUtils.getStackTrace(e));
         }
-
         return logStack.formatMessages();
+    }
+    
+    /**
+     * 拷贝pine文件
+     */
+    private static void copyFileToPine(File source, String prefix) throws Exception {
+        if(source.isDirectory()){
+            File[] listFiles = source.listFiles();
+            for (File file : listFiles) {
+                copyFileToPine(file, prefix);
+            }
+        } else {
+            String sourcePath = source.getPath();
+            String prefixPath = new File(prefix).getPath();
+            String copyPath = sourcePath.substring(prefixPath.length() + 1);
+            File copyFile = new File(copyPath);
+            if (!copyFile.exists()) {
+                copyFile.getParentFile().mkdirs();
+                Files.copy(Paths.get(sourcePath), copyFile.toPath());
+            }
+        }
+    }
+
+    /**
+     * 拷贝faas文件
+     */
+    public void copyFileToFaas(File source, String prefix) throws Exception {
+        if(source.isDirectory()){
+            File[] listFiles = source.listFiles();
+            for (File file : listFiles) {
+                copyFileToFaas(file, prefix);
+            }
+        } else {
+            String sourcePath = source.getPath();
+            String prefixPath = new File(prefix).getPath();
+            String copyPath = sourcePath.substring(prefixPath.length() + 1);
+            File copyFile = new File(copyPath);
+            String name = copyFile.getName();
+            String path = copyFile.getParent();
+            path = path.replaceAll("\\\\", "/");
+            DB.kdbApi().uploadFile(new FileInputStream(sourcePath), name, path);
+        }
     }
 
     /**

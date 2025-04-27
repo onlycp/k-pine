@@ -134,6 +134,10 @@ public class ZipUtils {
     }
 
     public static void unzip(String destDirPath, String path) throws Exception {
+        unzip(destDirPath, path, "GBK");
+    }
+
+    public static void unzip(String destDirPath, String path, String charset) throws Exception {
         File file = new File(path);
         if (!file.exists()) {
             throw new Exception(I18n.t("ZipUtils.pathNotFound", "源目标路径：[{0}] 不存在...", path));
@@ -141,7 +145,7 @@ public class ZipUtils {
         // 开始解压
         ZipFile zipFile = null;
         try {
-            zipFile = new ZipFile(file, Charset.forName("GBK"));
+            zipFile = new ZipFile(file, Charset.forName(charset));
             Enumeration<?> entries = zipFile.entries();
             while (entries.hasMoreElements()) {
                 ZipEntry entry = (ZipEntry) entries.nextElement();
@@ -184,7 +188,4 @@ public class ZipUtils {
             }
         }
     }
-
-
-
 }
