@@ -4,10 +4,8 @@ import com.kingsware.kdev.core.auth.AppAuthProperties;
 import com.kingsware.kdev.core.auth.AuthToken;
 import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.cache.session.SessionManager;
-import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.cache.instance.InstanceManager;
 import com.kingsware.kdev.core.context.SpringContext;
-import com.kingsware.kdev.core.cron.DynamicTask;
 import com.kingsware.kdev.core.kmq.KmqMessageCenter;
 import com.kingsware.kdev.core.util.JsonUtil;
 import org.slf4j.Logger;
@@ -165,6 +163,18 @@ public class MessageWebSocket {
             }
 
         }
+        else if ("forward".equalsIgnoreCase(wmMessage.getTopic())) {
+
+            ForwardMessage forwardMessage = JsonUtil.toBean(wmMessage.getBody(), ForwardMessage.class);
+            // 如果会话在当前实例，则直接发送给会话，否则发送给目标节点
+                 List<SessionToken> sessionTokenList = sessionTokenSet.stream().filter(it -> it.getToken().equalsIgnoreCase(forwardMessage.getToken())).collect(Collectors.toList());
+                 for (SessionToken sessionToken : sessionTokenList) {
+                    // 如果会话在当前实例，则直接发送给会话，否则发送给目标节点
+                    if (sessionToken.getSession().isOpen()) {
+                        sessionToken.getSession().getBasicRemote().sendText(JsonUtil.toJson(forwardMessage.getWmMessage()));
+                    }
+                }
+        }
         else if ("refresh-api-data".equalsIgnoreCase(wmMessage.getTopic())) {
             // 需要广播所有节点进行修改时间的刷新
             InstanceManager.getInstance().broadMessage("refresh-api-data", message);
@@ -202,58 +212,58 @@ public class MessageWebSocket {
 
     public void clearExpireSessions() {
 
-        // 移除过时的sessionToken
-        try {
-            Set<SessionToken> removeSessions = sessionTokenSet.stream().filter(it-> ((it.getHeartTime() + 30000) <= System.currentTimeMillis())).collect(Collectors.toSet());
-            removeSessions.forEach(it -> {
-                try {
-                    //logger.info("移除过时的session: {}", it.getSession().getId());
-                    try {
-                        sessionTokenSet.remove(it);
-                        if (it.getSession().isOpen()) {
-                            it.getSession().close();
-                        }
-                    }
-                    catch (Exception e) {
-
-                    }
-
-                }
-                catch (Exception e) {
-                    logger.error("移除过时的sessionToken失败", e);
-                }
-
-
-            });
-            sessionTokenSet.removeAll(removeSessions);
-        }
-        catch (Exception ignored) {
-            //ignored.printStackTrace();
-        }
-        //  移除过时的session
-        try {
-          List<Session> removeSessions = allSessionSet.entrySet().stream().filter(it -> ((it.getValue() + 30000) <= System.currentTimeMillis())).map(Map.Entry::getKey).collect(Collectors.toList());
-          removeSessions.forEach(it -> {
-              try {
-                  WmMessage exitMessage = new WmMessage("exit", "心跳超时，会话将被关闭");
-                  if (it.isOpen()) {
-                      it.getBasicRemote().sendText(JsonUtil.toJson(exitMessage));
-                      logger.info("移除过时的session: {}", it.getId());
-                      it.close();
-                  }
-
-
-              }
-              catch (Exception e) {
-                  // logger.error("移除过时的session失败", e);
-              }
-
-          });
-          removeSessions.forEach(allSessionSet.keySet()::remove);
-        }
-        catch (Exception ignored) {
-
-        }
+//        // 移除过时的sessionToken
+//        try {
+//            Set<SessionToken> removeSessions = sessionTokenSet.stream().filter(it-> ((it.getHeartTime() + 30000) <= System.currentTimeMillis())).collect(Collectors.toSet());
+//            removeSessions.forEach(it -> {
+//                try {
+//                    //logger.info("移除过时的session: {}", it.getSession().getId());
+//                    try {
+//                        sessionTokenSet.remove(it);
+//                        if (it.getSession().isOpen()) {
+//                            it.getSession().close();
+//                        }
+//                    }
+//                    catch (Exception e) {
+//
+//                    }
+//
+//                }
+//                catch (Exception e) {
+//                    logger.error("移除过时的sessionToken失败", e);
+//                }
+//
+//
+//            });
+//            sessionTokenSet.removeAll(removeSessions);
+//        }
+//        catch (Exception ignored) {
+//            //ignored.printStackTrace();
+//        }
+//        //  移除过时的session
+//        try {
+//          List<Session> removeSessions = allSessionSet.entrySet().stream().filter(it -> ((it.getValue() + 30000) <= System.currentTimeMillis())).map(Map.Entry::getKey).collect(Collectors.toList());
+//          removeSessions.forEach(it -> {
+//              try {
+//                  WmMessage exitMessage = new WmMessage("exit", "心跳超时，会话将被关闭");
+//                  if (it.isOpen()) {
+//                      it.getBasicRemote().sendText(JsonUtil.toJson(exitMessage));
+//                      logger.info("移除过时的session: {}", it.getId());
+//                      it.close();
+//                  }
+//
+//
+//              }
+//              catch (Exception e) {
+//                  // logger.error("移除过时的session失败", e);
+//              }
+//
+//          });
+//          removeSessions.forEach(allSessionSet.keySet()::remove);
+//        }
+//        catch (Exception ignored) {
+//
+//        }
     }
 
     public SessionToken getSessionToken(Session session) {
