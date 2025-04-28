@@ -8,6 +8,7 @@ import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.LogStack;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.bean.SqlSegment;
 import com.kingsware.kdev.core.cache.access.AccessManager;
 import com.kingsware.kdev.core.cache.kcache.KCacheManager;
 import com.kingsware.kdev.core.cache.license.LicenseManager;
@@ -35,13 +36,18 @@ import com.kingsware.kdev.sys.model.*;
 import com.kingsware.kdev.sys.ret.DevApplicationRet;
 import com.kingsware.kdev.sys.service.DevApplicationService;
 import com.kingsware.kdev.sys.service.SysFileService;
+
+import aj.org.objectweb.asm.TypeReference;
 import lombok.extern.slf4j.Slf4j;
+import net.minidev.json.JSONArray;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
@@ -673,13 +679,17 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                             throw new RuntimeException(I18n.t("DevApplicationServiceImpl.fileNotFound", "安装文件不存在"));
                         }
                         // 解压文件
+                        logStack.addMessage(I18n.t("DevApplicationServiceImpl.startInstall", "开始安装pinezip:") + sysFile.getFileOriginalName());
+                        logStack.addMessage(I18n.t("DevApplicationServiceImpl.startUnzip", "开始解压pinezip:") + sysFile.getFileOriginalName());
                         String unzipPath = SpringContext.getProperties("file.base-path", "/") + "temp/" + StringUtils.getUUID();
                         File unzipFile = new File(unzipPath);
                         if (!unzipFile.exists()) {
                             unzipFile.mkdirs();
                         }
                         ZipUtils.unzip(unzipPath, file.getPath(), "UTF8");
+                        logStack.addMessage(I18n.t("DevApplicationServiceImpl.finishUnzip", "完成解压pinezip:") + sysFile.getFileOriginalName());
                         // 安装pine
+                        logStack.addMessage(I18n.t("DevApplicationServiceImpl.beginPines", "开始导入.pine文件") + sysFile.getFileOriginalName());
                         File pines = new File(unzipPath + "/pines");
                         File[] appFiles = pines.listFiles();
                         if(appFiles != null && appFiles.length > 0){
@@ -688,12 +698,41 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                                 importApp(json, argv.getTeamId());
                             }
                         }
+                        logStack.addMessage(I18n.t("DevApplicationServiceImpl.finishPines", "完成导入.pine文件") + sysFile.getFileOriginalName());
                         // 拷贝res文件
+                        logStack.addMessage(I18n.t("DevApplicationServiceImpl.beginRes", "开始导入静态资源文件:") + sysFile.getFileOriginalName());
                         File pineFiles = new File(unzipPath + "/pineFiles");
                         copyFileToPine(pineFiles, pineFiles.getPath());
+                        logStack.addMessage(I18n.t("DevApplicationServiceImpl.finishRes", "完成导入静态资源文件:") + sysFile.getFileOriginalName());
                         // 拷贝faas文件
+                        logStack.addMessage(I18n.t("DevApplicationServiceImpl.beginRes", "开始导入faas服务器文件:") + sysFile.getFileOriginalName());
                         File faasFiles = new File(unzipPath + "/faasFiles");
                         copyFileToFaas(faasFiles, faasFiles.getPath());
+                        logStack.addMessage(I18n.t("DevApplicationServiceImpl.finishRes", "完成导入faas服务器文件:") + sysFile.getFileOriginalName());
+                        // 导入sysFile表数据
+                        File sysFileFiles = new File(unzipPath + "/sysFile");
+                        File[] jsonFiles = sysFileFiles.listFiles();
+                        if(jsonFiles!= null && jsonFiles.length > 0){
+                            for (File jsonFile : jsonFiles) {
+                                String content = FileUtils.readFile(jsonFile);
+                                importSysFileData(content);
+                            }
+                        }
+                        // 执行DDL + 导入数据
+                        logStack.addMessage(I18n.t("DevApplicationServiceImpl.beginDDL", "开始导入DDL和表数据:") + sysFile.getFileOriginalName());
+                        File ddlFiles = new File(unzipPath + "/sqls");
+                        File[] ddlFile = ddlFiles.listFiles();
+                        if(ddlFile!= null && ddlFile.length > 0){
+                            for (File ddl : ddlFile) {
+                                if (ddl.isDirectory()) {
+                                    importDDL(ddl.getName(), ddl.getPath());
+                                }
+                            }
+                        }
+                        logStack.addMessage(I18n.t("DevApplicationServiceImpl.finishDDL", "完成导入DDL和表数据:") + sysFile.getFileOriginalName());
+                        logStack.addMessage(I18n.t("DevApplicationServiceImpl.completeInstall", "完成安装pinezip：") + sysFile.getFileOriginalName());
+                        // 删除临时文件
+                        FileUtils.deleteFileOrDirectory(unzipPath);
                     } else {
                         // pine 安装
                         String json = "";
@@ -716,9 +755,90 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         }
         return logStack.formatMessages();
     }
+
+
+    /**
+     * 更新DDL+数据（pinezip导入）
+     */
+    private static void importDDL(String dsName, String path) throws Exception {
+        File[] listFiles = new File(path).listFiles(pathname -> 
+            pathname.isFile() && pathname.getName().toLowerCase().endsWith(".sql")
+        );
+        // 更新 DDL
+        if (listFiles != null && listFiles.length > 0) {
+            for (File file : listFiles) {
+                List<String> cnt = FileUtils.readAllLine(new FileInputStream(file));
+                List<SqlSegment> sqlSegments = SqlUtils.parseSql(cnt);
+                for (SqlSegment sql : sqlSegments) {
+                    String curSql = sql.getSql();
+                    if (DB.getDefault().getConfig().getInnerType().equalsIgnoreCase("Oracle") && curSql.endsWith(";")) {
+                        curSql = curSql.substring(0, curSql.length() - 1);
+                    }
+                    // 如果是 delete or drop 语句，暂时不予执行
+                    if (curSql.toLowerCase().trim().startsWith("delete") || curSql.toLowerCase().trim().startsWith("drop")) {
+                        continue;    
+                    }
+                    // 这里需要 catch 异常，否则上面的异常了，下面的sql 无法继续执行
+                    try {
+                        SqlUtils.executeSql(dsName, curSql);
+                    }catch (Exception ignored) {
+                    }
+                }
+            }
+        }
+        // 更新数据
+        File[] dataFiles = new File(path + "/data").listFiles(pathname -> 
+            pathname.isFile() && pathname.getName().toLowerCase().endsWith(".json")
+        );
+        ObjectMapper objectMapper = new ObjectMapper();
+        if (dataFiles!= null && dataFiles.length > 0) {
+            for (File file : dataFiles) {
+                String shardName = file.getName().split("\\.")[0];
+                String tableName = shardName.substring(0, shardName.lastIndexOf("_"));
+                String json = FileUtils.readFile(file);
+                List<Map<String, Object>> datas = objectMapper.readValue(json, objectMapper.getTypeFactory().constructCollectionType(List.class, Map.class));
+                if (datas!= null &&!datas.isEmpty()) {
+                    for (Map<String, Object> data : datas) {
+                        String prefix = "insert into " + tableName + " (";
+                        String suffix = ") values (";
+                        List<Object> params = new ArrayList<>();
+                        for (Map.Entry entry : data.entrySet()) {
+                            prefix += entry.getKey() + ",";
+                            suffix += "?,";
+                            params.add(entry.getValue());
+                        }
+                        prefix = prefix.substring(0, prefix.length() - 1);
+                        suffix = suffix.substring(0, suffix.length() - 1);
+                        suffix += ")";
+                        String sql = prefix + suffix;
+                        try {
+                            DB.executeUpdateSql(sql, params.toArray());
+                        } catch (Exception e) {
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    /**
+     * 导入 sys_file 表数据（pinezip导入）
+     */
+    private static void importSysFileData(String json) {
+        List<SysFile> sysFiles = JsonUtil.toListBean(json, SysFile.class);
+        if (sysFiles != null &&!sysFiles.isEmpty()) {
+            for (SysFile sysFile : sysFiles) {
+                SysFile existFile = DB.findById(SysFile.class, sysFile.getId());
+                if (existFile == null) {
+                    DB.save(sysFile);
+                }
+            }    
+        }
+    }
     
     /**
-     * 拷贝pine文件
+     * 拷贝pine文件（pinezip导入）
      */
     private static void copyFileToPine(File source, String prefix) throws Exception {
         if(source.isDirectory()){
@@ -739,7 +859,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
     }
 
     /**
-     * 拷贝faas文件
+     * 拷贝faas文件（pinezip导入）
      */
     public void copyFileToFaas(File source, String prefix) throws Exception {
         if(source.isDirectory()){
