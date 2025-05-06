@@ -1,0 +1,1 @@
+alter table dev_git_tag add db_schema int COMMENT '是否包含表结构和数据';
