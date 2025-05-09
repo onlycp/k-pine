@@ -26,5 +26,7 @@ public class Functions {
     private Long createTime;
     /** 更新时间 **/
     private Long updateTime;
+    /** 应用id **/
+    private String appId;
 
 }

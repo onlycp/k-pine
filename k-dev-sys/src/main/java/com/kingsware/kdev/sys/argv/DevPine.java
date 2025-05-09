@@ -27,6 +27,8 @@ public class DevPine {
             "tasks", "info", "powerLinks", "devPowerTrees", "extPluginInterfaces",
             "extPluginTrees", "sysLogicTemplates", "devFaasNodeTypes", "devFaasNodes", "extPluginInterfaces",
             "devRoles", "devRoleMenus", "devPageTemplates"};
+    // 是否覆盖开发平台系统数据
+    private boolean isForceReplaceDev;
     /** [x]系统配置 **/
     private List<SysConfig> configs;
     /** [x]页面信息 **/
