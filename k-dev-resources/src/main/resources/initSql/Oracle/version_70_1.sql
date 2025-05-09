@@ -1275,7 +1275,7 @@ CREATE TABLE sys_instance(
                                   port INT  ,
                                   heart_beat_time VARCHAR(20)   ,
                                   reg_time VARCHAR(20),
-                                  "online" INT
+                                  "ONLINE" INT
 
 );
 
