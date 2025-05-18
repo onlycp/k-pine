@@ -151,8 +151,17 @@ public class KDataBase extends KdbApiAbstract implements DataBase, KdbApi {
             objects.add(pageSize);
         }
         else if (this.getConfig().getInnerType().equalsIgnoreCase("Oracle")) {
-            sql = "select * from (" + sql + ") table_alias ";
-            limitSql = " where ROWNUM <= ? AND ROWNUM > ?";
+//            sql = "select * from (" + sql + ") table_alias ";
+//            limitSql = " where ROWNUM <= ? AND ROWNUM > ?";
+            StringBuilder oracleSqlBuilder = new StringBuilder();
+            oracleSqlBuilder.append("SELECT * FROM (")
+                    .append(" SELECT temp_page.*, ROWNUM rn FROM (")
+                    .append(sql)
+                    .append(") temp_page WHERE ROWNUM <= ?")
+                    .append(") WHERE rn > ?");
+
+            sql = oracleSqlBuilder.toString();
+            limitSql = ""; // limitSql 不再需要额外拼接，sql 中已包含完整分页逻辑
             objects.add(from + pageSize);
             objects.add(from);
 
