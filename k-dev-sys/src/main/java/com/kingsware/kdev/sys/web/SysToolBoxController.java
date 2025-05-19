@@ -65,6 +65,14 @@ public class SysToolBoxController extends BaseController {
         }
     }
 
+    @GetMapping("/removeRepeatI18nKey")
+    @ApiIgnore
+    public BaseRet<?> removeRepeatI18nKey() {
+        return BaseRet.success(I18n.removeRepeatI18nKey());
+    }
+
+
+
     @GetMapping("/exceptionList")
     @ApiIgnore
     public BaseRet<?> findException(String term) throws UnsupportedEncodingException {

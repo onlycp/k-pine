@@ -290,9 +290,10 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         log.info("完成导入系统配置：{}", configCount);
         importMessageMap.put(I18n.t("DevApplicationServiceImpl.config", "系统配置") , configCount);
         // 国际化
-        long i18nCount = DB.batchSaveOrUpdate(devPine.getI18ns(), SysI18n.class);
-        log.info("完成导入国际化信息：{}", i18nCount);
-        importMessageMap.put(I18n.t("DevApplicationServiceImpl.i18n", "国际化信息") , i18nCount);
+//        long i18nCount = DB.batchSaveOrUpdate(devPine.getI18ns(), SysI18n.class);
+//        log.info("完成导入国际化信息：{}", i18nCount);
+//        importMessageMap.put(I18n.t("DevApplicationServiceImpl.i18n", "国际化信息") , i18nCount);
+        long i18nCount = 0;
         // 开放账号
         List<OpenAccount> openAccounts = devPine.getOpenAccounts();
         if (openAccounts != null && !openAccounts.isEmpty()) {
@@ -305,7 +306,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                     ));
             long openAccountCount = DB.batchSaveOrUpdate(openAccounts, OpenAccount.class);
             log.info("完成导入开放账号：{}", openAccountCount);
-            importMessageMap.put(I18n.t("DevApplicationServiceImpl.openAccount", "开放账号") , i18nCount);
+            importMessageMap.put(I18n.t("DevApplicationServiceImpl.openAccount", "开放账号") , openAccountCount);
         }
         // 开放账号权限
         List<OpenAccountApi> openAccountApis = devPine.getOpenAccountApis();
@@ -320,7 +321,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                     ));
             long openAccountApiCount = DB.batchSaveOrUpdate(openAccountApis, OpenAccountApi.class);
             log.info("完成导入开放权限：{}", openAccountApiCount);
-            importMessageMap.put(I18n.t("DevApplicationServiceImpl.openAccountApi", "开放权限") , i18nCount);
+            importMessageMap.put(I18n.t("DevApplicationServiceImpl.openAccountApi", "开放权限") , openAccountApiCount);
         }
         // 菜单
         long menuCount = 0;

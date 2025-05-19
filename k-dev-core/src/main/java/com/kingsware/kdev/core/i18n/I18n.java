@@ -5,16 +5,20 @@ import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.model.SysI18n;
 import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.orm.SqlWrapper;
+import com.kingsware.kdev.core.util.CollectUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.MD5Utils;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -103,6 +107,16 @@ public class I18n {
             return false;
         }
         return i18nData.containsKey(key);
+    }
+
+    public static boolean hasKey(String key) {
+        for (String appId : appI18nData.keySet()) {
+            Map<String, Map<String, String>> i18nData = getI18nData(appId);
+            if (i18nData !=null && i18nData.containsKey(key)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
@@ -330,7 +344,7 @@ public class I18n {
                 }
 
             }
-            if (!I18n.hasKey(appId, key) &&  !I18n.hasKey(SysConst.pineAppId, key)) {
+            if (!I18n.hasKey(key)) {
                 boolean devMode = SpringContext.getBoolean("app.mode.dev", false);
                 // 只要开发模式下才创建
                 if (devMode) {
@@ -441,5 +455,32 @@ public class I18n {
             });
 
         }
+    }
+
+    /**
+     * 移除重复的i18n key
+     */
+    public static int removeRepeatI18nKey() {
+        List<SysI18n> list = DB.findList(SysI18n.class, "select i18n_key, id from sys_i18n order by when_created asc");
+        List<Object> toRemoveIds = new ArrayList<>();
+        List<String> keys = new ArrayList<>();
+        for (SysI18n sysI18n: list) {
+            if (keys.contains(sysI18n.getI18nKey())) {
+                toRemoveIds.add(sysI18n.getId());
+            }
+            else {
+                keys.add(sysI18n.getI18nKey());
+            }
+        }
+        AtomicInteger count = new AtomicInteger();
+        List<List<Object>> listList = CollectUtils.splitList(toRemoveIds, 200);
+        for (List<Object> subList: listList) {
+            SqlWrapper wrapper = new SqlWrapper();
+            wrapper.appendSql("delete from sys_i18n where 1=1 ");
+            wrapper.in("id", subList);
+            DB.executeUpdateSql(wrapper.getSql(), wrapper.getParams().toArray());
+            count.addAndGet(subList.size());
+        }
+        return count.get();
     }
 }
