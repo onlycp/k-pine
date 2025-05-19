@@ -189,6 +189,8 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         PageCacheManager.getInstance().clear();
         String pineAppId = "064b3b44b85a45fe87fcce88d72b2519";
         String importEnable = SpringContext.getProperties("app.dev.import-enable", "true");
+        boolean isDev = SpringContext.getBoolean("app.mode.dev", false);
+
         if ("false".equalsIgnoreCase(importEnable)) {
             throw BusinessException.serviceThrow(I18n.t("DevApplicationServiceImpl.pineNotAllowInstall", "当前平台禁止导入pine数据！"));
         }
@@ -247,9 +249,10 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         }
 
 
+
         // 处理页面
         List<DevPage> importPages = devPine.getPages();
-        if (!forceReplaceDev && importPages != null && !importPages.isEmpty()){
+        if (isDev && !forceReplaceDev && importPages != null && !importPages.isEmpty()){
            importPages = importPages.stream().filter(e -> e.getAppId() != null
                    && !"".equals(e.getAppId()) && !"0".equals(e.getAppId()) && !pineAppId.equals(e.getAppId()) )
                    .collect(Collectors.toList());
@@ -259,7 +262,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         importMessageMap.put(I18n.t("DevApplicationServiceImpl.page", "页面信息") , pageCount);
         // 接口
         List<SysApi> importApis = devPine.getApis();
-        if(!forceReplaceDev && importApis != null && !importApis.isEmpty()){
+        if(isDev && !forceReplaceDev && importApis != null && !importApis.isEmpty()){
             importApis = importApis.stream().filter(e -> e.getAppId() != null
                             && !"".equals(e.getAppId()) && !"0".equals(e.getAppId()) && !pineAppId.equals(e.getAppId()) )
                     .collect(Collectors.toList());
@@ -269,7 +272,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         importMessageMap.put(I18n.t("DevApplicationServiceImpl.api", "接口信息"), apiCount);
         // 字典分类
         List<SysDict> importDicts = devPine.getDict();
-        if(!forceReplaceDev && importDicts != null && !importDicts.isEmpty()){
+        if(isDev && !forceReplaceDev && importDicts != null && !importDicts.isEmpty()){
             importDicts = importDicts.stream().filter(e -> e.getAppId() != null
                             && !"".equals(e.getAppId()) && !"0".equals(e.getAppId()) && !pineAppId.equals(e.getAppId()) )
                     .collect(Collectors.toList());
@@ -287,7 +290,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         }
         if (devPine.getDictItems() != null && !devPine.getDictItems().isEmpty()) {
             devPine.getDictItems().removeIf(item -> dictItemMap.containsKey(String.format("%s-%s-%s",  item.getAppId() != null ? item.getAppId() : "", item.getCode(), item.getValue())));
-            if(!forceReplaceDev){
+            if(isDev && !forceReplaceDev){
                 devPine.getDictItems().removeIf(e -> e.getAppId() == null
                                 || "".equals(e.getAppId()) || "0".equals(e.getAppId()) || pineAppId.equals(e.getAppId()));
             }
@@ -302,7 +305,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         // 处理java类任务, 如果已有，即移除他们
         devPine.getTasks().removeIf(task -> task.getTaskType() == 1);
         List<SysTask> importTasks = devPine.getTasks();
-        if (!forceReplaceDev && importTasks != null && !importTasks.isEmpty()){
+        if (isDev && !forceReplaceDev && importTasks != null && !importTasks.isEmpty()){
             importTasks = importTasks.stream().filter(e -> e.getAppId() != null
                             && !"".equals(e.getAppId()) && !"0".equals(e.getAppId()) && !pineAppId.equals(e.getAppId()) )
                     .collect(Collectors.toList());
@@ -312,7 +315,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         importMessageMap.put(I18n.t("DevApplicationServiceImpl.task", "任务调度信息") , taskCount);
         // 系度配置
         List<SysConfig> importConfigs = devPine.getConfigs();
-        if (!forceReplaceDev && importConfigs != null && !importConfigs.isEmpty()){
+        if (isDev && !forceReplaceDev && importConfigs != null && !importConfigs.isEmpty()){
             importConfigs = importConfigs.stream().filter(e -> e.getAppId() != null
                             && !"".equals(e.getAppId()) && !"0".equals(e.getAppId()) && !pineAppId.equals(e.getAppId()) )
                     .collect(Collectors.toList());
@@ -322,7 +325,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         importMessageMap.put(I18n.t("DevApplicationServiceImpl.config", "系统配置") , configCount);
         // 国际化
         List<SysI18n> importI18ns = devPine.getI18ns();
-        if (!forceReplaceDev && importI18ns != null && !importI18ns.isEmpty()){
+        if (isDev && !forceReplaceDev && importI18ns != null && !importI18ns.isEmpty()){
             importI18ns = importI18ns.stream().filter(e -> e.getAppId() != null
                             && !"".equals(e.getAppId()) && !"0".equals(e.getAppId()) && !pineAppId.equals(e.getAppId()) )
                     .collect(Collectors.toList());
@@ -340,7 +343,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                                     .map(group -> group.get(0))  // 取每组第一个元素
                                     .collect(Collectors.toList())
                     ));
-            if (!forceReplaceDev){
+            if (isDev && !forceReplaceDev){
                 openAccounts = openAccounts.stream().filter(e -> e.getAppId() != null
                                 && !"".equals(e.getAppId()) && !"0".equals(e.getAppId()) && !pineAppId.equals(e.getAppId()) )
                         .collect(Collectors.toList());
@@ -360,7 +363,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                                     .map(group -> group.get(0))  // 取每组第一个元素
                                     .collect(Collectors.toList())
                     ));
-            if (!forceReplaceDev){
+            if (isDev && !forceReplaceDev){
                 // 因为 OpenAccountApi 不包含 appId，需要查库
                 List<String> systemOpenAccountIds = DB.findSingleAttributeList(String.class, "select id from open_account where app_id = ?", pineAppId);
                 openAccountApis = openAccountApis.stream().filter(e -> !systemOpenAccountIds.contains(e.getAccountId()))
@@ -373,7 +376,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         // 菜单
         long menuCount = 0;
         List<SysMenu> importMenus = devPine.getMenus();
-        if (!forceReplaceDev && importMenus != null && !importMenus.isEmpty()){
+        if (isDev && !forceReplaceDev && importMenus != null && !importMenus.isEmpty()){
             importMenus = importMenus.stream().filter(e -> e.getAppId() != null
                             && !"".equals(e.getAppId()) && !"0".equals(e.getAppId()) && !pineAppId.equals(e.getAppId()) )
                     .collect(Collectors.toList());
@@ -393,7 +396,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         long devRoleCount = 0;
         if (appModeProperties.getDev() && devPine.getDevRoles() != null && !devPine.getDevRoles().isEmpty()) {
             List<SysRole> devRoles = devPine.getDevRoles();
-            if (!forceReplaceDev) {
+            if (isDev && !forceReplaceDev) {
                 devRoles = devRoles.stream().filter(e -> e.getAppId() != null
                                 && !"".equals(e.getAppId()) && !"0".equals(e.getAppId()) && !pineAppId.equals(e.getAppId()) )
                         .collect(Collectors.toList());
@@ -408,7 +411,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
 
         if (appModeProperties.getDev() && devPine.getDevRoleMenus() != null && !devPine.getDevRoleMenus().isEmpty()) {
             List<SysRoleMenu> devRoleMenus = devPine.getDevRoleMenus();
-            if (!forceReplaceDev) {
+            if (isDev && !forceReplaceDev) {
                 devRoleMenus = devRoleMenus.stream().filter(e -> e.getAppId() != null
                                 && !"".equals(e.getAppId()) && !"0".equals(e.getAppId()) && !pineAppId.equals(e.getAppId()) )
                         .collect(Collectors.toList());
@@ -433,7 +436,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 }
             }
             List<SysLogicFlow> importLogicFlows = devPine.getLogicFlows();
-            if (!forceReplaceDev && importLogicFlows != null && !importLogicFlows.isEmpty()) {
+            if (isDev && !forceReplaceDev && importLogicFlows != null && !importLogicFlows.isEmpty()) {
                 importLogicFlows = importLogicFlows.stream().filter(e -> e.getApplicationId() != null
                                 && !"".equals(e.getApplicationId()) && !"0".equals(e.getApplicationId()) && !pineAppId.equals(e.getApplicationId()) )
                         .collect(Collectors.toList());
@@ -457,7 +460,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                     kdbFlowQueryArgv.setFlowId(flowInfo.getFlowId());
                     List<FlowInfo> functionInfoList = DB.kdbApi().query(kdbFlowQueryArgv);
 
-                    if (!forceReplaceDev) {
+                    if (isDev && !forceReplaceDev) {
                         // 查询当前流程是否属于开发平台的
                         if (systemFlowIds.contains(flowInfo.getFlowId())) {
                             continue;
@@ -497,7 +500,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             boolean enableImportFunction = SpringContext.getBoolean("app.import-function", true);
             if (enableImportFunction) {
                 List<Functions> importFunctions = devPine.getFunctions();
-                if (!forceReplaceDev) {
+                if (isDev && !forceReplaceDev) {
                     importFunctions = importFunctions.stream().filter(e -> e.getAppId() != null
                                     && !"".equals(e.getAppId()) && !"0".equals(e.getAppId()) && !pineAppId.equals(e.getAppId()) )
                             .collect(Collectors.toList());
@@ -606,6 +609,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 }
             }
 
+            // 为了兼容性考虑，这个功能暂不进行开发平台的判断，默认都处理
             // 只有覆盖开发打开时，才允许导入 sys_、dev_ 等表的数据
             if (forceReplaceDev){
                 List<Method> list = getDevPineTableDataMethods(devPine);
