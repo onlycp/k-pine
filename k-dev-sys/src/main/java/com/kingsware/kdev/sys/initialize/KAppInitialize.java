@@ -3,6 +3,7 @@ package com.kingsware.kdev.sys.initialize;
 import com.kingsware.kdev.core.base.SystemInitialize;
 import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.kflow.bean.KFlowUploadFile;
@@ -12,6 +13,7 @@ import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.util.MD5Utils;
 import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.core.util.ZipUtils;
 import com.kingsware.kdev.sys.manager.FileManager;
 import com.kingsware.kdev.sys.service.impl.DevApplicationServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +50,8 @@ public class KAppInitialize {
 
 
     public void execute() {
-        String regex = ".*\\.pine";
+//        String regex = ".*\\.pine";
+        String regex = ".*\\.pine(zip)?$"; // 匹配 .pine 或 .pinezip 结尾
 //        executeExportFlowSql();
 //        log.info("开始安装pine应用包");
         // 扫描指定目录的psi文件
@@ -85,7 +88,58 @@ public class KAppInitialize {
                     log.info("开始安装应用: {}", file.getName());
                     long t1 = System.currentTimeMillis();
 
-                    devApplicationService.importApp(fileContent);
+                    // 判断 pinezip 压缩包还是普通 pine 文件
+                    String fileExt = sysFile.getFileExt();
+                    if ("pinezip".equalsIgnoreCase(fileExt)) {
+
+                        // 解压文件
+                        String unzipPath = SpringContext.getProperties("file.base-path", "/") + "temp/" + StringUtils.getUUID();
+                        File unzipFile = new File(unzipPath);
+                        if (!unzipFile.exists()) {
+                            unzipFile.mkdirs();
+                        }
+                        ZipUtils.unzip(unzipPath, file.getPath(), "UTF8");
+                        // 安装pine
+                        File pines = new File(unzipPath + "/pines");
+                        File[] appFiles = pines.listFiles();
+                        if(appFiles != null && appFiles.length > 0){
+                            for (File pine : appFiles) {
+                                String json = FileUtils.readFile(pine);
+                                devApplicationService.importApp(json);
+                            }
+                        }
+                        // 拷贝res文件
+                        File pineFiles = new File(unzipPath + "/pineFiles");
+                        devApplicationService.copyFileToPine(pineFiles, pineFiles.getPath());
+                        // 拷贝faas文件
+                        File faasFiles = new File(unzipPath + "/faasFiles");
+                        devApplicationService.copyFileToFaas(faasFiles, faasFiles.getPath());
+                        // 导入sysFile表数据
+                        File sysFileFiles = new File(unzipPath + "/sysFile");
+                        File[] jsonFiles = sysFileFiles.listFiles();
+                        if(jsonFiles!= null && jsonFiles.length > 0){
+                            for (File jsonFile : jsonFiles) {
+                                String content = FileUtils.readFile(jsonFile);
+                                devApplicationService.importSysFileData(content);
+                            }
+                        }
+                        // 执行DDL + 导入数据
+                        File ddlFiles = new File(unzipPath + "/sqls");
+                        File[] ddlFile = ddlFiles.listFiles();
+                        if(ddlFile!= null && ddlFile.length > 0){
+                            for (File ddl : ddlFile) {
+                                if (ddl.isDirectory()) {
+                                    devApplicationService.importDDL(ddl.getName(), ddl.getPath());
+                                }
+                            }
+                        }
+                        // 删除临时文件
+                        FileUtils.deleteFileOrDirectory(unzipPath);
+
+                    } else {
+                        devApplicationService.importApp(fileContent);
+                    }
+
                     long t2 = System.currentTimeMillis();
                     log.info("应用安装成功，应用包名称:{}, 用时:{} ms", file.getName(),  (t2 -t1));
                 }
