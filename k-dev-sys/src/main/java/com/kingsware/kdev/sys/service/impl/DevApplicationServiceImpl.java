@@ -887,7 +887,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
     /**
      * 更新DDL+数据（pinezip导入）
      */
-    private static void importDDL(String dsName, String path) throws Exception {
+    public void importDDL(String dsName, String path) throws Exception {
         File[] listFiles = new File(path).listFiles(pathname -> 
             pathname.isFile() && pathname.getName().toLowerCase().endsWith(".sql")
         );
@@ -952,7 +952,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
     /**
      * 导入 sys_file 表数据（pinezip导入）
      */
-    private static void importSysFileData(String json) {
+    public void importSysFileData(String json) {
         List<SysFile> sysFiles = JsonUtil.toListBean(json, SysFile.class);
         if (sysFiles != null &&!sysFiles.isEmpty()) {
             for (SysFile sysFile : sysFiles) {
@@ -967,7 +967,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
     /**
      * 拷贝pine文件（pinezip导入）
      */
-    private static void copyFileToPine(File source, String prefix) throws Exception {
+    public void copyFileToPine(File source, String prefix) throws Exception {
         if(source.isDirectory()){
             File[] listFiles = source.listFiles();
             for (File file : listFiles) {
