@@ -102,7 +102,7 @@ public class KAppInitialize {
                         // 安装pine
                         File pines = new File(unzipPath + "/pines");
                         File[] appFiles = pines.listFiles();
-                        if(appFiles != null && appFiles.length > 0){
+                        if(pines.exists() && appFiles != null && appFiles.length > 0){
                             for (File pine : appFiles) {
                                 String json = FileUtils.readFile(pine);
                                 devApplicationService.importApp(json);
@@ -117,7 +117,7 @@ public class KAppInitialize {
                         // 导入sysFile表数据
                         File sysFileFiles = new File(unzipPath + "/sysFile");
                         File[] jsonFiles = sysFileFiles.listFiles();
-                        if(jsonFiles!= null && jsonFiles.length > 0){
+                        if(sysFileFiles.exists() && jsonFiles!= null && jsonFiles.length > 0){
                             for (File jsonFile : jsonFiles) {
                                 String content = FileUtils.readFile(jsonFile);
                                 devApplicationService.importSysFileData(content);
@@ -126,7 +126,7 @@ public class KAppInitialize {
                         // 执行DDL + 导入数据
                         File ddlFiles = new File(unzipPath + "/sqls");
                         File[] ddlFile = ddlFiles.listFiles();
-                        if(ddlFile!= null && ddlFile.length > 0){
+                        if(ddlFiles.exists() && ddlFile!= null && ddlFile.length > 0){
                             for (File ddl : ddlFile) {
                                 if (ddl.isDirectory()) {
                                     devApplicationService.importDDL(ddl.getName(), ddl.getPath());

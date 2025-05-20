@@ -819,7 +819,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                         logStack.addMessage(I18n.t("DevApplicationServiceImpl.beginPines", "开始导入.pine文件") + sysFile.getFileOriginalName());
                         File pines = new File(unzipPath + "/pines");
                         File[] appFiles = pines.listFiles();
-                        if(appFiles != null && appFiles.length > 0){
+                        if(pines.exists() && appFiles != null && appFiles.length > 0){
                             for (File pine : appFiles) {
                                 String json = FileUtils.readFile(pine);
                                 importApp(json, argv.getTeamId());
