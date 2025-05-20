@@ -839,7 +839,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                         // 导入sysFile表数据
                         File sysFileFiles = new File(unzipPath + "/sysFile");
                         File[] jsonFiles = sysFileFiles.listFiles();
-                        if(jsonFiles!= null && jsonFiles.length > 0){
+                        if(sysFileFiles.exists() && jsonFiles!= null && jsonFiles.length > 0){
                             for (File jsonFile : jsonFiles) {
                                 String content = FileUtils.readFile(jsonFile);
                                 importSysFileData(content);
@@ -849,7 +849,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                         logStack.addMessage(I18n.t("DevApplicationServiceImpl.beginDDL", "开始导入DDL和表数据:") + sysFile.getFileOriginalName());
                         File ddlFiles = new File(unzipPath + "/sqls");
                         File[] ddlFile = ddlFiles.listFiles();
-                        if(ddlFile!= null && ddlFile.length > 0){
+                        if(ddlFiles.exists() && ddlFile!= null && ddlFile.length > 0){
                             for (File ddl : ddlFile) {
                                 if (ddl.isDirectory()) {
                                     importDDL(ddl.getName(), ddl.getPath());
@@ -968,6 +968,9 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
      * 拷贝pine文件（pinezip导入）
      */
     public void copyFileToPine(File source, String prefix) throws Exception {
+        if (!source.exists()){
+            return;
+        }
         if(source.isDirectory()){
             File[] listFiles = source.listFiles();
             for (File file : listFiles) {
@@ -989,6 +992,9 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
      * 拷贝faas文件（pinezip导入）
      */
     public void copyFileToFaas(File source, String prefix) throws Exception {
+        if (!source.exists()){
+            return;
+        }
         if(source.isDirectory()){
             File[] listFiles = source.listFiles();
             for (File file : listFiles) {
