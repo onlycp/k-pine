@@ -27,6 +27,7 @@ import java.io.FileInputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -70,7 +71,7 @@ public class KAppInitialize {
                 // 通过文件名和md5去查询
                 String md5 = FileUtils.getMD5(new FileInputStream(file));
                 List<String> ids = DB.findSingleAttributeList(String.class, "select id from sys_file where file_md5 = ? and file_name = ?", md5, file.getName());
-                String fileContent = readFile(file);
+
                 if(!ids.isEmpty()) {
                     log.info("文件已存在，跳过: {}", file.getName());
                 }
@@ -91,7 +92,6 @@ public class KAppInitialize {
                     // 判断 pinezip 压缩包还是普通 pine 文件
                     String fileExt = sysFile.getFileExt();
                     if ("pinezip".equalsIgnoreCase(fileExt)) {
-
                         // 解压文件
                         String unzipPath = SpringContext.getProperties("file.base-path", "/") + "temp/" + StringUtils.getUUID();
                         File unzipFile = new File(unzipPath);
@@ -133,19 +133,26 @@ public class KAppInitialize {
                                 }
                             }
                         }
+                        // 将文件移动到备份目录
+                        String hisPathString = initPsiPath +"/AppHistory/";
+                        File hisPath  = new File(hisPathString);
+                        if (!hisPath.exists()) {
+                            hisPath.mkdirs();
+                        }
+                        Files.copy(file.toPath(), Paths.get(hisPathString + file.getName()), StandardCopyOption.REPLACE_EXISTING);
                         // 删除临时文件
                         FileUtils.deleteFileOrDirectory(unzipPath);
-
                     } else {
+                        String fileContent = readFile(file);
                         devApplicationService.importApp(fileContent);
+                        // 将文件移动到备份目录
+                        devApplicationService.backupPine(fileContent, file.getName());
                     }
 
                     long t2 = System.currentTimeMillis();
                     log.info("应用安装成功，应用包名称:{}, 用时:{} ms", file.getName(),  (t2 -t1));
                 }
                 log.info("开始备份应用: {}", file.getName());
-                // 将文件移动到备份目录
-                devApplicationService.backupPine(fileContent, file.getName());
                 // 移除当前文件
                 log.info("开始移除应用: {}", file.getName());
                 Files.delete(file.toPath());
