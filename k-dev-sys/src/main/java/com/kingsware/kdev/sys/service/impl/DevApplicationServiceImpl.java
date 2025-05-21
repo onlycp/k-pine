@@ -923,6 +923,9 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 String shardName = file.getName().split("\\.")[0];
                 String tableName = shardName.substring(0, shardName.lastIndexOf("_"));
                 String json = FileUtils.readFile(file);
+                if (json.isEmpty() || "null".equals(json) || "[]".equals(json)) {
+                    continue;
+                }
                 List<Map<String, Object>> datas = objectMapper.readValue(json, objectMapper.getTypeFactory().constructCollectionType(List.class, Map.class));
                 if (datas!= null &&!datas.isEmpty()) {
                     for (Map<String, Object> data : datas) {
