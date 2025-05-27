@@ -14,6 +14,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +35,8 @@ public class JsonUtil {
     private static final Logger logger  = LoggerFactory.getLogger(JsonUtil.class);
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     static {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -231,6 +235,24 @@ public class JsonUtil {
         }
 
 
+    }
+
+    /**
+     * 将 json转为list对象（修复 Timestamp 字段反序列化问题）
+     */
+    public static <T> List<T> toListBeanFixTimestamp(String json, Class<T> tClass) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            // 修复 Timestamp 字段反序列化问题
+            objectMapper.setDateFormat(dateFormat);
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            JavaType javaType =  objectMapper.getTypeFactory().constructParametricType(ArrayList.class, tClass);
+
+            return objectMapper.readValue(json, javaType);
+        } catch (JsonProcessingException e) {
+            logger.warn("字符串转为List对象失败, 源串:{}", json);
+            return null;
+        }
     }
 
     /**

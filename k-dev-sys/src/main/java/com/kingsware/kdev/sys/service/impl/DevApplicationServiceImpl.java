@@ -956,7 +956,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
      * 导入 sys_file 表数据（pinezip导入）
      */
     public void importSysFileData(String json) {
-        List<SysFile> sysFiles = JsonUtil.toListBean(json, SysFile.class);
+        List<SysFile> sysFiles = JsonUtil.toListBeanFixTimestamp(json, SysFile.class);
         if (sysFiles != null &&!sysFiles.isEmpty()) {
             for (SysFile sysFile : sysFiles) {
                 SysFile existFile = DB.findById(SysFile.class, sysFile.getId());
@@ -966,7 +966,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             }    
         }
     }
-    
+
     /**
      * 拷贝pine文件（pinezip导入）
      */
