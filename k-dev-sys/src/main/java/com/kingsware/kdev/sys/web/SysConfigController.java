@@ -44,6 +44,7 @@ public class SysConfigController extends BaseController {
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
+    @ApiCode("sysinfo:config:query")
     public BaseRet<PageDataRet<SysConfigRet>> page(SysConfigQueryArgv argv) {
         return BaseRet.success(sysConfigService.query(argv));
     }
@@ -54,6 +55,7 @@ public class SysConfigController extends BaseController {
      */
     @ApiOperation(value = "详情 " ,notes = "详情")
     @GetMapping("/{id}")
+    @ApiCode("sysinfo:config:detail")
     public BaseRet<SysConfigRet> get(@PathVariable String id) {
         return BaseRet.success(sysConfigService.get(id));
     }
