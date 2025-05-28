@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.argv;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kingsware.kdev.core.cache.open.OpenAccount;
 import com.kingsware.kdev.core.cache.open.OpenAccountInfo;
 import com.kingsware.kdev.core.model.*;
@@ -28,6 +29,7 @@ public class DevPine {
             "extPluginTrees", "sysLogicTemplates", "devFaasNodeTypes", "devFaasNodes", "extPluginInterfaces",
             "devRoles", "devRoleMenus", "devPageTemplates"};
     // 是否覆盖开发平台系统数据
+    @JsonProperty("isForceReplaceDev")
     private boolean isForceReplaceDev;
     /** [x]系统配置 **/
     private List<SysConfig> configs;
