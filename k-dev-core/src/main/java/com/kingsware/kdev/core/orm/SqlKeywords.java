@@ -40,6 +40,10 @@ public class SqlKeywords {
         xuguKeywords.add("number");
         xuguKeywords.add("order");
         keywords.put("Xugu", xuguKeywords);
+        /** kingbase **/
+        Set<String> kingbaseKeywords = new HashSet<>();
+        kingbaseKeywords.add("online");
+        keywords.put("Kingbase8", kingbaseKeywords);
 
     }
 
@@ -87,6 +91,9 @@ public class SqlKeywords {
             return "\""+ columnName.toUpperCase() + "\"";
         }
         else if (dataBaseTypeEnum.equalsIgnoreCase("Xugu")) {
+            return "\""+ columnName.toUpperCase() + "\"";
+        }
+        else if (dataBaseTypeEnum.equalsIgnoreCase("Kingbase8")) {
             return "\""+ columnName.toUpperCase() + "\"";
         }
         return columnName;
