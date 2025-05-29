@@ -891,6 +891,8 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         File[] listFiles = new File(path).listFiles(pathname -> 
             pathname.isFile() && pathname.getName().toLowerCase().endsWith(".sql")
         );
+        // 是否允许危险sql执行
+        boolean dangerExec = SpringContext.getBoolean("pinezip.danger.sql.import", false);
         // 更新 DDL
         if (listFiles != null && listFiles.length > 0) {
             for (File file : listFiles) {
@@ -901,9 +903,11 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                     if (DB.getDefault().getConfig().getInnerType().equalsIgnoreCase("Oracle") && curSql.endsWith(";")) {
                         curSql = curSql.substring(0, curSql.length() - 1);
                     }
-                    // 如果是 delete or drop 语句，暂时不予执行
+                    // 如果是 delete or drop 语句，执行判断
                     if (curSql.toLowerCase().trim().startsWith("delete") || curSql.toLowerCase().trim().startsWith("drop")) {
-                        continue;    
+                        if(!dangerExec){
+                            continue;
+                        }
                     }
                     // 这里需要 catch 异常，否则上面的异常了，下面的sql 无法继续执行
                     try {
