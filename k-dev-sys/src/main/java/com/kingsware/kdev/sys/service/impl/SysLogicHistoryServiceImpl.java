@@ -3,6 +3,10 @@ package com.kingsware.kdev.sys.service.impl;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.kflow.bean.ErrorResult;
+import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
+import com.kingsware.kdev.core.kflow.function.AppGit;
 import com.kingsware.kdev.core.model.SysLogicFlow;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
@@ -12,6 +16,7 @@ import com.kingsware.kdev.core.orm.kdb.EditFlowInfo;
 import com.kingsware.kdev.core.orm.kdb.FlowInfo;
 import com.kingsware.kdev.core.orm.kdb.KdbApi;
 import com.kingsware.kdev.core.util.BeanUtils;
+import com.kingsware.kdev.core.util.FaasInvoke;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysKdbFlowArgv;
 import com.kingsware.kdev.sys.argv.SysLogicHistoryArgv;
@@ -24,6 +29,8 @@ import com.kingsware.kdev.sys.service.SysLogicHistoryService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 业务实现类
@@ -76,6 +83,10 @@ public class SysLogicHistoryServiceImpl extends BaseServiceImpl implements SysLo
 
             api.editFlow(info);
 
+            // 如果要回滚旧的，要清除一下 newFlowJson，去除 v3 设计器代码
+            // 这样，当 v3 设计器重新被打开时，就会自动重新构建 newFlowJson，保证代码一致
+            DB.executeUpdateSql("update sys_logic_flow set new_flow_json = null where flow_id=?", argv.getFlowId());
+
         }
         else {
             String name = DB.findSingleAttribute(String.class, "select name from sys_logic_flow where flow_id=?", argv.getFlowId());
@@ -86,6 +97,15 @@ public class SysLogicHistoryServiceImpl extends BaseServiceImpl implements SysLo
             flowInfo.setDescription("");
             api.addFlow(flowInfo);
         }
+
+        // 提交Git
+        Map<String, Object> params = new HashMap<>();
+        params.put("flowId", argv.getFlowId());
+        KdbFlowResult result = FaasInvoke.callFlow("f494d882a9554d1cbd9fb72559f6b9db", params);
+        if (result.getData() instanceof ErrorResult){
+            throw BusinessException.serviceThrow(result.getExceptionStack());
+        }
+
     }
 
     @Override
