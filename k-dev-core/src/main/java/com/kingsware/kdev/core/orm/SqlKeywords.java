@@ -99,7 +99,8 @@ public class SqlKeywords {
             return "\""+ columnName.toUpperCase() + "\"";
         }
         else if (dataBaseTypeEnum.equalsIgnoreCase("PostgreSQL")) {
-            return "\""+ columnName + "\"";
+            return "\"" + columnName + "\"";
+        }
         else if (dataBaseTypeEnum.equalsIgnoreCase("Kingbase8")) {
             return "\""+ columnName.toUpperCase() + "\"";
         }
