@@ -29,6 +29,12 @@ public class SysLogicHistoryRet extends BaseSimpleRet {
     /** 流程JSON */
     private String flowJson;
 
+    /** 版本Tag */
+    private String versionTag;
+
+    /** 版本Tag时间 */
+    private Timestamp versionTagTime;
+
     /** 创建人员 **/
     private String whoCreated;
 

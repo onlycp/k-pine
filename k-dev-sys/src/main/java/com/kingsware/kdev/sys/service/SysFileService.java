@@ -67,6 +67,8 @@ public interface SysFileService extends BaseService {
 
     void downloadStaticFile(String path) throws ServletException, IOException;
 
+    String compressStaticZip(String filePaths, String name)  throws IOException;
+
     /**
      * 从faas里下载文件
      * @param path

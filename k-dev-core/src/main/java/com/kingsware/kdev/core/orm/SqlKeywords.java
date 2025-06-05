@@ -29,7 +29,7 @@ public class SqlKeywords {
         /** dm **/
         Set<String> dmKeywords = new HashSet<>();
         dmKeywords.add("distributed");
-        dmKeywords.add("distributed");
+        dmKeywords.add("online");
         keywords.put("DM", dmKeywords);
         /** oracle **/
         Set<String> oracleKeywords = new HashSet<>();
@@ -45,6 +45,11 @@ public class SqlKeywords {
         postgresKeywords.add("distributed");
         postgresKeywords.add("online");
         keywords.put("Postgresql", postgresKeywords);
+        /** kingbase **/
+        Set<String> kingbaseKeywords = new HashSet<>();
+        kingbaseKeywords.add("online");
+        keywords.put("Kingbase8", kingbaseKeywords);
+
     }
 
 
@@ -95,6 +100,8 @@ public class SqlKeywords {
         }
         else if (dataBaseTypeEnum.equalsIgnoreCase("PostgreSQL")) {
             return "\""+ columnName + "\"";
+        else if (dataBaseTypeEnum.equalsIgnoreCase("Kingbase8")) {
+            return "\""+ columnName.toUpperCase() + "\"";
         }
         return columnName;
     }

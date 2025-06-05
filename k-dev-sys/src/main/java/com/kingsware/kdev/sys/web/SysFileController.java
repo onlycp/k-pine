@@ -16,7 +16,9 @@ import com.kingsware.kdev.sys.service.SysFileService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.List;
@@ -172,6 +175,20 @@ public class SysFileController extends BaseController {
         sysFileService.download(relativePath);
     }
 
+    /**
+     * 静态资源文件压缩下载
+     */
+    @ApiOperation(value = "静态资源文件压缩下载 " ,notes = "静态资源文件压缩下载")
+    @RequestMapping(value = "/downloadStaticZip", method = {RequestMethod.GET, RequestMethod.POST})
+    @ApiIgnore
+    public ResponseEntity<org.springframework.core.io.Resource> downloadStaticZip(String path, String name) throws IOException, ServletException {
+        String resultPath = sysFileService.compressStaticZip(path, name);
+        org.springframework.core.io.Resource resource = new FileSystemResource(resultPath);
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment;filename=" + new File(name).getName())
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource); // 直接返回二进制流，不触发静态资源处理
+    }
 
     /**
      * 文件下载

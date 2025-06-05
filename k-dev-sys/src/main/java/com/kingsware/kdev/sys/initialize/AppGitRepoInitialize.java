@@ -246,7 +246,7 @@ public class AppGitRepoInitialize implements SystemInitialize {
     // 判断是否有 pine 包正在安装
     private boolean hasPineInstalled(){
         String currentDirectory = System.getProperty("user.dir");
-        File[] files = new File(currentDirectory).listFiles((dir, name) -> name.toLowerCase().endsWith(".pine"));
+        File[] files = new File(currentDirectory).listFiles((dir, name) -> name.toLowerCase().endsWith(".pine") || name.toLowerCase().endsWith(".pinezip"));
         return files != null && files.length > 0;
     }
 
