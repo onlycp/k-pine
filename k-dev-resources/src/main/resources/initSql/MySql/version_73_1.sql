@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS `dev_chat_session` (
                                     `when_created` varchar(30) DEFAULT NULL COMMENT '创建时间',
                                     `when_modified` varchar(30) DEFAULT NULL COMMENT '修改时间',
                                     PRIMARY KEY (`session_id`)
-)
+);
 
 CREATE TABLE IF NOT EXISTS `dev_chat_message` (
                                     `message_id` varchar(36) NOT NULL COMMENT '消息唯一标识符（UUID）',
@@ -23,4 +23,4 @@ CREATE TABLE IF NOT EXISTS `dev_chat_message` (
                                     `when_created` varchar(30) DEFAULT NULL COMMENT '创建时间',
                                     `when_modified` varchar(30) DEFAULT NULL COMMENT '修改时间',
                                     PRIMARY KEY (`message_id`)
-)
+);
