@@ -1,0 +1,1 @@
+ALTER TABLE sys_config modify is_public int NULL DEFAULT null COMMENT '是否是公开的配置，非公开的配置接口不返回';
