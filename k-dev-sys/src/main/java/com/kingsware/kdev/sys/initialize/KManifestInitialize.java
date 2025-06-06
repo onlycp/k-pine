@@ -47,9 +47,9 @@ public class KManifestInitialize implements SystemInitialize {
             Attributes attributes = manifest.getMainAttributes();
 //            log.info("MANIFEST：{}", JsonUtil.toJson(attributes));
             String buildTime = attributes.getValue("Build-Time");
-            if (StringUtils.isEmpty(buildTime)) {
-                return;
-            }
+//            if (StringUtils.isEmpty(buildTime)) {
+//                return;
+//            }
             String version = attributes.getValue("Implementation-Version");
             String key = "application.buildVersion";
             String value = String.format("%s-%s", version, buildTime);
@@ -64,6 +64,7 @@ public class KManifestInitialize implements SystemInitialize {
                 sysConfig.setIsSys(1);
                 sysConfig.setName(I18n.t("platform.version", "平台版本号"));
                 sysConfig.setCode(key);
+                sysConfig.setValue(value);
                 sysConfig.setValueType(0);
                 sysConfig.setNote(I18n.t("platform.version", "平台版本号"));
                 DB.save(sysConfig);
