@@ -51,7 +51,9 @@ public class DevApplicationVersionHistoryServiceImpl extends BaseServiceImpl imp
     @SuppressWarnings("unchecked")
     public PageDataRet<DevApplicationVersionHistoryRet> query(DevApplicationVersionHistoryQueryArgv argv) {
         // 拼装sql
-        SqlWrapper wrapper = new SqlWrapper("select * from dev_application_version_history where 1=1 ");
+        // SqlWrapper wrapper = new SqlWrapper("select * from dev_application_version_history where 1=1 ");
+        //-- [青松4.1] 兼容 oracle 表名最多30个字符问题 --
+        SqlWrapper wrapper = new SqlWrapper("select * from dev_app_version_history where 1=1 ");
 
         wrapper.sortBy("when_created desc");
         return (PageDataRet<DevApplicationVersionHistoryRet>) query(wrapper.getSql(), wrapper.getParams(), argv, DevApplicationVersionHistory.class, DevApplicationVersionHistoryRet.class);

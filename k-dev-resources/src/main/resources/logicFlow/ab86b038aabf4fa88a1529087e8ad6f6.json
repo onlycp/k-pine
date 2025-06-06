@@ -1,0 +1,305 @@
+{
+  "node_link": [
+    {
+      "catch_exception": "false",
+      "name": "Git导出数据->JS任务",
+      "from": "525d702f-8a77-490a-b747-eda33b3796bb",
+      "id": "c2427083-8d4a-49ac-89cf-b9d86f0fb215",
+      "to": "2c252fe3-1532-4c9b-8c31-17c074fc8a2d"
+    },
+    {
+      "catch_exception": "false",
+      "name": "查询版本信息->JS任务",
+      "from": "520d1de7-01ea-415b-ac65-d3c8d5c3db52",
+      "id": "a918c27c-902c-47d3-849a-68d079c834cc",
+      "to": "4b8630d0-526a-40de-b3f7-a433a3567245"
+    },
+    {
+      "catch_exception": "false",
+      "name": "JS任务->Git导出数据",
+      "from": "4b8630d0-526a-40de-b3f7-a433a3567245",
+      "id": "c0447381-f470-419e-b978-b9803b962d45",
+      "to": "eb5c0264e1864fb6a4d0bb44c5a3c099"
+    },
+    {
+      "catch_exception": "false",
+      "name": "安装包生成->SQL任务",
+      "from": "2c252fe3-1532-4c9b-8c31-17c074fc8a2d",
+      "id": "eec8e1c3-b522-4958-99a7-1d71579a9d00",
+      "to": "664ef32b-4af7-41df-a169-b58407b5e91b"
+    },
+    {
+      "catch_exception": "false",
+      "name": "生成下载记录->JS任务",
+      "from": "664ef32b-4af7-41df-a169-b58407b5e91b",
+      "id": "0faca566-b6a1-45cf-8254-3632f128de10",
+      "to": "b45c94d7-3b49-4ce7-b96c-e99440470af8"
+    },
+    {
+      "catch_exception": "false",
+      "name": "JS任务->结束",
+      "from": "b45c94d7-3b49-4ce7-b96c-e99440470af8",
+      "id": "997559f0-d403-4128-b0d3-fc860390a9b9",
+      "to": "end"
+    },
+    {
+      "catch_exception": "false",
+      "name": "Git导出数据->生成历史文件记录",
+      "from": "eb5c0264e1864fb6a4d0bb44c5a3c099",
+      "id": "69811d15eace48c79f0835d741d5b252",
+      "to": "525d702f-8a77-490a-b747-eda33b3796bb"
+    },
+    {
+      "catchException": "false",
+      "name": "开始->子流程",
+      "from": "start",
+      "id": "4ec1ee6c-635d-48de-be2c-9a8a77aace94",
+      "to": "b86f2019-6f1a-4f59-a973-d8216723a031"
+    },
+    {
+      "catchException": "false",
+      "name": "子流程->查询版本信息",
+      "from": "b86f2019-6f1a-4f59-a973-d8216723a031",
+      "id": "71305619-1af9-4ac5-a045-9b6eac8d7130",
+      "to": "520d1de7-01ea-415b-ac65-d3c8d5c3db52"
+    }
+  ],
+  "name": "Git版本下载",
+  "node_definition": [
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "start",
+      "extra": {
+        "position": "280,50"
+      },
+      "name": "开始",
+      "id": "start",
+      "state": "completed",
+      "type": "start"
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "end",
+      "extra": {
+        "position": "290,1620"
+      },
+      "name": "结束",
+      "id": "end",
+      "state": "completed",
+      "type": "end"
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "task",
+      "extra": {
+        "position": "3,276"
+      },
+      "name": "查询版本信息",
+      "listener": {
+        "before": {
+          "script": {
+            "type": "js",
+            "params": [],
+            "content": "\n"
+          }
+        },
+        "after": {
+          "script": {
+            "type": "js",
+            "params": [],
+            "content": "const list = toHumpResult();\nconst gitTag = list[0]\nklog.info(gitTag)\nsetResult('gitTag', gitTag)\n"
+          }
+        }
+      },
+      "id": "520d1de7-01ea-415b-ac65-d3c8d5c3db52",
+      "state": "completed",
+      "type": "task",
+      "execute": {
+        "script": {
+          "columnLabelCase": "normal",
+          "sourceName": "MySql",
+          "type": "sql",
+          "params": [],
+          "content": "<tpl>\nselect gt.*,da.name as app_name, da.short_name from dev_git_tag gt left join dev_application da on da.id=gt.repo where gt.id=#{id}\n</tpl>"
+        }
+      }
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "task",
+      "extra": {
+        "position": "218,740"
+      },
+      "name": "Git导出数据",
+      "id": "525d702f-8a77-490a-b747-eda33b3796bb",
+      "state": "completed",
+      "type": "task",
+      "execute": {
+        "script": {
+          "type": "js",
+          "params": [],
+          "content": "function getCommitContent(repoPath, commitId, resource) {\n if (!commitId) {\n return null;\n }\n // klog.info(`repo:${repoPath}, commit:${commitId}, resource:${resource}`)\n const res = git.getFileContentByCommit(repoPath, commitId, resource)\n // klog.info('sssdf:' + res)\n if (res.status == 0) {\n let s = JSON.parse(res.data)[\"value\"];\n if (s == '') {\n s = null\n }\n return s;\n }\n return null;\n}\n\nfunction deduplicateById(list) {\n const seen = new Set(); // 用于存储已遇到的 id\n return list.filter(item => {\n if (!item.id) return false; // 确保 item 有 id 属性\n if (seen.has(item.id)) {\n return false; // 如果 id 已存在于 Set 中，则过滤掉\n } else {\n seen.add(item.id); // 否则将 id 添加到 Set\n return true; // 保留该元素\n }\n });\n}\n\n\n// 获取当前版本信息\nconst gitTag = getResult('gitTag');\nconst appId = gitTag.repo;\n// 数据清单\nconst dataOptions = (context.get('dataOptions') || '').split(',');\n// 判断是否包括系统数据，如果包括，要同时读取依赖应用的信息\nconst repoCommits = []\n// 加入当前应用\nrepoCommits.push({\n repo: appId,\n commitId: gitTag.commitId\n})\n// 如果包含系统数据，则将公共仓库加入进来\nconst pineDataType = getResult('pineDataType');\nif (pineDataType === 'total') {\n const publicCommits = JSON.parse(gitTag.publicCommitIds);\n for (let it of publicCommits) {\n repoCommits.push(it)\n }\n}\n// 数据包\nconst devPineData = {\n info: {},\n pages: [],\n apis: [],\n kdbFlows: [],\n logicFlows: [],\n flows: [],\n functions: [],\n dict: [],\n dictItems: [],\n configs: [],\n sources: [],\n tasks: [],\n menus: [],\n i18ns: [],\n openAccounts: [],\n openAccountApis:[]\n}\n// 是否覆盖开发平台系统数据\nlet isForceReplaceDev = context.get(\"isForceReplaceDev\");\nif (isForceReplaceDev == null || isForceReplaceDev == '') {\n isForceReplaceDev = false\n}\ndevPineData['isForceReplaceDev'] = isForceReplaceDev;\n// 获取应用info\nlet gitBasePath = getProperty(\"git.base-path\", \"AppGit\")\nconst myRepo = `${gitBasePath}/${appId}`\n// 读取应用信息\nconst appContent = getCommitContent(myRepo, gitTag.commitId, 'app.json')\ndevPineData.info = JSON.parse(appContent)\n// 插件\nconst plugins = []\n\n// 包类型\nconst packageType = getResult('packageType')\n\n// 处理所有的仓库\nfor (let commit of repoCommits) {\n const repo = `${gitBasePath}/${commit.repo}`\n // 页面数据\n if (dataOptions.indexOf('pageData') >= 0) {\n const pageArrayContent = getCommitContent(repo, commit.commitId, 'pine/pages.json')\n if (pageArrayContent != null && pageArrayContent != '') {\n // klog.info(pageArrayContent)\n const arr = JSON.parse(pageArrayContent)\n // 读取所有的页面\n for (let pageId of arr) {\n const pageResource = `pages/${pageId}.json`\n // klog.info(\"pageResource:\" + pageResource + \", commitId:\" + commit.commitId)\n const pageContent = getCommitContent(repo, commit.commitId, pageResource)\n if (pageContent != null) {\n const page = JSON.parse(pageContent)\n if (page.pageJson) {\n page['pageJson'] = JSON.stringify(page['pageJson'])\n }\n devPineData.pages.push(page)\n }\n }\n }\n }\n // 接口数据\n if (dataOptions.indexOf('apiData') >= 0) {\n const arrayContent = getCommitContent(repo, commit.commitId, 'pine/apis.json')\n if (arrayContent != null && arrayContent != '') {\n const arr = JSON.parse(arrayContent)\n devPineData.apis.push(...arr)\n }\n }\n\n // 系统配置\n if (dataOptions.indexOf('configData') >= 0) {\n const arrayContent = getCommitContent(repo, commit.commitId, 'pine/config.json')\n if (arrayContent != null && arrayContent != '') {\n let arr = JSON.parse(arrayContent)\n if (commit.repo == \"public\") {\n arr = arr.filter(e => e[\"appId\"] == \"064b3b44b85a45fe87fcce88d72b2519\")\n }\n devPineData.configs.push(...arr)\n }\n }\n \n // 字典数据\n if (dataOptions.indexOf('dictData') >= 0) {\n {\n const arrayContent = getCommitContent(repo, commit.commitId, 'pine/dict.json')\n if (arrayContent != null && arrayContent != '') {\n let arr = JSON.parse(arrayContent)\n if (commit.repo == \"public\") {\n arr = arr.filter(e => e[\"appId\"] == \"064b3b44b85a45fe87fcce88d72b2519\")\n }\n devPineData.dict.push(...arr)\n }\n }\n {\n const arrayContent = getCommitContent(repo, commit.commitId, 'pine/dictItem.json')\n if (arrayContent != null && arrayContent != '') {\n let arr = JSON.parse(arrayContent)\n if (commit.repo == \"public\") {\n arr = arr.filter(e => e[\"appId\"] == \"064b3b44b85a45fe87fcce88d72b2519\")\n }\n devPineData.dictItems.push(...arr)\n }\n }\n }\n // 数据源\n if (dataOptions.indexOf('sourceData') >= 0) {\n const arrayContent = getCommitContent(repo, commit.commitId, 'pine/datasource.json')\n if (arrayContent != null && arrayContent != '') {\n const arr = JSON.parse(arrayContent)\n devPineData.sources.push(...arr)\n }\n }\n // 国际化\n if (dataOptions.indexOf('i18nData') >= 0) {\n const arrayContent = getCommitContent(repo, commit.commitId, 'pine/i18n.json')\n if (arrayContent != null && arrayContent != '') {\n const arr = JSON.parse(arrayContent)\n devPineData.i18ns.push(...arr)\n }\n }\n // 函数\n if (dataOptions.indexOf('funData') >= 0) {\n const arrayContent = getCommitContent(repo, commit.commitId, 'pine/functions.json')\n if (arrayContent != null && arrayContent != '') {\n const arr = JSON.parse(arrayContent)\n // klog.info('函数数:' + arr.length)\n devPineData.functions.push(...arr)\n }\n }\n\n // 逻辑编排\n if (dataOptions.indexOf('logicData') >= 0) {\n // klog.info('sssdfd:' + repo + \", commit:\" + commit.commitId)\n // 数据库的逻辑编排\n const arrayContent = getCommitContent(repo, commit.commitId, 'pine/logics.json')\n if (arrayContent != null && arrayContent != '') {\n const ids = JSON.parse(arrayContent)\n // 读取所有的接口\n for (let id of ids) {\n const resource = `logic/${id}.json`\n const content = getCommitContent(repo, commit.commitId, resource)\n // klog.info('content:' + content)\n if (content != null) {\n const fw = JSON.parse(content);\n const lf = fw.logicFlow;\n if (lf.newFlowJson) {\n lf.newFlowJson = JSON.stringify(lf.newFlowJson)\n }\n devPineData.logicFlows.push(lf)\n const kf = fw.kdbFlow\n if (kf?.content) {\n kf.content = JSON.stringify(kf.content)\n }\n devPineData.kdbFlows.push(kf)\n }\n }\n }\n }\n // 数据源\n {\n const arrayContent = getCommitContent(repo, commit.commitId, 'pine/datasource.json')\n if (arrayContent != null && arrayContent != '') {\n const arr = JSON.parse(arrayContent)\n devPineData.sources.push(...arr)\n }\n }\n // 定时任务\n if (dataOptions.indexOf('taskData') >= 0) {\n\n const arrayContent = getCommitContent(repo, commit.commitId, 'pine/task.json')\n if (arrayContent != null && arrayContent != '') {\n const arr = JSON.parse(arrayContent)\n devPineData.tasks.push(...arr)\n }\n }\n\n // 旧的废弃的\n // // 基础菜单\n // if (dataOptions.indexOf('baseMenu') >= 0 && gitTag.repo == '064b3b44b85a45fe87fcce88d72b2519' && gitTag.repo != commit.repo) {\n // const arrayContent = getCommitContent(repo, commit.commitId, 'pine/menu.json')\n // if (arrayContent != null && arrayContent != '') {\n // const arr = JSON.parse(arrayContent)\n // devPineData.menus.push(...arr)\n // }\n // }\n // // 应用菜单\n // if (dataOptions.indexOf('appMenu') >= 0 && gitTag.repo == commit.repo) {\n\n // const arrayContent = getCommitContent(repo, commit.commitId, 'pine/menu.json')\n // if (arrayContent != null && arrayContent != '') {\n // const arr = JSON.parse(arrayContent)\n // devPineData.menus.push(...arr)\n // }\n // }\n\n /**\n * 如果当前发版的是【用户应用】：应用菜单+基础菜单【系统配置、基础信息】\n * 如果当前发版的是【青松开发管理】：所有青松开发管理的菜单\n */\n // 基础菜单\n // 部署平台只导出【基础信息、系统配置】两层菜单\n // a98ca7f3364940e69a424f97006f0f47：用户管理【一级菜单】\n // 843af15ab7694d54af793e4a5e6fb76e：系统配置【一级菜单】\n // c2348bbf343a47b5852f12ee32869b13：基础信息【一级菜单】\n if (dataOptions.indexOf('baseMenu') >= 0 && ['064b3b44b85a45fe87fcce88d72b2519', 'public'].includes(commit.repo) && gitTag.repo != commit.repo) {\n const arrayContent = getCommitContent(repo, commit.commitId, 'pine/menu.json')\n if (arrayContent != null && arrayContent != '') {\n const arr = JSON.parse(arrayContent)\n const newArr = arr.filter(e => {\n const path = e?.path || \"\"\n return path.startsWith(\"/843af15ab7694d54af793e4a5e6fb76e\") || path.startsWith(\"/c2348bbf343a47b5852f12ee32869b13\") || path.startsWith(\"/a98ca7f3364940e69a424f97006f0f47\")\n })\n devPineData.menus.push(...newArr)\n }\n }\n \n // 应用菜单\n if (dataOptions.indexOf('appMenu') >= 0 && gitTag.repo == commit.repo) {\n const arrayContent = getCommitContent(repo, commit.commitId, 'pine/menu.json')\n if (arrayContent != null && arrayContent != '') {\n const arr = JSON.parse(arrayContent)\n devPineData.menus.push(...arr)\n }\n }\n\n // 去重\n devPineData.menus = deduplicateById(devPineData.menus)\n \n // plugins.json\n {\n const arrayContent = getCommitContent(repo, commit.commitId, 'pine/plugins.json')\n if (arrayContent != null && arrayContent != '') {\n const arr = JSON.parse(arrayContent)\n plugins.push(...arr)\n }\n \n }\n // 开放账号\n {\n const arrayContent = getCommitContent(repo, commit.commitId, 'pine/openAccounts.json')\n if (arrayContent != null && arrayContent != '') {\n const arr = JSON.parse(arrayContent)\n devPineData.openAccounts.push(...arr)\n }\n \n }\n // 开放账号权限 \n {\n const arrayContent = getCommitContent(repo, commit.commitId, 'pine/openAccountApis.json')\n if (arrayContent != null && arrayContent != '') {\n const arr = JSON.parse(arrayContent)\n devPineData.openAccountApis.push(...arr)\n }\n }\n\n\n}\nsetResult('plugins', plugins)\ncontext.set('pine', JSON.stringify(devPineData))"
+        }
+      }
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "task",
+      "extra": {
+        "position": "220,960"
+      },
+      "name": "安装包生成",
+      "id": "2c252fe3-1532-4c9b-8c31-17c074fc8a2d",
+      "state": "completed",
+      "type": "task",
+      "execute": {
+        "script": {
+          "type": "js",
+          "params": [],
+          "content": "// 获取 Java 的 File 类和 Files 类\nvar File = Java.type('java.io.File');\nvar Files = Java.type('java.nio.file.Files');\nvar Paths = Java.type('java.nio.file.Paths');\n\n// 动态替换变量\nfunction initReplace(txt, obj) {\n for (var k in obj) {\n var key = line2Hump(k);\n // klog.info('==fileRead==|' + k + '|' + key + '|' + obj[k]);\n txt = txt.replaceAll('${' + key + '}', obj[k]);\n }\n return txt;\n}\n\nklog.info(\"一键导出数据处理时间开始:\" + kutils.getNow(\"yyyyMMddHHmmss\"));\n\n// git版本\nconst version = getResult('gitTag');\n// 获取*.pine的数据\nvar pine = context.get('pine');\nvar pineDateFilename = `${version.shortName}-${version.tag}`\n// 获取参数\nvar datasources = \"[]\"\nvar appShortName = version.shortName\n// 下载信息\nconst packageType = getResult('packageType')\n// 定义地址\nvar currDir = kutils.getCurrDirectory();\nvar productPackagePath = `${currDir}/../package` // 半成品\nvar uploadPackagePath = `${currDir}/upload/package` // 成品、上传/下载目录\n// 发行版本路径\nconst createTime = kutils.getNow(\"yyyyMMddHHmmss\");\nvar releasePath = `${uploadPackagePath}/${version.shortName}/${version.tag}/${createTime}`\n// 保存pine数据\nconst pineFile = `${releasePath}/api/${version.tag}.pine`\nklog.info(pineFile)\nkutils.fileUpload(pine, pineFile, \"UTF-8\")\nif (packageType == 'total') {\n const platform = getResult('platform')\n var productPath = 'product/'\n var systemProductPath = platform + \"/\"\n // 复制半成品，开始组装成品\n klog.info(`src:${productPackagePath + '/'+ productPath}, dst:${releasePath}`)\n kutils.fileCopy(productPackagePath + '/' + productPath, `${releasePath}`); //复制\n klog.info('sssssssssss')\n kutils.fileCopy(productPackagePath + '/' + systemProductPath, `${releasePath}`); //复制\n klog.info('tttttttttt')\n // 移除非必要插件\n const plugins = getResult('plugins')\n const File = Java.type('java.io.File');\n if (plugins != null && plugins.length != 0) {\n const pluginDir = new File(`${releasePath}/faas/ext`);\n const dirs = pluginDir.listFiles();\n for (let file of dirs) {\n const fileName = file.getName();\n if (file.isDirectory() && fileName != 'def') {\n if (plugins.indexOf(fileName) == -1) {\n klog.info('[导出]删除非必要目录:' + file.getAbsoluteFile());\n kutils.fileDelete(file.getAbsoluteFile() + '')\n // file.delete();\n }\n }\n }\n }\n // 运行容器\n const container = getResult('container');\n // 兼容以前的，判断指定的jar包是否存在\n // 定义 A 和 B 文件路径\n var fileAPath = `${releasePath}/api/kpine-${container}.jar`\n var fileBPath = `${releasePath}/api/kpine.jar`\n // 创建 File 对象\n var fileA = new File(fileAPath);\n var fileB = new File(fileBPath);\n if (fileA.exists()) {\n // 如果 A 文件存在，拷贝 A 文件为 B 文件，覆盖 B 文件\n var sourcePath = Paths.get(fileAPath);\n var targetPath = Paths.get(fileBPath);\n\n try {\n // 使用 Files.copy() 方法进行文件拷贝，覆盖目标文件\n Files.copy(sourcePath, targetPath, Java.type('java.nio.file.StandardCopyOption').REPLACE_EXISTING);\n print(\"文件 A 已拷贝为文件 B，覆盖成功!\");\n }\n catch (e) {\n klog.info('文件拷贝失败')\n }\n }\n // 删除针对容器内的包\n kutils.fileDelete(`${releasePath}/api/kpine-tongweb.jar`)\n kutils.fileDelete(`${releasePath}/api/kpine-tomcat.jar`)\n // 动态替换变量 \n const variables = {\n faasPort: \"10081\",\n pinePort: \"10082\"\n };\n // application.properties\n {\n const fileFullPath = `${releasePath}/api/application.properties`\n var fileTxt = kutils.fileRead(fileFullPath) //读出\n fileTxt = initReplace(fileTxt, variables) //替换\n kutils.fileUpload(fileTxt, fileFullPath, 'UTF-8')//写入\n }\n // config.json\n {\n const fileFullPath = `${releasePath}/faas/config.json`\n var fileTxt = kutils.fileRead(fileFullPath) //读出\n fileTxt = initReplace(fileTxt, variables) //替换\n kutils.fileUpload(fileTxt, fileFullPath, 'UTF-8')//写入\n }\n\n // 加载\n var downloadFileName = `package/${version.shortName}/${version.shortName}-${version.tag}.zip`\n klog.info(\"开始压缩时间:\" + kutils.getNow('yyyy-MM-dd HH:mm:ss.SSS'));\n const zipFile = `${uploadPackagePath}/${version.shortName}/${version.shortName}-${version.tag}.zip`\n\n // 当前是否导出pinezip\n // 如果不是，则直接生成zip返回路径即可\n // 如果是，则需要暂停生成zip，然后继续生成pinezip包，放入到api里，最后再打包zip\n const dataOptions = context.get(\"dataOptions\")?.split(\",\") || [];\n if (dataOptions.includes(\"ddlData\")) {\n // 记录待压缩位置\n setResult('downloadFile', releasePath);\n // 这里还不能移除临时目录，因为后面的子流程打包需要\n } else {\n kutils.fileDelete(zipFile)\n kutils.zip(`${releasePath}`, zipFile, '');\n klog.info('完成压缩时间:' + kutils.getNow('yyyy-MM-dd HH:mm:ss.SSS'));\n setResult('downloadFile', downloadFileName);\n // 移除临时目录\n kutils.fileDelete(releasePath)\n }\n \n}\nelse {\n const destFile = `${uploadPackagePath}/${version.shortName}/${version.tag}-${createTime}.pine`\n klog.info('souce:' + pineFile + \", dest:\" +destFile )\n // 加载\n kutils.fileCopy(pineFile, destFile)\n // 拷贝应用目录下\n var downloadFileName = `package/${version.shortName}/${version.tag}-${createTime}.pine`\n setResult('downloadFile', downloadFileName);\n}\n\n\n"
+        }
+      }
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "task",
+      "extra": {
+        "position": "220,400"
+      },
+      "name": "数据预处理",
+      "id": "4b8630d0-526a-40de-b3f7-a433a3567245",
+      "state": "completed",
+      "type": "task",
+      "execute": {
+        "script": {
+          "type": "js",
+          "params": [],
+          "content": "// git版本\nconst version = getResult('gitTag');\n// 定义地址\nvar currDir = kutils.getCurrDirectory();\nvar productPackagePath = `${currDir}/../package` // 半成品\nvar uploadPackagePath = `${currDir}/upload/package` // 成品、上传/下载目录\n// 发行版本路径\nvar releasePath = `${uploadPackagePath}/${version.shortName}/${version.tag}/${kutils.getNow(\"yyyyMMddHHmmss\")}`\nsetResult('releasePath', releasePath)\nklog.info(releasePath)"
+        }
+      }
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "task",
+      "extra": {
+        "position": "219,1180"
+      },
+      "name": "生成下载记录",
+      "listener": {
+        "before": {
+          "script": {
+            "type": "js",
+            "params": [],
+            "content": "\n"
+          }
+        },
+        "after": {
+          "script": {
+            "type": "js",
+            "params": [],
+            "content": "\n"
+          }
+        }
+      },
+      "id": "664ef32b-4af7-41df-a169-b58407b5e91b",
+      "state": "completed",
+      "type": "task",
+      "execute": {
+        "script": {
+          "columnLabelCase": "normal",
+          "sourceName": "MySql",
+          "type": "sql",
+          "params": [],
+          "content": "<tpl>\n\nupdate\n<if test = \"isLargeVersion == true\">\n dev_app_version_history \n</if>\n<if test = \"isLargeVersion == false\">\n dev_application_version_history\n</if>\n\nset file_name=#{downloadFile} where id=#{historyId}\n\n</tpl>\n\n"
+        }
+      }
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "task",
+      "extra": {
+        "position": "220,1400"
+      },
+      "name": "返回下载文件地址",
+      "id": "b45c94d7-3b49-4ce7-b96c-e99440470af8",
+      "state": "completed",
+      "type": "task",
+      "execute": {
+        "script": {
+          "type": "js",
+          "params": [],
+          "content": "setResult('result', context.get('downloadFile'))"
+        }
+      }
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "task",
+      "extra": {
+        "position": "600,540"
+      },
+      "name": "生成历史文件记录",
+      "listener": {
+        "before": {
+          "script": {
+            "type": "js",
+            "params": [],
+            "content": "setResult('historyId', getUuid())\n"
+          }
+        },
+        "after": {
+          "script": {
+            "type": "js",
+            "params": [],
+            "content": "\n"
+          }
+        }
+      },
+      "id": "eb5c0264e1864fb6a4d0bb44c5a3c099",
+      "state": "completed",
+      "type": "task",
+      "execute": {
+        "script": {
+          "columnLabelCase": "normal",
+          "sourceName": "MySql",
+          "type": "sql",
+          "params": [],
+          "content": "<tpl>\n\nINSERT INTO \n<if test = \"isLargeVersion == true\">\n dev_app_version_history \n</if>\n<if test = \"isLargeVersion == false\">\n dev_application_version_history\n</if>\n\n (id, app_id, export_data,note, version, when_created, who_created) \n values (#{historyId}, #{gitTag.repo}, #{request.body}, '',#{gitTag.tag}, #{sys.when}, #{sys.who})\n\n</tpl>"
+        }
+      }
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "sub",
+      "extra": {
+        "subFlowName": "获取kpine版本号判断是否大于等于指定版本（子流程）",
+        "position": "-164,82"
+      },
+      "name": "子流程",
+      "id": "b86f2019-6f1a-4f59-a973-d8216723a031",
+      "state": "completed",
+      "type": "sub",
+      "flowID": "c9a87862a50b4241867146bb6a43cc8e"
+    }
+  ]
+}

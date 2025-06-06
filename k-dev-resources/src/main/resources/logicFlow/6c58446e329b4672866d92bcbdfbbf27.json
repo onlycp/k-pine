@@ -1,0 +1,291 @@
+{
+  "node_link": [
+    {
+      "catch_exception": "false",
+      "name": "生成pine文件 ->是否pinezip",
+      "from": "6457c40d5a3e467494588be2ff8e5389",
+      "id": "a4e62e3ae670402184feb52f38aefb5c",
+      "to": "16487021c30c44288c1b11a705aba393"
+    },
+    {
+      "catch_exception": "false",
+      "name": "==1",
+      "from": "16487021c30c44288c1b11a705aba393",
+      "id": "cb5d5d0cf5054549980a0283ef9b7ebb",
+      "to": "2848cdb4381a4bfc89843b4e81dbd857",
+      "conditions": {
+        "decision": {
+          "expr": "compare(${isPineZip}==1)"
+        }
+      }
+    },
+    {
+      "catch_exception": "false",
+      "name": "预处理&步骤梳理->导出文件",
+      "from": "2848cdb4381a4bfc89843b4e81dbd857",
+      "id": "54615c6bbc0c4d9f9efff1df4c7ace8f",
+      "to": "d0b2516dee694c6d938b681ec5a33fb6"
+    },
+    {
+      "catch_exception": "false",
+      "name": "导出文件->导出表",
+      "from": "d0b2516dee694c6d938b681ec5a33fb6",
+      "id": "fd1bd61b638c40bbad297dc72d993f02",
+      "to": "50fd3da905134347b839fc52fdc1c88d"
+    },
+    {
+      "catch_exception": "false",
+      "name": "导出表->生成pinezip",
+      "from": "50fd3da905134347b839fc52fdc1c88d",
+      "id": "e8595a1eb78143d8b5f2df844c2d1ed4",
+      "to": "9bb2094f7a1841a19f4bd8be1024ae36"
+    },
+    {
+      "catch_exception": "false",
+      "name": "==0",
+      "from": "16487021c30c44288c1b11a705aba393",
+      "id": "798e54b8a24d49888c952027068d85e8",
+      "to": "c2813c7628e04c26848bb666f6c26029",
+      "conditions": {
+        "decision": {
+          "expr": "compare(${isPineZip}==0)"
+        }
+      }
+    },
+    {
+      "catch_exception": "false",
+      "name": "返回pine下载路径->结束",
+      "from": "c2813c7628e04c26848bb666f6c26029",
+      "id": "fc8b21103ee04eb496c631435c2c05d8",
+      "to": "end"
+    },
+    {
+      "catch_exception": "false",
+      "name": "生成pinezip->插入版本表",
+      "from": "9bb2094f7a1841a19f4bd8be1024ae36",
+      "id": "81f622d6e1d94da69acd18b463f4837b",
+      "to": "3e32c78051b142ec8058d03387d539f6"
+    },
+    {
+      "catch_exception": "false",
+      "name": "插入版本表->结束",
+      "from": "3e32c78051b142ec8058d03387d539f6",
+      "id": "c003aaaae94148b78a81a7a94a6b743e",
+      "to": "end"
+    },
+    {
+      "catchException": "false",
+      "name": "开始->子流程",
+      "from": "start",
+      "id": "e2a4cb30-dfe0-4b25-81cf-b3a6ee89f708",
+      "to": "6df92c3b-9382-480f-952f-059a364c5ce2"
+    },
+    {
+      "catchException": "false",
+      "name": "子流程->生成pine文件 ",
+      "from": "6df92c3b-9382-480f-952f-059a364c5ce2",
+      "id": "cb43fd3f-ee34-4627-ac02-7e504785aff4",
+      "to": "6457c40d5a3e467494588be2ff8e5389"
+    }
+  ],
+  "name": "pine-应用导出-导出pinezip（4.0+）",
+  "node_definition": [
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "start",
+      "extra": {
+        "position": "-165,-140"
+      },
+      "name": "开始",
+      "id": "start",
+      "state": "completed",
+      "type": "start"
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "end",
+      "extra": {
+        "position": "1670,395"
+      },
+      "name": "结束",
+      "id": "end",
+      "state": "completed",
+      "type": "end"
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "sub",
+      "extra": {
+        "subFlowName": "pine-应用管理-导出-V2（数据包）",
+        "position": "-305,157"
+      },
+      "name": "生成pine文件 ",
+      "id": "6457c40d5a3e467494588be2ff8e5389",
+      "state": "completed",
+      "type": "sub",
+      "flowID": "609a655bae59402babe2c1f439849e03"
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "decision",
+      "extra": {
+        "position": "102.5,10"
+      },
+      "name": "是否pinezip",
+      "id": "16487021c30c44288c1b11a705aba393",
+      "state": "completed",
+      "type": "decision"
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "task",
+      "extra": {
+        "position": "75,340"
+      },
+      "name": "预处理&步骤梳理",
+      "id": "2848cdb4381a4bfc89843b4e81dbd857",
+      "state": "completed",
+      "type": "task",
+      "execute": {
+        "script": {
+          "type": "js",
+          "params": [],
+          "content": "/**\n * 1、pine 文件（已获得）\n * 2、pine 和 faas 文件\n * 3、sysFile表记录获取\n * 4、数据源名称、表结构、数据\n */\n"
+        }
+      }
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "sub",
+      "extra": {
+        "subFlowName": "pine-应用导出-导出pinezip-导出文件（子流程）（4.0+）",
+        "position": "390,340"
+      },
+      "name": "导出文件",
+      "id": "d0b2516dee694c6d938b681ec5a33fb6",
+      "state": "completed",
+      "type": "sub",
+      "flowID": "c807f213943c4b53b108d9009eab0ca8"
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "sub",
+      "extra": {
+        "subFlowName": "pine-应用导出-导出pinezip-导出表-外循环（子流程）（4.0+）",
+        "position": "800,340"
+      },
+      "name": "导出表",
+      "id": "50fd3da905134347b839fc52fdc1c88d",
+      "state": "completed",
+      "type": "sub",
+      "flowID": "7f001788ab10475486e841d11b9dee05"
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "task",
+      "extra": {
+        "position": "1260,340"
+      },
+      "name": "生成pinezip",
+      "id": "9bb2094f7a1841a19f4bd8be1024ae36",
+      "state": "completed",
+      "type": "task",
+      "execute": {
+        "script": {
+          "type": "js",
+          "params": [],
+          "content": "\nconst pinezipDir = \"upload/package/pinezip/\" + context.sys.uuid\n\n// 打包zip\nlet targetFile = pinezipDir + \".pinezip\"\nconst result = kutils.zip(pinezipDir, targetFile, \"\")\n\n// 删除压缩目录\nkutils.fileDelete(pinezipDir)\n\n// 返回下载路径\ntargetFile = targetFile.substring(7) // 去除 upload/\nsetResult(\"targetFile\", targetFile)\nsetResult(\"targetResult\", JSON.stringify({ path: targetFile }))\n\nconst exportDataJson = getResult(\"exportData\")\nsetResult(\"exportDataJson\", JSON.stringify(exportDataJson))\n\n\nconst applicationConfig = getResult(\"applicationConfig\")\nsetResult(\"exportVersion\", applicationConfig?.version || \"\")"
+        }
+      }
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "task",
+      "extra": {
+        "position": "1250,0"
+      },
+      "name": "返回pine下载路径",
+      "id": "c2813c7628e04c26848bb666f6c26029",
+      "state": "completed",
+      "type": "task",
+      "execute": {
+        "script": {
+          "type": "js",
+          "params": [],
+          "content": "// 返回下载路径\nlet targetFile = context.get(\"pineFilePath\")\ntargetFile = targetFile.substring(7) // 去除 upload/\nsetResult(\"result\", JSON.stringify({ path: targetFile }))"
+        }
+      }
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "task",
+      "extra": {
+        "position": "1258,661"
+      },
+      "name": "插入版本表",
+      "listener": {
+        "before": {
+          "script": {
+            "type": "js",
+            "params": [],
+            "content": "\n"
+          }
+        },
+        "after": {
+          "script": {
+            "type": "js",
+            "params": [],
+            "content": "setResult(\"result\", context.get(\"targetResult\"))"
+          }
+        }
+      },
+      "id": "3e32c78051b142ec8058d03387d539f6",
+      "state": "completed",
+      "type": "task",
+      "execute": {
+        "script": {
+          "columnLabelCase": "normal",
+          "sourceName": "MySql",
+          "type": "sql",
+          "params": [],
+          "content": "<tpl>\n\nINSERT INTO \n<if test = \"isLargeVersion == true\">\n dev_app_version_history \n</if>\n<if test = \"isLargeVersion == false\">\n dev_application_version_history\n</if>\n\n(\n id,when_created,who_created,app_id,VERSION,\n file_name,export_data\n)VALUES (\n #{sys.uuid},#{sys.when},#{sys.who},#{appId},#{exportVersion},\n #{targetFile},#{exportDataJson}\n)\n\n</tpl>"
+        }
+      }
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "sub",
+      "extra": {
+        "subFlowName": "获取kpine版本号判断是否大于等于指定版本（子流程）",
+        "position": "-338,-80"
+      },
+      "name": "子流程",
+      "id": "6df92c3b-9382-480f-952f-059a364c5ce2",
+      "state": "completed",
+      "type": "sub",
+      "flowID": "c9a87862a50b4241867146bb6a43cc8e"
+    }
+  ]
+}

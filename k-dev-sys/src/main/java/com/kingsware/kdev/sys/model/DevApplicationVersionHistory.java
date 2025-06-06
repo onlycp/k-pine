@@ -18,7 +18,7 @@ import java.sql.Timestamp;
  * @date 2022-02-13 10:20
  */
 @Data
-@Table
+@Table("dev_app_version_history")
 public class DevApplicationVersionHistory extends BaseModel {
 
     /** id **/

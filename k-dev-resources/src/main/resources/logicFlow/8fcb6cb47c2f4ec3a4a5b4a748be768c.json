@@ -1,0 +1,103 @@
+{
+  "name": "应用历史版本查询",
+  "node_definition": [
+    {
+      "id": "start",
+      "name": "开始",
+      "auto": true,
+      "state": "completed",
+      "debug": false,
+      "type": "start",
+      "variables": {},
+      "extra": {
+        "position": "220,80"
+      }
+    },
+    {
+      "id": "end",
+      "name": "结束",
+      "auto": true,
+      "state": "completed",
+      "debug": false,
+      "type": "end",
+      "variables": {},
+      "extra": {
+        "position": "220,740"
+      }
+    },
+    {
+      "id": "30be352402d647038cf216782e4a13ea",
+      "name": "查询数据",
+      "auto": true,
+      "state": "completed",
+      "debug": false,
+      "type": "task",
+      "execute": {
+        "script": {
+          "sourceName": "MySql",
+          "content": "<tpl>\n\n <if test=\"dbType == 'oracle'\">\n select * from (\n select temp_page.*, ROWNUM rn from (\n\t\t\t\t\tselect * from \n <if test = \"isLargeVersion == true\">\n dev_app_version_history \n </if>\n <if test = \"isLargeVersion == false\">\n dev_application_version_history\n </if>\n where app_id = #{appId}\n order by when_created desc\n ) temp_page\n <if test=\"start != null and limit != null and pageQuery != null and pageQuery == 'true' \">\n where ROWNUM &lt;= #{end}\n </if>\n )\n <if test=\"start != null and limit != null and pageQuery != null and pageQuery == 'true' \">\n where rn &gt; #{start}\n </if>\n </if>\n\n <if test=\"dbType != 'oracle'\">\n select * from \n <if test = \"isLargeVersion == true\">\n dev_app_version_history \n </if>\n <if test = \"isLargeVersion == false\">\n dev_application_version_history\n </if>\n where app_id = #{appId}\n order by when_created desc\n limit ${limit} offset ${start}\n </if>\n\n\n\n</tpl>\n",
+          "type": "sql",
+          "params": [],
+          "columnLabelCase": "normal"
+        }
+      },
+      "variables": {},
+      "listener": {
+        "before": {
+          "script": {
+            "content": "\n",
+            "type": "js",
+            "params": []
+          }
+        },
+        "after": {
+          "script": {
+            "content": "renderPaged()",
+            "type": "js",
+            "params": []
+          }
+        }
+      },
+      "extra": {
+        "position": "-563,420"
+      }
+    },
+    {
+      "id": "d72f58f9-ecb6-42b9-905c-fd28c0ba9e9f",
+      "name": "子流程",
+      "auto": true,
+      "state": "completed",
+      "debug": false,
+      "type": "sub",
+      "variables": {},
+      "extra": {
+        "subFlowName": "获取kpine版本号判断是否大于等于指定版本（子流程）",
+        "position": "-271,42"
+      },
+      "flowID": "c9a87862a50b4241867146bb6a43cc8e"
+    }
+  ],
+  "node_link": [
+    {
+      "id": "b96375dee2bf4380b78ee29865ee2cd7",
+      "name": "查询数据->结束",
+      "from": "30be352402d647038cf216782e4a13ea",
+      "to": "end",
+      "catch_exception": "false"
+    },
+    {
+      "id": "3517baa9-99da-4950-8eb2-4f448a9c9741",
+      "name": "开始->子流程",
+      "from": "start",
+      "to": "d72f58f9-ecb6-42b9-905c-fd28c0ba9e9f",
+      "catch_exception": "false"
+    },
+    {
+      "id": "897003a4-cb7d-4f4e-8f08-b59727c16768",
+      "name": "子流程->查询数据",
+      "from": "d72f58f9-ecb6-42b9-905c-fd28c0ba9e9f",
+      "to": "30be352402d647038cf216782e4a13ea",
+      "catch_exception": "false"
+    }
+  ]
+}
