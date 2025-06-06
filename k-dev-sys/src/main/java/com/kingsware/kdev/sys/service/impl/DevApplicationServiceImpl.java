@@ -626,32 +626,28 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 }
             }
 
-            // 为了兼容性考虑，这个功能暂不进行开发平台的判断，默认都处理
-            // 只有覆盖开发打开时，才允许导入 sys_、dev_ 等表的数据
-            if (forceReplaceDev){
-                List<Method> list = getDevPineTableDataMethods(devPine);
-                for (Method method : list) {
-                    try {
-                        // 数据不为空才继续处理
-                        if (method.invoke(devPine) == null) {
-                            continue;
-                        }
-                        String typeName = method.getGenericReturnType().toString();
-                        String regex = "List<(.+?)>";
-                        Pattern pattern = Pattern.compile(regex);
-                        Matcher matcher = pattern.matcher(typeName);
-                        if (matcher.find()) {
-                            String devModuleType = matcher.group(1);
-                            long importCount = DB.batchSaveOrUpdate((List)method.invoke(devPine), Class.forName(devModuleType));
-                            String varName = method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4);
-                            log.info("完成导入{}：{}", varName, importCount);
-                            importMessageMap.put(varName, importCount);
-                        }
-                    } catch (Exception e) {
-                        log.error(String.format("导入：{}失败",method.getName()), e);
-                    } finally {
+            List<Method> list = getDevPineTableDataMethods(devPine);
+            for (Method method : list) {
+                try {
+                    // 数据不为空才继续处理
+                    if (method.invoke(devPine) == null) {
                         continue;
                     }
+                    String typeName = method.getGenericReturnType().toString();
+                    String regex = "List<(.+?)>";
+                    Pattern pattern = Pattern.compile(regex);
+                    Matcher matcher = pattern.matcher(typeName);
+                    if (matcher.find()) {
+                        String devModuleType = matcher.group(1);
+                        long importCount = DB.batchSaveOrUpdate((List)method.invoke(devPine), Class.forName(devModuleType));
+                        String varName = method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4);
+                        log.info("完成导入{}：{}", varName, importCount);
+                        importMessageMap.put(varName, importCount);
+                    }
+                } catch (Exception e) {
+                    log.error(String.format("导入：{}失败",method.getName()), e);
+                } finally {
+                    continue;
                 }
             }
 
