@@ -614,7 +614,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         if (pineMap.containsKey("pages")) {
             List<Map<String, Object>> list = (List<Map<String, Object>>) pineMap.get("pages");
             for (Map<String, Object> map : list) {
-                MapUtil.transMapBooleanToInt(map, "devStatus", "enableStatus");
+                MapUtil.transMapBooleanToInt(map, "devStatus", "enableStatus", "loginRequired");
                 MapUtil.transMapDateToString(map, "whenCreated", "whenModified");
             }
 
