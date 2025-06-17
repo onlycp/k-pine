@@ -834,6 +834,10 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                         File[] appFiles = pines.listFiles();
                         if(pines.exists() && appFiles != null && appFiles.length > 0){
                             for (File pine : appFiles) {
+                                // 排除 MacOS 文件
+                                if (!pine.getName().toLowerCase().endsWith(".pine")){
+                                    continue;
+                                }
                                 String json = FileUtils.readFile(pine);
                                 importApp(json, argv.getTeamId());
                             }
@@ -854,6 +858,9 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                         File[] jsonFiles = sysFileFiles.listFiles();
                         if(sysFileFiles.exists() && jsonFiles!= null && jsonFiles.length > 0){
                             for (File jsonFile : jsonFiles) {
+                                if (jsonFile.isDirectory() || jsonFile.getName().equalsIgnoreCase(".DS_Store")) {
+                                    continue;
+                                }
                                 String content = FileUtils.readFile(jsonFile);
                                 importSysFileData(content);
                             }
@@ -861,7 +868,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                         // 执行DDL + 导入数据
                         logStack.addMessage(I18n.t("DevApplicationServiceImpl.beginDDL", "开始导入DDL和表数据:") + sysFile.getFileOriginalName());
                         File ddlFiles = new File(unzipPath + "/sqls");
-                        File[] ddlFile = ddlFiles.listFiles();
+                        File[] ddlFile = ddlFiles.listFiles(e -> e.isDirectory() && !e.getName().equalsIgnoreCase("__MACOSX"));
                         if(ddlFiles.exists() && ddlFile!= null && ddlFile.length > 0){
                             for (File ddl : ddlFile) {
                                 if (ddl.isDirectory()) {
@@ -988,10 +995,13 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
      * 拷贝pine文件（pinezip导入）
      */
     public void copyFileToPine(File source, String prefix) throws Exception {
-        if (!source.exists()){
+        if (!source.exists() || source.getName().equalsIgnoreCase(".DS_Store")){
             return;
         }
         if(source.isDirectory()){
+            if (source.getName().equalsIgnoreCase("__MACOSX")){
+                return;
+            }
             File[] listFiles = source.listFiles();
             for (File file : listFiles) {
                 copyFileToPine(file, prefix);
@@ -1012,10 +1022,13 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
      * 拷贝faas文件（pinezip导入）
      */
     public void copyFileToFaas(File source, String prefix) throws Exception {
-        if (!source.exists()){
+        if (!source.exists() || source.getName().equalsIgnoreCase(".DS_Store")){
             return;
         }
         if(source.isDirectory()){
+            if (source.getName().equalsIgnoreCase("__MACOSX")){
+                return;
+            }
             File[] listFiles = source.listFiles();
             for (File file : listFiles) {
                 copyFileToFaas(file, prefix);
