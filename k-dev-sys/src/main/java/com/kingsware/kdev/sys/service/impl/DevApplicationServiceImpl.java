@@ -959,7 +959,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                         suffix += ")";
                         String sql = prefix + suffix;
                         try {
-                            DB.executeUpdateSql(sql, params.toArray());
+                            DB.byName(dsName).executeUpdateSql(sql, params.toArray());
                         } catch (Exception e) {
                         }
                     }
