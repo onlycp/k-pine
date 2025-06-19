@@ -918,6 +918,9 @@ public class KAuthFilter implements Filter {
             Object phoneNumber = argvMap.get("phoneNumber");
             if (phoneNumber != null && StringUtils.isNotEmpty(phoneNumber.toString())) {
                 String uname = KClientContext.getContext().getUsername();
+                if (StringUtils.isEmpty(uname)) {
+                    return phoneNumber.toString();
+                }
                 return uname;
             }
         }
