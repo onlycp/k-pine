@@ -9,6 +9,9 @@ import com.kingsware.kdev.core.context.SpringContext;
 import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,16 +24,21 @@ import java.util.Map;
  * @version 1.0.0
  * @date 2021/12/29 10:20 下午
  */
+@Component
 public class BaiduTranslate {
+
+    private static String appid;
+    private static String securityKey;
+
+    @Autowired
+    public void setProperties(BaiduTranslateProperties properties) {
+        BaiduTranslate.appid = properties.getAppid();
+        BaiduTranslate.securityKey = properties.getSecurityKey();
+    }
 
     /** 接口地址 **/
     private final static String url = "http://api.fanyi.baidu.com/api/trans/vip/translate";
 
-    /** appid **/
-    private final static String appid = SpringContext.getProperties("app.baidu.translate.appid", "20221009001378798"); // 通过application.properties配置
-
-    /** 密钥 **/
-    private final static String securityKey = SpringContext.getProperties("app.baidu.translate.securityKey", "rjVnXG_xAbT4mYHd6h9G"); // 通过application.properties配置
     private static final Logger log = LoggerFactory.getLogger(BaiduTranslate.class);
 
     @Data
@@ -91,4 +99,25 @@ public class BaiduTranslate {
 
 
 
+}
+
+@Component
+@ConfigurationProperties(prefix = "app.baidu.translate")
+class BaiduTranslateProperties {
+    private String appid;
+    private String securityKey;
+
+    // 必须有setter方法
+    public void setAppid(String appid) {
+        this.appid = appid;
+    }
+    public void setSecurityKey(String securityKey) {
+        this.securityKey = securityKey;
+    }
+    public String getAppid() {
+        return appid;
+    }
+    public String getSecurityKey() {
+        return securityKey;
+    }
 }
