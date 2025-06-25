@@ -5,6 +5,7 @@ import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.MD5Utils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.core.util.ThreadUtils;
+import com.kingsware.kdev.core.context.SpringContext;
 import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,10 +27,10 @@ public class BaiduTranslate {
     private final static String url = "http://api.fanyi.baidu.com/api/trans/vip/translate";
 
     /** appid **/
-    private final static String appid = "20200624000504919";
+    private final static String appid = SpringContext.getProperties("app.baidu.translate.appid", "20221009001378798"); // 通过application.properties配置
 
     /** 密钥 **/
-    private final static String securityKey = "wUmVbXTCgte52AOc9PrV";
+    private final static String securityKey = SpringContext.getProperties("app.baidu.translate.securityKey", "rjVnXG_xAbT4mYHd6h9G"); // 通过application.properties配置
     private static final Logger log = LoggerFactory.getLogger(BaiduTranslate.class);
 
     @Data

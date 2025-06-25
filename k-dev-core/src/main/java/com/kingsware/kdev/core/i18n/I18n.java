@@ -444,11 +444,16 @@ public class I18n {
     }
 
     public static void translateApp(String appId) {
-        List<String> i18ns = DB.findSingleAttributeList(String.class, "select id from sys_i18n where message not like '%en_US%' or message like '%\"en_US\":null%' or message like '%\"en_US\":\"\",%' and app_id=? order by when_created asc", appId);
+        List<String> i18ns = DB.findSingleAttributeList(String.class, "select id from sys_i18n " +
+                "where (message not like '%en_US%' or message like '%\"en_US\":null%' or message like '%\"en_US\":\"\",%') " +
+                "and app_id=? order by when_created asc", appId);
         ExecutorService executorService = Executors.newFixedThreadPool(10);
         for (int i = 0; i < i18ns.size(); i++) {
             int finalI = i;
             int finalI1 = i;
+            if (executorService.isShutdown() || executorService.isTerminated()) {
+                log.warn("translate i18n ExecutorService error!");
+            }
             executorService.submit(() -> {
                 translate(i18ns.get(finalI));
                 log.info("translate i18n: {}, 进度:{}/{}", i18ns.get(finalI1), finalI1 +1, i18ns.size());
