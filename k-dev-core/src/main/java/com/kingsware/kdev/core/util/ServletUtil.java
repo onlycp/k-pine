@@ -9,6 +9,7 @@ import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.bean.KFlowUploadFile;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.entity.StringEntity;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -302,6 +303,7 @@ public class ServletUtil {
             String name = names.nextElement();
             String value = request.getParameter(name);
             params.put(name, value);
+
         }
         // 获取path变量
         if (api != null) {
@@ -365,6 +367,25 @@ public class ServletUtil {
 
         // 返回
         return params;
+    }
+
+    /**
+     * 获取请求字符集
+     * @param request
+     * @return
+     */
+    public static String getRequestCharset(HttpServletRequest request) {
+        String contentType = request.getContentType();
+        String contentCharset = request.getHeader("Content-encoding");
+        if (contentCharset != null && contentCharset.toLowerCase().equalsIgnoreCase("gbk")) {
+            return "GBK";
+        }
+        else if (contentType != null && contentType.toLowerCase().contains("gbk")) {
+            return "GBK";
+        }
+        log.info("urlL{}, contentType：{}, contentCharset:{}, CharacterEncoding:{}", request.getRequestURI(), contentType, contentCharset, request.getCharacterEncoding() );
+        return request.getCharacterEncoding();
+
     }
 
     public static Map<String, Object> getRequestData() {
@@ -455,8 +476,9 @@ public class ServletUtil {
      * @param object    对象
      */
     public static void responseJson(HttpServletResponse response, Object object) {
-        response.setCharacterEncoding("UTF-8");
-        response.setContentType("application/json; charset=utf-8");
+        String charset = ServletUtil.getCharset();
+        response.setCharacterEncoding(charset);
+        response.setContentType("application/json; charset=" + charset);
         try (PrintWriter out = response.getWriter()) {
             String responseBody = new ObjectMapper().writeValueAsString(object);
             out.append(responseBody);
@@ -538,14 +560,43 @@ public class ServletUtil {
         }
     }
 
+    /**
+     * 获取字符集
+     * @return
+     */
+    public static String getCharset() {
+        return getCharset(ServletUtil.request());
+    }
+
+
+    /**
+     * 获取字符集
+     * @param request
+     * @return
+     */
+    public static String getCharset(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        if (uri.contains("/gbk")) {
+            return "GBK";
+        }
+        else {
+            return "UTF-8";
+        }
+    }
+
+    /**
+     * 输出原始数据
+     * @param response
+     * @param content
+     */
     public static void responseRaw(HttpServletResponse response, String content) {
         if (content == null || content.isEmpty()) {
             return;
         }
-
+        String charset = getCharset();
         // 设置默认编码
-        response.setCharacterEncoding("UTF-8");
-        
+        response.setCharacterEncoding(charset);
+
         // 根据内容格式判断 Content-Type
         String contentType = "text/plain";
         if (content.trim().startsWith("<")) {
@@ -561,12 +612,20 @@ public class ServletUtil {
         }
 
         // 设置 Content-Type
-        response.setContentType(contentType + ";charset=UTF-8");
+        response.setContentType(contentType + ";charset=" + charset);
 
         try {
-            response.getWriter().write(content);
+            if (charset.equalsIgnoreCase("gbk")) {
+                byte[] bytes = content.getBytes("GBK");
+                response.getWriter().write(new String(bytes, "GBK"));
+            }
+            else {
+                response.getWriter().write(content);
+            }
+
+
             response.getWriter().flush();
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException("响应内容写入失败", e);
         }
     }
@@ -641,7 +700,7 @@ public class ServletUtil {
                 Map<String, Object> map = JsonUtil.toMap(requestBody);
                 stringObjectTreeMap.putAll(map);
             } catch (Exception e) {
-                log.error("error", e);
+                //log.error("error", e);
             }
         }
 

@@ -1,5 +1,7 @@
 package com.kingsware.kdev.core.util;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -366,6 +368,75 @@ public class StringUtils {
         return str.substring(0, avgSize) + "...." + str.substring(str.length()-avgSize);
     }
 
+    /**
+     * 通用编码转换方法
+     * @param str           原始字符串
+     * @param sourceCharset 源编码
+     * @param targetCharset 目标编码
+     * @return              转换后的字符串
+     */
+    public static String convertEncoding(String str, String sourceCharset, String targetCharset) {
+        if (StringUtils.isEmpty(str)) {
+            return str;
+        }
+        try {
+            byte[] bytes = str.getBytes(sourceCharset);
+            return new String(bytes, targetCharset);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("编码转换失败: " + e.getMessage(), e);
+        }
+    }
 
+    /**
+     * UTF-8 转 GBK
+     * @param str   UTF-8编码的字符串
+     * @return      GBK编码的字符串
+     */
+    public static String utf8ToGbk(String str) {
+        return convertEncoding(str, StandardCharsets.UTF_8.name(), "GBK");
+    }
+
+    /**
+     * GBK 转 UTF-8
+     * @param str   GBK编码的字符串
+     * @return      UTF-8编码的字符串
+     */
+    public static String gbkToUtf8(String str) {
+        return convertEncoding(str, "GBK", StandardCharsets.UTF_8.name());
+    }
+
+    /**
+     * 获取字符串的字节数组（指定编码）
+     * @param str       字符串
+     * @param charset   编码
+     * @return          字节数组
+     */
+    public static byte[] getBytes(String str, String charset) {
+        if (StringUtils.isEmpty(str)) {
+            return new byte[0];
+        }
+        try {
+            return str.getBytes(charset);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("获取字节数组失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 从字节数组创建字符串（指定编码）
+     * @param bytes     字节数组
+     * @param charset   编码
+     * @return          字符串
+     */
+    public static String fromBytes(byte[] bytes, String charset) {
+        if (bytes == null || bytes.length == 0) {
+            return "";
+        }
+        try {
+            return new String(bytes, charset);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("从字节数组创建字符串失败: " + e.getMessage(), e);
+        }
+    }
 
 }

@@ -227,7 +227,13 @@ public class KAuthFilter implements Filter {
                     String contentType = request.getContentType();
                     if (contentType == null || !contentType.toLowerCase().contains("multipart/form-data")) {
                         wrapperRequest.getInputStream();
-                        requestBody = new String(wrapperRequest.getRequestBody(), StandardCharsets.UTF_8);
+                        if (url.toLowerCase().contains("/gbk")) {
+                            requestBody = new String(wrapperRequest.getRequestBody(), "gbk");
+                        }
+                        else {
+                            requestBody = new String(wrapperRequest.getRequestBody(), StandardCharsets.UTF_8);
+                        }
+
                     }
                     if (ServletUtil.isAjaxRequest(request)) {
                         wrapperResponse = new ContentCachingResponseWrapper(response);
