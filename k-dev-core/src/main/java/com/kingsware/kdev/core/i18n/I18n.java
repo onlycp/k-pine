@@ -189,9 +189,13 @@ public class I18n {
 
         // 如果消息为空且语言代码不为空，则尝试从公共消息数据中获取消息
         if (StringUtils.isEmpty(message)) {
-            Map<String, Map<String, String>> publicI18nData = getI18nData(SysConst.pineAppId);
-            if (Objects.requireNonNull(publicI18nData).containsKey(key)) {
-                message = publicI18nData.get(key).get(lang);
+            for (String p : appI18nData.keySet()) {
+                if (appI18nData.get(p).getI18nData().containsKey(key)) {
+                    message = appI18nData.get(p).getI18nData().get(key).get(lang);
+                    if (StringUtils.isNotEmpty( message)) {
+                        return message;
+                    }
+                }
             }
         }
 
@@ -217,22 +221,18 @@ public class I18n {
         try {
             // 初始化消息为默认值
             String message = defaultMessage;
-            // 如果国际化数据中包含给定的键
-            Map<String, Map<String, String>> i18nData = getI18nData(appId);
-            if (i18nData == null) {
-                i18nData = getI18nData(SysConst.pineAppId);
+            // 尝试用特定语言获取消息
+            if (key.equalsIgnoreCase("消息通知")) {
+                System.currentTimeMillis();
             }
-            if (Objects.requireNonNull(i18nData).containsKey(key)) {
-                // 尝试用特定语言获取消息
-                String str = getMessage(appId, key, lang());
-                // 如果获取的消息为空或仅含空格，则回退到默认消息
-                if (StringUtils.isEmpty(str)) {
-                    message = defaultMessage;
-                }
-                else {
-                    // 否则，使用获取到的消息
-                    message = str;
-                }
+            String str = getMessage(appId, key, lang());
+            // 如果获取的消息为空或仅含空格，则回退到默认消息
+            if (StringUtils.isEmpty(str)) {
+                message = defaultMessage;
+            }
+            else {
+                // 否则，使用获取到的消息
+                message = str;
             }
             // 作为额外的检查，如果此时消息仍然为空或仅含空格，则设置为默认消息
             if (StringUtils.isEmpty(message)) {
