@@ -9,7 +9,6 @@ import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.bean.KFlowUploadFile;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.entity.StringEntity;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -369,24 +368,6 @@ public class ServletUtil {
         return params;
     }
 
-    /**
-     * 获取请求字符集
-     * @param request
-     * @return
-     */
-    public static String getRequestCharset(HttpServletRequest request) {
-        String contentType = request.getContentType();
-        String contentCharset = request.getHeader("Content-encoding");
-        if (contentCharset != null && contentCharset.toLowerCase().equalsIgnoreCase("gbk")) {
-            return "GBK";
-        }
-        else if (contentType != null && contentType.toLowerCase().contains("gbk")) {
-            return "GBK";
-        }
-        log.info("urlL{}, contentType：{}, contentCharset:{}, CharacterEncoding:{}", request.getRequestURI(), contentType, contentCharset, request.getCharacterEncoding() );
-        return request.getCharacterEncoding();
-
-    }
 
     public static Map<String, Object> getRequestData() {
         if (KClientContext.getContext() != null && KClientContext.getContext().getRequest() != null) {
@@ -476,12 +457,13 @@ public class ServletUtil {
      * @param object    对象
      */
     public static void responseJson(HttpServletResponse response, Object object) {
-        String charset = ServletUtil.getCharset();
+        String charset = KClientContext.getContext().getRequestCharset();
         response.setCharacterEncoding(charset);
         response.setContentType("application/json; charset=" + charset);
         try (PrintWriter out = response.getWriter()) {
             String responseBody = new ObjectMapper().writeValueAsString(object);
-            out.append(responseBody);
+            byte[] bytes = responseBody.getBytes(charset);
+            out.write(new String(bytes, charset));
         } catch (IOException e) {
             log.error("error", e);
         }
@@ -553,36 +535,16 @@ public class ServletUtil {
     public static void responseJsonString(HttpServletResponse response, String content) {
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json; charset=utf-8");
+        String charset = KClientContext.getContext().getRequestCharset();
         try (PrintWriter out = response.getWriter()) {
-            out.append(content);
+            byte[] bytes = content.getBytes(charset);
+            out.write(new String(bytes, charset));
         } catch (IOException e) {
             log.error("error", e);
         }
     }
 
-    /**
-     * 获取字符集
-     * @return
-     */
-    public static String getCharset() {
-        return getCharset(ServletUtil.request());
-    }
 
-
-    /**
-     * 获取字符集
-     * @param request
-     * @return
-     */
-    public static String getCharset(HttpServletRequest request) {
-        String uri = request.getRequestURI();
-        if (uri.contains("/gbk")) {
-            return "GBK";
-        }
-        else {
-            return "UTF-8";
-        }
-    }
 
     /**
      * 输出原始数据
@@ -593,7 +555,7 @@ public class ServletUtil {
         if (content == null || content.isEmpty()) {
             return;
         }
-        String charset = getCharset();
+        String charset = KClientContext.getContext().getRequestCharset();
         // 设置默认编码
         response.setCharacterEncoding(charset);
 
@@ -615,15 +577,8 @@ public class ServletUtil {
         response.setContentType(contentType + ";charset=" + charset);
 
         try {
-            if (charset.equalsIgnoreCase("gbk")) {
-                byte[] bytes = content.getBytes("GBK");
-                response.getWriter().write(new String(bytes, "GBK"));
-            }
-            else {
-                response.getWriter().write(content);
-            }
-
-
+            byte[] bytes = content.getBytes(charset);
+            response.getWriter().write(new String(bytes, charset));
             response.getWriter().flush();
         } catch (Exception e) {
             throw new RuntimeException("响应内容写入失败", e);
