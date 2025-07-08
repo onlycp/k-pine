@@ -920,7 +920,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 List<SqlSegment> sqlSegments = SqlUtils.parseSql(cnt);
                 for (SqlSegment sql : sqlSegments) {
                     String curSql = sql.getSql();
-                    if (DB.getDefault().getConfig().getInnerType().equalsIgnoreCase("Oracle") && curSql.endsWith(";")) {
+                    if (DB.byName(dsName).getConfig().getInnerType().equalsIgnoreCase("Oracle") && curSql.endsWith(";")) {
                         curSql = curSql.substring(0, curSql.length() - 1);
                     }
                     // 如果是 delete or drop 语句，执行判断
@@ -933,6 +933,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                     try {
                         SqlUtils.executeSql(dsName, curSql);
                     }catch (Exception ignored) {
+                        ignored.printStackTrace();
                     }
                 }
             }
