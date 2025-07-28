@@ -16,7 +16,7 @@ import com.kingsware.kdev.core.util.StringUtils;
 public class AESInstance implements EncryptInterface {
 
     @Override
-    public String encrypt(String source, AlgorithmConfig config) {
+    public String encrypt(String source, AlgorithmConfig config, String slat) {
         AESConfig aesConfig = (AESConfig) config;
         // 获取密钥
         String secret = aesConfig.getSecret();
@@ -32,9 +32,9 @@ public class AESInstance implements EncryptInterface {
     }
 
     @Override
-    public boolean validate(String source, String encrypted, AlgorithmConfig config) {
+    public boolean validate(String source, String encrypted, AlgorithmConfig config, String slat) {
         // 加密源串
-        String str1 =  encrypt(source, config);
+        String str1 =  encrypt(source, config, slat);
         // 返回
         return str1.equalsIgnoreCase(encrypted);
     }

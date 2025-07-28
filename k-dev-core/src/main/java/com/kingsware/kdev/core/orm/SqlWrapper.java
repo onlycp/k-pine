@@ -77,6 +77,36 @@ public class SqlWrapper {
     }
 
     /**
+     *  模糊查询
+     * @param columnName
+     * @param context
+     * @return
+     */
+    public SqlWrapper ilike(String columnName, String context) {
+        sqlBuffer.append(" and ");
+        sqlBuffer.append(columnName).append(" ");
+        sqlBuffer.append(" like ");
+        sqlBuffer.append("concat('%',?,'%') ");
+        params.add(context);
+        return this;
+    }
+
+    /**
+     *  模糊查询
+     * @param columnName
+     * @param context
+     * @return
+     */
+    public SqlWrapper notlike(String columnName, String context) {
+        sqlBuffer.append(" and ");
+        sqlBuffer.append(columnName).append(" ");
+        sqlBuffer.append(" not like ");
+        sqlBuffer.append("concat('%',?,'%') ");
+        params.add(context);
+        return this;
+    }
+
+    /**
      * In 查询
      * @param columnName 列表
      * @param inSet      id的集合

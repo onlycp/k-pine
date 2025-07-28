@@ -223,25 +223,33 @@ public class KAuthFilter implements Filter {
                 // 如果是接口或者url文件
                 if (url.startsWith(apiUrlPrefix) || url.contains(kPageFlag)) {
 
-                    wrapperRequest = new MyHttpServletRequestWrapper(request);
-                    String contentType = request.getContentType();
-                    if (contentType == null || !contentType.toLowerCase().contains("multipart/form-data")) {
-                        wrapperRequest.getInputStream();
-                        requestBody = new String(wrapperRequest.getRequestBody(), StandardCharsets.UTF_8);
-                    }
-                    if (ServletUtil.isAjaxRequest(request)) {
-                        wrapperResponse = new ContentCachingResponseWrapper(response);
-                    }
                     if (url.startsWith(apiUrlPrefix)) {
                         contextPath = apiUrlPrefix;
                     }
+                    // 初始化青松上下文
+                    initContext(request, response);
                     // log.info("Take-{}, {}",2,  (System.currentTimeMillis()-tt0));
                     // 获取配置的接口信息
                     path = url.replaceFirst(contextPath, "");
                     api = ApiManager.getInstance().getApi(method, path);
                     apiDefine = getApiDefine(request, response);
-                    // 初始化青松上下文
-                    initContext(request, response);
+                    if (api != null) {
+                        KClientContext.getContext().setRequestCharset(api.getReqeustCharset());
+                    }
+
+                    wrapperRequest = new MyHttpServletRequestWrapper(request);
+                    String contentType = request.getContentType();
+                    if (contentType == null || !contentType.toLowerCase().contains("multipart/form-data")) {
+                        wrapperRequest.getInputStream();
+                        requestBody = new String(wrapperRequest.getRequestBody(), KClientContext.getContext().getRequestCharset());
+
+                    }
+                    if (ServletUtil.isAjaxRequest(request)) {
+                        wrapperResponse = new ContentCachingResponseWrapper(response);
+                    }
+
+
+
                     // 如果是openapi，表示是ignore
                     boolean ignore = false;
                     // 是否开发
@@ -950,6 +958,9 @@ public class KAuthFilter implements Filter {
             Object phoneNumber = argvMap.get("phoneNumber");
             if (phoneNumber != null && StringUtils.isNotEmpty(phoneNumber.toString())) {
                 String uname = KClientContext.getContext().getUsername();
+                if (StringUtils.isEmpty(uname)) {
+                    return phoneNumber.toString();
+                }
                 return uname;
             }
         }

@@ -43,6 +43,8 @@ public class ClientInfo {
     private String username;
     /** api响应适配器 **/
     private String apiRspAdapter;
+    /** 请求字符集 **/
+    private String requestCharset = "utf-8";
 
 
 }

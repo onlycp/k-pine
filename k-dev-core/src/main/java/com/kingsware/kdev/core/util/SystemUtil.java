@@ -19,6 +19,7 @@ import java.util.*;
 @Slf4j
 public class SystemUtil {
 
+    private static String myIp = null;
     /**
      * 获取主机信息
      * @return
@@ -27,10 +28,26 @@ public class SystemUtil {
     public static HostInfo getHost() {
         HostInfo hostInfo = new HostInfo();
         String ip = "";
+
+        String ip = "127.0.0.1";
         // 如果有配置ip，直接从配置里读取
         String configIp = SpringContext.getProperties("network.ip", "");
         if (StringUtils.isNotEmpty(configIp)) {
             ip = configIp;
+        }
+        else {
+            if (myIp != null) {
+                ip = myIp;
+            }
+            else {
+                Optional<Inet4Address> inet4Address = IpUtil.
+                        getLocalIp4Address();
+                if (inet4Address.isPresent()) {
+                    ip = inet4Address.get().getHostAddress();
+                    myIp = ip;
+                }
+            }
+
         }
         else {
             ip = getLocalIPv4Address();

@@ -16,7 +16,7 @@ import com.kingsware.kdev.core.util.StringUtils;
 public class MD5Instance implements EncryptInterface {
 
     @Override
-    public String encrypt(String source, AlgorithmConfig config) {
+    public String encrypt(String source, AlgorithmConfig config, String slat) {
         MD5Config md5Config = (MD5Config) config;
         String encrypted = MD5Utils.md5(source);
         // 获取大小写定义
@@ -30,7 +30,7 @@ public class MD5Instance implements EncryptInterface {
     }
 
     @Override
-    public boolean validate(String source, String encrypted, AlgorithmConfig config) {
+    public boolean validate(String source, String encrypted, AlgorithmConfig config, String slat) {
 
         // 获取大小写定义
         String lowerUpper = getLowerUpper((MD5Config) config);
