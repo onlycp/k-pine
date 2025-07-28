@@ -108,7 +108,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         // 把参数里的加密密码解密出来
         model.setPassword(decodeBase64(argv.getPassword()));
         // 设置密码
-        model.setPassword(EncryptWorker.getInstance().encrypt(model.getPassword()));
+        model.setPassword(EncryptWorker.getInstance().encrypt(model.getPassword(), model.getUsername()));
         // 唯一性校验
         DBChecker<SysUser> checker = DBChecker.build(model, SysUser.class);
         // 名称唯一
@@ -528,7 +528,8 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             if (useUsernamePassword && KClientContext.getContext().isValidatePassFlag()) {
                 Boolean showCode = false;
                 // 把参数里的加密密码解密出来
-                if (!EncryptWorker.getInstance().validate(argv.get("password").toString(), model.getPassword())) {
+                Map<String, Object> encryptContext = JsonUtil.beanToMap(model);
+                if (!EncryptWorker.getInstance().validate(argv.get("password").toString(), model.getPassword(), model.getUsername())) {
                     if(countOfLeave == 0)   {
                         sysCacheService.setCache(lockCacheKey, System.currentTimeMillis() + "");
                         throw BusinessException.serviceThrow(I18n.t("SysUser.tip.fail3","密码错误连续次数已达到{0}次，用户将被锁定{1}分钟", allowErrorCount, userLockMinutes));
@@ -716,13 +717,13 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         argv.setOldPassword(decodeBase64(argv.getOldPassword()));
         argv.setNewPassword(decodeBase64(argv.getNewPassword()));
 
-        if (!EncryptWorker.getInstance().validate(argv.getOldPassword(), model.getPassword())) {
+        if (!EncryptWorker.getInstance().validate(argv.getOldPassword(), model.getPassword(), model.getUsername())) {
             throw BusinessException.serviceThrow(I18n.t("SysUser.tip.oldPasswordFail", "旧密码有误！") );
         }
-        if (EncryptWorker.getInstance().validate(argv.getNewPassword(), model.getPassword())) {
+        if (EncryptWorker.getInstance().validate(argv.getNewPassword(), model.getPassword(), model.getUsername())) {
             throw BusinessException.serviceThrow(I18n.t("SysUser.tip.passwordSame", "重置的密码不可以与旧密码一样！") );
         }
-        model.setPassword(EncryptWorker.getInstance().encrypt(argv.getNewPassword()));
+        model.setPassword(EncryptWorker.getInstance().encrypt(argv.getNewPassword(), model.getUsername()));
         // 保存
         DB.update(model);
         // 保存到密码日志
@@ -889,10 +890,10 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         }
         // 把参数里的加密密码解密出来
         argv.setPassword(decodeBase64(argv.getPassword()));
-        if (EncryptWorker.getInstance().validate(argv.getPassword(), model.getPassword())) {
+        if (EncryptWorker.getInstance().validate(argv.getPassword(), model.getPassword(), model.getUsername())) {
             throw BusinessException.serviceThrow(I18n.t("SysUser.tip.passwordSame", "重置的密码不可以与旧密码一样！"));
         }
-        model.setPassword(EncryptWorker.getInstance().encrypt(argv.getPassword()));
+        model.setPassword(EncryptWorker.getInstance().encrypt(argv.getPassword(), model.getUsername()));
         // 保存
         DB.update(model);
         // 保存密码日志

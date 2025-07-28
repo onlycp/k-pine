@@ -2,6 +2,8 @@ package com.kingsware.kdev.core.encrypt;
 
 import com.kingsware.kdev.core.encrypt.config.AlgorithmConfig;
 
+import java.util.Map;
+
 /**
  *
  *
@@ -18,7 +20,7 @@ public interface EncryptInterface {
      * @param config     配置
      * @return          加密后的数据
      */
-    String encrypt(String source, AlgorithmConfig config);
+    String encrypt(String source, AlgorithmConfig config, String slat);
 
     /**
      *  校验结果
@@ -27,6 +29,6 @@ public interface EncryptInterface {
      * @param config     配置
      * @return          加密后的数据
      */
-    boolean validate(String source, String encrypted, AlgorithmConfig config);
+    boolean validate(String source, String encrypted, AlgorithmConfig config, String slat);
 
 }
