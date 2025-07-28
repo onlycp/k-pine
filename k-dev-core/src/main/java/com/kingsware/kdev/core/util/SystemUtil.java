@@ -27,7 +27,6 @@ public class SystemUtil {
     @SneakyThrows
     public static HostInfo getHost() {
         HostInfo hostInfo = new HostInfo();
-        String ip = "";
 
         String ip = "127.0.0.1";
         // 如果有配置ip，直接从配置里读取
@@ -48,9 +47,6 @@ public class SystemUtil {
                 }
             }
 
-        }
-        else {
-            ip = getLocalIPv4Address();
         }
 
         hostInfo.setHostName(ip);
