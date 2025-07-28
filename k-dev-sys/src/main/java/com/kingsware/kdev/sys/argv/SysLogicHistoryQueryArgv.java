@@ -23,6 +23,9 @@ public class SysLogicHistoryQueryArgv extends BasePageArgv {
     /** 流程JSON */
     private String flowJson;
 
+    /** 关键字 */
+    private String keyword;
+
     /** 创建人员 **/
     private String whoCreated;
 

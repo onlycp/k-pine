@@ -116,7 +116,14 @@ public class SysLogicHistoryServiceImpl extends BaseServiceImpl implements SysLo
         if (StringUtils.isNotEmpty(argv.getFlowId())) {
             wrapper.addCondition("dph.flow_id", Op.EQ, argv.getFlowId());
         }
-        wrapper.sortBy("dph.when_created desc");
+        if (StringUtils.isNotEmpty(argv.getKeyword())) {
+            wrapper.addCondition("dph.version_tag", Op.LIKE, "%" + argv.getKeyword() + "%");
+            // 如果有 keyword，优先按 version_tag_time 再按创建时间排序
+            wrapper.sortBy("dph.version_tag_time DESC, dph.when_created DESC");
+        } else {
+            // 默认排序：version_tag DESC，再按创建时间倒序
+            wrapper.sortBy("dph.version_tag DESC, dph.when_created DESC");
+        }
         return (PageDataRet<SysLogicHistoryRet>) query(wrapper.getSql(), wrapper.getParams(), argv, SysLogicHistoryRet.class);
     }
 
