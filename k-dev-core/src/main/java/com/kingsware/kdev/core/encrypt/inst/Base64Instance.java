@@ -3,7 +3,9 @@ package com.kingsware.kdev.core.encrypt.inst;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.encrypt.EncryptInterface;
 import com.kingsware.kdev.core.encrypt.config.AlgorithmConfig;
+import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.util.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -15,6 +17,7 @@ import java.util.Base64;
  * @version 1.0.0
  * @date 2021/12/27 2:50 下午
  */
+@Slf4j
 public class Base64Instance implements EncryptInterface {
 
     @Override
@@ -38,8 +41,8 @@ public class Base64Instance implements EncryptInterface {
             return str1.equals(encrypted);
         }
         else {
-            String encryptBase64 = new String(Base64.getEncoder().encode(source.getBytes(StandardCharsets.UTF_8)));
-            return encryptBase64.equals(encrypted);
+            log.warn("密码存在安全问题，已禁用");
+            return false;
         }
     }
 
