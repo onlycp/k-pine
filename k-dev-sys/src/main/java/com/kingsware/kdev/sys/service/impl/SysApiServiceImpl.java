@@ -27,6 +27,7 @@ import com.kingsware.kdev.sys.manager.UniOpsTokenStore;
 import com.kingsware.kdev.sys.model.SysApi;
 import com.kingsware.kdev.sys.ret.SysApiRet;
 import com.kingsware.kdev.sys.service.SysApiService;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -163,6 +164,7 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
      *
      * @return 调用数据
      */
+    @SneakyThrows
     @Override
     public BaseRet<?> callUniops(Map<String, Object> params) {
         HttpServletRequest request = ServletUtil.request();

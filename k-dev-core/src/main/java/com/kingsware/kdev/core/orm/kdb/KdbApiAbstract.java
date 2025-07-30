@@ -192,7 +192,7 @@ public abstract class KdbApiAbstract implements KdbApi {
     @Override
     public List<DataSourceInfo> queryDataSource(DataSourceQueryArgv dataSourceInfo) {
         KdbRet<List> list = post(getServer(), dataSourceInfo, QUERY_DS_URL, List.class, true);
-        log.info("数据源查询响应:{}", JsonUtil.toJson(list));
+        //log.info("数据源查询响应:{}", JsonUtil.toJson(list));
         String json = JsonUtil.toJson(list.getResponseBody());
         return JsonUtil.toListBean(json, DataSourceInfo.class);
     }
@@ -342,7 +342,7 @@ public abstract class KdbApiAbstract implements KdbApi {
             if (api.contains("sync")) {
                 System.currentTimeMillis();
             }
-            String responseBody = HttpUtil.postBody(url, requestBody, Collections.emptyMap(), anyone);
+            String responseBody = HttpUtil.postFaas(url, requestBody, Collections.emptyMap());
             KdbRet<T> ret = JsonUtil.toBean(responseBody, KdbRet.class, tClass);
             if (ret == null) {
                 throw new OrmDbException(I18n.t("KdbApiAbstract.error2", "响应数据不合法") + responseBody);
@@ -366,8 +366,7 @@ public abstract class KdbApiAbstract implements KdbApi {
                 throw new OrmDbException(I18n.t("KdbApiAbstract.kdb", "kdb响应数据不合法，响应内容:") + responseBody);
             }
             return ret;
-        } catch (HttpClientException e) {
-            log.error("接口调用，响应码:{}, 响应信息：{}，接口:{}, 参数:{}", e.getCode(), e.getMessage(), e.getUrl(), e.getParams());
+        } catch (BusinessException e) {
             throw new OrmDbException(e.getMessage());
         }
     }

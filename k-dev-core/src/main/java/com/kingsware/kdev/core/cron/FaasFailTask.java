@@ -56,7 +56,7 @@ public class FaasFailTask implements KTask, KRunner {
                 String recordStr = new String(Base64.getDecoder().decode(line), StandardCharsets.UTF_8);
                 FaasFailRecord record = JsonUtil.toBean(recordStr, FaasFailRecord.class);
                 try {
-                    HttpUtil.callHttp(record.getUrl(), record.getBody(), record.getHeaderMap());
+                    HttpUtil.postFaas(record.getUrl(), record.getBody(), record.getHeaderMap());
                     log.info("补发:{}", JsonUtil.toJson(record));
                     Files.write(Paths.get(seqFile), (i+"").getBytes(StandardCharsets.UTF_8));
                 } catch (Exception e) {

@@ -1,71 +1,47 @@
 package com.kingsware.kdev.core.util;
 
-import com.kingsware.kdev.core.context.NonStaticResourceHttpRequestHandler;
+import com.kingsware.kdev.core.bean.FaasRequestBody;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.HttpClientException;
 import com.kingsware.kdev.core.i18n.I18n;
-import com.kingsware.kdev.core.orm.FaasFailRecord;
 import com.kingsware.kdev.core.plugins.FaasChannelPlugin;
-import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
-import org.yaml.snakeyaml.util.UriEncoder;
+import okhttp3.*;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static com.kingsware.kdev.core.context.NonStaticResourceHttpRequestHandler.URL_PATH;
-import static org.springframework.util.MimeTypeUtils.APPLICATION_OCTET_STREAM_VALUE;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Http工具类
+ * Http工具类 - 基于OkHttp重构
  *
  * @author chen peng
- * @version 1.0.0
- * @date 2021/12/24 8:42 上午
+ * @version 2.0.0
+ * @date 2024/01/01
  */
 @Slf4j
 public class HttpUtil {
 
-
-    private static final int TIME_OUT = 8 * 1000;                          //超时时间
-    private static final String CHARSET = "utf-8";                         //编码格式
-    private static final String PREFIX = "--";                            //前缀
-    private static final String BOUNDARY = UUID.randomUUID().toString();  //边界标识 随机生成
-    private static final String CONTENT_TYPE = "multipart/form-data";     //内容类型
-    private static final String LINE_END = "\r\n";
-
+    private static final OkHttpClient client;
+    private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
+    private static final MediaType FORM = MediaType.get("multipart/form-data");
     private static final Map<String, FaasChannelPlugin> faasChannelPluginMap = new HashMap<>();
-//
-//    public static final okhttp3.MediaType JSON = okhttp3.MediaType.get("application/json");
-//
-//    private static  OkHttpClient client = null;
-//    private static final Dns SYSTEM = Dns.SYSTEM;
-//
-//
+
     static {
-//        if (client == null) {
-//            client = new OkHttpClient.Builder()
-//                    .dns(new Dns() {
-//
-//                        @NotNull
-//                        @Override
-//                        public List<InetAddress> lookup(@NotNull String hostname) throws UnknownHostException {
-//                            List<InetAddress> inetAddresses = Arrays.asList(InetAddress.getAllByName(hostname));
-//                            return inetAddresses;
-//                        }
-//                    })
-//
-//                    .followRedirects(true)
-//                   .build();
-//        }
+        // 配置OkHttp客户端
+        int maxRetryCount = 3;
+        client = new OkHttpClient.Builder()
+                .dns(new ClusterDns()) // 使用自定义DNS支持集群
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
+                .addInterceptor(new RetryInterceptor(maxRetryCount)) // 使用Interceptor实现重试
+                .build();
+
         loadPlugins();
     }
 
@@ -75,266 +51,549 @@ public class HttpUtil {
     private HttpUtil() {
     }
 
-
-
+    /**
+     * 加载插件
+     */
     private static void loadPlugins() {
-        List<Class<?>> classList =  ClassUtils.getClassesByParentClass("com.kingsware.kdev", FaasChannelPlugin.class);
-        for (Class<?> tClass: classList) {
+        List<Class<?>> classList = ClassUtils.getClassesByParentClass("com.kingsware.kdev", FaasChannelPlugin.class);
+        for (Class<?> tClass : classList) {
             // 生成实例
             try {
                 FaasChannelPlugin plugin = (FaasChannelPlugin) tClass.newInstance();
                 faasChannelPluginMap.put(plugin.name(), plugin);
             } catch (Exception e) {
-                log.error("定时类扫描初始化失败:{}" , e.getMessage());
+                log.error("定时类扫描初始化失败:{}", e.getMessage());
             }
         }
+    }
 
+        /**
+     * 执行HTTP POST请求
+     *
+     * @param apiUrl API的URL地址
+     * @param body 请求体内容
+     * @param headerMap 请求头信息
+     * @return HTTP响应内容
+     * @throws IOException 当HTTP请求失败时抛出
+     */
+    public static String post(String apiUrl, String body, Map<String, String> headerMap) throws IOException {
+        try {
+            // 构建请求体
+            RequestBody requestBody = RequestBody.create(body, JSON);
+
+            // 构建请求头
+            Headers.Builder headersBuilder = new Headers.Builder();
+            if (headerMap != null) {
+                headerMap.forEach(headersBuilder::add);
+            }
+
+
+            // 构建请求
+            Request request = new Request.Builder()
+                    .url(apiUrl)
+                    .post(requestBody)
+                    .headers(headersBuilder.build())
+                    .build();
+
+            // 执行请求
+            try (Response response = client.newCall(request).execute()) {
+                if (!response.isSuccessful()) {
+                    String errorBody = response.body() != null ? response.body().string() : "";
+                    throw new IOException("HTTP request failed with code: " + response.code() +
+                                        (errorBody.isEmpty() ? "" : ", Error: " + errorBody));
+                }
+
+                ResponseBody responseBody = response.body();
+                return responseBody != null ? responseBody.string() : "";
+            }
+
+        } catch (Exception e) {
+            log.error("HTTP POST request failed: {}", e.getMessage(), e);
+            throw new IOException("HTTP POST request failed", e);
+        }
     }
 
 
 
     /**
-     * Get请求
-     * @param apiUrl   请求路径
-     * @param headerMap 请求头
-     * @return  返回结果
+     * 执行HTTP GET请求
+     *
+     * @param apiUrl API的URL地址
+     * @param headerMap 请求头信息
+     * @return HTTP响应内容
+     * @throws IOException 当HTTP请求失败时抛出
      */
-    public static String get(String apiUrl,  Map<String, String> headerMap) throws HttpClientException{
-        // http连接
-        HttpURLConnection connection = null;
-
+    public static String get(String apiUrl, Map<String, String> headerMap) throws Exception {
         try {
-            URL url = new URL(apiUrl);
-            // 根据URL生成HttpURLConnection
-            connection = (HttpURLConnection) url.openConnection();
-            // 设置body模式
-            connection.setDoOutput(true);
-            connection.setDoInput(true);
-            // 设置post方式
-            connection.setRequestMethod("GET");
-            // 禁用缓存
-            connection.setUseCaches(false);
-            // 设置超时时间
-            connection.setConnectTimeout(10000);
-            connection.setReadTimeout(1000*60*10);
-            // 自动执行自定向
-            connection.setInstanceFollowRedirects(true);
-            // 连接复用
-            connection.setRequestProperty("connection", "Keep-Alive");
-            // 设置编码
-            connection.setRequestProperty("charset", "utf-8");
-            //  设置content-type
-            connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-            // 将额外的请求头加入进来
-            if (headerMap != null && !headerMap.isEmpty()) {
-                for (Map.Entry<String, String> entry: headerMap.entrySet()) {
-                    connection.setRequestProperty(entry.getKey(), entry.getValue());
+            // 构建请求头
+            Headers.Builder headersBuilder = new Headers.Builder();
+            if (headerMap != null) {
+                headerMap.forEach(headersBuilder::add);
+            }
+
+            // 构建请求
+            Request request = new Request.Builder()
+                    .url(apiUrl)
+                    .headers(headersBuilder.build())
+                    .build();
+
+            // 执行请求
+            try (Response response = client.newCall(request).execute()) {
+                if (!response.isSuccessful()) {
+                    String errorBody = response.body() != null ? response.body().string() : "";
+                    throw new IOException("HTTP GET request failed with code: " + response.code() +
+                                        (errorBody.isEmpty() ? "" : ", Error: " + errorBody));
+                }
+
+                ResponseBody responseBody = response.body();
+                return responseBody != null ? responseBody.string() : "";
+            }
+
+        } catch (Exception e) {
+            log.error("HTTP GET request failed: {}", e.getMessage(), e);
+            throw new IOException("HTTP GET request failed", e);
+        }
+    }
+
+    /**
+     * 上传文件
+     *
+     * @param apiUrl API的URL地址要
+     * @param fileName 文件名
+     * @param formName 表单字段名
+     * @param inputStream 文件输入流
+     * @param path 文件路径
+     * @return HTTP响应内容
+     * @throws BusinessException 当HTTP请求失败时抛出
+     */
+    public static String uploadFile(String apiUrl, String fileName, String formName,
+                                  InputStream inputStream, String path) throws BusinessException {
+        try {
+            // 构建MultipartBody
+            MultipartBody.Builder bodyBuilder = new MultipartBody.Builder()
+                    .setType(MultipartBody.FORM);
+
+            // 添加文件路径参数
+            if (path != null) {
+                bodyBuilder.addFormDataPart("path", path);
+            }
+
+            // 添加文件
+            byte[] fileBytes = readInputStream(inputStream);
+            bodyBuilder.addFormDataPart(formName, fileName,
+                RequestBody.create(fileBytes, MediaType.get("application/octet-stream")));
+
+            // 构建请求
+            Request request = new Request.Builder()
+                    .url(apiUrl)
+                    .post(bodyBuilder.build())
+                    .build();
+
+            // 执行请求
+            try (Response response = client.newCall(request).execute()) {
+                if (!response.isSuccessful()) {
+                    String errorBody = response.body() != null ? response.body().string() : "";
+                    throw new IOException("File upload failed with code: " + response.code() +
+                                        (errorBody.isEmpty() ? "" : ", Error: " + errorBody));
+                }
+
+                ResponseBody responseBody = response.body();
+                return responseBody != null ? responseBody.string() : "";
+            }
+
+        } catch (Exception e) {
+            log.error("File upload failed: {}", e.getMessage(), e);
+            throw new BusinessException("File upload failed:" +  e.getMessage());
+        }
+    }
+
+    /**
+     * 上传文件（支持额外参数）
+     *
+     * @param apiUrl API的URL地址
+     * @param fileName 文件名
+     * @param formName 表单字段名
+     * @param inputStream 文件输入流
+     * @param params 额外参数
+     * @param header 请求头
+     * @return HTTP响应内容
+     * @throws BusinessException 当上传失败时抛出
+     */
+    public static String uploadFile(String apiUrl, String fileName, String formName,
+                                  InputStream inputStream, Map<String, String> params, Map<String, String> header) throws BusinessException {
+        try {
+            // 构建MultipartBody
+            MultipartBody.Builder bodyBuilder = new MultipartBody.Builder()
+                    .setType(MultipartBody.FORM);
+
+            // 添加额外参数
+            if (params != null) {
+                for (Map.Entry<String, String> entry : params.entrySet()) {
+                    bodyBuilder.addFormDataPart(entry.getKey(), entry.getValue());
                 }
             }
-            // 建立连接
-            connection.connect();
-            // 获取body
-            String responseBody = getBody(connection.getInputStream());
-            // 获取响应结果
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                // 如果是ok，直接返回body
-                return responseBody;
+
+            // 添加文件
+            byte[] fileBytes = readInputStream(inputStream);
+            bodyBuilder.addFormDataPart(formName, fileName,
+                RequestBody.create(fileBytes, MediaType.get("application/octet-stream")));
+
+            // 构建请求头
+            Headers.Builder headersBuilder = new Headers.Builder();
+            if (header != null) {
+                header.forEach(headersBuilder::add);
             }
-            else {
-                throw new HttpClientException("Get Request Failed", connection.getResponseCode(), apiUrl, "");
+
+            // 添加Authorization Token
+            String token = SpringContext.getProperties("faas.token", "JWDNCUZlHnIUfBGJ2BNs2P44");
+            headersBuilder.add("Authorization", "Bearer " + token);
+
+            // 构建请求
+            Request request = new Request.Builder()
+                    .url(apiUrl)
+                    .post(bodyBuilder.build())
+                    .headers(headersBuilder.build())
+                    .build();
+
+            // 执行请求
+            try (Response response = client.newCall(request).execute()) {
+                if (!response.isSuccessful()) {
+                    String errorBody = response.body() != null ? response.body().string() : "";
+                    throw new IOException("File upload failed with code: " + response.code() +
+                                        (errorBody.isEmpty() ? "" : ", Error: " + errorBody));
+                }
+
+                ResponseBody responseBody = response.body();
+                return responseBody != null ? responseBody.string() : "";
             }
-        } catch (IOException e) {
-            throw new HttpClientException(e.getLocalizedMessage(), -1, apiUrl, "");
+
+        } catch (Exception e) {
+            log.error("File upload failed: {}", e.getMessage(), e);
+            throw new BusinessException("File upload failed:" +  e.getMessage());
+        }
+    }
+
+    /**
+     * 下载文件
+     *
+     * @param downloadUrl 下载地址
+     * @param fileName 文件名
+     * @param prefix 文件前缀
+     * @param suffix 文件后缀
+     * @return 下载的文件
+     * @throws IOException 当下载失败时抛出
+     */
+    public static File downloadFile(String downloadUrl, String fileName, String prefix, String suffix) throws IOException {
+        try {
+            Request request = new Request.Builder()
+                    .url(downloadUrl)
+                    .build();
+
+            try (Response response = client.newCall(request).execute()) {
+                if (!response.isSuccessful()) {
+                    throw new IOException("File download failed with code: " + response.code());
+                }
+
+                ResponseBody responseBody = response.body();
+                if (responseBody == null) {
+                    throw new IOException("Response body is null");
+                }
+
+                File tempFile = FileUtils.createTempFile(prefix, suffix, fileName);
+                if (tempFile == null) {
+                    throw new IOException("Failed to create temp file");
+                }
+
+                try (FileOutputStream outputStream = new FileOutputStream(tempFile);
+                     InputStream inputStream = responseBody.byteStream()) {
+
+                    byte[] buffer = new byte[8192];
+                    int bytesRead;
+                    while ((bytesRead = inputStream.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, bytesRead);
+                    }
+                    outputStream.flush();
+                }
+
+                return tempFile;
+            }
+
+        } catch (Exception e) {
+            log.error("File download failed: {}", e.getMessage(), e);
+            throw new IOException("File download failed", e);
+        }
+    }
+
+    /**
+     * 下载文件（简化版本）
+     *
+     * @param downloadUrl 下载地址
+     * @param fileName 文件名
+     * @return 下载的文件
+     * @throws IOException 当下载失败时抛出
+     */
+    public static File downloadFile(String downloadUrl, String fileName) throws IOException {
+        return downloadFile(downloadUrl, fileName, "", "");
+    }
+
+    /**
+     * 下载流
+     *
+     * @param downloadUrl 下载地址
+     * @param path 文件路径
+     * @param userFileName 用户文件名
+     * @throws IOException 当下载失败时抛出
+     */
+    public static void downloadStream(String downloadUrl, String path, String userFileName) throws IOException {
+        try {
+            Request request = new Request.Builder()
+                    .url(downloadUrl)
+                    .build();
+
+            try (Response response = client.newCall(request).execute()) {
+                if (!response.isSuccessful()) {
+                    throw new IOException("File download failed with code: " + response.code());
+                }
+
+                ResponseBody responseBody = response.body();
+                if (responseBody == null) {
+                    throw new IOException("Response body is null");
+                }
+
+                String outFileName = userFileName;
+                if (StringUtils.isEmpty(userFileName)) {
+                    outFileName = path;
+                }
+
+                // 确保目录存在
+                File targetDir = new File(path);
+                if (!targetDir.exists()) {
+                    targetDir.mkdirs();
+                }
+
+                File targetFile = new File(targetDir, outFileName);
+
+                try (FileOutputStream outputStream = new FileOutputStream(targetFile);
+                     InputStream inputStream = responseBody.byteStream()) {
+
+                    byte[] buffer = new byte[8192];
+                    int bytesRead;
+                    while ((bytesRead = inputStream.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, bytesRead);
+                    }
+                    outputStream.flush();
+                }
+
+                log.info("File downloaded successfully: {}", targetFile.getAbsolutePath());
+            }
+
+        } catch (Exception e) {
+            log.error("File download failed: {}", e.getMessage(), e);
+            throw new IOException("File download failed", e);
+        }
+    }
+
+    /**
+     * 读取输入流到字节数组
+     */
+    private static byte[] readInputStream(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        int nRead;
+        byte[] data = new byte[8192];
+        while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+            buffer.write(data, 0, nRead);
+        }
+        buffer.flush();
+        return buffer.toByteArray();
+    }
+
+    /**
+     * 集群DNS实现 - 支持多个URL的负载均衡
+     */
+    private static class ClusterDns implements okhttp3.Dns {
+        @Override
+        public List<InetAddress> lookup(String hostname) throws UnknownHostException {
+            // 检查是否是集群URL（用分号分隔）
+            if (hostname.contains(";")) {
+                String[] urls = hostname.split(";");
+                List<InetAddress> addresses = new ArrayList<>();
+
+                // 随机选择一个URL进行解析
+                String selectedUrl = urls[new Random().nextInt(urls.length)];
+                String selectedHostname = extractHostname(selectedUrl);
+
+                // 使用系统DNS解析选中的主机名
+                List<InetAddress> systemAddresses = okhttp3.Dns.SYSTEM.lookup(selectedHostname);
+                addresses.addAll(systemAddresses);
+
+                return addresses;
+            } else {
+                // 普通URL，使用系统DNS
+                return okhttp3.Dns.SYSTEM.lookup(hostname);
+            }
+        }
+
+        private String extractHostname(String url) {
+            try {
+                return new java.net.URL(url).getHost();
+            } catch (Exception e) {
+                return url;
+            }
         }
     }
 
 
-    /**
-     * 调用HTTP接口方法
-     *
-     * 此方法对外提供调用HTTP接口的能力，它会尝试连接到指定的API URL并发送POST请求
-     * 如果请求失败并满足重试条件，方法会自动重试，最多重试次数由配置项http.retry.max决定，默认为3次
-     *
-     * @param apiUrl API的URL地址
-     * @param body 请求体内容
-     * @param headerMap 请求头信息
-     * @return HTTP响应内容
-     */
-    public static String callHttp(String apiUrl, String body, Map<String, String> headerMap) {
-        // 用于记录并控制重试次数的原子整型变量
-        AtomicInteger retryCount = new AtomicInteger(0);
-        // 调用带有重试机制的私有HTTP调用方法
-        return privateCallHttp(apiUrl, body, headerMap, retryCount);
-    }
 
     /**
-     * 私有HTTP接口调用方法
-     *
-     * 此方法实际执行HTTP调用，并处理可能的异常如果发生特定类型的HTTP错误（502），且未超过最大重试次数，
-     * 方法会递归地调用自身以重试请求重试逻辑通过传递AtomicInteger retryCount来维护重试计数
-     *
-     * @param apiUrl API的URL地址
-     * @param body 请求体内容
-     * @param headerMap 请求头信息
-     * @param retryCount 用于记录并控制重试次数的原子整型变量
-     * @return HTTP响应内容
-     * @throws HttpClientException 当HTTP请求失败且不再满足重试条件时抛出
+     * post请求， body方式
+     * @param apiUrl   请求路径
+     * @param body  请求内容体
+     * @param headerMap 请求头
+     * @param anyone 是否任意一个成功即可
+     * @return  返回结果
      */
-    private static String privateCallHttp(String apiUrl, String body, Map<String, String> headerMap, AtomicInteger retryCount) {
-        // 从配置中读取最大重试次数，默认为3次
-        int maxRetryCount = SpringContext.getInt("http.retry.max", 3);
-        try {
-            // 增加重试计数，表示已尝试过至少一次
-            retryCount.getAndIncrement();
-            // 执行HTTP POST请求并返回响应
-            return doPost(apiUrl, body, headerMap);
-        } catch (Exception e) {
-            // 检查异常是否由特定的HTTP错误（502）引起，且看是否已超过最大重试次数
-            if (e.getMessage().contains("502") && e.getMessage().contains("HTTP POST request") && retryCount.get() <= maxRetryCount) {
-                // 如果满足重试条件，递归调用自身重试请求
-                return privateCallHttp(apiUrl, body, headerMap, retryCount);
-            } else {
-                // 如果不再满足重试条件，抛出自定义异常指示调用失败
+    public static String postBody(String apiUrl, String body, Map<String, String> headerMap, boolean anyone) throws HttpClientException{
+        // 检查是否是集群URL（用分号分隔）
+        if (apiUrl.contains(";")) {
+            String[] urls = apiUrl.split(";");
+            List<String> urlList = Arrays.asList(urls);
+            Collections.shuffle(urlList);
+
+            for (String url : urlList) {
+                try {
+                    String response = post(url, body, headerMap);
+                    if (anyone) {
+                        return response;
+                    }
+                } catch (Exception e) {
+                    log.warn("HTTP request failed for URL: {}, error: {}", url, e.getMessage());
+                    if (!anyone) {
+                        // 如果不是anyone模式，继续尝试下一个URL
+                        continue;
+                    }
+                }
+            }
+
+            // 所有URL都失败了
+            if (anyone) {
+                throw new HttpClientException("All cluster nodes failed", -1, apiUrl, body);
+            }
+            return null; // anyone=false且所有节点都失败时返回null
+        } else {
+            // 单个URL，直接调用post方法
+            try {
+                return post(apiUrl, body, headerMap);
+            } catch (Exception e) {
                 throw new HttpClientException(e.getLocalizedMessage(), -1, apiUrl, body);
             }
         }
     }
 
-    public static String doPost(String apiUrl, String body, Map<String, String> headerMap) throws IOException {
-        System.setProperty("networkaddress.cache.ttl", "0");
-        System.setProperty("networkaddress.cache.negative.ttl", "0");
 
-        HttpURLConnection connection = null;
-        OutputStream outputStream = null;
-        InputStream inputStream = null;
-        BufferedReader reader = null;
-        StringBuilder responseBody = new StringBuilder();
+    public static String postFaas1(String apiUrl, String body, Map<String, String> headerMap) throws HttpClientException{
+        String faasCallMode = SpringContext.getProperties("app.k-flow.call-model", "http");
+        if (faasCallMode.equals("http")) {
+            // HTTP模式，检查是否需要加密
+            boolean enableEncrypt = SpringContext.getProperties("faas.enable-encrypt", "true").equalsIgnoreCase("true");
+            if (enableEncrypt) {
+                // 加密签名模式
+                long t1 = System.currentTimeMillis();
+                String signSecret = SpringContext.getProperties("faas.signSecret", "JRc7ciSE2n75sJf4bY3RK56Y");
+                long timestamp = System.currentTimeMillis();
+                String encodedBody = SecurityUtil.encrypt(body, signSecret + timestamp + (timestamp%9));
 
-        try {
-            URL url = new URL(apiUrl);
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setDoOutput(true);
-            // 设置高级DNS解析器
-            connection.setUseCaches(false);
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-            // 设置超时时间
-            connection.setConnectTimeout(5 * 1000);
-            if (apiUrl.contains("/api/async/execute")) {
-                connection.setReadTimeout(5 * 1000);
+                String signValue = SecurityUtil.generateHmacSignature(encodedBody, timestamp, signSecret);
+                long t2 = System.currentTimeMillis();
+//                log.info("Signature generation completed, time: {}ms", t2 - t1);
+
+                FaasRequestBody faasRequestBody = new FaasRequestBody();
+                faasRequestBody.setBody(encodedBody);
+                faasRequestBody.setTimestamp(timestamp);
+                faasRequestBody.setSignature(signValue);
+
+                String encryptedBody = JsonUtil.toJson(faasRequestBody);
+                return postBody(apiUrl, encryptedBody, headerMap, true);
+            } else {
+                // 普通模式
+                return postBody(apiUrl, body, headerMap, true);
             }
-            else {
-                String httpReadTimeout = SpringContext.getProperties("app.http-read-timeout", (5 * 60 * 1000)+"");
-                connection.setReadTimeout(Integer.parseInt(httpReadTimeout));
-            }
-
-            if (headerMap!= null && !headerMap.isEmpty()) {
-                headerMap.forEach(connection::setRequestProperty);
-            }
-
-            outputStream = connection.getOutputStream();
-            outputStream.write(body.getBytes(StandardCharsets.UTF_8));
-            outputStream.flush();
-
-            int responseCode = connection.getResponseCode();
-
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                inputStream = connection.getInputStream();
-                reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    responseBody.append(line);
+        } else {
+            // 插件模式
+            long t1 = System.currentTimeMillis();
+            FaasChannelPlugin faasChannelPlugin = faasChannelPluginMap.get(faasCallMode);
+            if (faasChannelPlugin != null) {
+                try {
+                    String result = faasChannelPlugin.send(apiUrl, body, headerMap);
+                    long t2 = System.currentTimeMillis();
+                    log.info("FaaS plugin [{}] call completed, time: {}ms", faasCallMode, t2 - t1);
+                    return result;
+                } catch (Exception e) {
+                    log.error("FaaS plugin [{}] call failed: {}", faasCallMode, e.getMessage(), e);
+                    throw new HttpClientException("FaaS plugin call failed: " + e.getMessage(), -1, apiUrl, body);
                 }
             } else {
-                throw new IOException("HTTP POST request failed with response code: " + responseCode);
-            }
-        } finally {
-            if (outputStream != null) {
-                outputStream.close();
-            }
-            if (reader != null) {
-                reader.close();
-            }
-            if (inputStream != null) {
-                inputStream.close();
-            }
-            if (connection != null) {
-                connection.disconnect();
-
+                log.info("当前模式:{}, 找不到插件", faasCallMode);
+                throw new HttpClientException("Faas plugin Not Found!", -1, apiUrl, "");
             }
         }
-        String response = responseBody.toString();
-        if (response.length() > 1024 * 500) {
-            // log.error("请求响应内容过大，请检查接口是否有返回大量数据，接口地址：{}, 长度:{}, 参数:{}", apiUrl, response.length(), StringUtils.retrench(body, 500));
-        }
-        return responseBody.toString();
     }
 
 
     /**
-     * 调用http集群
-     * @param apiUrl    a
-     * @param body
-     * @param headerMap
-     * @param anyone 是否任意一个成功即可
-     * @return
-     * @throws HttpClientException
+     * FaaS插件调用方法（内部实现）
+     * @param apiUrl   请求路径
+     * @param body  请求内容体
+     * @param headerMap 请求头
+     * @return  返回结果
      */
-    public static String callHttpCluster(String apiUrl, String body, Map<String, String> headerMap, boolean anyone) throws HttpClientException {
-        String[] urls = apiUrl.split(";");
-        List<String> urlList = new ArrayList<>();
-        Collections.addAll(urlList, urls);
-        // 打乱，避免每次都同一个节点
-        Collections.shuffle(urlList);
-        String responseBody = null;
-        List<String> failList = new ArrayList<>();
-        for (int i = 0; i< urlList.size(); i++) {
-            String url = urlList.get(i);
-            if (url.contains("edit")) {
-                System.currentTimeMillis();
+    public static String postFaas(String apiUrl, String body, Map<String, String> headerMap) throws HttpClientException{
+        String faasCallMode = SpringContext.getProperties("app.k-flow.call-model", "http");
+        if (faasCallMode.equals("http")) {
+            // HTTP模式，检查是否需要加密
+            boolean enableEncrypt = SpringContext.getProperties("faas.enable-encrypt", "false").equalsIgnoreCase("true");
+            if (enableEncrypt) {
+                long t1 = System.currentTimeMillis();
+                // 加密签名模式
+                String signSecret = SpringContext.getProperties("faas.signSecret", "JRc7ciSE2n75sJf4bY3RK56Y");
+                long timestamp = System.currentTimeMillis();
+                String encodedBody = SecurityUtil.encrypt(body, signSecret + timestamp + (timestamp%9));
+//                String afterDecrypt = SecurityUtil.decrypt(encodedBody, signSecret);
+
+                String signValue = SecurityUtil.generateHmacSignature(encodedBody, timestamp, signSecret);
+
+                FaasRequestBody faasRequestBody = new FaasRequestBody();
+                faasRequestBody.setBody(encodedBody);
+                faasRequestBody.setTimestamp(timestamp);
+                faasRequestBody.setSignature(signValue);
+
+                String encryptedBody = JsonUtil.toJson(faasRequestBody);
+                long t2 = System.currentTimeMillis();
+                log.info("Signature generation completed, time: {}ms", t2 - t1);
+
+                return postBody(apiUrl, encryptedBody, headerMap, true);
+            } else {
+                // 普通模式
+                return postBody(apiUrl, body, headerMap, true);
             }
-            try {
-                responseBody = callHttp(url, body, headerMap);
-                if (anyone) {
-                    return responseBody;
+        } else {
+            // 插件模式
+            long t1 = System.currentTimeMillis();
+            FaasChannelPlugin faasChannelPlugin = faasChannelPluginMap.get(faasCallMode);
+            if (faasChannelPlugin != null) {
+                try {
+                    String result = faasChannelPlugin.send(apiUrl, body, headerMap);
+                    long t2 = System.currentTimeMillis();
+                    log.info("FaaS plugin [{}] call completed, time: {}ms", faasCallMode, t2 - t1);
+                    return result;
+                } catch (Exception e) {
+                    log.error("FaaS plugin [{}] call failed: {}", faasCallMode, e.getMessage(), e);
+                    throw new HttpClientException("FaaS plugin call failed: " + e.getMessage(), -1, apiUrl, body);
                 }
-            }
-            catch (Exception e) {
-                if (i == (urls.length -1) && anyone) {
-                    throw e;
-                }
-                if (!anyone) {
-                    failList.add(url);
-                    // 如果全部失败，那么就直接返回异常
-                    if (failList.size() == urlList.size()) {
-                        throw e;
-                    }
-                }
+            } else {
+                log.info("当前模式:{}, 找不到插件", faasCallMode);
+                throw new HttpClientException("Faas plugin Not Found!", -1, apiUrl, "");
             }
         }
-        // 如果是要求写所有的，此时有失败，则记录一下
-        if (!failList.isEmpty()) {
-            List<String> lines = new ArrayList<>();
-            for (String failUrl: failList) {
-                FaasFailRecord record = new FaasFailRecord();
-                record.setUrl(failUrl);
-                record.setTime(System.currentTimeMillis());
-                record.setHeaderMap(headerMap);
-                record.setBody(body);
-                lines.add(Base64.getEncoder().encodeToString(JsonUtil.toJson(record).getBytes(StandardCharsets.UTF_8)) );
-            }
-            // faas的失败日志存储目录
-            String pathName = "fail";
-            Path path = Paths.get(pathName);
-            if (!path.toFile().exists()) {
-                path.toFile().mkdirs();
-            }
-            // 保存文件名
-            String filePath = pathName + File.separator + "faas.log";
-            FileUtils.writeLineToTxt(lines, filePath);
-        }
-        return responseBody;
     }
 
     /**
@@ -349,433 +608,56 @@ public class HttpUtil {
     }
 
     /**
-     * post请求， body方式
-     * @param apiUrl   请求路径
-     * @param body  请求内容体
-     * @param headerMap 请求头
-     * @return  返回结果
+     * 重试拦截器 - 使用OkHttp Interceptor实现重试机制
      */
-    public static String postBody(String apiUrl, String body, Map<String, String> headerMap, boolean anyone) throws HttpClientException{
-        String faasCallMode = SpringContext.getProperties("app.k-flow.call-model", "http");
-        if (faasCallMode.equals("http")) {
-            return callHttpCluster(apiUrl, body, headerMap, anyone);
-        }
-        else {
-            long t1 = System.currentTimeMillis();
-            FaasChannelPlugin faasChannelPlugin = faasChannelPluginMap.get(faasCallMode);
-            if (faasChannelPlugin != null)  {
-                return faasChannelPlugin.send(apiUrl, body, headerMap);
-            }
-            else {
-                log.info("当前模式:{}, 找不到插件", faasCallMode);
-                throw new HttpClientException("Faas plugin Not Found!", -1, apiUrl, "");
-            }
+    private static class RetryInterceptor implements okhttp3.Interceptor {
+        private final int maxRetry;
 
+        public RetryInterceptor(int maxRetry) {
+            this.maxRetry = maxRetry;
         }
 
-    }
+        @Override
+        public okhttp3.Response intercept(okhttp3.Interceptor.Chain chain) throws IOException {
+            okhttp3.Request request = chain.request();
+            IOException exception = null;
+            okhttp3.Response response = null;
+            int retryCount = 0;
 
-    /**
-     * 上传文件
-     * @param fileName 文件名
-     * @param apiUrl    接口地路
-     */
-    public static String uploadFile(String apiUrl, String fileName, String formName, InputStream inputStream, Map<String, Object> formMap, Map<String, String> header) {
-
-        HttpURLConnection conn = null;
-        long t1 = System.currentTimeMillis();
-        try {
-            URL url = new URL(apiUrl);
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setConnectTimeout(5000);
-            conn.setReadTimeout(600000);
-            conn.setDoOutput(true);
-            conn.setDoInput(true);
-            conn.setUseCaches(false);//Post 请求不能使用缓存
-            //设置请求头参数
-            conn.setRequestProperty("Connection", "Keep-Alive");
-            conn.setRequestProperty("Charset", "UTF-8");
-            for (Map.Entry<String, String> entry: header.entrySet()) {
-                conn.setRequestProperty(entry.getKey(), entry.getValue());
-            }
-            conn.setRequestProperty("Content-Type", CONTENT_TYPE+";boundary=" + BOUNDARY);
-
-            //上传参数
-            DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
-            //getStrParams()为一个
-            Map<String, String> strParams = new HashMap<>();
-            formMap.forEach((k, v) -> {
-                strParams.put(k, new String(v.toString().getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1));
-            });
-
-            dos.writeBytes(getStrParams(strParams).toString() );
-            dos.flush();
-
-            //文件上传
-            String stringBuilder = PREFIX + BOUNDARY + LINE_END +
-                    "Content-Disposition: form-data; name=\"" + formName + "\"; filename=\""
-                    +  new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1) + "\"" + LINE_END +
-                    "Content-Type: application/octet-stream" + LINE_END + //此处的ContentType不同于 请求头 中Content-Type
-                    "Content-Transfer-Encoding: 8bit" + LINE_END +
-                    LINE_END;// 参数头设置完以后需要两个换行，然后才是参数内容
-            dos.writeBytes(stringBuilder);
-            dos.flush();
-            byte[] buffer = new byte[102400];
-            int len = 0;
-            while ((len = inputStream.read(buffer)) != -1){
-                dos.write(buffer,0,len);
-            }
-            inputStream.close();
-            dos.writeBytes(LINE_END);
-            //请求结束标志
-            dos.writeBytes(PREFIX + BOUNDARY + PREFIX + LINE_END);
-            dos.flush();
-            dos.close();
-            //读取服务器返回信息
-            String responseBody = getBody(conn.getInputStream());
-            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                // 如果是ok，直接返回body
-                return responseBody;
-            }
-            else {
-                throw new HttpClientException(responseBody, conn.getResponseCode(), apiUrl, "");
-            }
-
-        } catch (Exception e) {
-            log.error("error", e);
-            throw BusinessException.serviceThrow("Faas upload failed");
-        }finally {
-            long t2 = System.currentTimeMillis();
-            log.info("文件{},上传用时: {}", fileName , (t2 - t1));
-            if (conn!=null){
-                conn.disconnect();
-            }
-        }
-    }
-
-
-    /**
-     * 上传文件
-     * @param fileName 文件名
-     * @param apiUrl    接口地路
-     */
-    public static String uploadFile(String apiUrl, String fileName, String formName, InputStream inputStream, String path, Map<String, String> headers) {
-
-        HttpURLConnection conn = null;
-        long t1 = System.currentTimeMillis();
-        try {
-            URL url = new URL(apiUrl);
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setConnectTimeout(5000);
-            conn.setReadTimeout(600000);
-            conn.setDoOutput(true);
-            conn.setDoInput(true);
-            conn.setUseCaches(false);//Post 请求不能使用缓存
-            //设置请求头参数
-            conn.setRequestProperty("Connection", "Keep-Alive");
-            conn.setRequestProperty("Charset", "UTF-8");
-            conn.setRequestProperty("Content-Type", CONTENT_TYPE+";boundary=" + BOUNDARY);
-            for (Map.Entry<String, String> entry: headers.entrySet()) {
-                conn.setRequestProperty(entry.getKey(), entry.getValue());
-            }
-            log.info("文件上传, 文件名:{}, 路径:{}", fileName, path);
-            //上传参数
-            DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
-            //getStrParams()为一个
-            Map<String, String> strParams = new HashMap<>();
-            strParams.put("path", new String(path.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1));
-            dos.writeBytes( getStrParams(strParams).toString() );
-            dos.flush();
-
-            //文件上传
-            String stringBuilder = PREFIX + BOUNDARY + LINE_END +
-                    "Content-Disposition: form-data; name=\"" + formName + "\"; filename=\""
-                    +  new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1) + "\"" + LINE_END +
-                    "Content-Type: application/octet-stream" + LINE_END + //此处的ContentType不同于 请求头 中Content-Type
-                    "Content-Transfer-Encoding: 8bit" + LINE_END +
-                    LINE_END;// 参数头设置完以后需要两个换行，然后才是参数内容
-            dos.writeBytes(stringBuilder);
-            dos.flush();
-            byte[] buffer = new byte[1024];
-            int len = 0;
-            while ((len = inputStream.read(buffer)) != -1){
-                dos.write(buffer,0,len);
-            }
-            inputStream.close();
-            dos.writeBytes(LINE_END);
-            //请求结束标志
-            dos.writeBytes(PREFIX + BOUNDARY + PREFIX + LINE_END);
-            dos.flush();
-            dos.close();
-            //读取服务器返回信息
-            String responseBody = getBody(conn.getInputStream());
-            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                // 如果是ok，直接返回body
-                return responseBody;
-            }
-            else {
-                throw new HttpClientException(responseBody, conn.getResponseCode(), apiUrl, "");
-            }
-
-        } catch (Exception e) {
-            log.error("error", e);
-            throw BusinessException.serviceThrow("Faas upload failed");
-        }finally {
-            long t2 = System.currentTimeMillis();
-            log.info("文件{},上传用时: {}", fileName , (t2 - t1));
-            if (conn!=null){
-                conn.disconnect();
-            }
-        }
-    }
-
-    /**
-     * 上传文件
-     * @param fileName 文件名
-     * @param apiUrl    接口地路
-     */
-    public static String uploadFile(String apiUrl, String fileName, String formName, InputStream inputStream, String path) {
-        return uploadFile(apiUrl, fileName, formName, inputStream, path, new HashMap<>());
-
-    }
-
-
-    /**
-     * 对post参数进行编码处理
-     * */
-    private static StringBuilder getStrParams(Map<String,String> strParams) {
-        StringBuilder strSb = new StringBuilder();
-        for (Map.Entry<String, String> entry : strParams.entrySet()) {
-            strSb.append(PREFIX)
-                    .append(BOUNDARY)
-                    .append(LINE_END)
-                    .append("Content-Disposition: form-data; name=\"" + entry.getKey() + "\"" + LINE_END)
-                    .append("Content-Type: text/plain; charset=" + CHARSET + LINE_END)
-                    .append("Content-Transfer-Encoding: 8bit" + LINE_END)
-                    .append(LINE_END)// 参数头设置完以后需要两个换行，然后才是参数内容
-                    .append(entry.getValue())
-                    .append(LINE_END);
-        }
-        return strSb;
-    }
-
-
-    public static File downloadFile(String downloadUrl, String fileName) {
-        return downloadFile(downloadUrl, fileName, "", "");
-    }
-
-        /**
-         * 下载文件
-         * @param downloadUrl       下载地址
-         * @param fileName      输出流
-         */
-    public static File downloadFile(String downloadUrl, String fileName, String prefix, String suffix) {
-
-        HttpURLConnection connection = null;
-        try {
-            URL url = new URL(downloadUrl);
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestProperty("connection", "Keep-Alive");
-            connection.setRequestProperty("Charset", "UTF-8");
-            connection.setConnectTimeout(5000);
-            connection.setReadTimeout(60000);
-            connection.setDoInput(true);
-            @Cleanup InputStream is = connection.getInputStream();
-            File tempFile = FileUtils.createTempFile(prefix, suffix, fileName);
-            assert tempFile != null;
-
-            @Cleanup FileOutputStream outputStream = new FileOutputStream(tempFile);
-            byte[] buf = new byte[100 * 1024];
-            int len;
-            while ((len = is.read(buf)) != -1) {
-                outputStream.write(buf, 0, len);
-                ThreadUtils.sleep(0);
-            }
-            outputStream.flush();
-            outputStream.close();
-            return tempFile;
-        } catch (Exception e) {
-            log.error("error", e);
-            throw BusinessException.serviceThrow(I18n.t("HttpUtil.fileDownloadFail", "文件下载失败"));
-
-        } finally {
-            if (connection != null)
-                connection.disconnect();
-        }
-
-    }
-
-
-        /**
-     * 获取响应body的内容
-     * @param inputStream   输入流
-     * @return  body
-     */
-    private static String getBody(InputStream inputStream) throws IOException {
-        // 缓冲区读取器
-        BufferedReader reader = null;
-        reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        // 循环读取流
-        StringBuilder result = new StringBuilder();
-        String line = null;
-        while ((line = reader.readLine()) != null) {
-            result.append(line);
-        }
-        return result.toString();
-    }
-
-    /**
-     * 获取通道
-     * @return  通道
-     */
-    public static FaasChannelPlugin getFaasChannel(String name) {
-
-        List<Class<?>> classList =  ClassUtils.getClassesByParentClass("com.kingsware.kdev", FaasChannelPlugin.class);
-        for (Class<?> tClass: classList) {
-            // 生成实例
-            try {
-                FaasChannelPlugin plugin = (FaasChannelPlugin) tClass.newInstance();
-                if (name.equalsIgnoreCase(plugin.name())) {
-                    return plugin;
+            while (retryCount < maxRetry) {
+                try {
+                    response = chain.proceed(request);
+                    // 如果响应成功，直接返回
+                    if (response.isSuccessful()) {
+                        return response;
+                    }
+                    // 如果响应不成功，关闭响应体并继续重试
+                    if (response.body() != null) {
+                        response.body().close();
+                    }
+                    retryCount++;
+                    if (retryCount < maxRetry) {
+                        log.warn("HTTP request failed with code: {}, retrying... (attempt {}/{})",
+                                response.code(), retryCount, maxRetry);
+                    }
+                } catch (IOException e) {
+                    exception = e;
+                    retryCount++;
+                    if (retryCount < maxRetry) {
+                        log.warn("HTTP request failed with exception: {}, retrying... (attempt {}/{})",
+                                e.getMessage(), retryCount, maxRetry);
+                    }
                 }
-            } catch (Exception e) {
-                log.error("定时类扫描初始化失败:{}" , e.getMessage());
-            }
-        }
-
-        return null;
-
-    }
-
-    public static void downloadStream(String downloadUrl, String path, String fileName) {
-
-        HttpURLConnection connection = null;
-        try {
-            log.info("流式下载文件开始:" + downloadUrl);
-//            ServletUtil.response().sendRedirect("/download/YeCongOA_784c88fa4c504b9285923a6d9bc9c1c3.zip?path=%2Fusr%2Flocal%2Fkfaas%2Fserver%2Fupload%2Fpackage");
-            URL url = new URL(downloadUrl);
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestProperty("connection", "Keep-Alive");
-            connection.setRequestProperty("Charset", "UTF-8");
-            connection.setConnectTimeout(5000);
-            connection.setReadTimeout(60000);
-            connection.setDoInput(true);
-            @Cleanup InputStream is = connection.getInputStream();
-            if ((!FileTypeChecker.isAudioFile(path) && !FileTypeChecker.isVideoFile(fileName)) || ServletUtil.request().getHeader("Range") == null) {
-
-                String contentLength = connection.getHeaderField("Content-Length");
-                    try {
-                        ServletUtil.response().setContentLengthLong(Long.parseLong(contentLength));
-                    }
-                    catch (Exception ignored) {
-
-                    }
-
-                    ServletUtil.response().setContentType(APPLICATION_OCTET_STREAM_VALUE);
-                    ServletUtil.response().setHeader("Content-Disposition", "attachment;filename=" + UriEncoder.encode(fileName));
-                    byte[] buf = new byte[512 * 1024];
-                    int len;
-                    OutputStream out = ServletUtil.response().getOutputStream();
-                    while ((len = is.read(buf)) != -1) {
-                        out.write(buf, 0, len);
-                        out.flush();
-
-                        //ServletUtil.response().getOutputStream().flush();
-                    }
-//            log.info("流式下载文件:" + fileName);
-                 ServletUtil.response().getOutputStream().flush();
-            }
-            else {
-//
-//                // 多线程下载文件至
-                // 创建一个空流
-//
-                log.info("正在下载视频: {}, {}", path, fileName);
-                NonStaticResourceHttpRequestHandler nonStaticResourceHttpRequestHandler = SpringContext.getBean(NonStaticResourceHttpRequestHandler.class);
-                log.info("视频大小:{}-{}", connection.getContentLength(), is.available());
-                ServletUtil.request().setAttribute(NonStaticResourceHttpRequestHandler.ATTR_FILE, is);
-                ServletUtil.request().setAttribute(NonStaticResourceHttpRequestHandler.URL_CONNECTION, connection);
-                ServletUtil.request().setAttribute(URL_PATH, downloadUrl );
-                nonStaticResourceHttpRequestHandler.handleRequest(ServletUtil.request(), ServletUtil.response());
-//                videoHttpRequestHandler.handleRequest(ServletUtil.request(), ServletUtil.response());
-//                HttpServletResponse response = ServletUtil.response();
-//                String rangeHeader = ServletUtil.request().getHeader("Range");
-//                // 设置 Range 请求头
-//                if (rangeHeader != null) {
-//                    connection.setRequestProperty("Range", rangeHeader);
-//                }
-//
-//                int responseCode = connection.getResponseCode();
-//                if (responseCode == HttpURLConnection.HTTP_PARTIAL || responseCode == HttpURLConnection.HTTP_OK) {
-//                    String contentType = connection.getContentType();
-//                    // 设置响应头
-//                    response.setStatus(responseCode);
-//                    response.setContentType(contentType != null ? contentType : "application/octet-stream");
-//                    String contentLength = connection.getHeaderField("Content-Length");
-//                    if (responseCode == HttpURLConnection.HTTP_PARTIAL) {
-//                        String contentRange = connection.getHeaderField("Content-Range");
-//                        response.setHeader("Content-Range", contentRange);
-//                        response.setHeader("Accept-Ranges", "bytes");
-//                        response.setHeader("Content-Length", String.valueOf(contentLength));
-//                    }
-//
-//                    // 写入响应
-//                    try (InputStream inputStream = connection.getInputStream()) {
-//                        byte[] buffer = new byte[8192];  // 8KB 缓冲区
-//                        int bytesRead;
-//                        try {
-//                            while ((bytesRead = inputStream.read(buffer)) != -1) {
-//                                response.getOutputStream().write(buffer, 0, bytesRead);
-//                            }
-//                            response.flushBuffer();  // 确保所有数据都被发送
-//                        } catch (ClientAbortException e) {
-//                            // 客户端中止异常，记录日志
-//                            System.err.println("Client aborted the connection: " + e.getMessage());
-//                        } catch (IOException e) {
-//                            // 其他IO异常，记录日志并重新抛出
-//                            System.err.println("Error while reading/writing video stream: " + e.getMessage());
-//                            throw e;
-//                        }
-//                    }
-//                } else {
-//                    response.sendError(responseCode, connection.getResponseMessage());
-//                }
             }
 
-
-
-        } catch (Exception e) {
-            log.error("error", e);
-            throw BusinessException.serviceThrow(I18n.t("HttpUtil.fileDownloadFail", "文件下载失败"));
-
-        } finally {
-            if (connection != null)
-                connection.disconnect();
-        }
-    }
-
-    /**
-     * 下载文件的指定范围的部分，并返回输入流
-     *
-     * @param fileUrl 文件的URL地址
-     * @param rangeStart 范围的起始字节位置（包括）
-     * @param rangeEnd 范围的结束字节位置（包括）
-     * @return InputStream 文件指定范围的输入流
-     * @throws IOException 下载过程中可能抛出的IO异常
-     */
-    public static InputStream downloadPartialFile(String fileUrl, long rangeStart, long rangeEnd) throws IOException {
-        URL url = new URL(fileUrl);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
-        connection.setRequestProperty("Range", "bytes=" + rangeStart + "-" + rangeEnd);
-
-        int responseCode = connection.getResponseCode();
-        if (responseCode == HttpURLConnection.HTTP_PARTIAL || responseCode == HttpURLConnection.HTTP_OK) {
-            return new BufferedInputStream(connection.getInputStream());
-        } else {
-            throw new IOException("Server returned HTTP response code: " + responseCode);
+            // 所有重试都失败了
+            if (exception != null) {
+                throw exception;
+            } else if (response != null) {
+                return response;
+            } else {
+                throw new IOException("All retry attempts failed");
+            }
         }
     }
 

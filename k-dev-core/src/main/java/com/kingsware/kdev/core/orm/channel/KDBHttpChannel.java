@@ -183,7 +183,7 @@ public class KDBHttpChannel implements DbChannel{
             String url = StringUtils.joinToString(urls, ";");
             long t1 = System.currentTimeMillis();
             // 发起请求
-            String  responseBody = HttpUtil.postBody(url, requestBody, Collections.emptyMap(), true);
+            String  responseBody = HttpUtil.postFaas(url, requestBody, Collections.emptyMap());
             if (isAsync) {
                 responseBody = syncValue;
             }

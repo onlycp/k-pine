@@ -23,6 +23,7 @@ import com.kingsware.kdev.uniops.argv.ToPageArgv;
 import com.kingsware.kdev.uniops.argv.UniOpsMenu;
 import com.kingsware.kdev.uniops.config.ServerConfig;
 import com.kingsware.kdev.uniops.service.UniOpsService;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -69,6 +70,7 @@ public class UniOpsServiceImpl implements UniOpsService {
      *
      * @param to 页面
      */
+    @SneakyThrows
     @Override
     public void page(ToPageArgv to) {
         String pineToken = "";
@@ -96,7 +98,7 @@ public class UniOpsServiceImpl implements UniOpsService {
                     Map<String, String> headers = new HashMap<>();
                     headers.put("token", to.getOpsToken());
                     log.info("开始请求uniops token: {}", url);
-                    String body = HttpUtil.callHttp(url, "{}", headers);
+                    String body = HttpUtil.post(url, "{}", headers);
                     log.info("开始请求uniops token, Result: {}", body);
                     Map<String, Object> map = JsonUtil.toMap(body);
                     if(map != null && map.containsKey("id")) {
@@ -301,8 +303,8 @@ public class UniOpsServiceImpl implements UniOpsService {
             String uniopsServer = SpringContext.getProperties("uniops.master.url", "http://localhost:8080");
             String url = uniopsServer + "/ops/system/menu/import";
             log.info("安装菜单url:" + url);
-            Map<String, Object> params = new HashMap<>();
-            params.put("cover", false);
+            Map<String, String> params = new HashMap<>();
+            params.put("cover", "false");
             // 请求头
             Map<String,String> header = new HashMap<>();
 
@@ -323,6 +325,7 @@ public class UniOpsServiceImpl implements UniOpsService {
      * @param menus 菜单
      */
     @Override
+    @SneakyThrows
     public void uninstall(List<SysMenu> menus) {
         if (menus.isEmpty()) {
             return;
@@ -344,7 +347,7 @@ public class UniOpsServiceImpl implements UniOpsService {
         headers.put("token", getUniOpsToken());
         Map<String, Object> bodyMap = new HashMap<>();
         bodyMap.put("keys", StringUtils.joinToString(keys, ","));
-        String body = HttpUtil.callHttp(url, JsonUtil.toJson(bodyMap), headers);
+        String body = HttpUtil.post(url, JsonUtil.toJson(bodyMap), headers);
         Map<String, Object> retMap = JsonUtil.toMap(body);
         int errorCode = (int)retMap.get("errorCode");
         if (errorCode != 0) {

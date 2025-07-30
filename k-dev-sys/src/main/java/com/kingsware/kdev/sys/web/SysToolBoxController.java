@@ -5,13 +5,16 @@ import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.ExceptionLog;
+import com.kingsware.kdev.core.bean.FaasRequestBody;
 import com.kingsware.kdev.core.cache.page.PageCacheManager;
 import com.kingsware.kdev.core.constants.Version;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.ExceptionLogManager;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.FileUtils;
+import com.kingsware.kdev.core.util.HttpUtil;
 import com.kingsware.kdev.core.util.JsonUtil;
+import com.kingsware.kdev.core.util.SecurityUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.model.DevPageHistory;
 import io.swagger.annotations.Api;
@@ -24,10 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 //import org.eclipse.jgit.lib.Repository;
 //import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 //import org.springframework.boot.autoconfigure.info.ProjectInfoProperties;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -86,6 +86,123 @@ public class SysToolBoxController extends BaseController {
     public BaseRet<?> clearPageCache() {
         PageCacheManager.getInstance().clear();
         return BaseRet.success();
+    }
+
+    /**
+     * Mock FaaS接口 - 模拟FaaS服务响应
+     */
+    @PostMapping("/mock-faas")
+    @ApiIgnore
+    public BaseRet<?> mockFaas(@RequestBody FaasRequestBody faasRequestBody) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // 获取签名密钥
+            String signSecret = SpringContext.getProperties("faas.signSecret", "JRc7ciSE2n75sJf4bY3RK56Y");
+
+            // 验证签名
+            String receivedBody = faasRequestBody.getBody();
+            Long receivedTimestamp = faasRequestBody.getTimestamp();
+            String receivedSignature = faasRequestBody.getSignature();
+
+            // 计算期望的签名
+            String expectedSignature = SecurityUtil.generateHmacSignature(receivedBody, receivedTimestamp, signSecret);
+
+            // 验证签名是否匹配
+            boolean signatureValid = expectedSignature.equals(receivedSignature);
+
+            // 验证时间戳（允许5分钟的时间差）
+            long currentTime = System.currentTimeMillis();
+            long timeDiff = Math.abs(currentTime - receivedTimestamp);
+            boolean timestampValid = timeDiff <= 5 * 60 * 1000; // 5分钟
+
+            if (!signatureValid) {
+                response.put("status", "error");
+                response.put("message", "签名验证失败");
+                response.put("receivedSignature", receivedSignature);
+                response.put("expectedSignature", expectedSignature);
+                log.error("签名验证失败: 接收到的签名={}, 期望的签名={}", receivedSignature, expectedSignature);
+                return BaseRet.failMessage("签名验证失败");
+            }
+
+            if (!timestampValid) {
+                response.put("status", "error");
+                response.put("message", "时间戳验证失败");
+                response.put("receivedTimestamp", receivedTimestamp);
+                response.put("currentTimestamp", currentTime);
+                response.put("timeDiff", timeDiff);
+                log.error("时间戳验证失败: 接收到的时间戳={}, 当前时间戳={}, 时间差={}ms",
+                         receivedTimestamp, currentTime, timeDiff);
+                return BaseRet.failMessage("时间戳验证失败");
+            }
+
+            // 解密请求体（如果需要）
+            String decryptedBody = receivedBody;
+            try {
+                decryptedBody = SecurityUtil.decrypt(receivedBody, signSecret + receivedTimestamp  + (receivedTimestamp%9));
+                log.info("请求体解密成功：" + decryptedBody);
+            } catch (Exception e) {
+                log.warn("请求体解密失败，使用原始请求体: {}", e.getMessage());
+            }
+
+            // 构建成功响应
+            response.put("status", "success");
+            response.put("message", "Mock FaaS接口调用成功");
+            response.put("timestamp", System.currentTimeMillis());
+            response.put("receivedBody", receivedBody);
+            response.put("decryptedBody", decryptedBody);
+            response.put("signatureValid", signatureValid);
+            response.put("timestampValid", timestampValid);
+            response.put("verificationTime", System.currentTimeMillis());
+
+            log.info("Mock FaaS接口验证成功: 签名={}, 时间戳={}", signatureValid, timestampValid);
+            return BaseRet.success(response);
+
+        } catch (Exception e) {
+            log.error("Mock FaaS接口验证过程中发生异常: {}", e.getMessage(), e);
+            response.put("status", "error");
+            response.put("message", "验证过程中发生异常: " + e.getMessage());
+            return BaseRet.failMessage("验证过程中发生异常: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 通过HttpUtil.postFaas调用Mock FaaS接口
+     */
+    @GetMapping("/test-faas-call")
+    @ApiIgnore
+    public BaseRet<?> testFaasCall() {
+        try {
+            String mockFaasUrl = "http://127.0.0.1:8080/" + Version.V1 + "/sys-tool-box/mock-faas";
+            Map<String, Object> requestData = new HashMap<>();
+            requestData.put("testParam", "testValue");
+            requestData.put("timestamp", System.currentTimeMillis());
+            String requestBody = JsonUtil.toJson(requestData);
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Content-Type", "application/json");
+            headers.put("X-Test-Header", "test-header-value");
+
+            log.info("开始调用Mock FaaS接口: {}", mockFaasUrl);
+            log.info("请求体: {}", requestBody);
+
+            String response = HttpUtil.postFaas1(mockFaasUrl, requestBody, headers);
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", true);
+            result.put("response", response);
+            result.put("callTime", System.currentTimeMillis());
+
+            log.info("Mock FaaS接口调用成功: {}", response);
+            return BaseRet.success(result);
+
+        } catch (Exception e) {
+            log.error("Mock FaaS接口调用失败: {}", e.getMessage(), e);
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", false);
+            result.put("error", e.getMessage());
+            result.put("callTime", System.currentTimeMillis());
+            return BaseRet.failMessage("Mock FaaS接口调用失败: " + e.getMessage());
+        }
     }
 //
 //    @GetMapping("/compress-testing")

@@ -169,7 +169,7 @@ public class InstanceManager {
                 Map<String, String> body = new HashMap<>();
                 body.put("topic", topic);
                 body.put("message", message);
-                String res = HttpUtil.doPost(url, JsonUtil.toJson(body), new HashMap<>());
+                String res = HttpUtil.post(url, JsonUtil.toJson(body), new HashMap<>());
                 BaseRet<?> ret = JsonUtil.toBean(res, BaseRet.class);
 //                log.info("session-实例：{}, {} 消息发送成功:{},返回信息:{}", instance.instanceName(),url, JsonUtil.toJson(body), JsonUtil.toJson(ret));
                 if (ret.getCode() != 200) {

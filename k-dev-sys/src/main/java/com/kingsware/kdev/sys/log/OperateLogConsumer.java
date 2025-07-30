@@ -74,7 +74,7 @@ public class OperateLogConsumer implements KmqConsumer {
                     Map<String, Object> requestBody = new HashMap<>();
                     requestBody.put("operateLogList", rows);
                     try {
-                        String resp = HttpUtil.doPost(uniopsLogUrl, JsonUtil.toJson(requestBody), new HashMap<>());
+                        String resp = HttpUtil.post(uniopsLogUrl, JsonUtil.toJson(requestBody), new HashMap<>());
                          log.info("日志推送：{}", JsonUtil.toJson(requestBody));
                         Map<String, Object> respMap = JsonUtil.toMap(resp);
                         if (respMap == null || respMap.get("errorCode") == null || (int)respMap.get("errorCode") != 0) {

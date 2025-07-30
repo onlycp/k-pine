@@ -153,7 +153,7 @@ public class KFaasInitialize implements SystemInitialize {
                 m.setDbName(dataSourceInfo.getSourceName());
                 m.setInnerType(getDbTyeName(dataSourceInfo.getJdbcUrl()));
                 DbContext.getInstance().createDataBase(dataSourceInfo.getSourceName(), m);
-                log.info("自动注册数据源：{}", dataSourceInfo.getSourceName());
+                //log.info("自动注册数据源：{}", dataSourceInfo.getSourceName());
             }
         }
 
