@@ -1,6 +1,7 @@
 package com.kingsware.kdev.sys.web;
 
 import com.kingsware.kdev.core.auth.ApiIgnore;
+import com.kingsware.kdev.core.auth.Dev;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -39,6 +40,7 @@ public class DevPageHistoryController extends BaseController {
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
+    @Dev
     public BaseRet<PageDataRet<DevPageHistoryRet>> page(DevPageHistoryQueryArgv argv) {
         return BaseRet.success(DevPageHistoryService.query(argv));
     }
@@ -49,6 +51,7 @@ public class DevPageHistoryController extends BaseController {
      */
     @ApiOperation(value = "详情 " ,notes = "详情")
     @GetMapping("/{id}")
+    @Dev
     public BaseRet<DevPageHistoryRet> get(@PathVariable String id) {
         return BaseRet.success(DevPageHistoryService.get(id));
     }
@@ -59,7 +62,7 @@ public class DevPageHistoryController extends BaseController {
      */
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
-    @ApiIgnore
+    @Dev
     public BaseRet<?> add(@RequestBody DevPageHistoryArgv argv) {
         DevPageHistoryService.add(argv);
         return BaseRet.success();
@@ -72,6 +75,7 @@ public class DevPageHistoryController extends BaseController {
      */
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
+    @Dev
     public BaseRet<?> edit(@RequestBody DevPageHistoryArgv argv) {
         DevPageHistoryService.edit(argv);
         return BaseRet.success();
@@ -83,6 +87,7 @@ public class DevPageHistoryController extends BaseController {
      */
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
+    @Dev
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         DevPageHistoryService.delete(argv);
         return BaseRet.success();
@@ -95,6 +100,7 @@ public class DevPageHistoryController extends BaseController {
      */
     @ApiOperation(value = "回滚 " ,notes = "回滚")
     @PostMapping("/rollback")
+    @Dev
     public BaseRet<?> rollback(@RequestBody DevPageHistoryArgv argv) {
         DevPageHistoryService.rollback(argv);
         return BaseRet.success();

@@ -42,6 +42,7 @@ public class DevPageController extends BaseController {
     @ApiOperation(value = "查询 " ,notes = "查询")
     @ResponseBody
     @GetMapping("/query")
+    @Dev
     public BaseRet<PageDataRet<DevPageRet>> page(DevPageQueryArgv argv) {
         return BaseRet.success(devPageService.query(argv));
     }
@@ -53,6 +54,7 @@ public class DevPageController extends BaseController {
     @ApiOperation(value = "详情 " ,notes = "详情")
     @ResponseBody
     @GetMapping("/{id}")
+    @Dev
     public BaseRet<DevPageRet> get(@PathVariable String id) {
         return BaseRet.success(devPageService.get(id));
     }
@@ -63,7 +65,7 @@ public class DevPageController extends BaseController {
      */
     @ApiOperation(value = "渲染页面 " ,notes = "渲染页面")
     @GetMapping("/render/{id}")
-    @ApiIgnore
+    @Dev
     public void render(@PathVariable String id) {
         devPageService.render(id);
     }
@@ -87,6 +89,7 @@ public class DevPageController extends BaseController {
     @ApiOperation(value = "新增 " ,notes = "新增")
     @ResponseBody
     @PostMapping
+    @Dev
     public BaseRet<?> add(@RequestBody DevPageArgv argv) {
         devPageService.add(argv);
         return BaseRet.success();
@@ -100,6 +103,7 @@ public class DevPageController extends BaseController {
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @ResponseBody
     @PutMapping
+    @Dev
     public BaseRet<?> edit(@RequestBody DevPageArgv argv) {
         devPageService.edit(argv);
         return BaseRet.success();
@@ -112,6 +116,7 @@ public class DevPageController extends BaseController {
     @ApiOperation(value = "删除 " ,notes = "删除")
     @ResponseBody
     @PostMapping(value = "/delete")
+    @Dev
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         devPageService.delete(argv);
         return BaseRet.success();
@@ -136,6 +141,7 @@ public class DevPageController extends BaseController {
      */
     @ApiOperation(value = "导出pine " ,notes = "导出pine")
     @PostMapping("/export-pine")
+    @Dev
     public void exportPine(@RequestBody MultiIdArgv argv) {
         devPageService.exportPine(argv);
     }

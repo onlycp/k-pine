@@ -27,10 +27,14 @@ import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.orm.kdb.*;
 import com.kingsware.kdev.core.util.*;
+import com.kingsware.kdev.core.util.SecurityUtil;
 import com.kingsware.kdev.sys.argv.*;
+import org.yaml.snakeyaml.Yaml;
+import org.jasypt.encryption.StringEncryptor;
 import com.kingsware.kdev.sys.bean.CopyProcessData;
 import com.kingsware.kdev.sys.manager.CopyAppManager;
 import com.kingsware.kdev.sys.model.*;
+import com.kingsware.kdev.sys.ret.BlackList;
 import com.kingsware.kdev.sys.ret.DevApplicationRet;
 import com.kingsware.kdev.sys.service.DevApplicationService;
 import com.kingsware.kdev.sys.service.SysFileService;
@@ -46,6 +50,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.LinkedHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -725,6 +730,110 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             log.info("文件备份失败:{}", e.getMessage());
         }
 
+    }
+
+    @Override
+    public String generateBlackListConfig(boolean encrypted) {
+        // 查询api_tags包含DEV的sys_api
+        List<String> apiList = DB.findSingleAttributeList(String.class,
+            "select id from sys_api where api_tags like '%DEV%'");
+
+        // 查询sys_api的flow_id
+        List<String> flowList = DB.findSingleAttributeList(String.class,
+            "select distinct api_flow_id from sys_api where api_flow_id is not null and api_flow_id != '' and api_tags like '%DEV%'");
+
+        // 查询dev_page的tags包含DEV的
+        List<String> pageList = DB.findSingleAttributeList(String.class,
+            "select id from dev_page where tags like '%DEV%'");
+
+        // 构建黑名单配置Map
+        Map<String, Object> blacklistConfig = new LinkedHashMap<>();
+        blacklistConfig.put("blacklist", new LinkedHashMap<String, Object>());
+
+        Map<String, Object> blacklist = (Map<String, Object>) blacklistConfig.get("blacklist");
+
+        if (encrypted) {
+            // 使用jasypt加密
+            try {
+                StringEncryptor encryptor = SpringContext.getBean(StringEncryptor.class);
+
+                // 加密API列表
+                List<String> encryptedApiList = new ArrayList<>();
+                for (String api : apiList) {
+                    String encryptedValue = encryptor.encrypt(api);
+                    encryptedApiList.add("ENC(" + encryptedValue + ")");
+                }
+                blacklist.put("apis", encryptedApiList);
+
+                // 加密流程列表
+                List<String> encryptedFlowList = new ArrayList<>();
+                for (String flow : flowList) {
+                    String encryptedValue = encryptor.encrypt(flow);
+                    encryptedFlowList.add("ENC(" + encryptedValue + ")");
+                }
+                blacklist.put("flows", encryptedFlowList);
+
+                // 加密页面列表
+                List<String> encryptedPageList = new ArrayList<>();
+                for (String page : pageList) {
+                    String encryptedValue = encryptor.encrypt(page);
+                    encryptedPageList.add("ENC(" + encryptedValue + ")");
+                }
+                blacklist.put("pages", encryptedPageList);
+
+            } catch (Exception e) {
+                log.error("jasypt加密黑名单配置失败: {}", e.getMessage(), e);
+                // 回退到默认加密方式
+                try {
+                    String signSecret = SpringContext.getProperties("faas.signSecret", "JRc7ciSE2n75sJf4bY3RK56Y");
+
+                    // 加密API列表
+                    List<String> encryptedApiList = new ArrayList<>();
+                    for (String api : apiList) {
+                        String encryptedValue = SecurityUtil.encrypt(api, signSecret + System.currentTimeMillis());
+                        encryptedApiList.add("ENC(" + encryptedValue + ")");
+                    }
+                    blacklist.put("apis", encryptedApiList);
+
+                    // 加密流程列表
+                    List<String> encryptedFlowList = new ArrayList<>();
+                    for (String flow : flowList) {
+                        String encryptedValue = SecurityUtil.encrypt(flow, signSecret + System.currentTimeMillis());
+                        encryptedFlowList.add("ENC(" + encryptedValue + ")");
+                    }
+                    blacklist.put("flows", encryptedFlowList);
+
+                    // 加密页面列表
+                    List<String> encryptedPageList = new ArrayList<>();
+                    for (String page : pageList) {
+                        String encryptedValue = SecurityUtil.encrypt(page, signSecret + System.currentTimeMillis());
+                        encryptedPageList.add("ENC(" + encryptedValue + ")");
+                    }
+                    blacklist.put("pages", encryptedPageList);
+
+                } catch (Exception ex) {
+                    log.error("默认加密也失败: {}", ex.getMessage(), ex);
+                    // 如果加密失败，使用明文
+                    blacklist.put("apis", apiList);
+                    blacklist.put("flows", flowList);
+                    blacklist.put("pages", pageList);
+                }
+            }
+        } else {
+            // 明文格式
+            blacklist.put("apis", apiList);
+            blacklist.put("flows", flowList);
+            blacklist.put("pages", pageList);
+        }
+
+        // 生成YAML格式
+        org.yaml.snakeyaml.DumperOptions options = new org.yaml.snakeyaml.DumperOptions();
+        options.setDefaultFlowStyle(org.yaml.snakeyaml.DumperOptions.FlowStyle.BLOCK);
+        options.setIndent(2);
+        options.setWidth(80);
+
+        Yaml yaml = new Yaml(options);
+        return yaml.dump(blacklistConfig);
     }
 
 

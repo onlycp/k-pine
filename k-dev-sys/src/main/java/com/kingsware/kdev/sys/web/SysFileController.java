@@ -1,6 +1,7 @@
 package com.kingsware.kdev.sys.web;
 
 import com.kingsware.kdev.core.auth.ApiIgnore;
+import com.kingsware.kdev.core.auth.Dev;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -204,5 +205,19 @@ public class SysFileController extends BaseController {
     @ResponseBody
     public BaseRet<List<SysStaticFileRet>> getStaticFileTree(boolean onlyFolder) throws IOException {
         return sysFileService.getStaticFileTree(onlyFolder);
+    }
+
+    /**
+     * 识别文件MIME类型
+     * @param file 上传的文件
+     * @return MIME类型信息
+     */
+    @ApiOperation(value = "识别文件MIME类型", notes = "上传文件并识别其MIME类型，无需权限访问")
+    @PostMapping(value = "/detect-mime-type", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ApiIgnore
+    @Dev
+    public BaseRet<String> detectMimeType(@RequestParam("file") MultipartFile file) {
+        return sysFileService.detectMimeType(file);
     }
 }

@@ -41,6 +41,7 @@ public class SysApiController extends BaseController {
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
+    @Dev
     public BaseRet<PageDataRet<SysApiRet>> page(SysApiQueryArgv argv) {
         return BaseRet.success(sysApiService.query(argv));
     }
@@ -51,6 +52,7 @@ public class SysApiController extends BaseController {
      */
     @ApiOperation(value = "详情 " ,notes = "详情")
     @GetMapping("/{id}")
+    @Dev
     public BaseRet<SysApiRet> get(@PathVariable String id) {
         return BaseRet.success(sysApiService.get(id));
     }
@@ -61,6 +63,7 @@ public class SysApiController extends BaseController {
      */
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
+    @Dev
     public BaseRet<?> add(@RequestBody SysApiArgv argv) {
         sysApiService.add(argv);
         return BaseRet.success();
@@ -73,6 +76,7 @@ public class SysApiController extends BaseController {
      */
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
+    @Dev
     public BaseRet<?> edit(@RequestBody SysApiArgv argv) {
         sysApiService.edit(argv);
         return BaseRet.success();
@@ -84,6 +88,7 @@ public class SysApiController extends BaseController {
      */
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
+    @Dev
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         sysApiService.delete(argv);
         return BaseRet.success();
@@ -113,6 +118,7 @@ public class SysApiController extends BaseController {
      */
     @ApiOperation(value = "导出pine " ,notes = "导出pine")
     @PostMapping("/export-pine")
+    @Dev
     public void exportPine(@RequestBody MultiIdArgv argv) {
         sysApiService.exportPine(argv);
     }

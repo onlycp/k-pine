@@ -86,4 +86,11 @@ public interface SysFileService extends BaseService {
 
     void deleteStaticFile(MultiIdArgv argv) throws IOException;
 
+    /**
+     * 识别文件MIME类型
+     * @param file 文件
+     * @return MIME类型信息
+     */
+    BaseRet<String> detectMimeType(MultipartFile file);
+
 }

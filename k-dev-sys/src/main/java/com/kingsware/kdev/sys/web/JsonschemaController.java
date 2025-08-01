@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.Dev;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.constants.Version;
@@ -35,6 +36,7 @@ public class JsonschemaController extends BaseController {
      */
     @ApiOperation(value = "表schema " ,notes = "表schema")
     @GetMapping("/table/{tableName}/{curd}/{inOut}")
+    @Dev
     public BaseRet<BaseSchemaDefine> table(@PathVariable String tableName, @PathVariable String curd, @PathVariable String inOut) {
         return BaseRet.success(jsonSchemaService.createByTable(tableName, curd, inOut));
     }

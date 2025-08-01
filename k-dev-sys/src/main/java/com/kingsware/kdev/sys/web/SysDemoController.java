@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.Dev;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -37,6 +38,7 @@ public class SysDemoController extends BaseController {
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
+    @Dev
     public BaseRet<PageDataRet<SysDemoRet>> page(SysDemoQueryArgv argv) {
         return BaseRet.success(sysDemoService.query(argv));
     }
@@ -47,6 +49,7 @@ public class SysDemoController extends BaseController {
      */
     @ApiOperation(value = "详情 " ,notes = "详情")
     @GetMapping("/{id}")
+    @Dev
     public BaseRet<SysDemoRet> get(@PathVariable String id) {
         return BaseRet.success(sysDemoService.get(id));
     }
@@ -57,6 +60,7 @@ public class SysDemoController extends BaseController {
      */
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
+    @Dev
     public BaseRet<?> add(@RequestBody SysDemoArgv argv) {
         sysDemoService.add(argv);
         return BaseRet.success();
@@ -69,6 +73,7 @@ public class SysDemoController extends BaseController {
      */
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
+    @Dev
     public BaseRet<?> edit(@RequestBody SysDemoArgv argv) {
         sysDemoService.edit(argv);
         return BaseRet.success();
@@ -80,6 +85,7 @@ public class SysDemoController extends BaseController {
      */
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
+    @Dev
     public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
         sysDemoService.delete(argv);
         return BaseRet.success();

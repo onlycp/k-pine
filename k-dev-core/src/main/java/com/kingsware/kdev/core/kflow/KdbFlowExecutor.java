@@ -1,6 +1,7 @@
 package com.kingsware.kdev.core.kflow;
 
 import com.kingsware.kdev.core.cache.logic.LogicFlowManager;
+import com.kingsware.kdev.core.config.BlacklistConfig;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
@@ -11,6 +12,7 @@ import com.kingsware.kdev.core.kflow.bean.KFlowMessage;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.kflow.handler.KResultHandlers;
 import com.kingsware.kdev.core.kflow.tcp.TcpClientContext;
+import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.orm.exception.TransactionException;
@@ -56,6 +58,12 @@ public class KdbFlowExecutor {
      * @return             执行结果
      */
     public KdbFlowResult execute(String flowId, String subFlowIds, Map<String, Object> params, KFlowContext context, boolean debug, boolean sync, List<DebugNode> debugger) {
+
+        AppModeProperties appModeProperties = SpringContext.getBean(AppModeProperties.class);
+        BlacklistConfig blacklistConfig = SpringContext.getBean(BlacklistConfig.class);
+        if(appModeProperties.getDev() == false && blacklistConfig.getFlows().contains(flowId)) {
+            throw BusinessException.serviceThrow(I18n.t("KdbFlowExecutor.blacklist.fail", "没有权限访问此逻辑编排"));
+        }
         long t1 = System.currentTimeMillis();
         String statusMessage = I18n.t("common.fail", "失败") ;
         KdbFlowResult result = new KdbFlowResult();

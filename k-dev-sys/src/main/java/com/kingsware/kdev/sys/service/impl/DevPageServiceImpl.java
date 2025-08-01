@@ -3,9 +3,11 @@ package com.kingsware.kdev.sys.service.impl;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.config.BlacklistConfig;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
+import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
@@ -24,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
+import javax.annotation.Resource;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.Date;
@@ -47,6 +50,12 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
     @Value("${app.menu.search-order:menu}")
     private String menuSearchOrder;
 
+    @Resource
+    private BlacklistConfig blacklistConfig;
+
+    @Resource
+    private AppModeProperties appModeProperties;
+
     @Override
     public DevPageRet get(String id) {
         // 查询model
@@ -58,6 +67,18 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
     @Override
     // @KCache(onlyForProd = true)
     public DevPageRet getByPath(String path) {
+
+        DevPageRet page = getMyPage(path);
+        // 如果是开发模式，并且只针对于生产模式
+        if (appModeProperties.getDev() == false) {
+            if (blacklistConfig.getPages().contains(page.getId())) {
+                throw BusinessException.serviceThrow(I18n.t("DevPageServiceImpl.pageBlacklist", "页面没有访问权限"));
+            }
+        }
+        return page;
+    }
+
+    private DevPageRet getMyPage(String path) {
         if ("menu".equalsIgnoreCase(menuSearchOrder)) {
 //            log.info("请求页面信息:{}", path );
             List<DevPageRet> pages =  DB.findList(DevPageRet.class, " select dp.* from dev_page dp left join sys_menu sm on (dp.id = sm.page_id and sm.menu_type='C' and sm.status=1) where sm.full_path=? and deleted=0 ", path);
@@ -91,10 +112,6 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
                 throw BusinessException.serviceThrow(I18n.t("DevPageServiceImpl.pageNotFound", "找不到页面"));
             }
         }
-
-
-
-
     }
 
     @Override

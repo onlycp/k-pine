@@ -169,6 +169,7 @@ public class SysKdbFlowController extends BaseController {
      */
     @ApiOperation(value = "导出pine " ,notes = "导出pine")
     @PostMapping("/export-pine")
+    @Dev
     public void exportPine(@RequestBody MultiIdArgv argv) {
         sysKdbFlowService.exportPine(argv);
     }

@@ -13,6 +13,7 @@ import com.kingsware.kdev.core.cache.open.OpenApiManager;
 import com.kingsware.kdev.core.cache.permssion.PermissionManager;
 import com.kingsware.kdev.core.cache.refer.PageLoadManager;
 import com.kingsware.kdev.core.cache.session.SessionManager;
+import com.kingsware.kdev.core.config.BlacklistConfig;
 import com.kingsware.kdev.core.config.MyHttpServletRequestWrapper;
 import com.kingsware.kdev.core.config.UiConfig;
 import com.kingsware.kdev.core.context.ClientInfo;
@@ -74,6 +75,8 @@ public class KAuthFilter implements Filter {
     private AppAuthProperties appAuthProperties;
     @Autowired
     private ControllerManager controllerManager;
+    @Autowired
+    private BlacklistConfig blacklistConfig;
     @Autowired
     private UiConfig uiConfig;
 
@@ -268,6 +271,7 @@ public class KAuthFilter implements Filter {
                         apiCode = api.getApiCode();
                         // 是否允许跳过权限
                         ignore = (StringUtils.isNotEmpty(api.getApiCode()) && apiCode.startsWith(ignoreApi)) || ServletUtil.isRefererRule(request);
+                        dev = blacklistConfig.getApis().contains(api.getId());
                     } else {
                         if (apiDefine != null) {
                             apiCode = apiDefine.getApiCode();

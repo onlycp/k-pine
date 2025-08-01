@@ -28,6 +28,7 @@ import com.kingsware.kdev.sys.ret.SysStaticFileRet;
 import com.kingsware.kdev.sys.service.SysFileService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tika.Tika;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -259,15 +260,19 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         if (!isLocal && isFileLocalToFaas() && saveType == 1) {
             saveType = 2;
         }
+        Tika tika = new Tika();
+
         // 遍历处理文件
         for (MultipartFile file: files) {
+
             if (!FileUtils.checkFileNaming(file.getOriginalFilename())) {
                 throw BusinessException.serviceThrow( I18n.t("FileManager.nameFailTip", "文件名命名不符合规范，请重新命名后再上传!"));
             }
             if (!FileUtils.checkFileFrom(fileFrom)) {
                 throw BusinessException.serviceThrow(I18n.t("FileManager.dirCheckFailTip", "文件目录命名不符合规范!"));
             }
-            String fileExt = FileUtils.getFileExt(file.getOriginalFilename());
+            String mimeType = tika.detect(file.getInputStream());
+            String fileExt = FileUtils.getExtensionFromMimeType(mimeType);
             if (!FileUtils.checkFileExt(fileExt)) {
                 throw BusinessException.serviceThrow(FileUtils.getFileExt(file.getOriginalFilename()) + I18n.t("FileManager.suffixCheckFail", "文件后缀名不在上传文件白名单中!") );
             }
@@ -285,6 +290,43 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
 
         return retList;
     }
+
+    public boolean isFileTypeValid(MultipartFile file, String[] allowedExtensions) {
+        try {
+            // 使用Tika检测真实文件类型
+            Tika tika = new Tika();
+            String detectedType = tika.detect(file.getInputStream());
+
+            // 获取文件后缀名
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null || originalFilename.isEmpty()) {
+                return false;
+            }
+
+            String fileExtension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1).toLowerCase();
+
+            // 将检测到的MIME类型转换为常见扩展名
+            String detectedExtension = FileUtils.getExtensionFromMimeType(detectedType);
+
+            // 检查检测到的扩展名是否与文件扩展名匹配
+            if (!fileExtension.equalsIgnoreCase(detectedExtension)) {
+                return false;
+            }
+
+            // 检查扩展名是否在允许的列表中
+            for (String allowedExt : allowedExtensions) {
+                if (fileExtension.equalsIgnoreCase(allowedExt)) {
+                    return true;
+                }
+            }
+
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+
 
 
     @Override
@@ -713,5 +755,42 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             }
         }
         return null;
+    }
+
+    @Override
+    public BaseRet<String> detectMimeType(MultipartFile file) {
+        try {
+            if (file == null || file.isEmpty()) {
+                return BaseRet.failMessage("文件为空");
+            }
+
+            // 使用Apache Tika检测MIME类型
+            Tika tika = new Tika();
+            String mimeType = tika.detect(file.getInputStream());
+
+            // 获取文件扩展名
+            String originalFilename = file.getOriginalFilename();
+            String extension = "";
+            if (originalFilename != null && originalFilename.contains(".")) {
+                extension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1).toLowerCase();
+            }
+
+            // 获取对应的文件扩展名
+            String expectedExtension = FileUtils.getExtensionFromMimeType(mimeType);
+
+            // 构建返回信息
+            Map<String, Object> result = new HashMap<>();
+            result.put("mimeType", mimeType);
+            result.put("originalExtension", extension);
+            result.put("expectedExtension", expectedExtension);
+            result.put("fileName", originalFilename);
+            result.put("fileSize", file.getSize());
+
+            return BaseRet.success(JsonUtil.toJson(result));
+
+        } catch (Exception e) {
+            log.error("检测MIME类型失败", e);
+            return BaseRet.failMessage("检测MIME类型失败: " + e.getMessage());
+        }
     }
 }

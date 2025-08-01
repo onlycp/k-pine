@@ -24,6 +24,11 @@ public interface DevPageService extends BaseService {
      */
     DevPageRet get(String id);
 
+    /**
+     * 通过路径查询
+     * @param path
+     * @return
+     */
     DevPageRet getByPath(String path);
 
     /**

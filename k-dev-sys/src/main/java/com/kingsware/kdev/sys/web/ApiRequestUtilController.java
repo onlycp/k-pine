@@ -1,6 +1,7 @@
 package com.kingsware.kdev.sys.web;
 
 import com.kingsware.kdev.core.auth.ApiIgnore;
+import com.kingsware.kdev.core.auth.Dev;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.constants.Version;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +23,7 @@ public class ApiRequestUtilController {
 
     @RequestMapping("back-all")
     @ApiIgnore
+    @Dev
     public BaseRet<Map<String, Object>> backAll(@RequestBody Map<String, Object> params) {
         return BaseRet.success(params);
     }

@@ -449,4 +449,118 @@ public class FileUtils {
 
 
     }
+
+    /**
+     * 根据MIME类型获取文件扩展名
+     * @param mimeType MIME类型
+     * @return 文件扩展名
+     */
+    public static String getExtensionFromMimeType(String mimeType) {
+        if (mimeType == null || mimeType.isEmpty()) {
+            return "";
+        }
+        
+        switch (mimeType.toLowerCase()) {
+            // 图片类型
+            case "image/jpeg": return "jpg";
+            case "image/jpg": return "jpg";
+            case "image/png": return "png";
+            case "image/gif": return "gif";
+            case "image/bmp": return "bmp";
+            case "image/webp": return "webp";
+            case "image/svg+xml": return "svg";
+            case "image/tiff": return "tiff";
+            case "image/x-icon": return "ico";
+            case "image/x-ms-bmp": return "bmp";
+            case "image/pjpeg": return "jpg";
+            case "image/x-png": return "png";
+            case "image/x-portable-pixmap": return "ppm";
+            case "image/x-portable-graymap": return "pgm";
+            case "image/x-portable-bitmap": return "pbm";
+            case "image/x-xbitmap": return "xbm";
+            case "image/x-xpixmap": return "xpm";
+            case "image/x-rgb": return "rgb";
+            case "image/x-xwindowdump": return "xwd";
+            case "image/x-cmu-raster": return "ras";
+            case "image/x-portable-anymap": return "pnm";
+            case "image/x-quicktime": return "qtif";
+            case "image/x-photoshop": return "psd";
+            case "image/x-coreldraw": return "cdr";
+            case "image/x-canon-crw": return "crw";
+            case "image/x-canon-cr2": return "cr2";
+            case "image/x-nikon-nef": return "nef";
+            case "image/x-adobe-dng": return "dng";
+            case "image/x-sony-arw": return "arw";
+            case "image/x-fuji-raf": return "raf";
+            case "image/x-olympus-orf": return "orf";
+            case "image/x-panasonic-rw2": return "rw2";
+            case "image/x-samsung-srw": return "srw";
+            case "image/x-pentax-pef": return "pef";
+            case "image/x-kodak-dcr": return "dcr";
+            case "image/x-kodak-kdc": return "kdc";
+            case "image/x-minolta-mrw": return "mrw";
+            case "image/x-sigma-x3f": return "x3f";
+            case "image/x-hasselblad-3fr": return "3fr";
+            case "image/x-hasselblad-fff": return "fff";
+            case "image/x-phaseone-iiq": return "iiq";
+            case "image/x-leaf-mos": return "mos";
+            case "image/x-raw": return "raw";
+            case "image/x-dcraw": return "raw";
+            
+            // 文档类型
+            case "application/pdf": return "pdf";
+            case "application/msword": return "doc";
+            case "application/vnd.openxmlformats-officedocument.wordprocessingml.document": return "docx";
+            case "application/vnd.ms-excel": return "xls";
+            case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": return "xlsx";
+            case "application/vnd.ms-powerpoint": return "ppt";
+            case "application/vnd.openxmlformats-officedocument.presentationml.presentation": return "pptx";
+            case "text/plain": return "txt";
+            case "text/html": return "html";
+            case "text/css": return "css";
+            case "text/javascript": return "js";
+            case "application/json": return "json";
+            case "application/xml": return "xml";
+            
+            // 压缩文件类型
+            case "application/zip": return "zip";
+            case "application/x-rar-compressed": return "rar";
+            case "application/x-7z-compressed": return "7z";
+            case "application/gzip": return "gz";
+            case "application/x-tar": return "tar";
+            
+            // 音频类型
+            case "audio/mpeg": return "mp3";
+            case "audio/wav": return "wav";
+            case "audio/ogg": return "ogg";
+            case "audio/mp4": return "m4a";
+            case "audio/flac": return "flac";
+            
+            // 视频类型
+            case "video/mp4": return "mp4";
+            case "video/avi": return "avi";
+            case "video/mpeg": return "mpeg";
+            case "video/quicktime": return "mov";
+            case "video/x-msvideo": return "avi";
+            case "video/x-ms-wmv": return "wmv";
+            case "video/webm": return "webm";
+            case "video/ogg": return "ogv";
+            
+            // 字体类型
+            case "font/ttf": return "ttf";
+            case "font/otf": return "otf";
+            case "font/woff": return "woff";
+            case "font/woff2": return "woff2";
+            
+            // 其他常见类型
+            case "application/octet-stream": return "bin";
+            case "application/x-shockwave-flash": return "swf";
+            case "application/x-java-archive": return "jar";
+            case "application/x-executable": return "exe";
+            case "application/x-dosexec": return "exe";
+            case "application/x-msdownload": return "exe";
+            
+            default: return "";
+        }
+    }
 }

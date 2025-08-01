@@ -2,6 +2,7 @@ package com.kingsware.kdev.sys.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kingsware.kdev.core.auth.ApiIgnore;
+import com.kingsware.kdev.core.auth.Dev;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.ExceptionLog;
@@ -17,6 +18,7 @@ import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.SecurityUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.model.DevPageHistory;
+import com.kingsware.kdev.sys.service.DevApplicationService;
 import io.swagger.annotations.Api;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 //import org.springframework.boot.autoconfigure.info.ProjectInfoProperties;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
@@ -52,6 +55,9 @@ import java.util.*;
 @RestController
 @RequestMapping("/"+ Version.V1 + "/sys-tool-box")
 public class SysToolBoxController extends BaseController {
+
+    @Resource
+    private DevApplicationService devApplicationService;
 
     @GetMapping("/to-url")
     @ApiIgnore
@@ -80,6 +86,7 @@ public class SysToolBoxController extends BaseController {
         }
 
     }
+
 
     @GetMapping("/clear-page")
     @ApiIgnore
@@ -202,6 +209,54 @@ public class SysToolBoxController extends BaseController {
             result.put("error", e.getMessage());
             result.put("callTime", System.currentTimeMillis());
             return BaseRet.failMessage("Mock FaaS接口调用失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 下载黑名单配置文件（明文）
+     */
+    @GetMapping("/download-blacklist-plain")
+    @ApiIgnore
+    @Dev
+    public void downloadBlackListPlain(HttpServletResponse response) throws IOException {
+        try {
+            String content = devApplicationService.generateBlackListConfig(false);
+
+            response.setContentType("text/yaml;charset=UTF-8");
+            response.setHeader("Content-Disposition", "attachment; filename=blacklist-plain.yml");
+
+            response.getWriter().write(content);
+            response.getWriter().flush();
+
+            log.info("黑名单配置文件（明文）下载成功");
+        } catch (Exception e) {
+            log.error("下载黑名单配置文件（明文）失败: {}", e.getMessage(), e);
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write("下载失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 下载黑名单配置文件（密文）
+     */
+    @GetMapping("/download-blacklist-encrypted")
+    @ApiIgnore
+    @Dev
+    public void downloadBlackListEncrypted(HttpServletResponse response) throws IOException {
+        try {
+            String content = devApplicationService.generateBlackListConfig(true);
+
+            response.setContentType("application/octet-stream;charset=UTF-8");
+            response.setHeader("Content-Disposition", "attachment; filename=blacklist-encrypted.yml");
+
+            response.getWriter().write(content);
+            response.getWriter().flush();
+
+            log.info("黑名单配置文件（密文）下载成功");
+        } catch (Exception e) {
+            log.error("下载黑名单配置文件（密文）失败: {}", e.getMessage(), e);
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write("下载失败: " + e.getMessage());
         }
     }
 //

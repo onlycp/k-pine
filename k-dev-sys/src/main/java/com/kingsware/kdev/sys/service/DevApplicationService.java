@@ -88,4 +88,11 @@ public interface DevApplicationService extends BaseService {
      */
     void backupPine(String pineBody, String fileName);
 
+    /**
+     * 生成黑名单配置文件
+     * @param encrypted 是否加密
+     * @return 黑名单配置内容
+     */
+    String generateBlackListConfig(boolean encrypted);
+
 }
