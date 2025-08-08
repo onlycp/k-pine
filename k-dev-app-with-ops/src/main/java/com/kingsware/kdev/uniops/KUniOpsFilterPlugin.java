@@ -14,7 +14,7 @@ package com.kingsware.kdev.uniops;//package com.kingsware.kdev.uniops;
 //import org.springframework.stereotype.Component;
 //import org.springframework.web.util.ContentCachingResponseWrapper;
 //
-//import javax.annotation.Resource;
+//import jakarta.annotation.Resource;
 //import java.util.Enumeration;
 //import java.util.HashMap;
 //import java.util.Map;

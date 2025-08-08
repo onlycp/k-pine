@@ -36,9 +36,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -476,13 +477,28 @@ public class DynamicTask implements CommandLineRunner {
                 }
 
                 @Override
+                public Instant lastScheduledExecution() {
+                    return null;
+                }
+
+                @Override
                 public Date lastActualExecutionTime() {
                     return null; // 返回上一次任务实际执行的时间，如果没有则返回null
                 }
 
                 @Override
+                public Instant lastActualExecution() {
+                    return null;
+                }
+
+                @Override
                 public Date lastCompletionTime() {
                     return null; // 返回上一次任务完成的时间，如果没有则返回null
+                }
+
+                @Override
+                public Instant lastCompletion() {
+                    return null;
                 }
             });
 

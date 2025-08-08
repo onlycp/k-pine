@@ -42,7 +42,7 @@
             <artifactId>jsoup</artifactId>
             <version>1.17.2</version>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
@@ -126,7 +126,7 @@
 <!--                        </option>-->
 
 <!--                        &lt;!&ndash;忽略note消息，如果提示javax.annotation有问题，那麽就加入以下代码&ndash;&gt;-->
-<!--                        <option>-dontnote javax.annotation.**</option>-->
+<!--                        <option>-dontnote jakarta.annotation.**</option>-->
 <!--                        <option>-dontnote sun.applet.**</option>-->
 <!--                        <option>-dontnote sun.tools.jar.**</option>-->
 <!--                        <option>-dontnote org.apache.commons.logging.**</option>-->

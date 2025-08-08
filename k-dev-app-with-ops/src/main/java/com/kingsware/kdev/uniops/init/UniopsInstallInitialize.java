@@ -6,7 +6,7 @@
 //import org.springframework.beans.factory.annotation.Value;
 //import org.springframework.stereotype.Component;
 //
-//import javax.annotation.Resource;
+//import jakarta.annotation.Resource;
 //import java.io.File;
 //import java.nio.charset.StandardCharsets;
 //import java.nio.file.Files;

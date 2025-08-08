@@ -2,9 +2,9 @@ package com.kingsware.kdev.core.i18n;
 
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.util.StringUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.i18n.LocaleContextHolder;
 
-import javax.servlet.http.HttpServletRequest;
 import java.text.MessageFormat;
 import java.util.*;
 

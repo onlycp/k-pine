@@ -14,6 +14,8 @@ import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.model.DevPage;
 import com.kingsware.kdev.core.util.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -29,8 +31,7 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+
 import java.io.File;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
@@ -168,7 +169,7 @@ public class UiConfig extends WebMvcConfigurationSupport {
      * 向前端重定向到首页
      * @param response
      */
-    public void redirectToIndex(HttpServletRequest request ,HttpServletResponse response) {
+    public void redirectToIndex(HttpServletRequest request , HttpServletResponse response) {
         String uri = request.getRequestURI();
         String action = request.getParameter("act");
         if (StringUtils.isNotEmpty(action) && (action.equalsIgnoreCase("whoisyourdaddy") || action.equalsIgnoreCase("dota"))) {

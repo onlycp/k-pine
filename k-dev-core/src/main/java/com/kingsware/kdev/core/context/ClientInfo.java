@@ -1,10 +1,10 @@
 package com.kingsware.kdev.core.context;
 
 import com.kingsware.kdev.core.auth.BaseUserInfo;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Data;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 /**

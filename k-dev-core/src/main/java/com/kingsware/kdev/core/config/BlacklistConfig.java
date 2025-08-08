@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import org.yaml.snakeyaml.Yaml;
 import com.kingsware.kdev.core.context.SpringContext;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;

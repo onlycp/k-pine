@@ -3,6 +3,7 @@ package com.kingsware.kdev.core.cache.kcache;
 import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.MD5Utils;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -10,7 +11,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;

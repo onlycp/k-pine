@@ -19,10 +19,10 @@ import com.kingsware.kdev.sys.ret.SysTaskRet;
 import com.kingsware.kdev.sys.service.SysTaskService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.support.CronSequenceGenerator;
+import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.Map;
 
 /**
@@ -70,7 +70,7 @@ public class SysTaskServiceImpl extends BaseServiceImpl implements SysTaskServic
             return;
         }
         try {
-            new CronSequenceGenerator(cron);
+            CronExpression.parse(cron);
         }
         catch (Exception e) {
             throw BusinessException.serviceThrow(I18n.t("SysTask.cron.error", "cron表达式错误"));

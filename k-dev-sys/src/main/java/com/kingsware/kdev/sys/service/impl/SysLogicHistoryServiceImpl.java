@@ -23,7 +23,7 @@ import com.kingsware.kdev.sys.service.SysKdbFlowService;
 import com.kingsware.kdev.sys.service.SysLogicHistoryService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 业务实现类
