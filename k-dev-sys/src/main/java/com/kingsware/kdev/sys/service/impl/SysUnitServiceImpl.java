@@ -72,29 +72,23 @@ public class SysUnitServiceImpl extends BaseServiceImpl implements SysUnitServic
         model.setLeader(argv.getLeader());
         model.setMobile(argv.getMobile());
         model.setOrderNum(argv.getOrderNum());
-        // 处理path， 如果单位有变动时，才需要处理
+
+        // 记录变更前的path
+        String oldPath = model.getPath();
         boolean parentChanged = !Objects.equals(model.getParentId(), argv.getParentId());
-        String hisParentPath = model.getPath().replace("/" + model.getId() +"/", "/");
         model.setParentId(argv.getParentId());
+        // 生成新path
+        String newPath = generateNodePath(model.getId(), model.getParentId());
+        model.setPath(newPath);
         // 唯一性校验
         DBChecker<SysUnit> checker =DBChecker.build(model, SysUnit.class);
-        // 同级下名称唯一
         checker.uni(new String[]{"name", "parentId"}, I18n.t("SysUnit.name.unique", "同一级别的名称要求唯一"));
-        // 执行校验
         checker.checkUnique();
-        // 保存
         DB.update(model);
-        // 更新path
+        // 批量更新所有子节点path
         if (parentChanged) {
-            SysUnit newParent = DB.findById(SysUnit.class, model.getParentId());
-            String newParentPath = "/";
-            if (newParent != null) {
-                newParentPath = newParent.getPath();
-            }
-            // 新老头
             String updateSql = "update sys_unit set path=replace(path,?,?) where path like ?";
-            DB.executeUpdateSql(updateSql, hisParentPath, newParentPath, "%/"+ model.getId() + "/%");
-
+            DB.executeUpdateSql(updateSql, oldPath, newPath, oldPath + "%");
         }
     }
 

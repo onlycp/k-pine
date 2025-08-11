@@ -95,23 +95,65 @@
                     </archive>
                 </configuration>
             </plugin>
-            <!--拷贝依赖到jar外面的lib目录-->
+<!--            &lt;!&ndash;拷贝依赖到jar外面的lib目录&ndash;&gt;-->
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-dependency-plugin</artifactId>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>copy</id>-->
+<!--                        <phase>package</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>copy-dependencies</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>                &lt;!&ndash;指定的依赖路径&ndash;&gt;-->
+<!--                            <outputDirectory>-->
+<!--                                ${project.build.directory}/lib-->
+<!--                            </outputDirectory>-->
+<!--                        </configuration>-->
+
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
+                <!-- https://gitee.com/roseboy/classfinal -->
+                <groupId>net.roseboy</groupId>
+                <artifactId>classfinal-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <configuration>
+                    <password>tQjLiDL5cLogQ38a</password>
+                    <packages>com.kingsware.kdev</packages>
+                    <cfgfiles>application.properties,application-pine.properties</cfgfiles>
+                    <excludes>org.spring</excludes>
+                    <libjars>k-dev-core-${kdev.version}.jar,k-dev-sys-${kdev.version}.jar</libjars>
+                </configuration>
                 <executions>
                     <execution>
-                        <id>copy</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>copy-dependencies</goal>
+                            <goal>classFinal</goal>
                         </goals>
-                        <configuration>                <!--指定的依赖路径-->
-                            <outputDirectory>
-                                ${project.build.directory}/lib
-                            </outputDirectory>
-                        </configuration>
-
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- https://gitee.com/roseboy/classfinal -->
+                <groupId>net.roseboy</groupId>
+                <artifactId>classfinal-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <configuration>
+                    <password>tQjLiDL5cLogQ38a</password>
+                    <packages>com.kingsware.kdev</packages>
+                    <cfgfiles>application.properties,application-pine.properties</cfgfiles>
+                    <excludes>org.spring</excludes>
+                    <libjars>k-dev-core-${kdev.version}.jar,k-dev-sys-${kdev.version}.jar</libjars>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>classFinal</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>

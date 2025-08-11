@@ -6,6 +6,7 @@ import com.kingsware.kdev.core.encrypt.inst.AESInstance;
 import com.kingsware.kdev.core.encrypt.inst.Base64Instance;
 import com.kingsware.kdev.core.encrypt.inst.MD5Instance;
 
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -60,8 +61,8 @@ public class EncryptWorker {
      * @param source    源串
      * @return          加密后的字符串
      */
-    public String encrypt(String source) {
-        return encryptInterface.encrypt(source,algorithmConfig);
+    public String encrypt(String source, String slat) {
+        return encryptInterface.encrypt(source,algorithmConfig, slat);
     }
 
     /**
@@ -70,7 +71,7 @@ public class EncryptWorker {
      * @param encrypted     原先加密后的字符串
      * @return              结果
      */
-    public boolean validate(String source, String encrypted) {
-        return encryptInterface.validate(source, encrypted, algorithmConfig);
+    public boolean validate(String source, String encrypted, String slat) {
+        return encryptInterface.validate(source, encrypted, algorithmConfig, slat);
     }
 }

@@ -189,9 +189,13 @@ public class I18n {
 
         // 如果消息为空且语言代码不为空，则尝试从公共消息数据中获取消息
         if (StringUtils.isEmpty(message)) {
-            Map<String, Map<String, String>> publicI18nData = getI18nData(SysConst.pineAppId);
-            if (Objects.requireNonNull(publicI18nData).containsKey(key)) {
-                message = publicI18nData.get(key).get(lang);
+            for (String p : appI18nData.keySet()) {
+                if (appI18nData.get(p).getI18nData().containsKey(key)) {
+                    message = appI18nData.get(p).getI18nData().get(key).get(lang);
+                    if (StringUtils.isNotEmpty( message)) {
+                        return message;
+                    }
+                }
             }
         }
 
@@ -217,22 +221,18 @@ public class I18n {
         try {
             // 初始化消息为默认值
             String message = defaultMessage;
-            // 如果国际化数据中包含给定的键
-            Map<String, Map<String, String>> i18nData = getI18nData(appId);
-            if (i18nData == null) {
-                i18nData = getI18nData(SysConst.pineAppId);
+            // 尝试用特定语言获取消息
+            if (key.equalsIgnoreCase("消息通知")) {
+                System.currentTimeMillis();
             }
-            if (Objects.requireNonNull(i18nData).containsKey(key)) {
-                // 尝试用特定语言获取消息
-                String str = getMessage(appId, key, lang());
-                // 如果获取的消息为空或仅含空格，则回退到默认消息
-                if (StringUtils.isEmpty(str)) {
-                    message = defaultMessage;
-                }
-                else {
-                    // 否则，使用获取到的消息
-                    message = str;
-                }
+            String str = getMessage(appId, key, lang());
+            // 如果获取的消息为空或仅含空格，则回退到默认消息
+            if (StringUtils.isEmpty(str)) {
+                message = defaultMessage;
+            }
+            else {
+                // 否则，使用获取到的消息
+                message = str;
             }
             // 作为额外的检查，如果此时消息仍然为空或仅含空格，则设置为默认消息
             if (StringUtils.isEmpty(message)) {
@@ -444,11 +444,16 @@ public class I18n {
     }
 
     public static void translateApp(String appId) {
-        List<String> i18ns = DB.findSingleAttributeList(String.class, "select id from sys_i18n where message not like '%en_US%' or message like '%\"en_US\":null%' or message like '%\"en_US\":\"\",%' and app_id=? order by when_created asc", appId);
+        List<String> i18ns = DB.findSingleAttributeList(String.class, "select id from sys_i18n " +
+                "where (message not like '%en_US%' or message like '%\"en_US\":null%' or message like '%\"en_US\":\"\",%') " +
+                "and app_id=? order by when_created asc", appId);
         ExecutorService executorService = Executors.newFixedThreadPool(10);
         for (int i = 0; i < i18ns.size(); i++) {
             int finalI = i;
             int finalI1 = i;
+            if (executorService.isShutdown() || executorService.isTerminated()) {
+                log.warn("translate i18n ExecutorService error!");
+            }
             executorService.submit(() -> {
                 translate(i18ns.get(finalI));
                 log.info("translate i18n: {}, 进度:{}/{}", i18ns.get(finalI1), finalI1 +1, i18ns.size());

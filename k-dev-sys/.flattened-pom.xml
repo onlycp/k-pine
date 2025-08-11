@@ -5,11 +5,11 @@
   <parent>
     <groupId>com.kingsware.dev</groupId>
     <artifactId>k-dev-parent</artifactId>
-    <version>4.1.0-beta.2</version>
+    <version>4.1.0-beta.3</version>
   </parent>
   <groupId>com.kingsware.dev</groupId>
   <artifactId>k-dev-sys</artifactId>
-  <version>4.1.0-beta.2</version>
+  <version>4.1.0-beta.3</version>
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>

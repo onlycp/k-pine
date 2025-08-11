@@ -304,6 +304,7 @@ public class ServletUtil {
             String name = names.nextElement();
             String value = request.getParameter(name);
             params.put(name, value);
+
         }
         // 获取path变量
         if (api != null) {
@@ -368,6 +369,7 @@ public class ServletUtil {
         // 返回
         return params;
     }
+
 
     public static Map<String, Object> getRequestData() {
         if (KClientContext.getContext() != null && KClientContext.getContext().getRequest() != null) {
@@ -457,11 +459,13 @@ public class ServletUtil {
      * @param object    对象
      */
     public static void responseJson(HttpServletResponse response, Object object) {
-        response.setCharacterEncoding("UTF-8");
-        response.setContentType("application/json; charset=utf-8");
+        String charset = KClientContext.getContext().getRequestCharset();
+        response.setCharacterEncoding(charset);
+        response.setContentType("application/json; charset=" + charset);
         try (PrintWriter out = response.getWriter()) {
             String responseBody = new ObjectMapper().writeValueAsString(object);
-            out.append(responseBody);
+            byte[] bytes = responseBody.getBytes(charset);
+            out.write(new String(bytes, charset));
         } catch (IOException e) {
             log.error("error", e);
         }
@@ -559,21 +563,30 @@ public class ServletUtil {
     public static void responseJsonString(HttpServletResponse response, String content) {
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json; charset=utf-8");
+        String charset = KClientContext.getContext().getRequestCharset();
         try (PrintWriter out = response.getWriter()) {
-            out.append(content);
+            byte[] bytes = content.getBytes(charset);
+            out.write(new String(bytes, charset));
         } catch (IOException e) {
             log.error("error", e);
         }
     }
 
+
+
+    /**
+     * 输出原始数据
+     * @param response
+     * @param content
+     */
     public static void responseRaw(HttpServletResponse response, String content) {
         if (content == null || content.isEmpty()) {
             return;
         }
-
+        String charset = KClientContext.getContext().getRequestCharset();
         // 设置默认编码
-        response.setCharacterEncoding("UTF-8");
-        
+        response.setCharacterEncoding(charset);
+
         // 根据内容格式判断 Content-Type
         String contentType = "text/plain";
         if (content.trim().startsWith("<")) {
@@ -589,12 +602,13 @@ public class ServletUtil {
         }
 
         // 设置 Content-Type
-        response.setContentType(contentType + ";charset=UTF-8");
+        response.setContentType(contentType + ";charset=" + charset);
 
         try {
-            response.getWriter().write(content);
+            byte[] bytes = content.getBytes(charset);
+            response.getWriter().write(new String(bytes, charset));
             response.getWriter().flush();
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException("响应内容写入失败", e);
         }
     }

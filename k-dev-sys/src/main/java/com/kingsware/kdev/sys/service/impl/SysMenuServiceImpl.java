@@ -362,6 +362,9 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
             return;
         }
         SysMenu extraData = (SysMenu) menu.getExtraData();
+        if (menu.getLabel().equalsIgnoreCase("消息通知")) {
+            System.currentTimeMillis();
+        }
         // 如果菜单项的标签文本不为空，则进行国际化处理
         if (StringUtils.isNotEmpty(menu.getLabel())) {
             String str = I18n.parseScript(extraData.getAppId(), menu.getLabel());

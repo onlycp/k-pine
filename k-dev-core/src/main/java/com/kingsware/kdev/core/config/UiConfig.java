@@ -385,6 +385,8 @@ public class UiConfig extends WebMvcConfigurationSupport {
         matchKeys.add("success");
         matchKeys.add("content");
         matchKeys.add("suffix");
+        matchKeys.add("groupName");
+        matchKeys.add("deleteBtnLabel");
 //        matchKeys.add("unitOptions");
         List<String> pathKeys = new ArrayList<>();
         for (String key : matchKeys) {

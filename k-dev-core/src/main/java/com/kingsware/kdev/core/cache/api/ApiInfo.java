@@ -1,5 +1,7 @@
 package com.kingsware.kdev.core.cache.api;
 
+import com.kingsware.kdev.core.util.StringUtils;
+import io.netty.util.internal.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -52,5 +54,41 @@ public class ApiInfo{
     private Integer cacheExpireTime;
     // 自动化国际键值
     private String i18nKeys;
+
+    public String getReqeustCharset() {
+        if (StringUtils.isEmpty(apiTags)) {
+            return "utf-8";
+        }
+        String[] arr = apiTags.replace(";", ",").split(",");
+        for (String a : arr) {
+            String trimmedTag = a.trim();
+            if ("gbk".equalsIgnoreCase(trimmedTag)) {
+                return "gbk";
+            }
+            else if ("gb2312".equalsIgnoreCase(trimmedTag) || "gb2312-80".equalsIgnoreCase(trimmedTag)) {
+                return "gb2312";
+            }
+            else if ("gb18030".equalsIgnoreCase(trimmedTag)) {
+                return "gb18030";
+            }
+            else if ("big5".equalsIgnoreCase(trimmedTag) || "big-5".equalsIgnoreCase(trimmedTag)) {
+                return "big5";
+            }
+            else if ("utf-8".equalsIgnoreCase(trimmedTag) || "utf8".equalsIgnoreCase(trimmedTag)) {
+                return "utf-8";
+            }
+            else if ("utf-16".equalsIgnoreCase(trimmedTag) || "utf16".equalsIgnoreCase(trimmedTag)) {
+                return "utf-16";
+            }
+            else if ("utf-16le".equalsIgnoreCase(trimmedTag)) {
+                return "utf-16le";
+            }
+            else if ("utf-16be".equalsIgnoreCase(trimmedTag)) {
+                return "utf-16be";
+            }
+        }
+        // 如果没有找到指定的字符集，返回默认值
+        return "utf-8";
+    }
 
 }
