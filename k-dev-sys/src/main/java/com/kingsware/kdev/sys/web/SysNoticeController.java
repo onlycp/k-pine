@@ -14,10 +14,9 @@ import com.kingsware.kdev.sys.ret.SysNoticeRet;
 import com.kingsware.kdev.sys.service.SysNoticeService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.*;
-
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author: crb
@@ -63,7 +62,7 @@ public class SysNoticeController {
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
     @ApiCode("sysinfo:notice:add")
-    public BaseRet<?> add(@RequestBody SysNoticeArgv argv) {
+    public BaseRet<Void> add(@RequestBody SysNoticeArgv argv) {
         sysNoticeService.add(argv);
         return BaseRet.success();
     }
@@ -76,7 +75,7 @@ public class SysNoticeController {
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
     @ApiCode("sysinfo:notice:edit")
-    public BaseRet<?> edit(@RequestBody SysNoticeArgv argv) {
+    public BaseRet<Void> edit(@RequestBody SysNoticeArgv argv) {
         sysNoticeService.edit(argv);
         return BaseRet.success();
     }
@@ -88,7 +87,7 @@ public class SysNoticeController {
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
     @ApiCode("sysinfo:notice:remove")
-    public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
+    public BaseRet<Void> delete(@RequestBody MultiIdArgv argv) {
         sysNoticeService.delete(argv);
         return BaseRet.success();
     }
@@ -100,7 +99,7 @@ public class SysNoticeController {
     @ApiOperation(value = "发送消息 " ,notes = "发送消息")
     @PostMapping(value = "/sendNotice")
     @ApiCode("sysinfo:notice:send")
-    public BaseRet<?> sendNotice(HttpServletRequest request, @RequestBody SysNoticeRelationArgv argv) {
+    public BaseRet<Void> sendNotice(HttpServletRequest request, @RequestBody SysNoticeRelationArgv argv) {
         String ip = ServletUtil.getClientIp(request);
         String token = TokenUtil.getTokenString(request);
         sysNoticeService.sendNotice(argv, token, ip);

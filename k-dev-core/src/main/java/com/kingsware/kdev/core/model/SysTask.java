@@ -3,7 +3,6 @@ package com.kingsware.kdev.core.model;
 import com.kingsware.kdev.core.bean.BaseManageModel;
 import com.kingsware.kdev.core.orm.annotation.Table;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.sql.Timestamp;
 import java.util.Objects;

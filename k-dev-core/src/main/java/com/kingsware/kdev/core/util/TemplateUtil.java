@@ -1,8 +1,6 @@
 package com.kingsware.kdev.core.util;
 
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * 模板工具类

@@ -1,12 +1,12 @@
 package com.kingsware.kdev.sys.service.impl;
 
+import com.kingsware.kdev.core.cache.license.License;
 import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.LicenseException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.util.FileUtils;
-import com.kingsware.kdev.core.cache.license.License;
 import com.kingsware.kdev.sys.argv.SysLicenseActive;
 import com.kingsware.kdev.sys.ret.LicenseRet;
 import com.kingsware.kdev.sys.service.LicenseService;

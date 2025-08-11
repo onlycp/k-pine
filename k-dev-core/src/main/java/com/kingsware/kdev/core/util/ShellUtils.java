@@ -3,9 +3,14 @@ package com.kingsware.kdev.core.util;
 import com.kingsware.kdev.core.bean.NullOutputStream;
 import com.kingsware.kdev.core.bean.ShellResult;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.exec.*;
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.PumpStreamHandler;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 /**
  * shell工具类

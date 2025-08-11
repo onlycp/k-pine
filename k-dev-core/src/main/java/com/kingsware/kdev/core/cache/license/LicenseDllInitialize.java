@@ -1,7 +1,6 @@
 package com.kingsware.kdev.core.cache.license;
 
 import com.kingsware.kdev.core.base.SystemInitialize;
-import com.kingsware.kdev.core.bean.ShellResult;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.util.ShellUtils;
@@ -14,10 +13,8 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.StreamUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;

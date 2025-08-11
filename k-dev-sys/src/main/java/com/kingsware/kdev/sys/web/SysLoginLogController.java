@@ -1,7 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
 import com.kingsware.kdev.core.auth.ApiCode;
-import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.PageDataRet;
@@ -11,17 +10,11 @@ import com.kingsware.kdev.sys.ret.SysLoginLogRet;
 import com.kingsware.kdev.sys.service.SysLoginLogService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 
 /**
  * 演示控制器
@@ -71,7 +64,7 @@ public class SysLoginLogController extends BaseController {
 
 //    @GetMapping("/test-trans")
 //    @ApiIgnore
-//    public BaseRet<?> testTrans(HttpServletRequest request, HttpServletResponse response) throws IOException {
+//    public BaseRet<Void> testTrans(HttpServletRequest request, HttpServletResponse response) throws IOException {
 //        sysLoginLogService.testTran();
 //        return BaseRet.success();
 //    }

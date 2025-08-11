@@ -1,8 +1,5 @@
 package com.kingsware.kdev.core.cron;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
 /**
  * Cron 定时任务异常
  *

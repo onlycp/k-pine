@@ -11,15 +11,16 @@ import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysDataAccessArgv;
 import com.kingsware.kdev.sys.argv.SysDataAccessQueryArgv;
-import com.kingsware.kdev.sys.model.*;
+import com.kingsware.kdev.sys.model.SysDataAccess;
+import com.kingsware.kdev.sys.model.SysDataAccessResource;
+import com.kingsware.kdev.sys.model.SysDataAccessUser;
+import com.kingsware.kdev.sys.model.SysDataResource;
 import com.kingsware.kdev.sys.ret.SysDataAccessRet;
 import com.kingsware.kdev.sys.service.SysDataAccessService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 数据访问业务层

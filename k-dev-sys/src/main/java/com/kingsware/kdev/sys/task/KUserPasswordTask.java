@@ -1,22 +1,18 @@
 package com.kingsware.kdev.sys.task;
 
-import com.kingsware.kdev.core.bean.CategoryData;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.cron.KRunner;
 import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.core.encrypt.EncryptWorker;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.SqlWrapper;
-import com.kingsware.kdev.core.orm.expression.Op;
 import com.kingsware.kdev.core.util.StringUtils;
-import com.kingsware.kdev.sys.model.SysDataAccessResource;
-import com.kingsware.kdev.sys.model.SysDataResource;
 import com.kingsware.kdev.sys.model.SysUser;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Base64;
+import java.util.List;
 
 /**
  * @author chenp

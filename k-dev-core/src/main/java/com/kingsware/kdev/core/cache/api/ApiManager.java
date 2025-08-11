@@ -1,7 +1,6 @@
 package com.kingsware.kdev.core.cache.api;
 
 import com.kingsware.kdev.core.bean.DataModified;
-import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 

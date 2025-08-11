@@ -1,6 +1,5 @@
 package com.kingsware.kdev.sys.argv;
 
-import com.kingsware.kdev.core.bean.BaseSimpleRet;
 import lombok.Data;
 
 /**

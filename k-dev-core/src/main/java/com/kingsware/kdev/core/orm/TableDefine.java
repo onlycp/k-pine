@@ -2,9 +2,6 @@ package com.kingsware.kdev.core.orm;
 
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * 表定义
  *

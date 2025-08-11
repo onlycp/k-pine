@@ -14,10 +14,9 @@ import com.kingsware.kdev.sys.ret.DevPageRet;
 import com.kingsware.kdev.sys.service.DevPageService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.annotation.Resource;
 
 /**
  * 控制器
@@ -90,7 +89,7 @@ public class DevPageController extends BaseController {
     @ResponseBody
     @PostMapping
     @Dev
-    public BaseRet<?> add(@RequestBody DevPageArgv argv) {
+    public BaseRet<Void> add(@RequestBody DevPageArgv argv) {
         devPageService.add(argv);
         return BaseRet.success();
     }
@@ -104,7 +103,7 @@ public class DevPageController extends BaseController {
     @ResponseBody
     @PutMapping
     @Dev
-    public BaseRet<?> edit(@RequestBody DevPageArgv argv) {
+    public BaseRet<Void> edit(@RequestBody DevPageArgv argv) {
         devPageService.edit(argv);
         return BaseRet.success();
     }
@@ -117,7 +116,7 @@ public class DevPageController extends BaseController {
     @ResponseBody
     @PostMapping(value = "/delete")
     @Dev
-    public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
+    public BaseRet<Void> delete(@RequestBody MultiIdArgv argv) {
         devPageService.delete(argv);
         return BaseRet.success();
     }
@@ -130,7 +129,7 @@ public class DevPageController extends BaseController {
     @ApiOperation(value = "深度拷贝 " ,notes = "深度拷贝")
     @PostMapping("/copyData")
     @ResponseBody
-    public BaseRet<?> copyData(@RequestBody CopyContextArgv argv, String id) {
+    public BaseRet<Void> copyData(@RequestBody CopyContextArgv argv, String id) {
         devPageService.copyData(id, argv);
         return BaseRet.success();
     }

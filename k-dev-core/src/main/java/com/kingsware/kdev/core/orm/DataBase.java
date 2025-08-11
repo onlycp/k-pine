@@ -1,7 +1,6 @@
 package com.kingsware.kdev.core.orm;
 
 import com.kingsware.kdev.core.orm.expression.Expression;
-import com.kingsware.kdev.core.orm.kdb.KdbRet;
 import com.kingsware.kdev.core.orm.kdb.TransactionInfo;
 
 import java.util.List;

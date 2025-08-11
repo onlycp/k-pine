@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.ExceptionLog;
 import com.kingsware.kdev.core.cache.config.ConfigManager;
@@ -24,9 +23,6 @@ import com.kingsware.kdev.core.orm.kdb.KdbRet;
 import com.kingsware.kdev.core.util.*;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 import java.util.*;
 
 /**
@@ -444,9 +440,9 @@ public class FlowUtils {
      * @param result 源名称
      * @return
      */
-    public static BaseRet<?> toJsonResult(Object result, String log) {
+    public static BaseRet<Void> toJsonResult(Object result, String log) {
         // 返回前端
-        BaseRet<?> ret;
+        BaseRet<Void> ret;
         if (result instanceof MessageResult) {
             ret = BaseRet.successMessage(((MessageResult) result).getMessage());
         }
@@ -468,7 +464,7 @@ public class FlowUtils {
      */
     public static Object toJsonResult(Object result, String log, String stackException) {
         // 返回前端
-        BaseRet<?> ret = toJsonResult(result, log);
+        BaseRet<Void> ret = toJsonResult(result, log);
         Map<String, Object> map = new HashMap<>();
         map.put("code", ret.getCode());
         if(ret.getCode() != 200 || ret.getCode() != 0) {

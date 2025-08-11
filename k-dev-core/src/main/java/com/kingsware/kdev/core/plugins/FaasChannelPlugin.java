@@ -1,6 +1,5 @@
 package com.kingsware.kdev.core.plugins;
 
-import java.io.InputStream;
 import java.util.Map;
 
 /**

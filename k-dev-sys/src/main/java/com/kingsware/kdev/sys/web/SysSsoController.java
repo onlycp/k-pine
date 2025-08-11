@@ -9,12 +9,11 @@ import com.kingsware.kdev.sys.ret.SysUserLoginRet;
 import com.kingsware.kdev.sys.service.SysSsoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import jakarta.annotation.Resource;
 
 @Api(value = "sso", tags = {"sso"})
 @RestController

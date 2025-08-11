@@ -5,8 +5,6 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.sys.argv.SysOperateLogQueryArgv;
 import com.kingsware.kdev.sys.ret.SysOperateLogRet;
 
-import java.util.List;
-
 /**
  * 角色业务类
  *

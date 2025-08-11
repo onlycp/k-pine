@@ -31,7 +31,6 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
-
 import java.io.File;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;

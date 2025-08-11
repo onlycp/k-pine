@@ -1,6 +1,5 @@
 package com.kingsware.kdev.core.bean;
 
-import com.kingsware.kdev.core.bean.BaseManageRet;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

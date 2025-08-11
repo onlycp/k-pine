@@ -17,9 +17,9 @@ import com.kingsware.kdev.sys.model.SysMenu;
 import com.kingsware.kdev.sys.model.SysRole;
 import com.kingsware.kdev.sys.ret.SysMenuRet;
 import com.kingsware.kdev.sys.service.SysMenuService;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 

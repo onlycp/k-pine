@@ -6,7 +6,6 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
-import com.kingsware.kdev.core.orm.PagedList;
 import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysDemoArgv;

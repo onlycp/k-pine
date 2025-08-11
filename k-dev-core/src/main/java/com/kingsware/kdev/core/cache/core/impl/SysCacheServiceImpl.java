@@ -1,16 +1,11 @@
 package com.kingsware.kdev.core.cache.core.impl;
 
 import com.kingsware.kdev.core.cache.core.SysCacheService;
-import com.kingsware.kdev.core.model.SysCache;
-import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.FaasInvoke;
-import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 @Slf4j
 @Service

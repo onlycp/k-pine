@@ -2,7 +2,6 @@ package com.kingsware.kdev.core.cache.open;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * 开放接口

@@ -1,12 +1,10 @@
 package com.kingsware.kdev.core.kmq;
 
-import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.kmq.websocket.WmMessage;
 import com.kingsware.kdev.core.kmq.websocket.WmMessageArgv;
 import com.kingsware.kdev.core.util.ClassUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
-import com.kingsware.kdev.core.util.StringUtils;
 import com.lmax.disruptor.dsl.Disruptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import static com.kingsware.kdev.core.kmq.websocket.WebsocketConstants.MQ_TO_WEBSOCKET;
 

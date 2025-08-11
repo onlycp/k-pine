@@ -12,9 +12,8 @@ import com.kingsware.kdev.sys.ret.SysDataResourceRet;
 import com.kingsware.kdev.sys.service.SysDataResourceService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.*;
-
 import jakarta.annotation.Resource;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 演示控制器
@@ -61,7 +60,7 @@ public class SysDataResourceController extends BaseController {
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
     @ApiCode("sysinfo:dataresources:add")
-    public BaseRet<?> add(@RequestBody SysDataResourceArgv argv) {
+    public BaseRet<Void> add(@RequestBody SysDataResourceArgv argv) {
         sysDataResourceService.add(argv);
         return BaseRet.success();
     }
@@ -74,7 +73,7 @@ public class SysDataResourceController extends BaseController {
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
     @ApiCode("sysinfo:dataresources:edit")
-    public BaseRet<?> edit(@RequestBody SysDataResourceArgv argv) {
+    public BaseRet<Void> edit(@RequestBody SysDataResourceArgv argv) {
         sysDataResourceService.edit(argv);
         return BaseRet.success();
     }
@@ -86,7 +85,7 @@ public class SysDataResourceController extends BaseController {
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
     @ApiCode("sysinfo:dataresources:remove")
-    public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
+    public BaseRet<Void> delete(@RequestBody MultiIdArgv argv) {
         sysDataResourceService.delete(argv);
         return BaseRet.success();
     }

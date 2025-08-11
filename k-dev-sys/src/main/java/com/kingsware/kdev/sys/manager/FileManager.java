@@ -5,6 +5,7 @@ import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.encrypt.EncryptProperties;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
+import com.kingsware.kdev.core.model.SysFile;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.KdbRet;
 import com.kingsware.kdev.core.plugins.CdnPlugin;
@@ -13,7 +14,6 @@ import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.bean.FaasUploadRet;
-import com.kingsware.kdev.core.model.SysFile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.FileCopyUtils;
 

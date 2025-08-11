@@ -2,15 +2,15 @@ package com.kingsware.kdev.sys.initialize;
 
 import com.kingsware.kdev.core.base.SystemInitialize;
 import com.kingsware.kdev.core.bean.JdbcUrl;
-import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.encrypt.SM4Utils;
-import com.kingsware.kdev.core.kflow.define.FlowDefinition;
 import com.kingsware.kdev.core.orm.DB;
-import com.kingsware.kdev.core.orm.DBConnectConfig;
 import com.kingsware.kdev.core.orm.DataBase;
 import com.kingsware.kdev.core.orm.DbContext;
-import com.kingsware.kdev.core.orm.kdb.*;
+import com.kingsware.kdev.core.orm.kdb.DataSourceFileInfo;
+import com.kingsware.kdev.core.orm.kdb.DataSourceInfo;
+import com.kingsware.kdev.core.orm.kdb.DataSourceQueryArgv;
+import com.kingsware.kdev.core.orm.kdb.KDBConnectConfig;
 import com.kingsware.kdev.core.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +18,9 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.net.Socket;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * k-faas初始化

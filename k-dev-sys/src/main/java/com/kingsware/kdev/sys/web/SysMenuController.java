@@ -1,7 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
 import com.kingsware.kdev.core.auth.ApiCode;
-import com.kingsware.kdev.core.auth.BaseUserInfo;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -15,10 +14,10 @@ import com.kingsware.kdev.sys.ret.SysMenuRet;
 import com.kingsware.kdev.sys.service.SysMenuService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
 import java.util.List;
 
 /**
@@ -93,7 +92,7 @@ public class SysMenuController extends BaseController {
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
     @ApiCode("sysinfo:menu:add")
-    public BaseRet<?> add(@RequestBody SysMenuArgv argv) {
+    public BaseRet<Void> add(@RequestBody SysMenuArgv argv) {
         SysMenuService.add(argv);
         return BaseRet.success();
     }
@@ -106,7 +105,7 @@ public class SysMenuController extends BaseController {
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
     @ApiCode("sysinfo:menu:edit")
-    public BaseRet<?> edit(@RequestBody SysMenuArgv argv) {
+    public BaseRet<Void> edit(@RequestBody SysMenuArgv argv) {
         SysMenuService.edit(argv);
         return BaseRet.success();
     }
@@ -118,7 +117,7 @@ public class SysMenuController extends BaseController {
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
     @ApiCode("sysinfo:menu:remove")
-    public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
+    public BaseRet<Void> delete(@RequestBody MultiIdArgv argv) {
         SysMenuService.delete(argv);
         return BaseRet.success();
     }

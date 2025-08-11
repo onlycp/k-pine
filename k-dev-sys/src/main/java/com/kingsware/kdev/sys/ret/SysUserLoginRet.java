@@ -1,10 +1,7 @@
 package com.kingsware.kdev.sys.ret;
 
-import com.kingsware.kdev.core.bean.BaseManageRet;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.util.Map;
 
 /**
  * 用户返回

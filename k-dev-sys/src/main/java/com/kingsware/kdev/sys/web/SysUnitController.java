@@ -13,9 +13,9 @@ import com.kingsware.kdev.sys.ret.SysUnitRet;
 import com.kingsware.kdev.sys.service.SysUnitService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
 import java.util.List;
 
 /**
@@ -71,7 +71,7 @@ public class SysUnitController extends BaseController {
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
     @ApiCode("sysinfo:unit:add")
-    public BaseRet<?> add(@RequestBody SysUnitArgv argv) {
+    public BaseRet<Void> add(@RequestBody SysUnitArgv argv) {
         SysUnitService.add(argv);
         return BaseRet.success();
     }
@@ -84,7 +84,7 @@ public class SysUnitController extends BaseController {
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
     @ApiCode("sysinfo:unit:edit")
-    public BaseRet<?> edit(@RequestBody SysUnitArgv argv) {
+    public BaseRet<Void> edit(@RequestBody SysUnitArgv argv) {
         SysUnitService.edit(argv);
         return BaseRet.success();
     }
@@ -96,7 +96,7 @@ public class SysUnitController extends BaseController {
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
     @ApiCode("sysinfo:unit:remove")
-    public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
+    public BaseRet<Void> delete(@RequestBody MultiIdArgv argv) {
         SysUnitService.delete(argv);
         return BaseRet.success();
     }

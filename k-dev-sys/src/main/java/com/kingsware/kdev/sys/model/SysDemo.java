@@ -1,7 +1,6 @@
 package com.kingsware.kdev.sys.model;
 
 import com.kingsware.kdev.core.bean.BaseManageModel;
-import com.kingsware.kdev.core.bean.BaseModel;
 import com.kingsware.kdev.core.orm.annotation.ColumnIgnore;
 import com.kingsware.kdev.core.orm.annotation.LogicDelete;
 import com.kingsware.kdev.core.orm.annotation.Table;

@@ -13,9 +13,8 @@ import com.kingsware.kdev.sys.ret.SysLogicHistoryRet;
 import com.kingsware.kdev.sys.service.SysLogicHistoryService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.*;
-
 import jakarta.annotation.Resource;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 控制器
@@ -63,7 +62,7 @@ public class SysLogicHistoryController extends BaseController {
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
     @ApiIgnore
-    public BaseRet<?> add(@RequestBody SysLogicHistoryArgv argv) {
+    public BaseRet<Void> add(@RequestBody SysLogicHistoryArgv argv) {
         sysLogicHistoryService.add(argv);
         return BaseRet.success();
     }
@@ -76,7 +75,7 @@ public class SysLogicHistoryController extends BaseController {
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
     @Dev
-    public BaseRet<?> edit(@RequestBody SysLogicHistoryArgv argv) {
+    public BaseRet<Void> edit(@RequestBody SysLogicHistoryArgv argv) {
         sysLogicHistoryService.edit(argv);
         return BaseRet.success();
     }
@@ -88,7 +87,7 @@ public class SysLogicHistoryController extends BaseController {
     @Dev
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
-    public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
+    public BaseRet<Void> delete(@RequestBody MultiIdArgv argv) {
         sysLogicHistoryService.delete(argv);
         return BaseRet.success();
     }
@@ -101,7 +100,7 @@ public class SysLogicHistoryController extends BaseController {
     @Dev
     @ApiOperation(value = "回滚 " ,notes = "回滚")
     @PostMapping("/rollback")
-    public BaseRet<?> rollback(@RequestBody SysLogicHistoryArgv argv) {
+    public BaseRet<Void> rollback(@RequestBody SysLogicHistoryArgv argv) {
         sysLogicHistoryService.rollback(argv);
         return BaseRet.success();
     }

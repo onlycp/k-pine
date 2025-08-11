@@ -1,7 +1,6 @@
 package com.kingsware.kdev.core.context;
 
 import com.kingsware.kdev.core.util.FileTypeChecker;
-import com.kingsware.kdev.core.util.HttpUtil;
 import com.kingsware.kdev.core.util.StringUtils;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,11 +15,13 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
-import org.springframework.util.StreamUtils;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLConnection;
 import java.nio.file.Path;
 import java.nio.file.Paths;

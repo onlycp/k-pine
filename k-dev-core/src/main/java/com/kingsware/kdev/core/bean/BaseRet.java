@@ -146,7 +146,7 @@ public class BaseRet<T> implements Serializable {
      * 成功返回
      * @return      返回成功结果
      */
-    public static  BaseRet<?> success() {
+    public static  BaseRet<Void> success() {
         return success(null, I18n.t("common.ok", "OK"));
     }
 

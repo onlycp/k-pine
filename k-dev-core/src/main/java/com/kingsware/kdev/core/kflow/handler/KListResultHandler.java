@@ -8,7 +8,6 @@ import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.util.JsonUtil;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 对象处理类

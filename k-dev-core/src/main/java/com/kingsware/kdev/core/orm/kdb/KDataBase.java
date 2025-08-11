@@ -1,10 +1,8 @@
 package com.kingsware.kdev.core.orm.kdb;
 
 import com.kingsware.kdev.core.bean.BaseModel;
-import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
-import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.orm.*;
 import com.kingsware.kdev.core.orm.annotation.LogicDelete;
 import com.kingsware.kdev.core.orm.channel.DbChannel;

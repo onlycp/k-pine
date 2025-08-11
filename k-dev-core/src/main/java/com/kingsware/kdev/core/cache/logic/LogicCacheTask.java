@@ -1,19 +1,11 @@
 package com.kingsware.kdev.core.cache.logic;
 
-import com.kingsware.kdev.core.cache.open.OpenAccount;
-import com.kingsware.kdev.core.cache.open.OpenAccountApiCode;
-import com.kingsware.kdev.core.cache.open.OpenAccountInfo;
-import com.kingsware.kdev.core.cache.open.OpenApiManager;
 import com.kingsware.kdev.core.cron.KRunner;
 import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.core.orm.DB;
-import com.kingsware.kdev.core.util.JsonUtil;
-import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 字典定时任务，从数据库定时加载

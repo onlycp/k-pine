@@ -1,14 +1,12 @@
 package com.kingsware.kdev.sys.service.impl;
 
 import com.kingsware.kdev.core.base.BaseServiceImpl;
-import com.kingsware.kdev.core.bean.BaseManageRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.bean.TreeDataRet;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
-import com.kingsware.kdev.core.orm.PagedList;
 import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.orm.expression.Op;
@@ -18,7 +16,6 @@ import com.kingsware.kdev.sys.argv.SysUnitArgv;
 import com.kingsware.kdev.sys.argv.SysUnitQueryArgv;
 import com.kingsware.kdev.sys.model.SysUnit;
 import com.kingsware.kdev.sys.ret.SysUnitRet;
-import com.kingsware.kdev.sys.ret.SysUserRoleName;
 import com.kingsware.kdev.sys.service.SysUnitService;
 import org.springframework.stereotype.Service;
 

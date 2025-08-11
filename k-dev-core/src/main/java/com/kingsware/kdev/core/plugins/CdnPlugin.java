@@ -1,7 +1,5 @@
 package com.kingsware.kdev.core.plugins;
 
-import com.kingsware.kdev.core.model.SysFile;
-
 import java.io.InputStream;
 
 /**

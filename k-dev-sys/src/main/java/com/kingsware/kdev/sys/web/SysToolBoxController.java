@@ -1,6 +1,5 @@
 package com.kingsware.kdev.sys.web;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.auth.Dev;
 import com.kingsware.kdev.core.base.BaseController;
@@ -11,38 +10,23 @@ import com.kingsware.kdev.core.cache.page.PageCacheManager;
 import com.kingsware.kdev.core.constants.Version;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.ExceptionLogManager;
-import com.kingsware.kdev.core.orm.DB;
-import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.util.HttpUtil;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.SecurityUtil;
-import com.kingsware.kdev.core.util.StringUtils;
-import com.kingsware.kdev.sys.model.DevPageHistory;
 import com.kingsware.kdev.sys.service.DevApplicationService;
 import io.swagger.annotations.Api;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-//import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
-//import org.apache.commons.compress.compressors.lzma.LZMACompressorOutputStream;
-//import org.brotli.dec.BrotliInputStream;
-//import org.eclipse.jgit.api.Git;
-//import org.eclipse.jgit.lib.Repository;
-//import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
-//import org.springframework.boot.autoconfigure.info.ProjectInfoProperties;
-import org.springframework.web.bind.annotation.*;
-
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 /**
  * 系统工具箱
  *
@@ -70,7 +54,7 @@ public class SysToolBoxController extends BaseController {
 
     @GetMapping("/exception")
     @ApiIgnore
-    public BaseRet<?> getExceptionDetail(String id) throws UnsupportedEncodingException {
+    public BaseRet<Void> getExceptionDetail(String id) throws UnsupportedEncodingException {
         String enableException = SpringContext.getProperties("app.exception.enable", "false");
         if ("true".equalsIgnoreCase(enableException)) {
             ExceptionLog exceptionLog = ExceptionLogManager.getInstance().read(id);
@@ -90,7 +74,7 @@ public class SysToolBoxController extends BaseController {
 
     @GetMapping("/clear-page")
     @ApiIgnore
-    public BaseRet<?> clearPageCache() {
+    public BaseRet<Void> clearPageCache() {
         PageCacheManager.getInstance().clear();
         return BaseRet.success();
     }
@@ -100,7 +84,7 @@ public class SysToolBoxController extends BaseController {
      */
     @PostMapping("/mock-faas")
     @ApiIgnore
-    public BaseRet<?> mockFaas(@RequestBody FaasRequestBody faasRequestBody) {
+    public BaseRet<Void> mockFaas(@RequestBody FaasRequestBody faasRequestBody) {
         Map<String, Object> response = new HashMap<>();
 
         try {
@@ -178,7 +162,7 @@ public class SysToolBoxController extends BaseController {
      */
     @GetMapping("/test-faas-call")
     @ApiIgnore
-    public BaseRet<?> testFaasCall() {
+    public BaseRet<Void> testFaasCall() {
         try {
             String mockFaasUrl = "http://127.0.0.1:8080/" + Version.V1 + "/sys-tool-box/mock-faas";
             Map<String, Object> requestData = new HashMap<>();
@@ -262,7 +246,7 @@ public class SysToolBoxController extends BaseController {
 //
 //    @GetMapping("/compress-testing")
 //    @ApiIgnore
-//    public BaseRet<?> compressTesting(String data) {
+//    public BaseRet<Void> compressTesting(String data) {
 //        Map<String, Object> ret = new HashMap<>();
 //        List<String> pageList = DB.findSingleAttributeList(String.class, "select page_json from dev_page_history  limit 200");
 //        List<byte[]> compressList = new ArrayList<>();
@@ -290,7 +274,7 @@ public class SysToolBoxController extends BaseController {
 //    @GetMapping("/git-testing")
 //    @ApiIgnore
 //    @SneakyThrows
-//    public BaseRet<?> gitTesting() {
+//    public BaseRet<Void> gitTesting() {
 ////        String pageId= "af21c51d808b46f5b826a4df9ca41b7d";
 //        String pageId = "bc354dc1478045389d9e48a90f8984a\6";
 //        List<String> pageList = DB.findSingleAttributeList(String.class, "select page_json from dev_page_history  where page_id=? order by when_created asc", pageId);

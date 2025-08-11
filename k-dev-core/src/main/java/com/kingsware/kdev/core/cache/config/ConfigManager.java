@@ -1,7 +1,6 @@
 package com.kingsware.kdev.core.cache.config;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**

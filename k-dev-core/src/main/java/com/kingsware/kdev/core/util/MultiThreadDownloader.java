@@ -2,7 +2,9 @@ package com.kingsware.kdev.core.util;
 
 import lombok.Cleanup;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.CountDownLatch;

@@ -9,11 +9,8 @@ import com.kingsware.kdev.core.plugins.FaasChannelPlugin;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.tools.FEnv;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;

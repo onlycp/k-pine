@@ -6,13 +6,11 @@ import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.cache.api.ApiInfo;
-import com.kingsware.kdev.core.cache.api.ApiManager;
 import com.kingsware.kdev.core.cache.instance.InstanceManager;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.bean.KdbRetFile;
-import com.kingsware.kdev.core.model.SysLogicFlow;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBChecker;
 import com.kingsware.kdev.core.orm.SqlWrapper;
@@ -27,12 +25,12 @@ import com.kingsware.kdev.sys.manager.UniOpsTokenStore;
 import com.kingsware.kdev.sys.model.SysApi;
 import com.kingsware.kdev.sys.ret.SysApiRet;
 import com.kingsware.kdev.sys.service.SysApiService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -166,7 +164,7 @@ public class SysApiServiceImpl extends BaseServiceImpl implements SysApiService 
      */
     @SneakyThrows
     @Override
-    public BaseRet<?> callUniops(Map<String, Object> params) {
+    public BaseRet<Void> callUniops(Map<String, Object> params) {
         HttpServletRequest request = ServletUtil.request();
         HttpServletResponse response = ServletUtil.response();
         String username = SpringContext.getProperties("uniops.user", "admin");

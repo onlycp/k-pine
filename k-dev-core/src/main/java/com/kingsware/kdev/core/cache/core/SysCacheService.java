@@ -1,9 +1,5 @@
 package com.kingsware.kdev.core.cache.core;
 
-import com.kingsware.kdev.core.model.SysCache;
-
-import java.util.List;
-
 public interface SysCacheService {
     String getCache(String key);
 

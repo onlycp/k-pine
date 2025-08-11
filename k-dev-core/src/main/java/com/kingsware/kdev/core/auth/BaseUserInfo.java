@@ -1,10 +1,7 @@
 package com.kingsware.kdev.core.auth;
 
-import com.kingsware.kdev.core.enums.ApiSystemEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.util.Set;
 
 /**
  * 登录用户的基本信息

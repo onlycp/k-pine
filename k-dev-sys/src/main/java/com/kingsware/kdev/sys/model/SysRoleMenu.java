@@ -1,6 +1,5 @@
 package com.kingsware.kdev.sys.model;
 
-import com.kingsware.kdev.core.bean.BaseManageModel;
 import com.kingsware.kdev.core.bean.BaseModel;
 import com.kingsware.kdev.core.orm.annotation.AutoEnum;
 import com.kingsware.kdev.core.orm.annotation.Column;

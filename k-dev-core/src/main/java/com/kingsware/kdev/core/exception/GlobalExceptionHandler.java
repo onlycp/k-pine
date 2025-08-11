@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.NoHandlerFoundException;
 
 
 
@@ -26,7 +25,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = BusinessException.class)
     @ResponseBody
-    public BaseRet<?> businessExceptionHandler(HttpServletRequest request, BusinessException e) {
+    public BaseRet<Void> businessExceptionHandler(HttpServletRequest request, BusinessException e) {
         KClientContext.getContext().setErrorMessage(e.getMessage());
         return BaseRet.failData(e.getMessage(), e.getData());
     }
@@ -36,7 +35,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = OrmDbException.class)
     @ResponseBody
-    public BaseRet<?> ormExceptionHandler(HttpServletRequest request, OrmDbException e) {
+    public BaseRet<Void> ormExceptionHandler(HttpServletRequest request, OrmDbException e) {
         String devMode = SpringContext.getProperties("app.mode.dev", "true");
         String message = I18n.t("GlobalExceptionHandler.error1","数据库操作异常:{0}", e.getMessage());
         if ("true".equals(devMode)) {
@@ -53,7 +52,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = Exception.class)
     @ResponseBody
-    public BaseRet<?> exceptionHandler(HttpServletRequest request, Exception e) {
+    public BaseRet<Void> exceptionHandler(HttpServletRequest request, Exception e) {
         String devMode = SpringContext.getProperties("app.mode.dev", "true");
         log.error("系统内部异常:", e);
         String message = I18n.t("GlobalExceptionHandler.error2","系统内部异常:{0}", e.getMessage());
@@ -71,7 +70,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = TransactionException.class)
     @ResponseBody
-    public BaseRet<?> transactionExceptionHandler(HttpServletRequest request, TransactionException e) {
+    public BaseRet<Void> transactionExceptionHandler(HttpServletRequest request, TransactionException e) {
         String devMode = SpringContext.getProperties("app.mode.dev", "true");
         if ("true".equals(devMode)) {
             return BaseRet.failMessage(e.getMessage(), e.getKlog(), e.getExceptionTrace());
@@ -87,7 +86,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = UnauthorizedException.class)
     @ResponseBody
-    public BaseRet<?> unauthorizedExceptionHandler(HttpServletRequest request, UnauthorizedException e) {
+    public BaseRet<Void> unauthorizedExceptionHandler(HttpServletRequest request, UnauthorizedException e) {
         return BaseRet.fail(e.getMessage(), RetEnum.UNAUTHORIZED.getCode());
     }
 
@@ -96,7 +95,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = ForbiddenException.class)
     @ResponseBody
-    public BaseRet<?> forbiddenExceptionHandler(HttpServletRequest request, ForbiddenException e) {
+    public BaseRet<Void> forbiddenExceptionHandler(HttpServletRequest request, ForbiddenException e) {
         return BaseRet.fail(e.getMessage(), RetEnum.FORBIDDEN.getCode());
     }
 

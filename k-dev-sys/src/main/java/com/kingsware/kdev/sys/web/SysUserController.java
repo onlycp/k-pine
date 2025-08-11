@@ -19,11 +19,11 @@ import com.kingsware.kdev.sys.ret.VerificationCodeRet;
 import com.kingsware.kdev.sys.service.SysUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Map;
 
@@ -50,13 +50,13 @@ public class SysUserController extends BaseController {
     @ApiIgnore
     @ApiOperation(value = "登录" ,notes = "登录")
     @PostMapping(value = "login")
-    public BaseRet<?> login(@RequestBody Map<String, Object> argv) throws Exception {
+    public BaseRet<Void> login(@RequestBody Map<String, Object> argv) throws Exception {
         return BaseRet.success(sysUserService.login(argv));
     }
     @ApiIgnore
     @ApiOperation(value = "是否加密登录" ,notes = "是否加密登录")
     @GetMapping(value = "isLoginCrypt")
-    public BaseRet<?> isLoginCrypt() {
+    public BaseRet<Void> isLoginCrypt() {
         String loginBySM2 = SpringContext.getProperties("app.loginBySM2", PropertiesConstant.FALSE);
         return BaseRet.success(PropertiesConstant.TRUE.equals(loginBySM2));
     }
@@ -89,7 +89,7 @@ public class SysUserController extends BaseController {
      */
     @ApiOperation(value = "个人信息 " ,notes = "个人信息")
     @GetMapping(value = "info")
-    public BaseRet<?> info(HttpServletRequest request) {
+    public BaseRet<Void> info(HttpServletRequest request) {
         String ip = ServletUtil.getClientIp(request);
         String token = TokenUtil.getTokenString(request);
         return BaseRet.success(sysUserService.getBaseUserInfo(token, ip));
@@ -100,7 +100,7 @@ public class SysUserController extends BaseController {
      */
     @ApiOperation(value = "登出 " ,notes = "登出")
     @PostMapping(value = "logout")
-    public BaseRet<?> logout() {
+    public BaseRet<Void> logout() {
         sysUserService.logout();
         return BaseRet.success();
     }
@@ -134,7 +134,7 @@ public class SysUserController extends BaseController {
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
     @ApiCode("sysinfo:user:add")
-    public BaseRet<?> add(@RequestBody SysUserArgv argv) {
+    public BaseRet<Void> add(@RequestBody SysUserArgv argv) {
         sysUserService.add(argv);
         return BaseRet.success();
     }
@@ -147,7 +147,7 @@ public class SysUserController extends BaseController {
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
     @ApiCode("sysinfo:user:edit")
-    public BaseRet<?> edit(@RequestBody SysUserArgv argv) {
+    public BaseRet<Void> edit(@RequestBody SysUserArgv argv) {
         sysUserService.edit(argv);
         return BaseRet.success();
     }
@@ -160,7 +160,7 @@ public class SysUserController extends BaseController {
     @ApiOperation(value = "按批量添加用户角色" ,notes = "按批量添加用户角色")
     @PostMapping("addRoles")
     @ApiCode("sysinfo:user:addRoles")
-    public BaseRet<?> addRoles(@RequestBody SysUserArgv argv) {
+    public BaseRet<Void> addRoles(@RequestBody SysUserArgv argv) {
         sysUserService.addRoles(argv);
         return BaseRet.success();
     }
@@ -172,7 +172,7 @@ public class SysUserController extends BaseController {
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
     @ApiCode("sysinfo:user:remove")
-    public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
+    public BaseRet<Void> delete(@RequestBody MultiIdArgv argv) {
         sysUserService.delete(argv);
         return BaseRet.success();
     }
@@ -183,7 +183,7 @@ public class SysUserController extends BaseController {
      */
     @ApiOperation(value = "获取用户基本信息 " ,notes = "获取用户基本信息")
     @GetMapping(value = "/get-profile")
-    public BaseRet<?> getProfile(HttpServletRequest request) {
+    public BaseRet<Void> getProfile(HttpServletRequest request) {
         String ip = ServletUtil.getClientIp(request);
         String token = TokenUtil.getTokenString(request);
         return BaseRet.success(sysUserService.getProfile(token, ip));
@@ -195,7 +195,7 @@ public class SysUserController extends BaseController {
      */
     @ApiOperation(value = "修改用户基本信息 " ,notes = "修改用户基本信息")
     @PostMapping(value = "/edit-profile")
-    public BaseRet<?> editProfile(@RequestBody SysUserProfileArgv argv) {
+    public BaseRet<Void> editProfile(@RequestBody SysUserProfileArgv argv) {
         sysUserService.editProfile(argv);
         return BaseRet.success();
     }
@@ -206,7 +206,7 @@ public class SysUserController extends BaseController {
      */
     @ApiOperation(value = "修改密码 " ,notes = "修改密码")
     @PostMapping(value = "/change-password")
-    public BaseRet<?> changePassword(HttpServletRequest request, @RequestBody SysUserChangePasswordArgv argv) {
+    public BaseRet<Void> changePassword(HttpServletRequest request, @RequestBody SysUserChangePasswordArgv argv) {
         String ip = ServletUtil.getClientIp(request);
         String token = TokenUtil.getTokenString(request);
         sysUserService.changePassword(argv, token, ip);
@@ -220,7 +220,7 @@ public class SysUserController extends BaseController {
     @ApiOperation(value = "重置密码 " ,notes = "重置密码")
     @PostMapping(value = "/reset-password")
     @ApiCode("sysinfo:user:resetpwd")
-    public BaseRet<?> resetPassword(HttpServletRequest request, @RequestBody SysUserResetPasswordArgv argv) {
+    public BaseRet<Void> resetPassword(HttpServletRequest request, @RequestBody SysUserResetPasswordArgv argv) {
         sysUserService.resetPassword(argv);
         return BaseRet.success();
     }
@@ -239,7 +239,7 @@ public class SysUserController extends BaseController {
     @ApiOperation(value = "加密转换 " ,notes = "加密转换")
     @GetMapping(value = "/encryptChange/{from}/{to}/{secret}")
     @ApiIgnore
-    public BaseRet<?> encryptChange(@PathVariable String from, @PathVariable String to, @PathVariable String secret)  {
+    public BaseRet<Void> encryptChange(@PathVariable String from, @PathVariable String to, @PathVariable String secret)  {
         sysUserService.encryptChange(from, to, secret);
         return BaseRet.success();
     }
@@ -250,7 +250,7 @@ public class SysUserController extends BaseController {
      */
     @GetMapping(value = "/ping")
     @ApiIgnore
-    public BaseRet<?> ping() {
+    public BaseRet<Void> ping() {
         sysUserService.ping();
         return BaseRet.success();
     }
@@ -261,7 +261,7 @@ public class SysUserController extends BaseController {
      */
     @PostMapping(value = "/passwordValidate")
     @ApiIgnore
-    public BaseRet<?> passwordValidate(String password, String appId) {
+    public BaseRet<Void> passwordValidate(String password, String appId) {
         return BaseRet.success(sysUserService.passwordValidate(password, appId));
     }
 
@@ -273,7 +273,7 @@ public class SysUserController extends BaseController {
 
     @PostMapping("validVerifyCode")
     @ApiIgnore
-    public BaseRet<?> validVerificationCode(String uuid, String code, String encryptCode) {
+    public BaseRet<Void> validVerificationCode(String uuid, String code, String encryptCode) {
         return sysUserService.validVerificationCode(uuid, code, encryptCode);
     }
 }

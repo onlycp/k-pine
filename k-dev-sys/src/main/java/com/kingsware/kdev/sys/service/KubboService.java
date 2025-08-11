@@ -1,6 +1,5 @@
 package com.kingsware.kdev.sys.service;
 
-import com.kingsware.kdev.core.base.BaseService;
 import com.kingsware.kdev.core.orm.kdb.KdbRet;
 import com.kingsware.kdev.sys.argv.ExecuteFaasArgv;
 import com.kingsware.kdev.sys.ret.ApiRequestRet;

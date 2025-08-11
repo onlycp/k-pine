@@ -12,9 +12,8 @@ import com.kingsware.kdev.sys.ret.SysDemoRet;
 import com.kingsware.kdev.sys.service.SysDemoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.*;
-
 import jakarta.annotation.Resource;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 演示控制器
@@ -61,7 +60,7 @@ public class SysDemoController extends BaseController {
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
     @Dev
-    public BaseRet<?> add(@RequestBody SysDemoArgv argv) {
+    public BaseRet<Void> add(@RequestBody SysDemoArgv argv) {
         sysDemoService.add(argv);
         return BaseRet.success();
     }
@@ -74,7 +73,7 @@ public class SysDemoController extends BaseController {
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
     @Dev
-    public BaseRet<?> edit(@RequestBody SysDemoArgv argv) {
+    public BaseRet<Void> edit(@RequestBody SysDemoArgv argv) {
         sysDemoService.edit(argv);
         return BaseRet.success();
     }
@@ -86,7 +85,7 @@ public class SysDemoController extends BaseController {
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
     @Dev
-    public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
+    public BaseRet<Void> delete(@RequestBody MultiIdArgv argv) {
         sysDemoService.delete(argv);
         return BaseRet.success();
     }

@@ -1,10 +1,7 @@
 package com.kingsware.kdev.sys.ret;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.kingsware.kdev.core.bean.BaseManageRet;
 import com.kingsware.kdev.core.bean.BaseSimpleRet;
-import com.kingsware.kdev.core.orm.annotation.AutoEnum;
-import com.kingsware.kdev.core.orm.annotation.Column;
 import lombok.Data;
 
 import java.sql.Timestamp;

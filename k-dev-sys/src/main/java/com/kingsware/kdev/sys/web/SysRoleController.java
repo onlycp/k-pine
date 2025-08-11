@@ -13,9 +13,8 @@ import com.kingsware.kdev.sys.ret.SysRoleRet;
 import com.kingsware.kdev.sys.service.SysRoleService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.*;
-
 import jakarta.annotation.Resource;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 演示控制器
@@ -62,7 +61,7 @@ public class SysRoleController extends BaseController {
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
     @ApiCode("sysinfo:role:add")
-    public BaseRet<?> add(@RequestBody SysRoleArgv argv) {
+    public BaseRet<Void> add(@RequestBody SysRoleArgv argv) {
         SysRoleService.add(argv);
         return BaseRet.success();
     }
@@ -75,7 +74,7 @@ public class SysRoleController extends BaseController {
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
     @ApiCode("sysinfo:role:edit")
-    public BaseRet<?> edit(@RequestBody SysRoleArgv argv) {
+    public BaseRet<Void> edit(@RequestBody SysRoleArgv argv) {
         SysRoleService.edit(argv);
         return BaseRet.success();
     }
@@ -87,7 +86,7 @@ public class SysRoleController extends BaseController {
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
     @ApiCode("sysinfo:role:remove")
-    public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
+    public BaseRet<Void> delete(@RequestBody MultiIdArgv argv) {
         SysRoleService.delete(argv);
         return BaseRet.success();
     }
@@ -99,7 +98,7 @@ public class SysRoleController extends BaseController {
     @ApiOperation(value = "修改角色权限 " ,notes = "修改角色权限")
     @PostMapping("update-permission")
     @ApiCode("sysinfo:role:permission")
-    public BaseRet<?> updatePermission(@RequestBody SysRoleMenuArgv argv) {
+    public BaseRet<Void> updatePermission(@RequestBody SysRoleMenuArgv argv) {
         SysRoleService.updatePermission(argv);
         return BaseRet.success();
     }

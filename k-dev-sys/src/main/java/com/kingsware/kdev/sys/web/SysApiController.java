@@ -1,6 +1,5 @@
 package com.kingsware.kdev.sys.web;
 
-import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.auth.Dev;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
@@ -14,9 +13,9 @@ import com.kingsware.kdev.sys.ret.SysApiRet;
 import com.kingsware.kdev.sys.service.SysApiService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
 import java.util.Map;
 
 /**
@@ -64,7 +63,7 @@ public class SysApiController extends BaseController {
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
     @Dev
-    public BaseRet<?> add(@RequestBody SysApiArgv argv) {
+    public BaseRet<Void> add(@RequestBody SysApiArgv argv) {
         sysApiService.add(argv);
         return BaseRet.success();
     }
@@ -77,7 +76,7 @@ public class SysApiController extends BaseController {
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
     @Dev
-    public BaseRet<?> edit(@RequestBody SysApiArgv argv) {
+    public BaseRet<Void> edit(@RequestBody SysApiArgv argv) {
         sysApiService.edit(argv);
         return BaseRet.success();
     }
@@ -89,14 +88,14 @@ public class SysApiController extends BaseController {
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
     @Dev
-    public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
+    public BaseRet<Void> delete(@RequestBody MultiIdArgv argv) {
         sysApiService.delete(argv);
         return BaseRet.success();
     }
 
     @ApiOperation(value = "调用uniops接口 " ,notes = "调用uniops接口")
     @PostMapping(value = "/callUniOps")
-    public BaseRet<?> callUniOps(@RequestBody Map<String, Object> params) {
+    public BaseRet<Void> callUniOps(@RequestBody Map<String, Object> params) {
         return sysApiService.callUniops(params);
     }
 
@@ -107,7 +106,7 @@ public class SysApiController extends BaseController {
     @Dev
     @ApiOperation(value = "深度拷贝 " ,notes = "深度拷贝")
     @PostMapping("/copyData")
-    public BaseRet<?> copyData(@RequestBody CopyContextArgv argv, String id) {
+    public BaseRet<Void> copyData(@RequestBody CopyContextArgv argv, String id) {
         sysApiService.copyData(id, argv);
         return BaseRet.success();
     }

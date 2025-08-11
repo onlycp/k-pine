@@ -1,6 +1,5 @@
 package com.kingsware.kdev.sys.web;
 
-import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.auth.Dev;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
@@ -9,14 +8,12 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
 import com.kingsware.kdev.sys.argv.DevPageHistoryArgv;
 import com.kingsware.kdev.sys.argv.DevPageHistoryQueryArgv;
-import com.kingsware.kdev.sys.argv.SysLogicHistoryArgv;
 import com.kingsware.kdev.sys.ret.DevPageHistoryRet;
 import com.kingsware.kdev.sys.service.DevPageHistoryService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.*;
-
 import jakarta.annotation.Resource;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 控制器
@@ -63,7 +60,7 @@ public class DevPageHistoryController extends BaseController {
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
     @Dev
-    public BaseRet<?> add(@RequestBody DevPageHistoryArgv argv) {
+    public BaseRet<Void> add(@RequestBody DevPageHistoryArgv argv) {
         DevPageHistoryService.add(argv);
         return BaseRet.success();
     }
@@ -76,7 +73,7 @@ public class DevPageHistoryController extends BaseController {
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
     @Dev
-    public BaseRet<?> edit(@RequestBody DevPageHistoryArgv argv) {
+    public BaseRet<Void> edit(@RequestBody DevPageHistoryArgv argv) {
         DevPageHistoryService.edit(argv);
         return BaseRet.success();
     }
@@ -88,7 +85,7 @@ public class DevPageHistoryController extends BaseController {
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
     @Dev
-    public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
+    public BaseRet<Void> delete(@RequestBody MultiIdArgv argv) {
         DevPageHistoryService.delete(argv);
         return BaseRet.success();
     }
@@ -101,7 +98,7 @@ public class DevPageHistoryController extends BaseController {
     @ApiOperation(value = "回滚 " ,notes = "回滚")
     @PostMapping("/rollback")
     @Dev
-    public BaseRet<?> rollback(@RequestBody DevPageHistoryArgv argv) {
+    public BaseRet<Void> rollback(@RequestBody DevPageHistoryArgv argv) {
         DevPageHistoryService.rollback(argv);
         return BaseRet.success();
     }

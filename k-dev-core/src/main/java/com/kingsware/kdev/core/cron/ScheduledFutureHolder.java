@@ -1,6 +1,5 @@
 package com.kingsware.kdev.core.cron;
 
-import com.kingsware.kdev.core.model.SysTask;
 import lombok.Data;
 
 import java.util.concurrent.ScheduledFuture;

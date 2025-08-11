@@ -1,15 +1,10 @@
 package com.kingsware.kdev.core.util;
 
-import ch.qos.logback.core.util.FileUtil;
 import com.kingsware.kdev.core.context.SpringContext;
-import com.kingsware.kdev.core.encrypt.EncryptProperties;
 import com.kingsware.kdev.core.properties.FileProperties;
 import lombok.Cleanup;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.FileSystemUtils;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -20,9 +15,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 /**
  * 文件处理工具类
@@ -459,7 +451,7 @@ public class FileUtils {
         if (mimeType == null || mimeType.isEmpty()) {
             return "";
         }
-        
+
         switch (mimeType.toLowerCase()) {
             // 图片类型
             case "image/jpeg": return "jpg";
@@ -506,7 +498,7 @@ public class FileUtils {
             case "image/x-leaf-mos": return "mos";
             case "image/x-raw": return "raw";
             case "image/x-dcraw": return "raw";
-            
+
             // 文档类型
             case "application/pdf": return "pdf";
             case "application/msword": return "doc";
@@ -521,21 +513,21 @@ public class FileUtils {
             case "text/javascript": return "js";
             case "application/json": return "json";
             case "application/xml": return "xml";
-            
+
             // 压缩文件类型
             case "application/zip": return "zip";
             case "application/x-rar-compressed": return "rar";
             case "application/x-7z-compressed": return "7z";
             case "application/gzip": return "gz";
             case "application/x-tar": return "tar";
-            
+
             // 音频类型
             case "audio/mpeg": return "mp3";
             case "audio/wav": return "wav";
             case "audio/ogg": return "ogg";
             case "audio/mp4": return "m4a";
             case "audio/flac": return "flac";
-            
+
             // 视频类型
             case "video/mp4": return "mp4";
             case "video/avi": return "avi";
@@ -545,13 +537,13 @@ public class FileUtils {
             case "video/x-ms-wmv": return "wmv";
             case "video/webm": return "webm";
             case "video/ogg": return "ogv";
-            
+
             // 字体类型
             case "font/ttf": return "ttf";
             case "font/otf": return "otf";
             case "font/woff": return "woff";
             case "font/woff2": return "woff2";
-            
+
             // 其他常见类型
             case "application/octet-stream": return "bin";
             case "application/x-shockwave-flash": return "swf";
@@ -559,7 +551,7 @@ public class FileUtils {
             case "application/x-executable": return "exe";
             case "application/x-dosexec": return "exe";
             case "application/x-msdownload": return "exe";
-            
+
             default: return "";
         }
     }

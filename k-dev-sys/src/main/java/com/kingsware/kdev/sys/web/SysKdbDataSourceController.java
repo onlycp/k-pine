@@ -13,9 +13,8 @@ import com.kingsware.kdev.sys.ret.SysKdbDataSourceRet;
 import com.kingsware.kdev.sys.service.SysKdbDataSourceService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.*;
-
 import jakarta.annotation.Resource;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 演示控制器
@@ -62,7 +61,7 @@ public class SysKdbDataSourceController extends BaseController {
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
     @Dev
-    public BaseRet<?> add(@RequestBody SysKdbDataSourceArgv argv) {
+    public BaseRet<Void> add(@RequestBody SysKdbDataSourceArgv argv) {
         sysKdbDataSourceService.add(argv);
         return BaseRet.success();
     }
@@ -75,7 +74,7 @@ public class SysKdbDataSourceController extends BaseController {
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
     @Dev
-    public BaseRet<?> edit(@RequestBody SysKdbDataSourceArgv argv) {
+    public BaseRet<Void> edit(@RequestBody SysKdbDataSourceArgv argv) {
         sysKdbDataSourceService.edit(argv);
         return BaseRet.success();
     }
@@ -87,7 +86,7 @@ public class SysKdbDataSourceController extends BaseController {
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
     @Dev
-    public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
+    public BaseRet<Void> delete(@RequestBody MultiIdArgv argv) {
         sysKdbDataSourceService.delete(argv);
         return BaseRet.success();
     }
@@ -99,7 +98,7 @@ public class SysKdbDataSourceController extends BaseController {
     @ApiOperation(value = "刷新数据源 " ,notes = "刷新数据源")
     @GetMapping("/refresh-base-flow")
     @ApiIgnore
-    public BaseRet<?> refreshBaseFlow() {
+    public BaseRet<Void> refreshBaseFlow() {
         sysKdbDataSourceService.refreshBaseFlow();
         return BaseRet.success();
     }

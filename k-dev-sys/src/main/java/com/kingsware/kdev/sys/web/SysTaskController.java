@@ -13,9 +13,8 @@ import com.kingsware.kdev.sys.ret.SysTaskRet;
 import com.kingsware.kdev.sys.service.SysTaskService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.*;
-
 import jakarta.annotation.Resource;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 演示控制器
@@ -62,7 +61,7 @@ public class SysTaskController extends BaseController {
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
     @ApiCode("sysinfo:task:add")
-    public BaseRet<?> add(@RequestBody SysTaskArgv argv) {
+    public BaseRet<Void> add(@RequestBody SysTaskArgv argv) {
         sysTaskService.add(argv);
         return BaseRet.success();
     }
@@ -75,7 +74,7 @@ public class SysTaskController extends BaseController {
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
     @ApiCode("sysinfo:task:edit")
-    public BaseRet<?> edit(@RequestBody SysTaskArgv argv) {
+    public BaseRet<Void> edit(@RequestBody SysTaskArgv argv) {
         sysTaskService.edit(argv);
         return BaseRet.success();
     }
@@ -87,7 +86,7 @@ public class SysTaskController extends BaseController {
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
     @ApiCode("sysinfo:task:remove")
-    public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
+    public BaseRet<Void> delete(@RequestBody MultiIdArgv argv) {
         sysTaskService.delete(argv);
         return BaseRet.success();
     }
@@ -99,7 +98,7 @@ public class SysTaskController extends BaseController {
     @ApiOperation(value = "详情 " ,notes = "详情")
     @GetMapping("/executeTask/{id}")
     @ApiIgnore
-    public BaseRet<?> executeTask(@PathVariable String id) {
+    public BaseRet<Void> executeTask(@PathVariable String id) {
         sysTaskService.executeTask(id);
         return BaseRet.successMessage("任务执行成功");
     }

@@ -2,16 +2,16 @@ package com.kingsware.kdev.core.plugins.file;
 
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.encrypt.EncryptProperties;
+import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.util.AESUtil;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 
 /**
  * 文件AES加密
@@ -51,7 +51,7 @@ public class AesFileEncryptPlugin implements FileEncryptPlugin{
             // 返回
             return new File(targetFilePath);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new BusinessException(e, null);
         }
 
     }

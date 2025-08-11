@@ -19,8 +19,6 @@ import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * SQL生成器

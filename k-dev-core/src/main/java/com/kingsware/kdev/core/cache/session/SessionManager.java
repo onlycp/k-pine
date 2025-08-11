@@ -6,10 +6,8 @@ import com.kingsware.kdev.core.cache.instance.InstanceManager;
 import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.BeanUtils;
-import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
 import com.kingsware.kdev.core.util.MD5Utils;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Timestamp;

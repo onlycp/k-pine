@@ -1,7 +1,6 @@
 package com.kingsware.kdev.sys.service.impl;
 
 import com.kingsware.kdev.core.auth.AppAuthProperties;
-import com.kingsware.kdev.core.auth.BaseUserInfo;
 import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
@@ -9,7 +8,6 @@ import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.PropertiesConstant;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
-import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.orm.DB;
@@ -22,13 +20,12 @@ import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysConfigArgv;
 import com.kingsware.kdev.sys.argv.SysConfigQueryArgv;
 import com.kingsware.kdev.sys.model.SysConfig;
-import com.kingsware.kdev.sys.model.SysUser;
 import com.kingsware.kdev.sys.ret.SysConfigRet;
 import com.kingsware.kdev.sys.service.SysConfigService;
-import org.springframework.stereotype.Service;
-
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

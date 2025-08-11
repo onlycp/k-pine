@@ -9,10 +9,10 @@ import com.kingsware.kdev.uniops.argv.DevPublishArgv;
 import com.kingsware.kdev.uniops.argv.ToPageArgv;
 import com.kingsware.kdev.uniops.service.UniOpsService;
 import io.swagger.annotations.ApiOperation;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
 import java.util.List;
 
 /**
@@ -44,7 +44,7 @@ public class UniopsSSoController {
     @PostMapping("/publish")
     @ResponseBody
     @ApiIgnore
-    public BaseRet<?> publish(@RequestBody DevPublishArgv argv) {
+    public BaseRet<Void> publish(@RequestBody DevPublishArgv argv) {
         this.uniOpsService.publish(argv);
         return BaseRet.successMessage(I18n.t("UniopsSSoController.publishSuccess", "发布成功"));
     }
@@ -53,7 +53,7 @@ public class UniopsSSoController {
     @PostMapping("/uninstall")
     @ResponseBody
     @ApiIgnore
-    public BaseRet<?> uninstall(@RequestBody List<SysMenu> menus) {
+    public BaseRet<Void> uninstall(@RequestBody List<SysMenu> menus) {
         this.uniOpsService.uninstall(menus);
         return BaseRet.successMessage(I18n.t("UniopsSSoController.publishFail", "卸载成功"));
     }
@@ -62,7 +62,7 @@ public class UniopsSSoController {
     @GetMapping("/token")
     @ResponseBody
     @ApiIgnore
-    public BaseRet<?> token() {
+    public BaseRet<Void> token() {
         return BaseRet.success(uniOpsService.getUniOpsToken());
     }
 

@@ -6,7 +6,6 @@ import com.kingsware.kdev.core.encrypt.inst.AESInstance;
 import com.kingsware.kdev.core.encrypt.inst.Base64Instance;
 import com.kingsware.kdev.core.encrypt.inst.MD5Instance;
 
-import java.util.Map;
 import java.util.Objects;
 
 /**

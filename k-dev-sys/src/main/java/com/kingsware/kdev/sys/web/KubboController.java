@@ -4,7 +4,6 @@ import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.constants.Version;
-import com.kingsware.kdev.core.jsonschema.BaseSchemaDefine;
 import com.kingsware.kdev.sys.argv.ExecuteFaasArgv;
 import com.kingsware.kdev.sys.ret.ApiRequestRet;
 import com.kingsware.kdev.sys.ret.AppInfoRet;
@@ -12,10 +11,9 @@ import com.kingsware.kdev.sys.ret.HealthRet;
 import com.kingsware.kdev.sys.service.KubboService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.apache.catalina.valves.HealthCheckValve;
+import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
 import java.util.List;
 
 /**
@@ -73,7 +71,7 @@ public class KubboController extends BaseController {
     @ApiOperation(value = "执行Faas " ,notes = "执行Faas")
     @ApiIgnore
     @PostMapping("/execute/faas")
-    public BaseRet<?> executeFaas(@RequestBody ExecuteFaasArgv argv) {
+    public BaseRet<Void> executeFaas(@RequestBody ExecuteFaasArgv argv) {
         return BaseRet.success(kubboService.executeFaas(argv));
     }
 

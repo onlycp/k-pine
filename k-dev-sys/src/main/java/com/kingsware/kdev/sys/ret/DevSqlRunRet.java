@@ -1,7 +1,6 @@
 package com.kingsware.kdev.sys.ret;
 
 import com.kingsware.kdev.core.bean.BaseSimpleRet;
-import com.kingsware.kdev.core.orm.annotation.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

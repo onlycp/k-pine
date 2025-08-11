@@ -6,16 +6,16 @@ import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.bean.SysDictItemRet;
 import com.kingsware.kdev.core.constants.Version;
 import com.kingsware.kdev.sys.argv.SysDictItemArgv;
 import com.kingsware.kdev.sys.argv.SysDictItemQueryArgv;
-import com.kingsware.kdev.core.bean.SysDictItemRet;
 import com.kingsware.kdev.sys.service.SysDictItemService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
 import java.util.Map;
 
 /**
@@ -63,7 +63,7 @@ public class SysDictItemController extends BaseController {
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
     @ApiCode("sysinfo:dictitem:add")
-    public BaseRet<?> add(@RequestBody SysDictItemArgv argv) {
+    public BaseRet<Void> add(@RequestBody SysDictItemArgv argv) {
         sysDictItemService.add(argv);
         return BaseRet.success();
     }
@@ -76,7 +76,7 @@ public class SysDictItemController extends BaseController {
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
     @ApiCode("sysinfo:dictitem:edit")
-    public BaseRet<?> edit(@RequestBody SysDictItemArgv argv) {
+    public BaseRet<Void> edit(@RequestBody SysDictItemArgv argv) {
         sysDictItemService.edit(argv);
         return BaseRet.success();
     }
@@ -88,7 +88,7 @@ public class SysDictItemController extends BaseController {
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
     @ApiCode("sysinfo:dictitem:remove")
-    public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
+    public BaseRet<Void> delete(@RequestBody MultiIdArgv argv) {
         sysDictItemService.delete(argv);
         return BaseRet.success();
     }

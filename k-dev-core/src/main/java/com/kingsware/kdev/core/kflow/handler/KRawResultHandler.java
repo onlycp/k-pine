@@ -1,13 +1,8 @@
 package com.kingsware.kdev.core.kflow.handler;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.kingsware.kdev.core.kflow.FlowUtils;
 import com.kingsware.kdev.core.kflow.KFlowConstant;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
-import com.kingsware.kdev.core.util.JsonUtil;
-
-import java.util.Map;
 
 /**
  * 对象处理类

@@ -1,6 +1,5 @@
 package com.kingsware.kdev.core.bean;
 
-import com.kingsware.kdev.core.auth.ApiCode;
 import lombok.Data;
 
 import java.util.HashSet;

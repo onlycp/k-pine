@@ -1,6 +1,7 @@
 package com.kingsware.kdev.core.orm.kdb;
 
 import lombok.Data;
+
 import java.util.List;
 
 /**

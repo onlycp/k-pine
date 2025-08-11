@@ -1,6 +1,5 @@
 package com.kingsware.kdev.core.kflow.tcp;
 
-import com.kingsware.kdev.core.util.StringUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;

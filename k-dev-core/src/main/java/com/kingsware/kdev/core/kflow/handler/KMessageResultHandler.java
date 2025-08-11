@@ -2,8 +2,8 @@ package com.kingsware.kdev.core.kflow.handler;
 
 import com.kingsware.kdev.core.kflow.KFlowConstant;
 import com.kingsware.kdev.core.kflow.KFlowContext;
-import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.kflow.MessageResult;
+import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 
 /**
  * 对象处理类

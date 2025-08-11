@@ -1,12 +1,13 @@
 package com.kingsware.kdev.sys.log;
 
-import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.kmq.KmqConsumer;
+import com.kingsware.kdev.core.model.SysOperateLog;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.kdb.SyncValueManager;
-import com.kingsware.kdev.core.util.*;
-import com.kingsware.kdev.core.model.SysOperateLog;
+import com.kingsware.kdev.core.util.HttpUtil;
+import com.kingsware.kdev.core.util.JsonUtil;
+import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;

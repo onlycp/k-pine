@@ -1,8 +1,6 @@
 package com.kingsware.kdev.core.cache.session;
 
 import com.kingsware.kdev.core.auth.AppAuthProperties;
-import com.kingsware.kdev.core.cache.dict.DictItemInfo;
-import com.kingsware.kdev.core.cache.dict.DictManager;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.cron.KRunner;
 import com.kingsware.kdev.core.cron.KTask;
@@ -12,7 +10,6 @@ import com.kingsware.kdev.core.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 

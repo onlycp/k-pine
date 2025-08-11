@@ -23,9 +23,6 @@ public class ApiTask implements KTask, KRunner {
 
 
 
-    public ApiTask() {
-
-    }
 
     /**
      * 定时拉取字典项

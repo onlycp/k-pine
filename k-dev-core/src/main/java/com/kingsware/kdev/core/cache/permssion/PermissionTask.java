@@ -1,12 +1,7 @@
 package com.kingsware.kdev.core.cache.permssion;
 
-import com.kingsware.kdev.core.cache.dict.DictItemInfo;
-import com.kingsware.kdev.core.cache.dict.DictManager;
 import com.kingsware.kdev.core.cron.KRunner;
 import com.kingsware.kdev.core.cron.KTask;
-import com.kingsware.kdev.core.orm.DB;
-
-import java.util.List;
 
 /**
  * 字典定时任务，从数据库定时加载

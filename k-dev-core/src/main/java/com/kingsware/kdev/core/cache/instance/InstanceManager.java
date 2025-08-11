@@ -1,17 +1,14 @@
 package com.kingsware.kdev.core.cache.instance;
 
-import com.kingsware.kdev.core.auth.AuthToken;
-import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.bean.BaseRet;
-import com.kingsware.kdev.core.cache.session.TokenSession;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.model.SysInstance;
-import com.kingsware.kdev.core.model.SysOnlineUser;
-import com.kingsware.kdev.core.orm.DB;
-import com.kingsware.kdev.core.util.*;
+import com.kingsware.kdev.core.util.HttpUtil;
+import com.kingsware.kdev.core.util.JsonUtil;
+import com.kingsware.kdev.core.util.StringUtils;
+import com.kingsware.kdev.core.util.SystemUtil;
 import lombok.extern.slf4j.Slf4j;
 
-import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -170,7 +167,7 @@ public class InstanceManager {
                 body.put("topic", topic);
                 body.put("message", message);
                 String res = HttpUtil.post(url, JsonUtil.toJson(body), new HashMap<>());
-                BaseRet<?> ret = JsonUtil.toBean(res, BaseRet.class);
+                BaseRet<Void> ret = JsonUtil.toBean(res, BaseRet.class);
 //                log.info("session-实例：{}, {} 消息发送成功:{},返回信息:{}", instance.instanceName(),url, JsonUtil.toJson(body), JsonUtil.toJson(ret));
                 if (ret.getCode() != 200) {
                     log.debug("实例：{} 消息发送失败，系统将重试,异常信息:{}", instance.instanceName(), ret.getMessage());

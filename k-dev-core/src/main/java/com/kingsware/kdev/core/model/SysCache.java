@@ -7,8 +7,6 @@ import com.kingsware.kdev.core.orm.annotation.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.sql.Timestamp;
-
 /**
  * 缓存
  * @author AndyZheng

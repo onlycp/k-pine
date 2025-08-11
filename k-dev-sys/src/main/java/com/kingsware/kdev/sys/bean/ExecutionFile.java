@@ -4,8 +4,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.core.io.Resource;
 
-import java.io.File;
-
 /**
  * @author andyzheng
  * @version 1.0.0

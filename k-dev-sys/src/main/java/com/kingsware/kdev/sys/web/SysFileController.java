@@ -8,7 +8,6 @@ import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.constants.Version;
-import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.sys.argv.SysFileQueryArgv;
 import com.kingsware.kdev.sys.ret.SysFileRet;
@@ -16,17 +15,16 @@ import com.kingsware.kdev.sys.ret.SysStaticFileRet;
 import com.kingsware.kdev.sys.service.SysFileService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import jakarta.annotation.Resource;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.annotation.Resource;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.List;
 
 /**
@@ -74,7 +72,7 @@ public class SysFileController extends BaseController {
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
     @ResponseBody
-    public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
+    public BaseRet<Void> delete(@RequestBody MultiIdArgv argv) {
         sysFileService.delete(argv);
         return BaseRet.success();
     }
@@ -86,7 +84,7 @@ public class SysFileController extends BaseController {
     @ApiOperation(value = "删除静态文件" ,notes = "删除静态文件")
     @PostMapping(value = "/deleteStaticFile")
     @ResponseBody
-    public BaseRet<?> deleteStaticFile(@RequestBody MultiIdArgv argv) throws IOException {
+    public BaseRet<Void> deleteStaticFile(@RequestBody MultiIdArgv argv) throws IOException {
         sysFileService.deleteStaticFile(argv);
         return BaseRet.success();
     }

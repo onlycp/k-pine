@@ -2,8 +2,6 @@ package com.kingsware.kdev.core.kmq.websocket;
 
 import jakarta.websocket.Session;
 
-import java.util.Objects;
-
 /**
  * Websocket的session实体
  *

@@ -37,12 +37,12 @@ import com.kingsware.kdev.sys.bean.PasswordRuleResult;
 import com.kingsware.kdev.sys.model.*;
 import com.kingsware.kdev.sys.ret.*;
 import com.kingsware.kdev.sys.service.SysUserService;
+import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.Resource;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -1105,7 +1105,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     }
 
     @Override
-    public BaseRet<?> validVerificationCode(String uuid, String code, String encryptCode) {
+    public BaseRet<Void> validVerificationCode(String uuid, String code, String encryptCode) {
         return checkVerifyCode(uuid, code, encryptCode) ? BaseRet.success(true) : BaseRet.failMessage(I18n.t("SysUser.tip.codeFail2", "验证码有误！"));
     }
 

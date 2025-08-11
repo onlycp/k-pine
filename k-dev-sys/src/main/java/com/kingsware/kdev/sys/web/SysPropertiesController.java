@@ -1,18 +1,13 @@
 package com.kingsware.kdev.sys.web;
 
 import com.kingsware.kdev.core.bean.BaseRet;
-import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
 import com.kingsware.kdev.core.mode.AppModeProperties;
-import com.kingsware.kdev.sys.argv.SysNoticeQueryArgv;
-import com.kingsware.kdev.sys.ret.SysNoticeRet;
-import io.swagger.annotations.ApiOperation;
-import org.springframework.stereotype.Controller;
+import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,7 +29,7 @@ public class SysPropertiesController {
      * @return
      */
     @GetMapping("dev")
-    public BaseRet<?> isDevMode() {
+    public BaseRet<Void> isDevMode() {
         Map<String, String> resultMap = new HashMap<>();
         resultMap.put("dev", String.valueOf(appModeProperties.getDev()));
         return BaseRet.success(resultMap);

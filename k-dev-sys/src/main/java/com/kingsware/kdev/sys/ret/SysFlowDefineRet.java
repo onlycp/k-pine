@@ -7,7 +7,6 @@ import lombok.EqualsAndHashCode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 新增流程实体

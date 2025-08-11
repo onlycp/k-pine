@@ -1,6 +1,5 @@
 package com.kingsware.kdev.sys.service;
 
-import com.kingsware.kdev.core.cache.license.License;
 import com.kingsware.kdev.sys.argv.SysLicenseActive;
 import com.kingsware.kdev.sys.ret.LicenseRet;
 

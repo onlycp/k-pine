@@ -1,13 +1,10 @@
 package com.kingsware.kdev.core.cron;
 
 import com.kingsware.kdev.core.auth.AppAuthProperties;
-import com.kingsware.kdev.core.auth.BaseUserInfo;
 import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.cache.api.ApiResultCache;
 import com.kingsware.kdev.core.cache.api.ApiResultCacheManager;
 import com.kingsware.kdev.core.cache.instance.InstanceManager;
-import com.kingsware.kdev.core.cache.session.SessionManager;
-import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.UnauthorizedException;
 import com.kingsware.kdev.core.kflow.KFlowConstant;
@@ -15,7 +12,6 @@ import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.KdbFlowExecutor;
 import com.kingsware.kdev.core.kflow.bean.ErrorResult;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
-import com.kingsware.kdev.core.kflow.tcp.TcpWmMessage;
 import com.kingsware.kdev.core.kmq.KmqMessageCenter;
 import com.kingsware.kdev.core.kmq.websocket.MessageWebSocket;
 import com.kingsware.kdev.core.kmq.websocket.WebsocketConstants;
@@ -26,6 +22,7 @@ import com.kingsware.kdev.core.model.SysTask;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBInitialize;
 import com.kingsware.kdev.core.util.*;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -36,7 +33,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.Resource;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;

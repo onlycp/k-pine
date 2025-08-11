@@ -1,7 +1,5 @@
 package com.kingsware.kdev.core.auth;
 
-import com.kingsware.kdev.core.enums.ApiSystemEnum;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

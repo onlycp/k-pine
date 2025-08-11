@@ -3,9 +3,6 @@ package com.kingsware.kdev.core.orm.kdb;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * 数据源信息.
  *

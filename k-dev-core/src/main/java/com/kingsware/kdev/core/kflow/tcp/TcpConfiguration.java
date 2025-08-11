@@ -1,10 +1,9 @@
 package com.kingsware.kdev.core.kflow.tcp;
 
 import com.kingsware.kdev.core.util.StringUtils;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import jakarta.annotation.PostConstruct;
 
 @Component
 public class TcpConfiguration {

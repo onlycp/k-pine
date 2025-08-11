@@ -63,7 +63,7 @@
 //            result = pjd.proceed();
 //            // 处理结果
 //            if (result instanceof BaseRet) {
-//                BaseRet<?> ret = (BaseRet<?>) result;
+//                BaseRet<Void> ret = (BaseRet<Void>) result;
 //                responseCode = ret.getCode();
 //                responseMessage = ret.getMessage();
 //                responseBody = JsonUtil.toJson(ret);

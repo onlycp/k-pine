@@ -8,7 +8,6 @@ import com.kingsware.kdev.core.kflow.KFlowConstant;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.util.JsonUtil;
-import com.kingsware.kdev.core.util.StringUtils;
 
 import java.util.*;
 

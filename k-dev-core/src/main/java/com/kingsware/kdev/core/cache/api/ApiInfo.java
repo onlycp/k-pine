@@ -1,7 +1,6 @@
 package com.kingsware.kdev.core.cache.api;
 
 import com.kingsware.kdev.core.util.StringUtils;
-import io.netty.util.internal.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -14,6 +13,18 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode
 public class ApiInfo{
+
+    // 定义字符集常量
+    private static final String DEFAULT_CHARSET = "utf-8";
+    private static final String CHARSET_GBK = "gbk";
+    private static final String CHARSET_GB2312 = "gb2312";
+    private static final String CHARSET_GB18030 = "gb18030";
+    private static final String CHARSET_BIG5 = "big5";
+    private static final String CHARSET_UTF8 = "utf-8";
+    private static final String CHARSET_UTF16 = "utf-16";
+    private static final String CHARSET_UTF16LE = "utf-16le";
+    private static final String CHARSET_UTF16BE = "utf-16be";
+
     /** 接口 **/
     private String id;
     /** 接口名称 */
@@ -53,40 +64,42 @@ public class ApiInfo{
     // 缓存过期时长（毫秒）
     private Integer cacheExpireTime;
 
+
     public String getReqeustCharset() {
         if (StringUtils.isEmpty(apiTags)) {
-            return "utf-8";
+            return DEFAULT_CHARSET;
         }
         String[] arr = apiTags.replace(";", ",").split(",");
         for (String a : arr) {
             String trimmedTag = a.trim();
-            if ("gbk".equalsIgnoreCase(trimmedTag)) {
-                return "gbk";
+            if (CHARSET_GBK.equalsIgnoreCase(trimmedTag)) {
+                return CHARSET_GBK;
             }
-            else if ("gb2312".equalsIgnoreCase(trimmedTag) || "gb2312-80".equalsIgnoreCase(trimmedTag)) {
-                return "gb2312";
+            else if (CHARSET_GB2312.equalsIgnoreCase(trimmedTag) || "gb2312-80".equalsIgnoreCase(trimmedTag)) {
+                return CHARSET_GB2312;
             }
-            else if ("gb18030".equalsIgnoreCase(trimmedTag)) {
-                return "gb18030";
+            else if (CHARSET_GB18030.equalsIgnoreCase(trimmedTag)) {
+                return CHARSET_GB18030;
             }
-            else if ("big5".equalsIgnoreCase(trimmedTag) || "big-5".equalsIgnoreCase(trimmedTag)) {
-                return "big5";
+            else if (CHARSET_BIG5.equalsIgnoreCase(trimmedTag) || "big-5".equalsIgnoreCase(trimmedTag)) {
+                return CHARSET_BIG5;
             }
-            else if ("utf-8".equalsIgnoreCase(trimmedTag) || "utf8".equalsIgnoreCase(trimmedTag)) {
-                return "utf-8";
+            else if (CHARSET_UTF8.equalsIgnoreCase(trimmedTag) || "utf8".equalsIgnoreCase(trimmedTag)) {
+                return CHARSET_UTF8;
             }
-            else if ("utf-16".equalsIgnoreCase(trimmedTag) || "utf16".equalsIgnoreCase(trimmedTag)) {
-                return "utf-16";
+            else if (CHARSET_UTF16.equalsIgnoreCase(trimmedTag) || "utf16".equalsIgnoreCase(trimmedTag)) {
+                return CHARSET_UTF16;
             }
-            else if ("utf-16le".equalsIgnoreCase(trimmedTag)) {
-                return "utf-16le";
+            else if (CHARSET_UTF16LE.equalsIgnoreCase(trimmedTag)) {
+                return CHARSET_UTF16LE;
             }
-            else if ("utf-16be".equalsIgnoreCase(trimmedTag)) {
-                return "utf-16be";
+            else if (CHARSET_UTF16BE.equalsIgnoreCase(trimmedTag)) {
+                return CHARSET_UTF16BE;
             }
         }
         // 如果没有找到指定的字符集，返回默认值
-        return "utf-8";
+        return DEFAULT_CHARSET;
     }
+
 
 }

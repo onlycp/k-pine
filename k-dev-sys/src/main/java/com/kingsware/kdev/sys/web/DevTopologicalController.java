@@ -11,9 +11,8 @@ import com.kingsware.kdev.sys.ret.DevTopologicalRet;
 import com.kingsware.kdev.sys.service.DevTopologicalService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.*;
-
 import jakarta.annotation.Resource;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 控制器
@@ -57,7 +56,7 @@ public class DevTopologicalController extends BaseController {
      */
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
-    public BaseRet<?> add(@RequestBody DevTopologicalArgv argv) {
+    public BaseRet<Void> add(@RequestBody DevTopologicalArgv argv) {
         DevTopologicalService.add(argv);
         return BaseRet.success();
     }
@@ -69,7 +68,7 @@ public class DevTopologicalController extends BaseController {
      */
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
-    public BaseRet<?> edit(@RequestBody DevTopologicalArgv argv) {
+    public BaseRet<Void> edit(@RequestBody DevTopologicalArgv argv) {
         DevTopologicalService.edit(argv);
         return BaseRet.success();
     }
@@ -80,7 +79,7 @@ public class DevTopologicalController extends BaseController {
      */
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
-    public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
+    public BaseRet<Void> delete(@RequestBody MultiIdArgv argv) {
         DevTopologicalService.delete(argv);
         return BaseRet.success();
     }

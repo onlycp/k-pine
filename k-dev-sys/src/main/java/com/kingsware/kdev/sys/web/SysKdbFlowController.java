@@ -1,6 +1,5 @@
 package com.kingsware.kdev.sys.web;
 
-import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.auth.Dev;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
@@ -14,10 +13,9 @@ import com.kingsware.kdev.sys.ret.SysKdbFlowRet;
 import com.kingsware.kdev.sys.service.SysKdbFlowService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.annotation.Resource;
 
 /**
  * 演示控制器
@@ -67,7 +65,7 @@ public class SysKdbFlowController extends BaseController {
     @ApiOperation(value = "拷贝 " ,notes = "拷贝")
     @GetMapping("/copy/{id}")
     @ResponseBody
-    public BaseRet<?> copy(@PathVariable String id) {
+    public BaseRet<Void> copy(@PathVariable String id) {
         sysKdbFlowService.copy(id);
         return BaseRet.success();
     }
@@ -93,7 +91,7 @@ public class SysKdbFlowController extends BaseController {
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
     @ResponseBody
-    public BaseRet<?> add(@RequestBody SysKdbFlowArgv argv) {
+    public BaseRet<Void> add(@RequestBody SysKdbFlowArgv argv) {
         sysKdbFlowService.add(argv);
         return BaseRet.success();
     }
@@ -107,7 +105,7 @@ public class SysKdbFlowController extends BaseController {
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
     @ResponseBody
-    public BaseRet<?> edit(@RequestBody SysKdbFlowArgv argv) {
+    public BaseRet<Void> edit(@RequestBody SysKdbFlowArgv argv) {
         sysKdbFlowService.edit(argv);
         return BaseRet.success();
     }
@@ -120,7 +118,7 @@ public class SysKdbFlowController extends BaseController {
     @ApiOperation(value = "编辑流程定义 " ,notes = "编辑流程定义")
     @PutMapping("/define")
     @ResponseBody
-    public BaseRet<?> edit(@RequestBody SysFlowDefineArgv argv) {
+    public BaseRet<Void> edit(@RequestBody SysFlowDefineArgv argv) {
         sysKdbFlowService.editDefine(argv);
         return BaseRet.success();
     }
@@ -133,7 +131,7 @@ public class SysKdbFlowController extends BaseController {
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
     @ResponseBody
-    public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
+    public BaseRet<Void> delete(@RequestBody MultiIdArgv argv) {
         sysKdbFlowService.delete(argv);
         return BaseRet.success();
     }
@@ -158,7 +156,7 @@ public class SysKdbFlowController extends BaseController {
     @ApiOperation(value = "深度拷贝 " ,notes = "深度拷贝")
     @PostMapping("/copyData")
     @ResponseBody
-    public BaseRet<?> copyData(@RequestBody CopyContextArgv argv, String id) {
+    public BaseRet<Void> copyData(@RequestBody CopyContextArgv argv, String id) {
         sysKdbFlowService.copyData(id, argv);
         return BaseRet.success();
     }

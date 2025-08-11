@@ -3,6 +3,7 @@ package com.kingsware.kdev.sys.service.impl;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.bean.SysDictRet;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
@@ -14,7 +15,6 @@ import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysDictArgv;
 import com.kingsware.kdev.sys.argv.SysDictQueryArgv;
 import com.kingsware.kdev.sys.model.SysDict;
-import com.kingsware.kdev.core.bean.SysDictRet;
 import com.kingsware.kdev.sys.service.SysDictService;
 import org.springframework.stereotype.Service;
 

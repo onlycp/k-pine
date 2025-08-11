@@ -4,9 +4,6 @@ import com.kingsware.kdev.core.kflow.KFlowConstant;
 import com.kingsware.kdev.core.kflow.KFlowContext;
 import com.kingsware.kdev.core.kflow.bean.KdbFlowResult;
 import com.kingsware.kdev.core.util.NumberUtils;
-import com.kingsware.kdev.core.util.StringUtils;
-
-import java.math.BigDecimal;
 
 /**
  * 对象处理类

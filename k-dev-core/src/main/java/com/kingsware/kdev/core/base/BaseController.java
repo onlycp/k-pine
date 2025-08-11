@@ -9,6 +9,4 @@ package com.kingsware.kdev.core.base;
  */
 public class BaseController {
 
-    public BaseController(){
-    }
 }

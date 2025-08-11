@@ -71,7 +71,7 @@ public interface SysApiService extends BaseService {
      * 调用uniops接口
      * @return  调用数据
      */
-    BaseRet<?> callUniops(Map<String, Object> params);
+    BaseRet<Void> callUniops(Map<String, Object> params);
 
 
     /**

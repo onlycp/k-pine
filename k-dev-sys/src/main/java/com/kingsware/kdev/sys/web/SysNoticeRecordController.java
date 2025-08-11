@@ -9,9 +9,8 @@ import com.kingsware.kdev.sys.ret.SysNoticeRecordRet;
 import com.kingsware.kdev.sys.service.SysNoticeRecordService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.*;
-
 import jakarta.annotation.Resource;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author: crb
@@ -53,7 +52,7 @@ public class SysNoticeRecordController {
      */
     @ApiOperation(value = "所有标志为已读 " ,notes = "所有标志为已读")
     @GetMapping("/will-read-all")
-    public BaseRet<?> willReadAll() {
+    public BaseRet<Void> willReadAll() {
         sysNoticeRecordService.willReadAll();
         return BaseRet.success();
     }
@@ -74,7 +73,7 @@ public class SysNoticeRecordController {
      */
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
-    public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
+    public BaseRet<Void> delete(@RequestBody MultiIdArgv argv) {
         sysNoticeRecordService.delete(argv);
         return BaseRet.success();
     }

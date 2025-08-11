@@ -2,18 +2,12 @@ package com.kingsware.kdev.core.cache.license;
 
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.encrypt.EncryptProperties;
-import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.LicenseException;
 import com.kingsware.kdev.core.i18n.I18n;
-import com.kingsware.kdev.core.plugins.CdnPlugin;
 import com.kingsware.kdev.core.util.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.InterfaceAddress;
-import java.net.NetworkInterface;
 import java.util.*;
 
 /**

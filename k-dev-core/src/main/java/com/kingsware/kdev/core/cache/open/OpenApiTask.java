@@ -1,7 +1,5 @@
 package com.kingsware.kdev.core.cache.open;
 
-import com.kingsware.kdev.core.cache.dict.DictItemInfo;
-import com.kingsware.kdev.core.cache.dict.DictManager;
 import com.kingsware.kdev.core.cron.KRunner;
 import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.core.orm.DB;

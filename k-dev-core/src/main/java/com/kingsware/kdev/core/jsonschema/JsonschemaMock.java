@@ -3,12 +3,9 @@ package com.kingsware.kdev.core.jsonschema;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.kingsware.kdev.core.kflow.FlowUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
-import com.kingsware.kdev.core.util.RandomUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**

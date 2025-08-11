@@ -1,18 +1,15 @@
 package com.kingsware.kdev.core.config;
 
+import com.kingsware.kdev.core.context.SpringContext;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.yaml.snakeyaml.Yaml;
-import com.kingsware.kdev.core.context.SpringContext;
 
 import java.io.IOException;
 import java.io.InputStream;

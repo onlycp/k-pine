@@ -3,7 +3,6 @@ package com.kingsware.kdev.sys.service;
 import com.kingsware.kdev.core.base.BaseService;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.sys.argv.SysSearchConfigQueryArgv;
-import com.kingsware.kdev.sys.ret.DevPageRet;
 
 /**
  * 接口业务类

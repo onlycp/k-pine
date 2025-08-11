@@ -1,25 +1,17 @@
 package com.kingsware.kdev.sys.web;
 
-import com.kingsware.kdev.core.auth.ApiCode;
 import com.kingsware.kdev.core.auth.ApiIgnore;
-import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
-import com.kingsware.kdev.core.bean.MultiIdArgv;
-import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
-import com.kingsware.kdev.core.util.ServletUtil;
-import com.kingsware.kdev.sys.argv.*;
+import com.kingsware.kdev.sys.argv.SysLicenseActive;
 import com.kingsware.kdev.sys.ret.LicenseRet;
-import com.kingsware.kdev.sys.ret.SysUserRet;
 import com.kingsware.kdev.sys.service.LicenseService;
-import com.kingsware.kdev.sys.service.SysUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.*;
-
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 演示控制器

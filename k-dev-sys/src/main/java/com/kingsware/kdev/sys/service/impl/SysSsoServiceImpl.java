@@ -7,18 +7,15 @@ import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.JsonUtil;
-import com.kingsware.kdev.core.util.ServletUtil;
-import com.kingsware.kdev.sys.argv.SysAutoLoginArgv;
 import com.kingsware.kdev.sys.argv.SysSsoArgv;
 import com.kingsware.kdev.sys.argv.SysUserLoginArgv;
 import com.kingsware.kdev.sys.model.SysUser;
 import com.kingsware.kdev.sys.ret.SysUserLoginRet;
 import com.kingsware.kdev.sys.service.SysSsoService;
 import com.kingsware.kdev.sys.service.SysUserService;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import jakarta.annotation.Resource;
 
 
 @Slf4j

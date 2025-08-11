@@ -2,24 +2,21 @@ package com.kingsware.kdev.sys.web;
 
 import com.kingsware.kdev.core.auth.ApiCode;
 import com.kingsware.kdev.core.auth.ApiIgnore;
-import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.constants.Version;
-import com.kingsware.kdev.core.util.ServletUtil;
 import com.kingsware.kdev.sys.argv.SysConfigArgv;
 import com.kingsware.kdev.sys.argv.SysConfigQueryArgv;
 import com.kingsware.kdev.sys.ret.SysConfigRet;
 import com.kingsware.kdev.sys.service.SysConfigService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.*;
-
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.List;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.Map;
 
 /**
@@ -67,7 +64,7 @@ public class SysConfigController extends BaseController {
     @ApiOperation(value = "新增 " ,notes = "新增")
     @PostMapping
     @ApiCode("sysinfo:config:add")
-    public BaseRet<?> add(@RequestBody SysConfigArgv argv) {
+    public BaseRet<Void> add(@RequestBody SysConfigArgv argv) {
         sysConfigService.add(argv);
         return BaseRet.success();
     }
@@ -80,7 +77,7 @@ public class SysConfigController extends BaseController {
     @ApiOperation(value = "编辑 " ,notes = "编辑")
     @PutMapping
     @ApiCode("sysinfo:config:edit")
-    public BaseRet<?> edit(@RequestBody SysConfigArgv argv) {
+    public BaseRet<Void> edit(@RequestBody SysConfigArgv argv) {
         sysConfigService.edit(argv);
         return BaseRet.success();
     }
@@ -92,7 +89,7 @@ public class SysConfigController extends BaseController {
     @ApiOperation(value = "删除 " ,notes = "删除")
     @PostMapping(value = "/delete")
     @ApiCode("sysinfo:config:remove")
-    public BaseRet<?> delete(@RequestBody MultiIdArgv argv) {
+    public BaseRet<Void> delete(@RequestBody MultiIdArgv argv) {
         sysConfigService.delete(argv);
         return BaseRet.success();
     }

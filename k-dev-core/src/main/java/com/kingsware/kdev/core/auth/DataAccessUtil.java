@@ -4,12 +4,14 @@ import com.kingsware.kdev.core.cache.access.AccessManager;
 import com.kingsware.kdev.core.cache.access.DataResourceInfo;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.orm.DB;
-import com.kingsware.kdev.core.orm.kdb.DataSourceInfo;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 数据权限工具类

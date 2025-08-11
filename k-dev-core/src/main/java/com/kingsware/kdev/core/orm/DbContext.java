@@ -3,7 +3,6 @@ package com.kingsware.kdev.core.orm;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.kdb.KDataBase;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 

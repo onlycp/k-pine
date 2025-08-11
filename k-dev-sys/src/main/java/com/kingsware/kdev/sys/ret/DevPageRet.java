@@ -1,8 +1,6 @@
 package com.kingsware.kdev.sys.ret;
 
-import com.kingsware.kdev.core.bean.BaseManageModel;
 import com.kingsware.kdev.core.bean.BaseManageRet;
-import com.kingsware.kdev.core.orm.annotation.LogicDelete;
 import com.kingsware.kdev.core.orm.annotation.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
