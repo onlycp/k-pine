@@ -1,7 +1,6 @@
 package com.kingsware.kdev.sys.task;
 
 import com.kingsware.kdev.core.context.SpringContext;
-import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.core.model.SysTaskHistory;
 import com.kingsware.kdev.core.orm.DB;
@@ -18,11 +17,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 定时清理任务调度历史数据
  */
 @Slf4j
+
 public class SysTaskHistoryCleanTask implements KTask {
 
     private static final String BACKUP_DIR = "backup/sysTaskHistory";
@@ -33,8 +34,26 @@ public class SysTaskHistoryCleanTask implements KTask {
             "executeMsg", "whoCreated", "whenCreated", "whoModified", "whenModified"
     );
 
+    private static final AtomicBoolean running = new AtomicBoolean(false);
+
     @Override
     public void execute() throws Exception {
+        // 使用compareAndSet原子地“检查并设置”
+        if (running.compareAndSet(false, true)) {
+            try {
+                // 成功获取到锁，执行业务逻辑
+                doBusiness();
+            } finally {
+                // 确保在业务执行完毕或异常后释放锁
+                running.set(false);
+            }
+        } else {
+            // 未获取到锁，说明任务已在运行
+            log.warn("任务 {} 正在运行，本次调度将被忽略。", name());
+        }
+    }
+
+    private void doBusiness() throws Exception {
         // 从配置中获取保留天数，默认为7天
         int retentionDays = SpringContext.getInt("sys.task.clean.interval", 7);
         if (retentionDays <= 0) {
