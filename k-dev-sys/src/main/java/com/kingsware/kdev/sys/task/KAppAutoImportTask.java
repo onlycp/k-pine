@@ -30,20 +30,35 @@ public class KAppAutoImportTask implements KTask, KRunner {
      **/
     @Override
     public void execute() throws Exception {
-        if (upgrading.get()) {
+//        if (upgrading.get()) {
+//            log.info("当前正在升级，将跳过本次升级");
+//            return;
+//        }
+//        try {
+//            upgrading.set(true);
+//            KAppInitialize kAppInitialize = SpringContext.getBean(KAppInitialize.class);
+//            kAppInitialize.execute();
+//        }
+//        catch (Exception e) {
+//            log.info("系统自动安装Pine包任务执行失败", e);
+//        }
+//        finally {
+//            upgrading.set(false);
+//        }
+        if (upgrading.compareAndSet(false, true)) {
+            try {
+                // 成功获取到锁，执行业务逻辑
+                KAppInitialize kAppInitialize = SpringContext.getBean(KAppInitialize.class);
+                kAppInitialize.execute();
+            } catch (Exception e) {
+                log.info("系统自动安装Pine包任务执行失败", e);
+            } finally {
+                // 确保在业务执行完毕或异常后释放锁
+                upgrading.set(false);
+            }
+        } else {
+            // 未获取到锁，说明任务已在运行
             log.info("当前正在升级，将跳过本次升级");
-            return;
-        }
-        try {
-            upgrading.set(true);
-            KAppInitialize kAppInitialize = SpringContext.getBean(KAppInitialize.class);
-            kAppInitialize.execute();
-        }
-        catch (Exception e) {
-            log.info("系统自动安装Pine包任务执行失败", e);
-        }
-        finally {
-            upgrading.set(false);
         }
 
     }
