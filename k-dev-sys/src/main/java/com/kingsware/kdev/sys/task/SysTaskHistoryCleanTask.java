@@ -4,6 +4,7 @@ import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.core.model.SysTaskHistory;
 import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.orm.PagedList;
 import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
 import de.siegmar.fastcsv.writer.CsvWriter;
@@ -78,11 +79,12 @@ public class SysTaskHistoryCleanTask implements KTask {
         // 批处理
         int pageSize = 1000;
         int totalPage = (int) Math.ceil(total / (double) pageSize);
-        String pageSql = "select * from sys_task_history where execute_begin_time < ? order by execute_begin_time asc limit ? offset ?";
+        String pageSql = "select * from sys_task_history where execute_begin_time < ? order by execute_begin_time asc";
+        Object[] params = {sevenDaysAgo};
 
         for (int i = 1; i <= totalPage; i++) {
-            int offset = (i - 1) * pageSize;
-            List<SysTaskHistory> histories = DB.findList(SysTaskHistory.class, pageSql, sevenDaysAgo, pageSize, offset);
+            PagedList<SysTaskHistory> pagedList = DB.getDefault().findPagedList(SysTaskHistory.class, i, pageSize, pageSql, params);
+            List<SysTaskHistory> histories = pagedList.getList();
             if (histories.isEmpty()) {
                 continue;
             }
