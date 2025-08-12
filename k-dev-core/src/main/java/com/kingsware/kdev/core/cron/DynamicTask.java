@@ -323,15 +323,12 @@ public class DynamicTask implements CommandLineRunner {
                 }
             }
 
-            // 流程才记录历史
-            if (myTask.getClassName() == null || !myTask.getClassName().isEmpty()) {
-                sysTaskHistory.setExecuteStatus(executeStatus);
-                sysTaskHistory.setExecuteTake(t2 - t1);
-                sysTaskHistory.setExecuteBeginTime(DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME));
-                sysTaskHistory.setExecuteEndTime(DateUtils.formatDate(new Timestamp(t2), DateUtils.DATE_TIME));
-                sysTaskHistory.setExecuteMsg(errorMessage);
-                DB.save(sysTaskHistory);
-            }
+            sysTaskHistory.setExecuteStatus(executeStatus);
+            sysTaskHistory.setExecuteTake(t2 - t1);
+            sysTaskHistory.setExecuteBeginTime(DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME));
+            sysTaskHistory.setExecuteEndTime(DateUtils.formatDate(new Timestamp(t2), DateUtils.DATE_TIME));
+            sysTaskHistory.setExecuteMsg(errorMessage);
+            DB.save(sysTaskHistory);
         }
 
     }
