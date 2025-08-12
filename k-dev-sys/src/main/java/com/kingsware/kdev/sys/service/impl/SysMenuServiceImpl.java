@@ -5,6 +5,7 @@ import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.bean.TreeDataRet;
 import com.kingsware.kdev.core.context.KClientContext;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.orm.DB;
@@ -246,7 +247,8 @@ public class SysMenuServiceImpl extends BaseServiceImpl implements SysMenuServic
         if (excludeId != null) {
             wrapper.addCondition("sm.path", Op.NOT_LIKE, "%/"+ excludeId + "/%");
         }
-        if (isMobile) {
+        boolean isDev = SpringContext.getBoolean("app.mode.dev", false);
+        if (!isDev && isMobile) {
             wrapper.addCondition("sm.data_type", Op.EQ, 3);
         }
         if (!isSuperAdmin) {
