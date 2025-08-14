@@ -196,6 +196,32 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
         }
     }
 
+    private String updateDataSourceAppId(String json, String appId) {
+        if (StringUtils.isNotEmpty(json)) {
+            // 添加appId到json字段里
+            String argvJson = json;
+            if (StringUtils.isNotEmpty(appId)) {
+                Map<String, Object> json2Map = JsonUtil.toBean(argvJson, Map.class);
+                json2Map.put("appId", appId);
+                argvJson = JsonUtil.toJson(json2Map);
+            }
+            else {
+                Map<String, Object> json2Map = JsonUtil.toBean(argvJson, Map.class);
+                json2Map.remove("appId");
+                argvJson = JsonUtil.toJson(json2Map);
+            }
+            return argvJson;
+        } else {
+            String defaultJson = "{}";
+            if (StringUtils.isNotEmpty(appId)) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("appId", appId);
+                defaultJson = JsonUtil.toJson(map);
+            }
+            return defaultJson;
+        }
+    }
+
     @Override
     public void edit(SysKdbDataSourceArgv argv) {
         try {
@@ -210,30 +236,9 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
 
             instanceToField(info, argv);
             KdbApi api = (KdbApi)(DB.getDefault());
-            if (StringUtils.isNotEmpty(argv.getJson())) {
-                // 添加appId到json字段里
-                String argvJson = argv.getJson();
-                if (StringUtils.isNotEmpty(argv.getAppId())){
-                    Map<String, Object> json2Map = JsonUtil.toBean(argvJson, Map.class);
-                    json2Map.put("appId", argv.getAppId());
-                    argvJson = JsonUtil.toJson(json2Map);
-                }
-                else {
-                    Map<String, Object> json2Map = JsonUtil.toBean(argvJson, Map.class);
-                    json2Map.remove("appId");
-                    argvJson = JsonUtil.toJson(json2Map);
-                }
-                info.setJson(argvJson);
-            }
-            else {
-                String defaultJson = "{}";
-                if (StringUtils.isNotEmpty(argv.getAppId())){
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("appId", argv.getAppId());
-                    defaultJson = JsonUtil.toJson(map);
-                }
-                info.setJson(defaultJson);
-            }
+
+            String newJson = updateDataSourceAppId(argv.getJson(), argv.getAppId());
+            info.setJson(newJson);
             api.editDataSource(info);
 
             // 查询数据源详情
@@ -393,17 +398,18 @@ public class SysKdbDataSourceServiceImpl extends BaseServiceImpl implements SysK
     @Override
     public void take(DataSourceTakeArgv argv) {
         SysKdbDataSourceRet data = get(argv.getSourceName());
-        SysKdbDataSourceArgv editArgv = BeanUtils.copyObject(data, SysKdbDataSourceArgv.class);
-        editArgv.setAppId(argv.getAppId());
-        this.edit(editArgv);
+        String sql = "update data_source set app_id = ?, json = ? where sourcename = ?";
+        String appId = argv.getAppId();
+        String json = updateDataSourceAppId(data.getJson(), argv.getAppId());
+        DB.byName("kingDB").executeUpdateSql(sql, appId, json, argv.getSourceName());
     }
 
     @Override
     public void unTake(DataSourceTakeArgv argv) {
         SysKdbDataSourceRet data = get(argv.getSourceName());
-        SysKdbDataSourceArgv editArgv = BeanUtils.copyObject(data, SysKdbDataSourceArgv.class);
-        editArgv.setAppId(null);
-        this.edit(editArgv);
+        String sql = "update data_source set app_id = ?, json = ? where sourcename = ?";
+        String json = updateDataSourceAppId(data.getJson(), null);
+        DB.byName("kingDB").executeUpdateSql(sql, null, json, argv.getSourceName());
     }
 
 }
