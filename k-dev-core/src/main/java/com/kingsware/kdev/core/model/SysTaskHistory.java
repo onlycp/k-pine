@@ -30,4 +30,10 @@ public class SysTaskHistory extends BaseManageModel {
 
     /** 上次执行错误信息 **/
     private String executeMsg;
+
+    /** 请求体内容 **/
+    private String requestBody;
+
+    /** 响应体内容 **/
+    private String responseBody;
 }

@@ -321,14 +321,16 @@ public class DynamicTask implements CommandLineRunner {
                     String sql = "update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ?,  last_execute_time=?, next_inst=? where id=?";
                     DB.executeUpdateSql(sql, executeStatus, (t2 - t1), errorMessage, DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME), SystemUtil.getHost().instanceName(), myTask.getId());
                 }
+
+                // 只记录 java类历史，流程的走 task_agent逻辑保存历史
+                sysTaskHistory.setExecuteStatus(executeStatus);
+                sysTaskHistory.setExecuteTake(t2 - t1);
+                sysTaskHistory.setExecuteBeginTime(DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME));
+                sysTaskHistory.setExecuteEndTime(DateUtils.formatDate(new Timestamp(t2), DateUtils.DATE_TIME));
+                sysTaskHistory.setExecuteMsg(errorMessage);
+                DB.save(sysTaskHistory);
             }
 
-            sysTaskHistory.setExecuteStatus(executeStatus);
-            sysTaskHistory.setExecuteTake(t2 - t1);
-            sysTaskHistory.setExecuteBeginTime(DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME));
-            sysTaskHistory.setExecuteEndTime(DateUtils.formatDate(new Timestamp(t2), DateUtils.DATE_TIME));
-            sysTaskHistory.setExecuteMsg(errorMessage);
-            DB.save(sysTaskHistory);
         }
 
     }

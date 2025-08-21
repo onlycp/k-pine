@@ -1,67 +1,160 @@
 {
-  "node_link": [
-    {
-      "catchException": "false",
-      "name": "开始->JS任务",
-      "from": "start",
-      "id": "ba1c4ae6-c00f-4f8c-8015-91bf41344c88",
-      "to": "d3321fac-2432-48a2-811d-00970413f734"
-    },
-    {
-      "catchException": "false",
-      "name": "JS任务->结束",
-      "from": "d3321fac-2432-48a2-811d-00970413f734",
-      "id": "c6c5fa7d-07c7-4774-85a0-b1b259af0621",
-      "to": "end"
-    }
-  ],
-  "name": "任务调度中间层",
+  "name": "task_agent",
   "node_definition": [
     {
-      "auto": true,
-      "variables": {},
-      "debug": false,
-      "shape": "start",
-      "extra": {
-        "position": "270,0"
-      },
-      "name": "开始",
       "id": "start",
+      "name": "开始",
+      "auto": true,
       "state": "completed",
-      "type": "start"
+      "debug": false,
+      "type": "start",
+      "variables": {},
+      "extra": {
+        "position": "-260,-430"
+      }
     },
     {
-      "auto": true,
-      "variables": {},
-      "debug": false,
-      "shape": "end",
-      "extra": {
-        "position": "270,338"
-      },
-      "name": "结束",
       "id": "end",
+      "name": "结束",
+      "auto": true,
       "state": "completed",
-      "type": "end"
+      "debug": false,
+      "type": "end",
+      "variables": {},
+      "extra": {
+        "position": "500,195"
+      }
     },
     {
-      "auto": true,
-      "variables": {},
-      "debug": false,
-      "shape": "task",
-      "extra": {
-        "position": "206.5,190"
-      },
-      "name": "JS任务",
       "id": "d3321fac-2432-48a2-811d-00970413f734",
+      "name": "任务调度",
+      "auto": true,
       "state": "completed",
+      "debug": false,
       "type": "task",
       "execute": {
         "script": {
+          "content": "const System = Java.type('java.lang.System')\nconst JSONObject = Java.type('com.alibaba.fastjson.JSONObject')\n\n// 获取要执行的逻辑编排\nconst flowId = context.get('__flowId');\nconst taskId = context.get('__taskId');\nconst instanceId = context.get('__instanceId');\nlet variables = getResult('variables')\nklog.info(`[X-TASK]-[${taskId}]-[task_agent]开始执行`)\nif (!variables) {\n variables = {}\n}\n\n// 加入系统变量\nconst currentVariables = JSONObject.toJSON(context)\nconst sysVariables = JSON.parse(currentVariables);\nvariables['sys'] = sysVariables['sys']\nvariables['request'] = sysVariables['request']\nconst taskInstanceId = instanceId + \".\" + taskId\nvariables['_taskId'] = taskId\nlet t1 = System.currentTimeMillis()\nconst lck = kutils.getCache('x-task', taskInstanceId);\nconst lockTime = parseInt(lck)\n\n// 执行历史\nconst taskInfo = getResult(\"taskInfo\")\nconst taskHistory = {\n id: getUuid(),\n taskId: taskId,\n taskName: taskInfo[\"name\"],\n executeBeginTime: dateFormat(new Date(), \"yyyy-MM-dd HH:mm:ss\"),\n requestBody: taskInfo[\"taskArgv\"]\n}\n\nif (lck && ((t1 - lockTime) < 1000 * 60 * 10)) {\n klog.info(`[X-TASK]-[${taskInstanceId}]-[task_agent]任务正在执行中，将跳过此次执行`)\n}\nelse {\n let lastExecuteStatus = 1;\n let errorMessage = '';\n try {\n kutils.setCache('x-task', taskInstanceId, t1 + '', 1000 * 60 * 10)\n kutils.dbCommand('MySql', 'update sys_task set last_execute_time=?, last_execute_status=? where id=?', [context.get('sys').get('when'), 2, taskId])\n klog.info(`[X-TASK]-[${taskInstanceId}]-[task_agent]执行变量:` + JSON.stringify(variables))\n const s = kutils.callFlow(flowId, JSON.stringify(variables));\n // 获取执行结果\n taskHistory[\"responseBody\"] = s.data\n \n klog.info(`[X-TASK]-[${taskInstanceId}]-[task_agent]执行完成`)\n if (s.status != 0) {\n errorMessage = s.errorMsg;\n lastExecuteStatus = 0;\n }\n }\n catch (e) {\n const errorDetails = e instanceof Error ? `` : JSON.stringify(e);\n klog.info(`[X-TASK]-[${taskInstanceId}]-[task_agent]执行异常: ` + e);\n errorMessage = errorDetails;\n lastExecuteStatus = 0;\n }\n finally {\n kutils.removeCache('x-task', taskInstanceId)\n }\n let t2 = System.currentTimeMillis()\n if (lastExecuteStatus == 0) {\n const sql = \"update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ? where id=?\";\n const params = [lastExecuteStatus, (t2 - t1), errorMessage, taskId]\n kutils.dbCommand('MySql', sql, params)\n }\n else {\n const sql = \"update sys_task set last_execute_status=?, last_execute_take = ? where id=?\";\n const params = [lastExecuteStatus, (t2 - t1), taskId]\n kutils.dbCommand('MySql', sql, params)\n }\n\n\n klog.info(`[X-TASK]-[]-[task_agent]开始结束`)\n\n // 执行历史\n taskHistory[\"executeStatus\"] = lastExecuteStatus\n taskHistory[\"executeTake\"] = t2 - t1\n taskHistory[\"executeMsg\"] = errorMessage\n taskHistory[\"executeEndTime\"] = dateFormat(new Date(), \"yyyy-MM-dd HH:mm:ss\")\n\n setResult(\"taskHistory\", taskHistory)\n}",
           "type": "js",
-          "params": [],
-          "content": "const System = Java.type('java.lang.System')\nconst JSONObject = Java.type('com.alibaba.fastjson.JSONObject')\n// 获取要执行的逻辑编排\nconst flowId = context.get('__flowId');\nconst taskId = context.get('__taskId');\nconst instanceId = context.get('__instanceId');\nlet variables = getResult('variables')\nklog.info(`[X-TASK]-[${taskId}]-[task_agent]开始执行`)\nif (!variables) {\n    variables = {}\n}\n// 加入系统变量\nconst currentVariables = JSONObject.toJSON(context)\nconst sysVariables = JSON.parse(currentVariables);\nvariables['sys'] = sysVariables['sys']\nvariables['request'] = sysVariables['request']\nconst taskInstanceId = instanceId + \".\" + taskId\nvariables['_taskId'] = taskId\nlet t1 = System.currentTimeMillis()\nconst lck = kutils.getCache('x-task', taskInstanceId);\nconst lockTime = parseInt(lck)\nif (lck && ((t1 - lockTime) < 1000 * 60 * 10)) {\n    klog.info(`[X-TASK]-[${taskInstanceId}]-[task_agent]任务正在执行中，将跳过此次执行`)\n}\nelse {\n    let lastExecuteStatus = 1;\n    let errorMessage = '';\n    try {\n        kutils.setCache('x-task', taskInstanceId, t1 + '', 1000 * 60 * 10)\n        kutils.dbCommand('MySql', 'update sys_task set last_execute_time=?, last_execute_status=? where id=?', [context.get('sys').get('when'), 2, taskId])\n        klog.info(`[X-TASK]-[${taskInstanceId}]-[task_agent]执行变量:` + JSON.stringify(variables))\n        const s = kutils.callFlow(flowId, JSON.stringify(variables));\n        klog.info(`[X-TASK]-[${taskInstanceId}]-[task_agent]执行完成`)\n        if (s.status != 0) {\n            errorMessage = s.errorMsg;\n            lastExecuteStatus = 0;\n        }\n    }\n    catch (e) {\n        const errorDetails = e instanceof Error ? `\n` : JSON.stringify(e);\n        klog.info(`[X-TASK]-[${taskInstanceId}]-[task_agent]执行异常: ` + e);\n        errorMessage = errorDetails;\n        lastExecuteStatus = 0;\n    }\n    finally {\n        kutils.removeCache('x-task', taskInstanceId)\n    }\n    let t2 = System.currentTimeMillis()\n    if (lastExecuteStatus == 0) {\n        const sql = \"update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ? where id=?\";\n        const params = [lastExecuteStatus, (t2 - t1), errorMessage, taskId]\n        kutils.dbCommand('MySql', sql, params)\n    }\n    else {\n        const sql = \"update sys_task set last_execute_status=?, last_execute_take = ? where id=?\";\n        const params = [lastExecuteStatus, (t2 - t1), taskId]\n        kutils.dbCommand('MySql', sql, params)\n    }\n\n\n    klog.info(`[X-TASK]-[]-[task_agent]开始结束`)\n\n}"
+          "params": []
         }
+      },
+      "variables": {},
+      "extra": {
+        "position": "-400,140"
       }
+    },
+    {
+      "id": "7c7cbd1ec26242d18d505131e53d25cd",
+      "name": "查询任务信息",
+      "auto": true,
+      "state": "completed",
+      "debug": false,
+      "type": "task",
+      "execute": {
+        "script": {
+          "sourceName": "MySql",
+          "content": "select * from sys_task where id = #{taskId}",
+          "type": "sql",
+          "params": [],
+          "columnLabelCase": "normal"
+        }
+      },
+      "variables": {},
+      "listener": {
+        "before": {
+          "script": {
+            "content": "\n",
+            "type": "js",
+            "params": []
+          }
+        },
+        "after": {
+          "script": {
+            "content": "const list = toHumpResult();\n// 获取任务信息\nlet taskInfo = {}\nlet taskExist = false\nif (list.length > 0) {\n taskInfo = list[0]\n taskExist = true\n}\nsetResult(\"taskInfo\", taskInfo)\nsetResult(\"taskExist\", taskExist)\n",
+            "type": "js",
+            "params": []
+          }
+        }
+      },
+      "extra": {
+        "position": "20,-140"
+      }
+    },
+    {
+      "id": "24b2105496634a53b557892acde3c685",
+      "name": "预处理",
+      "auto": true,
+      "state": "completed",
+      "debug": false,
+      "type": "task",
+      "execute": {
+        "script": {
+          "content": "// 获取任务 id\nconst taskId = context.get('__taskId');\nsetResult(\"taskId\", taskId)",
+          "type": "js",
+          "params": []
+        }
+      },
+      "variables": {},
+      "extra": {
+        "position": "-320,-290"
+      }
+    },
+    {
+      "id": "ba5a8a12edfb4d93ba2d4d6712f78263",
+      "name": "添加历史记录",
+      "auto": true,
+      "state": "completed",
+      "debug": false,
+      "type": "task",
+      "execute": {
+        "script": {
+          "content": "const taskExist = getResult(\"taskExist\")\nconst taskHistory = getResult(\"taskHistory\")\nconst nowStr = dateFormat(new Date(), \"yyyy-MM-dd HH:mm:ss\")\n\nconst sql = `insert into sys_task_history (id, task_id, task_name, execute_status, execute_take, execute_begin_time, execute_end_time, execute_msg, request_body, response_body, when_created, when_modified) values (?,?,?,?,?,?,?,?,?,?,?,?)`\nconst params = [ \n taskHistory[\"id\"],\n taskHistory[\"taskId\"],\n taskHistory[\"taskName\"],\n taskHistory[\"executeStatus\"],\n taskHistory[\"executeTake\"],\n taskHistory[\"executeBeginTime\"],\n taskHistory[\"executeEndTime\"],\n taskHistory[\"executeMsg\"],\n taskHistory[\"requestBody\"],\n taskHistory[\"responseBody\"],\n nowStr,\n nowStr\n]\n\ntry {\n // 防止旧版没有历史表的定时任务会报错，这里异常也不影响\n let existTable = kutils.getCache('existTable', 'sys_task_history')\n \n if (existTable == null) {\n const status = kutils.getTableMeta('MySql', \"sys_task_history\").status\n if (status == 0) {\n existTable = \"true\"\n } else {\n existTable = \"false\"\n }\n kutils.setCache('existTable', 'sys_task_history', existTable)\n } \n klog.info(\"existTable: \" + existTable)\n // 存在表，记录历史\n // 不存在表，那么不记录历史\n if (existTable == \"true\") {\n const result = kutils.dbCommand('MySql', sql, params)\n klog.info(result)\n }\n} catch(e) {\n}\n",
+          "type": "js",
+          "params": []
+        }
+      },
+      "variables": {},
+      "extra": {
+        "position": "50,140"
+      }
+    }
+  ],
+  "node_link": [
+    {
+      "id": "5438c9715c694c4c85952caa2672f30b",
+      "name": "查询任务信息->JS任务",
+      "from": "7c7cbd1ec26242d18d505131e53d25cd",
+      "to": "d3321fac-2432-48a2-811d-00970413f734",
+      "catch_exception": "false"
+    },
+    {
+      "id": "3cd644391a2347959ca0f51213f35a1b",
+      "name": "开始->预处理",
+      "from": "start",
+      "to": "24b2105496634a53b557892acde3c685",
+      "catch_exception": "false"
+    },
+    {
+      "id": "8833c068b20f47ce8d5912d98fb33700",
+      "name": "预处理->查询任务信息",
+      "from": "24b2105496634a53b557892acde3c685",
+      "to": "7c7cbd1ec26242d18d505131e53d25cd",
+      "catch_exception": "false"
+    },
+    {
+      "id": "1aaab66ce9ca4c8e8b4b0343654a2eb4",
+      "name": "任务调度->判断是否存在历史表",
+      "from": "d3321fac-2432-48a2-811d-00970413f734",
+      "to": "ba5a8a12edfb4d93ba2d4d6712f78263",
+      "catch_exception": "false"
+    },
+    {
+      "id": "17d51b0c253f487ebcc7466405d0c788",
+      "name": "判断是否存在历史表->结束",
+      "from": "ba5a8a12edfb4d93ba2d4d6712f78263",
+      "to": "end",
+      "catch_exception": "false"
     }
   ]
 }
