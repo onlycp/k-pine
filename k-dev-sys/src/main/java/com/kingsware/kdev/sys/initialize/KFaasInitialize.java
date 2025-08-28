@@ -106,12 +106,12 @@ public class KFaasInitialize implements SystemInitialize {
         // 读取文件
         // 在windows环境中，代码版运行./xx会找不到文件，需要改成.\xx
         String dbConfigFilePath = initDatasourcePath + File.separator + "db.json";
-        log.info("DB-JSON path:{}", dbConfigFilePath);
+//        log.info("DB-JSON path:{}", dbConfigFilePath);
         File dbConfigFile = new File(dbConfigFilePath);
         if (dbConfigFile.exists()) {
-            log.info("DB-JSON begin");
+//            log.info("DB-JSON begin");
             String text = FileUtils.readFileText(dbConfigFile);
-            log.info("DB-JSON Content:{}", text);
+//            log.info("DB-JSON Content:{}", text);
             if (StringUtils.isNotEmpty(text)) {
                 List<DataSourceFileInfo> dataSourceFromFile = JsonUtil.toListBean(text, DataSourceFileInfo.class);
                 if (dataSourceFromFile != null) {
