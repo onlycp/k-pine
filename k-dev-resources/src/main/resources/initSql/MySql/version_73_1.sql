@@ -24,3 +24,16 @@ CREATE TABLE IF NOT EXISTS `dev_chat_message` (
                                     `when_modified` varchar(30) DEFAULT NULL COMMENT '修改时间',
                                     PRIMARY KEY (`message_id`)
 );
+
+CREATE TABLE IF NOT EXISTS `dev_online_user` (
+                                    `id` varchar(36) NOT NULL COMMENT '规范化唯一ID，主键',
+                                    `tab_id` varchar(36) NOT NULL COMMENT '前端生成的唯一 tabId',
+                                    `user_id` varchar(36) NOT NULL COMMENT '用户ID',
+                                    `user_name` varchar(50) DEFAULT NULL COMMENT '用户名',
+                                    `avatar` varchar(255) DEFAULT NULL COMMENT '头像URL',
+                                    `page_id` varchar(36) NOT NULL COMMENT '页面ID',
+                                    `last_heartbeat` varchar(30) DEFAULT NULL COMMENT '最近一次心跳时间',
+                                    `when_created` varchar(30) DEFAULT NULL COMMENT '创建时间',
+                                    `when_modified` varchar(30) DEFAULT NULL COMMENT '修改时间',
+                                    PRIMARY KEY (`id`)
+);

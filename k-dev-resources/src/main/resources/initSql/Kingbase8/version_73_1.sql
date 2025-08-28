@@ -23,3 +23,16 @@ CREATE TABLE DEV_CHAT_MESSAGE (
                                   WHEN_CREATED     VARCHAR2(30 CHAR),
                                   WHEN_MODIFIED    VARCHAR2(30 CHAR)
 );
+
+CREATE TABLE DEV_ONLINE_USER (
+                                 ID              VARCHAR2(36 CHAR) NOT NULL
+                                     CONSTRAINT PK_DEV_ONLINE_USER PRIMARY KEY,
+                                 TAB_ID          VARCHAR2(36 CHAR) NOT NULL,
+                                 USER_ID         VARCHAR2(36 CHAR) NOT NULL,
+                                 USER_NAME       VARCHAR2(50 CHAR),
+                                 AVATAR          VARCHAR2(255 CHAR),
+                                 PAGE_ID         VARCHAR2(36 CHAR) NOT NULL,
+                                 LAST_HEARTBEAT  VARCHAR2(30 CHAR),
+                                 WHEN_CREATED    VARCHAR2(30 CHAR),
+                                 WHEN_MODIFIED   VARCHAR2(30 CHAR)
+);
