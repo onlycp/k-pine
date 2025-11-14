@@ -508,7 +508,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 }
             }
 
-            String errorMessage = I18n.t("SysUser.tip.fail1","用户名或密码有误，您还有{0}次机会输入，达到次数之后，账户将被锁定{1}分钟", countOfLeave, userLockMinutes);
+            String errorMessage = I18n.t("SysUser.tip.fail1","用户已停用或用户名、密码错误，您还有{0}次机会输入，达到次数之后，账户将被锁定{1}分钟", countOfLeave, userLockMinutes);
             if (model == null) {
                 Boolean showCode = false;
                 if(countOfLeave == 0)   {

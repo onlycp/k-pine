@@ -5,11 +5,11 @@
   <parent>
     <groupId>com.kingsware.dev</groupId>
     <artifactId>k-dev-parent</artifactId>
-    <version>4.1.0-beta.3</version>
+    <version>4.1.0-beta.4</version>
   </parent>
   <groupId>com.kingsware.dev</groupId>
   <artifactId>k-dev-app</artifactId>
-  <version>4.1.0-beta.3</version>
+  <version>4.1.0-beta.4</version>
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
@@ -95,19 +95,44 @@
         </configuration>
       </plugin>
       <plugin>
-        <artifactId>maven-dependency-plugin</artifactId>
+        <groupId>net.roseboy</groupId>
+        <artifactId>classfinal-maven-plugin</artifactId>
+        <version>1.2.1</version>
         <executions>
           <execution>
-            <id>copy</id>
             <phase>package</phase>
             <goals>
-              <goal>copy-dependencies</goal>
+              <goal>classFinal</goal>
             </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}/lib</outputDirectory>
-            </configuration>
           </execution>
         </executions>
+        <configuration>
+          <password>tQjLiDL5cLogQ38a</password>
+          <packages>com.kingsware.kdev</packages>
+          <cfgfiles>application.properties,application-pine.properties</cfgfiles>
+          <excludes>org.spring</excludes>
+          <libjars>k-dev-core-${kdev.version}.jar,k-dev-sys-${kdev.version}.jar</libjars>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>net.roseboy</groupId>
+        <artifactId>classfinal-maven-plugin</artifactId>
+        <version>1.2.1</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>classFinal</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <password>tQjLiDL5cLogQ38a</password>
+          <packages>com.kingsware.kdev</packages>
+          <cfgfiles>application.properties,application-pine.properties</cfgfiles>
+          <excludes>org.spring</excludes>
+          <libjars>k-dev-core-${kdev.version}.jar,k-dev-sys-${kdev.version}.jar</libjars>
+        </configuration>
       </plugin>
     </plugins>
   </build>
