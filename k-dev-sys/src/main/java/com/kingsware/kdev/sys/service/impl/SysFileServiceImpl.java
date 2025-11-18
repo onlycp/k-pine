@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.service.impl;
 
+import com.kingsware.kdev.core.auth.BaseUserInfo;
 import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.*;
@@ -119,9 +120,34 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
 
     @Override
     public void delete(MultiIdArgv argv) {
-        for (String id: argv.getIds()) {
-            DB.delete(SysFile.class, id);
+        // 修复漏洞：文件删除存在垂直越权
+        // 修复措施：普通用户只允许删除自己上传的文件
+        boolean isAdmin = false;
+        BaseUserInfo userInfo = KClientContext.getContext().getUserInfo();
+        String roleCodes = userInfo.getRoleCodes();
+        if (roleCodes != null && !roleCodes.trim().isEmpty()) {
+            isAdmin = Arrays.stream(roleCodes.split(",")).collect(Collectors.toList()).contains("admin");
         }
+
+        // 普通用户需要查询哪些文件有权限删除
+        if(!isAdmin){
+            SqlWrapper sqlWrapper = new SqlWrapper("select id, who_created from sys_file where 1=1 ");
+            Set<Object> ids = Collections.singleton(argv.getIds());
+            Set<Object> ids2Set = new HashSet<>(ids);
+            sqlWrapper.in("id", ids2Set);
+            List<SysFile> files = DB.findList(SysFile.class, sqlWrapper.getSql(), sqlWrapper.getParams());
+            List<SysFile> canDeleteFiles = files.stream().filter(e -> e.getWhoCreated().equalsIgnoreCase(userInfo.getId())).collect(Collectors.toList());
+            for (SysFile canDeleteFile : canDeleteFiles) {
+                DB.delete(SysFile.class, canDeleteFile.getId());
+            }
+        } else {
+            // 管理员可以直接删除
+            for (String id: argv.getIds()) {
+                DB.delete(SysFile.class, id);
+            }
+        }
+
+
     }
 
     @SneakyThrows
