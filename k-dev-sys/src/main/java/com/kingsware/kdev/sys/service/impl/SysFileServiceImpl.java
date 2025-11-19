@@ -127,14 +127,16 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         BaseUserInfo userInfo = KClientContext.getContext().getUserInfo();
         // 普通用户需要查询哪些文件有权限删除
         if(!isAdmin){
-            SqlWrapper sqlWrapper = new SqlWrapper("select id, who_created from sys_file where 1=1 ");
+            SqlWrapper sqlWrapper = new SqlWrapper("select id, file_name, who_created from sys_file where 1=1 ");
             Set<String> ids = argv.getIds();
             Set<Object> ids2Set = new HashSet<>(ids);
             sqlWrapper.in("id", ids2Set);
-            List<SysFile> files = DB.findList(SysFile.class, sqlWrapper.getSql(), sqlWrapper.getParams());
-            List<SysFile> canDeleteFiles = files.stream().filter(e -> e.getWhoCreated().equalsIgnoreCase(userInfo.getId())).collect(Collectors.toList());
-            for (SysFile canDeleteFile : canDeleteFiles) {
-                DB.delete(SysFile.class, canDeleteFile.getId());
+            List<SysFile> files = DB.findList(SysFile.class, sqlWrapper.getSql(), sqlWrapper.getParams().toArray());
+            List<SysFile> canNotDeleteFiles = files.stream().filter(e -> !userInfo.getId().equalsIgnoreCase(e.getWhoCreated())).collect(Collectors.toList());
+            if (!canNotDeleteFiles.isEmpty()){
+                String names = canNotDeleteFiles.stream().map(SysFile::getFileName).collect(Collectors.joining());
+                String errorMgs = "删除失败，因为包含没有删除权限的文件：" + names;
+                throw BusinessException.serviceThrow(errorMgs);
             }
         } else {
             // 管理员可以直接删除

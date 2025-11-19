@@ -515,7 +515,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                     sysCacheService.setCache(lockCacheKey, System.currentTimeMillis() + "");
                     // 移除当前登录次数缓存
                     sysCacheService.removeCache(cacheKey);
-                    throw BusinessException.serviceThrow(I18n.t("SysUser.tip.fail2","由于密码错误连续次数已达到{0}次，用户被锁定{1}分钟", allowErrorCount, userLockMinutes));
+                    throw BusinessException.serviceThrow(I18n.t("SysUser.tip.fail2","由于用户名或密码错误连续次数已达到{0}次，用户被锁定{1}分钟", allowErrorCount, userLockMinutes));
                 }
                 // 记录密码错误
                 userLoginPasswordErrorCount++;
@@ -532,7 +532,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 if (!EncryptWorker.getInstance().validate(argv.get("password").toString(), model.getPassword(), model.getUsername())) {
                     if(countOfLeave == 0)   {
                         sysCacheService.setCache(lockCacheKey, System.currentTimeMillis() + "");
-                        throw BusinessException.serviceThrow(I18n.t("SysUser.tip.fail3","密码错误连续次数已达到{0}次，用户将被锁定{1}分钟", allowErrorCount, userLockMinutes));
+                        throw BusinessException.serviceThrow(I18n.t("SysUser.tip.fail3","用户名或密码错误连续次数已达到{0}次，用户将被锁定{1}分钟", allowErrorCount, userLockMinutes));
                     }
                     // 记录密码错误
                     userLoginPasswordErrorCount++;
@@ -884,6 +884,15 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
 
     @Override
     public void resetPassword(SysUserResetPasswordArgv argv) {
+        String password = argv.getPassword();
+        String rePassword = argv.getRePassword();
+        if (StringUtils.isEmpty(password) || StringUtils.isEmpty(rePassword)) {
+            throw BusinessException.serviceThrow(I18n.t("SysUserServiceImpl.resetPassword","密码不能为空"));
+        }
+        if (!password.equals(rePassword)) {
+            throw BusinessException.serviceThrow(I18n.t("SysUserServiceImpl.resetPassword","重复输入的密码必须相同"));
+        }
+
         SysUser model = DB.findById(SysUser.class, argv.getUserId());
         if (model == null) {
             throw BusinessException.serviceThrow(I18n.t("SysUser.tip.userNotFound", "用户不存在！"));
