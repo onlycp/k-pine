@@ -3,9 +3,7 @@
 
 create table DEV_SQL_RUN
 (
-    ID             VARCHAR2(36 char) not null
-        constraint DEV_SQL_RUN_PK_DEV_POWER_TREE
-        primary key,
+    ID             VARCHAR2(36 char) not null,
     VERSION        NUMBER            not null,
     MD5            VARCHAR(100),
     WHEN_CREATED   VARCHAR(20),
@@ -18,9 +16,7 @@ create table DEV_SQL_RUN
 
 create table DEV_API
 (
-    ID                 VARCHAR2(36 char) default '' not null
-        constraint DEV_API_PK_
-        primary key,
+    ID                 VARCHAR2(36 char) default '' not null,
     API_NAME           VARCHAR2(50 char),
     APPLICATION_ID     VARCHAR2(36 char),
     API_URL            VARCHAR2(128 char),
@@ -42,9 +38,7 @@ create table DEV_API
 );
 create table DEV_APPLICATION
 (
-    ID              VARCHAR2(36 char)   not null
-        constraint DEV_APPLICATION_PK_DEV_API
-        primary key,
+    ID              VARCHAR2(36 char)   not null,
     NAME            VARCHAR2(100 char),
     SHORT_NAME      VARCHAR2(30 char)   not null,
     DESCRIPTION     VARCHAR2(255 char),
@@ -68,7 +62,7 @@ create table DEV_APPLICATION
 
 create table DEV_DOCUMENT
 (
-    ID           VARCHAR2(255 char) not null primary key,
+    ID           VARCHAR2(255 char) not null,
     NAME         VARCHAR2(255 char),
     PATH         VARCHAR2(255 char),
     CONTENT      CLOB,
@@ -83,9 +77,7 @@ create table DEV_DOCUMENT
 
 create table DEV_MODULE
 (
-    ID            VARCHAR2(36 char) not null
-        constraint DEV_MODULE_PK_DEV_DOCUMENT
-        primary key,
+    ID            VARCHAR2(36 char) not null,
     NAME          VARCHAR2(100 char),
     PATH          VARCHAR2(255 char),
     HAS_PATH      NUMBER,
@@ -101,9 +93,7 @@ create table DEV_MODULE
 
 create table DEV_OTA_CHANNEL
 (
-    ID            VARCHAR2(36 char) not null
-        constraint DEV_OTA_CHANNEL_PK_DEV_MODULE
-        primary key,
+    ID            VARCHAR2(36 char) not null,
     CHANNEL_NAME  VARCHAR2(50 char),
     CHANNEL_URL   VARCHAR2(100 char),
     AUTH_TOKEN    VARCHAR2(50 char),
@@ -118,9 +108,7 @@ create table DEV_OTA_CHANNEL
 
 create table DEV_PAGE
 (
-    ID             VARCHAR2(36 char) not null
-        constraint DEV_PAGE_PK_DEV_OTA_CHANNEL
-        primary key,
+    ID             VARCHAR2(36 char) not null,
     WHEN_CREATED   VARCHAR2(20 char),
     WHEN_MODIFIED  VARCHAR2(20 char),
     WHO_CREATED    VARCHAR2(36 char),
@@ -138,8 +126,7 @@ create table DEV_PAGE
 );
 create table dev_page_history
 (
-    id               varchar(36) not null
-        primary key,
+    id               varchar(36) not null,
     page_id          varchar(36) ,
     page_json        clob   ,
     when_created     timestamp   ,
@@ -150,9 +137,7 @@ create table dev_page_history
 
 create table DEV_POWER_LINK
 (
-    ID           VARCHAR2(36 char) not null
-        constraint IND_93035A0CDEDE6A72
-        primary key,
+    ID           VARCHAR2(36 char) not null,
     TREE_ID      VARCHAR2(36 char),
     POWER_ID     VARCHAR2(36 char),
     POWER_TYPE   NUMBER,
@@ -162,9 +147,7 @@ create table DEV_POWER_LINK
 
 create table DEV_POWER_TREE
 (
-    ID            VARCHAR2(36 char) not null
-        constraint IND_61723BC7B93A02FB
-        primary key,
+    ID            VARCHAR2(36 char) not null,
     NAME          VARCHAR2(128 char),
     PARENT_ID     VARCHAR2(36 char),
     NOTE          VARCHAR2(255 char),
@@ -179,18 +162,14 @@ create table DEV_SQL_SCRIPT
 (
     SQL         CLOB                not null,
     DESCRIPTION VARCHAR2(255 char),
-    VERSION     NUMBER              not null
-        constraint DEV_SQL_SCRIPT_PK_DEV_SQL_RUN
-            primary key,
+    VERSION     NUMBER              not null,
     IS_ONCE     NUMBER(3) default 1 not null
 );
 
 
 create table DEV_TEAM
 (
-    ID            VARCHAR2(36 char)   not null
-        constraint DEV_TEAM_PK_DEV_SQL_SCRIPT
-        primary key,
+    ID            VARCHAR2(36 char)   not null,
     NAME          VARCHAR2(100 char)  not null,
     OWNER         VARCHAR2(36 char)   not null,
     DESCRIPTION   VARCHAR2(255 char),
@@ -203,9 +182,7 @@ create table DEV_TEAM
 
 create table DEV_TEAM_APP
 (
-    ID           VARCHAR2(36 char) not null
-        constraint DEV_TEAM_APP_PK_DEV_TEAM
-        primary key,
+    ID           VARCHAR2(36 char) not null,
     TEAM_ID      VARCHAR2(36 char),
     APP_ID       VARCHAR2(36 char),
     TEAM_TYPE    NUMBER(3)         not null,
@@ -215,9 +192,7 @@ create table DEV_TEAM_APP
 
 create table DEV_TEAM_MEMBER
 (
-    ID           VARCHAR2(36 char) not null
-        constraint IND_9780D19670F5F074
-        primary key,
+    ID           VARCHAR2(36 char) not null,
     TEAM_ID      VARCHAR2(36 char) not null,
     USER_ID      VARCHAR2(36 char) not null,
     WHEN_JOIN    VARCHAR2(20 char),
@@ -244,9 +219,7 @@ create table DEV_TOPOLOGICAL
 
 create table DEV_VIEW_MODEL
 (
-    ID            VARCHAR2(36 char) not null
-        constraint IND_D45B602F3B03325E
-        primary key,
+    ID            VARCHAR2(36 char) not null,
     NAME          VARCHAR2(50 char),
     NOTE          CLOB,
     WHO_CREATED   VARCHAR2(36 char),
@@ -260,9 +233,7 @@ create table DEV_VIEW_MODEL
 
 create table DEV_VIEW_MODEL_FIELD
 (
-    ID             VARCHAR2(36 char) not null
-        constraint IND_B7F8EC3B5B6D845F
-        primary key,
+    ID             VARCHAR2(36 char) not null,
     VIEW_MODEL_ID  VARCHAR2(36 char),
     FIELD          VARCHAR2(50 char),
     LABEL          VARCHAR2(50 char),
@@ -281,9 +252,7 @@ create table DEV_VIEW_MODEL_FIELD
 
 create table DEV_VIEW_MODEL_FLOW
 (
-    ID            VARCHAR2(36 char) not null
-        constraint IND_69EC72C50F2576E3
-        primary key,
+    ID            VARCHAR2(36 char) not null,
     FLOW_ID       VARCHAR2(36 char),
     VIEW_MODEL_ID VARCHAR2(36 char),
     WHO_CREATED   VARCHAR2(36 char),
@@ -295,8 +264,7 @@ create table DEV_VIEW_MODEL_FLOW
 
 create table ext_plugin_interface
 (
-    id          varchar(255)                           not null
-        primary key,
+    id          varchar(255)                           not null,
     name        varchar(255)                           ,
     resp_type   varchar(255) default ''                ,
     content     text                                ,
@@ -314,8 +282,7 @@ create table ext_plugin_interface
 
 create table ext_plugin_tree
 (
-    id          varchar(255)
-        primary key,
+    id          varchar(255) not null,
     ext_name    varchar(255)                     ,
     jar_name    varchar(255)                       ,
     type        int                                ,
@@ -332,21 +299,18 @@ create table ext_plugin_tree
 
 create table KFAAS_LIB
 (
-    JARNAME    VARCHAR2(255 char) not null
-        constraint KFAAS_LIB_PK_EXT_PLUGIN_TREE
-        primary key,
+    JARNAME    VARCHAR2(255 char) not null,
     CREATETIME TIMESTAMP(6) default CURRENT_TIMESTAMP,
     UPDATETIME TIMESTAMP(6) default CURRENT_TIMESTAMP,
     CREATEUSER VARCHAR2(255 char),
     UPDATEUSER VARCHAR2(255 char),
-    STATUS     NUMBER       default 0
+    STATUS     NUMBER       default 0,
+    primary key (JARNAME)
 );
 
 create table OPEN_ACCOUNT
 (
-    ID            VARCHAR2(36 char) not null
-        constraint OPEN_ACCOUNT_PK_KFAAS_LIB
-        primary key,
+    ID            VARCHAR2(36 char) not null,
     ACCESS_NAME   VARCHAR2(128 char),
     ACCESS_ID     VARCHAR2(36 char),
     AUTH_TYPE     NUMBER,
@@ -364,9 +328,7 @@ create table OPEN_ACCOUNT
 
 create table OPEN_ACCOUNT_API
 (
-    ID           VARCHAR2(36 char) not null
-        constraint IND_18E26ABA9325DC00
-        primary key,
+    ID           VARCHAR2(36 char) not null,
     ACCOUNT_ID   VARCHAR2(36),
     API_ID       VARCHAR2(36 char),
     WHEN_CREATED VARCHAR2(20 char),
@@ -375,9 +337,7 @@ create table OPEN_ACCOUNT_API
 
 create table OPEN_API_LOG
 (
-    ID             VARCHAR2(36 char) not null
-        constraint IND_5054CEE393E0EEE5
-        primary key,
+    ID             VARCHAR2(36 char) not null,
     ACCESS_ID      VARCHAR2(100 char),
     API_NAME       VARCHAR2(100 char),
     REQUEST_PARAMS CLOB,
@@ -390,9 +350,7 @@ create table OPEN_API_LOG
 
 create table SYS_API
 (
-    ID                 VARCHAR2(36 char) default '' not null
-        constraint SYS_API_PK_OPEN_API_LOG
-        primary key,
+    ID                 VARCHAR2(36 char) default '' not null,
     API_NAME           VARCHAR2(255 char),
     API_URL            VARCHAR2(128 char),
     API_NOTE           CLOB,
@@ -414,9 +372,7 @@ create table SYS_API
 
 create table SYS_BASE
 (
-    ID            VARCHAR2(36 char) not null
-        constraint SYS_BASE_PK_SYS_API
-        primary key,
+    ID            VARCHAR2(36 char) not null,
     NAME          VARCHAR2(50 char),
     CODE          VARCHAR2(50 char),
     NOTE          CLOB,
@@ -430,9 +386,7 @@ create table SYS_BASE
 
 create table SYS_CONFIG
 (
-    ID            VARCHAR2(36 char) not null
-        constraint SYS_CONFIG_PK_SYS_BASE
-        primary key,
+    ID            VARCHAR2(36 char) not null,
     NAME          VARCHAR2(255 char),
     CODE          VARCHAR2(255 char),
     VALUE         VARCHAR2(255 char),
@@ -448,9 +402,7 @@ create table SYS_CONFIG
 
 create table SYS_DATA_ACCESS
 (
-    ID            VARCHAR2(36 char) not null
-        constraint SYS_DATA_ACCESS_PK_SYS_CONFIG
-        primary key,
+    ID            VARCHAR2(36 char) not null,
     NAME          VARCHAR2(50 char),
     STATUS        NUMBER(3),
     NOTE          CLOB,
@@ -463,9 +415,7 @@ create table SYS_DATA_ACCESS
 
 create table SYS_DATA_ACCESS_RESOURCE
 (
-    ID           VARCHAR2(36 char) not null
-        constraint IND_4F3FAC411D998D88
-        primary key,
+    ID           VARCHAR2(36 char) not null,
     DATA_ID      VARCHAR2(36 char),
     ACCESS_ID    VARCHAR2(36 char),
     TABLE_NAME   VARCHAR2(50 char),
@@ -476,9 +426,7 @@ create table SYS_DATA_ACCESS_RESOURCE
 
 create table SYS_DATA_ACCESS_USER
 (
-    ID                 VARCHAR2(36 char) not null
-        constraint IND_B9439577C148032B
-        primary key,
+    ID                 VARCHAR2(36 char) not null,
     SYS_USER_ID        VARCHAR2(36 char),
     SYS_DATA_ACCESS_ID VARCHAR2(50 char),
     WHO_CREATED        VARCHAR2(36 char),
@@ -488,9 +436,7 @@ create table SYS_DATA_ACCESS_USER
 
 create table SYS_DATA_RESOURCE
 (
-    ID            VARCHAR2(36 char) not null
-        constraint IND_C0094018357BBE24
-        primary key,
+    ID            VARCHAR2(36 char) not null,
     NAME          VARCHAR2(50 char),
     TABLE_NAME    VARCHAR2(50 char),
     LABEL_FIELD   VARCHAR2(50 char),
@@ -509,9 +455,7 @@ create table SYS_DATA_RESOURCE
 
 create table SYS_DICT
 (
-    ID            VARCHAR2(36 char) not null
-        constraint SYS_DICT_PK_SYS_DATA_RESOURCE
-        primary key,
+    ID            VARCHAR2(36 char) not null,
     NAME          VARCHAR2(255 char),
     CODE          VARCHAR2(255 char),
     NOTE          CLOB,
@@ -524,9 +468,7 @@ create table SYS_DICT
 
 create table SYS_DICT_ITEM
 (
-    ID            VARCHAR2(36 char) not null
-        constraint SYS_DICT_ITEM_PK_SYS_DICT
-        primary key,
+    ID            VARCHAR2(36 char) not null,
     NAME          VARCHAR2(255 char),
     GROUP_NAME    VARCHAR2(255 char),
     SYS_DICT_ID   VARCHAR2(36 char),
@@ -544,9 +486,7 @@ create table SYS_DICT_ITEM
 
 create table SYS_FILE
 (
-    ID                 VARCHAR2(36 char) not null
-        constraint SYS_FILE_PK_SYS_DICT_ITEM
-        primary key,
+    ID                 VARCHAR2(36 char) not null,
     FILE_NAME          VARCHAR2(100 char),
     FILE_ORIGINAL_NAME VARCHAR2(100 char),
     FILE_SIZE          NUMBER,
@@ -564,9 +504,7 @@ create table SYS_FILE
 );
 create table SYS_I18N
 (
-    ID            VARCHAR2(36 char)  not null
-        constraint SYS_I18N_PK_SYS_FILE
-        primary key,
+    ID            VARCHAR2(36 char)  not null,
     I18N_KEY      VARCHAR2(255 char) not null,
     MESSAGE       CLOB,
     APP_ID        VARCHAR2(36 char),
@@ -577,9 +515,7 @@ create table SYS_I18N
 );
 create table SYS_LOGIC_FLOW
 (
-    ID                  VARCHAR2(36 char) not null
-        constraint SYS_LOGIC_FLOW_PK_SYS_I18N
-        primary key,
+    ID                  VARCHAR2(36 char) not null,
     NAME                VARCHAR2(255 char),
     FLOW_ID             VARCHAR2(36 char),
     APPLICATION_ID      VARCHAR2(36 char),
@@ -598,8 +534,7 @@ create table SYS_LOGIC_FLOW
 
 create table sys_logic_history
 (
-    id               varchar(36) not null
-        primary key,
+    id               varchar(36) not null,
     flow_id          varchar(36) null ,
     flow_json        clob    null ,
     when_created     timestamp   null ,
@@ -609,9 +544,7 @@ create table sys_logic_history
 );
 create table SYS_LOGIC_TEMPLATE
 (
-    ID            VARCHAR2(36 char) not null
-        constraint IND_7785ED58DD2228CF
-        primary key,
+    ID            VARCHAR2(36 char) not null,
     NAME          VARCHAR2(255 char),
     MODULE_ID     VARCHAR2(36 char),
     DESCRIPTION   CLOB,
@@ -626,9 +559,7 @@ create table SYS_LOGIC_TEMPLATE
 
 create table SYS_LOGIN_LOG
 (
-    ID               VARCHAR2(36 char) not null
-        constraint IND_92DBFF804AA263E0
-        primary key,
+    ID               VARCHAR2(36 char) not null,
     OPERATE_TIME     VARCHAR2(20 char),
     OPERATOR         VARCHAR2(36 char),
     IP               VARCHAR2(20 char),
@@ -641,9 +572,7 @@ create table SYS_LOGIN_LOG
 
 create table SYS_MENU
 (
-    ID               VARCHAR2(36 char)        not null
-        constraint SYS_MENU_PK_SYS_LOGIN_LOG
-        primary key,
+    ID               VARCHAR2(36 char)        not null, 
     NAME             VARCHAR2(255 char)        not null,
     PARENT_ID        VARCHAR2(36 char),
     ICON             VARCHAR2(50 char),
@@ -675,9 +604,7 @@ create table SYS_MENU
 );
 create table SYS_NOTICE
 (
-    ID            VARCHAR2(36 char)   not null
-        constraint SYS_NOTICE_PK_SYS_MENU
-        primary key,
+    ID            VARCHAR2(36 char)   not null,
     TITLE         VARCHAR2(255 char),
     CONTENT       CLOB,
     TYPE          NUMBER(3),
@@ -692,9 +619,7 @@ create table SYS_NOTICE
 
 create table SYS_NOTICE_RECORD
 (
-    ID            VARCHAR2(36 char)   not null
-        constraint IND_1ADC39F23AD032B1
-        primary key,
+    ID            VARCHAR2(36 char)   not null,
     FROM_WHO      VARCHAR2(36 char),
     TO_WHO        VARCHAR2(36 char)   not null,
     NOTICE_ID     VARCHAR2(36 char),
@@ -710,9 +635,7 @@ create table SYS_NOTICE_RECORD
 
 create table SYS_ONLINE_USER
 (
-    ID           VARCHAR2(36 char) not null
-        constraint IND_534210AC1B2C86A1
-        primary key,
+    ID           VARCHAR2(36 char) not null,
     USER_ID      VARCHAR2(36 char),
     LOGIN_TIME   VARCHAR2(20 char),
     LOGIN_IP     VARCHAR2(20 char),
@@ -725,9 +648,7 @@ create table SYS_ONLINE_USER
 
 create table SYS_OPERATE_LOG
 (
-    ID               VARCHAR2(36 char) not null
-        constraint IND_7E50FF753E7784FC
-        primary key,
+    ID               VARCHAR2(36 char) not null,
     MODULE           VARCHAR2(100 char),
     ACTION           VARCHAR2(255 char),
     URL              VARCHAR2(255 char),
@@ -745,9 +666,7 @@ create table SYS_OPERATE_LOG
 
 create table SYS_ROLE
 (
-    ID            VARCHAR2(36 char) not null
-        constraint SYS_ROLE_PK_SYS_OPERATE_LOG
-        primary key,
+    ID            VARCHAR2(36 char) not null,
     NAME          VARCHAR2(255 char) not null,
     CODE          VARCHAR2(255 char) not null,
     NOTE          CLOB,
@@ -762,9 +681,7 @@ create table SYS_ROLE
 
 create table SYS_ROLE_MENU
 (
-    ID           VARCHAR2(36 char) not null
-        constraint SYS_ROLE_MENU_PK_SYS_ROLE
-        primary key,
+    ID           VARCHAR2(36 char) not null,
     SYS_MENU_ID  VARCHAR2(36 char) not null,
     SYS_ROLE_ID  VARCHAR2(36 char) not null,
     WHO_CREATED  VARCHAR2(36 char) not null,
@@ -774,9 +691,7 @@ create table SYS_ROLE_MENU
 
 create table SYS_TASK
 (
-    ID                  VARCHAR2(36 char) not null
-        constraint SYS_TASK_PK_SYS_ROLE_MENU
-        primary key,
+    ID                  VARCHAR2(36 char) not null,
     NAME                VARCHAR2(100 char),
     CRON                VARCHAR2(50 char),
     "DISTRIBUTED"         NUMBER(3),
@@ -803,9 +718,7 @@ create table SYS_TASK
 
 create table SYS_UNIT
 (
-    ID            VARCHAR2(36 char)   not null
-        constraint SYS_UNIT_PK_SYS_TASK
-        primary key,
+    ID            VARCHAR2(36 char)   not null,
     NAME          VARCHAR2(255 char)   not null,
     PARENT_ID     VARCHAR2(36 char),
     PATH          CLOB                not null,
@@ -824,9 +737,7 @@ create table SYS_UNIT
 
 create table SYS_USER
 (
-    ID            VARCHAR2(36 char) not null
-        constraint SYS_USER_PK_SYS_UNIT
-        primary key,
+    ID            VARCHAR2(36 char) not null,
     USERNAME      VARCHAR2(255 char) not null,
     PASSWORD      VARCHAR2(256 char),
     REAL_NAME     VARCHAR2(255 char) not null,
@@ -849,9 +760,7 @@ create table SYS_USER
 
 create table SYS_USER_ROLE
 (
-    ID           VARCHAR2(36 char) not null
-        constraint SYS_USER_ROLE_PK_SYS_USER
-        primary key,
+    ID           VARCHAR2(36 char) not null,
     SYS_USER_ID  VARCHAR2(36 char) not null,
     SYS_ROLE_ID  VARCHAR2(36 char) not null,
     WHO_CREATED  VARCHAR2(36 char) not null,
@@ -862,9 +771,7 @@ create table SYS_USER_ROLE
 
 create table SYS_VIEW_MODEL
 (
-    ID            VARCHAR2(36 char) not null
-        constraint IND_804CF57D84E815EB
-        primary key,
+    ID            VARCHAR2(36 char) not null,   
     NAME          VARCHAR2(50 char),
     NOTE          CLOB,
     WHO_CREATED   VARCHAR2(36 char),
@@ -895,9 +802,7 @@ create table SYS_VIEW_MODEL_FIELD
 
 create table SYS_VIEW_MODEL_FLOW
 (
-    ID            VARCHAR2(36 char) not null
-        constraint IND_8B74B862559750DE
-        primary key,
+    ID            VARCHAR2(36 char) not null,
     FLOW_ID       VARCHAR2(36 char),
     VIEW_MODEL_ID VARCHAR2(36 char),
     WHO_CREATED   VARCHAR2(36 char),
@@ -1332,23 +1237,22 @@ alter table dev_page
     modify tags VARCHAR(255) null;
 
 
-CREATE TABLE IF NOT EXISTS sys_logic_flow_mock
+CREATE TABLE sys_logic_flow_mock
 (
     id            VARCHAR(36) NOT NULL,
     name          VARCHAR(90),
     flow_id       VARCHAR(36),
     depend_id     VARCHAR(36),
-    request_argv  text,
+    request_argv  CLOB,
     assert_expr   VARCHAR(900),
     enable_mock   INT,
     who_created   VARCHAR(36),
     when_created  VARCHAR(20),
     who_modified  VARCHAR(36),
-    when_modified VARCHAR(20),
-    PRIMARY KEY (id)
+    when_modified VARCHAR(20)
 );
 
-CREATE TABLE IF NOT EXISTS dev_page_template
+CREATE TABLE dev_page_template
 (
     id            varchar(36) NOT NULL,
     when_created  varchar(20),
@@ -1362,11 +1266,10 @@ CREATE TABLE IF NOT EXISTS dev_page_template
     app_type      varchar(100),
     page_json CLOB,
     tags          varchar(255),
-    module_id     varchar(36),
-    PRIMARY KEY (id)
+    module_id     varchar(36)
 );
 
-CREATE TABLE IF NOT EXISTS dev_table
+CREATE TABLE dev_table
 (
     id            varchar(36),
     data_source   varchar(100),
@@ -1375,11 +1278,10 @@ CREATE TABLE IF NOT EXISTS dev_table
     when_created  varchar(100),
     when_modified varchar(100),
     who_created   varchar(100),
-    who_modified  varchar(100),
-    PRIMARY KEY (id)
+    who_modified  varchar(100)
 );
 
-CREATE TABLE IF NOT EXISTS dev_table_column
+CREATE TABLE dev_table_column
 (
     id              varchar(36),
     table_id        varchar(36),
@@ -1395,12 +1297,11 @@ CREATE TABLE IF NOT EXISTS dev_table_column
     when_modified   varchar(100),
     who_created     varchar(100),
     who_modified    varchar(100),
-    is_label_column int NOT NULL DEFAULT 0,
-    PRIMARY KEY (id)
+    is_label_column int NOT NULL DEFAULT 0
 );
 
 
-CREATE TABLE IF NOT EXISTS dev_table_update_log
+CREATE TABLE dev_table_update_log
 (
     id              varchar(36),
     operate_type    int,
@@ -1421,15 +1322,14 @@ CREATE TABLE IF NOT EXISTS dev_table_update_log
     sort            varchar(36),
     "comment"       varchar(255),
     table_id        varchar(100),
-    is_column_label int,
-    PRIMARY KEY (id)
+    is_column_label int
 );
 
 alter table sys_operate_log modify  operate_time varchar(20);
 alter table dev_application modify  enable_status int NULL DEFAULT NULL;
 alter table dev_application modify  dev_status int NULL DEFAULT NULL;
 
-create table if not exists sf_ext_form
+create table sf_ext_form
 (
     id               varchar(50)  not null
         primary key,
@@ -1451,7 +1351,7 @@ create table if not exists sf_ext_form
     description      text         null
 );
 
-create table if not exists rep_app
+create table rep_app
 (
     id            varchar(32)  not null
         primary key,
@@ -1480,7 +1380,7 @@ create table rep_dataset
     column_def    text         null
 );
 
-create table if not exists rep_dataset_config
+create table rep_dataset_config
 (
     id                  varchar(32)  not null,
     select_table        varchar(100) null ,
@@ -1496,10 +1396,9 @@ create table if not exists rep_dataset_config
 );
 
 -- auto-generated definition
-create table if not exists wf_ext_category
+create table wf_ext_category
 (
-    id            varchar(32) not null
-        primary key,
+    id            varchar(32) not null,
     category_name varchar(50) null ,
     order_num     int      null ,
     who_created   varchar(32) null ,
@@ -1509,10 +1408,9 @@ create table if not exists wf_ext_category
 );
 
 -- auto-generated definition
-create table if not exists wf_ext_comment
+create table wf_ext_comment
 (
-    id             varchar(32)                   not null
-        primary key,
+    id             varchar(32)                   not null,
     task_name      varchar(50)                   null,
     proc_inst_id   varchar(32)                   null ,
     task_id        varchar(32)                   null ,
@@ -1525,10 +1423,9 @@ create table if not exists wf_ext_comment
 
 
 -- auto-generated definition
-create table if not exists wf_ext_node_attribute
+create table wf_ext_node_attribute
 (
-    id             varchar(100) not null
-        primary key,
+    id             varchar(100) not null,
     node_type      varchar(50)  null,
     next_user      varchar(500) null,
     msg_send_rule  varchar(100) null,
@@ -1549,9 +1446,9 @@ create table if not exists wf_ext_node_attribute
 );
 
 -- auto-generated definition
-create table if not exists wf_ext_node_define
+create table wf_ext_node_define
 (
-    id            varchar(50)  null,
+    id            varchar(50)  not null,
     who_created   varchar(50)  null,
     when_created  varchar(50)  null,
     who_modified  varchar(50)  null,
@@ -1567,10 +1464,9 @@ create table if not exists wf_ext_node_define
 );
 
 -- auto-generated definition
-create table if not exists wf_ext_procdef
+create table wf_ext_procdef
 (
-    id                  varchar(50)  not null
-        primary key,
+    id                  varchar(50)  not null,
     proc_definition_key varchar(100) null,
     proc_name           varchar(100) null,
     category_id         varchar(32)  null,
@@ -1594,10 +1490,9 @@ create table if not exists wf_ext_procdef
 );
 
 -- auto-generated definition
-create table if not exists wf_ext_procinst
+create table wf_ext_procinst
 (
-    id           varchar(32)  not null
-        primary key,
+    id           varchar(32)  not null,
     proc_inst_id varchar(32)  null ,
     starter      varchar(32)  null ,
     bill_code    varchar(50)  null ,
@@ -1611,8 +1506,7 @@ create table if not exists wf_ext_procinst
 -- auto-generated definition
 create table sys_excel
 (
-    id            varchar(255) not null
-        primary key,
+    id            varchar(255) not null,
     name          varchar(255) null,
     data_json     clob     null,
     data_from     int          null ,
@@ -1627,15 +1521,15 @@ create table sys_excel
 -- auto-generated definition
 create table dev_application_version_history
 (
-    id           varchar(36)  not null
-        primary key,
+    id           varchar(36)  not null,
     when_created timestamp    null,
     who_created  varchar(36)  null,
     app_id       varchar(36)  null,
     version      varchar(50)  null,
     file_name    varchar(255) null,
     note         varchar(255) null,
-    export_data  text         null
+    export_data  CLOB         null,
+    primary key (id)
 );
 
 INSERT INTO DEV_MODULE (ID, NAME, PATH, HAS_PATH, PARENT_ID, SORT, WHEN_CREATED, WHO_CREATED, WHEN_MODIFIED, WHO_MODIFIED, IS_SYS, APP_ID) VALUES ('0913bc0b384c44d99e384b992cb7fe40', '开发平台', '/dev', 1, null, 1, '2023-03-29 10:43:48', '7aed8c297a6940f681c26eb6ab68893d', '2023-03-30 09:55:00', '7aed8c297a6940f681c26eb6ab68893d', 1, '064b3b44b85a45fe87fcce88d72b2519');
@@ -1657,8 +1551,8 @@ INSERT INTO DEV_MODULE (ID, NAME, PATH, HAS_PATH, PARENT_ID, SORT, WHEN_CREATED,
 
 -- 以下是来自 version_36_1.sql 的内容 --
 
-CREATE TABLE if not exists dev_plugin_api (
-                                id VARCHAR(36) PRIMARY KEY,
+CREATE TABLE dev_plugin_api (
+                                id VARCHAR(36) not null,
                                 title VARCHAR(255),
                                 group_code VARCHAR(255),
                                 code VARCHAR(255),
@@ -1668,11 +1562,12 @@ CREATE TABLE if not exists dev_plugin_api (
                                 who_created VARCHAR(36),
                                 when_created VARCHAR(20),
                                 who_modified VARCHAR(36),
-                                when_modified VARCHAR(20)
+                                when_modified VARCHAR(20),
+                                primary key (ID)
 );
 
-CREATE TABLE  if not exists dev_plugin_group (
-                                                 id VARCHAR(36) PRIMARY KEY,
+CREATE TABLE  dev_plugin_group (
+                                                 id VARCHAR(36) not null,
                                                  name VARCHAR(255),
                                                  code VARCHAR(255),
                                                  notes CLOB,
@@ -1680,13 +1575,14 @@ CREATE TABLE  if not exists dev_plugin_group (
                                                  who_created VARCHAR(36),
                                                  when_created VARCHAR(20),
                                                  who_modified VARCHAR(36),
-                                                 when_modified VARCHAR(20)
+                                                 when_modified VARCHAR(20),
+                                                 primary key (ID)
 );
 
 
 
-CREATE TABLE if not exists dev_plugin_operation (
-                                                    id VARCHAR(36) PRIMARY KEY,
+CREATE TABLE dev_plugin_operation (
+                                                    id VARCHAR(36) not null,
                                                     code VARCHAR(255),
                                                     tags VARCHAR(255),
                                                     api_id VARCHAR(36),
@@ -1700,7 +1596,8 @@ CREATE TABLE if not exists dev_plugin_operation (
                                                     when_created VARCHAR(20),
                                                     who_modified VARCHAR(36),
                                                     when_modified VARCHAR(20),
-                                                    order_num INT DEFAULT 0
+                                                    order_num INT DEFAULT 0,
+                                                    primary key (ID)
 );
 
 
@@ -1723,17 +1620,17 @@ alter table sys_logic_template add new_flow_json CLOB null;
 
 -- 以下是来自 version_39_1.sql 的内容 --
 
-CREATE TABLE IF NOT EXISTS "SYS_DATA_CHANGE" ("ID" VARCHAR(32) NOT NULL, "NAME" VARCHAR(255), "TABLE_NAME" VARCHAR(255), "OBJECT_NAME" VARCHAR(255), "OPERATOR" VARCHAR(255), "OPER_TYPE" VARCHAR(255), "OPER_TIME" VARCHAR(255), "CONTENT" VARCHAR(255), PRIMARY KEY ("ID"));
+CREATE TABLE "SYS_DATA_CHANGE" ("ID" VARCHAR(32) NOT NULL, "NAME" VARCHAR(255), "TABLE_NAME" VARCHAR(255), "OBJECT_NAME" VARCHAR(255), "OPERATOR" VARCHAR(255), "OPER_TYPE" VARCHAR(255), "OPER_TIME" VARCHAR(255), "CONTENT" VARCHAR(255), PRIMARY KEY ("ID"));
 
-CREATE TABLE IF NOT EXISTS "NUMBER_REGULATION" ("ID" VARCHAR(36) NOT NULL, "SORT" VARCHAR(255), "TYPE" VARCHAR(255), "VALUE" VARCHAR(255), PRIMARY KEY ("ID"));
+CREATE TABLE "NUMBER_REGULATION" ("ID" VARCHAR(36) NOT NULL, "SORT" VARCHAR(255), "TYPE" VARCHAR(255), "VALUE" VARCHAR(255), PRIMARY KEY ("ID"));
 
-CREATE TABLE IF NOT EXISTS "NUMBER_SERIAL" ("ID" VARCHAR(36) NOT NULL, "CREATE_TIME" VARCHAR(255), "NAME" VARCHAR(255), "NUMBER" VARCHAR(255), "REGULATIONID" VARCHAR(64), "REMARK" VARCHAR(255), "START_VALUE" VARCHAR(255), "STEP_VALUE" VARCHAR(255), "UPDATE_TIME" VARCHAR(255), PRIMARY KEY ("ID"));
+CREATE TABLE "NUMBER_SERIAL" ("ID" VARCHAR(36) NOT NULL, "CREATE_TIME" VARCHAR(255), "NAME" VARCHAR(255), "NUMBER" VARCHAR(255), "REGULATIONID" VARCHAR(64), "REMARK" VARCHAR(255), "START_VALUE" VARCHAR(255), "STEP_VALUE" VARCHAR(255), "UPDATE_TIME" VARCHAR(255), PRIMARY KEY ("ID"));
 
-CREATE TABLE IF NOT EXISTS "SYS_AUTO_SERIAL" ("ID" VARCHAR(36) NOT NULL, "AUTO_NUM" INT, "CATEGORY" VARCHAR(100), "CREATE_TIME" VARCHAR(20), "CREATE_USER" VARCHAR(50), "KEY" VARCHAR(50), "LOCKED" INT DEFAULT 0, "NUM_LENGTH" INT, "START_NUM" INT, "STEP" INT, "TPL" VARCHAR(100), "TYPE" INT, "UPDATE_TIME" VARCHAR(20), "UPDATE_USER" VARCHAR(50), PRIMARY KEY ("ID"));
+CREATE TABLE "SYS_AUTO_SERIAL" ("ID" VARCHAR(36) NOT NULL, "AUTO_NUM" INT, "CATEGORY" VARCHAR(100), "CREATE_TIME" VARCHAR(20), "CREATE_USER" VARCHAR(50), "KEY" VARCHAR(50), "LOCKED" INT DEFAULT 0, "NUM_LENGTH" INT, "START_NUM" INT, "STEP" INT, "TPL" VARCHAR(100), "TYPE" INT, "UPDATE_TIME" VARCHAR(20), "UPDATE_USER" VARCHAR(50), PRIMARY KEY ("ID"));
 
-CREATE TABLE IF NOT EXISTS "SYS_HINT_SELECT" ("ID" VARCHAR(36) NOT NULL, "CODE" VARCHAR(100), "DB_ID" VARCHAR(100), "FLOW_ID" VARCHAR(50), "REMARK" CLOB(65535), "SELECT_FIELDS" CLOB(65535), "SELECT_SQL" CLOB(65535), "TYPE" VARCHAR(50), PRIMARY KEY ("ID"));
+CREATE TABLE "SYS_HINT_SELECT" ("ID" VARCHAR(36) NOT NULL, "CODE" VARCHAR(100), "DB_ID" VARCHAR(100), "FLOW_ID" VARCHAR(50), "REMARK" CLOB(65535), "SELECT_FIELDS" CLOB(65535), "SELECT_SQL" CLOB(65535), "TYPE" VARCHAR(50), PRIMARY KEY ("ID"));
 
-CREATE TABLE IF NOT EXISTS "SYS_MQ_CHANNEL" ("ID" VARCHAR(36) NOT NULL, "BATCH_CONSUMER" INT, "CHANNEL_NAME" VARCHAR(50), "CONSUMER_GROUP" VARCHAR(50), "CONSUMER_THREAD" INT, "ENABLE" INT, "MESSAGE_NAME" VARCHAR(50), "TOPIC" VARCHAR(50), "ZK_ADDRESS" VARCHAR(50), PRIMARY KEY ("ID"));
+CREATE TABLE "SYS_MQ_CHANNEL" ("ID" VARCHAR(36) NOT NULL, "BATCH_CONSUMER" INT, "CHANNEL_NAME" VARCHAR(50), "CONSUMER_GROUP" VARCHAR(50), "CONSUMER_THREAD" INT, "ENABLE" INT, "MESSAGE_NAME" VARCHAR(50), "TOPIC" VARCHAR(50), "ZK_ADDRESS" VARCHAR(50), PRIMARY KEY ("ID"));
 
 
 -- 以下是来自 version_40_1.sql 的内容 --
@@ -1757,8 +1654,7 @@ create table sys_auth_source
     when_created varchar2 (20 char),
     when_modified varchar2 (20 char),
     who_created varchar2 (36 char),
-    who_modified varchar2 (36 char),
-    primary key (id)
+    who_modified varchar2 (36 char)
 );
 
 
@@ -1767,15 +1663,14 @@ create table sys_auth_source
 alter table SYS_LOGIN_LOG
     add ADDRESS varchar(255) null;
 
-CREATE TABLE IF NOT EXISTS dev_chat_history (
-    id varchar2(36)  NOT NULL,
-    question CLOB  NOT NULL,
-    answer CLOB ,
+CREATE TABLE dev_chat_history (
+    id varchar2(36) NOT NULL,
+    question CLOB NOT NULL,
+    answer CLOB,
     args CLOB,
-    when_created varchar2(50)  DEFAULT NULL,
-    who_created varchar2(36)  DEFAULT NULL,
-    PRIMARY KEY (id)
-    );
+    when_created varchar2(50) DEFAULT NULL,
+    who_created varchar2(36) DEFAULT NULL
+);
 
 -- 以下是来自 version_43_1.sql 的内容 --
 
@@ -1783,7 +1678,7 @@ INSERT INTO dev_team (id, deleted, description, name, owner, when_created, when_
 INSERT INTO dev_team_member (id, app_id, is_owner, team_role_id, user_id, when_join, who_invite, team_id) VALUES('dfae64f660ff435086ae2482d7fa1a48', NULL, 0, '3fc43c9c69f44144bd032d9451ba328b', '8116f0bc8222413fb72de98a32960b1a', '2022-09-28 14:52:00', '056fb0eeb9a44cb0953534b4c0ca01fa', '991718335d57416a9be67d4090538402');
 INSERT INTO dev_team_member (id, app_id, is_owner, team_role_id, user_id, when_join, who_invite, team_id) VALUES('dfae64f660ff435086ae2482d7fa1a49', NULL, 1, '4a30f4d346074b4ba8363944f004c1d9', '056fb0eeb9a44cb0953534b4c0ca01fa', '2022-09-28 14:52:00', '056fb0eeb9a44cb0953534b4c0ca01fa', '991718335d57416a9be67d4090538402');
 
-CREATE TABLE IF NOT EXISTS sys_logic_template_user (
+CREATE TABLE sys_logic_template_user (
                                          id varchar(36) NOT NULL,
                                          app_id varchar(36) DEFAULT NULL,
                                          when_created varchar(50) DEFAULT NULL,
@@ -1791,24 +1686,23 @@ CREATE TABLE IF NOT EXISTS sys_logic_template_user (
                                          template_id varchar(36) DEFAULT NULL,
                                          PRIMARY KEY (id)
 );
-CREATE TABLE IF NOT EXISTS dev_curd (
-    id varchar(36)  NOT NULL ,
-    name varchar(255)  DEFAULT null,
-    group_id varchar(36)  DEFAULT NULL,
-    source_name varchar(255)  DEFAULT NULL,
-    table_name varchar(255)  DEFAULT NULL,
-    primary_name varchar(50)  DEFAULT NULL,
-    request_prefix varchar(255)  DEFAULT NULL,
-    enable_funs varchar(255)  DEFAULT NULL,
-    create_funs varchar(255)  DEFAULT NULL,
-    column_json clob ,
-    app_id varchar(36)  DEFAULT NULL,
-    who_created varchar(36)  DEFAULT NULL,
-    when_created varchar(20)  DEFAULT NULL,
-    who_modified varchar(36)  DEFAULT NULL,
-    when_modified varchar(255)  DEFAULT NULL ,
-    PRIMARY KEY (id)
-    );
+CREATE TABLE dev_curd (
+    id varchar(36) NOT NULL,
+    name varchar(255) DEFAULT NULL,
+    group_id varchar(36) DEFAULT NULL,
+    source_name varchar(255) DEFAULT NULL,
+    table_name varchar(255) DEFAULT NULL,
+    primary_name varchar(50) DEFAULT NULL,
+    request_prefix varchar(255) DEFAULT NULL,
+    enable_funs varchar(255) DEFAULT NULL,
+    create_funs varchar(255) DEFAULT NULL,
+    column_json CLOB,
+    app_id varchar(36) DEFAULT NULL,
+    who_created varchar(36) DEFAULT NULL,
+    when_created varchar(20) DEFAULT NULL,
+    who_modified varchar(36) DEFAULT NULL,
+    when_modified varchar(255) DEFAULT NULL
+);
 
 ALTER TABLE dev_page_template ADD snapshot_img_id VARCHAR(32) NULL;
 ALTER TABLE dev_page_template ADD order_num integer NULL  ;
@@ -1822,28 +1716,17 @@ alter table sys_logic_template add sys_suggested integer null;
 alter table sys_logic_template add publish_status integer null;
 
 
-CREATE TABLE IF NOT EXISTS dev_page_template_history (
+CREATE TABLE dev_page_template_history (
     id varchar(36) NOT NULL,
     tpl_id varchar(36) DEFAULT NULL,
-    page_json text,
-    when_created varchar(50) NULL DEFAULT NULL,
+    page_json CLOB,
+    when_created varchar(50) DEFAULT NULL,
     who_created varchar(36) DEFAULT NULL,
     version_tag varchar(50) DEFAULT NULL,
     version_tag_time varchar(30) DEFAULT NULL,
-    app_id varchar(36) DEFAULT NULL,
-    PRIMARY KEY (id)
-    );
+    app_id varchar(36) DEFAULT NULL
+);
 
-
-CREATE TABLE IF NOT EXISTS dev_chat_history (
-    id varchar(36)  NOT NULL,
-    question text  NOT NULL,
-    answer text ,
-    args text,
-    when_created varchar(50)  DEFAULT NULL,
-    who_created varchar(36)  DEFAULT NULL,
-    PRIMARY KEY (id)
-    );
 
 
 -- 修改 dev_power_tree 表
@@ -1923,7 +1806,7 @@ ALTER TABLE dev_team ADD image VARCHAR(255) DEFAULT NULL;
 
 -- 以下是来自 version_49_1.sql 的内容 --
 
-CREATE TABLE IF NOT EXISTS DEV_PINE_PLUGIN (
+CREATE TABLE DEV_PINE_PLUGIN (
     ID varchar(36) NOT NULL,
     APP_ID varchar(36),
     AUTHOR varchar(50),
@@ -1935,8 +1818,7 @@ CREATE TABLE IF NOT EXISTS DEV_PINE_PLUGIN (
     WHEN_CREATED varchar(36),
     WHEN_MODIFIED varchar(30),
     WHO_CREATED varchar(36),
-    WHO_MODIFIED varchar(36),
-    PRIMARY KEY (ID)
+    WHO_MODIFIED varchar(36)
 );
 COMMENT ON COLUMN DEV_PINE_PLUGIN.APP_ID IS '归属应用id';
 COMMENT ON COLUMN DEV_PINE_PLUGIN.AUTHOR IS '插件作者';
@@ -1951,7 +1833,7 @@ COMMENT ON COLUMN DEV_PINE_PLUGIN.WHO_CREATED IS '创建人';
 COMMENT ON COLUMN DEV_PINE_PLUGIN.WHO_MODIFIED IS '修改人员';
 
 
-CREATE TABLE IF NOT EXISTS DEV_MODEL_SQL (
+CREATE TABLE DEV_MODEL_SQL (
     ID varchar(36) NOT NULL,
     APP_ID varchar(36),
     TITLE varchar(255),
@@ -1967,8 +1849,7 @@ CREATE TABLE IF NOT EXISTS DEV_MODEL_SQL (
     WHEN_CREATED varchar(20),
     WHO_CREATED varchar(36),
     WHEN_MODIFIED varchar(20),
-    WHO_MODIFIED varchar(36),
-    PRIMARY KEY (ID)
+    WHO_MODIFIED varchar(36)
 );
 COMMENT ON COLUMN DEV_MODEL_SQL.ID IS '主键';
 COMMENT ON COLUMN DEV_MODEL_SQL.APP_ID IS '应用id';
@@ -1988,7 +1869,7 @@ COMMENT ON COLUMN DEV_MODEL_SQL.WHEN_MODIFIED IS '修改时间';
 COMMENT ON COLUMN DEV_MODEL_SQL.WHO_MODIFIED IS '修改人';
 
 
-CREATE TABLE IF NOT EXISTS DEV_DATA_SOURCE (
+CREATE TABLE DEV_DATA_SOURCE (
     ID varchar(36) NOT NULL,
     NAME varchar(100),
     WHO_CREATED varchar(36),
@@ -1998,8 +1879,7 @@ CREATE TABLE IF NOT EXISTS DEV_DATA_SOURCE (
     APP_ID varchar(36),
     KDB_ID varchar(40),
     TEAM_ID varchar(36),
-    DELETED int,
-    PRIMARY KEY (ID)
+    DELETED int
 );
 COMMENT ON COLUMN DEV_DATA_SOURCE.ID IS 'ID';
 COMMENT ON COLUMN DEV_DATA_SOURCE.NAME IS '数据源名称';
@@ -2013,12 +1893,11 @@ COMMENT ON COLUMN DEV_DATA_SOURCE.TEAM_ID IS '所属团队ID';
 COMMENT ON COLUMN DEV_DATA_SOURCE.DELETED IS '是否已删除';
 
 
-CREATE TABLE IF NOT EXISTS DEV_SEARCH_HISTORY (
+CREATE TABLE DEV_SEARCH_HISTORY (
     ID varchar(36) NOT NULL,
     KEYWORD varchar(36) NOT NULL,
     USE_NUM int,
-    DELETED int DEFAULT 0,
-    PRIMARY KEY (ID)
+    DELETED int DEFAULT 0
  );
 COMMENT ON COLUMN DEV_SEARCH_HISTORY.ID IS '主键';
 COMMENT ON COLUMN DEV_SEARCH_HISTORY.KEYWORD IS '关键字';
@@ -2026,7 +1905,7 @@ COMMENT ON COLUMN DEV_SEARCH_HISTORY.USE_NUM IS '搜索次数';
 COMMENT ON COLUMN DEV_SEARCH_HISTORY.DELETED IS '是否删除';
 
 
-CREATE TABLE IF NOT EXISTS DEV_GIT_TAG (
+CREATE TABLE DEV_GIT_TAG (
     ID varchar(36) NOT NULL,
     TAG varchar(255),
     REPO varchar(255),
@@ -2035,8 +1914,7 @@ CREATE TABLE IF NOT EXISTS DEV_GIT_TAG (
     PUBLIC_COMMIT_IDS clob,
     NOTE clob,
     WHEN_CREATED varchar(20),
-    WHO_CREATED varchar(255),
-    PRIMARY KEY (ID)
+    WHO_CREATED varchar(255)
 );
 COMMENT ON COLUMN DEV_GIT_TAG.ID IS '主键';
 COMMENT ON COLUMN DEV_GIT_TAG.TAG IS '标签名称';
@@ -2048,7 +1926,7 @@ COMMENT ON COLUMN DEV_GIT_TAG.NOTE IS '版本说明';
 COMMENT ON COLUMN DEV_GIT_TAG.WHEN_CREATED IS '创建时间';
 COMMENT ON COLUMN DEV_GIT_TAG.WHO_CREATED IS '创建人';
 
-CREATE TABLE IF NOT EXISTS SYS_CONFIG_GROUP (
+CREATE TABLE SYS_CONFIG_GROUP (
     ID varchar(36) NOT NULL,
     APP_ID varchar(36),
     GROUP_NAME varchar(255) NOT NULL,
@@ -2062,8 +1940,7 @@ CREATE TABLE IF NOT EXISTS SYS_CONFIG_GROUP (
     GROUP_TYPE int DEFAULT 1,
     LEAF_CONFIG clob,
     SORT int,
-    ICON varchar(50),
-    PRIMARY KEY (ID)
+    ICON varchar(50)
 );
 COMMENT ON COLUMN SYS_CONFIG_GROUP.ID IS '主键ID';
 COMMENT ON COLUMN SYS_CONFIG_GROUP.APP_ID IS '关联应用';
@@ -2081,7 +1958,7 @@ COMMENT ON COLUMN SYS_CONFIG_GROUP.SORT IS '排序';
 COMMENT ON COLUMN SYS_CONFIG_GROUP.ICON IS '图标';
 
 
-CREATE TABLE IF NOT EXISTS DEV_MODEL_LATEST (
+CREATE TABLE DEV_MODEL_LATEST (
     ID varchar(36) NOT NULL,
     MODEL_NAME varchar(50),
     SOURCE_NAME varchar(50),
@@ -2096,8 +1973,7 @@ CREATE TABLE IF NOT EXISTS DEV_MODEL_LATEST (
     WHO_CREATED varchar(36),
     WHEN_CREATED varchar(20),
     WHO_MODIFIED varchar(36),
-    WHEN_MODIFIED varchar(20),
-    PRIMARY KEY (ID)
+    WHEN_MODIFIED varchar(20)
 );
 COMMENT ON COLUMN DEV_MODEL_LATEST.ID IS '主键ID';
 COMMENT ON COLUMN DEV_MODEL_LATEST.MODEL_NAME IS '模型名称';
@@ -2116,7 +1992,7 @@ COMMENT ON COLUMN DEV_MODEL_LATEST.WHO_MODIFIED IS '更新人';
 COMMENT ON COLUMN DEV_MODEL_LATEST.WHEN_MODIFIED IS '更新时间';
 
 
-CREATE TABLE IF NOT EXISTS DEV_PAGE_TEMPLATE_ACTION_LOG (
+CREATE TABLE DEV_PAGE_TEMPLATE_ACTION_LOG (
     ID varchar(36) NOT NULL,
     ACTION_TYPE int NOT NULL,
     IS_COPY_ALL int,
@@ -2125,8 +2001,7 @@ CREATE TABLE IF NOT EXISTS DEV_PAGE_TEMPLATE_ACTION_LOG (
     TEAM_ID varchar(36),
     ACTION_CONTENT clob,
     WHO_CREATED varchar(36) NOT NULL,
-    WHEN_CREATED varchar(20) NOT NULL,
-    PRIMARY KEY (ID)
+    WHEN_CREATED varchar(20) NOT NULL
 );
 COMMENT ON COLUMN DEV_PAGE_TEMPLATE_ACTION_LOG.ID IS '主键';
 COMMENT ON COLUMN DEV_PAGE_TEMPLATE_ACTION_LOG.ACTION_TYPE IS '动作类型；1：模板复制；2：模板预览';
@@ -2139,7 +2014,7 @@ COMMENT ON COLUMN DEV_PAGE_TEMPLATE_ACTION_LOG.WHO_CREATED IS '创建人员';
 COMMENT ON COLUMN DEV_PAGE_TEMPLATE_ACTION_LOG.WHEN_CREATED IS '创建时间';
 
 
-CREATE TABLE IF NOT EXISTS DEV_FILE_VERSION (
+CREATE TABLE DEV_FILE_VERSION (
     ID varchar(36) NOT NULL,
     FILE_NAME varchar(255),
     PATH varchar(1000),
@@ -2150,8 +2025,7 @@ CREATE TABLE IF NOT EXISTS DEV_FILE_VERSION (
     DESCRIPTION varchar(255),
     PARENT_PATH varchar(1000),
     WHEN_MODIFIED varchar(30),
-    WHO_MODIFIED varchar(36),
-    PRIMARY KEY (ID)
+    WHO_MODIFIED varchar(36)
 );
 COMMENT ON COLUMN DEV_FILE_VERSION.ID IS 'ID';
 COMMENT ON COLUMN DEV_FILE_VERSION.FILE_NAME IS '文件名';
