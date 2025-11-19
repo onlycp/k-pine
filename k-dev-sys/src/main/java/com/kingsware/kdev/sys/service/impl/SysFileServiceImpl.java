@@ -27,6 +27,7 @@ import com.kingsware.kdev.core.model.SysFile;
 import com.kingsware.kdev.sys.ret.SysFileRet;
 import com.kingsware.kdev.sys.ret.SysStaticFileRet;
 import com.kingsware.kdev.sys.service.SysFileService;
+import com.kingsware.kdev.sys.util.ClientUtil;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -122,17 +123,12 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
     public void delete(MultiIdArgv argv) {
         // 修复漏洞：文件删除存在垂直越权
         // 修复措施：普通用户只允许删除自己上传的文件
-        boolean isAdmin = false;
+        boolean isAdmin = ClientUtil.isAdmin();
         BaseUserInfo userInfo = KClientContext.getContext().getUserInfo();
-        String roleCodes = userInfo.getRoleCodes();
-        if (roleCodes != null && !roleCodes.trim().isEmpty()) {
-            isAdmin = Arrays.stream(roleCodes.split(",")).collect(Collectors.toList()).contains("admin");
-        }
-
         // 普通用户需要查询哪些文件有权限删除
         if(!isAdmin){
             SqlWrapper sqlWrapper = new SqlWrapper("select id, who_created from sys_file where 1=1 ");
-            Set<Object> ids = Collections.singleton(argv.getIds());
+            Set<String> ids = argv.getIds();
             Set<Object> ids2Set = new HashSet<>(ids);
             sqlWrapper.in("id", ids2Set);
             List<SysFile> files = DB.findList(SysFile.class, sqlWrapper.getSql(), sqlWrapper.getParams());
