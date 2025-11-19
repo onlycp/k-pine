@@ -899,6 +899,9 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         }
         // 把参数里的加密密码解密出来
         argv.setPassword(decodeBase64(argv.getPassword()));
+        if(argv.getPassword().equalsIgnoreCase(model.getUsername())){
+            throw BusinessException.serviceThrow(I18n.t("SysUser.tip.usernameSame", "重置的密码不可以与用户名一样！"));
+        }
         if (EncryptWorker.getInstance().validate(argv.getPassword(), model.getPassword(), model.getUsername())) {
             throw BusinessException.serviceThrow(I18n.t("SysUser.tip.passwordSame", "重置的密码不可以与旧密码一样！"));
         }
