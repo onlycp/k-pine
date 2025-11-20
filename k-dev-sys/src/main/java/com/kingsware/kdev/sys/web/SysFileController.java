@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.ApiCode;
 import com.kingsware.kdev.core.auth.ApiIgnore;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
@@ -54,6 +55,7 @@ public class SysFileController extends BaseController {
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
     @ResponseBody
+    @ApiCode("sysinfo:file:query")
     public BaseRet<PageDataRet<SysFileRet>> page(SysFileQueryArgv argv) {
         return BaseRet.success(sysFileService.query(argv));
     }
@@ -122,7 +124,8 @@ public class SysFileController extends BaseController {
     @ApiOperation(value = "文件上传 " ,notes = "文件上传")
     @PostMapping(value = "/uploadFile", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ApiIgnore
+//    @ApiIgnore
+    @ApiCode("sysinfo:file:upload")
     public BaseRet<List<SysFileRet>> uploadFile(@RequestParam("files") MultipartFile[] files, String fileFrom, Integer saveType) {
 //        fileFrom格式要求：aaa/bbb 前后无斜扛
         if (saveType == null) {

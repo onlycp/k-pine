@@ -1,7 +1,9 @@
 package com.kingsware.kdev.sys.service.impl;
 
+import com.kingsware.kdev.core.auth.BaseUserInfo;
 import com.kingsware.kdev.core.base.BaseServiceImpl;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.excel.ExcelWorker;
 import com.kingsware.kdev.core.excel.KExcel;
 import com.kingsware.kdev.core.excel.RegionDefine;
@@ -15,6 +17,7 @@ import com.kingsware.kdev.sys.argv.SysLoginLogQueryArgv;
 import com.kingsware.kdev.core.model.SysLoginLog;
 import com.kingsware.kdev.sys.ret.SysLoginLogRet;
 import com.kingsware.kdev.sys.service.SysLoginLogService;
+import com.kingsware.kdev.sys.util.ClientUtil;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -45,6 +48,11 @@ public class SysLoginLogServiceImpl extends BaseServiceImpl implements SysLoginL
     @Override
     @SuppressWarnings("unchecked")
     public PageDataRet<SysLoginLogRet> query(SysLoginLogQueryArgv argv) {
+        // 修复漏洞：日志管理登陆日志垂直越权
+        // 修复措施：普通用户只允许查询自己的登录日志
+        boolean isAdmin = ClientUtil.isAdmin();
+        BaseUserInfo userInfo = KClientContext.getContext().getUserInfo();
+
         // 拼装sql
         // 配置列表不显示ip，以免泄漏
         SqlWrapper wrapper = new SqlWrapper("select id, operate_time, operator, times, response_code, response_message, when_created, ip, address from sys_login_log where 1=1 ");
@@ -52,6 +60,11 @@ public class SysLoginLogServiceImpl extends BaseServiceImpl implements SysLoginL
         if (StringUtils.isNotEmpty(argv.getOperator())) {
             wrapper.addCondition("operator", Op.LIKE, "%" +argv.getOperator() +"%");
         }
+
+        if (!isAdmin){
+            wrapper.addCondition("operator", Op.EQ, userInfo.getUsername());
+        }
+
         if (StringUtils.isNotEmpty(argv.getOperateTimes())) {
             wrapper.between("operate_time", argv.getOperateTimes().split(",")[0], argv.getOperateTimes().split(",")[1]);
         }

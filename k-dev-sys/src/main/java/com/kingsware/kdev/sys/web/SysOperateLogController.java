@@ -35,6 +35,7 @@ public class SysOperateLogController extends BaseController {
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
+    @ApiCode("sysinfo:operationlog:query")
     public BaseRet<PageDataRet<SysOperateLogRet>> page(SysOperateLogQueryArgv argv) {
         return BaseRet.success(sysOperateLogService.query(argv));
     }

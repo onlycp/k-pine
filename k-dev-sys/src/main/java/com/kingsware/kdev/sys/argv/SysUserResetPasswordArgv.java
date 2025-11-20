@@ -11,4 +11,6 @@ public class SysUserResetPasswordArgv {
 
     private String password;
 
+    private String rePassword;
+
 }

@@ -40,6 +40,7 @@ public class SysUnitController extends BaseController {
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
+    @ApiCode("sysinfo:unit:query")
     public BaseRet<PageDataRet<SysUnitRet>> page(SysUnitQueryArgv argv) {
         return BaseRet.success(SysUnitService.query(argv));
     }
