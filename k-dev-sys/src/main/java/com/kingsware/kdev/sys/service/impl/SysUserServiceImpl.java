@@ -575,48 +575,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                     InstanceManager.getInstance().broadMessage("session-remove", JsonUtil.toJson(onlineUser));
                 }
             }
-            // 查找当前会话是否已经有令牌，如果有，就用已有的
-            List<SysOnlineUser> onlineUsers = DB.findList(SysOnlineUser.class, "select * from sys_online_user  where user_id =? and login_ip =? order by when_created desc", userInfo.getId(), KClientContext.getContext().getIp());
-            // 只取生成时间小于1分钟的- 1000*60
-            onlineUsers = onlineUsers.stream().filter(it-> it.getWhenCreated().getTime() > (System.currentTimeMillis() )).collect(Collectors.toList());
-            SysOnlineUser existOnlineUser = (onlineUsers != null && onlineUsers.size() > 0) ? onlineUsers.get(0) : null;
-            // 当前用户在前端自己清空浏览器缓存或使用无痕模式时，请求
-            boolean hasToken = KClientContext.getContext().getToken() != null;
-            // 当前用户在前端自己清空浏览器缓存或使用无痕模式时，认为用户不想使用缓存里的onlineUser数据，重新取出
-            if (!hasToken || existOnlineUser == null) {
-                // 获取会话id
-                String kSessionId = ServletUtil.getCookie("k_session_id", "");
-                TokenPair tokenPair = TokenUtil.createToken(appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), KClientContext.getContext().getIp(), kSessionId, userInfo);
-                String token = tokenPair.getToken();
-                if (StringUtils.isEmpty(token)) {
-                    throw BusinessException.serviceThrow(message != null ? message : I18n.t("SysUser.tip.loginFail", "登录失败，请检查登录信息是否有误！"));
-                }
-                // 创建在线用户
-                existOnlineUser = new SysOnlineUser();
-                existOnlineUser.setId(StringUtils.getUUID());
-                existOnlineUser.setUserId(model.getId());
-                existOnlineUser.setLoginIp(KClientContext.getContext().getIp());
-                existOnlineUser.setLoginTime(new Timestamp(System.currentTimeMillis()));
-                existOnlineUser.setLoginToken(token);
-                // 区分是jwt还是session
-                if (appAuthProperties.getMockSessionExpireMinutes() <= 0) {
-                    existOnlineUser.setExpireTime(new Timestamp(System.currentTimeMillis() + ((long) appAuthProperties.getTokenExpireMinutes() * 60 * 1000)));
-                } else {
-                    existOnlineUser.setExpireTime(new Timestamp(System.currentTimeMillis() + ((long) appAuthProperties.getMockSessionExpireMinutes() * 60 * 1000)));
-                }
-                // 保存
-                DB.save(existOnlineUser);
-            }
-            else {
-                if (appAuthProperties.getMockSessionExpireMinutes() <= 0) {
-                    existOnlineUser.setExpireTime(new Timestamp(System.currentTimeMillis() + ((long) appAuthProperties.getTokenExpireMinutes() * 60 * 1000)));
-                }
-                else {
-                    existOnlineUser.setExpireTime(new Timestamp(System.currentTimeMillis() + ((long) appAuthProperties.getMockSessionExpireMinutes() * 60 * 1000)));
-                }
-                DB.update(existOnlineUser);
-            }
-
+            SysOnlineUser existOnlineUser = getSysOnlineUser(userInfo);
             ret.setToken(MD5Utils.md5(existOnlineUser.getLoginToken()));
             // 发送上线通知
             InstanceManager.getInstance().broadMessage("session-add", JsonUtil.toJson(existOnlineUser));
@@ -649,13 +608,61 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                     // log.warn("warn", e);
                 }
             }
-
+            // 清理过期的在线用户
+            this.clearOldSysOnlineUser(userInfo.getId());
             return ret;
         }
         catch (Exception e) {
             log.error("error",e);
             throw e;
         }
+
+    }
+
+    @Override
+    public SysOnlineUser getSysOnlineUser(BaseUserInfo userInfo) {
+        // 查找当前会话是否已经有令牌，如果有，就用已有的
+        List<SysOnlineUser> onlineUsers = DB.findList(SysOnlineUser.class, "select * from sys_online_user  where user_id =? and login_ip =? order by when_created desc", userInfo.getId(), KClientContext.getContext().getIp());
+        // 只取生成时间小于1分钟的- 1000*60
+        onlineUsers = onlineUsers.stream().filter(it-> (it.getWhenCreated().getTime() + 1000*60) > (System.currentTimeMillis() )).collect(Collectors.toList());
+        SysOnlineUser existOnlineUser = (onlineUsers != null && onlineUsers.size() > 0) ? onlineUsers.get(0) : null;
+        // 当前用户在前端自己清空浏览器缓存或使用无痕模式时，请求
+        boolean hasToken = KClientContext.getContext().getToken() != null;
+        // 当前用户在前端自己清空浏览器缓存或使用无痕模式时，认为用户不想使用缓存里的onlineUser数据，重新取出
+        if (!hasToken || existOnlineUser == null) {
+            // 获取会话id
+            String kSessionId = ServletUtil.getCookie("k_session_id", "");
+            TokenPair tokenPair = TokenUtil.createToken(appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), KClientContext.getContext().getIp(), kSessionId, userInfo);
+            String token = tokenPair.getToken();
+            if (StringUtils.isEmpty(token)) {
+                throw BusinessException.serviceThrow( I18n.t("SysUser.tip.loginFail", "登录失败，请检查登录信息是否有误！"));
+            }
+            // 创建在线用户
+            existOnlineUser = new SysOnlineUser();
+            existOnlineUser.setId(StringUtils.getUUID());
+            existOnlineUser.setUserId(userInfo.getId());
+            existOnlineUser.setLoginIp(KClientContext.getContext().getIp());
+            existOnlineUser.setLoginTime(new Timestamp(System.currentTimeMillis()));
+            existOnlineUser.setLoginToken(token);
+            // 区分是jwt还是session
+            if (appAuthProperties.getMockSessionExpireMinutes() <= 0) {
+                existOnlineUser.setExpireTime(new Timestamp(System.currentTimeMillis() + ((long) appAuthProperties.getTokenExpireMinutes() * 60 * 1000)));
+            } else {
+                existOnlineUser.setExpireTime(new Timestamp(System.currentTimeMillis() + ((long) appAuthProperties.getMockSessionExpireMinutes() * 60 * 1000)));
+            }
+            // 保存
+            DB.save(existOnlineUser);
+        }
+        else {
+            if (appAuthProperties.getMockSessionExpireMinutes() <= 0) {
+                existOnlineUser.setExpireTime(new Timestamp(System.currentTimeMillis() + ((long) appAuthProperties.getTokenExpireMinutes() * 60 * 1000)));
+            }
+            else {
+                existOnlineUser.setExpireTime(new Timestamp(System.currentTimeMillis() + ((long) appAuthProperties.getMockSessionExpireMinutes() * 60 * 1000)));
+            }
+            DB.update(existOnlineUser);
+        }
+        return existOnlineUser;
 
     }
 
@@ -1118,6 +1125,29 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 saveUserRoles(userId, argv.getSysRoleIds());
             }
         }
+    }
+
+    @Override
+    public void clearOldSysOnlineUser(String userId) {
+        List<String> recordIds = DB.findSingleAttributeList(String.class, "select id from sys_online_user where user_id = ? order by login_time desc", userId);
+        if (recordIds == null || recordIds.size() <= 10) {
+            return;
+        }
+        List<Object> toRemoveIds  = new ArrayList<>();
+        for (int i = 10; i < recordIds.size(); i++) {
+            toRemoveIds.add(recordIds.get(i));
+        }
+        if (!toRemoveIds.isEmpty()) {
+            SqlWrapper wrapper = new SqlWrapper("delete from sys_online_user where 1=1");
+            wrapper.in("id", toRemoveIds);
+            DB.executeUpdateSql(wrapper.getSql(), wrapper.getParams().toArray());
+            // 清除当前内存中的session
+            for (Object recordId: toRemoveIds) {
+                SessionManager.getInstance().removeById(userId, recordId.toString());
+            }
+
+        }
+
     }
 
     private boolean checkVerifyCode(String uuid, String code, String encryptCode) {

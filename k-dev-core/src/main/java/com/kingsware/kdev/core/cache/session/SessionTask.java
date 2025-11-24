@@ -8,6 +8,7 @@ import com.kingsware.kdev.core.cron.KRunner;
 import com.kingsware.kdev.core.cron.KTask;
 import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.orm.SqlWrapper;
 import com.kingsware.kdev.core.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,10 +35,25 @@ public class SessionTask implements KTask, KRunner {
     @Override
     public void execute() {
         AppAuthProperties appAuthProperties = SpringContext.getBean(AppAuthProperties.class);
-        // 移除过期的会话
-        DB.executeUpdateSql("delete from sys_online_user where expire_time < ?", DateUtils.getNow());
-        // 移除心跳超时的会话
         Set<TokenSession> sessions = SessionManager.getInstance().sessions();
+
+        // 移除过期的会话：从内存中筛选过期会话
+        List<TokenSession> expiredSessions = new ArrayList<>();
+        long currentTime = System.currentTimeMillis();
+        for (TokenSession session : sessions) {
+            if (session.getExpireTime() != null && session.getExpireTime().getTime() < currentTime) {
+                expiredSessions.add(session);
+            }
+        }
+        if (!expiredSessions.isEmpty()) {
+            // 删除数据库中的过期会话
+            DB.executeUpdateSql("delete from sys_online_user where expire_time < ?", DateUtils.getNow());
+
+            // 清理内存中的session
+            for (TokenSession expiredSession : expiredSessions) {
+                SessionManager.getInstance().removeSessionByToken(expiredSession.getLoginToken());
+            }
+        }
         // 心跳过期的方案
         List<TokenSession> pingExpiredSessions = new ArrayList<>();
         for (TokenSession session: sessions) {
@@ -55,12 +71,20 @@ public class SessionTask implements KTask, KRunner {
                 pingExpiredSessions.add(session);
             }
         }
-        for (TokenSession session: pingExpiredSessions) {
-            SysOnlineUser onlineUser = DB.findById(SysOnlineUser.class, session.getId());
-            if (onlineUser != null) {
-                SessionManager.getInstance().inActiveSession(onlineUser.getUserId(), onlineUser.getLoginToken());
+        if (!pingExpiredSessions.isEmpty()) {
+            List<Object> ids = new ArrayList<>();
+            for (TokenSession session: pingExpiredSessions) {
+                ids.add(session.getId());
+            }
+            SqlWrapper sqlWrapper = new SqlWrapper();
+            sqlWrapper.appendSql("select id, user_id, login_token from sys_online_user where 1=1");
+            sqlWrapper.in("id", ids);
+            List<SysOnlineUser> onlineUsers = DB.findList(SysOnlineUser.class, sqlWrapper.getSql(), sqlWrapper.getParams().toArray());
+            for (TokenSession session: pingExpiredSessions) {
+                onlineUsers.stream().filter(o -> o.getId().equals(session.getId())).findFirst().ifPresent(onlineUser -> SessionManager.getInstance().inActiveSession(onlineUser.getUserId(), onlineUser.getLoginToken()));
             }
         }
+
         // 重置加载
         SessionManager.getInstance().reloadSessions();
     }

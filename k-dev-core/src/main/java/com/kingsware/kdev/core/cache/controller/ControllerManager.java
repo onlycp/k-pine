@@ -105,7 +105,7 @@ public class ControllerManager {
         controllerSet.addAll(controllerList2);
         // 获取所有的接口请求
         for(Class<?> clazz: controllerSet) {
-            log.info("controller:" + clazz.getName());
+//            log.info("controller:" + clazz.getName());
             // 如果没有@Controller注释或@RestController，跳过
             if (!clazz.isAnnotationPresent(Controller.class) && !clazz.isAnnotationPresent(RestController.class)) {
                 continue;

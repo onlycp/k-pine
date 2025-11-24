@@ -18,12 +18,14 @@ import com.kingsware.kdev.sys.argv.DevPine;
 import com.kingsware.kdev.sys.manager.UniOpsTokenStore;
 import com.kingsware.kdev.sys.model.SysMenu;
 import com.kingsware.kdev.sys.service.DevApplicationService;
+import com.kingsware.kdev.sys.service.SysUserService;
 import com.kingsware.kdev.uniops.argv.DevPublishArgv;
 import com.kingsware.kdev.uniops.argv.ToPageArgv;
 import com.kingsware.kdev.uniops.argv.UniOpsMenu;
 import com.kingsware.kdev.uniops.config.ServerConfig;
 import com.kingsware.kdev.uniops.service.UniOpsService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
@@ -59,6 +61,8 @@ public class UniOpsServiceImpl implements UniOpsService {
 
     @Resource
     private ServerConfig serverConfig;
+    @Autowired
+    private SysUserService sysUserService;
 
     @PostConstruct
     public void init() {
@@ -104,17 +108,11 @@ public class UniOpsServiceImpl implements UniOpsService {
                         BaseUserInfo userInfo = JsonUtil.toBean(body, BaseUserInfo.class);
                         log.info("青松: uniops用户信息:{}" , body);
                         userInfo.setAvatar(null);
-                        TokenPair pineKey = TokenUtil.createToken(appAuthProperties.getTokenSecret(), appAuthProperties.getIss(), KClientContext.getContext().getIp(), "-1", userInfo);
-                        // 保存sessionUser
-                        SysOnlineUser existOnlineUser = new SysOnlineUser();
-                        existOnlineUser.setId(StringUtils.getUUID());
-                        existOnlineUser.setUserId(userInfo.getId());
-                        existOnlineUser.setLoginIp(KClientContext.getContext().getIp());
-                        existOnlineUser.setLoginTime(new Timestamp(System.currentTimeMillis()));
-                        existOnlineUser.setLoginToken(pineKey.getToken());
-                        DB.save(existOnlineUser);
 
-                        UniOpsTokenStore.getInstance().put(token, pineKey.getMd5());
+                        SysOnlineUser onlineUser = sysUserService.getSysOnlineUser(userInfo);
+                        // 清除旧session
+                        sysUserService.clearOldSysOnlineUser(userInfo.getId());
+                        UniOpsTokenStore.getInstance().put(token, MD5Utils.md5(onlineUser.getLoginToken()));
                         contextMap.put("uniopsUserid", userInfo.getId() == null ?"":userInfo.getId() );
                         contextMap.put("uniopsUsername", userInfo.getUsername() == null?"": userInfo.getUsername());
                         contextMap.put("uniopsRealName", userInfo.getRealName() == null ?" ": userInfo.getRealName());

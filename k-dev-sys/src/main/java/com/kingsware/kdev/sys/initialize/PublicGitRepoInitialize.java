@@ -1,8 +1,10 @@
 package com.kingsware.kdev.sys.initialize;
 
 import com.kingsware.kdev.core.base.SystemInitialize;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.kflow.bean.GitFile;
 import com.kingsware.kdev.core.kflow.function.AppGit;
+import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.model.DevPage;
 import com.kingsware.kdev.core.model.SysLogicFlow;
 import com.kingsware.kdev.core.orm.DB;
@@ -35,6 +37,10 @@ public class PublicGitRepoInitialize implements SystemInitialize {
     @Override
     public void execute() throws FileNotFoundException {
         // 开辟一个新线程，防止卡住主线程
+        AppModeProperties appModeProperties = SpringContext.getBean(AppModeProperties.class);
+        if (appModeProperties.getDev() == false) {
+            return;
+        }
         new Thread(this::doHandler).start();
     }
 
