@@ -1,7 +1,6 @@
 package com.kingsware.kdev.core.cache.api;
 
 import com.kingsware.kdev.core.util.StringUtils;
-import io.netty.util.internal.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

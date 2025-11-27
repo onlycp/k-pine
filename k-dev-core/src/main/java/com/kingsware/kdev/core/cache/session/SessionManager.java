@@ -3,8 +3,10 @@ package com.kingsware.kdev.core.cache.session;
 import com.kingsware.kdev.core.auth.AuthToken;
 import com.kingsware.kdev.core.auth.TokenUtil;
 import com.kingsware.kdev.core.cache.instance.InstanceManager;
+import com.kingsware.kdev.core.kmq.websocket.SessionToken;
 import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.core.orm.DB;
+import com.kingsware.kdev.core.orm.expression.Expr;
 import com.kingsware.kdev.core.util.BeanUtils;
 import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
@@ -14,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * // 会话管理 单实例.
@@ -31,8 +35,12 @@ public class SessionManager {
     /**
      * 字典缓存
      **/
-    private Map<String, Set<TokenSession>> sessionMapping = new HashMap<>();
-    private Map<String, String> tokenHashMap = new HashMap<>();
+    private Map<String, Set<TokenSession>> sessionMapping = new ConcurrentHashMap<>();
+    private Map<String, String> tokenHashMap = new ConcurrentHashMap<>();
+    /**
+     * 最后更新时间，用于增量加载
+     **/
+    private Timestamp lastReloadTime = null;
 
     public static SessionManager getInstance() {
         if (instance == null) {
@@ -44,6 +52,10 @@ public class SessionManager {
     private SessionManager() {
     }
 
+
+
+
+
     /**
      * 增加字典项
      *
@@ -53,13 +65,7 @@ public class SessionManager {
         Set<TokenSession> onlineUsers = sessionMapping.computeIfAbsent(onlineUser.getUserId(), key -> new HashSet<>());
         TokenSession tokenSession = BeanUtils.copyObject(onlineUser, TokenSession.class);
         tokenSession.setActiveTime(onlineUser.getLoginTime());
-        boolean isNew = true;
-        for (TokenSession ts : onlineUsers) {
-            if (ts.isMe(tokenSession.getLoginToken())) {
-                isNew = false;
-                break;
-            }
-        }
+        boolean isNew = onlineUsers.stream().noneMatch(ts -> ts.isMe(tokenSession.getLoginToken()));
         if (isNew) {
 //            log.info("session添加1:" + tokenSession.getId());
             onlineUsers.add(tokenSession);
@@ -85,24 +91,44 @@ public class SessionManager {
     }
 
     /**
-     * 重置所有会话
+     * 重置所有会话（支持增量加载）
      */
     public void reloadSessions() {
-        // 查找所有会话
-        List<SysOnlineUser> onlineUserList = DB.findList(SysOnlineUser.class, Collections.emptyList());
-        Map<String, Set<TokenSession>> map = new HashMap<>();
+
+        // 构建查询条件：如果 lastReloadTime 为空则查全部，否则只查增量（使用>=避免漏数据）
+        List<SysOnlineUser> onlineUserList = lastReloadTime == null
+                ? DB.findList(SysOnlineUser.class, Collections.emptyList())
+                : DB.findList(SysOnlineUser.class, Expr.builder().add("loginTime", ">=", lastReloadTime).build());
+
+        // 如果是首次加载（全量），重建 sessionMapping
+        if (lastReloadTime == null) {
+            this.sessionMapping = new ConcurrentHashMap<>();
+        }
+
+        // 更新会话数据
         for (SysOnlineUser onlineUser : onlineUserList) {
-            Set<TokenSession> onlineUsers = map.computeIfAbsent(onlineUser.getUserId(), key -> new HashSet<>());
+            Set<TokenSession> onlineUsers = sessionMapping.computeIfAbsent(onlineUser.getUserId(), key -> new HashSet<>());
             // 从当前缓存中读取，如果已存在，则直接以缓存中的为准
             TokenSession ts = getByToken(onlineUser.getUserId(), onlineUser.getLoginToken());
             if (ts == null) {
                 ts = BeanUtils.copyObject(onlineUser, TokenSession.class);
                 ts.setActiveTime(onlineUser.getLoginTime());
+                onlineUsers.add(ts);
             }
-            onlineUsers.add(ts);
-
         }
-        this.sessionMapping = map;
+
+        // 更新 lastReloadTime 为最大的 loginTime
+        if (!onlineUserList.isEmpty()) {
+            Timestamp maxLoginTime = onlineUserList.stream()
+                    .map(SysOnlineUser::getLoginTime)
+                    .filter(Objects::nonNull)
+                    .max(Timestamp::compareTo)
+                    .orElse(lastReloadTime);
+            if (maxLoginTime != null) {
+                lastReloadTime = maxLoginTime;
+            }
+        }
+
         // 计算所有的hash
         sessionMapping.forEach((userId, onlineUsers) -> {
             onlineUsers.forEach(tokenSession -> {
@@ -110,6 +136,11 @@ public class SessionManager {
                 tokenHashMap.put(md5Value, tokenSession.getLoginToken());
             });
         });
+        List<String> dbIds = DB.findSingleAttributeList(String.class, "select id from sys_online_user");
+        sessionMapping.forEach((userId, onlineUsers) -> {
+            onlineUsers.removeIf(ts -> !dbIds.contains(ts.getId()));
+        });
+
 
     }
 
@@ -151,6 +182,30 @@ public class SessionManager {
         this.sessionMapping.remove(userId);
     }
 
+
+    /**
+     * 根据ID移除会话
+     * @param userId
+     * @param id
+     */
+    public void removeById(String userId, String id) {
+        if (sessionMapping.containsKey(userId)) {
+            sessionMapping.get(userId).removeIf(tokenSession -> tokenSession.getId().equals(id));
+        }
+    }
+
+    /**
+     * 根据ID列表批量移除会话
+     * @param ids ID列表
+     */
+    public void removeByIds(List<String> ids) {
+        if (ids != null && !ids.isEmpty()) {
+            sessionMapping.values().forEach(tokenSessions ->
+                    tokenSessions.removeIf(tokenSession -> ids.contains(tokenSession.getId()))
+            );
+        }
+    }
+
     /**
      * 检查会话
      *
@@ -176,13 +231,26 @@ public class SessionManager {
      * @param loginToken 令牌
      */
     public void removeSession(String userId, String loginToken) {
+        String token = getTokenByMd5(MD5Utils.md5(loginToken));
+        // 移除在线会话
+        DB.executeUpdateSql("delete from sys_online_user where login_token=?", token);
         if (sessionMapping.containsKey(userId)) {
             Set<TokenSession> onlineUsers = sessionMapping.get(userId);
-            for (TokenSession onlineUser : onlineUsers) {
-                if (onlineUser.isMe(loginToken)) {
-                    onlineUsers.remove(onlineUser);
-                    return;
-                }
+            onlineUsers.removeIf(tokenSession -> tokenSession.isMe(loginToken));
+        }
+    }
+
+    /**
+     * 通过 loginToken 删除会话（无需 userId）
+     *
+     * @param loginToken 令牌
+     */
+    public void removeSessionByToken(String loginToken) {
+        for (Map.Entry<String, Set<TokenSession>> entry : sessionMapping.entrySet()) {
+            Set<TokenSession> onlineUsers = entry.getValue();
+            boolean removed = onlineUsers.removeIf(tokenSession -> tokenSession.isMe(loginToken));
+            if (removed) {
+                return;
             }
         }
     }
@@ -192,17 +260,17 @@ public class SessionManager {
         if (session == null) {
             return;
         }
-        for (Set<TokenSession> ts : sessionMapping.values()) {
-            for (TokenSession onlineUser : ts) {
-                if (onlineUser.isMe(session.getLoginToken())) {
-                    onlineUser.setActiveTime(session.getActiveTime());
-                    onlineUser.setExpireTime(session.getExpireTime());
-                    onlineUser.setPingTime(session.getPingTime());
-                    onlineUser.setLoginTime(session.getLoginTime());
+        sessionMapping.values().forEach(tokenSessions -> {
+            tokenSessions.stream()
+                    .filter(onlineUser -> onlineUser.isMe(session.getLoginToken()))
+                    .forEach(onlineUser -> {
+                        onlineUser.setActiveTime(session.getActiveTime());
+                        onlineUser.setExpireTime(session.getExpireTime());
+                        onlineUser.setPingTime(session.getPingTime());
+                        onlineUser.setLoginTime(session.getLoginTime());
 //                   onlineUser.setHasChanged(session.isHasChanged());
-                }
-            }
-        }
+                    });
+        });
     }
 
     /**
@@ -214,15 +282,15 @@ public class SessionManager {
     public void inActiveSession(String userId, String loginToken) {
         if (sessionMapping.containsKey(userId)) {
             Set<TokenSession> onlineUsers = sessionMapping.get(userId);
-            for (TokenSession onlineUser : onlineUsers) {
-                if (onlineUser.isMe(loginToken)) {
-                    if (onlineUser.isActive()) {
-                        log.info("用户名：{} 失活，原因是心跳超时", userId);
-                    }
-                    onlineUser.setActive(false);
-                    return;
-                }
-            }
+            onlineUsers.stream()
+                    .filter(onlineUser -> onlineUser.isMe(loginToken))
+                    .findFirst()
+                    .ifPresent(onlineUser -> {
+                        if (onlineUser.isActive()) {
+                            log.info("用户名：{} 失活，原因是心跳超时", userId);
+                        }
+                        onlineUser.setActive(false);
+                    });
         }
     }
 
@@ -259,17 +327,25 @@ public class SessionManager {
     public void updateActiveTime(String userId, String loginToken, int mockSessionExpireTime, boolean updateExpired) {
         if (sessionMapping.containsKey(userId)) {
             Set<TokenSession> onlineUsers = sessionMapping.get(userId);
-            for (TokenSession onlineUser : onlineUsers) {
-                if (onlineUser.isMe(loginToken)) {
-                    if (updateExpired) {
-                        onlineUser.setActiveTime(new Timestamp(System.currentTimeMillis()));
-                        //log.info("更新活动时间:{}", DateUtils.formatDate(onlineUser.getActiveTime(), DateUtils.DATE_TIME));
-                        onlineUser.setHasChanged(true);
-                        onlineUser.setExpireTime(new Timestamp(onlineUser.getActiveTime().getTime() + (long) mockSessionExpireTime * 1000 * 60));
-                        InstanceManager.getInstance().broadMessage("session-update", JsonUtil.toJson(onlineUser));
-                    }
-                }
-            }
+            onlineUsers.stream()
+                    .filter(onlineUser -> onlineUser.isMe(loginToken))
+                    .forEach(onlineUser -> {
+                        if (updateExpired) {
+                            // 检查距离上次更新是否超过1分钟
+                            long currentTime = System.currentTimeMillis();
+                            long lastActiveTime = onlineUser.getActiveTime().getTime();
+                            long timeDiff = Math.abs(currentTime - lastActiveTime);
+
+                            // 只有超过1分钟（60000毫秒）才更新
+                            if (timeDiff > 60000) {
+                                onlineUser.setActiveTime(new Timestamp(currentTime));
+                                //log.info("更新活动时间:{}", DateUtils.formatDate(onlineUser.getActiveTime(), DateUtils.DATE_TIME));
+                                onlineUser.setHasChanged(true);
+                                onlineUser.setExpireTime(new Timestamp(onlineUser.getActiveTime().getTime() + (long) mockSessionExpireTime * 1000 * 60));
+                                InstanceManager.getInstance().broadMessage("session-update", JsonUtil.toJson(onlineUser));
+                            }
+                        }
+                    });
         }
     }
 
@@ -279,15 +355,10 @@ public class SessionManager {
      * @return
      */
     public Set<TokenSession> getChanged() {
-        Set<TokenSession> tokenSessions = new HashSet<>();
-        for (Map.Entry<String, Set<TokenSession>> entry : sessionMapping.entrySet()) {
-            for (TokenSession ts : entry.getValue()) {
-                if (ts.isHasChanged()) {
-                    tokenSessions.add(ts);
-                }
-            }
-        }
-        return tokenSessions;
+        return sessionMapping.values().stream()
+                .flatMap(Set::stream)
+                .filter(TokenSession::isHasChanged)
+                .collect(Collectors.toSet());
     }
 
     /**

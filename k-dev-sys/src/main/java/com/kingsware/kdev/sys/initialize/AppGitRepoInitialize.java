@@ -1,8 +1,10 @@
 package com.kingsware.kdev.sys.initialize;
 
 import com.kingsware.kdev.core.base.SystemInitialize;
+import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.kflow.bean.GitFile;
 import com.kingsware.kdev.core.kflow.function.AppGit;
+import com.kingsware.kdev.core.mode.AppModeProperties;
 import com.kingsware.kdev.core.model.DevPage;
 import com.kingsware.kdev.core.model.SysLogicFlow;
 import com.kingsware.kdev.core.orm.DB;
@@ -42,6 +44,11 @@ public class AppGitRepoInitialize implements SystemInitialize {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+        }
+        // 应用模式不需执行
+        AppModeProperties appModeProperties = SpringContext.getBean(AppModeProperties.class);
+        if (appModeProperties.getDev() ==  false) {
+            return;
         }
 
         // 查询所有应用

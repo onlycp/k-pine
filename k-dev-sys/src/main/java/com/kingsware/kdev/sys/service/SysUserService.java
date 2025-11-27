@@ -6,6 +6,7 @@ import com.kingsware.kdev.core.base.BaseService;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
+import com.kingsware.kdev.core.model.SysOnlineUser;
 import com.kingsware.kdev.sys.argv.*;
 import com.kingsware.kdev.sys.ret.SysUserLoginRet;
 import com.kingsware.kdev.sys.ret.SysUserProfileRet;
@@ -66,6 +67,13 @@ public interface SysUserService extends BaseService {
     SysUserLoginRet loginByApiKey(String apiKey) throws Exception;
 
     /**
+     * 获取系统在线用户
+     * @param userInfo
+     * @return
+     */
+    SysOnlineUser getSysOnlineUser(BaseUserInfo userInfo);
+
+    /**
      * 生成api key
      * @return
      */
@@ -118,5 +126,9 @@ public interface SysUserService extends BaseService {
 
     void addRoles(SysUserArgv argv);
 
-
+    /**
+     * 清理用户
+     * @param userId
+     */
+    void clearOldSysOnlineUser(String userId);
 }
