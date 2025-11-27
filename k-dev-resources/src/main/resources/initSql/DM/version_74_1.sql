@@ -1,0 +1,3 @@
+ALTER TABLE sys_file MODIFY COLUMN file_original_name VARCHAR(255) NULL COMMENT '文件新名称';
+ALTER TABLE sys_file MODIFY COLUMN file_name VARCHAR(255) NULL COMMENT '文件旧名称';
+ALTER TABLE sys_file MODIFY COLUMN file_from VARCHAR(255) NULL COMMENT '文件来源';
