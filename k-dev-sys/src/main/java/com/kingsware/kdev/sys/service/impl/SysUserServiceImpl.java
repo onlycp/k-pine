@@ -378,25 +378,29 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             if(StringUtils.isEmpty(authMode)) {
                 authMode = "pwd";
             }
-            // 遍历处理密码字段
-            for (Map.Entry<String, Object> entry: argv.entrySet()) {
-                String key = entry.getKey();
-                String lowerKey = key.toLowerCase();
-                if(lowerKey.contains("password")) {
-                    Object value = entry.getValue();
-                    if (value != null && StringUtils.isNotEmpty(value.toString())) {
-                        String loginBySM2 = SpringContext.getProperties("app.loginBySM2", PropertiesConstant.FALSE);
-                        String decryptPassword = argv.get(key).toString();
-                        if (PropertiesConstant.TRUE.equals(loginBySM2)) {
-                            decryptPassword = FaasInvoke.loginDecrypt(decryptPassword);
-                        } else {
-                            decryptPassword = decodeBase64(argv.get(key).toString());
+            // sso 登录跳过密码校验
+            if (KClientContext.getContext().isValidatePassFlag()){
+                // 遍历处理密码字段
+                for (Map.Entry<String, Object> entry: argv.entrySet()) {
+                    String key = entry.getKey();
+                    String lowerKey = key.toLowerCase();
+                    if(lowerKey.contains("password")) {
+                        Object value = entry.getValue();
+                        if (value != null && StringUtils.isNotEmpty(value.toString())) {
+                            String loginBySM2 = SpringContext.getProperties("app.loginBySM2", PropertiesConstant.FALSE);
+                            String decryptPassword = argv.get(key).toString();
+                            if (PropertiesConstant.TRUE.equals(loginBySM2)) {
+                                decryptPassword = FaasInvoke.loginDecrypt(decryptPassword);
+                            } else {
+                                decryptPassword = decodeBase64(argv.get(key).toString());
+                            }
+                            argv.put(key, decryptPassword);
                         }
-                        argv.put(key, decryptPassword);
-                    }
 
+                    }
                 }
             }
+
             String username = "";
             if(argv.containsKey("username") || argv.get("username") != null) {
                 username = argv.get("username").toString();
