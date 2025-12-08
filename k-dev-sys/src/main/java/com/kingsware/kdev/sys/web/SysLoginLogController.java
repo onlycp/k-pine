@@ -45,6 +45,7 @@ public class SysLoginLogController extends BaseController {
      */
     @ApiOperation(value = "查询 " ,notes = "查询")
     @GetMapping("/query")
+    @ApiCode("sysinfo:loginlog:query")
     public BaseRet<PageDataRet<SysLoginLogRet>> page(SysLoginLogQueryArgv argv) {
         return BaseRet.success(sysLoginLogService.query(argv));
     }

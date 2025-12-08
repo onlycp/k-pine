@@ -385,25 +385,29 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             if(StringUtils.isEmpty(authMode)) {
                 authMode = "pwd";
             }
-            // 遍历处理密码字段
-            for (Map.Entry<String, Object> entry: argv.entrySet()) {
-                String key = entry.getKey();
-                String lowerKey = key.toLowerCase();
-                if(lowerKey.contains("password")) {
-                    Object value = entry.getValue();
-                    if (value != null && StringUtils.isNotEmpty(value.toString())) {
-                        String loginBySM2 = SpringContext.getProperties("app.loginBySM2", PropertiesConstant.FALSE);
-                        String decryptPassword = argv.get(key).toString();
-                        if (PropertiesConstant.TRUE.equals(loginBySM2)) {
-                            decryptPassword = FaasInvoke.loginDecrypt(decryptPassword);
-                        } else {
-                            decryptPassword = decodeBase64(argv.get(key).toString());
+            // sso 登录跳过密码校验
+            if (KClientContext.getContext().isValidatePassFlag()){
+                // 遍历处理密码字段
+                for (Map.Entry<String, Object> entry: argv.entrySet()) {
+                    String key = entry.getKey();
+                    String lowerKey = key.toLowerCase();
+                    if(lowerKey.contains("password")) {
+                        Object value = entry.getValue();
+                        if (value != null && StringUtils.isNotEmpty(value.toString())) {
+                            String loginBySM2 = SpringContext.getProperties("app.loginBySM2", PropertiesConstant.FALSE);
+                            String decryptPassword = argv.get(key).toString();
+                            if (PropertiesConstant.TRUE.equals(loginBySM2)) {
+                                decryptPassword = FaasInvoke.loginDecrypt(decryptPassword);
+                            } else {
+                                decryptPassword = decodeBase64(argv.get(key).toString());
+                            }
+                            argv.put(key, decryptPassword);
                         }
-                        argv.put(key, decryptPassword);
-                    }
 
+                    }
                 }
             }
+
             String username = "";
             if(argv.containsKey("username") || argv.get("username") != null) {
                 username = argv.get("username").toString();
@@ -522,7 +526,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                     sysCacheService.setCache(lockCacheKey, System.currentTimeMillis() + "");
                     // 移除当前登录次数缓存
                     sysCacheService.removeCache(cacheKey);
-                    throw BusinessException.serviceThrow(I18n.t("SysUser.tip.fail2","由于密码错误连续次数已达到{0}次，用户被锁定{1}分钟", allowErrorCount, userLockMinutes));
+                    throw BusinessException.serviceThrow(I18n.t("SysUser.tip.fail2","由于用户名或密码错误连续次数已达到{0}次，用户被锁定{1}分钟", allowErrorCount, userLockMinutes));
                 }
                 // 记录密码错误
                 userLoginPasswordErrorCount++;
@@ -539,7 +543,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 if (!EncryptWorker.getInstance().validate(argv.get("password").toString(), model.getPassword(), model.getUsername())) {
                     if(countOfLeave == 0)   {
                         sysCacheService.setCache(lockCacheKey, System.currentTimeMillis() + "");
-                        throw BusinessException.serviceThrow(I18n.t("SysUser.tip.fail3","密码错误连续次数已达到{0}次，用户将被锁定{1}分钟", allowErrorCount, userLockMinutes));
+                        throw BusinessException.serviceThrow(I18n.t("SysUser.tip.fail3","用户名或密码错误连续次数已达到{0}次，用户将被锁定{1}分钟", allowErrorCount, userLockMinutes));
                     }
                     // 记录密码错误
                     userLoginPasswordErrorCount++;
@@ -898,8 +902,16 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
 
     @Override
     public void resetPassword(SysUserResetPasswordArgv argv) {
+        String password = decodeBase64(argv.getPassword());
+        String rePassword = decodeBase64(argv.getRePassword());
+        if (StringUtils.isEmpty(password) || StringUtils.isEmpty(rePassword)) {
+            throw BusinessException.serviceThrow(I18n.t("SysUserServiceImpl.resetPassword","密码不能为空"));
+        }
+        if (!password.equals(rePassword)) {
+            throw BusinessException.serviceThrow(I18n.t("SysUserServiceImpl.resetPassword","重复输入的密码必须相同"));
+        }
 
-        Map<String, Object> passwordValidate = passwordValidate(argv.getPassword(), null);
+        Map<String, Object> passwordValidate = passwordValidate(password, null);
         if (!(boolean) passwordValidate.get("success")) {
             throw BusinessException.serviceThrow(passwordValidate.get("message").toString());
         }
@@ -910,6 +922,9 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         }
         // 把参数里的加密密码解密出来
         argv.setPassword(decodeBase64(argv.getPassword()));
+        if(argv.getPassword().equalsIgnoreCase(model.getUsername())){
+            throw BusinessException.serviceThrow(I18n.t("SysUser.tip.usernameSame", "重置的密码不可以与用户名一样！"));
+        }
         if (EncryptWorker.getInstance().validate(argv.getPassword(), model.getPassword(), model.getUsername())) {
             throw BusinessException.serviceThrow(I18n.t("SysUser.tip.passwordSame", "重置的密码不可以与旧密码一样！"));
         }
@@ -948,7 +963,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             SysConfigInfo passwordValidateMessage = ConfigManager.getInstance().getItem(passwordValidateMessageKey);
             String validate = "^(?![a-zA-Z]+$)(?![A-Z0-9]+$)(?![A-Z\\W_-]+$)(?![a-z0-9]+$)(?![a-z\\W_-]+$)(?![0-9\\W_-]+$)[a-zA-Z0-9\\W_-]";
             String validateMessage = I18n.t("SysUser.tip.passwordRule1", "必须包含大写字母，小写字母，数字，特殊符号'_-'中任意3项");
-//            AppModeProperties appModeProperties = SpringContext.getBean(AppModeProperties.class);
+            AppModeProperties appModeProperties = SpringContext.getBean(AppModeProperties.class);
             // 仅非开发模式可用自定义密码校验
             if (!appModeProperties.getDev() && passwordValidate != null) {
                 validate = passwordValidate.getValue();
