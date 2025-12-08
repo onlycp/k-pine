@@ -105,8 +105,15 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         if(StringUtils.isEmpty(model.getId())) {
             model.setId(StringUtils.getUUID());
         }
+
+        // 密码校验
+        String decodeBase64Pwd = decodeBase64(argv.getPassword());
+        Map<String, Object> passwordValidate = passwordValidate(decodeBase64Pwd, null);
+        if (!(boolean) passwordValidate.get("success")) {
+            throw BusinessException.serviceThrow(passwordValidate.get("message").toString());
+        }
         // 把参数里的加密密码解密出来
-        model.setPassword(decodeBase64(argv.getPassword()));
+        model.setPassword(decodeBase64Pwd);
         // 设置密码
         model.setPassword(EncryptWorker.getInstance().encrypt(model.getPassword(), model.getUsername()));
         // 唯一性校验
@@ -891,6 +898,12 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
 
     @Override
     public void resetPassword(SysUserResetPasswordArgv argv) {
+
+        Map<String, Object> passwordValidate = passwordValidate(argv.getPassword(), null);
+        if (!(boolean) passwordValidate.get("success")) {
+            throw BusinessException.serviceThrow(passwordValidate.get("message").toString());
+        }
+
         SysUser model = DB.findById(SysUser.class, argv.getUserId());
         if (model == null) {
             throw BusinessException.serviceThrow(I18n.t("SysUser.tip.userNotFound", "用户不存在！"));
@@ -935,7 +948,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             SysConfigInfo passwordValidateMessage = ConfigManager.getInstance().getItem(passwordValidateMessageKey);
             String validate = "^(?![a-zA-Z]+$)(?![A-Z0-9]+$)(?![A-Z\\W_-]+$)(?![a-z0-9]+$)(?![a-z\\W_-]+$)(?![0-9\\W_-]+$)[a-zA-Z0-9\\W_-]";
             String validateMessage = I18n.t("SysUser.tip.passwordRule1", "必须包含大写字母，小写字母，数字，特殊符号'_-'中任意3项");
-            AppModeProperties appModeProperties = SpringContext.getBean(AppModeProperties.class);
+//            AppModeProperties appModeProperties = SpringContext.getBean(AppModeProperties.class);
             // 仅非开发模式可用自定义密码校验
             if (!appModeProperties.getDev() && passwordValidate != null) {
                 validate = passwordValidate.getValue();
