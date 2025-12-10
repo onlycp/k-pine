@@ -38,7 +38,7 @@ public class VerifyCodeUtils {
         }
 
         //画干扰线
-        for (int i = 0; i < 6; i++) {
+        for (int i = 20; i < 80; i++) {  // Increased from 6 to 25
             // 设置随机颜色
             graphics.setColor(getRandomColor());
             // 随机画线
@@ -47,7 +47,7 @@ public class VerifyCodeUtils {
         }
 
         //添加噪点
-        for (int i = 0; i < 30; i++) {
+        for (int i = 50; i < 200; i++) {  // Increased from 30 to 100
             int x1 = random.nextInt(width);
             int y1 = random.nextInt(height);
             graphics.setColor(getRandomColor());
