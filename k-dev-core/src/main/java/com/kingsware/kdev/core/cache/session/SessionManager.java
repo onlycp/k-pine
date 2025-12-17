@@ -94,11 +94,16 @@ public class SessionManager {
      * 重置所有会话（支持增量加载）
      */
     public void reloadSessions() {
+        Object loginTimeString = null;
+        if (lastReloadTime != null) {
+            String defDbType = DB.getDefault().getConfig().getInnerType();
+            loginTimeString = DateUtils.formatDate(new Date(lastReloadTime.getTime()), "yyyy-MM-dd HH:mm:ss");
 
+        }
         // 构建查询条件：如果 lastReloadTime 为空则查全部，否则只查增量（使用>=避免漏数据）
         List<SysOnlineUser> onlineUserList = lastReloadTime == null
                 ? DB.findList(SysOnlineUser.class, Collections.emptyList())
-                : DB.findList(SysOnlineUser.class, Expr.builder().add("loginTime", ">=", lastReloadTime).build());
+                : DB.findList(SysOnlineUser.class, Expr.builder().add("loginTime", ">=", loginTimeString).build());
 
         // 如果是首次加载（全量），重建 sessionMapping
         if (lastReloadTime == null) {
