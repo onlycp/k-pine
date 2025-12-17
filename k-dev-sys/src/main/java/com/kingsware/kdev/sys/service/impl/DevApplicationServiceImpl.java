@@ -531,8 +531,8 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                     // 如果没有，则新增，后面之所以再次编辑，就是为了实时生效
                     if (functionInfoList.isEmpty()) {
                         try {
-                            String sql = "insert into functions (id,name,type,desc,script) values (?,?,?,?,?)";
-                            DB.byName("kingDB").executeUpdateSql(sql, functions.getId(), functions.getName(), functions.getType(), functions.getDesc(), functions.getScript());
+                            String sql = "insert into functions (id,name,type,script) values (?,?,?,?)";
+                            DB.byName("kingDB").executeUpdateSql(sql, functions.getId(), functions.getName(), functions.getType(), functions.getScript());
 
                         } catch (Exception e) {
 
@@ -905,7 +905,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
      * 更新DDL+数据（pinezip导入）
      */
     public void importDDL(String dsName, String path) throws Exception {
-        File[] listFiles = new File(path).listFiles(pathname -> 
+        File[] listFiles = new File(path).listFiles(pathname ->
             pathname.isFile() && pathname.getName().toLowerCase().endsWith(".sql")
         );
         // 是否允许危险sql执行
@@ -935,7 +935,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             }
         }
         // 更新数据
-        File[] dataFiles = new File(path + "/data").listFiles(pathname -> 
+        File[] dataFiles = new File(path + "/data").listFiles(pathname ->
             pathname.isFile() && pathname.getName().toLowerCase().endsWith(".json")
         );
         ObjectMapper objectMapper = new ObjectMapper();
@@ -984,7 +984,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 if (existFile == null) {
                     DB.save(sysFile);
                 }
-            }    
+            }
         }
     }
 
