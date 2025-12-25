@@ -26,3 +26,16 @@ CREATE TABLE IF NOT EXISTS dev_chat_message (
     when_modified varchar(30) ,
     PRIMARY KEY (message_id)
     );
+
+CREATE TABLE IF NOT EXISTS dev_online_user (
+    id varchar(36) NOT NULL,
+    tab_id varchar(36) NOT NULL,
+    user_id varchar(36) NOT NULL,
+    user_name varchar(50),
+    avatar varchar(255),
+    page_id varchar(36) NOT NULL,
+    last_heartbeat varchar(30),
+    when_created varchar(30),
+    when_modified varchar(30),
+    PRIMARY KEY (id)
+    );

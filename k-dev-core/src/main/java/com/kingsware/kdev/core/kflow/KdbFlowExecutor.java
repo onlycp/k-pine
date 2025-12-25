@@ -21,6 +21,7 @@ import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -137,7 +138,7 @@ public class KdbFlowExecutor {
             }
 
             // 执行流程
-            KdbRet<String> ret = DB.kdbApi().executeFlow(argv, debug, sync);
+            KdbRet<String> ret = DB.kdbApi().executeFlow(argv, true, sync);
             if (LogicFlowManager.getInstance().isTranCtrl(argv.getFlowID())) {
                 if (ret.getErrorCode() == 0) {
                     // 提交事务
@@ -169,7 +170,19 @@ public class KdbFlowExecutor {
 
                 }
                 else {
-                    result.setData(new ErrorResult(ret.getMessage() == null ? I18n.t("KdbFlowExecutor.execute.fail", "流程处理失败")  : ret.getMessage()));
+                    // 青松 4.2 要求前端可以直接显示报错信息
+                    String stackTrace = ret.getStackTrace();
+                    String[] allLines = stackTrace.split("\n");
+                    int endIndex = allLines.length;
+                    for (int i = 0; i < allLines.length; i++) {
+                        if (allLines[i].startsWith("com.kingsware.script.PolyglotScriptExecutor.toBiz")
+                                || allLines[i].startsWith("com.kingsware.flow.core.AbstractDFlowEngine.runStartNode")) {
+                            endIndex = i;
+                            break;
+                        }
+                    }
+                    String lines = String.join("\n", Arrays.asList(allLines).subList(0, endIndex));
+                    result.setData(new ErrorResult(ret.getMessage() == null ? I18n.t("KdbFlowExecutor.execute.fail", "流程处理失败")  : lines));
                 }
 
             } else if (StringUtils.isNotEmpty(ret.getResponseBody())) {

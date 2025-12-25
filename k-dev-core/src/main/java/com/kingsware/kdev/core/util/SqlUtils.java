@@ -89,10 +89,11 @@ public class SqlUtils {
     private static boolean isDuplicateException(Exception e) {
         String message = e.getMessage().toLowerCase();
         String trace = ExceptionUtils.getStackTrace(e).toLowerCase();
-        return message.contains("duplicate") || trace.contains("duplicate")
-                || message.contains("already exists") || trace.contains("already exists")
-                || message.contains("重复") || trace.contains("重复")
-                || message.contains("存在") || trace.contains("存在");
+        String exceptionTrace = ((OrmDbException) e).getExceptionTrace();
+        return message.contains("duplicate") || trace.contains("duplicate") ||  exceptionTrace.contains("duplicate")
+                || message.contains("already exists") || trace.contains("already exists") || exceptionTrace.contains("already exists")
+                || message.contains("重复") || trace.contains("重复") ||  exceptionTrace.contains("重复")
+                || message.contains("存在") || trace.contains("存在") ||  exceptionTrace.contains("存在");
     }
 
 

@@ -855,6 +855,8 @@ public class CopyAppManager {
         devMap.put("sources", Collections.emptyList());
         devMap.put("configs", Collections.emptyList());
         devMap.put("sysLogicTemplates", Collections.emptyList());
+        // 青松 4.1 版本后，新增一个是否强制覆盖开发平台系统数据的开关
+        devMap.put("isForceReplaceDev", true);
         kdbRetFile.setData(JsonUtil.toJson(devMap).getBytes(StandardCharsets.UTF_8));
         return kdbRetFile;
     }

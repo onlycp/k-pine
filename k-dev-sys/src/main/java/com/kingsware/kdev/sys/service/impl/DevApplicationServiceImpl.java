@@ -626,32 +626,28 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 }
             }
 
-            // 为了兼容性考虑，这个功能暂不进行开发平台的判断，默认都处理
-            // 只有覆盖开发打开时，才允许导入 sys_、dev_ 等表的数据
-            if (forceReplaceDev){
-                List<Method> list = getDevPineTableDataMethods(devPine);
-                for (Method method : list) {
-                    try {
-                        // 数据不为空才继续处理
-                        if (method.invoke(devPine) == null) {
-                            continue;
-                        }
-                        String typeName = method.getGenericReturnType().toString();
-                        String regex = "List<(.+?)>";
-                        Pattern pattern = Pattern.compile(regex);
-                        Matcher matcher = pattern.matcher(typeName);
-                        if (matcher.find()) {
-                            String devModuleType = matcher.group(1);
-                            long importCount = DB.batchSaveOrUpdate((List)method.invoke(devPine), Class.forName(devModuleType));
-                            String varName = method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4);
-                            log.info("完成导入{}：{}", varName, importCount);
-                            importMessageMap.put(varName, importCount);
-                        }
-                    } catch (Exception e) {
-                        log.error(String.format("导入：{}失败",method.getName()), e);
-                    } finally {
+            List<Method> list = getDevPineTableDataMethods(devPine);
+            for (Method method : list) {
+                try {
+                    // 数据不为空才继续处理
+                    if (method.invoke(devPine) == null) {
                         continue;
                     }
+                    String typeName = method.getGenericReturnType().toString();
+                    String regex = "List<(.+?)>";
+                    Pattern pattern = Pattern.compile(regex);
+                    Matcher matcher = pattern.matcher(typeName);
+                    if (matcher.find()) {
+                        String devModuleType = matcher.group(1);
+                        long importCount = DB.batchSaveOrUpdate((List)method.invoke(devPine), Class.forName(devModuleType));
+                        String varName = method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4);
+                        log.info("完成导入{}：{}", varName, importCount);
+                        importMessageMap.put(varName, importCount);
+                    }
+                } catch (Exception e) {
+                    log.error(String.format("导入：{}失败",method.getName()), e);
+                } finally {
+                    continue;
                 }
             }
 
@@ -838,6 +834,10 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                         File[] appFiles = pines.listFiles();
                         if(pines.exists() && appFiles != null && appFiles.length > 0){
                             for (File pine : appFiles) {
+                                // 排除 MacOS 文件
+                                if (!pine.getName().toLowerCase().endsWith(".pine")){
+                                    continue;
+                                }
                                 String json = FileUtils.readFile(pine);
                                 importApp(json, argv.getTeamId());
                             }
@@ -858,6 +858,9 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                         File[] jsonFiles = sysFileFiles.listFiles();
                         if(sysFileFiles.exists() && jsonFiles!= null && jsonFiles.length > 0){
                             for (File jsonFile : jsonFiles) {
+                                if (jsonFile.isDirectory() || jsonFile.getName().equalsIgnoreCase(".DS_Store")) {
+                                    continue;
+                                }
                                 String content = FileUtils.readFile(jsonFile);
                                 importSysFileData(content);
                             }
@@ -865,7 +868,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                         // 执行DDL + 导入数据
                         logStack.addMessage(I18n.t("DevApplicationServiceImpl.beginDDL", "开始导入DDL和表数据:") + sysFile.getFileOriginalName());
                         File ddlFiles = new File(unzipPath + "/sqls");
-                        File[] ddlFile = ddlFiles.listFiles();
+                        File[] ddlFile = ddlFiles.listFiles(e -> e.isDirectory() && !e.getName().equalsIgnoreCase("__MACOSX"));
                         if(ddlFiles.exists() && ddlFile!= null && ddlFile.length > 0){
                             for (File ddl : ddlFile) {
                                 if (ddl.isDirectory()) {
@@ -917,7 +920,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                 List<SqlSegment> sqlSegments = SqlUtils.parseSql(cnt);
                 for (SqlSegment sql : sqlSegments) {
                     String curSql = sql.getSql();
-                    if (DB.getDefault().getConfig().getInnerType().equalsIgnoreCase("Oracle") && curSql.endsWith(";")) {
+                    if (DB.byName(dsName).getConfig().getInnerType().equalsIgnoreCase("Oracle") && curSql.endsWith(";")) {
                         curSql = curSql.substring(0, curSql.length() - 1);
                     }
                     // 如果是 delete or drop 语句，执行判断
@@ -930,6 +933,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                     try {
                         SqlUtils.executeSql(dsName, curSql);
                     }catch (Exception ignored) {
+                        ignored.printStackTrace();
                     }
                 }
             }
@@ -963,7 +967,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                         suffix += ")";
                         String sql = prefix + suffix;
                         try {
-                            DB.executeUpdateSql(sql, params.toArray());
+                            DB.byName(dsName).executeUpdateSql(sql, params.toArray());
                         } catch (Exception e) {
                         }
                     }
@@ -992,10 +996,13 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
      * 拷贝pine文件（pinezip导入）
      */
     public void copyFileToPine(File source, String prefix) throws Exception {
-        if (!source.exists()){
+        if (!source.exists() || source.getName().equalsIgnoreCase(".DS_Store")){
             return;
         }
         if(source.isDirectory()){
+            if (source.getName().equalsIgnoreCase("__MACOSX")){
+                return;
+            }
             File[] listFiles = source.listFiles();
             for (File file : listFiles) {
                 copyFileToPine(file, prefix);
@@ -1016,10 +1023,13 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
      * 拷贝faas文件（pinezip导入）
      */
     public void copyFileToFaas(File source, String prefix) throws Exception {
-        if (!source.exists()){
+        if (!source.exists() || source.getName().equalsIgnoreCase(".DS_Store")){
             return;
         }
         if(source.isDirectory()){
+            if (source.getName().equalsIgnoreCase("__MACOSX")){
+                return;
+            }
             File[] listFiles = source.listFiles();
             for (File file : listFiles) {
                 copyFileToFaas(file, prefix);

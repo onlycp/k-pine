@@ -24,6 +24,7 @@ import com.kingsware.kdev.core.kmq.websocket.WmMessage;
 import com.kingsware.kdev.core.kmq.websocket.WmMessageArgv;
 import com.kingsware.kdev.core.model.SysLogicFlow;
 import com.kingsware.kdev.core.model.SysTask;
+import com.kingsware.kdev.core.model.SysTaskHistory;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.orm.DBInitialize;
 import com.kingsware.kdev.core.util.*;
@@ -287,6 +288,12 @@ public class DynamicTask implements CommandLineRunner {
         long t1 = System.currentTimeMillis();
         int executeStatus = 1;
         String errorMessage = "";
+
+        // 记录任务执行历史
+        SysTaskHistory sysTaskHistory = new SysTaskHistory();
+        sysTaskHistory.setTaskId(myTask.getId());
+        sysTaskHistory.setTaskName(myTask.getName());
+
         try {
             // 如果是java类
             if (myTask.getTaskType() == 1) {
@@ -307,15 +314,22 @@ public class DynamicTask implements CommandLineRunner {
         }
         finally {
             // 只有java类的才更新
+            long t2 = System.currentTimeMillis();
             if (myTask.getTaskType() == 1) {
-                long t2 = System.currentTimeMillis();
                 log.debug("任务执行完成，名称:{}, 执行结果:{}, 用时:{}, 信息:{}", myTask.getName(), executeStatus == 1 ? "成功" : "失败", (t2 - t1), errorMessage);
                 if (resultToDb) {
                     String sql = "update sys_task set last_execute_status=?, last_execute_take = ?, last_execute_msg = ?,  last_execute_time=?, next_inst=? where id=?";
                     DB.executeUpdateSql(sql, executeStatus, (t2 - t1), errorMessage, DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME), SystemUtil.getHost().instanceName(), myTask.getId());
                 }
-            }
 
+                // 只记录 java类历史，流程的走 task_agent逻辑保存历史
+                sysTaskHistory.setExecuteStatus(executeStatus);
+                sysTaskHistory.setExecuteTake(t2 - t1);
+                sysTaskHistory.setExecuteBeginTime(DateUtils.formatDate(new Timestamp(t1), DateUtils.DATE_TIME));
+                sysTaskHistory.setExecuteEndTime(DateUtils.formatDate(new Timestamp(t2), DateUtils.DATE_TIME));
+                sysTaskHistory.setExecuteMsg(errorMessage);
+                DB.save(sysTaskHistory);
+            }
 
         }
 

@@ -110,6 +110,10 @@ public class ExceptionLogManager {
 
         // 构建日志文件路径
         String pathStr = "logs/exception/" + date;
+
+        // 修复：exception不会自动创建导致多环境异常日志查询不到问题
+        new File("logs/exception").mkdirs();
+
         File logFile = new File(pathStr, id);
 
         // 检查文件是否存在

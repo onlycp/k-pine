@@ -22,7 +22,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * k-faas初始化
@@ -180,11 +183,41 @@ public class KFaasInitialize implements SystemInitialize {
         try {
             // 初始化内置的逻辑编排
             List<FlowInfo> flowInfoList = getNestFlows();
+
+            // 读取本地的 imported.json，获取哪些文件已经导入过
+            File file = new File("imported.json");
+            boolean fileExist = file.exists();
+
+            boolean fileChange = false;
+
+            // 已经导入过的文件名称
+            List<String> skipFlowIdList = new ArrayList<>();
+            if (fileExist) {
+                String content = FileUtils.readFile(file);
+                Map<String, Object> jsonMap = JsonUtil.toMap(content);
+                if (jsonMap != null) {
+                    Object flowIds = jsonMap.get("flowIds");
+                    if (flowIds != null) {
+                        String[] split = flowIds.toString().split(",");
+                        skipFlowIdList.addAll(Arrays.asList(split));
+                    }
+                }
+            }
+
+
             for (FlowInfo flowInfo: flowInfoList) {
+
+                // 读取本地的 imported.json，判断是否已经导入过
+                if(skipFlowIdList.contains(flowInfo.getFlowId())){
+                    continue;
+                }
+
+                fileChange = true;
 
                 KdbFlowQueryArgv kdbFlowQueryArgv = new KdbFlowQueryArgv();
                 kdbFlowQueryArgv.setFlowId(flowInfo.getFlowId());
                 List<FlowInfo> functionInfoList = DB.kdbApi().query(kdbFlowQueryArgv);
+
                 // 如果没有，则新增
                 if (functionInfoList.isEmpty()) {
                     log.info("[内置逻辑编排]-加载新增:{}", flowInfo.getName());
@@ -196,10 +229,23 @@ public class KFaasInitialize implements SystemInitialize {
                     EditFlowInfo editFlowInfo = new EditFlowInfo();
                     editFlowInfo.setFlowId(flowInfo.getFlowId());
                     editFlowInfo.setContent(flowInfo.getContent());
-                    editFlowInfo.setName(flowInfo.getName());
+
+                    boolean needUpdateFlowName = functionInfoList.get(0).getName().isEmpty();
+                    if (needUpdateFlowName) {
+                        editFlowInfo.setName(flowInfo.getName());
+                    }
+
                     editFlowInfo.setDescription(flowInfo.getDescription());
                     DB.kdbApi().editFlow(editFlowInfo);
                 }
+
+                skipFlowIdList.add(flowInfo.getFlowId());
+            }
+
+            if (fileChange) {
+                Map<String, Object> resultMap = new HashMap<>();
+                resultMap.put("flowIds", String.join(",", skipFlowIdList));
+                FileUtils.writeStringToFile(file, JsonUtil.toJson(resultMap), StandardCharsets.UTF_8);
             }
         }
         catch (Exception e) {

@@ -79,6 +79,9 @@ public class AppGit {
         GitCommit commit = new GitCommit();
         // 设置提交者为当前上下文的用户名
         commit.setAuthor(KClientContext.getContext() == null ? "admin": KClientContext.getContext().getUsername());
+        if (commit.getAuthor() == null) {
+            commit.setAuthor("admin");
+        }
         // 设置扩展提交ID为仓库ID，用于跟踪仓库
         commit.setExtendCommitId(this.repoId);
         // 设置提交时间为当前时间

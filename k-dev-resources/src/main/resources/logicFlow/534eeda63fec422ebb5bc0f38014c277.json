@@ -1,0 +1,205 @@
+{
+  "node_link": [
+    {
+      "catch_exception": "false",
+      "name": "处理数据->插入版本表",
+      "from": "node-1651059010427",
+      "id": "link-1651059033195",
+      "to": "node-1651731797038"
+    },
+    {
+      "catch_exception": "false",
+      "name": "插入版本表->结束",
+      "from": "node-1651731797038",
+      "id": "link-1651731869651",
+      "to": "end"
+    },
+    {
+      "catch_exception": "false",
+      "name": "生成导出数据->获取关联插件信息",
+      "from": "519f2d5b25074c3d898f6af6b00a889b",
+      "id": "5a431f201a474624aa6a7290ca241ea0",
+      "to": "node-1651058732068"
+    },
+    {
+      "catch_exception": "false",
+      "name": "获取关联插件信息->处理数据",
+      "from": "node-1651058732068",
+      "id": "7707d3ad194a47ac8d8c6de7b48e2762",
+      "to": "node-1651059010427"
+    },
+    {
+      "catch_exception": "false",
+      "name": "初始化信息->生成导出数据",
+      "from": "d41f8c7bb28d47f78f89808c801c0de7",
+      "id": "fd6b09a58fa44b2ba2255eabc6a27f22",
+      "to": "519f2d5b25074c3d898f6af6b00a889b"
+    },
+    {
+      "catchException": "false",
+      "name": "开始->子流程",
+      "from": "start",
+      "id": "9744d67b-461d-4c15-90e0-f3f23c08069c",
+      "to": "b2256b47-8b6f-41f1-bb08-bb83b85afa69"
+    },
+    {
+      "catchException": "false",
+      "name": "子流程->初始化信息",
+      "from": "b2256b47-8b6f-41f1-bb08-bb83b85afa69",
+      "id": "3f55c5a3-195e-426b-9498-7d524f5592bc",
+      "to": "d41f8c7bb28d47f78f89808c801c0de7"
+    }
+  ],
+  "name": "一键导出v2.0（完整包）",
+  "node_definition": [
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "start",
+      "extra": {
+        "position": "355,-34"
+      },
+      "name": "开始",
+      "id": "start",
+      "state": "completed",
+      "type": "start"
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "end",
+      "extra": {
+        "position": "220,960"
+      },
+      "name": "结束",
+      "id": "end",
+      "state": "completed",
+      "type": "end"
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "sub",
+      "extra": {
+        "subFlowName": "pine-应用管理-导出-V2（数据包）",
+        "position": "300,400"
+      },
+      "name": "生成导出数据",
+      "id": "node-1651058732068",
+      "state": "completed",
+      "type": "sub",
+      "flowID": "609a655bae59402babe2c1f439849e03"
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "task",
+      "extra": {
+        "position": "530,670"
+      },
+      "name": "处理数据",
+      "id": "node-1651059010427",
+      "state": "completed",
+      "type": "task",
+      "execute": {
+        "script": {
+          "type": "js",
+          "params": [],
+          "content": "function getIds(type) {\r\n var exportData = context.get('exportData');\r\n for (var i = 0; i < exportData.size(); i++) {\r\n var item = exportData.get(i);\r\n if (item.get('type') == type) {\r\n return item.get('ids');\r\n }\r\n }\r\n return null;\r\n}\r\n\r\nklog.info(\"一键导出数据处理时间开始:\" + kutils.getNow(\"yyyy-MM-dd HH:mm:ss.SSS\"));\r\n\r\n\r\n\r\n// 获取*.pine的数据\r\nvar result = context.get('result');\r\nresult = result?.substring(5); //去掉 file|\r\nvar pineDateFilename = result?.substring(0, result?.indexOf(\"|\"));\r\nvar pineDataJson = result?.substring(result?.indexOf(\"|\") + 1);\r\nvar pineData = JSON.parse(pineDataJson);\r\nklog.info(pineDataJson)\r\n// 获取参数\r\nvar appData = getResult('appData')\r\nvar datasources = appData['datasources']\r\nvar appShortName = pineData?.info['short_name'] || pineData?.info['shortName']\r\nvar versionType = appData?.info['versionType']; //打包类型 linux或windows ,可能info值得到\r\n\r\n// 定义地址\r\nvar currDir = kutils.getCurrDirectory();\r\nvar productPackagePath = `${currDir}/../package/` // 半成品\r\nvar uploadPackagePath = `${currDir}/upload/package/` // 成品、上传/下载目录\r\nvar productPath = 'product/'\r\nvar systemProductPath = versionType == 'linux' ? 'linux/' : 'windows/'\r\n// klog.info('--------------type: ' + versionType + '---------' + JSON.stringify(appData))\r\n// 生成本次成品唯一文件名\r\nvar fileName = appShortName + '_' + getUuid()\r\nvar fullFileName = uploadPackagePath + fileName\r\n\r\n// 复制半成品，开始组装成品\r\nkutils.fileCopy(productPackagePath + productPath, fullFileName); //复制\r\nkutils.fileCopy(productPackagePath + systemProductPath, fullFileName); //复制\r\n\r\n// 移除非必要插件\r\nconst pluginArr = getResult('pluginSelected') || '';\r\nconst plugins = pluginArr.split(',')\r\nconst File = Java.type('java.io.File');\r\nklog.info('目录:' + fullFileName)\r\nif (plugins != null && plugins.length !=0) {\r\n const pluginDir = new File(`${fullFileName}/faas/ext`);\r\n const dirs = pluginDir.listFiles();\r\n for (let file of dirs) {\r\n const fileName = file.getName();\r\n if (file.isDirectory() && fileName != 'def') {\r\n if (plugins.indexOf(fileName) == -1) {\r\n klog.info('[导出]删除非必要目录:' + file.getAbsoluteFile());\r\n kutils.fileDelete(file.getAbsoluteFile() + '')\r\n // file.delete();\r\n\r\n }\r\n \r\n }\r\n }\r\n \r\n}\r\n\r\n// 动态替换变量\r\nfunction initReplace(txt, obj){\r\n\tfor(var k in obj){\t\t\r\n\t\tvar key = line2Hump(k);\r\n\t\t// klog.info('==fileRead==|' + k + '|' + key + '|' + obj[k]);\r\n\t\ttxt = txt.replaceAll('${' + key + '}', obj[k]);\r\n\t}\r\n\treturn txt;\r\n}\r\n\r\n// 动态替换配置\r\nvar dynamicConfigList = [{\r\n id: 'applicationProperties',\r\n file: '/api/application.properties'\r\n}, {\r\n id: 'db',\r\n file: '/api/db.json'\r\n}, {\r\n id: 'faasConfig',\r\n file: '/faas/config.json'\r\n}]\r\ndynamicConfigList?.forEach(item => {\r\n var fileFullPath = fullFileName + item?.file\r\n if (item?.id === 'db' && datasources) {\r\n datasources = datasources?.map(dbSource => {\r\n return {\r\n ...dbSource,\r\n userName: dbSource.username\r\n }\r\n })\r\n // 如果用户不配置，则不覆盖默认内容（示例）\r\n if (datasources != null && datasources.length > 0) {\r\n kutils.fileUpload(JSON.stringify(datasources), fileFullPath, \"UTF-8\")\r\n }\r\n } else {\r\n var fileTxt = kutils.fileRead(fileFullPath) //读出\r\n fileTxt = initReplace(fileTxt, pineData['info']) //替换\r\n kutils.fileUpload(fileTxt, fileFullPath, 'UTF-8')//写入\r\n }\r\n})\r\n\r\n\r\nvar pineFilePath = fullFileName + `/api/${fileName}.pine`\r\nkutils.fileUpload(pineDataJson, pineFilePath, \"UTF-8\")\r\n\r\n//压缩k-pine.version.time目录为k-pine.version.time.zip,并读取zip包内容返回到前端\r\nvar downloadFileName = `package/${fileName}.zip`\r\nklog.info(\"开始压缩时间:\" + kutils.getNow('yyyy-MM-dd HH:mm:ss.SSS'));\r\nkutils.zip(fullFileName, fullFileName + '.zip', '');\r\nklog.info('完成压缩时间:' + kutils.getNow('yyyy-MM-dd HH:mm:ss.SSS'));\r\n\r\n//txt = kutils.fileRead(setupPath + pine_new + '.zip'); \r\n//setResult('result', 'file|' + pine_new + '.zip' + '|' + txt);\r\nsetResult('result', downloadFileName);\r\n\r\nvar applicationConfig = context.get('applicationConfig');\r\nvar exportData = context.get('exportData');\r\nvar export_data = {};\r\nexport_data[\"exportData\"] = JSON.parse(exportData);\r\nexport_data[\"applicationConfig\"] = JSON.parse(applicationConfig);\r\n\r\nvar data = {};\r\ndata[\"app_id\"] = pineData['info']['id']\r\ndata[\"version\"] = pineData['info']['version']\r\ndata[\"file_name\"] = downloadFileName\r\ndata[\"export_data\"] = JSON.stringify(export_data)\r\nsetResult('data', data);\r\n\r\n//删除setupPath + pine_new目录\r\nkutils.fileDelete(fullFileName); //删除\r\n\r\nklog.info(\"一键导出数据处理时间结束:\" + kutils.getNow(\"yyyy-MM-dd HH:mm:ss.SSS\"));"
+        }
+      }
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "task",
+      "extra": {
+        "position": "160,711"
+      },
+      "name": "插入版本表",
+      "listener": {
+        "before": {
+          "script": {
+            "type": "js",
+            "params": [],
+            "content": "\n"
+          }
+        },
+        "after": {
+          "script": {
+            "type": "js",
+            "params": [],
+            "content": "var data = context.get('data');\r\nsetResult('result', data[\"file_name\"]);"
+          }
+        }
+      },
+      "id": "node-1651731797038",
+      "state": "completed",
+      "type": "task",
+      "execute": {
+        "script": {
+          "columnLabelCase": "lower",
+          "sourceName": "MySql",
+          "type": "sql",
+          "params": [],
+          "content": "<tpl>\r\n\r\nINSERT INTO \r\n<if test = \"isLargeVersion == true\">\r\n dev_app_version_history \r\n</if>\r\n<if test = \"isLargeVersion == false\">\r\n dev_application_version_history\r\n</if>\r\n\r\n(\r\n id,when_created,who_created,app_id,VERSION,\r\n file_name,export_data\r\n) VALUES (\r\n #{sys.uuid},#{sys.when},#{sys.who},#{data.app_id},#{data.version},\r\n #{data.file_name},#{data.export_data}\r\n)\r\n\r\n</tpl>"
+        }
+      }
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "sub",
+      "extra": {
+        "subFlowName": "插件关联扫描",
+        "position": "-180,400"
+      },
+      "name": "获取关联插件信息",
+      "id": "519f2d5b25074c3d898f6af6b00a889b",
+      "state": "completed",
+      "type": "sub",
+      "flowID": "41eee0aec9d94fee8c52eb97c7fbeaa2"
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "task",
+      "extra": {
+        "position": "-160,118"
+      },
+      "name": "初始化信息",
+      "id": "d41f8c7bb28d47f78f89808c801c0de7",
+      "state": "completed",
+      "type": "task",
+      "execute": {
+        "script": {
+          "type": "js",
+          "params": [],
+          "content": "// 获取应用数据\nvar app = context.get('applicationConfig');\nsetResult('appId', app['id'])\n"
+        }
+      }
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "sub",
+      "extra": {
+        "subFlowName": "获取kpine版本号判断是否大于等于指定版本（子流程）",
+        "position": "-11,-40"
+      },
+      "name": "子流程",
+      "id": "b2256b47-8b6f-41f1-bb08-bb83b85afa69",
+      "state": "completed",
+      "type": "sub",
+      "flowID": "c9a87862a50b4241867146bb6a43cc8e"
+    }
+  ]
+}

@@ -1,0 +1,154 @@
+{
+  "node_link": [
+    {
+      "catchException": "false",
+      "name": "开始->结束",
+      "from": "start",
+      "id": "link-eb70a98e48b042d8b6545f6d8c403ffe",
+      "to": "node-1651058732068"
+    },
+    {
+      "catchException": "false",
+      "name": "生成导出数据->处理数据",
+      "from": "node-1651058732068",
+      "id": "link-1651059025882",
+      "to": "node-1651059010427"
+    },
+    {
+      "catchException": "false",
+      "name": "插入版本表->结束",
+      "from": "node-1651731797038",
+      "id": "link-1651731869651",
+      "to": "end"
+    },
+    {
+      "catchException": "false",
+      "name": "处理数据->子流程",
+      "from": "node-1651059010427",
+      "id": "1be5a1f9-6bc3-48a6-864d-6057a91453f2",
+      "to": "13559380-406b-45fa-ae0c-bb285cba8659"
+    },
+    {
+      "catchException": "false",
+      "name": "子流程->插入版本表",
+      "from": "13559380-406b-45fa-ae0c-bb285cba8659",
+      "id": "f8e37163-839b-46b5-954c-5a2d925d7f0e",
+      "to": "node-1651731797038"
+    }
+  ],
+  "name": "pine-一键导出",
+  "node_definition": [
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "start",
+      "extra": {
+        "position": "283.5,118"
+      },
+      "name": "开始",
+      "id": "start",
+      "state": "completed",
+      "type": "start"
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "end",
+      "extra": {
+        "position": "283.5,998"
+      },
+      "name": "结束",
+      "id": "end",
+      "state": "completed",
+      "type": "end"
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "sub",
+      "extra": {
+        "position": "220,345"
+      },
+      "name": "生成导出数据",
+      "id": "node-1651058732068",
+      "state": "completed",
+      "type": "sub",
+      "flowID": "61b0ed7055de48fe918d5b28a91aca4e"
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "task",
+      "extra": {
+        "position": "220,565"
+      },
+      "name": "处理数据",
+      "id": "node-1651059010427",
+      "state": "completed",
+      "type": "task",
+      "execute": {
+        "script": {
+          "type": "js",
+          "params": [],
+          "content": "function initReplace(txt,obj){\r\n\tfor(var k in obj){\t\t\r\n\t\tvar key = line2Hump(k);\r\n\t\t//logger.info(\"==fileRead==|\" + k + \"|\" + key + \"|\" + obj[k]);\r\n\t\ttxt = txt.replaceAll(\"${\"+key+\"}\", obj[k]);\r\n\t}\r\n\treturn txt;\r\n}\r\n\r\nklog.info(\"一键导出数据处理时间开始:\" + kutils.getNow(\"yyyy-MM-dd HH:mm:ss.SSS\"));\r\n\r\nvar result = context.get('result');\r\nresult = result.substring(5); //去掉 file|\r\nvar filename = result.substring(0,result.indexOf(\"|\"));\r\nvar fs = result.substring(result.indexOf(\"|\") + 1);\r\n\r\nvar appData = JSON.parse(fs);\r\n\r\n\r\nvar versionType = \"linux\" ; //打包类型 linux或windows ,可能info值得到\r\n\r\nvar setupPath = \"/data/\" + versionType + \"/\"; //半成品安装包的路径\r\nvar pine = \"k-pine\"; //k-pine 目录名\r\nvar api = \"/api/\"; //api路径\r\nvar faas = \"/faas/\"; //faas路径\r\n\r\nvar application = api + \"application.properties\"; //application.properties 文件路径\r\nvar dbJson = api + \"db.json\"; //db.json 文件路径\r\nvar configJson = faas + \"config.json\"; //config.json 文件路径\r\n\r\nvar currDir = kutils.getCurrDirectory();\r\ncurrDir += \"/upload/\";\r\n\r\n\r\nvar pine_new = pine + \"-\" + appData['info']['version'] + \"-\" + getDate() + \"-\" + getNowTime() ;\r\n\r\n//复制k-pine目录 = k-pine-version-date-time\r\nkutils.fileDelete(setupPath + pine_new); //删除\r\nkutils.fileCopy(setupPath + pine, setupPath + pine_new); //复制\r\n\r\n//生成pine文件 到 api 目录下\r\nkutils.fileUpload(JSON.stringify(appData),setupPath + pine_new + api + filename,\"GBK\"); //写入\r\n\r\n//读出 application.properties 文件，替换内容，再重新写入application.properties\r\nvar txt = kutils.fileRead(setupPath + pine_new + application );\r\ntxt = initReplace(txt,appData['info']); //替换\r\nkutils.fileUpload(txt,setupPath + pine_new + application,\"GBK\");//写入\r\n\r\n//读出 config.json 文件，替换内容，再重新写入config.json\r\ntxt = kutils.fileRead(setupPath + pine_new + configJson ); //读出\r\ntxt = initReplace(txt,appData['info']); //替换\r\nkutils.fileUpload(txt,setupPath + pine_new + configJson,\"GBK\");//写入\r\n\r\n//datasources 内容写入db.json\r\nkutils.fileUpload(JSON.stringify(appData[\"datasources\"]),setupPath + pine_new + dbJson,\"GBK\");//写入\r\n\r\n//压缩k-pine.version.time目录为k-pine.version.time.zip,并读取zip包内容返回到前端\r\nklog.info(\"开始压缩时间:\" + kutils.getNow(\"yyyy-MM-dd HH:mm:ss.SSS\"));\r\nkutils.zip(setupPath + pine_new,setupPath + pine_new + \".zip\",\"\");\r\nklog.info(\"完成压缩时间:\" + kutils.getNow(\"yyyy-MM-dd HH:mm:ss.SSS\"));\r\n//移动目录到faas目录\r\nkutils.fileMove(setupPath + pine_new + \".zip\", currDir + pine_new + \".zip\");\r\n\r\n//txt = kutils.fileRead(setupPath + pine_new + \".zip\"); \r\n//setResult('result', 'file|' + pine_new + \".zip\" + \"|\" + txt);\r\nsetResult('result', pine_new + \".zip\");\r\n\r\nvar applicationConfig = context.get('applicationConfig');\r\nvar exportData = context.get('exportData');\r\nvar export_data = {};\r\nexport_data[\"exportData\"] = JSON.parse(exportData);\r\nexport_data[\"applicationConfig\"] = JSON.parse(applicationConfig);\r\n\r\nvar data = {};\r\ndata[\"app_id\"] = appData['info']['id'];\r\ndata[\"version\"] = appData['info']['version'];\r\ndata[\"file_name\"] = pine_new + \".zip\";\r\ndata[\"export_data\"] = JSON.stringify(export_data);\r\nsetResult('data', data);\r\n\r\n//删除setupPath + pine_new目录\r\nkutils.fileDelete(setupPath + pine_new); //删除\r\n\r\nklog.info(\"一键导出数据处理时间结束:\" + kutils.getNow(\"yyyy-MM-dd HH:mm:ss.SSS\"));"
+        }
+      }
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "task",
+      "extra": {
+        "position": "220,784"
+      },
+      "name": "插入版本表",
+      "listener": {
+        "before": {
+          "script": {
+            "type": "js",
+            "params": [],
+            "content": "\n"
+          }
+        },
+        "after": {
+          "script": {
+            "type": "js",
+            "params": [],
+            "content": "var data = context.get('data');\r\nsetResult('result', data[\"file_name\"]);"
+          }
+        }
+      },
+      "id": "node-1651731797038",
+      "state": "completed",
+      "type": "task",
+      "execute": {
+        "script": {
+          "sourceName": "MySql",
+          "type": "sql",
+          "params": [],
+          "content": "<tpl>\r\n\r\nINSERT INTO \r\n<if test = \"isLargeVersion == true\">\r\n dev_app_version_history \r\n</if>\r\n<if test = \"isLargeVersion == false\">\r\n dev_application_version_history\r\n</if>\r\n\r\n(\r\n id,when_created,who_created,app_id,VERSION,\r\n file_name,export_data\r\n) VALUES (\r\n #{sys.uuid},#{sys.when},#{sys.who},#{data.app_id},#{data.version},\r\n #{data.file_name},#{data.export_data}\r\n)\r\n\r\n</tpl>"
+        }
+      }
+    },
+    {
+      "auto": true,
+      "variables": {},
+      "debug": false,
+      "shape": "sub",
+      "extra": {
+        "subFlowName": "获取kpine版本号判断是否大于等于指定版本（子流程）",
+        "position": "-35,710"
+      },
+      "name": "子流程",
+      "id": "13559380-406b-45fa-ae0c-bb285cba8659",
+      "state": "completed",
+      "type": "sub",
+      "flowID": "c9a87862a50b4241867146bb6a43cc8e"
+    }
+  ]
+}
