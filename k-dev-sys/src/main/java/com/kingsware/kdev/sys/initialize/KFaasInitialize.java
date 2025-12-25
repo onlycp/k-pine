@@ -318,7 +318,7 @@ public class KFaasInitialize implements SystemInitialize {
                     DbContext.getInstance().createDataBase(sourceName, config);
                     // 需要先初始化数据源
                     DB.kdbApi().refreshBaseFlow();
-                    String createSchemaSql = String.format("CREATE DATABASE IF NOT EXISTS `%s` DEFAULT CHARSET utf8 COLLATE utf8_general_ci;", dbName);
+                    String createSchemaSql = String.format("CREATE DATABASE IF NOT EXISTS `%s` DEFAULT CHARSET utf8mb4 COLLATE utf8mb4_bin;", dbName);
                     DB.byName(initDs.getSourceName()).executeUpdateSql(createSchemaSql);
                 }
                 catch (Exception ignored) {
