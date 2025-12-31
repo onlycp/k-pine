@@ -2,6 +2,8 @@ package com.kingsware.kdev.core.kflow.bean;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * 上传文件实体
  *
@@ -21,4 +23,7 @@ public class KFlowUploadFile {
     private String fileContent;
     /** 类型 **/
     private String contentType;
+
+    /** 用于支持多文件上传 **/
+    private List<KFlowUploadFile> fileList;
 }

@@ -315,80 +315,69 @@ public class ServletUtil {
         // 判断是文件还是raw提交
         String contentType = request.getContentType();
         // 获取文件
-            if (StringUtils.isNotEmpty(contentType) && contentType.toLowerCase().contains("multipart/form-data")) {
-                if (needFile) {
-                    MultipartResolver resolver = new StandardServletMultipartResolver();
-                    MultipartHttpServletRequest multipartHttpServletRequest = resolver.resolveMultipart(request);
-                    // 获取所有文件
-                    // 1. 使用 getMultiFileMap() 获取所有文件（支持同名 key）
-                    MultiValueMap<String, MultipartFile> multiFileMap = multipartHttpServletRequest.getMultiFileMap();
-                    for (Map.Entry<String, List<MultipartFile>> entry : multiFileMap.entrySet()) {
-                        String key = entry.getKey();
-                        List<MultipartFile> multipartFiles = entry.getValue();
-                        if (multipartFiles == null || multipartFiles.isEmpty()) {
-                            continue;
-                        }
-
-                        // 处理该 key 下的所有文件，转为 KFlowUploadFile 列表
-                        List<KFlowUploadFile> uploadFileList = new ArrayList<>();
-                        for (MultipartFile file : multipartFiles) {
-                            KFlowUploadFile uploadFile = new KFlowUploadFile();
-                            // 原始文件名
-                            uploadFile.setOriginFileName(file.getOriginalFilename());
-                            // 文件大小
-                            uploadFile.setFileSize(file.getSize());
-                            // 名称 (表单 name)
-                            uploadFile.setName(file.getName());
-                            // content type
-                            uploadFile.setContentType(file.getContentType());
-
-                            // 文件内容转 Base64
-                            try {
-                                uploadFile.setFileContent(Base64Utils.encodeToString(file.getBytes()));
-                            } catch (IOException e) {
-                                log.error("文件转换失败，原始文件名:{}，名称:{}，{}",
-                                        uploadFile.getOriginFileName(), uploadFile.getName(), e);
-                            }
-                            uploadFileList.add(uploadFile);
-                        }
-
-                        // 2. 根据文件数量决定存储格式（兼容原有逻辑）
-                        if (uploadFileList.size() == 1) {
-                            // 如果只有一个文件，按原样存储对象，兼容存量业务
-                            params.put(key, uploadFileList.get(0));
-                        } else {
-                            // 如果有多个文件，存储为 List 或 数组
-                            params.put(key, uploadFileList);
-                        }
+        if (StringUtils.isNotEmpty(contentType) && contentType.toLowerCase().contains("multipart/form-data")) {
+            if (needFile) {
+                MultipartResolver resolver = new StandardServletMultipartResolver();
+                MultipartHttpServletRequest multipartHttpServletRequest = resolver.resolveMultipart(request);
+                // 获取所有文件
+                // 1. 获取多值 Map
+                MultiValueMap<String, MultipartFile> multiFileMap = multipartHttpServletRequest.getMultiFileMap();
+                for (Map.Entry<String, List<MultipartFile>> entry : multiFileMap.entrySet()) {
+                    String key = entry.getKey();
+                    List<MultipartFile> multipartFiles = entry.getValue();
+                    if (multipartFiles == null || multipartFiles.isEmpty()) continue;
+                    // 使用第一个文件的信息填充属性值，以兼容存量业务（旧版本只支持单个文件）
+                    KFlowUploadFile mainUploadFile = convertToKFlowFile(multipartFiles.get(0));
+                    // 增加：多文件子列表，这样能够在不修改历史代码的情况下，扩展多文件支持
+                    List<KFlowUploadFile> allFiles = new ArrayList<>();
+                    for (MultipartFile file : multipartFiles) {
+                        allFiles.add(convertToKFlowFile(file));
                     }
-
+                    mainUploadFile.setFileList(allFiles);
+                    // 4. 将主对象存入流程变量
+                    params.put(key, mainUploadFile);
                 }
-
             }
-            else {
-                // 获取body
-                String body = requestBody;
-                if (StringUtils.isNotEmpty(body)) {
-                    try {
-                        Map<String, Object> argv = objectMapper.readValue(body, Map.class);
-                        params.putAll(argv);
-                    }
-                    catch (Exception e) {
-                        //log.error("error", e);
-                    }
+
+        }
+        else {
+            // 获取body
+            String body = requestBody;
+            if (StringUtils.isNotEmpty(body)) {
+                try {
+                    Map<String, Object> argv = objectMapper.readValue(body, Map.class);
+                    params.putAll(argv);
                 }
-                // 将body加到变量中
-                Map<String, Object> requestMap = new HashMap<>();
-                requestMap.put("body", body);
-                requestMap.put("path", path);
-                requestMap.put("apiName", api != null ? api.getApiName() : "");
-                requestMap.putAll(getRequestData());
-                params.put("request", requestMap);
-
+                catch (Exception e) {
+                    //log.error("error", e);
+                }
             }
+            // 将body加到变量中
+            Map<String, Object> requestMap = new HashMap<>();
+            requestMap.put("body", body);
+            requestMap.put("path", path);
+            requestMap.put("apiName", api != null ? api.getApiName() : "");
+            requestMap.putAll(getRequestData());
+            params.put("request", requestMap);
+
+        }
 
         // 返回
         return params;
+    }
+
+    private static KFlowUploadFile convertToKFlowFile(MultipartFile multipartFile) {
+        KFlowUploadFile uploadFile = new KFlowUploadFile();
+        uploadFile.setOriginFileName(multipartFile.getOriginalFilename());
+        uploadFile.setFileSize(multipartFile.getSize());
+        uploadFile.setName(multipartFile.getName());
+        uploadFile.setContentType(multipartFile.getContentType());
+        try {
+            uploadFile.setFileContent(Base64Utils.encodeToString(multipartFile.getBytes()));
+        } catch (IOException e) {
+            log.error("文件转换失败: {}", multipartFile.getOriginalFilename(), e);
+        }
+        return uploadFile;
     }
 
 
