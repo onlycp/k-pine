@@ -320,28 +320,6 @@ public class ServletUtil {
                     MultipartResolver resolver = new StandardServletMultipartResolver();
                     MultipartHttpServletRequest multipartHttpServletRequest = resolver.resolveMultipart(request);
                     // 获取所有文件
-//                    Map<String, MultipartFile> fileMap = multipartHttpServletRequest.getFileMap();
-//                    for (Map.Entry<String, MultipartFile> multipartFileEntry: fileMap.entrySet()) {
-//                        KFlowUploadFile uploadFile = new KFlowUploadFile();
-//                        // Base64.getEncoder().encodeToString("1".getBytes());
-//                        // 原始文件名
-//                        uploadFile.setOriginFileName(multipartFileEntry.getValue().getOriginalFilename());
-//                        // 文件大小
-//                        uploadFile.setFileSize(multipartFileEntry.getValue().getSize());
-//                        // 名称
-//                        uploadFile.setName(multipartFileEntry.getValue().getName());
-//                        // content type
-//                        uploadFile.setContentType(multipartFileEntry.getValue().getContentType());
-//                        // 文件内容
-//                        try {
-//                            uploadFile.setFileContent(Base64Utils.encodeToString(multipartFileEntry.getValue().getBytes()));
-//                        }
-//                        catch (IOException e) {
-//                            log.error("文件转换失败，原始文件名:{}，名称:{}，{}", uploadFile.getOriginFileName(), uploadFile.getName(), e );
-//                        }
-//                        // 将文件加入到流程变量中
-//                        params.put(multipartFileEntry.getKey(), uploadFile);
-//                    }
                     // 1. 使用 getMultiFileMap() 获取所有文件（支持同名 key）
                     MultiValueMap<String, MultipartFile> multiFileMap = multipartHttpServletRequest.getMultiFileMap();
                     for (Map.Entry<String, List<MultipartFile>> entry : multiFileMap.entrySet()) {
@@ -376,7 +354,7 @@ public class ServletUtil {
 
                         // 2. 根据文件数量决定存储格式（兼容原有逻辑）
                         if (uploadFileList.size() == 1) {
-                            // 如果只有一个文件，按原样存储对象
+                            // 如果只有一个文件，按原样存储对象，兼容存量业务
                             params.put(key, uploadFileList.get(0));
                         } else {
                             // 如果有多个文件，存储为 List 或 数组
