@@ -12,6 +12,7 @@ import com.kingsware.kdev.core.kflow.bean.KFlowUploadFile;
 import com.kingsware.kdev.core.kflow.bean.KdbCustomResource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Base64Utils;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
@@ -319,28 +320,70 @@ public class ServletUtil {
                     MultipartResolver resolver = new StandardServletMultipartResolver();
                     MultipartHttpServletRequest multipartHttpServletRequest = resolver.resolveMultipart(request);
                     // 获取所有文件
-                    Map<String, MultipartFile> fileMap = multipartHttpServletRequest.getFileMap();
-                    for (Map.Entry<String, MultipartFile> multipartFileEntry: fileMap.entrySet()) {
-                        KFlowUploadFile uploadFile = new KFlowUploadFile();
-                        // Base64.getEncoder().encodeToString("1".getBytes());
-                        // 原始文件名
-                        uploadFile.setOriginFileName(multipartFileEntry.getValue().getOriginalFilename());
-                        // 文件大小
-                        uploadFile.setFileSize(multipartFileEntry.getValue().getSize());
-                        // 名称
-                        uploadFile.setName(multipartFileEntry.getValue().getName());
-                        // content type
-                        uploadFile.setContentType(multipartFileEntry.getValue().getContentType());
-                        // 文件内容
-                        try {
-                            uploadFile.setFileContent(Base64Utils.encodeToString(multipartFileEntry.getValue().getBytes()));
+//                    Map<String, MultipartFile> fileMap = multipartHttpServletRequest.getFileMap();
+//                    for (Map.Entry<String, MultipartFile> multipartFileEntry: fileMap.entrySet()) {
+//                        KFlowUploadFile uploadFile = new KFlowUploadFile();
+//                        // Base64.getEncoder().encodeToString("1".getBytes());
+//                        // 原始文件名
+//                        uploadFile.setOriginFileName(multipartFileEntry.getValue().getOriginalFilename());
+//                        // 文件大小
+//                        uploadFile.setFileSize(multipartFileEntry.getValue().getSize());
+//                        // 名称
+//                        uploadFile.setName(multipartFileEntry.getValue().getName());
+//                        // content type
+//                        uploadFile.setContentType(multipartFileEntry.getValue().getContentType());
+//                        // 文件内容
+//                        try {
+//                            uploadFile.setFileContent(Base64Utils.encodeToString(multipartFileEntry.getValue().getBytes()));
+//                        }
+//                        catch (IOException e) {
+//                            log.error("文件转换失败，原始文件名:{}，名称:{}，{}", uploadFile.getOriginFileName(), uploadFile.getName(), e );
+//                        }
+//                        // 将文件加入到流程变量中
+//                        params.put(multipartFileEntry.getKey(), uploadFile);
+//                    }
+                    // 1. 使用 getMultiFileMap() 获取所有文件（支持同名 key）
+                    MultiValueMap<String, MultipartFile> multiFileMap = multipartHttpServletRequest.getMultiFileMap();
+                    for (Map.Entry<String, List<MultipartFile>> entry : multiFileMap.entrySet()) {
+                        String key = entry.getKey();
+                        List<MultipartFile> multipartFiles = entry.getValue();
+                        if (multipartFiles == null || multipartFiles.isEmpty()) {
+                            continue;
                         }
-                        catch (IOException e) {
-                            log.error("文件转换失败，原始文件名:{}，名称:{}，{}", uploadFile.getOriginFileName(), uploadFile.getName(), e );
+
+                        // 处理该 key 下的所有文件，转为 KFlowUploadFile 列表
+                        List<KFlowUploadFile> uploadFileList = new ArrayList<>();
+                        for (MultipartFile file : multipartFiles) {
+                            KFlowUploadFile uploadFile = new KFlowUploadFile();
+                            // 原始文件名
+                            uploadFile.setOriginFileName(file.getOriginalFilename());
+                            // 文件大小
+                            uploadFile.setFileSize(file.getSize());
+                            // 名称 (表单 name)
+                            uploadFile.setName(file.getName());
+                            // content type
+                            uploadFile.setContentType(file.getContentType());
+
+                            // 文件内容转 Base64
+                            try {
+                                uploadFile.setFileContent(Base64Utils.encodeToString(file.getBytes()));
+                            } catch (IOException e) {
+                                log.error("文件转换失败，原始文件名:{}，名称:{}，{}",
+                                        uploadFile.getOriginFileName(), uploadFile.getName(), e);
+                            }
+                            uploadFileList.add(uploadFile);
                         }
-                        // 将文件加入到流程变量中
-                        params.put(multipartFileEntry.getKey(), uploadFile);
+
+                        // 2. 根据文件数量决定存储格式（兼容原有逻辑）
+                        if (uploadFileList.size() == 1) {
+                            // 如果只有一个文件，按原样存储对象
+                            params.put(key, uploadFileList.get(0));
+                        } else {
+                            // 如果有多个文件，存储为 List 或 数组
+                            params.put(key, uploadFileList);
+                        }
                     }
+
                 }
 
             }
