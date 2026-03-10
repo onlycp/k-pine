@@ -138,7 +138,7 @@ public class KdbFlowExecutor {
             }
 
             // 执行流程
-            KdbRet<String> ret = DB.kdbApi().executeFlow(argv, true, sync);
+            KdbRet<String> ret = DB.kdbApi().executeFlow(argv, debug, sync);
             if (LogicFlowManager.getInstance().isTranCtrl(argv.getFlowID())) {
                 if (ret.getErrorCode() == 0) {
                     // 提交事务
