@@ -316,6 +316,9 @@ public class KFaasInitialize implements SystemInitialize {
             dbType = "Kingbase8";
         } else if (tag.contains("base")) {
             dbType = "gbase";
+        }
+        else if (tag.contains("opengauss")) {
+            dbType = "Opengauss";
         } else {
             dbType = tag;
         }

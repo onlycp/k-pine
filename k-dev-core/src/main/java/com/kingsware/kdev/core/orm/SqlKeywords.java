@@ -50,6 +50,11 @@ public class SqlKeywords {
         kingbaseKeywords.add("online");
         keywords.put("Kingbase8", kingbaseKeywords);
 
+        Set<String> openguassKeywords = new HashSet<>();
+        postgresKeywords.add("distributed");
+        postgresKeywords.add("online");
+        keywords.put("Openguass", openguassKeywords);
+
     }
 
 
