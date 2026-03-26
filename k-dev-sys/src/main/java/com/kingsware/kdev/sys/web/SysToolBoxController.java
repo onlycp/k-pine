@@ -9,6 +9,7 @@ import com.kingsware.kdev.core.cache.page.PageCacheManager;
 import com.kingsware.kdev.core.constants.Version;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.encrypt.EncryptWorker;
 import com.kingsware.kdev.core.exception.ExceptionLogManager;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.sys.service.DevModelSqlService;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+
 /**
  * 系统工具箱
  *
@@ -42,6 +44,14 @@ public class SysToolBoxController extends BaseController {
 
     @Resource
     private DevModelSqlService devModelSqlService;
+
+    @PostMapping("/encrypt-password")
+    @ApiIgnore
+    public BaseRet<?> encryptPassword(String source, String slat) {
+        String encrypt = EncryptWorker.getInstance().encrypt(source, slat);
+        return BaseRet.success(encrypt);
+    }
+    
 
     @GetMapping("/to-url")
     @ApiIgnore
