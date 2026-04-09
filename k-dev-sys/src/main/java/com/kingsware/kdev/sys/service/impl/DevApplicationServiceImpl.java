@@ -300,13 +300,13 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         Map<String, SysDictItem> dictItemMap = new HashMap<>();
         for (SysDictItem item : myItems) {
             String appId = item.getAppId() != null ? item.getAppId() : "";
-            dictItemMap.put(String.format("%s-%s-%s", appId, item.getCode(), item.getValue()), item);
+            dictItemMap.put(String.format("%s-%s-%s-%s", appId, item.getCode(), item.getValue(),item.getName()), item);
         }
         if (devPine.getDictItems() != null && !devPine.getDictItems().isEmpty()) {
-            devPine.getDictItems().removeIf(item -> dictItemMap.containsKey(String.format("%s-%s-%s",  item.getAppId() != null ? item.getAppId() : "", item.getCode(), item.getValue())));
+            devPine.getDictItems().removeIf(item -> dictItemMap.containsKey(String.format("%s-%s-%s-%s",  item.getAppId() != null ? item.getAppId() : "", item.getCode(), item.getValue(), item.getName())));
             if(isDev && !forceReplaceDev){
                 devPine.getDictItems().removeIf(e -> e.getAppId() == null
-                                || "".equals(e.getAppId()) || "0".equals(e.getAppId()) || pineAppId.equals(e.getAppId()));
+                        || "".equals(e.getAppId()) || "0".equals(e.getAppId()) || pineAppId.equals(e.getAppId()));
             }
             for (SysDictItem item : devPine.getDictItems()) {
                 DB.delete(item);
