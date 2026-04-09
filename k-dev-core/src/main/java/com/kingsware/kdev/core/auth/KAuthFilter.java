@@ -41,6 +41,7 @@ import com.kingsware.kdev.core.orm.exception.OrmDbException;
 import com.kingsware.kdev.core.orm.kdb.TransactionManager;
 import com.kingsware.kdev.core.util.*;
 import com.kingsware.kdev.core.util.jWi.JWildcard;
+import com.kingsware.kdev.core.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -125,6 +126,99 @@ public class KAuthFilter implements Filter {
             }
         }
         return false;
+    }
+
+    /**
+     * 验证请求的安全性，防止常见攻击
+     *
+     * @param request HTTP请求
+     * @param requestBody 请求体
+     */
+    private void validateRequestSecurity(HttpServletRequest request, String requestBody) {
+        AppModeProperties appModeProperties = SpringContext.getBean(AppModeProperties.class);
+        if (appModeProperties.getDev() ==  true) {
+            return;
+        }
+        // 验证请求URL
+        String requestUrl = request.getRequestURI();
+        if (!SecurityUtil.isInputSafe(requestUrl)) {
+            log.warn("Detected potential attack in request URL: {}", requestUrl);
+            // 详细输出是哪种类型的攻击被检测到
+            if (SecurityUtil.containsSqlInjection(requestUrl)) {
+                log.warn("  - SQL Injection detected in URL");
+            }
+            if (SecurityUtil.containsXssAttack(requestUrl)) {
+                log.warn("  - XSS Attack detected in URL");
+            }
+            if (SecurityUtil.containsPathTraversal(requestUrl)) {
+                log.warn("  - Path Traversal detected in URL");
+            }
+            if (SecurityUtil.containsCommandInjection(requestUrl)) {
+                log.warn("  - Command Injection detected in URL");
+            }
+            throw new SecurityException("Invalid request detected");
+        }
+
+        // 验证查询参数
+        String queryString = request.getQueryString();
+        if (queryString != null && !SecurityUtil.isInputSafe(queryString)) {
+            log.warn("Detected potential attack in query parameters: {}", queryString);
+            // 详细输出是哪种类型的攻击被检测到
+            if (SecurityUtil.containsSqlInjection(queryString)) {
+                log.warn("  - SQL Injection detected in query string");
+            }
+            if (SecurityUtil.containsXssAttack(queryString)) {
+                log.warn("  - XSS Attack detected in query string");
+            }
+            if (SecurityUtil.containsPathTraversal(queryString)) {
+                log.warn("  - Path Traversal detected in query string");
+            }
+            if (SecurityUtil.containsCommandInjection(queryString)) {
+                log.warn("  - Command Injection detected in query string");
+            }
+            throw new SecurityException("Invalid request detected");
+        }
+
+        // 验证请求体
+        if (requestBody != null && !SecurityUtil.isInputSafe(requestBody)) {
+            log.warn("Detected potential attack in request body");
+            // 详细输出是哪种类型的攻击被检测到
+            if (SecurityUtil.containsSqlInjection(requestBody)) {
+                log.warn("  - SQL Injection detected in request body");
+            }
+            if (SecurityUtil.containsXssAttack(requestBody)) {
+                log.warn("  - XSS Attack detected in request body");
+            }
+            if (SecurityUtil.containsPathTraversal(requestBody)) {
+                log.warn("  - Path Traversal detected in request body");
+            }
+            if (SecurityUtil.containsCommandInjection(requestBody)) {
+                log.warn("  - Command Injection detected in request body");
+            }
+            throw new SecurityException("Invalid request detected");
+        }
+
+        // 验证请求头
+        for (String headerName : Collections.list(request.getHeaderNames())) {
+            String headerValue = request.getHeader(headerName);
+            if (headerValue != null && !SecurityUtil.isInputSafe(headerValue)) {
+                log.warn("Detected potential attack in header {}: {}", headerName, headerValue);
+                // 详细输出是哪种类型的攻击被检测到
+                if (SecurityUtil.containsSqlInjection(headerValue)) {
+                    log.warn("  - SQL Injection detected in header");
+                }
+                if (SecurityUtil.containsXssAttack(headerValue)) {
+                    log.warn("  - XSS Attack detected in header");
+                }
+                if (SecurityUtil.containsPathTraversal(headerValue)) {
+                    log.warn("  - Path Traversal detected in header");
+                }
+                if (SecurityUtil.containsCommandInjection(headerValue)) {
+                    log.warn("  - Command Injection detected in header");
+                }
+                throw new SecurityException("Invalid request detected");
+            }
+        }
     }
 
     private boolean isCacheUrl(String url) {
@@ -243,6 +337,9 @@ public class KAuthFilter implements Filter {
                         wrapperRequest.getInputStream();
                         requestBody = new String(wrapperRequest.getRequestBody(), KClientContext.getContext().getRequestCharset());
 
+                        // 验证请求安全性，防止常见攻击
+                        validateRequestSecurity(request, requestBody);
+
                     }
                     if (ServletUtil.isAjaxRequest(request)) {
                         wrapperResponse = new ContentCachingResponseWrapper(response);
@@ -287,8 +384,9 @@ public class KAuthFilter implements Filter {
                     // 判断是否开放接口
                     isOpenApi = StringUtils.isNotEmpty(apiCode) && apiCode.startsWith(openApiFlag) && api != null;
                     if (isOpenApi) {
+                        boolean openWithFiles = SpringContext.getBoolean("app.open-api.with-files", false);
                         // 处理请求变量
-                        argvMap = ServletUtil.getRequestParams(api, path, request, requestBody, false);
+                        argvMap = ServletUtil.getRequestParams(api, path, request, requestBody, openWithFiles);
                         this.checkOpenApi(api, argvMap);
                     } else {
                         // 检验噪点

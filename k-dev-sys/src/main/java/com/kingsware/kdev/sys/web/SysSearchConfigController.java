@@ -27,14 +27,14 @@ public class SysSearchConfigController {
 
     @Autowired
     private SysSearchConfigService sysSearchConfigService;
-    /**
-     *  查询
-     * @return 分页
-     */
-    @ApiOperation(value = "查询 " ,notes = "查询")
-    @ApiIgnore
-    @GetMapping("/table/query")
-    public BaseRet<PageDataRet<?>> page(SysSearchConfigQueryArgv argv) {
-        return BaseRet.success(sysSearchConfigService.query(argv));
-    }
+//    /**
+//     *  查询
+//     * @return 分页
+//     */
+//    @ApiOperation(value = "查询 " ,notes = "查询")
+//    @ApiIgnore
+//    @GetMapping("/table/query")
+//    public BaseRet<PageDataRet<?>> page(SysSearchConfigQueryArgv argv) {
+//        return BaseRet.success(sysSearchConfigService.query(argv));
+//    }
 }

@@ -15,6 +15,9 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,6 +39,9 @@ import java.util.zip.ZipOutputStream;
 public class FileUtils {
     /** hex码 **/
     private static final char[] hexCode = "0123456789ABCDEF".toCharArray();
+    private static final Pattern FILE_NAME_INVALID_CHAR_PATTERN = Pattern.compile("[/\\\\:*?\"<>|]");
+    private static final Pattern FILE_FROM_INVALID_CHAR_PATTERN = Pattern.compile("[:*?\"<>|]");
+    private static final Pattern WINDOWS_DRIVE_PATH_PATTERN = Pattern.compile("^[a-zA-Z]:([/\\\\].*)?$");
 
     private FileUtils(){
     }
@@ -271,8 +277,25 @@ public class FileUtils {
      * @return
      */
     public static boolean checkFileNaming(String fileName) {
-        Pattern pattern = Pattern.compile(".*[/\\\\:*?|]|(\\.\\.).*");
-        return !pattern.matcher(fileName).matches();
+        if (StringUtils.isEmpty(fileName)) {
+            return false;
+        }
+        String normalizedFileName = fileName.trim();
+        if (StringUtils.isEmpty(normalizedFileName) || hasControlChar(normalizedFileName)) {
+            return false;
+        }
+        if (FILE_NAME_INVALID_CHAR_PATTERN.matcher(normalizedFileName).find()) {
+            return false;
+        }
+        if (".".equals(normalizedFileName) || "..".equals(normalizedFileName)) {
+            return false;
+        }
+        try {
+            Path path = Paths.get(normalizedFileName).normalize();
+            return !path.isAbsolute() && path.getNameCount() == 1;
+        } catch (InvalidPathException e) {
+            return false;
+        }
     }
 
     public static boolean checkFileExt(String extName) {
@@ -286,13 +309,51 @@ public class FileUtils {
     }
 
     public static boolean checkFileFrom(String fileFrom) {
-        boolean flag = true;
-        flag = !fileFrom.startsWith("/");
-        if (!flag) {
+        if (fileFrom == null) {
             return false;
         }
-        Pattern pattern = Pattern.compile(".*[:*?|]|(\\.\\.).*");
-        return !pattern.matcher(fileFrom).matches();
+        String normalizedFileFrom = fileFrom.trim();
+        if (StringUtils.isEmpty(normalizedFileFrom)) {
+            return true;
+        }
+        if (hasControlChar(normalizedFileFrom)
+                || normalizedFileFrom.startsWith("/")
+                || normalizedFileFrom.startsWith("\\")
+                || WINDOWS_DRIVE_PATH_PATTERN.matcher(normalizedFileFrom).matches()
+                || FILE_FROM_INVALID_CHAR_PATTERN.matcher(normalizedFileFrom).find()) {
+            return false;
+        }
+
+        String unixPath = normalizedFileFrom.replace('\\', '/');
+        String[] segments = unixPath.split("/");
+        for (String segment : segments) {
+            if (StringUtils.isEmpty(segment) || ".".equals(segment) || "..".equals(segment)) {
+                return false;
+            }
+        }
+        try {
+            Path path = Paths.get(unixPath).normalize();
+            if (path.isAbsolute()) {
+                return false;
+            }
+            for (Path segment : path) {
+                if ("..".equals(segment.toString())) {
+                    return false;
+                }
+            }
+            return true;
+        } catch (InvalidPathException e) {
+            return false;
+        }
+    }
+
+    private static boolean hasControlChar(String value) {
+        for (int i = 0; i < value.length(); i++) {
+            if (Character.isISOControl(value.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
