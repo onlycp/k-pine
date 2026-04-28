@@ -1106,16 +1106,19 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     public BaseRet<VerificationCodeRet> getVerificationCode() throws IOException {
         ByteArrayOutputStream outputStream = null;
         try {
-            int width = 200;
-            int height = 69;
+            int width = 280;
+            int height = 80;
             BufferedImage verifyImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            // 读取验证码配置
+            int interferenceLines = Integer.parseInt(SpringContext.getProperties("app.verification-code.interference-lines", "25"));
+            int noisePoints = Integer.parseInt(SpringContext.getProperties("app.verification-code.noise-points", "80"));
             //生成对应宽高的初始图片
-            String randomText = VerifyCodeUtils.drawRandomText(width, height, verifyImg);
+            String randomText = VerifyCodeUtils.drawRandomText(width, height, verifyImg, interferenceLines, noisePoints);
             VerificationCodeRet ret = new VerificationCodeRet();
             //单独的一个类方法，出于代码复用考虑，进行了封装。
             //功能是生成验证码字符并加上噪点，干扰线，返回值为验证码字符
             outputStream = new ByteArrayOutputStream();
-            ImageIO.write(verifyImg, "jpg", outputStream);
+            ImageIO.write(verifyImg, "png", outputStream);
             byte[] bytes = outputStream.toByteArray();
             String base64String = Base64.getEncoder().encodeToString(bytes);
             if (outputStream != null) {
@@ -1125,7 +1128,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
             log.info("base64String: ", base64String);
             ret.setEncryptCode(AESUtil.encrypt(randomText, aesSecret));
             log.info("getEncryptCode: ", ret.getEncryptCode());
-            ret.setImageBase64String("data:image/jpeg;base64," + base64String);
+            ret.setImageBase64String("data:image/png;base64," + base64String);
             ret.setUuid(UUID.randomUUID().toString());
             sysCacheService.setCache(VALIDATION_CODE_CACHE_KEY + ret.getUuid(), randomText);
             return BaseRet.success(ret);
