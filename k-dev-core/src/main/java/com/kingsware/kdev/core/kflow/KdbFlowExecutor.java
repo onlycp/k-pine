@@ -182,6 +182,11 @@ public class KdbFlowExecutor {
                         }
                     }
                     String lines = String.join("\n", Arrays.asList(allLines).subList(0, endIndex));
+                    // 截断：只保留第一个 \r\n 之前的文本
+                    int crlfIndex = lines.indexOf("\r\n");
+                    if (crlfIndex > 0) {
+                        lines = lines.substring(0, crlfIndex);
+                    }
                     result.setData(new ErrorResult(ret.getMessage() == null ? I18n.t("KdbFlowExecutor.execute.fail", "流程处理失败")  : lines));
                 }
 

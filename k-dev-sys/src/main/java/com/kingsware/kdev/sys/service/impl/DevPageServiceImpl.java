@@ -97,9 +97,10 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
             }
 
         }
-        if (StringUtils.isNotEmpty(page.getPageJson())) {
-            page.setPageJson(UiConfig.i18nTranslatePage(page.getAppId(), page.getPageJson()));
-        }
+        // 适配3.2 版本移除多语言翻译。适配内容
+        // if (StringUtils.isNotEmpty(page.getPageJson())) {
+        //     page.setPageJson(UiConfig.i18nTranslatePage(page.getAppId(), page.getPageJson()));
+        // }
         return page;
     }
 

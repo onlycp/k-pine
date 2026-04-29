@@ -219,30 +219,33 @@ public class I18n {
      */
     public static String t(String appId, String key, String defaultMessage, Object... params) {
         try {
+
             // 初始化消息为默认值
             String message = defaultMessage;
-            // 尝试用特定语言获取消息
-            if (key.equalsIgnoreCase("消息通知")) {
-                System.currentTimeMillis();
-            }
-            String str = getMessage(appId, key, lang());
-            // 如果获取的消息为空或仅含空格，则回退到默认消息
-            if (StringUtils.isEmpty(str)) {
-                message = defaultMessage;
-            }
-            else {
-                // 否则，使用获取到的消息
-                message = str;
-            }
-            // 作为额外的检查，如果此时消息仍然为空或仅含空格，则设置为默认消息
-            if (StringUtils.isEmpty(message)) {
-                message = defaultMessage;
-            }
-            if (params == null || params.length == 0) {
-                return message;
-            }
-            // 使用参数格式化最终的消息，并返回
+            // 统一返回默认值
             return MessageFormat.format(message, params);
+            // 尝试用特定语言获取消息
+//            if (key.equalsIgnoreCase("消息通知")) {
+//                System.currentTimeMillis();
+//            }
+//            String str = getMessage(appId, key, lang());
+//            // 如果获取的消息为空或仅含空格，则回退到默认消息
+//            if (StringUtils.isEmpty(str)) {
+//                message = defaultMessage;
+//            }
+//            else {
+//                // 否则，使用获取到的消息
+//                message = str;
+//            }
+//            // 作为额外的检查，如果此时消息仍然为空或仅含空格，则设置为默认消息
+//            if (StringUtils.isEmpty(message)) {
+//                message = defaultMessage;
+//            }
+//            if (params == null || params.length == 0) {
+//                return message;
+//            }
+//            // 使用参数格式化最终的消息，并返回
+//            return MessageFormat.format(message, params);
         }
         // 捕获并处理任何发生的异常，简单返回键作为后备计划
         catch (Exception e) {
