@@ -52,7 +52,7 @@ public class FileManager {
      * @param saveType  保存类型    0:数据库 1:本地磁盘
      * @return 返回文件信息，失败时返回null
      */
-    public SysFile register(File file,  String fileFrom, Integer saveType) {
+    public SysFile register(File file,  String fileFrom, Integer saveType) throws IOException {
         try {
             if (file.isDirectory()) {
                 log.error("File为目录，无法注册到文件管理");
