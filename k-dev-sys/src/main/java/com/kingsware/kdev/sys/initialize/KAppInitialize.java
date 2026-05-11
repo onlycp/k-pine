@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -69,7 +69,10 @@ public class KAppInitialize {
             String fileId = "";
             try {
                 // 通过文件名和md5去查询
-                String md5 = FileUtils.getMD5(new FileInputStream(file));
+                String md5;
+                try (InputStream inputStream = Files.newInputStream(file.toPath())) {
+                    md5 = FileUtils.getMD5(inputStream);
+                }
                 List<String> ids = DB.findSingleAttributeList(String.class, "select id from sys_file where file_md5 = ? and file_name = ?", md5, file.getName());
 
                 if(!ids.isEmpty()) {
@@ -152,7 +155,6 @@ public class KAppInitialize {
                     long t2 = System.currentTimeMillis();
                     log.info("应用安装成功，应用包名称:{}, 用时:{} ms", file.getName(),  (t2 -t1));
                 }
-                log.info("开始备份应用: {}", file.getName());
                 // 移除当前文件
                 log.info("开始移除应用: {}", file.getName());
                 Files.delete(file.toPath());
@@ -163,7 +165,7 @@ public class KAppInitialize {
                     DB.delete(SysFile.class, fileId);
                 }
 
-                log.error("文件读取失败: ", e);
+                log.error("pine应用包处理失败: {}", file.getAbsolutePath(), e);
 
             }
 

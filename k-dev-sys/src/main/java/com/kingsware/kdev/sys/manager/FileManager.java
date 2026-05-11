@@ -59,8 +59,13 @@ public class FileManager {
                 return null;
             }
             String basePath = SpringContext.getProperties("file.base-path", ".");
-            FileInputStream inputStream = new FileInputStream(file);
-            return register(inputStream, file.getName(), (int)file.length(), fileFrom, saveType, basePath, false, false, FileUtils.getMD5(new FileInputStream(file)));
+            try (FileInputStream inputStream = new FileInputStream(file)) {
+                String md5;
+                try (FileInputStream md5InputStream = new FileInputStream(file)) {
+                    md5 = FileUtils.getMD5(md5InputStream);
+                }
+                return register(inputStream, file.getName(), (int)file.length(), fileFrom, saveType, basePath, false, false, md5);
+            }
         } catch (FileNotFoundException e) {
             log.error("文件不存在，文件路径:{}", file.getAbsolutePath());
             return null;
