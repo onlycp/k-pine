@@ -281,11 +281,11 @@ public class ServletUtil {
      * @return
      */
     private static String getFirstIp(String ipString) {
-        if (ipString == null && ipString.indexOf(",") != -1) {
+        if (StringUtils.isEmpty(ipString) || ipString.indexOf(",") == -1) {
             return ipString;
         }
         String[] ipArr = ipString.trim().split(",");
-        return ipArr[0];
+        return ipArr[0].trim();
     }
 
     /**
