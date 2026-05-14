@@ -364,12 +364,12 @@ public class KAuthFilter implements Filter {
                         callType = CallType.KFLOW;
                         apiCode = api.getApiCode();
                         // 是否允许跳过权限
-                        ignore = (StringUtils.isNotEmpty(api.getApiCode()) && apiCode.startsWith(ignoreApi)) || ServletUtil.isRefererRule(request);
+                        ignore = (StringUtils.isNotEmpty(api.getApiCode()) && apiCode.startsWith(ignoreApi));
                     } else {
                         if (apiDefine != null) {
                             apiCode = apiDefine.getApiCode();
-                            ignore = apiDefine.isIgnore() || ServletUtil.isRefererRule(request);
-                            dev = apiDefine.isDev() && ! ServletUtil.isRefererRule(request);
+                            ignore = apiDefine.isIgnore();
+                            dev = apiDefine.isDev();
                         } else {
                             //                    log.info("上下文-2:{},路径:{}", contextPath, request.getRequestURI()  );
                             filterChain.doFilter(wrapperRequest, response);

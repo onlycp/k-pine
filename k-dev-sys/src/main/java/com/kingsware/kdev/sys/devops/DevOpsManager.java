@@ -134,89 +134,18 @@ public class DevOpsManager {
 
     /**
      * 开启开发模式
-     * 此方法通过查询系统配置来开启开发模式，如果配置不存在，则创建新配置
-     * 开发模式下，会忽略referer，以便于开发和测试
+     * 历史兼容方法：不再通过写入 app.ignore.referer 放行权限
      */
     public void openDevMode() {
-        // 构造查询系统配置的URL
-        String url = copyParam.getHost() + "/api/v1/sys-config/query";
-
-        // 调用API获取系统配置信息
-        PageDataRet<SysConfigRet> pageDataRet = this.call(url, HttpMethod.GET, new HashMap<>(), new ParameterizedTypeReference<BaseRet<PageDataRet<SysConfigRet>>>() {});
-        // 定义需要查询的配置键
-        String key = "app.ignore.referer";
-        // 获取系统配置列表
-        List<SysConfigRet> list = pageDataRet.getList();
-        // 检查是否存在指定的配置项
-        Optional<SysConfigRet> hasRef = list.stream().filter(item -> item.getCode().equals(key)).findFirst();
-        SysConfigRet configRet = null;
-        // 如果存在，则获取该配置项
-        if (hasRef.isPresent()) {
-            configRet = hasRef.get();
-        }
-        // 如果配置项不存在，则创建新的配置项并设置为忽略referer
-        if (configRet == null) {
-            SysConfigArgv argv = new SysConfigArgv();
-            argv.setCode(key);
-            argv.setName("忽略referer");
-            argv.setValue("devpos");
-            argv.setValueType(1);
-            argv.setNote("生产环境忽略referer");
-            // 调用API创建新的系统配置项
-            this.call(copyParam.getHost() + "/api/v1/sys-config", HttpMethod.POST, argv , new ParameterizedTypeReference<BaseRet<Object>>() {});
-        }
-        // 如果配置项已存在，但需要更新其值
-        else {
-            String value = configRet.getValue();
-            // 如果当前值非空，则追加新的值
-            if (StringUtils.isNotEmpty(configRet.getValue())) {
-                value += (";" + "devpos");
-            }
-            configRet.setValue(value);
-            // 将现有的配置项复制到新的参数对象中
-            SysConfigArgv argv = BeanUtils.copyObject(configRet, SysConfigArgv.class);
-            // 调用API更新系统配置项
-            this.call(copyParam.getHost() + "/api/v1/sys-config", HttpMethod.PUT, argv,  new ParameterizedTypeReference<BaseRet<Object>>() {});
-        }
+        // no-op for security hardening
     }
 
     /**
      * 关闭开发模式
-     * 此方法通过调用API来修改系统配置，以关闭开发模式下的特定设置
+     * 历史兼容方法：不再通过 app.ignore.referer 控制权限
      */
     public void closeDevMode() {
-        // 构造请求URL以查询系统配置
-        String url = copyParam.getHost() + "/api/v1/sys-config/query";
-
-        // 发起GET请求获取系统配置列表
-        PageDataRet<SysConfigRet> pageDataRet = this.call(url, HttpMethod.GET, new HashMap<>(), new ParameterizedTypeReference<BaseRet<PageDataRet<SysConfigRet>>>() {});
-
-        // 定义要查找的配置键
-        String key = "app.ignore.referer";
-
-        // 提取系统配置列表
-        List<SysConfigRet> list = pageDataRet.getList();
-
-        // 使用流处理检查是否存在指定的配置键
-        Optional<SysConfigRet> hasRef = list.stream().filter(item -> item.getCode().equals(key)).findFirst();
-
-        // 如果找到了指定的配置项，则准备将其删除
-        if (hasRef.isPresent()) {
-            // 创建用于删除操作的参数对象
-            MultiIdArgv multiIdArgv = new MultiIdArgv();
-
-            // 创建一个集合来存储要删除的配置项ID
-            Set<String> ids = new HashSet<>();
-
-            // 将找到的配置项ID添加到集合中
-            ids.add(hasRef.get().getId());
-
-            // 设置要删除的ID集合到参数对象
-            multiIdArgv.setIds(ids);
-
-            // 发起POST请求删除指定的系统配置项
-            this.call(copyParam.getHost() + "/api/v1/sys-config/delete", HttpMethod.POST, multiIdArgv,  new ParameterizedTypeReference<BaseRet<Object>>() {});
-        }
+        // no-op for security hardening
     }
 
     /**

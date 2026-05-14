@@ -81,17 +81,17 @@ public class KubboController extends BaseController {
 
 
 
-    /**
-     * 执行faas流程
-     * @return 详细信息
-     */
-    @ApiOperation(value = "执行Faas " ,notes = "执行Faas")
-    @ResponseBody
-    @ApiIgnore
-    @PostMapping("/execute/faas")
-    public BaseRet<?> executeFaas(@RequestBody ExecuteFaasArgv argv) {
-        return BaseRet.success(kubboService.executeFaas(argv));
-    }
+//    /**
+//     * 执行faas流程
+//     * @return 详细信息
+//     */
+//    @ApiOperation(value = "执行Faas " ,notes = "执行Faas")
+//    @ResponseBody
+//    @ApiIgnore
+//    @PostMapping("/execute/faas")
+//    public BaseRet<?> executeFaas(@RequestBody ExecuteFaasArgv argv) {
+//        return BaseRet.success(kubboService.executeFaas(argv));
+//    }
 
     /**
      * 详细信息

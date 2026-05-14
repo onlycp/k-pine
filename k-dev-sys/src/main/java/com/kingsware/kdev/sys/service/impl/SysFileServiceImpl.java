@@ -39,6 +39,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.nio.file.InvalidPathException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -77,6 +78,14 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         String flag = SpringContext.getProperties("app.file-local-to-faas", "false");
         String callMode = SpringContext.getBootProperties("app.k-flow.call-model", "");
         return "true".equalsIgnoreCase(flag) && (!"sdk".equalsIgnoreCase(callMode));
+    }
+
+    private Path getBaseRootPath() {
+        return Paths.get(getBasePath()).toAbsolutePath().normalize();
+    }
+
+    private Path getStaticRootPath() {
+        return Paths.get(STATIC_FILE_FOLD).toAbsolutePath().normalize();
     }
 
     private final NonStaticResourceHttpRequestHandler nonStaticResourceHttpRequestHandler;
@@ -403,12 +412,8 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
      * @throws IOException
      */
     private void downloadByPath(String path, boolean isStatic) throws ServletException, IOException {
-        if (path.contains("..")) {
-            throw BusinessException.serviceThrow(I18n.t("common.paramInvalid", "参数不合法"));
-        }
-        // 进行url编码
-        path = UriEncoder.decode(path);
-        SysFile file = DB.findById(SysFile.class, path);
+        String normalizedPath = normalizeDownloadPath(path, isStatic);
+        SysFile file = DB.findById(SysFile.class, normalizedPath);
         HttpServletResponse response =  KClientContext.getContext().getResponse();
         HttpServletRequest request =  KClientContext.getContext().getRequest();
         response.setCharacterEncoding("utf-8");
@@ -419,14 +424,14 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         File tmpFile = null;
         if (file == null) {
             // 如果是ID格式，不是路径格式，则文件已不存在
-            if (StringUtils.isUuid(path)) {
+            if (StringUtils.isUuid(normalizedPath)) {
                 throw BusinessException.serviceThrow(I18n.t("SysFileServiceImpl.fileDeleted", "文件已被删除！") );
             }
             // 通过ID找不到文件，按路径处理，共有2处方式，1种是本地文件，2种是FAAS文件
             // 在本地找是否存在文件
-            File localFile = getLocalFile(path);
+            File localFile = getLocalFile(normalizedPath);
             if (isStatic) {
-                localFile = getStaticFile(path);
+                localFile = getStaticFile(normalizedPath);
                 if (localFile.isDirectory()) {
                     File zipFile = ZipUtils.zipDirectory(localFile, localFile.getAbsolutePath());
                     ServletUtil.responseFile(zipFile, localFile.getName() + ".zip");
@@ -438,9 +443,9 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                 fileName = localFile.getName();
             } else {
                 // 检测文件权限
-                validateFilePermission(null, path);
+                validateFilePermission(null, normalizedPath);
                 //
-                FaasFileInfo fileInfo = getFaasFileInfo(path);
+                FaasFileInfo fileInfo = getFaasFileInfo(normalizedPath);
                 DB.kdbApi().downloadStream(fileInfo.getPath(), fileInfo.getName(), userFileName);
                 return;
 //                if (!FileTypeChecker.isAudioFile(path) && !FileTypeChecker.isVideoFile(path)) {
@@ -559,12 +564,11 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
      * @return 对应的本地文件对象
      */
     private File getLocalFile(String path) {
-        String absFilePath = getBasePath().endsWith("/") ? getBasePath() : getBasePath() + File.separator + path;
-        return new File(absFilePath);
+        return resolveFileUnderRoot(getBaseRootPath(), path, false);
     }
 
     private File getStaticFile(String path) {
-       return new File(path);
+       return resolveFileUnderRoot(getStaticRootPath(), path, true);
     }
 
     public File getFaasFile(String path) {
@@ -630,16 +634,17 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         String targetDir = "upload/package/pinezip/" + System.currentTimeMillis();
         new File(targetDir).mkdirs();
 
-        String zipName = name;
-        if(StringUtils.isEmpty(name)){
-            zipName = targetDir + ".zip";
+        String fileName = StringUtils.isEmpty(name) ? ("static-files-" + System.currentTimeMillis() + ".zip") : new File(name).getName();
+        if (!fileName.toLowerCase().endsWith(".zip")) {
+            fileName += ".zip";
         }
+        String zipName = Paths.get(targetDir, fileName).toString();
 
 
         String[] pathList = Arrays.stream(filePaths.split(","))
                 .map(String::trim).filter(StringUtils::isNotEmpty).toArray(String[]::new);
         for (String path : pathList) {
-            File file = new File(path);
+            File file = getStaticFile(path);
             if (file.exists()) {
                 compressStaticFileInner(file, targetDir);
             }
@@ -662,10 +667,74 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
                 }
             }
         } else {
-            File destFile = new File(targetDir, source.getPath());
+            Path staticRootPath = getStaticRootPath();
+            Path sourcePath = source.toPath().toAbsolutePath().normalize();
+            Path relativePath = staticRootPath.relativize(sourcePath);
+            File destFile = new File(targetDir, relativePath.toString());
             destFile.getParentFile().mkdirs();
             Files.copy(source.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
+    }
+
+    private String normalizeDownloadPath(String rawPath, boolean isStatic) {
+        if (StringUtils.isEmpty(rawPath)) {
+            throw BusinessException.serviceThrow(I18n.t("common.paramInvalid", "参数不合法"));
+        }
+        String decodedPath;
+        try {
+            decodedPath = UriEncoder.decode(rawPath);
+        }
+        catch (Exception e) {
+            throw BusinessException.serviceThrow(I18n.t("common.paramInvalid", "参数不合法"));
+        }
+        String normalizedPath = decodedPath.trim().replace("\\", "/");
+        while (normalizedPath.startsWith("/")) {
+            normalizedPath = normalizedPath.substring(1);
+        }
+        if (isStatic) {
+            String staticPrefix = STATIC_FILE_FOLD + "/";
+            if (normalizedPath.startsWith(staticPrefix)) {
+                normalizedPath = normalizedPath.substring(staticPrefix.length());
+            }
+        }
+        if (StringUtils.isEmpty(normalizedPath) || normalizedPath.contains("\0")) {
+            throw BusinessException.serviceThrow(I18n.t("common.paramInvalid", "参数不合法"));
+        }
+        if (isAbsoluteLikePath(normalizedPath)) {
+            throw BusinessException.serviceThrow(I18n.t("common.paramInvalid", "参数不合法"));
+        }
+        try {
+            Path path = Paths.get(normalizedPath).normalize();
+            if (path.isAbsolute() || path.startsWith("..")) {
+                throw BusinessException.serviceThrow(I18n.t("common.paramInvalid", "参数不合法"));
+            }
+        }
+        catch (InvalidPathException e) {
+            throw BusinessException.serviceThrow(I18n.t("common.paramInvalid", "参数不合法"));
+        }
+        return normalizedPath;
+    }
+
+    private File resolveFileUnderRoot(Path rootPath, String inputPath, boolean isStatic) {
+        String normalizedPath = normalizeDownloadPath(inputPath, isStatic);
+        try {
+            Path relativePath = Paths.get(normalizedPath).normalize();
+            Path resolvedPath = rootPath.resolve(relativePath).normalize();
+            if (!resolvedPath.startsWith(rootPath)) {
+                throw BusinessException.serviceThrow(I18n.t("common.paramInvalid", "参数不合法"));
+            }
+            return resolvedPath.toFile();
+        }
+        catch (InvalidPathException e) {
+            throw BusinessException.serviceThrow(I18n.t("common.paramInvalid", "参数不合法"));
+        }
+    }
+
+    private boolean isAbsoluteLikePath(String path) {
+        if (StringUtils.isEmpty(path)) {
+            return false;
+        }
+        return path.startsWith("/") || path.startsWith("\\") || path.matches("^[a-zA-Z]:[\\\\/].*");
     }
 
     @Override

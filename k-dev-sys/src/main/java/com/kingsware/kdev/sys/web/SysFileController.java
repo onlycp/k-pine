@@ -186,9 +186,10 @@ public class SysFileController extends BaseController {
     @ApiIgnore
     public ResponseEntity<org.springframework.core.io.Resource> downloadStaticZip(String path, String name) throws IOException, ServletException {
         String resultPath = sysFileService.compressStaticZip(path, name);
+        String downloadName = new File(resultPath).getName();
         org.springframework.core.io.Resource resource = new FileSystemResource(resultPath);
         return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment;filename=" + new File(name).getName())
+                .header("Content-Disposition", "attachment;filename=" + downloadName)
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource); // 直接返回二进制流，不触发静态资源处理
     }
