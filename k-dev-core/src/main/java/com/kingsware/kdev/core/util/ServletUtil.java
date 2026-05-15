@@ -81,24 +81,10 @@ public class ServletUtil {
 
 
     /**
-     * 判断referer是否包含配置的url标识
+     * 历史兼容方法：不再允许基于referer放行权限
      * @return  是否
      */
     public static boolean isRefererRule(HttpServletRequest request) {
-        String referer = request.getHeader("referer");
-        if (StringUtils.isEmpty(referer)) {
-            return false;
-        }
-        String refererUrl = SpringContext.getProperties("app.ignore.referer", "");
-        String[] refererUrls = refererUrl.split(";");
-        for (String item: refererUrls) {
-            if (StringUtils.isEmpty(item)) {
-                continue;
-            }
-            if (referer.contains(item)) {
-                return true;
-            }
-        }
         return false;
     }
 

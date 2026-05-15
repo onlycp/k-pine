@@ -1,6 +1,7 @@
 package com.kingsware.kdev.sys.web;
 
 import com.kingsware.kdev.core.auth.ApiIgnore;
+import com.kingsware.kdev.core.auth.Dev;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.bean.ExceptionLog;
@@ -51,7 +52,7 @@ public class SysToolBoxController extends BaseController {
         String encrypt = EncryptWorker.getInstance().encrypt(source, slat);
         return BaseRet.success(encrypt);
     }
-    
+
 
     @GetMapping("/to-url")
     @ApiIgnore
@@ -128,6 +129,7 @@ public class SysToolBoxController extends BaseController {
 
 
     @GetMapping("/executeScript/{appId}/{sourceName}")
+    @Dev
     public BaseRet<?> executeScript(@PathVariable String appId, @PathVariable String sourceName) {
         devModelSqlService.execute(appId, sourceName);
         return BaseRet.success();

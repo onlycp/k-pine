@@ -5,13 +5,11 @@ import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.enums.RetEnum;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
-import com.kingsware.kdev.core.util.ServletUtil;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +23,7 @@ public class DevApiAspect {
     @Around("execution(public * com.kingsware..web.*.*(..)) && @annotation(dev)")
     public Object process(ProceedingJoinPoint pjd, Dev dev) throws Throwable {
         boolean isDev = SpringContext.getBoolean("app.mode.dev", false);
-        if (isDev || ServletUtil.isRefererRule(ServletUtil.request())) {
+        if (isDev) {
             return pjd.proceed();
         }
         else {

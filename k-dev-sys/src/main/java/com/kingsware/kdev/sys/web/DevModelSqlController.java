@@ -1,5 +1,6 @@
 package com.kingsware.kdev.sys.web;
 
+import com.kingsware.kdev.core.auth.Dev;
 import com.kingsware.kdev.core.base.BaseController;
 import com.kingsware.kdev.core.bean.BaseRet;
 import com.kingsware.kdev.core.constants.Version;
@@ -29,6 +30,7 @@ public class DevModelSqlController  extends BaseController {
 
     @GetMapping("/executeBySource/{appId}/{sourceName}")
     @ResponseBody
+    @Dev
     public BaseRet<?> executeBySource(@PathVariable String appId, @PathVariable String sourceName) {
         devModelSqlService.execute(appId, sourceName);
         return BaseRet.success();
@@ -36,6 +38,7 @@ public class DevModelSqlController  extends BaseController {
 
     @GetMapping("/executeByApp/{appId}")
     @ResponseBody
+    @Dev
     public BaseRet<?> executeByApp(@PathVariable String appId, @PathVariable String sourceName) {
         devModelSqlService.execute(appId);
         return BaseRet.success();
@@ -43,6 +46,7 @@ public class DevModelSqlController  extends BaseController {
 
     @GetMapping("/executeById/{id}")
     @ResponseBody
+    @Dev
     public BaseRet<?> executeById(@PathVariable String id) {
         devModelSqlService.executeById(id);
         return BaseRet.success();
