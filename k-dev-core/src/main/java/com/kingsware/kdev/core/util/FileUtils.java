@@ -18,10 +18,14 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFilePermission;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -42,6 +46,16 @@ public class FileUtils {
     private static final Pattern FILE_NAME_INVALID_CHAR_PATTERN = Pattern.compile("[/\\\\:*?\"<>|]");
     private static final Pattern FILE_FROM_INVALID_CHAR_PATTERN = Pattern.compile("[:*?\"<>|]");
     private static final Pattern WINDOWS_DRIVE_PATH_PATTERN = Pattern.compile("^[a-zA-Z]:([/\\\\].*)?$");
+
+    private static final Set<PosixFilePermission> UPLOAD_DIRECTORY_PERMISSIONS = EnumSet.of(
+            PosixFilePermission.OWNER_READ,
+            PosixFilePermission.OWNER_WRITE,
+            PosixFilePermission.OWNER_EXECUTE
+    );
+    private static final Set<PosixFilePermission> UPLOAD_FILE_PERMISSIONS = EnumSet.of(
+            PosixFilePermission.OWNER_READ,
+            PosixFilePermission.OWNER_WRITE
+    );
 
     private FileUtils(){
     }
@@ -345,6 +359,55 @@ public class FileUtils {
         } catch (InvalidPathException e) {
             return false;
         }
+    }
+
+    public static void hardenUploadDirectories(File stopDir, File targetDir) {
+        if (targetDir == null) {
+            return;
+        }
+        try {
+            File canonicalStopDir = stopDir == null ? null : stopDir.getCanonicalFile();
+            File current = targetDir.getCanonicalFile();
+            while (current != null && (canonicalStopDir == null || !current.equals(canonicalStopDir))) {
+                applyUploadDirectoryPermissions(current.toPath(), current);
+                current = current.getParentFile();
+            }
+        } catch (IOException e) {
+            log.warn("上传目录权限收口失败: {}", targetDir.getPath(), e);
+        }
+    }
+
+    public static void hardenUploadedFile(File file) {
+        if (file == null || !file.exists()) {
+            return;
+        }
+        try {
+            applyUploadFilePermissions(file.toPath(), file);
+        } catch (IOException e) {
+            log.warn("上传文件权限收口失败: {}", file.getPath(), e);
+        }
+    }
+
+    private static void applyUploadDirectoryPermissions(Path path, File file) throws IOException {
+        PosixFileAttributeView view = Files.getFileAttributeView(path, PosixFileAttributeView.class);
+        if (view != null) {
+            Files.setPosixFilePermissions(path, UPLOAD_DIRECTORY_PERMISSIONS);
+            return;
+        }
+        file.setReadable(true, true);
+        file.setWritable(true, true);
+        file.setExecutable(true, true);
+    }
+
+    private static void applyUploadFilePermissions(Path path, File file) throws IOException {
+        PosixFileAttributeView view = Files.getFileAttributeView(path, PosixFileAttributeView.class);
+        if (view != null) {
+            Files.setPosixFilePermissions(path, UPLOAD_FILE_PERMISSIONS);
+            return;
+        }
+        file.setReadable(true, true);
+        file.setWritable(true, true);
+        file.setExecutable(false, false);
     }
 
     private static boolean hasControlChar(String value) {

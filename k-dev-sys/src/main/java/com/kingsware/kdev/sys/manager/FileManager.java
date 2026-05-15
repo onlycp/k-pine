@@ -149,6 +149,7 @@ public class FileManager {
                 String filePath = basePath +  relativePath;
                 File path = new File(filePath);
                 boolean status = path.mkdirs();
+                FileUtils.hardenUploadDirectories(new File(basePath), path);
                 // 拷贝文件
                 String saveFileName = fileName;
                 if (!withoutChecking && isCloseReplaceMode) {
@@ -156,6 +157,7 @@ public class FileManager {
                 }
                 File saveFile = new File(path.getAbsolutePath() + "/" + saveFileName);
                 FileCopyUtils.copy(inputStream, Files.newOutputStream(saveFile.toPath()));
+                FileUtils.hardenUploadedFile(saveFile);
 //                sysFile.setFileMd5(FileUtils.getMD5(inputStream));
                 if (StringUtils.isEmpty(md5)) {
                     sysFile.setFileMd5(FileUtils.getMD5(Files.newInputStream(saveFile.toPath())));
