@@ -16,8 +16,8 @@ import javax.annotation.Resource;
 import java.util.List;
 
 @Api(value = "DevOPS", tags = {"DevOPS"})
-@RestController
-@RequestMapping("/"+ Version.V1 + "/devops")
+// @RestController
+// @RequestMapping("/"+ Version.V1 + "/devops")
 public class DevOpsController extends BaseController {
 
     @Resource

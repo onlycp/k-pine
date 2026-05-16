@@ -1,5 +1,7 @@
 package com.kingsware.kdev.core.util;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 /**
@@ -71,7 +73,28 @@ public class SecurityUtil {
         if (input == null) {
             return false;
         }
-        return PATH_TRAVERSAL_PATTERN.matcher(input).find();
+        if (PATH_TRAVERSAL_PATTERN.matcher(input).find()) {
+            return true;
+        }
+        String normalized = normalizeForPathTraversalCheck(input);
+        return PATH_TRAVERSAL_PATTERN.matcher(normalized).find();
+    }
+
+    private static String normalizeForPathTraversalCheck(String input) {
+        String normalized = input;
+        // Multi-encoding is common in traversal probes (%252e%252e%252f -> ../).
+        for (int i = 0; i < 3; i++) {
+            try {
+                String decoded = URLDecoder.decode(normalized, StandardCharsets.UTF_8.name());
+                if (decoded.equals(normalized)) {
+                    break;
+                }
+                normalized = decoded;
+            } catch (Exception e) {
+                break;
+            }
+        }
+        return normalized.replace('\\', '/');
     }
 
     /**

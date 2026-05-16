@@ -12,7 +12,7 @@
 		<module>k-dev-app-with-faas</module>
 		<module>k-dev-app-with-ops</module>
         <module>k-dev-app-tongweb</module>
-		<module>k-dev-all-in-one</module>
+<!--		<module>k-dev-all-in-one</module>-->
     </modules>
     <parent>
 		<groupId>org.springframework.boot</groupId>
@@ -32,6 +32,10 @@
 <!--		<poi.version>5.2.2</poi.version>-->
 <!--		<jxl.version>2.6.12</jxl.version>-->
 		<kdev.version>4.1.0-beta.4</kdev.version>
+		<tomcat.version>9.0.118</tomcat.version>
+		<netty.version>4.1.132.Final</netty.version>
+		<spring-framework.version>5.3.39</spring-framework.version>
+		<snakeyaml.version>2.6</snakeyaml.version>
 	</properties>
 	<repositories>
 <!--		<repository>-->
@@ -59,62 +63,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.logging.log4j</groupId>
-					<artifactId>log4j-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>ch.qos.logback</groupId>
-					<artifactId>logback-classic</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>ch.qos.logback</groupId>
-					<artifactId>logback-core</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.tomcat.embed</groupId>
-					<artifactId>tomcat-embed-core</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.tomcat.embed</groupId>
-					<artifactId>tomcat-embed-el</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.tomcat.embed</groupId>
-					<artifactId>tomcat-embed-websocket</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat.embed</groupId>
-			<artifactId>tomcat-embed-core</artifactId>
-			<version>9.0.98</version>
-			<scope>compile</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>tomcat-annotations-api</artifactId>
-					<groupId>org.apache.tomcat</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat.embed</groupId>
-			<artifactId>tomcat-embed-el</artifactId>
-			<version>9.0.98</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat.embed</groupId>
-			<artifactId>tomcat-embed-websocket</artifactId>
-			<version>9.0.98</version>
-			<scope>compile</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>tomcat-annotations-api</artifactId>
-					<groupId>org.apache.tomcat</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>

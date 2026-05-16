@@ -23,8 +23,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -53,15 +51,6 @@ public class SysToolBoxController extends BaseController {
         return BaseRet.success(encrypt);
     }
 
-
-    @GetMapping("/to-url")
-    @ApiIgnore
-    public void toUrl(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String url = request.getParameter("url");
-        String deUrl = URLDecoder.decode(url, StandardCharsets.UTF_8.toString());
-        log.info("Url302跳转:{}", deUrl);
-        response.sendRedirect(deUrl);
-    }
 
     @GetMapping("/exception")
     @ApiIgnore
