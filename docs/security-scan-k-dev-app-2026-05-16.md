@@ -5,6 +5,7 @@
 - 范围模块：`k-dev-app`、`k-dev-core`、`k-dev-sys`、`k-dev-resources`
 - 依赖范围：`k-dev-app` 最终 `compile/runtime` 依赖（基于 `mvn dependency:tree`）
 - 扫描时间：2026-05-16
+- 状态更新：2026-05-18（增量）
 - 外部漏洞源：OSV（Maven ecosystem）+ NVD（按 CVE 详情页）
 - 代码扫描方式：静态审计（接口暴露、鉴权绕过、重定向、命令执行、敏感配置）
 
@@ -98,13 +99,15 @@
 | BUG-004 | DevOps 接口未鉴权（可触发数据复制流程） | DONE |
 | BUG-005 | 开放重定向（`/sys-tool-box/to-url`） | DONE |
 | BUG-006 | 敏感密钥/令牌硬编码在配置文件 | TODO |
-| BUG-007 | 动态类执行与命令执行能力存在 | TODO |
+| BUG-007 | 动态类执行与命令执行能力存在 | DOING |
 | BUG-008 | Tomcat 依赖升级与引入方式优化（`tomcat.version=9.0.118`，移除手工 `exclusions`） | DONE |
 | BUG-009 | Spring WebMVC 风险处置（不升级 Boot3：升级到 `spring-framework.version=5.3.39` + 路径穿越双重编码拦截） | DONE |
 | BUG-010 | SnakeYAML 依赖升级（`snakeyaml.version=2.6`，替换 `1.30`） | DONE |
+| BUG-011 | Logback 保留在 `1.2.13` 的残余 CVE 风险处置（不升级 Boot3） | RISK_ACCEPTED |
 
 说明：
 - `5.3.39` 是 Maven Central 可获取的开源 `5.3.x` 上限版本；部分 `5.3.40+ / 5.3.41+ / 5.3.44` 修复属于商业发布，当前策略下仍有残余风险。
+- Logback 当前固定为 `1.2.13`（已从 `1.2.9` 升级）；由于 `1.2.x` 已 EOL，仍可能被漏洞库标记命中 `CVE-2024-12798 / CVE-2024-12801 / CVE-2025-11226 / CVE-2026-1225`。在“不可升级到 Boot3”的约束下，先采用补偿加固并将版本级残余风险标记为 `RISK_ACCEPTED`。
 
 ### 4.1 高风险：鉴权绕过面（仍待处理项）
 
@@ -146,6 +149,7 @@
 - 证据（动态类执行）：`k-dev-core/src/main/java/com/kingsware/kdev/core/cron/DynamicTask.java:345`
 - 证据（命令执行能力）：`k-dev-core/src/main/java/com/kingsware/kdev/core/util/ShellUtils.java:31`
 - 影响：若上游任务配置/参数被污染，可能扩大为代码执行链。
+- 状态补充（2026-05-17）：已完成“动态类执行”入口收敛 + 执行点白名单校验；`ShellUtils` 风险仍待收敛。
 
 ## 5. 本轮已验证“已修复/已加固”项
 
@@ -172,6 +176,12 @@
 
 6. 开放重定向接口 `/sys-tool-box/to-url` 已移除
 - 证据：`k-dev-sys/src/main/java/com/kingsware/kdev/sys/web/SysToolBoxController.java:55`
+
+7. Logback 保留 `1.2.13` 并完成补偿加固
+- 版本证据：`pom.xml`（`logback-classic=1.2.13`、`logback-core=1.2.13`）
+- 构建防护：`pom.xml` 新增 `maven-enforcer-plugin`，禁止引入 `org.codehaus.janino:janino` 与 `org.codehaus.janino:commons-compiler`
+- 运行时防护：各模块 `logback.xml` 已显式设置 `<configuration scan="false">`
+- 风险结论：保留当前版本，不再升主版本；将版本级残余 CVE 风险纳入 `BUG-011`，状态 `RISK_ACCEPTED`
 
 ## 6. 修复优先级建议
 

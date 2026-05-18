@@ -1,6 +1,5 @@
 package com.kingsware.kdev.core.util;
 
-import ch.qos.logback.core.util.FileUtil;
 import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.encrypt.EncryptProperties;
 import com.kingsware.kdev.core.properties.FileProperties;
