@@ -5,6 +5,7 @@ import com.kingsware.kdev.core.bean.MultiIdArgv;
 import com.kingsware.kdev.core.bean.PageDataRet;
 import com.kingsware.kdev.core.config.SysConst;
 import com.kingsware.kdev.core.cron.DynamicTask;
+import com.kingsware.kdev.core.cron.JavaTaskClassGuard;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.i18n.I18n;
 import com.kingsware.kdev.core.orm.DB;
@@ -52,7 +53,11 @@ public class SysTaskServiceImpl extends BaseServiceImpl implements SysTaskServic
 
     @Override
     public void add(SysTaskArgv argv) {
+        validateJavaTaskConfig(argv);
         SysTask model = BeanUtils.copyObject(argv, SysTask.class);
+        if (model.getTaskType() == null || model.getTaskType() != 1) {
+            model.setClassName(null);
+        }
         // 校验
         checkUnique(model);
         this.checkCron(argv.getCron());
@@ -80,6 +85,7 @@ public class SysTaskServiceImpl extends BaseServiceImpl implements SysTaskServic
 
     @Override
     public void edit(SysTaskArgv argv) {
+        validateJavaTaskConfig(argv);
         SysTask model = DB.findById(SysTask.class, argv.getId());
         if (isSystemTask(model)) {
             if (argv.getEnable() == 0 && model.getEnable() == 1) {
@@ -91,7 +97,11 @@ public class SysTaskServiceImpl extends BaseServiceImpl implements SysTaskServic
         model.setCron(argv.getCron());
         model.setTaskType(argv.getTaskType());
         model.setTaskResourceId(argv.getTaskResourceId());
-        model.setClassName(argv.getClassName());
+        if (argv.getTaskType() != null && argv.getTaskType() == 1) {
+            model.setClassName(argv.getClassName());
+        } else {
+            model.setClassName(null);
+        }
         model.setEnable(argv.getEnable());
         model.setDistributed(argv.getDistributed());
         model.setNote(argv.getNote());
@@ -129,6 +139,20 @@ public class SysTaskServiceImpl extends BaseServiceImpl implements SysTaskServic
         checker.uni(new String[]{"name", "applicationId"}, I18n.t("SysTask.name.unique", "同一应用下名称必须唯一"));
         // 执行校验
         checker.checkUnique();
+    }
+
+    private void validateJavaTaskConfig(SysTaskArgv argv) {
+        if (argv == null || argv.getTaskType() == null || argv.getTaskType() != 1) {
+            return;
+        }
+        if (StringUtils.isEmpty(argv.getClassName())) {
+            throw BusinessException.serviceThrow(I18n.t("SysTask.class-name.empty", "Java任务className不能为空"));
+        }
+        try {
+            JavaTaskClassGuard.validateOrThrow(argv.getClassName());
+        } catch (IllegalArgumentException e) {
+            throw BusinessException.serviceThrow(I18n.t("SysTask.class-name.invalid", "Java任务className不允许: " + e.getMessage()));
+        }
     }
 
     @Override

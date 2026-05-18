@@ -342,8 +342,11 @@ public class DynamicTask implements CommandLineRunner {
      */
     private void runJavaTask(SysTask sysTask) throws Exception {
         try {
-            KTask kTask = (KTask) Class.forName(sysTask.getClassName()).newInstance();
+            JavaTaskClassGuard.validateOrThrow(sysTask.getClassName());
+            KTask kTask = (KTask) Class.forName(sysTask.getClassName()).getDeclaredConstructor().newInstance();
             kTask.execute();
+        } catch (IllegalArgumentException e) {
+            throw new CronException("调度Class不允许执行: " + e.getMessage(), 1);
         } catch (ClassNotFoundException e) {
             throw new CronException("调度Class不存在", 1);
         }
