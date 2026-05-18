@@ -36,6 +36,10 @@
 		<netty.version>4.1.132.Final</netty.version>
 		<spring-framework.version>5.3.39</spring-framework.version>
 		<snakeyaml.version>2.6</snakeyaml.version>
+		<commons-io.version>2.21.0</commons-io.version>
+		<json-path.version>2.10.0</json-path.version>
+		<json-smart.version>2.6.0</json-smart.version>
+		<aspectjweaver.version>1.9.24</aspectjweaver.version>
 	</properties>
 	<repositories>
 <!--		<repository>-->
@@ -67,7 +71,7 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.11.0</version>
+			<version>${commons-io.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
@@ -77,16 +81,21 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.2.9</version>
+			<version>1.2.13</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
-			<version>1.2.9</version>
+			<version>1.2.13</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-aop</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>${aspectjweaver.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -106,7 +115,12 @@
 		<dependency>
 			<groupId>com.jayway.jsonpath</groupId>
 			<artifactId>json-path</artifactId>
-			<version>2.7.0</version>
+			<version>${json-path.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.minidev</groupId>
+			<artifactId>json-smart</artifactId>
+			<version>${json-smart.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.lmax</groupId>
@@ -177,11 +191,11 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>flatten-maven-plugin</artifactId>
+		<build>
+			<plugins>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>flatten-maven-plugin</artifactId>
 				<version>1.1.0</version>
 				<configuration>
 					<updatePomFile>true</updatePomFile>
@@ -202,10 +216,39 @@
 							<goal>clean</goal>
 						</goals>
 					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>3.5.0</version>
+					<executions>
+						<execution>
+							<id>ban-janino-for-logback-hardening</id>
+							<phase>validate</phase>
+							<goals>
+								<goal>enforce</goal>
+							</goals>
+							<configuration>
+								<rules>
+									<bannedDependencies>
+										<searchTransitive>true</searchTransitive>
+										<excludes>
+											<exclude>org.codehaus.janino:janino</exclude>
+											<exclude>org.codehaus.janino:commons-compiler</exclude>
+										</excludes>
+										<message>
+											Do not introduce Janino dependencies. This project hardens Logback by forbidding Janino-based evaluators.
+										</message>
+									</bannedDependencies>
+								</rules>
+								<fail>true</fail>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</build>
 
 
 </project>
