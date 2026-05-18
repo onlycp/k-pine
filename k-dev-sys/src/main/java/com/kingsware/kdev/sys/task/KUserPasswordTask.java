@@ -35,6 +35,7 @@ public class KUserPasswordTask implements KTask, KRunner {
     /**
      * 执行任务
      **/
+    @SuppressWarnings("java:S2068") // "password" here refers to DB column name, not hard-coded credential
     @Override
     public void execute() throws Exception {
         String mode = SpringContext.getProperties("encrypt.mode", "base64");

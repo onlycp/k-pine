@@ -7,8 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -81,8 +79,11 @@ public class ZipUtils {
      */
     public static File zip(List<FileEntry> fileList, String zipFileName) {
         try {
-            Path tmpFile = Files.createTempFile(zipFileName, "zip");
-            @Cleanup OutputStream out = new FileOutputStream(tmpFile.toFile());
+            File tmpFile = FileUtils.createTempFile(zipFileName + ".zip");
+            if (tmpFile == null) {
+                return null;
+            }
+            @Cleanup OutputStream out = new FileOutputStream(tmpFile);
             @Cleanup BufferedOutputStream bos = new BufferedOutputStream(out);
             @Cleanup ZipOutputStream zos = new ZipOutputStream(bos);
             // 遍历加入压缩文件中
@@ -98,7 +99,7 @@ public class ZipUtils {
                 }
                 zos.closeEntry();
             }
-            return tmpFile.toFile();
+            return tmpFile;
         } catch (FileNotFoundException e) {
             log.error("文件不存在，{}", e.getMessage());
         } catch (IOException e) {

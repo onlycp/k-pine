@@ -28,7 +28,7 @@ public class OperateLogConsumer implements KmqConsumer {
         long t1 = System.currentTimeMillis();
         String enableLog = SpringContext.getProperties("app.log.enable", "true");
         String toUniops = SpringContext.getProperties("uniops.log.enable", "false");
-        String uniopsLogUrl = SpringContext.getProperties("uniops.log.url", "http://10.11.2.96:8083/mdb/log/batchSave");
+        String uniopsLogUrl = SpringContext.getProperties("uniops.log.url", "");
         List<Map<String,Object>> rows  = new ArrayList<>();
         if ("true".equalsIgnoreCase(enableLog)) {
             List<SysOperateLog> sysOperateLogs = new ArrayList<>();

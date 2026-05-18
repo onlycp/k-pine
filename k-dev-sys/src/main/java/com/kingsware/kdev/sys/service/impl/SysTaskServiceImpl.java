@@ -19,7 +19,6 @@ import com.kingsware.kdev.core.model.SysTask;
 import com.kingsware.kdev.sys.ret.SysTaskRet;
 import com.kingsware.kdev.sys.service.SysTaskService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.support.CronSequenceGenerator;
 import org.springframework.stereotype.Service;
 
@@ -39,9 +38,6 @@ public class SysTaskServiceImpl extends BaseServiceImpl implements SysTaskServic
 
     @Resource
     private DynamicTask dynamicTask;
-
-    @Value("${encrypt.aes.secret:PsLZlcuUJBUB8yPo}")
-    private String aesSecret;
 
     @Override
     public SysTaskRet get(String id) {

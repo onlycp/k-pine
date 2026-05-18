@@ -47,6 +47,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import javax.servlet.*;
@@ -96,7 +97,7 @@ public class KAuthFilter implements Filter {
     @Value("${app.mode.dev:false}")
     private boolean modeDev;
 
-    @Value("#{'${app.ignore.urls:websocket;/eiac;/sys-tool-box;/kubbo/logs}'.split(';')}")
+    @Value("#{'${app.ignore.urls:/websocket;/eiac}'.split(';')}")
     private List<String> ignoreUrls;
 
     @Value("#{'${app.cache.urls:/hellworld}'.split(';')}")
@@ -110,22 +111,59 @@ public class KAuthFilter implements Filter {
     private RateLimiter rateLimiter = new RateLimiter();
 
     private final AtomicInteger currentInQueueCount = new AtomicInteger(0);
+    private final AntPathMatcher antPathMatcher = new AntPathMatcher();
 
 
 
 
     /**
-     * 判断url是否包括配置的url标识
-     * @param url url
+     * 判断请求路径是否命中忽略规则
+     * @param url request uri
      * @return  是否
      */
     private boolean containUrl(HttpServletRequest request, String url) {
+        String normalizedUrl = normalizePath(stripContextPath(url, request.getContextPath()));
         for (String item: ignoreUrls) {
-            if (url.contains(item)) {
+            if (isIgnoreRuleMatch(normalizedUrl, item)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private boolean isIgnoreRuleMatch(String normalizedUrl, String rule) {
+        if (StringUtils.isEmpty(rule)) {
+            return false;
+        }
+        String normalizedRule = normalizePath(rule);
+        if (normalizedRule.contains("*") || normalizedRule.contains("?") || normalizedRule.contains("{")) {
+            return antPathMatcher.match(normalizedRule, normalizedUrl);
+        }
+        return normalizedUrl.equals(normalizedRule) || normalizedUrl.startsWith(normalizedRule + "/");
+    }
+
+    private String stripContextPath(String uri, String contextPath) {
+        if (StringUtils.isEmpty(uri)) {
+            return "/";
+        }
+        if (StringUtils.isNotEmpty(contextPath) && uri.startsWith(contextPath)) {
+            return uri.substring(contextPath.length());
+        }
+        return uri;
+    }
+
+    private String normalizePath(String path) {
+        if (StringUtils.isEmpty(path)) {
+            return "/";
+        }
+        String normalized = path.trim().replaceAll("/+", "/");
+        if (!normalized.startsWith("/")) {
+            normalized = "/" + normalized;
+        }
+        if (normalized.length() > 1 && normalized.endsWith("/")) {
+            normalized = normalized.substring(0, normalized.length() - 1);
+        }
+        return normalized;
     }
 
     /**

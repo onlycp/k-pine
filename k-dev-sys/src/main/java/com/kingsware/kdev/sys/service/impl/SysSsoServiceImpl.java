@@ -33,6 +33,7 @@ public class SysSsoServiceImpl implements SysSsoService {
 
     private static final String SSO_LOGIN_LAN_ONLY_ENABLE_KEY = "sso.login.lan-only.enable";
     private static final String SSO_LOGIN_IP_WHITELIST_KEY = "sso.login.ip-whitelist";
+    @SuppressWarnings("java:S1313") // secure baseline for LAN-only access; can be overridden by sso.login.ip-whitelist
     private static final String DEFAULT_SSO_LOGIN_IP_WHITELIST = "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,127.0.0.1,::1,fc00::/7";
 
     @Resource
@@ -48,10 +49,13 @@ public class SysSsoServiceImpl implements SysSsoService {
     @Override
     public SysUserLoginRet doLogin(SysSsoArgv ssoArgv) {
         try {
-            String str = "{\"errorUrl\": \"/\",\"successUrl\":\"/\",\"username\": \"chenp\"}";
             validateLoginIp();
             // 查询安全令牌
-            String secretKey = SpringContext.getProperties("sso.key", "ZiKaPsJkw9AFjztH");
+            String secretKey = SpringContext.getProperties("sso.key", "");
+            if (StringUtils.isEmpty(secretKey)) {
+                log.error("SSO login rejected, property sso.key is not configured.");
+                throw BusinessException.serviceThrow(I18n.t("SysSsoServiceImpl.ssoKeyRequired", "系统未配置单点登录密钥"));
+            }
             if (!secretKey.equals(ssoArgv.getSecretKey())) {
                 throw new BusinessException(I18n.t("SysSsoServiceImpl.authFail", "认证不合法！"));
             }

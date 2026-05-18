@@ -39,7 +39,6 @@ import com.kingsware.kdev.sys.ret.*;
 import com.kingsware.kdev.sys.service.SysUserService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -68,9 +67,6 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
     private AppAuthProperties appAuthProperties;
     @Resource
     private EncryptProperties encryptProperties;
-
-    @Value("${encrypt.aes.secret:PsLZlcuUJBUB8yPo}")
-    private String aesSecret;
 
     @Resource
     private SysCacheService sysCacheService;
@@ -953,6 +949,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
      * @return
      */
     @Override
+    @SuppressWarnings("java:S2068") // "password" here is parameter/config key naming, not hard-coded credential
     public Map<String, Object> passwordValidate(String password, String appId) {
         String passwordCheckVersion = SpringContext.getProperties("app.auth.password-check-version", "v1");
         // 判断流程是否存在，兼容旧版本
@@ -1102,6 +1099,16 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
         return new String(Base64.getDecoder().decode(source));
     }
 
+    private String getAesSecretOrThrow() {
+        String secret = encryptProperties != null && encryptProperties.getAes() != null
+                ? encryptProperties.getAes().getSecret()
+                : null;
+        if (StringUtils.isEmpty(secret)) {
+            throw BusinessException.serviceThrow(I18n.t("SysUser.tip.aesPasswordEmpty", "AES密码不能为空"));
+        }
+        return secret;
+    }
+
     @Override
     public BaseRet<VerificationCodeRet> getVerificationCode() throws IOException {
         ByteArrayOutputStream outputStream = null;
@@ -1126,7 +1133,7 @@ public class SysUserServiceImpl extends BaseServiceImpl implements SysUserServic
                 outputStream.close();//关闭流
             }
             log.info("base64String: ", base64String);
-            ret.setEncryptCode(AESUtil.encrypt(randomText, aesSecret));
+            ret.setEncryptCode(AESUtil.encrypt(randomText, getAesSecretOrThrow()));
             log.info("getEncryptCode: ", ret.getEncryptCode());
             ret.setImageBase64String("data:image/png;base64," + base64String);
             ret.setUuid(UUID.randomUUID().toString());

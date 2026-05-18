@@ -34,14 +34,15 @@ import org.springframework.util.StreamUtils;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -267,6 +268,7 @@ public class UniOpsServiceImpl implements UniOpsService {
     @Override
     public void publishMenu(String appData) {
 
+        File tempJsonFile = null;
         try {
             // 注册菜单
             // TODO 发布菜单开关
@@ -293,8 +295,11 @@ public class UniOpsServiceImpl implements UniOpsService {
                 }
             }
             // 生成临时文件
-            Path jsonPath = Files.createTempFile("uniops-menu", "json");
-            FileUtils.writeToFile(jsonPath.toFile(), Objects.requireNonNull(JsonUtil.toJson(uMenus)).getBytes(StandardCharsets.UTF_8));
+            tempJsonFile = FileUtils.createTempFile("uniops-menu.json");
+            if (tempJsonFile == null) {
+                throw new IOException("create temp menu file failed");
+            }
+            FileUtils.writeToFile(tempJsonFile, Objects.requireNonNull(JsonUtil.toJson(uMenus)).getBytes(StandardCharsets.UTF_8));
             // 导入到UniOps
             String uniopsServer = SpringContext.getProperties("uniops.master.url", "http://localhost:8080");
             String url = uniopsServer + "/ops/system/menu/import";
@@ -306,12 +311,22 @@ public class UniOpsServiceImpl implements UniOpsService {
 
             header.put("token", getUniOpsToken());
             log.info("菜单内容: {}", JsonUtil.toJson(uMenus) );
-            String uploadRet = HttpUtil.uploadFile(url,"menu.json", "file", Files.newInputStream(jsonPath.toFile().toPath()), params, header);
-            log.info("菜单注册返回信息:" + uploadRet);
+            try (InputStream inputStream = Files.newInputStream(tempJsonFile.toPath())) {
+                String uploadRet = HttpUtil.uploadFile(url,"menu.json", "file", inputStream, params, header);
+                log.info("菜单注册返回信息:" + uploadRet);
+            }
             log.info("发布成功");
         } catch (Exception e) {
             log.error("error:{}",e);
             throw BusinessException.serviceThrow(I18n.t("UniOpsServiceImpl.fileParseFail", "应用包数据解析异常"));
+        } finally {
+            if (tempJsonFile != null) {
+                try {
+                    Files.deleteIfExists(tempJsonFile.toPath());
+                } catch (IOException e) {
+                    log.warn("临时菜单文件删除失败: {}", tempJsonFile.getAbsolutePath(), e);
+                }
+            }
         }
     }
 

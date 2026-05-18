@@ -68,10 +68,10 @@ public class KFaasInitialize implements SystemInitialize {
     @Value("${database.faas-ip:127.0.0.1}")
     private String faasIp;
 
-    @Value("${encrypt.sm4.key:k-pine@kingsware}")
+    @Value("${encrypt.sm4.key:}")
     private String sm4Key;
 
-    @Value("${encrypt.sm4.iv:2024120120991231}")
+    @Value("${encrypt.sm4.iv:}")
     private String iv;
 
 
@@ -80,23 +80,36 @@ public class KFaasInitialize implements SystemInitialize {
      * @param dataSourceInfo    数据源
      */
     private DataSourceInfo decryptDataSourceInfo(DataSourceInfo dataSourceInfo) {
-        if (dataSourceInfo.getUserName().startsWith("[SM4-") && dataSourceInfo.getUserName().endsWith("-SM4]")) {
+        if (isSm4CipherText(dataSourceInfo.getUserName())) {
+            requireSm4Config();
             String str0 = dataSourceInfo.getUserName().substring(5, dataSourceInfo.getUserName().length() - 5);
             String str1 = SM4Utils.decryptData_CBC(str0, sm4Key, iv);
             dataSourceInfo.setUserName(str1);
         }
-        if (dataSourceInfo.getPassword().startsWith("[SM4-") && dataSourceInfo.getPassword().endsWith("-SM4]")) {
+        if (isSm4CipherText(dataSourceInfo.getPassword())) {
+            requireSm4Config();
             String str0 = dataSourceInfo.getPassword().substring(5, dataSourceInfo.getPassword().length() - 5);
             String str1 = SM4Utils.decryptData_CBC(str0, sm4Key, iv);
             dataSourceInfo.setPassword(str1);
         }
-        if (dataSourceInfo.getJdbcUrl().startsWith("[SM4-") && dataSourceInfo.getJdbcUrl().endsWith("-SM4]")) {
+        if (isSm4CipherText(dataSourceInfo.getJdbcUrl())) {
+            requireSm4Config();
             String str0 = dataSourceInfo.getJdbcUrl().substring(5, dataSourceInfo.getJdbcUrl().length() - 5);
             String str1 = SM4Utils.decryptData_CBC(str0, sm4Key, iv);
             dataSourceInfo.setJdbcUrl(str1);
         }
         return dataSourceInfo;
 
+    }
+
+    private boolean isSm4CipherText(String value) {
+        return StringUtils.isNotEmpty(value) && value.startsWith("[SM4-") && value.endsWith("-SM4]");
+    }
+
+    private void requireSm4Config() {
+        if (StringUtils.isEmpty(sm4Key) || StringUtils.isEmpty(iv)) {
+            throw new IllegalStateException("encrypt.sm4.key and encrypt.sm4.iv must be configured when decrypting [SM4-...-SM4] values");
+        }
     }
 
     @Override

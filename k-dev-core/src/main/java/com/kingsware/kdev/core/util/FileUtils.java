@@ -55,6 +55,9 @@ public class FileUtils {
             PosixFilePermission.OWNER_READ,
             PosixFilePermission.OWNER_WRITE
     );
+    private static final String DEFAULT_TEMP_PREFIX = "kdev";
+    private static final String DEFAULT_TEMP_SUFFIX = ".tmp";
+    private static final String DEFAULT_SECURE_TEMP_DIR = "kdev-secure-tmp";
 
     private FileUtils(){
     }
@@ -264,11 +267,57 @@ public class FileUtils {
             suffix = fileName.substring(lastDotIndex);
         }
         try {
-            return File.createTempFile(prefix, suffix);
-        } catch (IOException e) {
+            String normalizedPrefix = normalizeTempPrefix(prefix);
+            String normalizedSuffix = normalizeTempSuffix(suffix);
+            File tempDir = resolveSecureTempDir();
+            File tempFile = File.createTempFile(normalizedPrefix, normalizedSuffix, tempDir);
+            hardenUploadedFile(tempFile);
+            return tempFile;
+        } catch (IOException | IllegalArgumentException e) {
             log.error("临时文件创建失败，文件名:{}", fileName);
             return null;
         }
+    }
+
+    private static String normalizeTempPrefix(String prefix) {
+        String normalized = prefix == null ? "" : prefix.trim();
+        if (StringUtils.isEmpty(normalized)) {
+            normalized = DEFAULT_TEMP_PREFIX;
+        }
+        normalized = normalized.replaceAll("[^A-Za-z0-9._-]", "_");
+        if (normalized.length() < 3) {
+            normalized = (normalized + DEFAULT_TEMP_PREFIX).substring(0, 3);
+        }
+        return normalized;
+    }
+
+    private static String normalizeTempSuffix(String suffix) {
+        String normalized = suffix == null ? "" : suffix.trim();
+        if (StringUtils.isEmpty(normalized)) {
+            return DEFAULT_TEMP_SUFFIX;
+        }
+        return normalized.startsWith(".") ? normalized : "." + normalized;
+    }
+
+    private static File resolveSecureTempDir() throws IOException {
+        String configuredDir = null;
+        try {
+            configuredDir = SpringContext.getProperties("kdev.temp.dir", "");
+        } catch (Exception e) {
+            log.debug("读取 kdev.temp.dir 失败，使用默认临时目录", e);
+        }
+        Path tempDirPath;
+        if (StringUtils.isNotEmpty(configuredDir)) {
+            tempDirPath = Paths.get(configuredDir).toAbsolutePath().normalize();
+        } else {
+            tempDirPath = Paths.get(System.getProperty("java.io.tmpdir"), DEFAULT_SECURE_TEMP_DIR)
+                    .toAbsolutePath()
+                    .normalize();
+        }
+        Files.createDirectories(tempDirPath);
+        File tempDir = tempDirPath.toFile();
+        hardenUploadDirectories(tempDir, tempDir);
+        return tempDir;
     }
 
     /**
@@ -367,8 +416,11 @@ public class FileUtils {
         try {
             File canonicalStopDir = stopDir == null ? null : stopDir.getCanonicalFile();
             File current = targetDir.getCanonicalFile();
-            while (current != null && (canonicalStopDir == null || !current.equals(canonicalStopDir))) {
+            while (current != null) {
                 applyUploadDirectoryPermissions(current.toPath(), current);
+                if (canonicalStopDir != null && current.equals(canonicalStopDir)) {
+                    break;
+                }
                 current = current.getParentFile();
             }
         } catch (IOException e) {
