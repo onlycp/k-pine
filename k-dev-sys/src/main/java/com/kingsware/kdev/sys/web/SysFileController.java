@@ -128,7 +128,6 @@ public class SysFileController extends BaseController {
     @PostMapping(value = "/uploadFile", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
 //    @ApiIgnore
-    @ApiCode("sysinfo:file:upload")
     public BaseRet<List<SysFileRet>> uploadFile(@RequestParam("files") MultipartFile[] files, String fileFrom, Integer saveType) {
 //        fileFrom格式要求：aaa/bbb 前后无斜扛
         if (saveType == null) {

@@ -11,10 +11,10 @@ import javax.servlet.MultipartConfigElement;
 @Configuration
 public class FileUploadConfig {
 
-    @Value("${server.servlet.multipart.max-file-size:2048MB}")
+    @Value("${spring.servlet.multipart.max-file-size:${server.servlet.multipart.max-file-size:2048MB}}")
     private String maxFileSize;
 
-    @Value("${server.servlet.multipart.max-request-size:2048MB}")
+    @Value("${spring.servlet.multipart.max-request-size:${server.servlet.multipart.max-request-size:2048MB}}")
     private String maxRequestSize;
 
     @Bean

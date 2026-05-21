@@ -289,7 +289,11 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             if (!FileUtils.checkFileExt(fileExt)) {
                 throw BusinessException.serviceThrow(FileUtils.getFileExt(file.getOriginalFilename()) + I18n.t("FileManager.suffixCheckFail", "文件后缀名不在上传文件白名单中!") );
             }
-            try (InputStream inputStream = file.getInputStream()){
+            try (InputStream rawInputStream = file.getInputStream();
+                 BufferedInputStream inputStream = new BufferedInputStream(rawInputStream)){
+                if (!FileTypeChecker.checkFileContent(file.getOriginalFilename(), inputStream)) {
+                    throw BusinessException.serviceThrow(I18n.t("FileManager.contentCheckFail", "文件内容与后缀不匹配，请检查后重试!"));
+                }
                 SysFile sysFile = FileManager.getInstance().register(inputStream, file.getOriginalFilename(), (int)file.getSize(), fileFrom, saveType, isLocal ? STATIC_FILE_FOLD : getBasePath(), isLocal);
                 if (sysFile == null) {
                     throw BusinessException.serviceThrow(I18n.t("SysFileServiceImpl.saveFail", "文件保存失败") );
