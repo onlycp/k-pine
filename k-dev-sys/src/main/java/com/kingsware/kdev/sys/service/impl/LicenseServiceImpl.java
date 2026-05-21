@@ -1,7 +1,6 @@
 package com.kingsware.kdev.sys.service.impl;
 
 import com.kingsware.kdev.core.cache.license.LicenseManager;
-import com.kingsware.kdev.core.context.SpringContext;
 import com.kingsware.kdev.core.exception.BusinessException;
 import com.kingsware.kdev.core.exception.LicenseException;
 import com.kingsware.kdev.core.i18n.I18n;
@@ -92,13 +91,9 @@ public class LicenseServiceImpl implements LicenseService {
         else if (status == 3) {
             throw BusinessException.serviceThrow(I18n.t("license.error.3", "许可证已过期"));
         }
-        // 保存license
-        // license目录
-        String licenseDir = SpringContext.getProperties("license.dir", ".");
-        // 读取文件
-        String licenseFilePath = licenseDir + "/" + SpringContext.getProperties("license.file", "pine.license");
         // 保存文件License
-        FileUtils.writeToFile(new File(licenseFilePath), licenseActive.getLicense().getBytes(StandardCharsets.UTF_8));
+        File licenseFile = LicenseManager.getInstance().resolveLicenseFile();
+        FileUtils.writeToFile(licenseFile, licenseActive.getLicense().getBytes(StandardCharsets.UTF_8));
         // 返回license
         return this.getLicense();
     }

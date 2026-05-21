@@ -41,9 +41,13 @@ import org.w3c.dom.NodeList;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -78,7 +82,8 @@ public class UiConfig extends WebMvcConfigurationSupport {
         registry.addResourceHandler("/res/**").addResourceLocations("file:./res/").setCacheControl(CacheControl.noStore());
         log.info("前端目录:{}", ui);
         // unzipUi();
-        if (new File(ui).exists()) {
+        File uiRoot = resolveUiRoot();
+        if (uiRoot != null && uiRoot.exists()) {
             // 替换内容
             String contextPath = SpringContext.getProperties("app.ui.prefix", SpringContext.getBootProperties("server.servlet.context-path", "") );
             if (contextPath.endsWith("/")) {
@@ -89,10 +94,15 @@ public class UiConfig extends WebMvcConfigurationSupport {
                 // 替换字体
                 String text = "url(/static/fonts/";
                 String replaceText = String.format("url(%s/static/fonts/",contextPath);
-                replaceText(new File(ui), text, replaceText);
+                replaceText(uiRoot, text, replaceText);
+
             }
             log.info("加载前端资源:{}", ui);
-            registry.addResourceHandler("/**").addResourceLocations("file:" +  ui);
+            String uiLocation = uiRoot.getPath();
+            if (!uiLocation.endsWith(File.separator)) {
+                uiLocation = uiLocation + File.separator;
+            }
+            registry.addResourceHandler("/**").addResourceLocations("file:" +  uiLocation);
 //            registry.addResourceHandler("/**").addResourceLocations("file:" +  ui).setCacheControl(CacheControl.noCache());
             //registry.addResourceHandler("/**").addResourceLocations("file:" +  ui).setCacheControl(CacheControl.noStore());;
         }
@@ -122,9 +132,32 @@ public class UiConfig extends WebMvcConfigurationSupport {
      * @return
      */
     public boolean isStaticsResource(String url) {
-        String path = ui + url;
-        path = path.replace("//", "/");
-        return Files.exists(Paths.get(path));
+        if (StringUtils.isEmpty(url)) {
+            return false;
+        }
+        String decodedUrl;
+        try {
+            decodedUrl = URLDecoder.decode(url, StandardCharsets.UTF_8.name()).trim();
+        } catch (UnsupportedEncodingException | IllegalArgumentException e) {
+            return false;
+        }
+        if (StringUtils.isEmpty(decodedUrl) || decodedUrl.indexOf('\0') >= 0) {
+            return false;
+        }
+        try {
+            Path uiRoot = Paths.get(ui).toAbsolutePath().normalize();
+            String relative = decodedUrl.replace('\\', '/');
+            if (relative.startsWith("/")) {
+                relative = relative.substring(1);
+            }
+            Path target = uiRoot.resolve(relative).normalize();
+            if (!target.startsWith(uiRoot)) {
+                return false;
+            }
+            return Files.exists(target);
+        } catch (InvalidPathException e) {
+            return false;
+        }
     }
 
     /**
@@ -155,8 +188,18 @@ public class UiConfig extends WebMvcConfigurationSupport {
     }
 
     public String getRouterPageHtml(String path, String token, Map<String, Object> extraData) {
-        String indexPageHtmlFile = ui + "index.html";
-        String html = FileUtils.readFileToString(new File(indexPageHtmlFile), StandardCharsets.UTF_8);
+        File uiRoot = resolveUiRoot();
+        if (uiRoot == null) {
+            return "";
+        }
+        File indexPageHtmlFile;
+        try {
+            indexPageHtmlFile = resolvePathInUiRoot(uiRoot, "index.html");
+        } catch (IOException e) {
+            log.warn("UI首页路径非法，跳过渲染: {}", e.getMessage());
+            return "";
+        }
+        String html = FileUtils.readFileToString(indexPageHtmlFile, StandardCharsets.UTF_8);
         boolean enableSSR = SpringContext.getBoolean("app.ui.enableSSR", false);
         if (enableSSR) {
             Document doc = Jsoup.parse(html);
@@ -289,19 +332,29 @@ public class UiConfig extends WebMvcConfigurationSupport {
         if (resources == null || resources.length == 0) {
             return;
         }
+        File uiRoot = resolveUiRoot();
+        if (uiRoot == null) {
+            return;
+        }
         log.info("应用存在ui目录，程序将自动解压ui包");
         // 判断解压后的目录是否存在此文件
-        String checkFile = ui + "ui-check";
+        File checkFile;
+        try {
+            checkFile = resolvePathInUiRoot(uiRoot, "ui-check");
+        } catch (IOException e) {
+            log.warn("UI检查文件路径非法，跳过解压: {}", e.getMessage());
+            return;
+        }
         // 如果存在ui目录，但不存在ui-check文件，此时不覆盖
-        if (new File(ui).exists() && !new File(checkFile).exists()) {
+        if (uiRoot.exists() && !checkFile.exists()) {
             return;
         }
         // 获取历史版本时间
         try {
 
             String hisMd5 = "";
-            if (new File(checkFile).exists()) {
-                hisMd5 = Files.readAllLines(new File(checkFile).toPath()).get(0).trim();
+            if (checkFile.exists()) {
+                hisMd5 = Files.readAllLines(checkFile.toPath()).get(0).trim();
             }
             Resource resource = findResource(resources, "index.html");
             if (resource == null) {
@@ -318,28 +371,38 @@ public class UiConfig extends WebMvcConfigurationSupport {
                 return;
             }
             // 如果不存在，就创建目录
-            if (!new File(ui).exists()) {
-                new File(ui).mkdirs();
+            if (!uiRoot.exists()) {
+                uiRoot.mkdirs();
             }
             log.info("开始解压ui包，资源数:" +  resources.length);
             for (Resource res: resources) {
                 if (!res.getURL().toString().endsWith("/")) {
                     String url = res.getURI().toString();
                     log.info("资源名称:{}, url：{}", res.getFilename(), url);
-                    String[] arr = res.getURI().toString().split("classes/ui");
-                    String filePath  = ui + arr[1];
-                    Path parentPath = Paths.get(new File(filePath).getParent());
+                    String[] arr = res.getURI().toString().split("classes/ui", 2);
+                    if (arr.length < 2) {
+                        log.warn("无法识别UI资源路径，跳过: {}", res.getURI());
+                        continue;
+                    }
+                    File targetFile;
+                    try {
+                        targetFile = resolvePathInUiRoot(uiRoot, arr[1]);
+                    } catch (IOException e) {
+                        log.warn("UI资源路径越界，跳过: {}", res.getURI());
+                        continue;
+                    }
+                    Path parentPath = Paths.get(targetFile.getParent());
                     if (!parentPath.toFile().exists()) {
                         parentPath.toFile().mkdirs();
                     }
                     // 写入文件
                     log.info("资源:{}", res.getURI().toString());
-                    Files.write(new File(filePath).toPath(), StreamUtils.copyToByteArray(res.getInputStream()));
+                    Files.write(targetFile.toPath(), StreamUtils.copyToByteArray(res.getInputStream()));
                 }
             }
 
             // 创建mdk文件
-            Files.write(new File(checkFile).toPath(), curMd5.getBytes(StandardCharsets.UTF_8));
+            Files.write(checkFile.toPath(), curMd5.getBytes(StandardCharsets.UTF_8));
         }
         catch (Exception e) {
             log.warn("解压ui错误:{}", e);
@@ -354,6 +417,31 @@ public class UiConfig extends WebMvcConfigurationSupport {
             }
         }
         return null;
+    }
+
+    private File resolveUiRoot() {
+        try {
+            return PathSecurityUtils.canonicalFile(ui, "app.ui");
+        } catch (IOException e) {
+            log.warn("UI根目录配置非法，跳过UI目录处理: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    private File resolvePathInUiRoot(File uiRoot, String relativePath) throws IOException {
+        String relative = relativePath == null ? "" : relativePath.trim();
+        if (relative.indexOf('\0') >= 0) {
+            throw new IOException("invalid ui path");
+        }
+        relative = relative.replace('\\', '/');
+        while (relative.startsWith("/")) {
+            relative = relative.substring(1);
+        }
+        File target = new File(uiRoot, relative).getCanonicalFile();
+        if (!PathSecurityUtils.isInsideRoot(target, uiRoot)) {
+            throw new IOException("path outside ui root");
+        }
+        return target;
     }
 
 

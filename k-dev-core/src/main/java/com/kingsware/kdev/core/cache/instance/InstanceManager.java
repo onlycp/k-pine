@@ -85,7 +85,9 @@ public class InstanceManager {
     public SysInstance masterInstance() {
         Integer masterClusterNo = SpringContext.getInt("app.master-cluster-no", 1);
         List<SysInstance> instanceList = DB.findList(SysInstance.class, "select * from sys_instance where cluster_no=? order by cluster_no asc, reg_time asc", masterClusterNo);
-        List<SysInstance> onlines = instanceList.stream().filter(it -> it.getOnline() == 1).collect(Collectors.toList());
+        List<SysInstance> onlines = instanceList.stream()
+                .filter(it -> Integer.valueOf(1).equals(it.getOnline()))
+                .collect(Collectors.toList());
         for (SysInstance sysInstance: onlines) {
             if (sysInstance.getClusterNo() == null) {
                 sysInstance.setClusterNo(1);

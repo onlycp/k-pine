@@ -36,6 +36,7 @@
 		<netty.version>4.1.132.Final</netty.version>
 		<spring-framework.version>5.3.39</spring-framework.version>
 		<snakeyaml.version>2.6</snakeyaml.version>
+		<jackson.version>2.17.3</jackson.version>
 		<commons-io.version>2.21.0</commons-io.version>
 		<json-path.version>2.10.0</json-path.version>
 		<json-smart.version>2.6.0</json-smart.version>
@@ -172,6 +173,13 @@
 	</distributionManagement>
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>com.fasterxml.jackson</groupId>
+				<artifactId>jackson-bom</artifactId>
+				<version>${jackson.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 			<dependency>
 				<artifactId>k-dev-core</artifactId>
 				<groupId>com.kingsware.dev</groupId>

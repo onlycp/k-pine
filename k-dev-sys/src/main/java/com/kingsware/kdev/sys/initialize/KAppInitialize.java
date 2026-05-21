@@ -12,6 +12,7 @@ import com.kingsware.kdev.core.model.SysFile;
 import com.kingsware.kdev.core.orm.DB;
 import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.util.MD5Utils;
+import com.kingsware.kdev.core.util.PathSecurityUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.core.util.ZipUtils;
 import com.kingsware.kdev.sys.manager.FileManager;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -53,10 +55,17 @@ public class KAppInitialize {
     public void execute() {
 //        String regex = ".*\\.pine";
         String regex = ".*\\.pine(zip)?$"; // 匹配 .pine 或 .pinezip 结尾
+        File initRoot;
+        try {
+            initRoot = PathSecurityUtils.canonicalFile(initPsiPath, "app.init-psi-path");
+        } catch (IOException e) {
+            log.warn("init psi path invalid, skip init: {}", initPsiPath, e);
+            return;
+        }
 //        executeExportFlowSql();
 //        log.info("开始安装pine应用包");
         // 扫描指定目录的psi文件
-        File[] files = new File(initPsiPath).listFiles((dir, name) -> Pattern.compile(regex).matcher(name).matches());
+        File[] files = initRoot.listFiles((dir, name) -> Pattern.compile(regex).matcher(name).matches());
         if (files == null) {
             return;
         }
@@ -96,8 +105,9 @@ public class KAppInitialize {
                     String fileExt = sysFile.getFileExt();
                     if ("pinezip".equalsIgnoreCase(fileExt)) {
                         // 解压文件
-                        String unzipPath = SpringContext.getProperties("file.base-path", "/") + "temp/" + StringUtils.getUUID();
-                        File unzipFile = new File(unzipPath);
+                        File baseRoot = PathSecurityUtils.canonicalFile(SpringContext.getProperties("file.base-path", "/"), "file.base-path");
+                        File unzipFile = PathSecurityUtils.resolveUnderRoot(baseRoot, "temp/" + StringUtils.getUUID(), "pinezip.unzip");
+                        String unzipPath = unzipFile.getPath();
                         if (!unzipFile.exists()) {
                             unzipFile.mkdirs();
                         }
@@ -137,12 +147,11 @@ public class KAppInitialize {
                             }
                         }
                         // 将文件移动到备份目录
-                        String hisPathString = initPsiPath +"/AppHistory/";
-                        File hisPath  = new File(hisPathString);
+                        File hisPath  = PathSecurityUtils.resolveUnderRoot(initRoot, "AppHistory", "init.appHistory");
                         if (!hisPath.exists()) {
                             hisPath.mkdirs();
                         }
-                        Files.copy(file.toPath(), Paths.get(hisPathString + file.getName()), StandardCopyOption.REPLACE_EXISTING);
+                        Files.copy(file.toPath(), new File(hisPath, file.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING);
                         // 删除临时文件
                         FileUtils.deleteFileOrDirectory(unzipPath);
                     } else {

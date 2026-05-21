@@ -175,7 +175,16 @@ public class FileUtils {
 
 
     public static void deleteFileOrDirectory(String path) {
-        File fileOrDirectory = new File(path);
+        if (StringUtils.isEmpty(path) || path.indexOf('\0') >= 0) {
+            return;
+        }
+        File fileOrDirectory;
+        try {
+            fileOrDirectory = PathSecurityUtils.canonicalFile(path, "delete.path");
+        } catch (IOException e) {
+            log.warn("delete path invalid: {}", path, e);
+            return;
+        }
         if (!fileOrDirectory.exists()) {
             System.out.println("File or directory does not exist.");
             return;
@@ -306,14 +315,18 @@ public class FileUtils {
         } catch (Exception e) {
             log.debug("读取 kdev.temp.dir 失败，使用默认临时目录", e);
         }
-        Path tempDirPath;
+        File tempDirFile;
         if (StringUtils.isNotEmpty(configuredDir)) {
-            tempDirPath = Paths.get(configuredDir).toAbsolutePath().normalize();
+            try {
+                tempDirFile = PathSecurityUtils.canonicalFile(configuredDir, "kdev.temp.dir");
+            } catch (IOException e) {
+                log.warn("kdev.temp.dir非法，回退默认临时目录: {}", configuredDir, e);
+                tempDirFile = new File(System.getProperty("java.io.tmpdir"), DEFAULT_SECURE_TEMP_DIR).getCanonicalFile();
+            }
         } else {
-            tempDirPath = Paths.get(System.getProperty("java.io.tmpdir"), DEFAULT_SECURE_TEMP_DIR)
-                    .toAbsolutePath()
-                    .normalize();
+            tempDirFile = new File(System.getProperty("java.io.tmpdir"), DEFAULT_SECURE_TEMP_DIR).getCanonicalFile();
         }
+        Path tempDirPath = tempDirFile.toPath();
         Files.createDirectories(tempDirPath);
         File tempDir = tempDirPath.toFile();
         hardenUploadDirectories(tempDir, tempDir);
@@ -523,20 +536,20 @@ public class FileUtils {
      * @throws IOException
      */
     public static void copyDir(String sourcePath, String newPath) throws IOException {
-
-        File file = new File(sourcePath);
-        String[] filePath = file.list();
-        if (!(new File(newPath)).exists()) {
-            (new File(newPath)).mkdirs();
+        File sourceDir = PathSecurityUtils.canonicalFile(sourcePath, "copyDir.sourcePath");
+        File targetDir = PathSecurityUtils.canonicalFile(newPath, "copyDir.newPath");
+        String[] filePath = sourceDir.list();
+        if (!targetDir.exists()) {
+            targetDir.mkdirs();
         }
         assert filePath != null;
         for (String s : filePath) {
-            if ((new File(sourcePath + File.separator + s)).isDirectory()) {
-                copyDir(sourcePath + File.separator + s, newPath + File.separator + s);
+            File child = new File(sourceDir, s);
+            if (child.isDirectory()) {
+                copyDir(child.getPath(), new File(targetDir, s).getPath());
             }
-            if (new File(sourcePath + File.separator + s).isFile()) {
-                copyFile(sourcePath + File.separator + s, newPath + file.separator + s);
-
+            if (child.isFile()) {
+                copyFile(child.getPath(), new File(targetDir, s).getPath());
             }
         }
     }
@@ -548,14 +561,18 @@ public class FileUtils {
      * @throws IOException
      */
     public static void copyFile(String oldPath, String newPath) throws IOException {
-
-        File oldFile = new File(oldPath);
-        File file = new File(newPath);
+        File oldFile = PathSecurityUtils.canonicalFile(oldPath, "copyFile.oldPath");
+        File file = PathSecurityUtils.canonicalFile(newPath, "copyFile.newPath");
+        File parent = file.getParentFile();
+        if (parent != null && !parent.exists()) {
+            parent.mkdirs();
+        }
         @Cleanup FileInputStream in = new FileInputStream(oldFile);
         @Cleanup FileOutputStream out = new FileOutputStream(file);
         byte[] buffer=new byte[2097152];
-        while((in.read(buffer)) != -1){
-            out.write(buffer);
+        int len;
+        while((len = in.read(buffer)) != -1){
+            out.write(buffer, 0, len);
         }
         out.close();
         in.close();

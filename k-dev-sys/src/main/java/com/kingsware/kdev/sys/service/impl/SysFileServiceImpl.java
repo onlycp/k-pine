@@ -330,9 +330,13 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         if (StringUtils.isNotEmpty(basePath)) {
             basePath += File.separator;
         }
-        String fullPath = basePath  + path;
-        // 获取系统路径
-        String systemPath = new File(fullPath).getAbsolutePath();
+        File fullFile;
+        try {
+            fullFile = resolveUnderBase(path);
+        } catch (Exception e) {
+            throw BusinessException.serviceThrow(I18n.t("common.paramInvalid", "参数不合法"));
+        }
+        String systemPath = fullFile.getAbsolutePath();
         // 创建文件解密信息对象
         FileDecryptInfo fileDecryptInfo = new FileDecryptInfo();
         // 设置文件路径
@@ -351,11 +355,13 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
         for (String key: groupProperties.getValues().keySet()) {
 
             String subKey = key.replace("app.file-permission.", "");
-            String dir = basePath + subKey;
-
-            File file = new File(fullPath);
-            File directory = new File(dir);
-            if (file.getAbsolutePath().startsWith(directory.getAbsolutePath())) {
+            File directory;
+            try {
+                directory = resolveUnderBase(subKey);
+            } catch (Exception e) {
+                continue;
+            }
+            if (PathSecurityUtils.isInsideRoot(fullFile, directory)) {
                 String flowId = groupProperties.stringValue(key, "");
                 if (StringUtils.isNotEmpty(flowId)) {
                     // 获取视图模型
@@ -521,7 +527,8 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
         } else {
             // 获取是否加密
-            Path path1 = Paths.get(fileRealPath);
+            File resolvedRealFile = PathSecurityUtils.canonicalFile(fileRealPath, "fileRealPath");
+            Path path1 = resolvedRealFile.toPath();
             String realFileName = path1.toFile().getName();
             String[] arr = realFileName.split("\\.");
             if (arr.length > 1 ) {
@@ -552,8 +559,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
      * @return 对应的本地文件对象
      */
     private File getLocalFile(String path) {
-        String absFilePath = getBasePath().endsWith("/") ? getBasePath() : getBasePath() + File.separator + path;
-        return new File(absFilePath);
+        return resolveUnderBase(path);
     }
 
     private File getStaticFile(String path) {
@@ -812,8 +818,7 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             return new FileEntry(tempFile, sysFile.getFileName());
         }
         else if (sysFile.getSaveType() == 1) {
-            String absFilePath = getBasePath() + sysFile.getFilePath();
-            File localFile = new File(absFilePath);
+            File localFile = getLocalFile(sysFile.getFilePath());
             if (!localFile.exists()) {
                 throw BusinessException.serviceThrow(I18n.t("SysFileServiceImpl.fileNotFound1", "文件不存在，可能被移动或删除！") );
             }
@@ -842,5 +847,14 @@ public class SysFileServiceImpl extends BaseServiceImpl implements SysFileServic
             }
         }
         return null;
+    }
+
+    private File resolveUnderBase(String relativePath) {
+        try {
+            File baseRoot = PathSecurityUtils.canonicalFile(getBasePath(), "file.base-path");
+            return PathSecurityUtils.resolveUnderRoot(baseRoot, relativePath, "relativePath");
+        } catch (IOException e) {
+            throw BusinessException.serviceThrow(I18n.t("common.paramInvalid", "参数不合法"));
+        }
     }
 }

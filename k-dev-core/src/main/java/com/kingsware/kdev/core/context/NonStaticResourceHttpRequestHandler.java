@@ -2,6 +2,7 @@ package com.kingsware.kdev.core.context;
 
 import com.kingsware.kdev.core.util.FileTypeChecker;
 import com.kingsware.kdev.core.util.HttpUtil;
+import com.kingsware.kdev.core.util.PathSecurityUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.logging.Log;
@@ -26,6 +27,7 @@ import java.io.*;
 import java.net.URLConnection;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,12 +49,17 @@ public class NonStaticResourceHttpRequestHandler extends ResourceHttpRequestHand
         Object attrFile = request.getAttribute(ATTR_FILE);
         Resource resource = null;
         if (attrFile instanceof File) {
-            File file = (File) attrFile;
+            File file = validateDownloadFile((File) attrFile);
+            if (file == null) {
+                return null;
+            }
             try {
 //                byte[] fileBytes = FileUtils.readFileToByteArray(file);
                 resource = new InputStreamResource(new FileInputStream(file));
                 request.setAttribute("fileName", file.getName());
-                file.delete();
+                if (isTempFile(file)) {
+                    file.delete();
+                }
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -64,12 +71,88 @@ public class NonStaticResourceHttpRequestHandler extends ResourceHttpRequestHand
         }
         else {
             String path = (String) attrFile;
-            Path filePath = Paths.get(path);
-            String fileName = filePath.getFileName().toString();
-            request.setAttribute("fileName", fileName);
-            resource = new FileSystemResource(filePath);
+            if (StringUtils.isEmpty(path)) {
+                return null;
+            }
+            try {
+                File file = validateDownloadFile(new File(path));
+                if (file == null) {
+                    return null;
+                }
+                Path filePath = file.toPath();
+                String fileName = filePath.getFileName().toString();
+                request.setAttribute("fileName", fileName);
+                resource = new FileSystemResource(filePath);
+            } catch (Exception e) {
+                log.warn("invalid download path from request attr: {}", path, e);
+                return null;
+            }
         }
         return resource;
+    }
+
+    private File validateDownloadFile(File inputFile) {
+        if (inputFile == null) {
+            return null;
+        }
+        try {
+            File file = inputFile.getCanonicalFile();
+            if (!file.exists() || file.isDirectory()) {
+                log.warn("download file missing or directory: {}", file.getPath());
+                return null;
+            }
+            if (!isInAllowedRoots(file)) {
+                log.warn("download file outside allowed roots: {}", file.getPath());
+                return null;
+            }
+            return file;
+        } catch (IOException e) {
+            log.warn("download file canonical failed: {}", inputFile.getPath(), e);
+            return null;
+        }
+    }
+
+    private boolean isInAllowedRoots(File file) {
+        List<File> roots = new ArrayList<>();
+        addRoot(roots, SpringContext.getProperties("file.base-path", "."), "file.base-path");
+        addRoot(roots, "res", "res");
+        addRoot(roots, System.getProperty("java.io.tmpdir"), "java.io.tmpdir");
+        String secureTempDir = SpringContext.getProperties("kdev.temp.dir", "");
+        if (StringUtils.isNotEmpty(secureTempDir)) {
+            addRoot(roots, secureTempDir, "kdev.temp.dir");
+        }
+        for (File root : roots) {
+            if (PathSecurityUtils.isInsideRoot(file, root)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isTempFile(File file) {
+        List<File> tempRoots = new ArrayList<>();
+        addRoot(tempRoots, System.getProperty("java.io.tmpdir"), "java.io.tmpdir");
+        String secureTempDir = SpringContext.getProperties("kdev.temp.dir", "");
+        if (StringUtils.isNotEmpty(secureTempDir)) {
+            addRoot(tempRoots, secureTempDir, "kdev.temp.dir");
+        }
+        for (File root : tempRoots) {
+            if (PathSecurityUtils.isInsideRoot(file, root)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void addRoot(List<File> roots, String path, String key) {
+        if (StringUtils.isEmpty(path)) {
+            return;
+        }
+        try {
+            roots.add(PathSecurityUtils.canonicalFile(path, key));
+        } catch (IOException e) {
+            log.warn("skip invalid allowed root {}={}", key, path);
+        }
     }
 
     @Override

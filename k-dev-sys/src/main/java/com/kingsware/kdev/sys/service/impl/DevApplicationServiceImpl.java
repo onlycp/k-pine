@@ -813,7 +813,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                         if (sysFile.getSaveType() == 2) {
                             file = sysFileService.getFaasFile(sysFile.getFilePath());
                         } else {
-                            file = new File(SpringContext.getProperties("file.base-path", "/") + sysFile.getFilePath());
+                            file = resolveUnderBasePath(sysFile.getFilePath(), "sysFile.filePath");
                         }
                         if (file == null || !file.exists()) {
                             throw new RuntimeException(I18n.t("DevApplicationServiceImpl.fileNotFound", "安装文件不存在"));
@@ -821,8 +821,8 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                         // 解压文件
                         logStack.addMessage(I18n.t("DevApplicationServiceImpl.startInstall", "开始安装pinezip:") + sysFile.getFileOriginalName());
                         logStack.addMessage(I18n.t("DevApplicationServiceImpl.startUnzip", "开始解压pinezip:") + sysFile.getFileOriginalName());
-                        String unzipPath = SpringContext.getProperties("file.base-path", "/") + "temp/" + StringUtils.getUUID();
-                        File unzipFile = new File(unzipPath);
+                        File unzipFile = resolveUnderBasePath("temp/" + StringUtils.getUUID(), "pinezip.unzipPath");
+                        String unzipPath = unzipFile.getPath();
                         if (!unzipFile.exists()) {
                             unzipFile.mkdirs();
                         }
@@ -830,7 +830,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                         logStack.addMessage(I18n.t("DevApplicationServiceImpl.finishUnzip", "完成解压pinezip:") + sysFile.getFileOriginalName());
                         // 安装pine
                         logStack.addMessage(I18n.t("DevApplicationServiceImpl.beginPines", "开始导入.pine文件") + sysFile.getFileOriginalName());
-                        File pines = new File(unzipPath + "/pines");
+                        File pines = PathSecurityUtils.resolveUnderRoot(unzipFile, "pines", "pinezip.pines");
                         File[] appFiles = pines.listFiles();
                         if(pines.exists() && appFiles != null && appFiles.length > 0){
                             for (File pine : appFiles) {
@@ -845,16 +845,16 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                         logStack.addMessage(I18n.t("DevApplicationServiceImpl.finishPines", "完成导入.pine文件") + sysFile.getFileOriginalName());
                         // 拷贝res文件
                         logStack.addMessage(I18n.t("DevApplicationServiceImpl.beginRes", "开始导入静态资源文件:") + sysFile.getFileOriginalName());
-                        File pineFiles = new File(unzipPath + "/pineFiles");
+                        File pineFiles = PathSecurityUtils.resolveUnderRoot(unzipFile, "pineFiles", "pinezip.pineFiles");
                         copyFileToPine(pineFiles, pineFiles.getPath());
                         logStack.addMessage(I18n.t("DevApplicationServiceImpl.finishRes", "完成导入静态资源文件:") + sysFile.getFileOriginalName());
                         // 拷贝faas文件
                         logStack.addMessage(I18n.t("DevApplicationServiceImpl.beginRes", "开始导入faas服务器文件:") + sysFile.getFileOriginalName());
-                        File faasFiles = new File(unzipPath + "/faasFiles");
+                        File faasFiles = PathSecurityUtils.resolveUnderRoot(unzipFile, "faasFiles", "pinezip.faasFiles");
                         copyFileToFaas(faasFiles, faasFiles.getPath());
                         logStack.addMessage(I18n.t("DevApplicationServiceImpl.finishRes", "完成导入faas服务器文件:") + sysFile.getFileOriginalName());
                         // 导入sysFile表数据
-                        File sysFileFiles = new File(unzipPath + "/sysFile");
+                        File sysFileFiles = PathSecurityUtils.resolveUnderRoot(unzipFile, "sysFile", "pinezip.sysFile");
                         File[] jsonFiles = sysFileFiles.listFiles();
                         if(sysFileFiles.exists() && jsonFiles!= null && jsonFiles.length > 0){
                             for (File jsonFile : jsonFiles) {
@@ -867,7 +867,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                         }
                         // 执行DDL + 导入数据
                         logStack.addMessage(I18n.t("DevApplicationServiceImpl.beginDDL", "开始导入DDL和表数据:") + sysFile.getFileOriginalName());
-                        File ddlFiles = new File(unzipPath + "/sqls");
+                        File ddlFiles = PathSecurityUtils.resolveUnderRoot(unzipFile, "sqls", "pinezip.sqls");
                         File[] ddlFile = ddlFiles.listFiles(e -> e.isDirectory() && !e.getName().equalsIgnoreCase("__MACOSX"));
                         if(ddlFiles.exists() && ddlFile!= null && ddlFile.length > 0){
                             for (File ddl : ddlFile) {
@@ -888,7 +888,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
                             json = FileUtils.readFile(file);
                             file.delete();
                         } else {
-                            json = FileUtils.readFile(new File(SpringContext.getProperties("file.base-path", "/") + sysFile.getFilePath()));
+                            json = FileUtils.readFile(resolveUnderBasePath(sysFile.getFilePath(), "sysFile.filePath"));
                         }
                         logStack.addMessage(I18n.t("DevApplicationServiceImpl.startInstall", "开始安装应用:") + sysFile.getFileOriginalName());
                         String result = importApp(json, argv.getTeamId());
@@ -1009,9 +1009,9 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             }
         } else {
             String sourcePath = source.getPath();
-            String prefixPath = new File(prefix).getPath();
+            String prefixPath = PathSecurityUtils.canonicalFile(prefix, "copy.prefix").getPath();
             String copyPath = sourcePath.substring(prefixPath.length() + 1);
-            File copyFile = new File(copyPath);
+            File copyFile = resolveInWorkspace(copyPath, "copy.pine.target");
             if (!copyFile.exists()) {
                 copyFile.getParentFile().mkdirs();
                 Files.copy(Paths.get(sourcePath), copyFile.toPath());
@@ -1036,9 +1036,9 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
             }
         } else {
             String sourcePath = source.getPath();
-            String prefixPath = new File(prefix).getPath();
+            String prefixPath = PathSecurityUtils.canonicalFile(prefix, "copy.prefix").getPath();
             String copyPath = sourcePath.substring(prefixPath.length() + 1);
-            File copyFile = new File(copyPath);
+            File copyFile = resolveInWorkspace(copyPath, "copy.faas.target");
             String name = copyFile.getName();
             String path = copyFile.getParent();
             path = path.replaceAll("\\\\", "/");
@@ -1163,8 +1163,7 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
     @Override
     public void backupPine(String pineBody, String fileName) {
         // 创建历史目录
-        String hisPathString = initPsiPath +"/AppHistory/";
-        File hisPath  = new File(hisPathString);
+        File hisPath  = resolveInInitRoot("AppHistory", "backup.history");
         if (!hisPath.exists()) {
             hisPath.mkdirs();
         }
@@ -1177,7 +1176,8 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         }
         newFileName = newFileName + "_" + DateUtils.formatDate(new Date(), "yyyyMMddHHmmss") + ".pine";
         try {
-            Files.write(new File(hisPathString + newFileName).toPath(), pineBody.getBytes(StandardCharsets.UTF_8));
+            File backupFile = PathSecurityUtils.resolveUnderRoot(hisPath, newFileName, "backup.file");
+            Files.write(backupFile.toPath(), pineBody.getBytes(StandardCharsets.UTF_8));
         }
         catch (Exception e) {
             log.info("文件备份失败:{}", e.getMessage());
@@ -1204,6 +1204,33 @@ public class DevApplicationServiceImpl extends BaseServiceImpl implements DevApp
         KdbFlowResult result = FaasInvoke.callFlow("b46a4875a5594c82a87d440ba01416d6", params);
         if (result.getData() instanceof ErrorResult) {
             throw BusinessException.serviceThrow(result.getExceptionStack());
+        }
+    }
+
+    private File resolveUnderBasePath(String relativePath, String key) {
+        try {
+            File baseRoot = PathSecurityUtils.canonicalFile(SpringContext.getProperties("file.base-path", "/"), "file.base-path");
+            return PathSecurityUtils.resolveUnderRoot(baseRoot, relativePath, key);
+        } catch (Exception e) {
+            throw BusinessException.serviceThrow(I18n.t("common.paramInvalid", "参数不合法"));
+        }
+    }
+
+    private File resolveInWorkspace(String relativePath, String key) {
+        try {
+            File workspaceRoot = PathSecurityUtils.canonicalFile(".", "workspace");
+            return PathSecurityUtils.resolveUnderRoot(workspaceRoot, relativePath, key);
+        } catch (Exception e) {
+            throw BusinessException.serviceThrow(I18n.t("common.paramInvalid", "参数不合法"));
+        }
+    }
+
+    private File resolveInInitRoot(String relativePath, String key) {
+        try {
+            File initRoot = PathSecurityUtils.canonicalFile(initPsiPath, "app.init-psi-path");
+            return PathSecurityUtils.resolveUnderRoot(initRoot, relativePath, key);
+        } catch (Exception e) {
+            throw BusinessException.serviceThrow(I18n.t("common.paramInvalid", "参数不合法"));
         }
     }
 }

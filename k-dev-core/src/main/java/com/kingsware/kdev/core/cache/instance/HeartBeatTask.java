@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.net.InetAddress;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -87,7 +88,9 @@ public class HeartBeatTask implements KTask, KRunner {
     private void refreshInstances() {
         // 查找所有会话
         List<SysInstance> instanceList = DB.findList(SysInstance.class, "select * from sys_instance order by cluster_no asc, reg_time asc ");
-        instanceList = instanceList.stream().filter(it -> it.getOnline() == 1).collect(Collectors.toList());
+        instanceList = instanceList.stream()
+                .filter(it -> Integer.valueOf(1).equals(it.getOnline()))
+                .collect(Collectors.toList());
         for (SysInstance instance : instanceList) {
             if (instance.getClusterNo() == null) {
                 instance.setClusterNo(1);
@@ -103,7 +106,8 @@ public class HeartBeatTask implements KTask, KRunner {
         long instTimeoutSecond = Long.parseLong(SpringContext.getProperties("app.inst-time-out-second", "30"));
         Date date = new Date(new Date().getTime() - (1000*instTimeoutSecond));
         for (SysInstance instance : instanceList) {
-            if (instance.getHeartBeatTime().compareTo(DateUtils.formatDate(date, DateUtils.DATE_TIME)) < 0) {
+            if (Objects.nonNull(instance.getHeartBeatTime())
+                    && instance.getHeartBeatTime().compareTo(DateUtils.formatDate(date, DateUtils.DATE_TIME)) < 0) {
                 instance.setOnline(0);
                 DB.update(instance);
             }

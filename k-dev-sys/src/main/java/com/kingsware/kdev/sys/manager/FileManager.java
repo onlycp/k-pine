@@ -11,6 +11,7 @@ import com.kingsware.kdev.core.plugins.CdnPlugin;
 import com.kingsware.kdev.core.util.AESUtil;
 import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
+import com.kingsware.kdev.core.util.PathSecurityUtils;
 import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.bean.FaasUploadRet;
 import com.kingsware.kdev.core.model.SysFile;
@@ -145,17 +146,16 @@ public class FileManager {
                 // 相对路径
 
                 String relativePath = File.separator + fileFrom + File.separator;
-                // 磁盘存储路径
-                String filePath = basePath +  relativePath;
-                File path = new File(filePath);
+                File baseDir = PathSecurityUtils.canonicalFile(basePath, "file.base-path");
+                File path = PathSecurityUtils.resolveUnderRoot(baseDir, fileFrom, "fileFrom");
                 boolean status = path.mkdirs();
-                FileUtils.hardenUploadDirectories(new File(basePath), path);
+                FileUtils.hardenUploadDirectories(baseDir, path);
                 // 拷贝文件
                 String saveFileName = fileName;
                 if (!withoutChecking && isCloseReplaceMode) {
                     saveFileName = realName;
                 }
-                File saveFile = new File(path.getAbsolutePath() + "/" + saveFileName);
+                File saveFile = PathSecurityUtils.resolveUnderRoot(path, saveFileName, "fileName");
                 FileCopyUtils.copy(inputStream, Files.newOutputStream(saveFile.toPath()));
                 FileUtils.hardenUploadedFile(saveFile);
 //                sysFile.setFileMd5(FileUtils.getMD5(inputStream));

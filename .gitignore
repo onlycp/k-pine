@@ -18,3 +18,10 @@ ui
 res
 .vscode
 ui2
+docs/
+delivery/
+stress_test_env/
+dll/
+data/
+__pycache__/
+/db-*.json

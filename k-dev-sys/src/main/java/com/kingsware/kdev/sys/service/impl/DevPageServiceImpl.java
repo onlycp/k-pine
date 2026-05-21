@@ -196,26 +196,6 @@ public class DevPageServiceImpl extends BaseServiceImpl implements DevPageServic
     @Override
     public void render (String id) {
         //控response以什么码表写数据
-        ServletUtil.response().setCharacterEncoding("utf-8");
-        //指定浏览器以什么码表解码服务器发送的数据
-        ServletUtil.response().setContentType("text/html; charset=UTF-8");
-        try (PrintWriter writer = ServletUtil.response().getWriter()) {
-
-            // 查找页面
-            DevPage model = DB.findById(DevPage.class, id);
-            // 读取模板文件
-            File file = ResourceUtils.getFile("classpath:templates/page.html");
-            String html = FileUtils.readFile(file);
-            // 替换标题
-            Map<String, String> context = new HashMap<>();
-            context.put("title", model.getName());
-            context.put("json", model.getPageJson());
-            String renderHtml = TemplateUtil.render(html, context);
-            writer.write(renderHtml);
-        }
-        catch (Exception e) {
-            throw BusinessException.serviceThrow(I18n.t("DevPageServiceImpl.pageRenderFail", "页面渲染失败") );
-        }
 
     }
 

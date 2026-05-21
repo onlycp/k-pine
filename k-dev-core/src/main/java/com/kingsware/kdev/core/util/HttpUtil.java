@@ -677,6 +677,7 @@ public class HttpUtil {
             connection.setReadTimeout(60000);
             connection.setDoInput(true);
             @Cleanup InputStream is = connection.getInputStream();
+            String safeFileName = sanitizeDownloadFileName(fileName);
             if ((!FileTypeChecker.isAudioFile(path) && !FileTypeChecker.isVideoFile(fileName)) || ServletUtil.request().getHeader("Range") == null) {
 
                 String contentLength = connection.getHeaderField("Content-Length");
@@ -688,7 +689,8 @@ public class HttpUtil {
                     }
 
                     ServletUtil.response().setContentType(APPLICATION_OCTET_STREAM_VALUE);
-                    ServletUtil.response().setHeader("Content-Disposition", "attachment;filename=" + UriEncoder.encode(fileName));
+                    ServletUtil.response().setHeader("Content-Disposition", "attachment;filename=" + UriEncoder.encode(safeFileName));
+                    ServletUtil.response().setHeader("X-Content-Type-Options", "nosniff");
                     byte[] buf = new byte[512 * 1024];
                     int len;
                     OutputStream out = ServletUtil.response().getOutputStream();
@@ -712,6 +714,7 @@ public class HttpUtil {
                 ServletUtil.request().setAttribute(NonStaticResourceHttpRequestHandler.ATTR_FILE, is);
                 ServletUtil.request().setAttribute(NonStaticResourceHttpRequestHandler.URL_CONNECTION, connection);
                 ServletUtil.request().setAttribute(URL_PATH, downloadUrl );
+                ServletUtil.response().setHeader("X-Content-Type-Options", "nosniff");
                 nonStaticResourceHttpRequestHandler.handleRequest(ServletUtil.request(), ServletUtil.response());
 //                videoHttpRequestHandler.handleRequest(ServletUtil.request(), ServletUtil.response());
 //                HttpServletResponse response = ServletUtil.response();
@@ -768,6 +771,14 @@ public class HttpUtil {
             if (connection != null)
                 connection.disconnect();
         }
+    }
+
+    private static String sanitizeDownloadFileName(String fileName) {
+        String safeName = StringUtils.isEmpty(fileName) ? "download.bin" : fileName.trim();
+        if (!FileUtils.checkFileNaming(safeName)) {
+            return "download.bin";
+        }
+        return safeName;
     }
 
     /**

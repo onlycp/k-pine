@@ -77,7 +77,7 @@ public class PacketEventHandler implements EventHandler<PacketEvent> {
                     payloads.clear();
                     lastProcessedTime = System.currentTimeMillis();
                 }
-                log.info("Processing batch of {} messages, topic={}", batchToProcess.size(), topic);
+//                log.info("Processing batch of {} messages, topic={}", batchToProcess.size(), topic);
 
                 for (KmqConsumer consumer : consumers) {
                     try {

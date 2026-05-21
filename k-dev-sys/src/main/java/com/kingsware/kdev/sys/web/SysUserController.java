@@ -265,6 +265,17 @@ public class SysUserController extends BaseController {
         return BaseRet.success(sysUserService.passwordValidate(password, appId));
     }
 
+    /**
+     *  获取用户基本信息
+     * @return 提示
+     */
+    @GetMapping(value = "/passwordValidate")
+    @ApiIgnore
+    public BaseRet<?> passwordValidateGet(String password, String appId) {
+        return BaseRet.success(sysUserService.passwordValidate(password, appId));
+    }
+
+
     @GetMapping("/getVerifyCode")
     @ApiIgnore
     public BaseRet<VerificationCodeRet> getVerificationCode() throws IOException {

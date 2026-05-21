@@ -2,6 +2,7 @@ package com.kingsware.kdev.core.util;
 
 import com.kingsware.kdev.core.bean.NullOutputStream;
 import com.kingsware.kdev.core.bean.ShellResult;
+import com.kingsware.kdev.core.context.SpringContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.exec.*;
 
@@ -27,8 +28,9 @@ public class ShellUtils {
             if (shell.isEmpty()) {
                 return ShellResult.fail("命令为空");
             }
+            File workDir = resolveShellWorkDir(path);
             // 组装命令
-            Process process = Runtime.getRuntime().exec(shell, null, new File(path));
+            Process process = Runtime.getRuntime().exec(shell, null, workDir);
 //            process.waitFor(3, TimeUnit.SECONDS);
             if (waitForResult) {
                 InputStreamReader isr = new InputStreamReader(process.getInputStream());
@@ -56,11 +58,12 @@ public class ShellUtils {
 
     public static void execAsync(String path, String command)  {
         try {
+            File workDir = resolveShellWorkDir(path);
             CommandLine commandLine = CommandLine.parse(command);
             DefaultExecutor exec = new DefaultExecutor();
             PumpStreamHandler streamHandler = new PumpStreamHandler(new NullOutputStream(), new NullOutputStream());
             exec.setStreamHandler(streamHandler);
-            exec.setWorkingDirectory(new File(path));
+            exec.setWorkingDirectory(workDir);
             exec.execute(commandLine);
             // 避免主线程退出导致程序退出
             Thread.currentThread().join();
@@ -68,6 +71,15 @@ public class ShellUtils {
         catch (Exception e) {
             log.info("error", e);
         }
+    }
+
+    private static File resolveShellWorkDir(String path) throws IOException {
+        File baseRoot = PathSecurityUtils.canonicalFile(SpringContext.getProperties("file.base-path", "."), "file.base-path");
+        File workDir = PathSecurityUtils.canonicalFile(path, "shell.path");
+        if (!PathSecurityUtils.isInsideRoot(workDir, baseRoot)) {
+            throw new IOException("shell path outside base root");
+        }
+        return workDir;
     }
 
 

@@ -121,10 +121,14 @@ public class KFaasInitialize implements SystemInitialize {
         DbContext.getInstance().createDataBase("MySql", DbContext.getInstance().getDefault().getConfig());
         // 读取文件
         // 在windows环境中，代码版运行./xx会找不到文件，需要改成.\xx
-        String dbConfigFilePath = initDatasourcePath + File.separator + "db.json";
-//        log.info("DB-JSON path:{}", dbConfigFilePath);
-        File dbConfigFile = new File(dbConfigFilePath);
-        if (dbConfigFile.exists()) {
+        File dbConfigFile = null;
+        try {
+            File datasourceRoot = PathSecurityUtils.canonicalFile(initDatasourcePath, "database.initDatasourcePath");
+            dbConfigFile = PathSecurityUtils.resolveUnderRoot(datasourceRoot, "db.json", "database.db.json");
+        } catch (IOException e) {
+            log.warn("db.json path invalid, skip datasource local init: {}", initDatasourcePath, e);
+        }
+        if (dbConfigFile != null && dbConfigFile.exists()) {
 //            log.info("DB-JSON begin");
             String text = FileUtils.readFileText(dbConfigFile);
 //            log.info("DB-JSON Content:{}", text);

@@ -10,6 +10,7 @@ import com.kingsware.kdev.core.util.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
@@ -25,6 +26,7 @@ import java.util.*;
  */
 @Slf4j
 public class LicenseManager {
+    private static final String DEFAULT_LICENSE_FILE = "pine.license";
     private static LicenseManager instance;
     private static Map<String, LicenseValidate> licenseValidateMap = new HashMap<>();
 
@@ -65,16 +67,40 @@ public class LicenseManager {
 
 
     public void loadLicense() {
-        // license目录
-        String licenseDir = SpringContext.getProperties("license.dir", ".");
-        // 读取文件
-        String licenseFilePath = licenseDir + "/" + SpringContext.getProperties("license.file", "pine.license");
-        File licenseFile = new File(licenseFilePath);
+        File licenseFile = resolveLicenseFile();
         // 如果license文件不存在
         if (licenseFile.exists()) {
             license = FileUtils.readFile(licenseFile).trim();
         }
 
+    }
+
+    public File resolveLicenseFile() {
+        String licenseDir = SpringContext.getProperties("license.dir", ".");
+        String configuredFile = SpringContext.getProperties("license.file", DEFAULT_LICENSE_FILE);
+        String licenseFileName = normalizeLicenseFileName(configuredFile);
+        try {
+            File rootDir = PathSecurityUtils.canonicalFile(licenseDir, "license.dir");
+            File candidate = new File(rootDir, licenseFileName).getCanonicalFile();
+            if (PathSecurityUtils.isInsideRoot(candidate, rootDir)) {
+                return candidate;
+            }
+        } catch (IOException e) {
+            log.warn("license路径配置非法，回退默认文件: {}", e.getMessage());
+        }
+        return new File(DEFAULT_LICENSE_FILE);
+    }
+
+    private String normalizeLicenseFileName(String configuredFile) {
+        String fileName = configuredFile == null ? "" : configuredFile.trim();
+        if (StringUtils.isEmpty(fileName)) {
+            return DEFAULT_LICENSE_FILE;
+        }
+        if (!FileUtils.checkFileNaming(fileName)) {
+            log.warn("license.file配置非法，回退默认文件: {}", fileName);
+            return DEFAULT_LICENSE_FILE;
+        }
+        return fileName;
     }
 
     public String getLicense() {

@@ -10,6 +10,9 @@ import com.kingsware.kdev.core.cache.license.LicenseManager;
 import com.kingsware.kdev.core.constants.Version;
 import com.kingsware.kdev.core.context.KClientContext;
 import com.kingsware.kdev.core.context.SpringContext;
+import com.kingsware.kdev.core.exception.BusinessException;
+import com.kingsware.kdev.core.i18n.I18n;
+import com.kingsware.kdev.core.util.StringUtils;
 import com.kingsware.kdev.sys.argv.SysFileQueryArgv;
 import com.kingsware.kdev.sys.ret.SysFileRet;
 import com.kingsware.kdev.sys.ret.SysStaticFileRet;
@@ -186,6 +189,9 @@ public class SysFileController extends BaseController {
     @ApiIgnore
     public ResponseEntity<org.springframework.core.io.Resource> downloadStaticZip(String path, String name) throws IOException, ServletException {
         String resultPath = sysFileService.compressStaticZip(path, name);
+        if (StringUtils.isEmpty(resultPath)) {
+            throw BusinessException.serviceThrow(I18n.t("SysFileServiceImpl.fileCompressFail", "文件压缩失败"));
+        }
         String downloadName = new File(resultPath).getName();
         org.springframework.core.io.Resource resource = new FileSystemResource(resultPath);
         return ResponseEntity.ok()

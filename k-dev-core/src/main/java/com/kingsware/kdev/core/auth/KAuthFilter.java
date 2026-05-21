@@ -97,7 +97,7 @@ public class KAuthFilter implements Filter {
     @Value("${app.mode.dev:false}")
     private boolean modeDev;
 
-    @Value("#{'${app.ignore.urls:/websocket;/eiac}'.split(';')}")
+    @Value("#{'${app.ignore.urls:**/websocket;**/eiac}'.split(';')}")
     private List<String> ignoreUrls;
 
     @Value("#{'${app.cache.urls:/hellworld}'.split(';')}")
@@ -284,6 +284,9 @@ public class KAuthFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         String url = request.getRequestURI();
+        if (url.contains("passwordValidate")) {
+            System.currentTimeMillis();
+        }
         try {
             initContext(request, response);
             if (containUrl(request, url) ) {
@@ -511,7 +514,7 @@ public class KAuthFilter implements Filter {
                 ServletUtil.responseJson(response, BaseRet.fail(message, RetEnum.FORBIDDEN.getCode()));
             }
             catch (ServletException e) {
-                //文件下载的不作处理
+                //文件下载的不作处理@
             }
             catch (Exception e) {
                 errorMessage = e.getMessage();

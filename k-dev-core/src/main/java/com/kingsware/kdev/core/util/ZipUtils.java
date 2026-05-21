@@ -32,12 +32,12 @@ public class ZipUtils {
 
     public static void zip(File[] files, String outFilePath, String deleteRootPath) {
         try {
-            File outFile = new File(outFilePath);
+            File outFile = PathSecurityUtils.canonicalFile(outFilePath, "zip.outFilePath");
             File parentFile = outFile.getParentFile();
             if (parentFile != null) {
                 parentFile.mkdirs();
             }
-            ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(outFilePath)));
+            ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(outFile)));
             for (File file : files) {
                 copyToZip(file, zos, deleteRootPath);
             }
@@ -139,14 +139,14 @@ public class ZipUtils {
     }
 
     public static void unzip(String destDirPath, String path, String charset) throws Exception {
-        File file = new File(path);
+        File file = PathSecurityUtils.canonicalFile(path, "zip.path");
         if (!file.exists()) {
             throw new Exception(I18n.t("ZipUtils.pathNotFound", "源目标路径：[{0}] 不存在...", path));
         }
         // 开始解压
         ZipFile zipFile = null;
         try {
-            File destDir = new File(destDirPath).getCanonicalFile();
+            File destDir = PathSecurityUtils.canonicalFile(destDirPath, "zip.destDirPath");
             if (!destDir.exists()) {
                 destDir.mkdirs();
             }

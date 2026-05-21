@@ -1,6 +1,8 @@
 package com.kingsware.kdev.core.util;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -41,8 +43,17 @@ public class FileTypeChecker {
      * @return 文件扩展名，如果无法获取则返回空字符串
      */
     private static String getFileExtension(String filePath) {
-        File file = new File(filePath);
-        String fileName = file.getName();
+        if (filePath == null) {
+            return "";
+        }
+        String fileName;
+        try {
+            Path path = Paths.get(filePath);
+            Path name = path.getFileName();
+            fileName = name == null ? "" : name.toString();
+        } catch (Exception ignored) {
+            fileName = new File(filePath).getName();
+        }
         int dotIndex = fileName.lastIndexOf(".");
         if (dotIndex > 0 && dotIndex < fileName.length() - 1) {
             return fileName.substring(dotIndex + 1);
@@ -51,4 +62,3 @@ public class FileTypeChecker {
         }
     }
 }
-

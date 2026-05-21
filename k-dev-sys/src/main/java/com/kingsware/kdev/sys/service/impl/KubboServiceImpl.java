@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StreamUtils;
+import org.springframework.web.util.HtmlUtils;
 
 import java.io.PrintWriter;
 import java.net.URLEncoder;
@@ -166,10 +167,10 @@ public class KubboServiceImpl implements KubboService {
                     instance.setClusterNo(1);
                 }
                 sb.append("<tr>");
-                sb.append("<td>").append(instance.getClusterNo()).append("</td>");
-                sb.append("<td>").append(instance.getHostName()).append("</td>");
-                sb.append("<td>").append(instance.getPort()).append("</td>");
-                sb.append("<td>").append(instance.getHeartBeatTime()).append("</td>");
+                sb.append("<td>").append(escapeHtml(instance.getClusterNo())).append("</td>");
+                sb.append("<td>").append(escapeHtml(instance.getHostName())).append("</td>");
+                sb.append("<td>").append(escapeHtml(instance.getPort())).append("</td>");
+                sb.append("<td>").append(escapeHtml(instance.getHeartBeatTime())).append("</td>");
                 sb.append("<td>").append(instance.getOnline() == 1 ? "在线": "离线").append("</td>");
                 sb.append("</tr>");
             }
@@ -197,6 +198,13 @@ public class KubboServiceImpl implements KubboService {
         catch (Exception e) {
             return "";
         }
+    }
+
+    private String escapeHtml(Object value) {
+        if (value == null) {
+            return "";
+        }
+        return HtmlUtils.htmlEscape(value.toString(), "UTF-8");
     }
 
 

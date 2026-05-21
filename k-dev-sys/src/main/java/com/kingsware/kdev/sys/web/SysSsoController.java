@@ -24,18 +24,18 @@ public class SysSsoController extends BaseController{
     @Resource
     private SysSsoService sysSsoService;
 
-//
-//    /**
-//     * sso
-//     *
-//     * @return 分页
-//     */
-//    @ApiOperation(value = "sso登录 ", notes = "sso登录")
-//    @PostMapping("/login")
-//    @ApiIgnore
-//    public BaseRet<SysUserLoginRet> autoLogin(@RequestBody SysSsoArgv argv) {
-//        return BaseRet.success(sysSsoService.doLogin(argv));
-//    }
+
+    /**
+     * sso
+     *
+     * @return 分页
+     */
+    @ApiOperation(value = "sso登录 ", notes = "sso登录")
+    @PostMapping("/login")
+    @ApiIgnore
+    public BaseRet<SysUserLoginRet> autoLogin(@RequestBody SysSsoArgv argv) {
+        return BaseRet.success(sysSsoService.doLogin(argv));
+    }
 
 
 

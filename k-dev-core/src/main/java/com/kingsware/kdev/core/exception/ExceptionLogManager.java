@@ -5,6 +5,7 @@ import com.kingsware.kdev.core.bean.Option;
 import com.kingsware.kdev.core.util.DateUtils;
 import com.kingsware.kdev.core.util.FileUtils;
 import com.kingsware.kdev.core.util.JsonUtil;
+import com.kingsware.kdev.core.util.PathSecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -15,6 +16,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * @author chenp
@@ -23,6 +25,8 @@ import java.util.List;
 @Slf4j
 public class ExceptionLogManager {
     private static ExceptionLogManager instance = new ExceptionLogManager();
+    private static final Pattern DATE_PATTERN = Pattern.compile("^\\d{8}$");
+    private static final Pattern ID_PATTERN = Pattern.compile("^[A-Za-z0-9._-]{1,128}$");
 
     private String today;
 
@@ -105,16 +109,26 @@ public class ExceptionLogManager {
     public ExceptionLog read(String exceptionId) {
         // 提取日期和ID
         String[] arr = exceptionId.split("_");
+        if (arr.length != 2) {
+            return null;
+        }
         String date = arr[0];
         String id = arr[1];
-
-        // 构建日志文件路径
-        String pathStr = "logs/exception/" + date;
+        if (!DATE_PATTERN.matcher(date).matches() || !ID_PATTERN.matcher(id).matches()) {
+            return null;
+        }
 
         // 修复：exception不会自动创建导致多环境异常日志查询不到问题
         new File("logs/exception").mkdirs();
-
-        File logFile = new File(pathStr, id);
+        File logFile;
+        try {
+            File logRoot = PathSecurityUtils.canonicalFile("logs/exception", "logs.exception");
+            File dateDir = PathSecurityUtils.resolveUnderRoot(logRoot, date, "logs.exception.date");
+            logFile = PathSecurityUtils.resolveUnderRoot(dateDir, id, "logs.exception.file");
+        } catch (IOException e) {
+            log.warn("invalid exception log path: {}", exceptionId, e);
+            return null;
+        }
 
         // 检查文件是否存在
         if (!logFile.exists()) {
