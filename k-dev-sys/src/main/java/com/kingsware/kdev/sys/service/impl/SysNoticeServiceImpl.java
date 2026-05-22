@@ -27,7 +27,7 @@ import com.kingsware.kdev.sys.ret.SysNoticeRet;
 import com.kingsware.kdev.sys.service.SysNoticeService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.sql.Timestamp;
 import java.util.Set;
 

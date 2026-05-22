@@ -22,7 +22,7 @@ import com.kingsware.kdev.sys.ret.SysMenuRet;
 import com.kingsware.kdev.sys.service.SysMenuService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 

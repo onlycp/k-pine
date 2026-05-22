@@ -9,10 +9,10 @@
         <module>k-dev-app</module>
         <module>k-dev-resources</module>
     </modules>
-    <parent>
+	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.7.18</version>
+		<version>3.5.14</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.kingsware.dev</groupId>
@@ -21,15 +21,13 @@
 	<name>k-dev-cli-api</name>
 	<description>金智维青松平台</description>
 	<properties>
-		<java.version>1.8</java.version>
-		<maven.compiler.source>8</maven.compiler.source>
-		<maven.compiler.target>8</maven.compiler.target>
+		<java.version>17</java.version>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
 <!--		<poi.version>5.2.2</poi.version>-->
 <!--		<jxl.version>2.6.12</jxl.version>-->
 		<kdev.version>4.1.0-beta.4</kdev.version>
-		<tomcat.version>9.0.118</tomcat.version>
 		<netty.version>4.1.133.Final</netty.version>
-		<spring-framework.version>5.3.39</spring-framework.version>
 		<snakeyaml.version>2.6</snakeyaml.version>
 		<jackson.version>2.17.3</jackson.version>
 		<commons-io.version>2.21.0</commons-io.version>

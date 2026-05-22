@@ -33,12 +33,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.annotation.Order;
-import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
+import org.springframework.scheduling.support.SimpleTriggerContext;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.*;
@@ -506,24 +506,8 @@ public class DynamicTask implements CommandLineRunner {
         }
         else {
             CronTrigger cronTrigger = new CronTrigger(cron); // 设置与任务的调度时间表达式一致的CronTrigger
-            Date nextExecutionTime = cronTrigger.nextExecutionTime(new TriggerContext() {
-                @Override
-                public Date lastScheduledExecutionTime() {
-                    return null; // 返回上一次任务调度的时间，如果没有则返回null
-                }
+            Date nextExecutionTime = Date.from(Objects.requireNonNull(cronTrigger.nextExecution(new SimpleTriggerContext())));
 
-                @Override
-                public Date lastActualExecutionTime() {
-                    return null; // 返回上一次任务实际执行的时间，如果没有则返回null
-                }
-
-                @Override
-                public Date lastCompletionTime() {
-                    return null; // 返回上一次任务完成的时间，如果没有则返回null
-                }
-            });
-
-            assert nextExecutionTime != null;
             ScheduledFuture<?> scheduledFuture = threadPoolTaskScheduler.schedule(() -> {}, nextExecutionTime);
             long delay = scheduledFuture.getDelay(TimeUnit.MILLISECONDS);
             scheduledFuture.cancel(true);

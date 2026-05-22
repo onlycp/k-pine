@@ -1,6 +1,6 @@
 package com.kingsware.kdev.core.kmq.websocket;
 
-import javax.websocket.Session;
+import jakarta.websocket.Session;
 import java.util.Objects;
 
 /**

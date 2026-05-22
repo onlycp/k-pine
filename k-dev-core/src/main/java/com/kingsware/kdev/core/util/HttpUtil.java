@@ -12,7 +12,7 @@ import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import org.yaml.snakeyaml.util.UriEncoder;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;

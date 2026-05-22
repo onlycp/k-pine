@@ -20,9 +20,9 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLConnection;
 import java.nio.file.Path;

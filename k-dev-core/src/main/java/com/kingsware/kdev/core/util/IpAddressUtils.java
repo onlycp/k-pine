@@ -1,6 +1,6 @@
 package com.kingsware.kdev.core.util;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * @author andyzheng
