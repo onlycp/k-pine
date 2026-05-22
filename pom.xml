@@ -8,11 +8,6 @@
 		<module>k-dev-sys</module>
         <module>k-dev-app</module>
         <module>k-dev-resources</module>
-		<module>k-dev-faas</module>
-		<module>k-dev-app-with-faas</module>
-		<module>k-dev-app-with-ops</module>
-        <module>k-dev-app-tongweb</module>
-<!--		<module>k-dev-all-in-one</module>-->
     </modules>
     <parent>
 		<groupId>org.springframework.boot</groupId>
@@ -33,11 +28,12 @@
 <!--		<jxl.version>2.6.12</jxl.version>-->
 		<kdev.version>4.1.0-beta.4</kdev.version>
 		<tomcat.version>9.0.118</tomcat.version>
-		<netty.version>4.1.132.Final</netty.version>
+		<netty.version>4.1.133.Final</netty.version>
 		<spring-framework.version>5.3.39</spring-framework.version>
 		<snakeyaml.version>2.6</snakeyaml.version>
 		<jackson.version>2.17.3</jackson.version>
 		<commons-io.version>2.21.0</commons-io.version>
+		<commons-lang3.version>3.18.0</commons-lang3.version>
 		<json-path.version>2.10.0</json-path.version>
 		<json-smart.version>2.6.0</json-smart.version>
 		<aspectjweaver.version>1.9.24</aspectjweaver.version>
@@ -181,6 +177,11 @@
 				<scope>import</scope>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>${commons-lang3.version}</version>
+			</dependency>
+			<dependency>
 				<artifactId>k-dev-core</artifactId>
 				<groupId>com.kingsware.dev</groupId>
 				<version>${kdev.version}</version>
@@ -192,11 +193,6 @@
 			</dependency>
 			<dependency>
 				<artifactId>k-dev-resources</artifactId>
-				<groupId>com.kingsware.dev</groupId>
-				<version>${kdev.version}</version>
-			</dependency>
-			<dependency>
-				<artifactId>k-dev-faas</artifactId>
 				<groupId>com.kingsware.dev</groupId>
 				<version>${kdev.version}</version>
 			</dependency>
